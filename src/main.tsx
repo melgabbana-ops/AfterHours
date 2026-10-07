@@ -51,6 +51,7 @@ function App(){
  const[checkIn,setCheckIn]=useState<"clear"|"pause"|"stop">("clear");
  const[displayNameDraft,setDisplayNameDraft]=useState(()=>state.profile.displayName);
  const[usernameDraft,setUsernameDraft]=useState(()=>state.profile.username);
+ useEffect(()=>{setDisplayNameDraft(state.profile.displayName);setUsernameDraft(state.profile.username)},[state.profile.displayName,state.profile.username]);
  const[selectedTask,setSelectedTask]=useState<string|null>(null);
  const[syncedHistoryIds,setSyncedHistoryIds]=useState<string[]>([]);
  const[notificationsOpen,setNotificationsOpen]=useState(false);
