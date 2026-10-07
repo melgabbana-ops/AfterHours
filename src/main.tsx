@@ -105,7 +105,7 @@ function App(){
  const unreadNotifications=state.notifications.filter(item=>!item.read).length;
  const markNotificationRead=(id:string)=>setState(s=>({...s,notifications:s.notifications.map(item=>item.id===id?{...item,read:true}:item)}));
  const markAllNotificationsRead=()=>setState(s=>({...s,notifications:s.notifications.map(item=>({...item,read:true}))}));
- useEffect(()=>{if(screen==="home")return;if(!state.ageConfirmed||state.consent.status!=="active"){setScreen("home")}},[screen,state.ageConfirmed,state.consent.status]);
+ useEffect(()=>{if(screen==="home")return;if(!state.ageConfirmed){setScreen("home");return}if(screen==="game"&&state.consent.status!=="active"){setScreen("home")}},[screen,state.ageConfirmed,state.consent.status]);
  const xp=state.profile.xp;
  const currentLevel=Math.max(1,state.profile.level);
  const levelFloor=(currentLevel-1)*200;
