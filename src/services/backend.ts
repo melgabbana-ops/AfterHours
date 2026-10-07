@@ -40,13 +40,14 @@ export async function loadRemoteState():Promise<AfterHoursState|null>{
  if(sessionError||!session)return null;
 
  const{data:consent}=await supabase.from("consent_records").select("status,confirmed_at,revoked_at").eq("session_id",session.id).order("created_at",{ascending:false}).limit(1).maybeSingle();
+ const{data:history}=await supabase.from("session_history").select("id,completed_at,xp_earned,rounds").eq("profile_id",user.id).order("completed_at",{ascending:false}).limit(12);
 
  return{
   ageConfirmed:false,
   safety:"green",
   profile:{id:profile.id,displayName:profile.display_name,username:profile.username??"night-walker",level:profile.level,xp:profile.xp,sessions:profile.sessions,createdAt:profile.created_at},
   session:{id:session.id,profileId:session.profile_id,status:session.status,round:session.round,startedAt:session.started_at,updatedAt:session.updated_at},
-  history:[],
+  history:(history??[]).map(row=>({id:row.id,completedAt:row.completed_at,xpEarned:row.xp_earned,rounds:row.rounds})),
   notifications:[],
   consent:consent?{status:consent.status==="active"?"active":"revoked",confirmedAt:consent.confirmed_at,revokedAt:consent.revoked_at}:{status:"pending",confirmedAt:null,revokedAt:null}
  };
