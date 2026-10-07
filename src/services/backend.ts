@@ -72,7 +72,7 @@ export async function syncRemoteState(state:AfterHoursState):Promise<void>{
   const{data:owned}=await supabase.from("sessions").select("id").eq("id",sessionId).eq("profile_id",user.id).maybeSingle();
   if(!owned)sessionId=null;
  }
- if(!sessionId){
+ if(!sessionId&&state.session.status!=="ready"){
   const{data:existing}=await supabase.from("sessions").select("id").eq("profile_id",user.id).order("updated_at",{ascending:false}).limit(1).maybeSingle();
   sessionId=existing?.id??null;
  }
