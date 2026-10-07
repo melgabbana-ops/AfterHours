@@ -105,3 +105,5 @@ nav button{position:relative;min-width:0;min-height:52px;padding:8px 10px;color:
 .experience-shell .actions button,.experience-shell .back{min-height:46px;justify-content:center;border-radius:10px;touch-action:manipulation}
 @media(max-width:520px){.experience-shell .timer{margin-top:30px;padding:18px 12px}.experience-shell .actions button{flex:1;min-width:105px}.experience-shell .next{width:100%;min-height:50px}}
 @media(min-width:768px){.experience-shell .timer{max-width:520px}.experience-shell .actions button{min-width:132px}}
+
+.notification-head button:disabled{opacity:.35;cursor:default}
