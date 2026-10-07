@@ -105,8 +105,7 @@ function App(){
  const revokeConsent=()=>{clearTimer();setRunning(false);setState(s=>({...s,consent:{status:"revoked",confirmedAt:s.consent.confirmedAt,revokedAt:new Date().toISOString()},session:{...s.session,status:"stopped",updatedAt:new Date().toISOString()}}));setScreen("home")};
  const confirmConsent=()=>{setCheckIn("clear");setState(s=>({...s,consent:{status:"active",confirmedAt:new Date().toISOString(),revokedAt:null}}));};
  const handleCheckIn=(choice:"clear"|"pause"|"stop")=>{setCheckIn(choice);if(choice==="pause"){setRunning(false);updateSession({status:"paused"})}if(choice==="stop"){stop()}};
- const saveDisplayName=()=>{const name=displayNameDraft.trim().replace(/\\s+/g," ");if(name.length<2)return;setState(s=>({...s,profile:{...s.profile,displayName:name}}));setDisplayNameDraft(name)};
- const setSafety=(next:Safety)=>setState(s=>({...s,safety:next}));
+ const saveDisplayName=()=>{const name=displayNameDraft.trim().replace(/\s+/g," ");if(name.length<2)return;setState(s=>({...s,profile:{...s.profile,displayName:name}}));setDisplayNameDraft(name)};
  const requestMagicLink=async()=>{setAuthMessage("");setAuthBusy(true);try{await sendMagicLink(authEmail.trim());setAuthMessage("Check je e-mail voor je veilige toegang.");}catch(error){setAuthMessage(error instanceof Error?error.message:"Aanmelden mislukt.")}finally{setAuthBusy(false)}};
 
  if(!state.ageConfirmed)return <div className="gate"><div className="mark">AH</div><span className="eyebrow">PRIVATE EXPERIENCE · 18+</span><h1>AFTER<br/><i>HOURS</i></h1><p>Een premium interactieve ervaring voor volwassenen. Bewust. Afgesproken. Veilig.</p><button onClick={()=>setState(s=>({...s,ageConfirmed:true}))}>Ik ben 18+ <ChevronRight/></button><small>Je toegang bevestigt alleen je leeftijd. Consent wordt afzonderlijk gevraagd.</small></div>;
