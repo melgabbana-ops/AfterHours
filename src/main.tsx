@@ -31,6 +31,12 @@ const fallbackRounds=[
  {title:"De Verdieping",text:"Blijf aanwezig en let op signalen. Pauzeren of stoppen is altijd een geldige keuze. Sluit af met een korte aftercare-check.",time:300}
 ];
 
+const supportItems=[
+ {title:"Consent & grenzen",body:"Stoppen mag altijd. Een eerdere afspraak is nooit belangrijker dan een huidige grens."},
+ {title:"Veiligheidscheck",body:"Gebruik Pauze bij twijfel en Stop wanneer één van jullie niet verder wil."},
+ {title:"Account & privacy",body:"Je profiel en sessiegegevens horen bij je eigen account. Deel nooit een wachtwoord of magic-link."}
+];
+
 const guidePrompts=[
  {title:"Voor je begint",body:"Check wat vandaag welkom is, wat niet, en welk stopwoord jullie gebruiken.",action:"Open consent"},
  {title:"Kies de energie",body:"Willen jullie rustig opbouwen, bewust tempo houden of eerst samen praten?",action:"Start Experience"},
@@ -154,7 +160,7 @@ function App(){
  return <div className="app">
  <header><button className="wordmark" onClick={()=>setScreen("home")} aria-label="AFTER HOURS home"><img src="/after-hours-logo.svg" alt="AFTER HOURS" /></button><div className="status"><span></span> privé sessie</div></header>
 
- {screen==="home"&&<main><section className="guide-card"><div className="guide-head"><div><span className="eyebrow">THE GUIDE</span><h2>{guidePrompts[guideIndex].title}</h2></div><Sparkles/></div><p>{guidePrompts[guideIndex].body}</p><div className="guide-actions"><button className="gold" onClick={()=>{const action=guidePrompts[guideIndex].action;if(action==="Open consent"){document.getElementById("consent")?.scrollIntoView({behavior:"smooth"});return}if(action==="Start Experience"){if(consent)setScreen("game");else document.getElementById("consent")?.scrollIntoView({behavior:"smooth"});return}if(action==="Open Insights"){setScreen("insights");return}setScreen("profile")}}>{guidePrompts[guideIndex].action}</button><button onClick={()=>setGuideIndex(i=>(i+1)%guidePrompts.length)}>Nieuwe guide</button></div><small>Consent-first · geen automatische instructies · jullie houden altijd de regie.</small></section>
+ {screen==="home"&&<main><section className="support-card"><div className="guide-head"><div><span className="eyebrow">HELP · SUPPORT</span><h2>Safety first.</h2></div><Shield/></div><div className="support-list">{supportItems.map(item=><div key={item.title}><strong>{item.title}</strong><span>{item.body}</span></div>)}</div></section><section className="guide-card"><div className="guide-head"><div><span className="eyebrow">THE GUIDE</span><h2>{guidePrompts[guideIndex].title}</h2></div><Sparkles/></div><p>{guidePrompts[guideIndex].body}</p><div className="guide-actions"><button className="gold" onClick={()=>{const action=guidePrompts[guideIndex].action;if(action==="Open consent"){document.getElementById("consent")?.scrollIntoView({behavior:"smooth"});return}if(action==="Start Experience"){if(consent)setScreen("game");else document.getElementById("consent")?.scrollIntoView({behavior:"smooth"});return}if(action==="Open Insights"){setScreen("insights");return}setScreen("profile")}}>{guidePrompts[guideIndex].action}</button><button onClick={()=>setGuideIndex(i=>(i+1)%guidePrompts.length)}>Nieuwe guide</button></div><small>Consent-first · geen automatische instructies · jullie houden altijd de regie.</small></section>
   <div className="notification-bar">
    <button className="notification-button" aria-label={unreadNotifications?unreadNotifications+" ongelezen meldingen":"Meldingen"} aria-expanded={notificationsOpen} onClick={()=>setNotificationsOpen(open=>!open)}>
     <Bell size={16}/>
