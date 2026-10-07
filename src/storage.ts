@@ -59,16 +59,16 @@ export function loadState():AfterHoursState{
 
 export function saveState(state:AfterHoursState){localStorage.setItem(KEY,JSON.stringify(state))}
 
-type TimerSnapshot={round:number;seconds:number;savedAt:number};
+type TimerSnapshot={round:number;seconds:number;savedAt:number;running:boolean};
 
 export function loadTimer(round:number,initialSeconds:number):number{
  try{
   const parsed=JSON.parse(localStorage.getItem(TIMER_KEY)??"null") as Partial<TimerSnapshot>|null;
-  if(!parsed||parsed.round!==round||!Number.isFinite(parsed.seconds)||!Number.isFinite(parsed.savedAt))return initialSeconds;
-  const elapsed=Math.max(0,Math.floor((Date.now()-Number(parsed.savedAt))/1000));
+  if(!parsed||parsed.round!==round||!Number.isFinite(parsed.seconds)||!Number.isFinite(parsed.savedAt)||typeof parsed.running!=="boolean")return initialSeconds;
+  const elapsed=parsed.running?Math.max(0,Math.floor((Date.now()-Number(parsed.savedAt))/1000)):0;
   return Math.max(0,Math.min(initialSeconds,Number(parsed.seconds)-elapsed));
  }catch{return initialSeconds}
 }
 
-export function saveTimer(round:number,seconds:number){localStorage.setItem(TIMER_KEY,JSON.stringify({round,seconds,savedAt:Date.now()}))}
+export function saveTimer(round:number,seconds:number,running=true){localStorage.setItem(TIMER_KEY,JSON.stringify({round,seconds,savedAt:Date.now(),running}))}
 export function clearTimer(){localStorage.removeItem(TIMER_KEY)}
