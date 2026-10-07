@@ -30,6 +30,7 @@ export async function loadRemoteState():Promise<AfterHoursState|null>{
   safety:"green",
   profile:{id:profile.id,displayName:profile.display_name,username:profile.username??"night-walker",level:profile.level,xp:profile.xp,sessions:profile.sessions,createdAt:profile.created_at},
   session:{id:session.id,profileId:session.profile_id,status:session.status,round:session.round,startedAt:session.started_at,updatedAt:session.updated_at},
+  history:[],
   consent:consent?{status:consent.status==="active"?"active":"revoked",confirmedAt:consent.confirmed_at,revokedAt:consent.revoked_at}:{status:"pending",confirmedAt:null,revokedAt:null}
  };
 }
