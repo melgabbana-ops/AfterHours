@@ -10,6 +10,7 @@ import{loadRemoteState,loadRemoteRounds,syncRemoteState,loadRemoteHistory,saveRe
 import{supabase,supabaseConfigured}from"./services/supabase";
 import{getCurrentUser,sendMagicLink,signOut}from"./services/auth";
 import{playNotificationSound}from"./services/notificationSound";
+import{notificationEvents}from"./services/notifications";
 
 const levelFromXp=(value:number)=>Math.max(1,Math.floor(Math.max(0,value)/200)+1);
 
@@ -121,12 +122,12 @@ function App(){
   }
  };
  const reset=()=>{clearTimer();setSeconds(rounds[round].time);setRunning(false);saveTimer(round,rounds[round].time,false);updateSession({status:"ready"})};
- const stop=()=>{const now=new Date().toISOString();clearTimer();setRunning(false);setCheckIn("stop");setState(s=>({...s,session:{...s.session,status:"stopped",updatedAt:now}}));setScreen("home")};
+ const stop=()=>{const now=new Date().toISOString();clearTimer();setRunning(false);setCheckIn("stop");setState(s=>({...s,notifications:[notificationEvents.safety("De sessie is veilig gestopt en staat klaar voor een volgende start."),...s.notifications].slice(0,20),session:{...s.session,status:"stopped",updatedAt:now}}));setScreen("home")};
  const revokeConsent=()=>{clearTimer();setRunning(false);setState(s=>({...s,consent:{status:"revoked",confirmedAt:s.consent.confirmedAt,revokedAt:new Date().toISOString()},session:{...s.session,status:"stopped",updatedAt:new Date().toISOString()}}));setScreen("home")};
- const confirmConsent=()=>{setCheckIn("clear");setState(s=>({...s,consent:{status:"active",confirmedAt:new Date().toISOString(),revokedAt:null}}));};
+ const confirmConsent=()=>{setCheckIn("clear");setState(s=>({...s,notifications:[notificationEvents.checkIn("Consent is bevestigd. De ervaring kan veilig worden gestart."),...s.notifications].slice(0,20),consent:{status:"active",confirmedAt:new Date().toISOString(),revokedAt:null}}));};
  const handleCheckIn=(choice:"clear"|"pause"|"stop")=>{setCheckIn(choice);void playNotificationSound(choice==="stop"?"safety":"checkin");if(choice==="pause"){setRunning(false);updateSession({status:"paused"})}if(choice==="stop"){stop()}};
  const saveDisplayName=()=>{const name=displayNameDraft.trim().replace(/\s+/g," ");if(name.length<2)return;setState(s=>({...s,profile:{...s.profile,displayName:name}}));setDisplayNameDraft(name)};
- const setSafety=(next:Safety)=>setState(s=>({...s,safety:next}));
+ const setSafety=(next:Safety)=>setState(s=>next===s.safety?s:{...s,notifications:[notificationEvents.safety(next==="green"?"Veiligheidsniveau bevestigd als GOED.":"Veiligheidsniveau staat op CHECK. Neem de afspraken opnieuw door."),...s.notifications].slice(0,20),safety:next});
  const requestMagicLink=async()=>{setAuthMessage("");setAuthBusy(true);try{await sendMagicLink(authEmail.trim());setAuthMessage("Check je e-mail voor je veilige toegang.");}catch(error){setAuthMessage(error instanceof Error?error.message:"Aanmelden mislukt.")}finally{setAuthBusy(false)}};
 
  if(!authReady)return <div className="gate"><div className="gate-card"><span className="eyebrow">AFTER HOURS</span><h1>Sessie herstellen…</h1><p>Beveiligde toegang wordt gecontroleerd.</p></div></div>;
