@@ -5,7 +5,7 @@ import"./styles.css";
 import{Insights}from"./Insights";
 import{RadioRoom}from"./RadioRoom";
 import type{AfterHoursState,Screen,Safety,SessionHistoryEntry}from"./types";
-import{loadState,saveState,loadTimer,saveTimer,clearTimer}from"./storage";
+import{loadState,saveState,loadTimer,saveTimer,clearTimer,defaultState}from"./storage";
 import{loadRemoteState,loadRemoteRounds,syncRemoteState,loadRemoteHistory,saveRemoteHistory}from"./services/backend";
 import{supabase,supabaseConfigured}from"./services/supabase";
 import{getCurrentUser,sendMagicLink,signInWithProvider,signOut}from"./services/auth";
@@ -82,8 +82,7 @@ function App(){
    if(remote){
     setState(current=>{const remoteIsNewer=new Date(remote.session.updatedAt).getTime()>=new Date(current.session.updatedAt).getTime();return {...remote,ageConfirmed:current.ageConfirmed,safety:current.safety,profile:{...remote.profile,username:remote.profile.username||current.profile.username},session:remoteIsNewer?remote.session:current.session,consent:remoteIsNewer?remote.consent:current.consent};});
    }else{
-    const local=loadState();
-    void syncRemoteState(local);
+    setState(current=>({...defaultState(),ageConfirmed:current.ageConfirmed}));
    }
    setSyncUserId(user.id);
    setAuthReady(true);
