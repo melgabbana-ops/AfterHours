@@ -40,4 +40,5 @@ export interface AfterHoursState{
  safety:Safety;
  profile:UserProfile;
  session:Session;
+ history:SessionHistoryEntry[];
 }
