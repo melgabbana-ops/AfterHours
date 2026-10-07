@@ -54,6 +54,8 @@ function App(){
    if(!user)return;
    const remoteRounds=await loadRemoteRounds();
    if(remoteRounds.length===3)setRounds(remoteRounds.map(r=>({title:r.title,text:r.body,time:r.durationSeconds})));
+   const remoteHistory=await loadRemoteHistory();
+   if(remoteHistory.length)setState(current=>({...current,history:remoteHistory}));
    const remote=await loadRemoteState();
    if(remote){
     setState(current=>({...remote,ageConfirmed:current.ageConfirmed,safety:current.safety}));
@@ -73,7 +75,7 @@ function App(){
   return()=>{active=false;sub?.data.subscription.unsubscribe()};
  },[]);
 
- useEffect(()=>{saveState(state);void syncRemoteState(state)},[state]);
+ useEffect(()=>{saveState(state);void syncRemoteState(state);const latest=state.history[0];if(latest)void saveRemoteHistory(latest)},[state]);
  useEffect(()=>{if(!running)return;const id=setInterval(()=>setSeconds(s=>{const next=Math.max(0,s-1);saveTimer(state.session.round,next,true);return next}),1000);return()=>clearInterval(id)},[running,state.session.round]);
  useEffect(()=>{if(seconds!==0)return;clearTimer();setRunning(false);setState(s=>({...s,session:{...s.session,status:"paused",updatedAt:new Date().toISOString()}}))},[seconds]);
 
