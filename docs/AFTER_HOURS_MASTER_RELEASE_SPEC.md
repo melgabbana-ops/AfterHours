@@ -54,6 +54,7 @@ Preferred practical login stack:
 - Session history
 - Favorites
 - Rank progression
+- Personal Dashboard / profile DNA summary
 
 ### Avatar system — approved moodboard characters
 
@@ -121,6 +122,8 @@ Content should support non-explicit, suggestive and kinky BDSM themes. Do not ge
 - Safety state
 - Aftercare flow
 - Private post-session notes
+- Always-accessible Safety route
+- Safety reports must be clearly separated from normal support
 
 ## THE ORACLE
 
@@ -168,7 +171,127 @@ AI must never override consent, safety state, or a user's explicit stop/pass act
 - Optional Spotify connection investigated separately
 - Spotify must not be treated as the core commercial streaming infrastructure; comply with Spotify platform and licensing restrictions
 
-## Admin / Control Room
+## DAILY AFTER HOURS
+
+A daily return experience:
+- Daily welcome / Tonight's Energy
+- Oracle card
+- Horoscope
+- Mood check
+- Daily challenge
+- Current streak
+- Personalized experience recommendation
+
+## PERSONALIZATION ENGINE
+
+Within explicit user preferences and consent boundaries, personalize:
+- Preferred experience duration
+- Favorite moods
+- Difficulty
+- Dynamics
+- Audio preferences
+- Guide persona/tone
+- Frequently favorited experiences
+- Skipped/pass patterns
+- Recommendations
+
+Personalization must not infer or expose sensitive attributes unnecessarily and must never override consent or safety settings.
+
+## THE AFTER HOURS ARCHIVE
+
+A private, unified personal history:
+- Experiences
+- Oracle draws
+- Achievements
+- Private notes
+- Collection
+- Progress
+- Session history
+- Favorites
+
+The Archive should feel like a private digital vault, not a generic activity log.
+
+## COLLECTIONS & COLLECTIBLES
+
+- Oracle cards
+- Badges
+- Avatar frames
+- Titles
+- Character items
+- Rank rewards
+- Seasonal/limited visual collectibles
+
+Collectibles are cosmetic/progression-oriented and must not create pay-to-win mechanics.
+
+## AFTER HOURS INBOX & NOTIFICATIONS
+
+### Inbox
+- Official AFTER HOURS messages
+- Product updates
+- Feature announcements
+- Account notices
+- Personal unlocks
+- Support replies
+- Safety/account alerts
+
+### Notification controls
+Users can independently control:
+- Achievements
+- Level-ups
+- Streaks
+- Oracle
+- New experiences
+- Messages
+- Support
+- Non-urgent product notifications
+
+Critical safety/security notifications remain appropriately prominent.
+
+## HELP CENTER / SUPPORT
+
+A persistent, easy-to-find support entry:
+- General question
+- Bug / technical issue
+- Account / login issue
+- Payment issue
+- Content issue
+- Safety / report
+- Contact AFTER HOURS Support
+- FAQ / help articles
+- Support request history
+- Support replies
+
+Support requests should be manageable in the Control Room. Technical reports may attach safe diagnostic context, but must not automatically transmit private or sensitive session content.
+
+### Safety vs Support
+
+Normal support and safety reporting are separate routes. Safety must be reachable immediately from relevant experiences and must not require navigating through normal support.
+
+## PRIVACY MODE
+
+A quick privacy-protection mode for mobile and shared environments:
+- Hide sensitive previews
+- Lock/obscure the app view
+- Protect access where supported by device capabilities
+- Resume safely after unlock
+- Avoid exposing sensitive content in notifications/previews
+
+Privacy Mode must not interfere with emergency stop/safety actions.
+
+## AFTERCARE MODE
+
+After an experience, transition into a calmer dedicated state:
+- Breathing / grounding option
+- Calm audio
+- Short reflection
+- Feeling check
+- Private note
+- Session close
+- Return to Archive/Profile
+
+Aftercare must remain optional and non-judgmental.
+
+## ADMIN / CONTROL ROOM
 
 - Manage experiences
 - Manage tasks/content
@@ -181,6 +304,11 @@ AI must never override consent, safety state, or a user's explicit stop/pass act
 - Manage avatar/character catalog
 - Moderation/safety controls
 - Test and preview tools
+- Manage support tickets
+- Manage FAQ/help content
+- Manage announcements and notification campaigns
+- Review safe diagnostic information
+- Manage collectibles and seasonal content
 
 ## Backend architecture
 
@@ -193,6 +321,7 @@ AI must never override consent, safety state, or a user's explicit stop/pass act
 - Secure webhook handling where applicable
 - Payment integration kept server-side
 - Local storage is offline/prototype only
+- Separate privacy-aware data boundaries for support, session history, notes and safety records
 
 ## Payments
 
@@ -214,7 +343,12 @@ Before production push:
 11. Production environment variables are configured outside the repository.
 12. No placeholder UI is presented as finished functionality.
 13. Final visual QA is completed against the approved moodboard, including the avatar/character system.
-14. Release branch is reviewed before merge to main.
+14. Help Center, support routing and Safety routing are tested.
+15. Privacy Mode and notification privacy are tested.
+16. Aftercare and Archive flows are tested.
+17. Personalization respects consent and privacy boundaries.
+18. Control Room support/moderation workflows are tested.
+19. Release branch is reviewed before merge to main.
 
 ## Current repository note
 
