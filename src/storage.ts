@@ -46,7 +46,7 @@ function isState(value:unknown):value is AfterHoursState{
   &&session.round>=0
   &&session.round<3
   &&(session.startedAt===null||typeof session.startedAt==="string")
-  &&typeof session.updatedAt==="string";
+  &&typeof session.updatedAt==="string"\n  &&Array.isArray(v.history);
 }
 
 export function loadState():AfterHoursState{
