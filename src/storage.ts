@@ -11,7 +11,8 @@ export const defaultState=():AfterHoursState=>{
   ageConfirmed:false,
   consent:{status:"pending",confirmedAt:null,revokedAt:null},
   safety:"green",
-  profile:{id:PROFILE_ID,displayName:"Night Walker",\n   username:"night-walker",level:4,xp:680,sessions:12,createdAt:now},
+  profile:{id:PROFILE_ID,displayName:"Night Walker",
+   username:"night-walker",level:4,xp:680,sessions:12,createdAt:now},
   session:{id:SESSION_ID,profileId:PROFILE_ID,status:"ready",round:0,startedAt:null,updatedAt:now}
  };
 };
@@ -30,7 +31,8 @@ function isState(value:unknown):value is AfterHoursState{
   &&(consent.revokedAt===null||typeof consent.revokedAt==="string")
   &&!!profile
   &&typeof profile.id==="string"
-  &&typeof profile.displayName==="string"\n  &&typeof profile.username==="string"
+  &&typeof profile.displayName==="string"
+  &&typeof profile.username==="string"
   &&Number.isFinite(profile.level)
   &&Number.isFinite(profile.xp)
   &&Number.isFinite(profile.sessions)
