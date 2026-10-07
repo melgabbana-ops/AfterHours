@@ -11,6 +11,6 @@ export async function sendMagicLink(email:string){
  return supabase.auth.signInWithOtp({email,options:{emailRedirectTo:window.location.origin}});
 }
 
-export async function signOut(){
+export async function signInWithProvider(provider:"google"|"apple"){\n if(!supabase)throw new Error("Backend is nog niet geconfigureerd.");\n return supabase.auth.signInWithOAuth({provider,options:{redirectTo:window.location.origin}});\n}\n\nexport async function signOut(){
  if(supabase)await supabase.auth.signOut();
 }
