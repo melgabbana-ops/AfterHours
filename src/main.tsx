@@ -57,6 +57,7 @@ function App(){
  const[authEmail,setAuthEmail]=useState("");
  const[authBusy,setAuthBusy]=useState(false);
  const[authMessage,setAuthMessage]=useState("");
+ const[syncUserId,setSyncUserId]=useState<string|null>(null);
  const[checkIn,setCheckIn]=useState<"clear"|"pause"|"stop">("clear");
  const[displayNameDraft,setDisplayNameDraft]=useState(()=>state.profile.displayName);
  const[usernameDraft,setUsernameDraft]=useState(()=>state.profile.username);
@@ -70,8 +71,9 @@ function App(){
    const user=await getCurrentUser();
    if(!active)return;
    setUserEmail(user?.email??null);
-   setAuthReady(true);
-   if(!user)return;
+   setSyncUserId(null);
+   if(!user){setAuthReady(true);return;}
+   setAuthReady(false);
    const remoteRounds=await loadRemoteRounds();
    if(remoteRounds.length===3)setRounds(remoteRounds.map(r=>({title:r.title,text:r.body,time:r.durationSeconds})));
    const remoteHistory=await loadRemoteHistory();
@@ -83,11 +85,14 @@ function App(){
     const local=loadState();
     void syncRemoteState(local);
    }
+   setSyncUserId(user.id);
+   setAuthReady(true);
   };
   void hydrate();
   const sub=supabase?.auth.onAuthStateChange((_event,session)=>{
    if(!active)return;
    setUserEmail(session?.user?.email??null);
+   setSyncUserId(null);
    if(session?.user){
     window.setTimeout(()=>{if(active)void hydrate()},0);
    }
@@ -95,7 +100,7 @@ function App(){
   return()=>{active=false;sub?.data.subscription.unsubscribe()};
  },[]);
 
- useEffect(()=>{saveState(state);void syncRemoteState(state);const pending=state.history.filter(item=>!syncedHistoryIds.includes(item.id));if(pending.length){void Promise.all(pending.map(saveRemoteHistory)).then(()=>setSyncedHistoryIds(ids=>Array.from(new Set([...ids,...pending.map(item=>item.id)]))))}},[state,syncedHistoryIds]);
+ useEffect(()=>{saveState(state);if(!supabaseConfigured||syncUserId){void syncRemoteState(state)}const pending=state.history.filter(item=>!syncedHistoryIds.includes(item.id));if(pending.length){void Promise.all(pending.map(saveRemoteHistory)).then(()=>setSyncedHistoryIds(ids=>Array.from(new Set([...ids,...pending.map(item=>item.id)]))))}},[state,syncedHistoryIds,syncUserId]);
  useEffect(()=>{if(!running)return;const id=setInterval(()=>setSeconds(s=>{const next=Math.max(0,s-1);saveTimer(state.session.round,next,true);return next}),1000);return()=>clearInterval(id)},[running,state.session.round]);
  useEffect(()=>{if(seconds!==0||state.session.status!=="active")return;clearTimer();setRunning(false);setState(s=>({...s,notifications:[notificationEvents.checkIn("De tijd van deze ronde is voorbij. De sessie staat op pauze en kan veilig worden hervat."),...s.notifications].slice(0,20),session:{...s.session,status:"paused",updatedAt:new Date().toISOString()}}))},[seconds,state.session.status]);
 
