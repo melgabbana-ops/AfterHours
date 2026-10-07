@@ -38,6 +38,7 @@ function isState(value:unknown):value is AfterHoursState{
   &&typeof session.id==="string"
   &&typeof session.profileId==="string"
   &&(session.status==="ready"||session.status==="active"||session.status==="paused"||session.status==="completed"||session.status==="stopped")
+  &&typeof session.round==="number"
   &&Number.isInteger(session.round)
   &&session.round>=0
   &&session.round<3
