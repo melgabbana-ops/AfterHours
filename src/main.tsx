@@ -46,6 +46,7 @@ function App(){
  const[checkIn,setCheckIn]=useState<"clear"|"pause"|"stop">("clear");
  const[displayNameDraft,setDisplayNameDraft]=useState(()=>state.profile.displayName);
  const[selectedTask,setSelectedTask]=useState<string|null>(null);
+ const[syncedHistoryIds,setSyncedHistoryIds]=useState<string[]>([]);
  useEffect(()=>{let active=true;
   const hydrate=async()=>{
    const user=await getCurrentUser();
@@ -75,7 +76,7 @@ function App(){
   return()=>{active=false;sub?.data.subscription.unsubscribe()};
  },[]);
 
- useEffect(()=>{saveState(state);void syncRemoteState(state);const latest=state.history[0];if(latest)void saveRemoteHistory(latest)},[state]);
+ useEffect(()=>{saveState(state);void syncRemoteState(state);const pending=state.history.filter(item=>!syncedHistoryIds.includes(item.id));if(pending.length){void Promise.all(pending.map(saveRemoteHistory)).then(()=>setSyncedHistoryIds(ids=>Array.from(new Set([...ids,...pending.map(item=>item.id)]))))}},[state,syncedHistoryIds]);
  useEffect(()=>{if(!running)return;const id=setInterval(()=>setSeconds(s=>{const next=Math.max(0,s-1);saveTimer(state.session.round,next,true);return next}),1000);return()=>clearInterval(id)},[running,state.session.round]);
  useEffect(()=>{if(seconds!==0)return;clearTimer();setRunning(false);setState(s=>({...s,session:{...s.session,status:"paused",updatedAt:new Date().toISOString()}}))},[seconds]);
 
