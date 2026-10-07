@@ -4,7 +4,7 @@ import{Shield,Lock,Play,Pause,RotateCcw,ChevronRight,User,Settings,Home,Timer,Ch
 import"./styles.css";
 import{Insights}from"./Insights";
 import{RadioRoom}from"./RadioRoom";
-import type{AfterHoursState,Screen,Safety}from"./types";
+import type{AfterHoursState,Screen,Safety,SessionHistoryEntry}from"./types";
 import{loadState,saveState,loadTimer,saveTimer,clearTimer}from"./storage";
 import{loadRemoteState,loadRemoteRounds,syncRemoteState}from"./services/backend";
 import{supabase,supabaseConfigured}from"./services/supabase";
