@@ -15,7 +15,8 @@ const fallbackRounds=[
 ];
 
 function App(){
- const[state,setState]=useState<AfterHoursState>(()=>loadState());\n const[rounds,setRounds]=useState(fallbackRounds);
+ const[state,setState]=useState<AfterHoursState>(()=>loadState());
+ const[rounds,setRounds]=useState(fallbackRounds);
  const[screen,setScreen]=useState<Screen>("home");
  const[running,setRunning]=useState(false);
  const[seconds,setSeconds]=useState(()=>loadTimer(state.session.round,rounds[state.session.round]?.time||rounds[0].time));
@@ -29,7 +30,9 @@ function App(){
    if(!active)return;
    setUserEmail(user?.email??null);
    if(!user)return;
-   const remoteRounds=await loadRemoteRounds();\n   if(remoteRounds.length===3)setRounds(remoteRounds.map(r=>({title:r.title,text:r.body,time:r.durationSeconds})));\n   const remote=await loadRemoteState();
+   const remoteRounds=await loadRemoteRounds();
+   if(remoteRounds.length===3)setRounds(remoteRounds.map(r=>({title:r.title,text:r.body,time:r.durationSeconds})));
+   const remote=await loadRemoteState();
    if(remote){
     setState(current=>({...remote,ageConfirmed:current.ageConfirmed,safety:current.safety}));
    }else{
