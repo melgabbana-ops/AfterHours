@@ -3,7 +3,7 @@ import{createRoot}from"react-dom/client";
 import{Shield,Lock,Play,Pause,RotateCcw,ChevronRight,User,Settings,Home,Timer,CheckCircle2,Square,Activity,LogOut}from"lucide-react";
 import"./styles.css";
 import type{AfterHoursState,Screen,Safety}from"./types";
-import{loadState,saveState}from"./storage";
+import{loadState,saveState,loadTimer,saveTimer,clearTimer}from"./storage";
 import{loadRemoteState,syncRemoteState}from"./services/backend";
 import{supabase,supabaseConfigured}from"./services/supabase";
 import{getCurrentUser,sendMagicLink,signOut}from"./services/auth";
@@ -18,7 +18,7 @@ function App(){
  const[state,setState]=useState<AfterHoursState>(()=>loadState());
  const[screen,setScreen]=useState<Screen>("home");
  const[running,setRunning]=useState(false);
- const[seconds,setSeconds]=useState(()=>rounds[state.session.round]?.time||rounds[0].time);
+ const[seconds,setSeconds]=useState(()=>loadTimer(state.session.round,rounds[state.session.round]?.time||rounds[0].time));
  const[userEmail,setUserEmail]=useState<string|null>(null);
  const[authEmail,setAuthEmail]=useState("");
  const[authBusy,setAuthBusy]=useState(false);
@@ -49,8 +49,8 @@ function App(){
  },[]);
 
  useEffect(()=>{saveState(state);void syncRemoteState(state)},[state]);
- useEffect(()=>{if(!running)return;const id=setInterval(()=>setSeconds(s=>Math.max(0,s-1)),1000);return()=>clearInterval(id)},[running]);
- useEffect(()=>{if(seconds!==0)return;setRunning(false);setState(s=>({...s,session:{...s.session,status:"paused",updatedAt:new Date().toISOString()}}))},[seconds]);
+ useEffect(()=>{if(!running)return;const id=setInterval(()=>setSeconds(s=>{const next=Math.max(0,s-1);saveTimer(round,next);return next}),1000);return()=>clearInterval(id)},[running,round]);
+ useEffect(()=>{if(seconds!==0)return;clearTimer();setRunning(false);setState(s=>({...s,session:{...s.session,status:"paused",updatedAt:new Date().toISOString()}}))},[seconds]);
 
  const round=state.session.round;
  const consent=state.consent.status==="active";
@@ -63,11 +63,13 @@ function App(){
  const startRound=()=>{
   if(!consent){setScreen("home");return}
   setRunning(true);
+  saveTimer(round,seconds);
   updateSession({status:"active",startedAt:state.session.startedAt||new Date().toISOString()});
  };
  const next=()=>{
   if(!consent){setRunning(false);setScreen("home");return}
   setRunning(false);
+  clearTimer();
   if(round<rounds.length-1){
    const n=round+1;
    setState(s=>({...s,session:{...s.session,round:n,status:"ready",updatedAt:new Date().toISOString()}}));
@@ -78,9 +80,9 @@ function App(){
    setScreen("home");
   }
  };
- const reset=()=>{setSeconds(rounds[round].time);setRunning(false);updateSession({status:"ready"})};
- const stop=()=>{setRunning(false);updateSession({status:"stopped"});setScreen("home")};
- const revokeConsent=()=>{setRunning(false);setState(s=>({...s,consent:{status:"revoked",confirmedAt:s.consent.confirmedAt,revokedAt:new Date().toISOString()},session:{...s.session,status:"stopped",updatedAt:new Date().toISOString()}}));setScreen("home")};
+ const reset=()=>{clearTimer();setSeconds(rounds[round].time);setRunning(false);updateSession({status:"ready"})};
+ const stop=()=>{clearTimer();setRunning(false);updateSession({status:"stopped"});setScreen("home")};
+ const revokeConsent=()=>{clearTimer();setRunning(false);setState(s=>({...s,consent:{status:"revoked",confirmedAt:s.consent.confirmedAt,revokedAt:new Date().toISOString()},session:{...s.session,status:"stopped",updatedAt:new Date().toISOString()}}));setScreen("home")};
  const confirmConsent=()=>setState(s=>({...s,consent:{status:"active",confirmedAt:new Date().toISOString(),revokedAt:null}}));
  const requestMagicLink=async()=>{setAuthMessage("");setAuthBusy(true);try{await sendMagicLink(authEmail.trim());setAuthMessage("Check je e-mail voor je veilige toegang.");}catch(error){setAuthMessage(error instanceof Error?error.message:"Aanmelden mislukt.")}finally{setAuthBusy(false)}};
 
