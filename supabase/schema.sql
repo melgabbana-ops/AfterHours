@@ -29,7 +29,12 @@ create table if not exists public.consent_records (
   status text not null check (status in ('active','revoked')),
   confirmed_at timestamptz,
   revoked_at timestamptz,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  check (
+    (status = 'active' and confirmed_at is not null and revoked_at is null)
+    or
+    (status = 'revoked' and revoked_at is not null)
+  )
 );
 
 create table if not exists public.experience_rounds (
@@ -58,16 +63,29 @@ alter table public.consent_records enable row level security;
 alter table public.experience_rounds enable row level security;
 alter table public.admin_audit_log enable row level security;
 
+drop policy if exists "profiles_self_read" on public.profiles;
+drop policy if exists "profiles_self_insert" on public.profiles;
+drop policy if exists "profiles_self_update" on public.profiles;
+
 create policy "profiles_self_read"
 on public.profiles for select
 to authenticated
 using (id = auth.uid());
+
+create policy "profiles_self_insert"
+on public.profiles for insert
+to authenticated
+with check (id = auth.uid());
 
 create policy "profiles_self_update"
 on public.profiles for update
 to authenticated
 using (id = auth.uid())
 with check (id = auth.uid());
+
+drop policy if exists "sessions_self_read" on public.sessions;
+drop policy if exists "sessions_self_insert" on public.sessions;
+drop policy if exists "sessions_self_update" on public.sessions;
 
 create policy "sessions_self_read"
 on public.sessions for select
@@ -84,6 +102,9 @@ on public.sessions for update
 to authenticated
 using (profile_id = auth.uid())
 with check (profile_id = auth.uid());
+
+drop policy if exists "consent_self_read" on public.consent_records;
+drop policy if exists "consent_self_insert" on public.consent_records;
 
 create policy "consent_self_read"
 on public.consent_records for select
@@ -107,18 +128,30 @@ with check (
   )
 );
 
+drop policy if exists "rounds_public_read" on public.experience_rounds;
+
 create policy "rounds_public_read"
 on public.experience_rounds for select
 to authenticated
 using (active = true);
 
--- Admin writes must be implemented through a server-side role check.
+-- Admin audit writes must be implemented through a server-side role check.
 -- Never grant browser clients a service-role key.
 -- Do not create a broad client-side admin policy.
 
 create index if not exists sessions_profile_id_idx on public.sessions(profile_id);
+create index if not exists sessions_updated_at_idx on public.sessions(updated_at desc);
 create index if not exists consent_session_id_idx on public.consent_records(session_id);
+create index if not exists consent_created_at_idx on public.consent_records(created_at desc);
 create index if not exists rounds_sort_order_idx on public.experience_rounds(sort_order);
+
+create unique index if not exists consent_active_event_idx
+on public.consent_records(session_id,status,confirmed_at)
+where status='active' and confirmed_at is not null;
+
+create unique index if not exists consent_revoked_event_idx
+on public.consent_records(session_id,status,revoked_at)
+where status='revoked' and revoked_at is not null;
 
 insert into public.experience_rounds (slug,title,body,duration_seconds,sort_order)
 values
