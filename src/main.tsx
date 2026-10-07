@@ -113,7 +113,7 @@ function App(){
   }
  };
  const reset=()=>{clearTimer();setSeconds(rounds[round].time);setRunning(false);saveTimer(round,rounds[round].time,false);updateSession({status:"ready"})};
- const stop=()=>{clearTimer();setRunning(false);updateSession({status:"stopped"});setScreen("home")};
+ const stop=()=>{const now=new Date().toISOString();clearTimer();setRunning(false);setCheckIn("stop");setState(s=>({...s,session:{...s.session,status:"stopped",updatedAt:now}}));setScreen("home")};
  const revokeConsent=()=>{clearTimer();setRunning(false);setState(s=>({...s,consent:{status:"revoked",confirmedAt:s.consent.confirmedAt,revokedAt:new Date().toISOString()},session:{...s.session,status:"stopped",updatedAt:new Date().toISOString()}}));setScreen("home")};
  const confirmConsent=()=>{setCheckIn("clear");setState(s=>({...s,consent:{status:"active",confirmedAt:new Date().toISOString(),revokedAt:null}}));};
  const handleCheckIn=(choice:"clear"|"pause"|"stop")=>{setCheckIn(choice);if(choice==="pause"){setRunning(false);updateSession({status:"paused"})}if(choice==="stop"){stop()}};
