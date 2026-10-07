@@ -11,7 +11,7 @@ export const defaultState=():AfterHoursState=>{
   ageConfirmed:false,
   consent:{status:"pending",confirmedAt:null,revokedAt:null},
   safety:"green",
-  profile:{id:PROFILE_ID,displayName:"Night Walker",level:4,xp:680,sessions:12,createdAt:now},
+  profile:{id:PROFILE_ID,displayName:"Night Walker",\n   username:"night-walker",level:4,xp:680,sessions:12,createdAt:now},
   session:{id:SESSION_ID,profileId:PROFILE_ID,status:"ready",round:0,startedAt:null,updatedAt:now}
  };
 };
