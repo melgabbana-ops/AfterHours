@@ -13,7 +13,8 @@ export const defaultState=():AfterHoursState=>{
   safety:"green",
   profile:{id:PROFILE_ID,displayName:"Night Walker",
    username:"night-walker",level:4,xp:680,sessions:12,createdAt:now},
-  session:{id:SESSION_ID,profileId:PROFILE_ID,status:"ready",round:0,startedAt:null,updatedAt:now}
+  session:{id:SESSION_ID,profileId:PROFILE_ID,status:"ready",round:0,startedAt:null,updatedAt:now},
+  history:[]
  };
 };
 
