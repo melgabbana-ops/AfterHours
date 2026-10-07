@@ -4,6 +4,7 @@ import{Shield,Lock,Play,Pause,RotateCcw,ChevronRight,User,Settings,Home,Timer,Ch
 import"./styles.css";
 import type{AfterHoursState,Screen,Safety}from"./types";
 import{loadState,saveState}from"./storage";
+import{loadRemoteState,syncRemoteState}from"./services/backend";
 
 const rounds=[
  {title:"De Eerste Stap",text:"Neem een moment. Spreek samen af wat vandaag wel, niet en misschien is.",time:180},
@@ -16,8 +17,9 @@ function App(){
  const[screen,setScreen]=useState<Screen>("home");
  const[running,setRunning]=useState(false);
  const[seconds,setSeconds]=useState(()=>rounds[state.session.round]?.time||rounds[0].time);
+ useEffect(()=>{let active=true;(async()=>{const remote=await loadRemoteState();if(active&&remote)setState(current=>({...remote,ageConfirmed:current.ageConfirmed,safety:current.safety}))})();return()=>{active=false}},[]);
 
- useEffect(()=>saveState(state),[state]);
+ useEffect(()=>{saveState(state);void syncRemoteState(state)},[state]);
  useEffect(()=>{if(!running)return;const id=setInterval(()=>setSeconds(s=>Math.max(0,s-1)),1000);return()=>clearInterval(id)},[running]);
  useEffect(()=>{if(seconds!==0)return;setRunning(false);setState(s=>({...s,session:{...s.session,status:"paused",updatedAt:new Date().toISOString()}}))},[seconds]);
 
