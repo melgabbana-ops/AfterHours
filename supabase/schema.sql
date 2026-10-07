@@ -18,7 +18,7 @@ $func$;
 
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
-  display_name text not null default 'Night Walker',
+  display_name text not null default 'Night Walker',\n  username text unique,
   level integer not null default 1 check (level > 0),
   xp integer not null default 0 check (xp >= 0),
   sessions integer not null default 0 check (sessions >= 0),
@@ -151,7 +151,7 @@ using (active = true);
 -- Never grant browser clients a service-role key.
 -- Do not create a broad client-side admin policy.
 
-create index if not exists sessions_profile_id_idx on public.sessions(profile_id);
+create unique index if not exists profiles_username_idx on public.profiles(lower(username)) where username is not null;\n\ncreate index if not exists sessions_profile_id_idx on public.sessions(profile_id);
 create index if not exists sessions_updated_at_idx on public.sessions(updated_at desc);
 create index if not exists consent_session_id_idx on public.consent_records(session_id);
 create index if not exists consent_created_at_idx on public.consent_records(created_at desc);
