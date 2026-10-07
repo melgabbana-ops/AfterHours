@@ -35,6 +35,7 @@ const fallbackRounds=[
 
 function App(){
  const[state,setState]=useState<AfterHoursState>(()=>loadState());
+ const[authReady,setAuthReady]=useState(!supabaseConfigured);
  const[rounds,setRounds]=useState(fallbackRounds);
  const[screen,setScreen]=useState<Screen>("home");
  const[running,setRunning]=useState(()=>state.session.status==="active");
@@ -52,6 +53,7 @@ function App(){
    const user=await getCurrentUser();
    if(!active)return;
    setUserEmail(user?.email??null);
+   setAuthReady(true);
    if(!user)return;
    const remoteRounds=await loadRemoteRounds();
    if(remoteRounds.length===3)setRounds(remoteRounds.map(r=>({title:r.title,text:r.body,time:r.durationSeconds})));
