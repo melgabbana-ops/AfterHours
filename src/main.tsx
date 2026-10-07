@@ -89,6 +89,7 @@ function App(){
  const consent=state.consent.status==="active";
  const safety=state.safety;
  const unreadNotifications=state.notifications.filter(item=>!item.read).length;
+ useEffect(()=>{if(screen==="home")return;if(!state.ageConfirmed||state.consent.status!=="active"){setScreen("home")}},[screen,state.ageConfirmed,state.consent.status]);
  const xp=state.profile.xp;
  const currentLevel=Math.max(1,state.profile.level);
  const levelFloor=(currentLevel-1)*200;
