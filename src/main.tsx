@@ -118,6 +118,7 @@ function App(){
    const n=round+1;
    const now=new Date().toISOString();
    setState(s=>({...s,session:{...s.session,round:n,status:"paused",updatedAt:now}}));
+   setSelectedTask(null);
    setSeconds(rounds[n].time);
    saveTimer(n,rounds[n].time,false);
   }else{
