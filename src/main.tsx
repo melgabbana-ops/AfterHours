@@ -23,7 +23,30 @@ function App(){
  const[authEmail,setAuthEmail]=useState("");
  const[authBusy,setAuthBusy]=useState(false);
  const[authMessage,setAuthMessage]=useState("");
- useEffect(()=>{let active=true;(async()=>{const user=await getCurrentUser();if(active)setUserEmail(user?.email??null);const remote=await loadRemoteState();if(active&&remote)setState(current=>({...remote,ageConfirmed:current.ageConfirmed,safety:current.safety}))})();const sub=supabase?.auth.onAuthStateChange((_event,session)=>{setUserEmail(session?.user?.email??null)});return()=>{active=false;sub?.data.subscription.unsubscribe()}},[]);
+ useEffect(()=>{let active=true;
+  const hydrate=async()=>{
+   const user=await getCurrentUser();
+   if(!active)return;
+   setUserEmail(user?.email??null);
+   if(!user)return;
+   const remote=await loadRemoteState();
+   if(remote){
+    setState(current=>({...remote,ageConfirmed:current.ageConfirmed,safety:current.safety}));
+   }else{
+    const local=loadState();
+    void syncRemoteState(local);
+   }
+  };
+  void hydrate();
+  const sub=supabase?.auth.onAuthStateChange((_event,session)=>{
+   if(!active)return;
+   setUserEmail(session?.user?.email??null);
+   if(session?.user){
+    window.setTimeout(()=>{if(active)void hydrate()},0);
+   }
+  });
+  return()=>{active=false;sub?.data.subscription.unsubscribe()};
+ },[]);
 
  useEffect(()=>{saveState(state);void syncRemoteState(state)},[state]);
  useEffect(()=>{if(!running)return;const id=setInterval(()=>setSeconds(s=>Math.max(0,s-1)),1000);return()=>clearInterval(id)},[running]);
