@@ -18,7 +18,8 @@ $func$;
 
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
-  display_name text not null default 'Night Walker',\n  username text unique,
+  display_name text not null default 'Night Walker',
+  username text unique,
   level integer not null default 1 check (level > 0),
   xp integer not null default 0 check (xp >= 0),
   sessions integer not null default 0 check (sessions >= 0),
@@ -33,6 +34,15 @@ create table if not exists public.sessions (
   round integer not null default 0 check (round >= 0),
   started_at timestamptz,
   updated_at timestamptz not null default now()
+);
+
+create table if not exists public.session_history (
+  id uuid primary key default gen_random_uuid(),
+  profile_id uuid not null references public.profiles(id) on delete cascade,
+  completed_at timestamptz not null default now(),
+  xp_earned integer not null default 0 check (xp_earned >= 0),
+  rounds integer not null default 0 check (rounds >= 0),
+  created_at timestamptz not null default now()
 );
 
 create table if not exists public.consent_records (
@@ -72,6 +82,7 @@ create table if not exists public.admin_audit_log (
 alter table public.profiles enable row level security;
 alter table public.sessions enable row level security;
 alter table public.consent_records enable row level security;
+alter table public.session_history enable row level security;
 alter table public.experience_rounds enable row level security;
 alter table public.admin_audit_log enable row level security;
 
@@ -140,6 +151,19 @@ with check (
   )
 );
 
+drop policy if exists "history_self_read" on public.session_history;
+drop policy if exists "history_self_insert" on public.session_history;
+
+create policy "history_self_read"
+on public.session_history for select
+to authenticated
+using (profile_id = auth.uid());
+
+create policy "history_self_insert"
+on public.session_history for insert
+to authenticated
+with check (profile_id = auth.uid());
+
 drop policy if exists "rounds_public_read" on public.experience_rounds;
 
 create policy "rounds_public_read"
@@ -151,7 +175,11 @@ using (active = true);
 -- Never grant browser clients a service-role key.
 -- Do not create a broad client-side admin policy.
 
-create unique index if not exists profiles_username_idx on public.profiles(lower(username)) where username is not null;\n\ncreate index if not exists sessions_profile_id_idx on public.sessions(profile_id);
+create unique index if not exists profiles_username_idx on public.profiles(lower(username)) where username is not null;
+
+create index if not exists sessions_profile_id_idx on public.sessions(profile_id);
+create index if not exists session_history_profile_id_idx on public.session_history(profile_id);
+create index if not exists session_history_completed_at_idx on public.session_history(completed_at desc);
 create index if not exists sessions_updated_at_idx on public.sessions(updated_at desc);
 create index if not exists consent_session_id_idx on public.consent_records(session_id);
 create index if not exists consent_created_at_idx on public.consent_records(created_at desc);
