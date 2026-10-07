@@ -25,6 +25,12 @@ export async function syncRemoteState(state:AfterHoursState):Promise<void>{
  if(!user)return;
  await supabase.from("profiles").upsert({id:user.id,display_name:state.profile.displayName,level:state.profile.level,xp:state.profile.xp,sessions:state.profile.sessions});
  await supabase.from("sessions").upsert({id:state.session.id,profile_id:user.id,status:state.session.status,round:state.session.round,started_at:state.session.startedAt,updated_at:state.session.updatedAt});
- if(state.consent.status==="active"&&state.consent.confirmedAt)await supabase.from("consent_records").insert({session_id:state.session.id,status:"active",confirmed_at:state.consent.confirmedAt});
- if(state.consent.status==="revoked"&&state.consent.revokedAt)await supabase.from("consent_records").insert({session_id:state.session.id,status:"revoked",revoked_at:state.consent.revokedAt});
+ if(state.consent.status==="active"&&state.consent.confirmedAt){
+  const{data:existing}=await supabase.from("consent_records").select("id").eq("session_id",state.session.id).eq("status","active").eq("confirmed_at",state.consent.confirmedAt).maybeSingle();
+  if(!existing)await supabase.from("consent_records").insert({session_id:state.session.id,status:"active",confirmed_at:state.consent.confirmedAt});
+ }
+ if(state.consent.status==="revoked"&&state.consent.revokedAt){
+  const{data:existing}=await supabase.from("consent_records").select("id").eq("session_id",state.session.id).eq("status","revoked").eq("revoked_at",state.consent.revokedAt).maybeSingle();
+  if(!existing)await supabase.from("consent_records").insert({session_id:state.session.id,status:"revoked",revoked_at:state.consent.revokedAt});
+ }
 }
