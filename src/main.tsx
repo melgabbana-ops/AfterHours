@@ -116,6 +116,8 @@ function App(){
  };
  const next=()=>{
   if(!consent){setRunning(false);setScreen("home");return}
+  if(running)return;
+  if(roundTasks[round]?.choices?.length&&!selectedTask)return;
   setRunning(false);
   clearTimer();
   if(round<rounds.length-1){
