@@ -38,7 +38,7 @@ function App(){
  const[state,setState]=useState<AfterHoursState>(()=>loadState());
  const[authReady,setAuthReady]=useState(!supabaseConfigured);
  const[rounds,setRounds]=useState(fallbackRounds);
- const initialScreen=(()=>{const value=new URLSearchParams(window.location.search).get("screen");return value==="game"||value==="profile"||value==="admin"||value==="insights"||value==="radio"?value:"home"})();
+ const initialScreen=(()=>{const value=new URLSearchParams(window.location.search).get("screen");if(value==="game"||value==="profile"||value==="admin"||value==="insights"||value==="radio")return value;return "home" as Screen})();
  const[screen,setScreen]=useState<Screen>(initialScreen);
  const[running,setRunning]=useState(()=>state.session.status==="active");
  const[seconds,setSeconds]=useState(()=>loadTimer(state.session.round,rounds[state.session.round]?.time||rounds[0].time));
