@@ -95,3 +95,13 @@ nav button{min-height:44px;}
 
 @media(min-width:768px){.notification-bar{max-width:760px;margin-left:auto;margin-right:auto}.notification-panel{width:380px}}@media(min-width:1024px){.notification-bar{max-width:980px}.notification-panel{width:400px}}@media(max-width:430px){.notification-panel{right:-4px;width:min(340px,calc(100vw - 24px))}.notification-button{width:42px;height:42px}}@media(orientation:landscape) and (max-height:520px){.notification-panel{max-height:70vh;overflow:auto}}
 nav button{position:relative;min-width:0;min-height:52px;padding:8px 10px;color:#756e65;transition:color .2s ease,transform .2s ease}nav button.active{color:#c9a45c}nav button.active:after{content:"";position:absolute;left:50%;bottom:3px;width:18px;height:2px;border-radius:2px;background:#c9a45c;transform:translateX(-50%);box-shadow:0 0 12px #c9a45c55}nav button[aria-disabled="true"]{opacity:.45}nav button:active{transform:translateY(1px)}@media(max-width:430px){nav{padding-bottom:max(8px,env(safe-area-inset-bottom));gap:2px}nav button{min-height:54px;padding-inline:6px;font-size:9px}nav button svg{width:19px;height:19px}}@media(min-width:768px){nav button{min-height:58px;padding-inline:16px}}
+
+/* Experience polish: calmer hierarchy and touch-safe controls */
+.experience-shell .round-steps{position:relative}
+.experience-shell .round-steps span{min-height:36px;display:grid;place-items:center;border-radius:7px;transition:border-color .2s ease,background .2s ease,color .2s ease}
+.experience-shell .timer{margin:38px auto 34px;padding:20px 16px;border:1px solid #211d18;border-radius:18px;background:radial-gradient(circle at 50% 0%,#15110b 0%,#090908 58%,#070707 100%);box-shadow:0 20px 55px #0008}
+.experience-shell .timer strong{font-size:clamp(58px,16vw,76px);line-height:1;letter-spacing:.02em;text-shadow:0 8px 30px #000}
+.experience-shell .actions{gap:10px}
+.experience-shell .actions button,.experience-shell .back{min-height:46px;justify-content:center;border-radius:10px;touch-action:manipulation}
+@media(max-width:520px){.experience-shell .timer{margin-top:30px;padding:18px 12px}.experience-shell .actions button{flex:1;min-width:105px}.experience-shell .next{width:100%;min-height:50px}}
+@media(min-width:768px){.experience-shell .timer{max-width:520px}.experience-shell .actions button{min-width:132px}}
