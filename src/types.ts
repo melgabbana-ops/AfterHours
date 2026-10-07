@@ -4,7 +4,7 @@ export type ConsentStatus="pending"|"active"|"revoked";
 
 export interface UserProfile{
  id:string;
- displayName:string;
+ displayName:string;\n username:string;
  level:number;
  xp:number;
  sessions:number;
