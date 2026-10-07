@@ -40,6 +40,7 @@ function App(){
  const[rounds,setRounds]=useState(fallbackRounds);
  const initialScreen=(()=>{const value=new URLSearchParams(window.location.search).get("screen");if(value==="game"||value==="profile"||value==="admin"||value==="insights"||value==="radio")return value;return "home" as Screen})();
  const[screen,setScreen]=useState<Screen>(initialScreen);
+ useEffect(()=>{if(new URLSearchParams(window.location.search).has("screen"))window.history.replaceState({},document.title,window.location.pathname+window.location.hash)},[]);
  const[running,setRunning]=useState(()=>state.session.status==="active");
  const[seconds,setSeconds]=useState(()=>loadTimer(state.session.round,rounds[state.session.round]?.time||rounds[0].time));
  const[userEmail,setUserEmail]=useState<string|null>(null);
