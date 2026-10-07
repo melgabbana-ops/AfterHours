@@ -59,7 +59,7 @@ function App(){
    if(remoteHistory.length)setState(current=>({...current,history:remoteHistory}));
    const remote=await loadRemoteState();
    if(remote){
-    setState(current=>({...remote,ageConfirmed:current.ageConfirmed,safety:current.safety}));
+    setState(current=>({...remote,ageConfirmed:current.ageConfirmed,safety:current.safety,profile:{...remote.profile,username:remote.profile.username||current.profile.username}}));
    }else{
     const local=loadState();
     void syncRemoteState(local);
