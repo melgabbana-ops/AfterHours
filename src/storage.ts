@@ -14,7 +14,8 @@ export const defaultState=():AfterHoursState=>{
   profile:{id:PROFILE_ID,displayName:"Night Walker",
    username:"night-walker",level:4,xp:680,sessions:12,createdAt:now},
   session:{id:SESSION_ID,profileId:PROFILE_ID,status:"ready",round:0,startedAt:null,updatedAt:now},
-  history:[]
+  history:[],
+  notifications:[]
  };
 };
 
@@ -48,7 +49,8 @@ function isState(value:unknown):value is AfterHoursState{
   &&session.round<3
   &&(session.startedAt===null||typeof session.startedAt==="string")
   &&typeof session.updatedAt==="string"
-  &&Array.isArray(v.history);
+  &&Array.isArray(v.history)
+  &&Array.isArray(v.notifications);
 }
 
 export function loadState():AfterHoursState{
