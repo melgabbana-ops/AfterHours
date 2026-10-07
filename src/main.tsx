@@ -54,7 +54,7 @@ function App(){
  },[]);
 
  useEffect(()=>{saveState(state);void syncRemoteState(state)},[state]);
- useEffect(()=>{if(!running)return;const id=setInterval(()=>setSeconds(s=>{const next=Math.max(0,s-1);saveTimer(state.session.round,next);return next}),1000);return()=>clearInterval(id)},[running,state.session.round]);
+ useEffect(()=>{if(!running)return;const id=setInterval(()=>setSeconds(s=>{const next=Math.max(0,s-1);saveTimer(state.session.round,next,true);return next}),1000);return()=>clearInterval(id)},[running,state.session.round]);
  useEffect(()=>{if(seconds!==0)return;clearTimer();setRunning(false);setState(s=>({...s,session:{...s.session,status:"paused",updatedAt:new Date().toISOString()}}))},[seconds]);
 
  const round=state.session.round;
@@ -72,7 +72,7 @@ function App(){
  const startRound=()=>{
   if(!consent){setScreen("home");return}
   setRunning(true);
-  saveTimer(round,seconds);
+  saveTimer(round,seconds,true);
   updateSession({status:"active",startedAt:state.session.startedAt||new Date().toISOString()});
  };
  const next=()=>{
@@ -89,7 +89,7 @@ function App(){
    setScreen("home");
   }
  };
- const reset=()=>{clearTimer();setSeconds(rounds[round].time);setRunning(false);updateSession({status:"ready"})};
+ const reset=()=>{clearTimer();setSeconds(rounds[round].time);setRunning(false);saveTimer(round,rounds[round].time,false);updateSession({status:"ready"})};
  const stop=()=>{clearTimer();setRunning(false);updateSession({status:"stopped"});setScreen("home")};
  const revokeConsent=()=>{clearTimer();setRunning(false);setState(s=>({...s,consent:{status:"revoked",confirmedAt:s.consent.confirmedAt,revokedAt:new Date().toISOString()},session:{...s.session,status:"stopped",updatedAt:new Date().toISOString()}}));setScreen("home")};
  const confirmConsent=()=>setState(s=>({...s,consent:{status:"active",confirmedAt:new Date().toISOString(),revokedAt:null}}));
