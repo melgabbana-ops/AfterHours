@@ -1,6 +1,6 @@
 import React,{useEffect,useMemo,useState}from"react";
 import{createRoot}from"react-dom/client";
-import{Shield,Lock,Play,Pause,RotateCcw,ChevronRight,User,Settings,Home,Timer,CheckCircle2,Square,Activity,LogOut,Sparkles,Radio}from"lucide-react";
+import{Shield,Lock,Play,Pause,RotateCcw,ChevronRight,User,Settings,Home,Timer,CheckCircle2,Square,Activity,LogOut,Sparkles,Radio,Bell}from"lucide-react";
 import"./styles.css";
 import{Insights}from"./Insights";
 import{RadioRoom}from"./RadioRoom";
@@ -91,6 +91,8 @@ function App(){
  const consent=state.consent.status==="active";
  const safety=state.safety;
  const unreadNotifications=state.notifications.filter(item=>!item.read).length;
+ const markNotificationRead=(id:string)=>setState(s=>({...s,notifications:s.notifications.map(item=>item.id===id?{...item,read:true}:item)}));
+ const markAllNotificationsRead=()=>setState(s=>({...s,notifications:s.notifications.map(item=>({...item,read:true}))}));
  useEffect(()=>{if(screen==="home")return;if(!state.ageConfirmed||state.consent.status!=="active"){setScreen("home")}},[screen,state.ageConfirmed,state.consent.status]);
  const xp=state.profile.xp;
  const currentLevel=Math.max(1,state.profile.level);
@@ -143,6 +145,16 @@ function App(){
  <header><button className="wordmark" onClick={()=>setScreen("home")} aria-label="AFTER HOURS home"><img src="/after-hours-logo.svg" alt="AFTER HOURS" /></button><div className="status"><span></span> privé sessie</div></header>
 
  {screen==="home"&&<main>
+  <div className="notification-bar">
+   <button className="notification-button" aria-label={unreadNotifications?unreadNotifications+" ongelezen meldingen":"Meldingen"} aria-expanded={notificationsOpen} onClick={()=>setNotificationsOpen(open=>!open)}>
+    <Bell size={16}/>
+    {unreadNotifications>0&&<span>{unreadNotifications>9?"9+":unreadNotifications}</span>}
+   </button>
+   {notificationsOpen&&<div className="notification-panel" role="dialog" aria-label="Meldingen">
+    <div className="notification-head"><strong>MELDINGEN</strong><button onClick={markAllNotificationsRead} disabled={!unreadNotifications}>Alles gelezen</button></div>
+    {state.notifications.length?state.notifications.slice(0,8).map(item=><button key={item.id} className={"notification-item "+(item.read?"":"unread")} onClick={()=>markNotificationRead(item.id)}><b>{item.title}</b><span>{item.body}</span></button>):<small>Geen nieuwe meldingen.</small>}
+   </div>}
+  </div>
   <section className="hero"><span className="eyebrow">JULLIE AVOND</span><h2>Take your time.</h2><p>Een zorgvuldig opgebouwde ervaring waarin toestemming, communicatie en grenzen altijd voorop staan.</p>
    <div className="safety"><Shield/><div><strong>Veiligheidscheck</strong><span>{safety==="green"?"Jullie grenzen zijn actief":"Check jullie afspraken opnieuw"}</span></div><b>{safety==="green"?"GOED":"CHECK"}</b></div>
   </section>
