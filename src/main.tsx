@@ -116,8 +116,10 @@ function App(){
   clearTimer();
   if(round<rounds.length-1){
    const n=round+1;
-   setState(s=>({...s,session:{...s.session,round:n,status:"ready",updatedAt:new Date().toISOString()}}));
+   const now=new Date().toISOString();
+   setState(s=>({...s,session:{...s.session,round:n,status:"paused",updatedAt:now}}));
    setSeconds(rounds[n].time);
+   saveTimer(n,rounds[n].time,false);
   }else{
    setState(s=>{const nextXp=s.profile.xp+120;const completedAt=new Date().toISOString();return {...s,profile:{...s.profile,xp:nextXp,level:levelFromXp(nextXp),sessions:s.profile.sessions+1},history:[{id:"session-"+Date.now(),completedAt,xpEarned:120,rounds:rounds.length},...s.history].slice(0,12),session:{...s.session,round:0,status:"completed",startedAt:null,updatedAt:completedAt}}});
    setSeconds(rounds[0].time);
