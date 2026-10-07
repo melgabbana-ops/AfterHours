@@ -3,7 +3,16 @@ import{supabase,supabaseConfigured}from"./supabase";
 
 const isUuid=(value:string)=>/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 
-export interface RemoteRound{slug:string;title:string;body:string;durationSeconds:number}\n\nexport async function loadRemoteRounds():Promise<RemoteRound[]>{\n if(!supabaseConfigured||!supabase)return [];\n const{data,error}=await supabase.from("experience_rounds").select("slug,title,body,duration_seconds").eq("active",true).order("sort_order",{ascending:true});\n if(error||!data||data.length===0)return [];\n return data.filter(row=>Number.isInteger(row.duration_seconds)&&row.duration_seconds>0).map(row=>({slug:row.slug,title:row.title,body:row.body,durationSeconds:row.duration_seconds}));\n}\n\nexport async function loadRemoteState():Promise<AfterHoursState|null>{
+export interface RemoteRound{slug:string;title:string;body:string;durationSeconds:number}
+
+export async function loadRemoteRounds():Promise<RemoteRound[]>{
+ if(!supabaseConfigured||!supabase)return [];
+ const{data,error}=await supabase.from("experience_rounds").select("slug,title,body,duration_seconds").eq("active",true).order("sort_order",{ascending:true});
+ if(error||!data||data.length===0)return [];
+ return data.filter(row=>Number.isInteger(row.duration_seconds)&&row.duration_seconds>0).map(row=>({slug:row.slug,title:row.title,body:row.body,durationSeconds:row.duration_seconds}));
+}
+
+export async function loadRemoteState():Promise<AfterHoursState|null>{
  if(!supabaseConfigured||!supabase)return null;
  const{data:{user},error:userError}=await supabase.auth.getUser();
  if(userError||!user)return null;
