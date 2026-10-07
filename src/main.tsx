@@ -4,18 +4,18 @@ import{Shield,Lock,Play,Pause,RotateCcw,ChevronRight,User,Settings,Home,Timer,Ch
 import"./styles.css";
 import type{AfterHoursState,Screen,Safety}from"./types";
 import{loadState,saveState,loadTimer,saveTimer,clearTimer}from"./storage";
-import{loadRemoteState,syncRemoteState}from"./services/backend";
+import{loadRemoteState,loadRemoteRounds,syncRemoteState}from"./services/backend";
 import{supabase,supabaseConfigured}from"./services/supabase";
 import{getCurrentUser,sendMagicLink,signOut}from"./services/auth";
 
-const rounds=[
+const fallbackRounds=[
  {title:"De Eerste Stap",text:"Neem een moment. Spreek samen af wat vandaag wel, niet en misschien is.",time:180},
  {title:"De Richting",text:"Kies één opdracht die past bij jullie afgesproken grenzen. Communiceer helder.",time:240},
  {title:"De Verdieping",text:"Blijf aanwezig, check in en gebruik jullie afgesproken stopwoord wanneer nodig.",time:300}
 ];
 
 function App(){
- const[state,setState]=useState<AfterHoursState>(()=>loadState());
+ const[state,setState]=useState<AfterHoursState>(()=>loadState());\n const[rounds,setRounds]=useState(fallbackRounds);
  const[screen,setScreen]=useState<Screen>("home");
  const[running,setRunning]=useState(false);
  const[seconds,setSeconds]=useState(()=>loadTimer(state.session.round,rounds[state.session.round]?.time||rounds[0].time));
@@ -29,7 +29,7 @@ function App(){
    if(!active)return;
    setUserEmail(user?.email??null);
    if(!user)return;
-   const remote=await loadRemoteState();
+   const remoteRounds=await loadRemoteRounds();\n   if(remoteRounds.length===3)setRounds(remoteRounds.map(r=>({title:r.title,text:r.body,time:r.durationSeconds})));\n   const remote=await loadRemoteState();
    if(remote){
     setState(current=>({...remote,ageConfirmed:current.ageConfirmed,safety:current.safety}));
    }else{
