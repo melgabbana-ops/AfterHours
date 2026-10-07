@@ -9,12 +9,12 @@ returns trigger
 language plpgsql
 security invoker
 set search_path = public
-as $
+as $func$
 begin
   new.updated_at = now();
   return new;
 end;
-$;
+$func$;
 
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
