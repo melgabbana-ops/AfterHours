@@ -8,6 +8,8 @@ import{loadRemoteState,loadRemoteRounds,syncRemoteState}from"./services/backend"
 import{supabase,supabaseConfigured}from"./services/supabase";
 import{getCurrentUser,sendMagicLink,signOut}from"./services/auth";
 
+const levelFromXp=(value:number)=>Math.max(1,Math.floor(Math.max(0,value)/200)+1);
+
 const fallbackRounds=[
  {title:"De Eerste Stap",text:"Neem een moment. Spreek samen af wat vandaag wel, niet en misschien is.",time:180},
  {title:"De Richting",text:"Kies één opdracht die past bij jullie afgesproken grenzen. Communiceer helder.",time:240},
@@ -59,6 +61,10 @@ function App(){
  const consent=state.consent.status==="active";
  const safety=state.safety;
  const xp=state.profile.xp;
+ const currentLevel=Math.max(1,state.profile.level);
+ const levelFloor=(currentLevel-1)*200;
+ const nextLevelFloor=currentLevel*200;
+ const levelProgress=Math.min(100,Math.max(0,Math.round(((xp-levelFloor)/(nextLevelFloor-levelFloor))*100)));
  const progress=Math.round(((round+1)/rounds.length)*100);
  const clock=useMemo(()=>String(Math.floor(seconds/60)).padStart(2,"0")+":"+String(seconds%60).padStart(2,"0"),[seconds]);
 
@@ -78,7 +84,7 @@ function App(){
    setState(s=>({...s,session:{...s.session,round:n,status:"ready",updatedAt:new Date().toISOString()}}));
    setSeconds(rounds[n].time);
   }else{
-   setState(s=>({...s,profile:{...s.profile,xp:s.profile.xp+120,sessions:s.profile.sessions+1},session:{...s.session,round:0,status:"completed",startedAt:null,updatedAt:new Date().toISOString()}}));
+   setState(s=>{const nextXp=s.profile.xp+120;return {...s,profile:{...s.profile,xp:nextXp,level:levelFromXp(nextXp),sessions:s.profile.sessions+1},session:{...s.session,round:0,status:"completed",startedAt:null,updatedAt:new Date().toISOString()}}});
    setSeconds(rounds[0].time);
    setScreen("home");
   }
@@ -105,7 +111,7 @@ function App(){
 
  {screen==="game"&&<main>{!consent?<section className="round"><span className="eyebrow">TOEGANG VEREIST</span><h2>Consent eerst.</h2><p>Bevestig jullie vrijwillige toestemming voordat de experience kan worden geopend.</p><button className="gold" onClick={()=>setScreen("home")}>Naar consent <ChevronRight/></button></section>:<><div className="game-top"><button onClick={stop}><LogOut/></button><span>ROUND {String(round+1).padStart(2,"0")} / 03</span></div><div className="progress"><span style={{width:progress+"%"}}/></div><section className="round"><span className="eyebrow">AFTER HOURS</span><h2>{rounds[round].title}</h2><p>{rounds[round].text}</p><div className="timer"><Timer/><strong>{clock}</strong><small>TIJD OVER</small></div><div className="actions"><button className="gold" onClick={()=>running?setRunning(false):startRound()}>{running?<Pause/>:<Play/>}{running?"Pauzeren":"Start ronde"}</button><button onClick={reset}><RotateCcw/> Reset</button><button className="stop" onClick={stop}><Square/> Stop sessie</button></div><div className="consent"><CheckCircle2/><div><strong>Consent bevestigd</strong><span>Jullie kunnen op elk moment stoppen.</span></div></div></section><button className="next" onClick={next}>{round===2?"Afronden":"Volgende ronde"} <ChevronRight/></button></>}</main>}
 
- {screen==="profile"&&<main><section className="profile"><div className="avatar">N4</div><span className="eyebrow">YOUR PROFILE</span><h2>{state.profile.displayName}</h2><p>Level {state.profile.level} · {xp} XP</p><div className="xp"><span style={{width:Math.min(100,(xp%1000)/10)+"%"}}/></div><div className="stats"><div><b>{String(state.profile.level).padStart(2,"0")}</b><small>LEVEL</small></div><div><b>{String(state.profile.sessions).padStart(2,"0")}</b><small>SESSIES</small></div><div><b>{xp}</b><small>XP</small></div></div></section><button className="back" onClick={()=>setScreen("home")}>← Terug</button></main>}
+ {screen==="profile"&&<main><section className="profile"><div className="avatar">N4</div><span className="eyebrow">YOUR PROFILE</span><h2>{state.profile.displayName}</h2><p>Level {state.profile.level} · {xp} XP</p><div className="xp"><span style={{width:levelProgress+"%"}}/></div><small className="xp-label">{Math.max(0,nextLevelFloor-xp)} XP tot Level {currentLevel+1}</small><div className="stats"><div><b>{String(state.profile.level).padStart(2,"0")}</b><small>LEVEL</small></div><div><b>{String(state.profile.sessions).padStart(2,"0")}</b><small>SESSIES</small></div><div><b>{xp}</b><small>XP</small></div></div></section><button className="back" onClick={()=>setScreen("home")}>← Terug</button></main>}
 
  {screen==="admin"&&<main><section className="admin"><span className="eyebrow">CONTROL ROOM</span><h2>Beheer</h2><div className="adminrow"><Activity/><div><b>Sessie status</b><span>{state.session.status==="active"?"Actief":state.session.status==="paused"?"Gepauzeerd":state.session.status==="completed"?"Afgerond":"Gereed"}</span></div><i/></div><div className="adminrow"><Shield/><div><b>Consent</b><span>{consent?"Bevestigd voor deze sessie":"Nog niet bevestigd"}</span></div><i/></div><div className="adminrow"><Lock/><div><b>Privacy</b><span>{userEmail?"Beveiligde sessie via Supabase":"Lokale sessiedata op dit apparaat"}</span></div><i/></div>{supabaseConfigured&&!userEmail&&<div className="auth-panel"><span className="eyebrow">PRIVATE ACCESS</span><strong>Veilige toegang</strong><p>Ontvang een eenmalige magic link per e-mail. Geen wachtwoord nodig.</p><input type="email" value={authEmail} onChange={e=>setAuthEmail(e.target.value)} placeholder="jij@email.nl" autoComplete="email"/><button onClick={requestMagicLink} disabled={authBusy||!authEmail.trim()}>{authBusy?"Versturen…":"Magic link sturen"}</button>{authMessage&&<small>{authMessage}</small>}</div>}{userEmail&&<div className="auth-panel"><span className="eyebrow">SIGNED IN</span><strong>{userEmail}</strong><button onClick={()=>void signOut()}>Uitloggen</button></div>}<button className="danger-action" onClick={revokeConsent}>Consent intrekken</button></section><button className="back" onClick={()=>setScreen("home")}>← Terug</button></main>}
 
