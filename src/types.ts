@@ -12,6 +12,13 @@ export interface UserProfile{
  createdAt:string;
 }
 
+export interface SessionHistoryEntry{
+ id:string;
+ completedAt:string;
+ xpEarned:number;
+ rounds:number;
+}
+
 export interface Session{
  id:string;
  profileId:string;
