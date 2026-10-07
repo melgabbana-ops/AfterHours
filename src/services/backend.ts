@@ -59,6 +59,7 @@ export async function syncRemoteState(state:AfterHoursState):Promise<void>{
  const{error:profileError}=await supabase.from("profiles").upsert({
   id:user.id,
   display_name:state.profile.displayName,
+  username:state.profile.username,
   level:state.profile.level,
   xp:state.profile.xp,
   sessions:state.profile.sessions
