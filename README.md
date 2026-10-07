@@ -30,3 +30,7 @@ npm run build
 ```
 
 The current client is the visual/interaction foundation. Authentication, persistent profiles, database-backed sessions and payment infrastructure should be connected before public production launch.
+
+## Architecture
+
+The client now has typed backend-ready contracts in `src/types.ts`, centralized persistence in `src/storage.ts`, and a documented production data model in `src/data-model.md`. Local storage is only an offline prototype layer and must not contain authentication secrets, payment credentials, or server authorization data.
