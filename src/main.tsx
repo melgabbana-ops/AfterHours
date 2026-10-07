@@ -101,13 +101,7 @@ function App(){
  const clock=useMemo(()=>String(Math.floor(seconds/60)).padStart(2,"0")+":"+String(seconds%60).padStart(2,"0"),[seconds]);
 
  const updateSession=(patch:Partial<AfterHoursState["session"]>)=>setState(s=>({...s,session:{...s.session,...patch,updatedAt:new Date().toISOString()}}));
- const startRound=()=>{
-  if(!consent){setScreen("home");return}
-  setRunning(true);
-  saveTimer(round,seconds,true);
-  updateSession({status:"active",startedAt:state.session.startedAt||new Date().toISOString()});
- };
- const next=()=>{
+ const startRound=()=>{\n  if(!consent){setScreen("home");return}\n  const resume=state.session.status==="paused"||state.session.status==="active";\n  const remaining=resume?seconds:rounds[round].time;\n  if(!resume)setSeconds(remaining);\n  setRunning(true);\n  saveTimer(round,remaining,true);\n  updateSession({status:"active",startedAt:state.session.startedAt||new Date().toISOString()});\n };\n const next=()=>{
   if(!consent){setRunning(false);setScreen("home");return}
   setRunning(false);
   clearTimer();
