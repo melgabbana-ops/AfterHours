@@ -13,7 +13,9 @@ Premium, mobile-first interactive experience with a cinematic black-and-gold vis
 - Stop-session flow
 - Profile, level and XP presentation
 - Control-room interface
-- Responsive iPhone/desktop layout
+- Responsive iPhone, Android phone, iPad and tablet layout
+- Safe-area and touch-target support for mobile browsers
+- iOS/iPadOS standalone web-app metadata
 - GitHub Actions production build check
 
 ## Development
