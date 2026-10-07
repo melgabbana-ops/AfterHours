@@ -6,7 +6,7 @@ import{Insights}from"./Insights";
 import{RadioRoom}from"./RadioRoom";
 import type{AfterHoursState,Screen,Safety,SessionHistoryEntry}from"./types";
 import{loadState,saveState,loadTimer,saveTimer,clearTimer}from"./storage";
-import{loadRemoteState,loadRemoteRounds,syncRemoteState}from"./services/backend";
+import{loadRemoteState,loadRemoteRounds,syncRemoteState,loadRemoteHistory,saveRemoteHistory}from"./services/backend";
 import{supabase,supabaseConfigured}from"./services/supabase";
 import{getCurrentUser,sendMagicLink,signOut}from"./services/auth";
 
