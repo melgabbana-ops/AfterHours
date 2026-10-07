@@ -4,6 +4,18 @@
 
 create extension if not exists pgcrypto;
 
+create or replace function public.set_updated_at()
+returns trigger
+language plpgsql
+security invoker
+set search_path = public
+as $
+begin
+  new.updated_at = now();
+  return new;
+end;
+$;
+
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   display_name text not null default 'Night Walker',
@@ -152,6 +164,16 @@ where status='active' and confirmed_at is not null;
 create unique index if not exists consent_revoked_event_idx
 on public.consent_records(session_id,status,revoked_at)
 where status='revoked' and revoked_at is not null;
+
+drop trigger if exists profiles_set_updated_at on public.profiles;
+create trigger profiles_set_updated_at
+before update on public.profiles
+for each row execute function public.set_updated_at();
+
+drop trigger if exists sessions_set_updated_at on public.sessions;
+create trigger sessions_set_updated_at
+before update on public.sessions
+for each row execute function public.set_updated_at();
 
 insert into public.experience_rounds (slug,title,body,duration_seconds,sort_order)
 values
