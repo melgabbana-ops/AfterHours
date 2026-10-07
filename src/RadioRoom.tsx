@@ -13,9 +13,10 @@ export function RadioRoom({onBack}:{onBack:()=>void}){
  const current=moods[mood];
  return <main className="radio-room">
   <section className="radio-hero"><span className="eyebrow">AFTER HOURS · RADIO</span><h2>Set the mood.</h2><p>Een eigen soundtrack voor jullie avond. Kies een sfeer en laat de ruimte het tempo volgen.</p></section>
-  <section className="radio-player">
+  <section className={"radio-player mood-"+current.name.toLowerCase()}>
    <div className="radio-disc"><Radio/><span>AH</span></div>
-   <span className="eyebrow">NOW PLAYING</span><h3>{current.tracks[track]}</h3><p>{current.name} · {current.desc}</p>
+   <span className="eyebrow">NOW PLAYING · {current.name.toUpperCase()}</span><h3>{current.tracks[track]}</h3><p>{current.name} · {current.desc}</p>
+   <div className="radio-vibe"><span>01</span><strong>{current.name}</strong><small>{current.tracks.length} curated moods</small></div>
    <div className="radio-controls"><button aria-label="Vorige nummer" onClick={()=>setTrack((track+current.tracks.length-1)%current.tracks.length)}>‹</button><button className="radio-play" onClick={()=>setPlaying(!playing)}>{playing?<Pause fill="currentColor"/>:<Play fill="currentColor"/>}</button><button aria-label="Volgende nummer" onClick={()=>setTrack((track+1)%current.tracks.length)}>›</button></div>
    <div className="radio-volume"><Volume2/><span/><span/><span/><span/><span/></div>
   </section>
