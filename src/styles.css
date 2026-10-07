@@ -68,3 +68,5 @@ nav button{min-height:44px;}
 .tile:focus-visible,.wordmark:focus-visible,nav button:focus-visible,.back:focus-visible,.gamecard button:focus-visible,.consent-panel button:focus-visible,.resume-panel button:focus-visible,.danger-action:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
 .tile{cursor:pointer}
 @media(max-width:520px){.tile{min-height:92px}.tile small{line-height:1.4}.consent-panel{align-items:flex-start}.consent-panel button{min-height:44px}.resume-panel button{min-height:44px}}
+
+.profile-rank{display:inline-block;margin:2px 0 18px;color:var(--gold);font-size:10px;letter-spacing:.16em;text-transform:uppercase}
