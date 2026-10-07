@@ -2,9 +2,8 @@ import React,{useEffect,useMemo,useState}from"react";
 import{createRoot}from"react-dom/client";
 import{Shield,Lock,Play,Pause,RotateCcw,ChevronRight,User,Settings,Home,Timer,CheckCircle2,Square,Activity,LogOut}from"lucide-react";
 import"./styles.css";
-
-type Screen="home"|"game"|"profile"|"admin";
-type Safety="green"|"amber";
+import type{AfterHoursState,Screen,Safety}from"./types";
+import{loadState,saveState}from"./storage";
 
 const rounds=[
  {title:"De Eerste Stap",text:"Neem een moment. Spreek samen af wat vandaag wel, niet en misschien is.",time:180},
@@ -12,36 +11,47 @@ const rounds=[
  {title:"De Verdieping",text:"Blijf aanwezig, check in en gebruik jullie afgesproken stopwoord wanneer nodig.",time:300}
 ];
 
-const storage={age:"afterhours.age",consent:"afterhours.consent",round:"afterhours.round",safety:"afterhours.safety",xp:"afterhours.xp"};
-
-function readBool(key:string){return localStorage.getItem(key)==="true"}
 function App(){
- const[age,setAge]=useState(()=>readBool(storage.age));
- const[consent,setConsent]=useState(()=>readBool(storage.consent));
+ const[state,setState]=useState<AfterHoursState>(()=>loadState());
  const[screen,setScreen]=useState<Screen>("home");
- const[round,setRound]=useState(()=>Number(localStorage.getItem(storage.round)||0));
  const[running,setRunning]=useState(false);
- const[seconds,setSeconds]=useState(()=>rounds[Number(localStorage.getItem(storage.round)||0)]?.time||rounds[0].time);
- const[safety,setSafety]=useState<Safety>(()=>localStorage.getItem(storage.safety)==="amber"?"amber":"green");
- const[xp,setXp]=useState(()=>Number(localStorage.getItem(storage.xp)||680));
+ const[seconds,setSeconds]=useState(()=>rounds[state.session.round]?.time||rounds[0].time);
 
- useEffect(()=>{localStorage.setItem(storage.age,String(age))},[age]);
- useEffect(()=>{localStorage.setItem(storage.consent,String(consent))},[consent]);
- useEffect(()=>{localStorage.setItem(storage.round,String(round))},[round]);
- useEffect(()=>{localStorage.setItem(storage.safety,safety)},[safety]);
- useEffect(()=>{localStorage.setItem(storage.xp,String(xp))},[xp]);
+ useEffect(()=>saveState(state),[state]);
  useEffect(()=>{if(!running)return;const id=setInterval(()=>setSeconds(s=>Math.max(0,s-1)),1000);return()=>clearInterval(id)},[running]);
+ useEffect(()=>{if(seconds!==0)return;setRunning(false);setState(s=>({...s,session:{...s.session,status:"paused",updatedAt:new Date().toISOString()}}))},[seconds]);
 
+ const round=state.session.round;
+ const consent=state.consent.status==="active";
+ const safety=state.safety;
+ const xp=state.profile.xp;
  const progress=Math.round(((round+1)/rounds.length)*100);
  const clock=useMemo(()=>String(Math.floor(seconds/60)).padStart(2,"0")+":"+String(seconds%60).padStart(2,"0"),[seconds]);
- const startRound=()=>{if(!consent){setScreen("home");return}setRunning(true)};
- const next=()=>{setRunning(false);if(round<rounds.length-1){const n=round+1;setRound(n);setSeconds(rounds[n].time)}else{setXp(v=>v+120);setRound(0);setSeconds(rounds[0].time);setScreen("home")}};
- const reset=()=>{setSeconds(rounds[round].time);setRunning(false)};
- const stop=()=>{setRunning(false);setScreen("home")};
- const revokeConsent=()=>{setConsent(false);setRunning(false);setScreen("home")};
- const confirmConsent=()=>setConsent(true);
 
- if(!age)return <div className="gate"><div className="mark">AH</div><span className="eyebrow">PRIVATE EXPERIENCE · 18+</span><h1>AFTER<br/><i>HOURS</i></h1><p>Een premium interactieve ervaring voor volwassenen. Bewust. Afgesproken. Veilig.</p><button onClick={()=>setAge(true)}>Ik ben 18+ <ChevronRight/></button><small>Je toegang bevestigt alleen je leeftijd. Consent wordt afzonderlijk gevraagd.</small></div>;
+ const updateSession=(patch:Partial<AfterHoursState["session"]>)=>setState(s=>({...s,session:{...s.session,...patch,updatedAt:new Date().toISOString()}}));
+ const startRound=()=>{
+  if(!consent){setScreen("home");return}
+  setRunning(true);
+  updateSession({status:"active",startedAt:state.session.startedAt||new Date().toISOString()});
+ };
+ const next=()=>{
+  setRunning(false);
+  if(round<rounds.length-1){
+   const n=round+1;
+   setState(s=>({...s,session:{...s.session,round:n,status:"ready",updatedAt:new Date().toISOString()}}));
+   setSeconds(rounds[n].time);
+  }else{
+   setState(s=>({...s,profile:{...s.profile,xp:s.profile.xp+120,sessions:s.profile.sessions+1},session:{...s.session,round:0,status:"completed",startedAt:null,updatedAt:new Date().toISOString()}}));
+   setSeconds(rounds[0].time);
+   setScreen("home");
+  }
+ };
+ const reset=()=>{setSeconds(rounds[round].time);setRunning(false);updateSession({status:"ready"})};
+ const stop=()=>{setRunning(false);updateSession({status:"stopped"});setScreen("home")};
+ const revokeConsent=()=>{setRunning(false);setState(s=>({...s,consent:{status:"revoked",confirmedAt:s.consent.confirmedAt,revokedAt:new Date().toISOString()},session:{...s.session,status:"stopped",updatedAt:new Date().toISOString()}}));setScreen("home")};
+ const confirmConsent=()=>setState(s=>({...s,consent:{status:"active",confirmedAt:new Date().toISOString(),revokedAt:null}}));
+
+ if(!state.ageConfirmed)return <div className="gate"><div className="mark">AH</div><span className="eyebrow">PRIVATE EXPERIENCE · 18+</span><h1>AFTER<br/><i>HOURS</i></h1><p>Een premium interactieve ervaring voor volwassenen. Bewust. Afgesproken. Veilig.</p><button onClick={()=>setState(s=>({...s,ageConfirmed:true}))}>Ik ben 18+ <ChevronRight/></button><small>Je toegang bevestigt alleen je leeftijd. Consent wordt afzonderlijk gevraagd.</small></div>;
 
  return <div className="app">
  <header><button className="wordmark" onClick={()=>setScreen("home")}>AFTER <i>HOURS</i></button><div className="status"><span></span> privé sessie</div></header>
@@ -51,15 +61,15 @@ function App(){
    <div className="safety"><Shield/><div><strong>Veiligheidscheck</strong><span>{safety==="green"?"Jullie grenzen zijn actief":"Check jullie afspraken opnieuw"}</span></div><b>{safety==="green"?"GOED":"CHECK"}</b></div>
   </section>
   <section><div className="sectionhead"><span>THE 60-MINUTE EXPERIENCE</span><em>03 ROUNDS</em></div><article className="gamecard"><div><span className="number">01</span><h3>De Nacht Begint</h3><p>Drie begeleide rondes. Jullie bepalen tempo, grenzen en stopmoment.</p></div><button onClick={()=>consent?setScreen("game"):setScreen("home")}><Play fill="currentColor"/></button></article></section>
-  <section className="grid"><button className="tile" onClick={()=>setScreen("profile")}><User/><span>Profiel</span><small>Night Walker · Level 4</small></button><button className="tile" onClick={()=>setSafety(safety==="green"?"amber":"green")}><Activity/><span>Consent</span><small>{consent?"Actief en bevestigd":"Bevestiging vereist"}</small></button><button className="tile" onClick={()=>setScreen("admin")}><Settings/><span>Control room</span><small>Beheer & instellingen</small></button></section>
+  <section className="grid"><button className="tile" onClick={()=>setScreen("profile")}><User/><span>Profiel</span><small>{state.profile.displayName} · Level {state.profile.level}</small></button><button className="tile" onClick={()=>setState(s=>({...s,safety:s.safety==="green"?"amber":"green"}))}><Activity/><span>Consent</span><small>{consent?"Actief en bevestigd":"Bevestiging vereist"}</small></button><button className="tile" onClick={()=>setScreen("admin")}><Settings/><span>Control room</span><small>Beheer & instellingen</small></button></section>
   {!consent&&<section className="consent-panel"><Shield/><div><strong>Consent is vereist</strong><span>Bevestig jullie vrijwillige toestemming voordat een ervaring kan starten.</span></div><button onClick={confirmConsent}>Bevestigen</button></section>}
  </main>}
 
  {screen==="game"&&<main><div className="game-top"><button onClick={stop}><LogOut/></button><span>ROUND {String(round+1).padStart(2,"0")} / 03</span></div><div className="progress"><span style={{width:progress+"%"}}/></div><section className="round"><span className="eyebrow">AFTER HOURS</span><h2>{rounds[round].title}</h2><p>{rounds[round].text}</p><div className="timer"><Timer/><strong>{clock}</strong><small>TIJD OVER</small></div><div className="actions"><button className="gold" onClick={()=>running?setRunning(false):startRound()}>{running?<Pause/>:<Play/>}{running?"Pauzeren":"Start ronde"}</button><button onClick={reset}><RotateCcw/> Reset</button><button className="stop" onClick={stop}><Square/> Stop sessie</button></div><div className="consent"><CheckCircle2/><div><strong>Consent bevestigd</strong><span>Jullie kunnen op elk moment stoppen.</span></div></div></section><button className="next" onClick={next}>{round===2?"Afronden":"Volgende ronde"} <ChevronRight/></button></main>}
 
- {screen==="profile"&&<main><section className="profile"><div className="avatar">N4</div><span className="eyebrow">YOUR PROFILE</span><h2>Night Walker</h2><p>Level 4 · {xp} XP</p><div className="xp"><span style={{width:Math.min(100,(xp%1000)/10)+"%"}}/></div><div className="stats"><div><b>04</b><small>LEVEL</small></div><div><b>12</b><small>SESSIES</small></div><div><b>{xp}</b><small>XP</small></div></div></section><button className="back" onClick={()=>setScreen("home")}>← Terug</button></main>}
+ {screen==="profile"&&<main><section className="profile"><div className="avatar">N4</div><span className="eyebrow">YOUR PROFILE</span><h2>{state.profile.displayName}</h2><p>Level {state.profile.level} · {xp} XP</p><div className="xp"><span style={{width:Math.min(100,(xp%1000)/10)+"%"}}/></div><div className="stats"><div><b>{String(state.profile.level).padStart(2,"0")}</b><small>LEVEL</small></div><div><b>{String(state.profile.sessions).padStart(2,"0")}</b><small>SESSIES</small></div><div><b>{xp}</b><small>XP</small></div></div></section><button className="back" onClick={()=>setScreen("home")}>← Terug</button></main>}
 
- {screen==="admin"&&<main><section className="admin"><span className="eyebrow">CONTROL ROOM</span><h2>Beheer</h2><div className="adminrow"><Activity/><div><b>Sessie status</b><span>Actief · alle systemen normaal</span></div><i/></div><div className="adminrow"><Shield/><div><b>Consent</b><span>{consent?"Bevestigd voor deze sessie":"Nog niet bevestigd"}</span></div><i/></div><div className="adminrow"><Lock/><div><b>Privacy</b><span>Lokale sessiedata op dit apparaat</span></div><i/></div><button className="danger-action" onClick={revokeConsent}>Consent intrekken</button></section><button className="back" onClick={()=>setScreen("home")}>← Terug</button></main>}
+ {screen==="admin"&&<main><section className="admin"><span className="eyebrow">CONTROL ROOM</span><h2>Beheer</h2><div className="adminrow"><Activity/><div><b>Sessie status</b><span>{state.session.status==="active"?"Actief":state.session.status==="paused"?"Gepauzeerd":state.session.status==="completed"?"Afgerond":"Gereed"}</span></div><i/></div><div className="adminrow"><Shield/><div><b>Consent</b><span>{consent?"Bevestigd voor deze sessie":"Nog niet bevestigd"}</span></div><i/></div><div className="adminrow"><Lock/><div><b>Privacy</b><span>Lokale sessiedata op dit apparaat</span></div><i/></div><button className="danger-action" onClick={revokeConsent}>Consent intrekken</button></section><button className="back" onClick={()=>setScreen("home")}>← Terug</button></main>}
 
  <nav><button onClick={()=>setScreen("home")}><Home/><span>Home</span></button><button onClick={()=>setScreen("game")}><Timer/><span>Experience</span></button><button onClick={()=>setScreen("profile")}><User/><span>Profiel</span></button></nav>
  </div>
