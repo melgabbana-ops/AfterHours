@@ -12,6 +12,17 @@ export interface UserProfile{
  createdAt:string;
 }
 
+export type NotificationKind="message"|"checkin"|"safety";
+
+export interface AfterHoursNotification{
+ id:string;
+ kind:NotificationKind;
+ title:string;
+ body:string;
+ createdAt:string;
+ read:boolean;
+}
+
 export interface SessionHistoryEntry{
  id:string;
  completedAt:string;
@@ -41,4 +52,5 @@ export interface AfterHoursState{
  profile:UserProfile;
  session:Session;
  history:SessionHistoryEntry[];
+ notifications:AfterHoursNotification[];
 }
