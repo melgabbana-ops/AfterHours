@@ -30,7 +30,7 @@ function isState(value:unknown):value is AfterHoursState{
   &&(consent.revokedAt===null||typeof consent.revokedAt==="string")
   &&!!profile
   &&typeof profile.id==="string"
-  &&typeof profile.displayName==="string"
+  &&typeof profile.displayName==="string"\n  &&typeof profile.username==="string"
   &&Number.isFinite(profile.level)
   &&Number.isFinite(profile.xp)
   &&Number.isFinite(profile.sessions)
