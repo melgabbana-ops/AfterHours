@@ -1,6 +1,6 @@
 import React,{useEffect,useMemo,useState}from"react";
 import{createRoot}from"react-dom/client";
-import{Shield,Lock,Play,Pause,RotateCcw,ChevronRight,User,Settings,Home,Timer,CheckCircle2,Square,Activity,LogOut,Sparkles}from"lucide-react";
+import{Shield,Lock,Play,Pause,RotateCcw,ChevronRight,User,Settings,Home,Timer,CheckCircle2,Square,Activity,LogOut,Sparkles,Radio}from"lucide-react";
 import"./styles.css";
 import{Insights}from"./Insights";
 import{RadioRoom}from"./RadioRoom";
