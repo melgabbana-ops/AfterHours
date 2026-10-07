@@ -5,6 +5,8 @@ import"./styles.css";
 import type{AfterHoursState,Screen,Safety}from"./types";
 import{loadState,saveState}from"./storage";
 import{loadRemoteState,syncRemoteState}from"./services/backend";
+import{supabase,supabaseConfigured}from"./services/supabase";
+import{getCurrentUser,sendMagicLink,signOut}from"./services/auth";
 
 const rounds=[
  {title:"De Eerste Stap",text:"Neem een moment. Spreek samen af wat vandaag wel, niet en misschien is.",time:180},
@@ -17,7 +19,11 @@ function App(){
  const[screen,setScreen]=useState<Screen>("home");
  const[running,setRunning]=useState(false);
  const[seconds,setSeconds]=useState(()=>rounds[state.session.round]?.time||rounds[0].time);
- useEffect(()=>{let active=true;(async()=>{const remote=await loadRemoteState();if(active&&remote)setState(current=>({...remote,ageConfirmed:current.ageConfirmed,safety:current.safety}))})();return()=>{active=false}},[]);
+ const[userEmail,setUserEmail]=useState<string|null>(null);
+ const[authEmail,setAuthEmail]=useState("");
+ const[authBusy,setAuthBusy]=useState(false);
+ const[authMessage,setAuthMessage]=useState("");
+ useEffect(()=>{let active=true;(async()=>{const user=await getCurrentUser();if(active)setUserEmail(user?.email??null);const remote=await loadRemoteState();if(active&&remote)setState(current=>({...remote,ageConfirmed:current.ageConfirmed,safety:current.safety}))})();const sub=supabase?.auth.onAuthStateChange((_event,session)=>{setUserEmail(session?.user?.email??null)});return()=>{active=false;sub?.data.subscription.unsubscribe()}},[]);
 
  useEffect(()=>{saveState(state);void syncRemoteState(state)},[state]);
  useEffect(()=>{if(!running)return;const id=setInterval(()=>setSeconds(s=>Math.max(0,s-1)),1000);return()=>clearInterval(id)},[running]);
@@ -52,6 +58,7 @@ function App(){
  const stop=()=>{setRunning(false);updateSession({status:"stopped"});setScreen("home")};
  const revokeConsent=()=>{setRunning(false);setState(s=>({...s,consent:{status:"revoked",confirmedAt:s.consent.confirmedAt,revokedAt:new Date().toISOString()},session:{...s.session,status:"stopped",updatedAt:new Date().toISOString()}}));setScreen("home")};
  const confirmConsent=()=>setState(s=>({...s,consent:{status:"active",confirmedAt:new Date().toISOString(),revokedAt:null}}));
+ const requestMagicLink=async()=>{setAuthMessage("");setAuthBusy(true);try{await sendMagicLink(authEmail.trim());setAuthMessage("Check je e-mail voor je veilige toegang.");}catch(error){setAuthMessage(error instanceof Error?error.message:"Aanmelden mislukt.")}finally{setAuthBusy(false)}};
 
  if(!state.ageConfirmed)return <div className="gate"><div className="mark">AH</div><span className="eyebrow">PRIVATE EXPERIENCE · 18+</span><h1>AFTER<br/><i>HOURS</i></h1><p>Een premium interactieve ervaring voor volwassenen. Bewust. Afgesproken. Veilig.</p><button onClick={()=>setState(s=>({...s,ageConfirmed:true}))}>Ik ben 18+ <ChevronRight/></button><small>Je toegang bevestigt alleen je leeftijd. Consent wordt afzonderlijk gevraagd.</small></div>;
 
@@ -71,7 +78,7 @@ function App(){
 
  {screen==="profile"&&<main><section className="profile"><div className="avatar">N4</div><span className="eyebrow">YOUR PROFILE</span><h2>{state.profile.displayName}</h2><p>Level {state.profile.level} · {xp} XP</p><div className="xp"><span style={{width:Math.min(100,(xp%1000)/10)+"%"}}/></div><div className="stats"><div><b>{String(state.profile.level).padStart(2,"0")}</b><small>LEVEL</small></div><div><b>{String(state.profile.sessions).padStart(2,"0")}</b><small>SESSIES</small></div><div><b>{xp}</b><small>XP</small></div></div></section><button className="back" onClick={()=>setScreen("home")}>← Terug</button></main>}
 
- {screen==="admin"&&<main><section className="admin"><span className="eyebrow">CONTROL ROOM</span><h2>Beheer</h2><div className="adminrow"><Activity/><div><b>Sessie status</b><span>{state.session.status==="active"?"Actief":state.session.status==="paused"?"Gepauzeerd":state.session.status==="completed"?"Afgerond":"Gereed"}</span></div><i/></div><div className="adminrow"><Shield/><div><b>Consent</b><span>{consent?"Bevestigd voor deze sessie":"Nog niet bevestigd"}</span></div><i/></div><div className="adminrow"><Lock/><div><b>Privacy</b><span>Lokale sessiedata op dit apparaat</span></div><i/></div><button className="danger-action" onClick={revokeConsent}>Consent intrekken</button></section><button className="back" onClick={()=>setScreen("home")}>← Terug</button></main>}
+ {screen==="admin"&&<main><section className="admin"><span className="eyebrow">CONTROL ROOM</span><h2>Beheer</h2><div className="adminrow"><Activity/><div><b>Sessie status</b><span>{state.session.status==="active"?"Actief":state.session.status==="paused"?"Gepauzeerd":state.session.status==="completed"?"Afgerond":"Gereed"}</span></div><i/></div><div className="adminrow"><Shield/><div><b>Consent</b><span>{consent?"Bevestigd voor deze sessie":"Nog niet bevestigd"}</span></div><i/></div><div className="adminrow"><Lock/><div><b>Privacy</b><span>{userEmail?"Beveiligde sessie via Supabase":"Lokale sessiedata op dit apparaat"}</span></div><i/></div>{supabaseConfigured&&!userEmail&&<div className="auth-panel"><span className="eyebrow">PRIVATE ACCESS</span><strong>Veilige toegang</strong><p>Ontvang een eenmalige magic link per e-mail. Geen wachtwoord nodig.</p><input type="email" value={authEmail} onChange={e=>setAuthEmail(e.target.value)} placeholder="jij@email.nl" autoComplete="email"/><button onClick={requestMagicLink} disabled={authBusy||!authEmail.trim()}>{authBusy?"Versturen…":"Magic link sturen"}</button>{authMessage&&<small>{authMessage}</small>}</div>}{userEmail&&<div className="auth-panel"><span className="eyebrow">SIGNED IN</span><strong>{userEmail}</strong><button onClick={()=>void signOut()}>Uitloggen</button></div>}<button className="danger-action" onClick={revokeConsent}>Consent intrekken</button></section><button className="back" onClick={()=>setScreen("home")}>← Terug</button></main>}
 
  <nav><button onClick={()=>setScreen("home")}><Home/><span>Home</span></button><button onClick={()=>setScreen("game")}><Timer/><span>Experience</span></button><button onClick={()=>setScreen("profile")}><User/><span>Profiel</span></button></nav>
  </div>
