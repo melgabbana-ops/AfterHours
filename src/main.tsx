@@ -108,10 +108,10 @@ function App(){
  const saveDisplayName=()=>{const name=displayNameDraft.trim().replace(/\s+/g," ");if(name.length<2)return;setState(s=>({...s,profile:{...s.profile,displayName:name}}));setDisplayNameDraft(name)};
  const requestMagicLink=async()=>{setAuthMessage("");setAuthBusy(true);try{await sendMagicLink(authEmail.trim());setAuthMessage("Check je e-mail voor je veilige toegang.");}catch(error){setAuthMessage(error instanceof Error?error.message:"Aanmelden mislukt.")}finally{setAuthBusy(false)}};
 
- if(!state.ageConfirmed)return <div className="gate"><div className="mark">AH</div><span className="eyebrow">PRIVATE EXPERIENCE · 18+</span><h1>AFTER<br/><i>HOURS</i></h1><p>Een premium interactieve ervaring voor volwassenen. Bewust. Afgesproken. Veilig.</p><button onClick={()=>setState(s=>({...s,ageConfirmed:true}))}>Ik ben 18+ <ChevronRight/></button><small>Je toegang bevestigt alleen je leeftijd. Consent wordt afzonderlijk gevraagd.</small></div>;
+ if(!state.ageConfirmed)return <div className="gate"><img className="gate-logo" src="/after-hours-logo.svg" alt="AFTER HOURS" /><span className="eyebrow">PRIVATE EXPERIENCE · 18+</span><h1>AFTER<br/><i>HOURS</i></h1><p>Een premium interactieve ervaring voor volwassenen. Bewust. Afgesproken. Veilig.</p><button onClick={()=>setState(s=>({...s,ageConfirmed:true}))}>Ik ben 18+ <ChevronRight/></button><small>Je toegang bevestigt alleen je leeftijd. Consent wordt afzonderlijk gevraagd.</small></div>;
 
  return <div className="app">
- <header><button className="wordmark" onClick={()=>setScreen("home")}>AFTER <i>HOURS</i></button><div className="status"><span></span> privé sessie</div></header>
+ <header><button className="wordmark" onClick={()=>setScreen("home")} aria-label="AFTER HOURS home"><img src="/after-hours-logo.svg" alt="AFTER HOURS" /></button><div className="status"><span></span> privé sessie</div></header>
 
  {screen==="home"&&<main>
   <section className="hero"><span className="eyebrow">JULLIE AVOND</span><h2>Take your time.</h2><p>Een zorgvuldig opgebouwde ervaring waarin toestemming, communicatie en grenzen altijd voorop staan.</p>
