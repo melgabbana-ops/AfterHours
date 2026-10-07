@@ -61,3 +61,5 @@ nav button{min-height:44px;}
 }
 
 .xp-label{display:block;text-align:center;color:var(--muted);font-size:9px;letter-spacing:.08em;margin-top:-16px;margin-bottom:18px;}
+
+.resume-panel{margin-top:18px;border:1px solid #4a3d25;background:#0d0c09;padding:16px;display:flex;align-items:center;gap:12px}.resume-panel>svg{width:19px;color:var(--gold);flex:none}.resume-panel>div{flex:1}.resume-panel strong,.resume-panel span{display:block;font-size:10px}.resume-panel span{color:var(--muted);line-height:1.5;margin-top:4px}.resume-panel button{border:1px solid #735b31;color:var(--gold);padding:10px 13px;font-size:9px;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}@media(max-width:520px){.resume-panel{align-items:flex-start;flex-wrap:wrap}.resume-panel>div{min-width:calc(100% - 35px)}.resume-panel button{margin-left:31px}}
