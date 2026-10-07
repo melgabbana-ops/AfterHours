@@ -20,15 +20,15 @@ const rankFromLevel=(level:number)=>{
 };
 
 const roundTasks=[
- {label:"CHECK-IN",question:"Welke richting past nu het beste?",choices:["Rustig opbouwen","Bewust tempo","Eerst praten"]},
- {label:"KEUZE",question:"Wat willen jullie deze ronde bewaken?",choices:["Tempo","Grenzen","Communicatie"]},
- {label:"VERDIEPING",question:"Wat is het belangrijkste signaal voor jullie?",choices:["Pauze","Stop","Opnieuw afstemmen"]}
+ {label:"CHECK-IN · INTENTIE",question:"Welke energie spreken jullie samen af?",choices:["Rustig opbouwen","Bewust leiden","Eerst afstemmen"]},
+ {label:"DYNAMIEK · REGIE",question:"Wat staat deze ronde centraal?",choices:["Tempo","Grenzen","Vertrouwen"]},
+ {label:"AFTERCARE · SIGNALEN",question:"Welk signaal krijgt vandaag voorrang?",choices:["Pauze","Stop","Opnieuw afstemmen"]}
 ];
 
 const fallbackRounds=[
- {title:"De Eerste Stap",text:"Neem een moment. Spreek samen af wat vandaag wel, niet en misschien is.",time:180},
- {title:"De Richting",text:"Kies één opdracht die past bij jullie afgesproken grenzen. Communiceer helder.",time:240},
- {title:"De Verdieping",text:"Blijf aanwezig, check in en gebruik jullie afgesproken stopwoord wanneer nodig.",time:300}
+ {title:"De Eerste Stap",text:"Bepaal samen de energie van het moment. Wat is welkom, wat is niet welkom en wat blijft open voor overleg?",time:180},
+ {title:"De Richting",text:"Laat de afgesproken dynamiek leidend zijn. Communiceer helder, respecteer grenzen en geef ruimte om van richting te veranderen.",time:240},
+ {title:"De Verdieping",text:"Blijf aanwezig en let op signalen. Pauzeren of stoppen is altijd een geldige keuze. Sluit af met een korte aftercare-check.",time:300}
 ];
 
 const guidePrompts=[
