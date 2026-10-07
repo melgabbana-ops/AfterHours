@@ -49,6 +49,7 @@ function App(){
  const[displayNameDraft,setDisplayNameDraft]=useState(()=>state.profile.displayName);
  const[selectedTask,setSelectedTask]=useState<string|null>(null);
  const[syncedHistoryIds,setSyncedHistoryIds]=useState<string[]>([]);
+ const[notificationsOpen,setNotificationsOpen]=useState(false);
  useEffect(()=>{let active=true;
   const hydrate=async()=>{
    const user=await getCurrentUser();
@@ -86,6 +87,7 @@ function App(){
  const round=state.session.round;
  const consent=state.consent.status==="active";
  const safety=state.safety;
+ const unreadNotifications=state.notifications.filter(item=>!item.read).length;
  const xp=state.profile.xp;
  const currentLevel=Math.max(1,state.profile.level);
  const levelFloor=(currentLevel-1)*200;
