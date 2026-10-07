@@ -55,6 +55,20 @@ Preferred practical login stack:
 - Favorites
 - Rank progression
 
+### Avatar system — approved moodboard characters
+
+The generic placeholder/default profile silhouette must be replaced by the custom AFTER HOURS character system based on the approved moodboard.
+
+- Provide a curated set of AFTER HOURS character bases derived from the approved moodboard's visual language.
+- On first profile creation, the user selects a character base instead of receiving a generic placeholder image.
+- Characters are customizable through modular visual attributes such as hairstyle, facial/visual details, clothing, accessories, color accents, pose/expression and unlocked rank elements, while preserving the AFTER HOURS art direction.
+- Rank progression can unlock additional avatar frames, outfits, accessories, badges and visual effects.
+- Users can change/customize their character later from Profile.
+- Avatar choices should be represented as structured data/configuration rather than hard-coded per screen.
+- The same character identity should be reused consistently across profile, session UI, progression, achievements and other appropriate surfaces.
+- Do not use generic stock avatars or unrelated emoji avatars as the default experience.
+- The character system must remain cohesive with the approved moodboard and premium black/deep-purple/gold visual system.
+
 ### Approved BDSM-themed ranks
 
 1. Curious
@@ -164,6 +178,7 @@ AI must never override consent, safety state, or a user's explicit stop/pass act
 - Manage media
 - Manage audio
 - Manage Oracle content
+- Manage avatar/character catalog
 - Moderation/safety controls
 - Test and preview tools
 
@@ -198,7 +213,7 @@ Before production push:
 10. No secrets are committed.
 11. Production environment variables are configured outside the repository.
 12. No placeholder UI is presented as finished functionality.
-13. Final visual QA is completed against the approved moodboard.
+13. Final visual QA is completed against the approved moodboard, including the avatar/character system.
 14. Release branch is reviewed before merge to main.
 
 ## Current repository note
