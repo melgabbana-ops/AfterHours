@@ -121,7 +121,7 @@ function App(){
    setSeconds(rounds[n].time);
    saveTimer(n,rounds[n].time,false);
   }else{
-   setState(s=>{const nextXp=s.profile.xp+120;const completedAt=new Date().toISOString();return {...s,profile:{...s.profile,xp:nextXp,level:levelFromXp(nextXp),sessions:s.profile.sessions+1},history:[{id:"session-"+Date.now(),completedAt,xpEarned:120,rounds:rounds.length},...s.history].slice(0,12),session:{...s.session,round:0,status:"completed",startedAt:null,updatedAt:completedAt}}});
+   setState(s=>{const nextXp=s.profile.xp+120;const completedAt=new Date().toISOString();return {...s,profile:{...s.profile,xp:nextXp,level:levelFromXp(nextXp),sessions:s.profile.sessions+1},history:[{id:"session-"+Date.now(),completedAt,xpEarned:120,rounds:rounds.length},...s.history].slice(0,12),notifications:[notificationEvents.message("Sessie voltooid","De volledige Experience is afgerond en veilig opgeslagen. +120 XP is toegevoegd."),...s.notifications].slice(0,20),session:{...s.session,round:0,status:"completed",startedAt:null,updatedAt:completedAt}}});
    setSeconds(rounds[0].time);
    setScreen("home");
   }
