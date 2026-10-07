@@ -1,20 +1,21 @@
 {
-  "name": "AFTER HOURS",
-  "short_name": "AFTER HOURS",
-  "description": "Premium interactieve ervaring met een cinematic black-and-gold interface.",
-  "lang": "nl",
-  "start_url": "/",
-  "scope": "/",
-  "display": "standalone",
-  "orientation": "any",
-  "background_color": "#050505",
-  "theme_color": "#050505",
-  "icons": [
-    {
-      "src": "/after-hours-logo.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    }
+  "name":"AFTER HOURS",
+  "short_name":"AFTER HOURS",
+  "description":"Premium interactieve ervaring met een cinematic black-and-gold interface.",
+  "lang":"nl",
+  "start_url":"/",
+  "scope":"/",
+  "display":"standalone",
+  "display_override":["window-controls-overlay","standalone"],
+  "orientation":"any",
+  "background_color":"#050505",
+  "theme_color":"#050505",
+  "icons":[
+    {"src":"/after-hours-logo.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}
+  ],
+  "shortcuts":[
+    {"name":"Experience","short_name":"Experience","url":"/?screen=game"},
+    {"name":"Profiel","short_name":"Profiel","url":"/?screen=profile"},
+    {"name":"Control Room","short_name":"Control Room","url":"/?screen=admin"}
   ]
 }
