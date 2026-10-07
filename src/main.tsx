@@ -15,12 +15,8 @@ import{notificationEvents}from"./services/notifications";
 const levelFromXp=(value:number)=>Math.max(1,Math.floor(Math.max(0,value)/200)+1);
 
 const rankFromLevel=(level:number)=>{
- if(level>=15)return "Midnight Sovereign";
- if(level>=12)return "Night Architect";
- if(level>=9)return "Velvet Authority";
- if(level>=6)return "Shadow Keeper";
- if(level>=3)return "After Hours Initiate";
- return "First Light";
+ const ranks=["Curious","Tease","Plaything","Submissive","Brat","Toy","Pet","Thrall","Devotee","Obedient","Enthralled","Collared","Owned","Devoted","Dark Devotion"];
+ return ranks[Math.max(0,Math.min(ranks.length-1,level-1))];
 };
 
 const roundTasks=[
