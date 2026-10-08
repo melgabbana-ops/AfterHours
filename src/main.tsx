@@ -105,7 +105,7 @@ function App(){
    if(!active||generation!==hydrateGeneration.current)return;
    if(remote){
     const sameAccount=localState.profile.id===user.id;
-    const remoteIsNewer=!sameAccount||new Date(remote.session.updatedAt).getTime()>=new Date(localState.session.updatedAt).getTime();
+    const remoteIsNewer=!sameAccount||remote.session.id!==localState.session.id||new Date(remote.session.updatedAt).getTime()>=new Date(localState.session.updatedAt).getTime();
     setState(current=>({...remote,ageConfirmed:current.ageConfirmed&&(current.ageConfirmedFor===user.id),ageConfirmedFor:current.ageConfirmedFor===user.id?user.id:null,safety:current.safety,profile:{...remote.profile,username:remote.profile.username||current.profile.username},session:remoteIsNewer?remote.session:current.session,consent:remoteIsNewer?remote.consent:current.consent}));
     if(remoteIsNewer){
      const restoredRound=Math.min(Math.max(0,remote.session.round),availableRounds.length-1);
