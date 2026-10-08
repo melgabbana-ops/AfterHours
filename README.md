@@ -31,7 +31,7 @@ Production build:
 npm run build
 ```
 
-Authentication, account-bound profiles, database-backed sessions, consent RPCs, session completion and password recovery are implemented when Supabase is configured. Payment infrastructure is intentionally not hard-coded into the client and still requires a configured payment provider and server-side checkout/webhook flow before public sales.
+Authentication, account-bound profiles, database-backed sessions, consent RPCs, session completion and password recovery are implemented when Supabase is configured. Payment functionality is intentionally absent from the client. Do not enable public sales until a compliant payment provider, server-side checkout/webhook flow, and required legal/business setup are in place.
 
 ## Architecture
 
