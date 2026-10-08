@@ -112,14 +112,16 @@ export async function syncRemoteState(state:AfterHoursState):Promise<string|null
  if(state.consent.status==="active"&&state.consent.confirmedAt){
   const{data:existing}=await supabase.from("consent_records").select("id").eq("session_id",sessionId).eq("status","active").eq("confirmed_at",state.consent.confirmedAt).maybeSingle();
   if(!existing){
-   await supabase.from("consent_records").insert({session_id:sessionId,status:"active",confirmed_at:state.consent.confirmedAt});
+   const{error}=await supabase.from("consent_records").insert({session_id:sessionId,status:"active",confirmed_at:state.consent.confirmedAt});
+   if(error)return error.message;
   }
  }
 
  if(state.consent.status==="revoked"&&state.consent.revokedAt){
   const{data:existing}=await supabase.from("consent_records").select("id").eq("session_id",sessionId).eq("status","revoked").eq("revoked_at",state.consent.revokedAt).maybeSingle();
   if(!existing){
-   await supabase.from("consent_records").insert({session_id:sessionId,status:"revoked",revoked_at:state.consent.revokedAt});
+   const{error}=await supabase.from("consent_records").insert({session_id:sessionId,status:"revoked",revoked_at:state.consent.revokedAt});
+   if(error)return error.message;
   }
  }
  return null;
