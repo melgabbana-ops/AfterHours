@@ -10,6 +10,7 @@ Premium, mobile-first interactive experience with a cinematic black-and-gold vis
 - Consent and safety state
 - Guided three-round experience
 - Session timer with pause/reset
+- Server-authoritative active-time accounting for completed sessions
 - Stop-session flow
 - Profile, level and XP presentation
 - Control-room interface
@@ -35,7 +36,7 @@ Authentication, account-bound profiles, database-backed sessions, consent RPCs, 
 
 ## Architecture
 
-The client now has typed backend-ready contracts in `src/types.ts`, centralized persistence in `src/storage.ts`, and a documented production data model in `src/data-model.md`. Local storage is only an offline prototype layer and must not contain authentication secrets, payment credentials, or server authorization data.
+The client now has typed backend-ready contracts in `src/types.ts`, centralized persistence in `src/storage.ts`, and a documented production data model in `src/data-model.md`. Local storage is only an offline prototype layer. Offline sessions are not a trusted source for server-side XP, history, consent, or authorization.
 
 
 ## Supabase setup
