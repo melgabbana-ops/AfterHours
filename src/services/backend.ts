@@ -75,7 +75,15 @@ export async function completeRemoteSession(sessionId:string,rounds:number):Prom
  return {error:null,xpEarned:Number(data?.xp_earned??120)};
 }
 
+let syncQueue=Promise.resolve();
+
 export async function syncRemoteState(state:AfterHoursState):Promise<string|null>{
+ const job=syncQueue.then(()=>syncRemoteStateNow(state));
+ syncQueue=job.then(()=>undefined,()=>undefined);
+ return job;
+}
+
+async function syncRemoteStateNow(state:AfterHoursState):Promise<string|null>{
  if(!supabaseConfigured||!supabase)return null;
  if(state.session.status==="completed")return null;
  const{data:{user},error:userError}=await supabase.auth.getUser();
@@ -121,7 +129,7 @@ export async function syncRemoteState(state:AfterHoursState):Promise<string|null
  if(state.consent.status==="active"&&state.consent.confirmedAt){
   const{data:existing}=await supabase.from("consent_records").select("id").eq("session_id",sessionId).eq("status","active").eq("confirmed_at",state.consent.confirmedAt).maybeSingle();
   if(!existing){
-   const{error}=await supabase.from("consent_records").insert({session_id:sessionId,status:"active",confirmed_at:state.consent.confirmedAt});
+   const{error}=await supabase.rpc("set_consent_state",{p_session_id:sessionId,p_status:"active",p_confirmed_at:state.consent.confirmedAt,p_revoked_at:null});
    if(error)return error.message;
   }
  }
@@ -129,7 +137,7 @@ export async function syncRemoteState(state:AfterHoursState):Promise<string|null
  if(state.consent.status==="revoked"&&state.consent.revokedAt){
   const{data:existing}=await supabase.from("consent_records").select("id").eq("session_id",sessionId).eq("status","revoked").eq("revoked_at",state.consent.revokedAt).maybeSingle();
   if(!existing){
-   const{error}=await supabase.from("consent_records").insert({session_id:sessionId,status:"revoked",revoked_at:state.consent.revokedAt});
+   const{error}=await supabase.rpc("set_consent_state",{p_session_id:sessionId,p_status:"revoked",p_confirmed_at:null,p_revoked_at:state.consent.revokedAt});
    if(error)return error.message;
   }
  }
