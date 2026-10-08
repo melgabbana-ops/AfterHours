@@ -109,6 +109,8 @@ async function syncRemoteStateNow(state:AfterHoursState):Promise<string|null>{
   remoteSessionExists=false;
  }
 
+ if(!remoteSessionExists && (state.session.status!=="ready" || state.session.round!==0)) return "Lokale sessie behouden: server-sessie ontbreekt.";
+
  const sessionPayload={
   id:sessionId,
   profile_id:user.id,
