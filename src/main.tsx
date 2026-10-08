@@ -1,4 +1,4 @@
-import React,{useEffect,useMemo,useState}from"react";
+import React,{useEffect,useMemo,useRef,useState}from"react";
 import{createRoot}from"react-dom/client";
 import{Shield,Lock,Play,Pause,RotateCcw,ChevronRight,User,Settings,Home,Timer,CheckCircle2,Square,Activity,LogOut,Sparkles,Radio,Bell}from"lucide-react";
 import"./styles.css";
@@ -66,13 +66,13 @@ function App(){
  const[selectedTask,setSelectedTask]=useState<string|null>(null);
  const[notificationsOpen,setNotificationsOpen]=useState(false);
  const[guideIndex,setGuideIndex]=useState(()=>Math.floor(Math.random()*guidePrompts.length));
- let hydrateGeneration=0;
+ const hydrateGeneration=useRef(0);
  useEffect(()=>{let active=true;
-  const generation=++hydrateGeneration;
+  const generation=++hydrateGeneration.current;
   const hydrate=async()=>{
    const localState=loadState();
    const user=await getCurrentUser();
-   if(!active||generation!==hydrateGeneration)return;
+   if(!active||generation!==hydrateGeneration.current)return;
    setUserEmail(user?.email??null);
    setSyncUserId(null);
    if(!user){
@@ -85,14 +85,14 @@ function App(){
    }
    setAuthReady(false);
    const remoteRounds=await loadRemoteRounds();
-   if(!active||generation!==hydrateGeneration)return;
+   if(!active||generation!==hydrateGeneration.current)return;
    const availableRounds=remoteRounds.length===3?remoteRounds.map(r=>({title:r.title,text:r.body,time:r.durationSeconds})):fallbackRounds;
    if(remoteRounds.length===3)setRounds(availableRounds);
    const remoteHistory=await loadRemoteHistory();
-   if(!active||generation!==hydrateGeneration)return;
+   if(!active||generation!==hydrateGeneration.current)return;
    if(remoteHistory.length)setState(current=>({...current,history:remoteHistory}));
    const remote=await loadRemoteState();
-   if(!active||generation!==hydrateGeneration)return;
+   if(!active||generation!==hydrateGeneration.current)return;
    if(remote){
     const sameAccount=localState.profile.id===user.id;
     const remoteIsNewer=!sameAccount||new Date(remote.session.updatedAt).getTime()>=new Date(localState.session.updatedAt).getTime();
