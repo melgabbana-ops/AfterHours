@@ -33,7 +33,7 @@ export async function loadRemoteState():Promise<AfterHoursState|null>{
  if(sessionError)return null;
 
  const effectiveSession=session??{
-  id:"local-session",
+  id:crypto.randomUUID(),
   profile_id:user.id,
   status:"ready",
   round:0,
