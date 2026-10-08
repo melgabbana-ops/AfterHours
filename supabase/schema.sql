@@ -222,6 +222,12 @@ alter table public.profiles drop constraint if exists profiles_avatar_style_chec
 alter table public.profiles add constraint profiles_avatar_style_check check (avatar_style in ('sigil','collar','key','crown'));
 
 
+-- Normalize constraints for existing databases as well as fresh installs.
+alter table public.sessions drop constraint if exists sessions_round_check;
+alter table public.sessions add constraint sessions_round_check check (round between 0 and 2);
+alter table public.session_history drop constraint if exists session_history_rounds_check;
+alter table public.session_history add constraint session_history_rounds_check check (rounds between 0 and 3);
+
 -- Authoritative session completion. XP/history are awarded only once server-side.
 create or replace function public.complete_session(p_session_id uuid, p_rounds integer)
 returns jsonb
@@ -242,6 +248,19 @@ begin
     return jsonb_build_object('xp_earned',0,'already_completed',true);
   end if;
   if v_session.status not in ('active','paused') or v_session.round <> 2 then raise exception 'Sessie kan nog niet worden afgerond.'; end if;
+  if not exists (
+    select 1
+    from public.consent_records c
+    where c.session_id = v_session.id
+      and c.status = 'active'
+      and c.confirmed_at is not null
+      and not exists (
+        select 1 from public.consent_records r
+        where r.session_id = v_session.id
+          and r.status = 'revoked'
+          and r.created_at > c.created_at
+      )
+  ) then raise exception 'Actieve consent ontbreekt.'; end if;
   update public.sessions set status='completed',round=0,started_at=null,updated_at=v_completed_at where id=v_session.id;
   insert into public.session_history(profile_id,completed_at,xp_earned,rounds) values(auth.uid(),v_completed_at,v_xp,p_rounds);
   update public.profiles set xp=xp+v_xp,level=floor((xp+v_xp)/200)+1,sessions=sessions+1 where id=auth.uid();
