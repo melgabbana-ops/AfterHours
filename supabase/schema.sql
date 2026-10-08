@@ -206,9 +206,9 @@ for each row execute function public.set_updated_at();
 
 insert into public.experience_rounds (slug,title,body,duration_seconds,sort_order)
 values
- ('eerste-stap','De Eerste Stap','Neem een moment. Spreek samen af wat vandaag wel, niet en misschien is.',180,1),
- ('richting','De Richting','Kies één opdracht die past bij jullie afgesproken grenzen. Communiceer helder.',240,2),
- ('verdieping','De Verdieping','Blijf aanwezig, check in en gebruik jullie afgesproken stopwoord wanneer nodig.',300,3)
+ ('eerste-stap','De Eerste Stap','Neem een moment. Spreek samen af wat vandaag wel, niet en misschien is.',1200,1),
+ ('richting','De Richting','Kies één opdracht die past bij jullie afgesproken grenzen. Communiceer helder.',1200,2),
+ ('verdieping','De Verdieping','Blijf aanwezig, check in en gebruik jullie afgesproken stopwoord wanneer nodig.',1200,3)
 on conflict (slug) do update set
  title=excluded.title,
  body=excluded.body,
