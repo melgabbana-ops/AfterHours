@@ -52,6 +52,7 @@ export async function loadRemoteState(preferredSessionId?:string):Promise<AfterH
 
  return{
   ageConfirmed:false,
+  ageConfirmedFor:null,
   safety:"green",
   profile:{id:profile.id,displayName:profile.display_name,username:profile.username??"nightwalker",avatarStyle:profile.avatar_style==="collar"||profile.avatar_style==="key"||profile.avatar_style==="crown"?profile.avatar_style:"sigil",level:profile.level,xp:profile.xp,sessions:profile.sessions,createdAt:profile.created_at},
   session:{id:effectiveSession.id,profileId:effectiveSession.profile_id,status:effectiveSession.status,round:effectiveSession.round,startedAt:effectiveSession.started_at,updatedAt:effectiveSession.updated_at},
