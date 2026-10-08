@@ -9,6 +9,7 @@ export const defaultState=():AfterHoursState=>{
  const now=new Date().toISOString();
  return {
   ageConfirmed:false,
+  ageConfirmedFor:null,
   consent:{status:"pending",confirmedAt:null,revokedAt:null},
   safety:"green",
   profile:{id:PROFILE_ID,displayName:"Night Walker",
@@ -26,6 +27,7 @@ function isState(value:unknown):value is AfterHoursState{
  const profile=v.profile as Partial<AfterHoursState["profile"]>|undefined;
  const session=v.session as Partial<AfterHoursState["session"]>|undefined;
  return typeof v.ageConfirmed==="boolean"
+  &&(v.ageConfirmedFor===null||typeof v.ageConfirmedFor==="string")
   &&(v.safety==="green"||v.safety==="amber")
   &&!!consent
   &&(consent.status==="pending"||consent.status==="active"||consent.status==="revoked")
