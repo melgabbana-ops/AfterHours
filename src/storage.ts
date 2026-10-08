@@ -3,7 +3,7 @@ import type{AfterHoursState}from"./types";
 const KEY="afterhours.state.v1";
 const TIMER_KEY="afterhours.timer.v1";
 const PROFILE_ID="local-profile";
-const SESSION_ID="local-session";
+const SESSION_ID=crypto.randomUUID();
 
 export const defaultState=():AfterHoursState=>{
  const now=new Date().toISOString();
