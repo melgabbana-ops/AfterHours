@@ -1,11 +1,13 @@
 export type Screen="home"|"game"|"profile"|"admin"|"insights"|"radio";
 export type Safety="green"|"amber";
 export type ConsentStatus="pending"|"active"|"revoked";
+export type AvatarStyle="sigil"|"collar"|"key"|"crown";
 
 export interface UserProfile{
  id:string;
  displayName:string;
  username:string;
+ avatarStyle?:AvatarStyle;
  level:number;
  xp:number;
  sessions:number;
