@@ -97,11 +97,11 @@ export async function syncRemoteState(state:AfterHoursState):Promise<string|null
  }
  if(!sessionId){
   const{data:existing}=await supabase.from("sessions").select("id").eq("profile_id",user.id).order("updated_at",{ascending:false}).limit(1).maybeSingle();
-  sessionId=existing?.id??null;
+  sessionId=existing?.id??crypto.randomUUID();
  }
 
  const sessionPayload={
-  ...(sessionId?{id:sessionId}:{}),
+  id:sessionId,
   profile_id:user.id,
   status:state.session.status,
   round:state.session.round,
@@ -113,9 +113,8 @@ export async function syncRemoteState(state:AfterHoursState):Promise<string|null
   const{error}=await supabase.rpc("set_session_state",{p_session_id:sessionId,p_status:state.session.status,p_round:state.session.round,p_started_at:state.session.startedAt});
   if(error)return error.message;
  }else{
-  const{data:created,error}=await supabase.from("sessions").insert(sessionPayload).select("id").single();
-  if(error||!created)return error?.message??"Sessie kon niet worden opgeslagen.";
-  sessionId=created.id;
+  const{error}=await supabase.from("sessions").insert(sessionPayload);
+  if(error)return error.message;
  }
 
  if(state.consent.status==="active"&&state.consent.confirmedAt){
