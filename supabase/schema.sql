@@ -249,16 +249,30 @@ begin
   if p_status='completed' then
     raise exception 'Gebruik complete_session voor afronden.';
   end if;
-  if p_status='active' and p_round <> v_session.round then
-    raise exception 'Ronde moet via de rondeflow worden gewijzigd.';
+  if p_status='ready' and p_round <> 0 then
+    raise exception 'Ready vereist ronde 0.';
   end if;
-  if p_status='paused' and p_round <> v_session.round then
-    if v_session.status <> 'paused' or p_round <> v_session.round + 1 then
+  if p_status='active' then
+    if p_round <> v_session.round then
+      raise exception 'Ronde moet via de rondeflow worden gewijzigd.';
+    end if;
+    if v_session.status not in ('ready','active','paused','stopped','completed') then
+      raise exception 'Ongeldige overgang naar actief.';
+    end if;
+  end if;
+  if p_status='paused' then
+    if p_round = v_session.round then
+      if v_session.status not in ('active','paused') then
+        raise exception 'Pauzeren kan alleen vanuit een actieve sessie.';
+      end if;
+    elsif v_session.status = 'paused' and p_round = v_session.round + 1 then
+      null;
+    else
       raise exception 'Ongeldige overgang naar de volgende ronde.';
     end if;
   end if;
-  if p_status='ready' and p_round <> 0 then
-    raise exception 'Ready vereist ronde 0.';
+  if p_status='stopped' and p_round <> v_session.round then
+    raise exception 'Stoppen mag de ronde niet wijzigen.';
   end if;
 
   update public.sessions
