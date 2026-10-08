@@ -104,10 +104,19 @@ function App(){
      setSeconds(loadTimer(user.id,restoredRound,availableRounds[restoredRound].time));
     }
    }else{
-    clearTimer(localState.profile.id);
-    setRunning(false);
-    setSeconds(availableRounds[0].time);
-    setState(current=>({...defaultState(),ageConfirmed:current.ageConfirmed,ageConfirmedFor:current.ageConfirmedFor,safety:current.safety}));
+    const sameAccount=localState.profile.id===user.id;
+    const hasRecoverableLocalSession=localState.session.status!=="ready"||localState.session.round!==0;
+    if(sameAccount&&hasRecoverableLocalSession){
+     setState(localState);
+     setRunning(localState.session.status==="active");
+     const restoredRound=Math.min(Math.max(0,localState.session.round),availableRounds.length-1);
+     setSeconds(loadTimer(localState.profile.id,restoredRound,availableRounds[restoredRound].time));
+    }else{
+     clearTimer(localState.profile.id);
+     setRunning(false);
+     setSeconds(availableRounds[0].time);
+     setState(current=>({...defaultState(),ageConfirmed:current.ageConfirmed,ageConfirmedFor:current.ageConfirmedFor,safety:current.safety}));
+    }
    }
    setSyncUserId(user.id);
    setAuthReady(true);
