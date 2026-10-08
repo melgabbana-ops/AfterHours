@@ -78,7 +78,6 @@ export async function completeRemoteSession(sessionId:string,rounds:number):Prom
 export async function syncRemoteState(state:AfterHoursState):Promise<string|null>{
  if(!supabaseConfigured||!supabase)return null;
  if(state.session.status==="completed")return null;
- if(state.session.status==="completed")return null;
  const{data:{user},error:userError}=await supabase.auth.getUser();
  if(userError||!user)return null;
 
@@ -91,13 +90,15 @@ export async function syncRemoteState(state:AfterHoursState):Promise<string|null
  if(profileError)return profileError.code==="23505"?"Deze username is al in gebruik. Kies een andere username.":profileError.message;
 
  let sessionId=isUuid(state.session.id)?state.session.id:null;
+ let remoteSessionExists=false;
  if(sessionId){
   const{data:owned}=await supabase.from("sessions").select("id").eq("id",sessionId).eq("profile_id",user.id).maybeSingle();
+  remoteSessionExists=Boolean(owned);
   if(!owned)sessionId=null;
  }
  if(!sessionId){
   const{data:existing}=await supabase.from("sessions").select("id").eq("profile_id",user.id).order("updated_at",{ascending:false}).limit(1).maybeSingle();
-  sessionId=existing?.id??crypto.randomUUID();
+  if(existing){sessionId=existing.id;remoteSessionExists=true;}else{sessionId=crypto.randomUUID();remoteSessionExists=false;}
  }
 
  const sessionPayload={
@@ -109,7 +110,7 @@ export async function syncRemoteState(state:AfterHoursState):Promise<string|null
   updated_at:state.session.updatedAt
  };
 
- if(sessionId){
+ if(remoteSessionExists){
   const{error}=await supabase.rpc("set_session_state",{p_session_id:sessionId,p_status:state.session.status,p_round:state.session.round,p_started_at:state.session.startedAt});
   if(error)return error.message;
  }else{
