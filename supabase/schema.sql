@@ -317,10 +317,7 @@ revoke all on function public.complete_session(uuid,integer) from public;
 grant execute on function public.complete_session(uuid,integer) to authenticated;
 
 
--- Authoritative profile progress is never browser-writable.
-revoke update on public.profiles from authenticated;
-grant update (display_name, username, avatar_style) on public.profiles to authenticated;
-revoke update (level, xp, sessions, id, created_at, updated_at) on public.profiles from authenticated;
+-- Profile progress protection is defined above and remains server-authoritative.
 
 -- Session history is created only by the authoritative completion function.
 drop policy if exists "history_self_insert" on public.session_history;
