@@ -250,6 +250,9 @@ begin
   end if;
   if p_status='ready' and p_round <> 0 then
     raise exception 'Ready vereist ronde 0.'; end if;
+  if p_status='ready' and v_session.status='completed' then
+    raise exception 'Een afgeronde sessie kan niet worden herstart.';
+  end if;
   if p_status='active' then
     if p_round <> v_session.round then raise exception 'Ronde moet via de rondeflow worden gewijzigd.'; end if;
     if v_session.status not in ('ready','active','paused','stopped') then raise exception 'Ongeldige overgang naar actief.'; end if;
