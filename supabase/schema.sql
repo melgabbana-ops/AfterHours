@@ -32,7 +32,7 @@ create table if not exists public.sessions (
   id uuid primary key default gen_random_uuid(),
   profile_id uuid not null references public.profiles(id) on delete cascade,
   status text not null default 'ready' check (status in ('ready','active','paused','completed','stopped')),
-  round integer not null default 0 check (round >= 0),
+  round integer not null default 0 check (round between 0 and 2),
   started_at timestamptz,
   updated_at timestamptz not null default now()
 );
@@ -42,7 +42,7 @@ create table if not exists public.session_history (
   profile_id uuid not null references public.profiles(id) on delete cascade,
   completed_at timestamptz not null default now(),
   xp_earned integer not null default 0 check (xp_earned >= 0),
-  rounds integer not null default 0 check (rounds >= 0),
+  rounds integer not null default 0 check (rounds between 0 and 3),
   created_at timestamptz not null default now()
 );
 
