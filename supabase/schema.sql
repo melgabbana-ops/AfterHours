@@ -220,3 +220,34 @@ on conflict (slug) do update set
 alter table public.profiles add column if not exists avatar_style text not null default 'sigil';
 alter table public.profiles drop constraint if exists profiles_avatar_style_check;
 alter table public.profiles add constraint profiles_avatar_style_check check (avatar_style in ('sigil','collar','key','crown'));
+
+
+-- Authoritative session completion. XP/history are awarded only once server-side.
+create or replace function public.complete_session(p_session_id uuid, p_rounds integer)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $func$
+declare
+  v_session public.sessions%rowtype;
+  v_xp integer := 120;
+  v_completed_at timestamptz := now();
+begin
+  if auth.uid() is null then raise exception 'Niet ingelogd.'; end if;
+  if p_rounds <> 3 then raise exception 'Ongeldige sessiegrootte.'; end if;
+  select * into v_session from public.sessions where id=p_session_id and profile_id=auth.uid() for update;
+  if not found then raise exception 'Sessie niet gevonden.'; end if;
+  if v_session.status='completed' then
+    return jsonb_build_object('xp_earned',0,'already_completed',true);
+  end if;
+  if v_session.status not in ('active','paused') or v_session.round <> 2 then raise exception 'Sessie kan nog niet worden afgerond.'; end if;
+  update public.sessions set status='completed',round=0,started_at=null,updated_at=v_completed_at where id=v_session.id;
+  insert into public.session_history(profile_id,completed_at,xp_earned,rounds) values(auth.uid(),v_completed_at,v_xp,p_rounds);
+  update public.profiles set xp=xp+v_xp,level=floor((xp+v_xp)/200)+1,sessions=sessions+1 where id=auth.uid();
+  return jsonb_build_object('xp_earned',v_xp,'already_completed',false);
+end;
+$func$;
+
+revoke all on function public.complete_session(uuid,integer) from public;
+grant execute on function public.complete_session(uuid,integer) to authenticated;
