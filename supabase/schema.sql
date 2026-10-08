@@ -251,3 +251,12 @@ $func$;
 
 revoke all on function public.complete_session(uuid,integer) from public;
 grant execute on function public.complete_session(uuid,integer) to authenticated;
+
+
+-- Protect authoritative profile counters from direct browser writes.
+revoke update on public.profiles from authenticated;
+grant update (display_name, username, avatar_style) on public.profiles to authenticated;
+
+-- Session history is created only by the authoritative completion function.
+drop policy if exists "history_self_insert" on public.session_history;
+revoke insert on public.session_history from authenticated;
