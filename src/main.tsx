@@ -69,13 +69,14 @@ function App(){
  const[guideIndex,setGuideIndex]=useState(()=>Math.floor(Math.random()*guidePrompts.length));
  useEffect(()=>{let active=true;
   const hydrate=async()=>{
+   const localState=loadState();
    const user=await getCurrentUser();
    if(!active)return;
    setUserEmail(user?.email??null);
    setSyncUserId(null);
    setSyncedHistoryIds([]);
    if(!user){
-    clearTimer(state.profile.id);
+    clearTimer(localState.profile.id);
     setRunning(false);
     setSeconds(fallbackRounds[0].time);
     setState(current=>({...defaultState(),ageConfirmed:current.ageConfirmed,safety:current.safety}));
@@ -90,8 +91,8 @@ function App(){
    if(remoteHistory.length)setState(current=>({...current,history:remoteHistory}));
    const remote=await loadRemoteState();
    if(remote){
-    const sameAccount=state.profile.id===user.id;
-    const remoteIsNewer=!sameAccount||new Date(remote.session.updatedAt).getTime()>=new Date(state.session.updatedAt).getTime();
+    const sameAccount=localState.profile.id===user.id;
+    const remoteIsNewer=!sameAccount||new Date(remote.session.updatedAt).getTime()>=new Date(localState.session.updatedAt).getTime();
     setState(current=>({...remote,ageConfirmed:current.ageConfirmed,safety:current.safety,profile:{...remote.profile,username:remote.profile.username||current.profile.username},session:remoteIsNewer?remote.session:current.session,consent:remoteIsNewer?remote.consent:current.consent}));
     if(remoteIsNewer){
      const restoredRound=Math.min(Math.max(0,remote.session.round),availableRounds.length-1);
@@ -99,7 +100,7 @@ function App(){
      setSeconds(loadTimer(user.id,restoredRound,availableRounds[restoredRound].time));
     }
    }else{
-    clearTimer(state.profile.id);
+    clearTimer(localState.profile.id);
     setRunning(false);
     setSeconds(availableRounds[0].time);
     setState(current=>({...defaultState(),ageConfirmed:current.ageConfirmed,safety:current.safety}));
@@ -169,8 +170,8 @@ function App(){
    setScreen("home");
   }
  };
- const reset=()=>{clearTimer(state.profile.id);setSeconds(rounds[round].time);setRunning(false);saveTimer(state.profile.id,round,rounds[round].time,false);updateSession({status:"ready"})};
- const stop=()=>{const now=new Date().toISOString();clearTimer(state.profile.id);setRunning(false);setCheckIn("stop");setState(s=>({...s,notifications:[notificationEvents.safety("De sessie is veilig gestopt en staat klaar voor een volgende start."),...s.notifications].slice(0,20),session:{...s.session,status:"stopped",updatedAt:now}}));setScreen("home")};
+ const reset=()=>{clearTimer(state.profile.id);setSeconds(rounds[round].time);setRunning(false);saveTimer(state.profile.id,round,rounds[round].time,false);updateSession({status:"ready",startedAt:null})};
+ const stop=()=>{const now=new Date().toISOString();clearTimer(state.profile.id);setRunning(false);setCheckIn("stop");setState(s=>({...s,notifications:[notificationEvents.safety("De sessie is veilig gestopt en staat klaar voor een volgende start."),...s.notifications].slice(0,20),session:{...s.session,status:"stopped",startedAt:null,updatedAt:now}}));setScreen("home")};
  const revokeConsent=()=>{clearTimer(state.profile.id);setRunning(false);setState(s=>({...s,consent:{status:"revoked",confirmedAt:s.consent.confirmedAt,revokedAt:new Date().toISOString()},session:{...s.session,status:"stopped",round:0,startedAt:null,updatedAt:new Date().toISOString()}}));setSeconds(rounds[0].time);saveTimer(state.profile.id,0,rounds[0].time,false);setScreen("home")};
  const confirmConsent=()=>{setCheckIn("clear");setState(s=>({...s,notifications:[notificationEvents.checkIn("Consent is bevestigd. De ervaring kan veilig worden gestart."),...s.notifications].slice(0,20),consent:{status:"active",confirmedAt:new Date().toISOString(),revokedAt:null}}));};
  const handleCheckIn=(choice:"clear"|"pause"|"stop")=>{setCheckIn(choice);void playNotificationSound(choice==="stop"?"safety":"checkin");if(choice==="pause"){setRunning(false);saveTimer(state.profile.id,round,seconds,false);updateSession({status:"paused"})}if(choice==="stop"){stop()}};
