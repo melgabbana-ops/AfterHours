@@ -75,6 +75,15 @@ export async function updateRemoteUsername(username:string):Promise<string|null>
  return null;
 }
 
+export async function completeRemoteSession(sessionId:string,rounds:number):Promise<{error:string|null,xpEarned:number}>{
+ if(!supabaseConfigured||!supabase)return {error:null,xpEarned:120};
+ const{data:{user},error:userError}=await supabase.auth.getUser();
+ if(userError||!user)return {error:userError?.message??"Geen actieve gebruiker.",xpEarned:0};
+ const{data,error}=await supabase.rpc("complete_session",{p_session_id:sessionId,p_rounds:rounds});
+ if(error)return {error:error.message,xpEarned:0};
+ return {error:null,xpEarned:Number(data?.xp_earned??120)};
+}
+
 export async function syncRemoteState(state:AfterHoursState):Promise<string|null>{
  if(!supabaseConfigured||!supabase)return null;
  const{data:{user},error:userError}=await supabase.auth.getUser();
@@ -84,9 +93,6 @@ export async function syncRemoteState(state:AfterHoursState):Promise<string|null
   id:user.id,
   display_name:state.profile.displayName,
   username:state.profile.username,
-  level:state.profile.level,
-  xp:state.profile.xp,
-  sessions:state.profile.sessions,
   avatar_style:state.profile.avatarStyle??"sigil"
  });
  if(profileError)return profileError.code==="23505"?"Deze username is al in gebruik. Kies een andere username.":profileError.message;
