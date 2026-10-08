@@ -103,7 +103,7 @@ export async function syncRemoteState(state:AfterHoursState):Promise<string|null
   if(error)return error.message;
  }else{
   const{data:created,error}=await supabase.from("sessions").insert(sessionPayload).select("id").single();
-  if(error||!created)return;
+  if(error||!created)return error?.message??"Sessie kon niet worden opgeslagen.";
   sessionId=created.id;
  }
 
