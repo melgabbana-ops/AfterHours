@@ -103,6 +103,12 @@ on public.profiles for insert
 to authenticated
 with check (id = auth.uid());
 
+-- Browser clients may create identity data only.
+-- Progress counters use database defaults and server-side RPCs.
+revoke insert on public.profiles from authenticated;
+grant insert (id, display_name, username, avatar_style) on public.profiles to authenticated;
+revoke insert (level, xp, sessions, created_at, updated_at) on public.profiles from authenticated;
+
 create policy "profiles_self_update"
 on public.profiles for update
 to authenticated
@@ -375,9 +381,3 @@ begin
     values(v_session.id,'revoked',v_now)
     returning * into v_result;
   end if;
-  return v_result;
-end;
-$func$;
-revoke all on function public.set_consent_state(uuid,text,timestamptz,timestamptz) from public;
-grant execute on function public.set_consent_state(uuid,text,timestamptz,timestamptz) to authenticated;
-revoke insert on public.consent_records from authenticated;
