@@ -72,7 +72,7 @@ function App(){
   const hydrate=async()=>{
    const localState=loadState();
    const user=await getCurrentUser();
-   if(!active||generation!==hydrateGeneration.current.current)return;
+   if(!active||generation!==hydrateGeneration.current)return;
    setUserEmail(user?.email??null);
    setSyncUserId(null);
    if(!user){
@@ -85,14 +85,14 @@ function App(){
    }
    setAuthReady(false);
    const remoteRounds=await loadRemoteRounds();
-   if(!active||generation!==hydrateGeneration.current.current)return;
+   if(!active||generation!==hydrateGeneration.current)return;
    const availableRounds=remoteRounds.length===3?remoteRounds.map(r=>({title:r.title,text:r.body,time:r.durationSeconds})):fallbackRounds;
    if(remoteRounds.length===3)setRounds(availableRounds);
    const remoteHistory=await loadRemoteHistory();
-   if(!active||generation!==hydrateGeneration.current.current)return;
+   if(!active||generation!==hydrateGeneration.current)return;
    if(remoteHistory.length)setState(current=>({...current,history:remoteHistory}));
    const remote=await loadRemoteState();
-   if(!active||generation!==hydrateGeneration.current.current)return;
+   if(!active||generation!==hydrateGeneration.current)return;
    if(remote){
     const sameAccount=localState.profile.id===user.id;
     const remoteIsNewer=!sameAccount||new Date(remote.session.updatedAt).getTime()>=new Date(localState.session.updatedAt).getTime();
