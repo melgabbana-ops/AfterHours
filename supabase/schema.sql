@@ -20,6 +20,7 @@ create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   display_name text not null default 'Night Walker',
   username text unique,
+  avatar_style text not null default 'sigil' check (avatar_style in ('sigil','collar','key','crown')),
   level integer not null default 1 check (level > 0),
   xp integer not null default 0 check (xp >= 0),
   sessions integer not null default 0 check (sessions >= 0),
