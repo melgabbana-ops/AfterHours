@@ -83,7 +83,7 @@ function App(){
    if(remote){
     setState(current=>{const remoteIsNewer=new Date(remote.session.updatedAt).getTime()>=new Date(current.session.updatedAt).getTime();return {...remote,ageConfirmed:current.ageConfirmed,safety:current.safety,profile:{...remote.profile,username:remote.profile.username||current.profile.username},session:remoteIsNewer?remote.session:current.session,consent:remoteIsNewer?remote.consent:current.consent};});
    }else{
-    setState(current=>({...defaultState(),ageConfirmed:current.ageConfirmed}));
+    setState(current=>({...defaultState(),ageConfirmed:current.ageConfirmed,safety:current.safety}));
    }
    setSyncUserId(user.id);
    setAuthReady(true);
