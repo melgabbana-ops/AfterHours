@@ -250,6 +250,11 @@ begin
   if p_status='active' then
     if p_round <> v_session.round then raise exception 'Ronde moet via de rondeflow worden gewijzigd.'; end if;
     if v_session.status not in ('ready','active','paused','stopped') then raise exception 'Ongeldige overgang naar actief.'; end if;
+    if v_session.status in ('ready','stopped') then
+      p_started_at := now();
+    else
+      p_started_at := v_session.started_at;
+    end if;
   end if;
   if p_status='paused' then
     if p_round = v_session.round then
