@@ -12,15 +12,6 @@ export async function loadRemoteRounds():Promise<RemoteRound[]>{
  return data.filter(row=>Number.isInteger(row.duration_seconds)&&row.duration_seconds>0).map(row=>({slug:row.slug,title:row.title,body:row.body,durationSeconds:row.duration_seconds}));
 }
 
-export async function loadRemoteHistory():Promise<import("../types").SessionHistoryEntry[]> {
- if(!supabaseConfigured||!supabase)return [];
- const{data:{user},error:userError}=await supabase.auth.getUser();
- if(userError||!user)return [];
- const{data,error}=await supabase.from("session_history").select("id,completed_at,xp_earned,rounds").eq("profile_id",user.id).order("completed_at",{ascending:false}).limit(12);
- if(error||!data)return [];
- return data.map(row=>({id:row.id,completedAt:row.completed_at,xpEarned:row.xp_earned,rounds:row.rounds}));
-}
-
 export async function loadRemoteState(preferredSessionId?:string):Promise<AfterHoursState|null>{
  if(!supabaseConfigured||!supabase)return null;
  const{data:{user},error:userError}=await supabase.auth.getUser();
