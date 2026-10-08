@@ -119,7 +119,7 @@ async function syncRemoteStateNow(state:AfterHoursState):Promise<string|null>{
  };
 
  if(remoteSessionExists){
-  const{error}=await supabase.rpc("set_session_state",{p_session_id:sessionId,p_status:state.session.status,p_round:state.session.round,p_started_at:state.session.startedAt});
+  const{error}=await supabase.rpc("set_session_state",{p_session_id:sessionId,p_status:state.session.status,p_round:state.session.round,p_started_at:state.session.startedAt,p_updated_at:state.session.updatedAt});
   if(error)return error.message;
  }else{
   const{error}=await supabase.from("sessions").insert(sessionPayload);
