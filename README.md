@@ -9,14 +9,15 @@ Premium, mobile-first interactive experience with a cinematic black-and-gold vis
 - 18+ access gate
 - Consent and safety state
 - Guided three-round experience
-- Session timer with pause/reset
 - Server-authoritative active-time accounting for completed sessions
+- Session timer with pause/reset
 - Stop-session flow
 - Profile, level and XP presentation
 - Control-room interface
 - Responsive iPhone, Android phone, iPad and tablet layout
 - Safe-area and touch-target support for mobile browsers
 - iOS/iPadOS standalone web-app metadata
+- Installable PWA with network-first offline fallback
 - GitHub Actions production build check
 
 ## Development
@@ -36,8 +37,11 @@ Authentication, account-bound profiles, database-backed sessions, consent RPCs, 
 
 ## Architecture
 
-The client now has typed backend-ready contracts in `src/types.ts`, centralized persistence in `src/storage.ts`, and a documented production data model in `src/data-model.md`. Local storage is only an offline prototype layer. Offline sessions are not a trusted source for server-side XP, history, consent, or authorization.
+The client has typed backend-ready contracts in `src/types.ts`, centralized persistence in `src/storage.ts`, and a documented production data model in `src/data-model.md`.
 
+Local storage is an offline prototype layer only. Offline sessions are not a trusted source for server-side XP, history, consent, or authorization.
+
+The PWA service worker caches same-origin application resources using a network-first strategy. Fresh resources are preferred whenever the network is available; cached resources are used as the fallback when a request fails. Third-party origins are not intercepted by the service worker.
 
 ## Supabase setup
 
@@ -54,3 +58,5 @@ The browser must only receive the public anon key. Never place a Supabase servic
 ## Deployment
 
 This is a Vite production build and is ready for a Git-connected deployment platform. Set the two Supabase variables in the deployment environment before enabling remote persistence.
+
+The PWA service worker is registered from the app shell and is safe to use without Supabase. Remote session state, consent, history, XP and authorization remain server-authoritative when Supabase is configured.
