@@ -78,6 +78,7 @@ export async function completeRemoteSession(sessionId:string,rounds:number):Prom
 
 export async function syncRemoteState(state:AfterHoursState):Promise<string|null>{
  if(!supabaseConfigured||!supabase)return null;
+ if(state.session.status==="completed")return null;
  const{data:{user},error:userError}=await supabase.auth.getUser();
  if(userError||!user)return null;
 
