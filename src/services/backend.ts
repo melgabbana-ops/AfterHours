@@ -125,8 +125,11 @@ async function syncRemoteStateNow(state:AfterHoursState):Promise<string|null>{
  }else{
   const{error}=await supabase.from("sessions").insert(sessionPayload);
   if(error)return error.message;
-  if(state.session.status!=="ready"||state.session.round!==0){
-   const{error:transitionError}=await supabase.rpc("set_session_state",{p_session_id:sessionId,p_status:state.session.status==="active"?"active":"ready",p_round:0,p_started_at:null,p_updated_at:new Date().toISOString()});
+  if(state.session.status==="active"){
+   const{error:transitionError}=await supabase.rpc("set_session_state",{p_session_id:sessionId,p_status:"active",p_round:0,p_started_at:null,p_updated_at:new Date().toISOString()});
+   if(transitionError)return transitionError.message;
+  }else if(state.session.status==="paused"||state.session.status==="stopped"){
+   const{error:transitionError}=await supabase.rpc("set_session_state",{p_session_id:sessionId,p_status:"ready",p_round:0,p_started_at:null,p_updated_at:new Date().toISOString()});
    if(transitionError)return transitionError.message;
   }
  }
