@@ -71,13 +71,13 @@ export async function updateRemoteUsername(username:string):Promise<string|null>
  return null;
 }
 
-export async function completeRemoteSession(sessionId:string,rounds:number):Promise<{error:string|null,xpEarned:number}>{
- if(!supabaseConfigured||!supabase)return {error:null,xpEarned:120};
+export async function completeRemoteSession(sessionId:string,rounds:number):Promise<{error:string|null,xpEarned:number,alreadyCompleted:boolean}>{
+ if(!supabaseConfigured||!supabase)return {error:null,xpEarned:120,alreadyCompleted:false};
  const{data:{user},error:userError}=await supabase.auth.getUser();
- if(userError||!user)return {error:userError?.message??"Geen actieve gebruiker.",xpEarned:0};
+ if(userError||!user)return {error:userError?.message??"Geen actieve gebruiker.",xpEarned:0,alreadyCompleted:false};
  const{data,error}=await supabase.rpc("complete_session",{p_session_id:sessionId,p_rounds:rounds});
- if(error)return {error:error.message,xpEarned:0};
- return {error:null,xpEarned:Number(data?.xp_earned??120)};
+ if(error)return {error:error.message,xpEarned:0,alreadyCompleted:false};
+ return {error:null,xpEarned:Number(data?.xp_earned??120),alreadyCompleted:Boolean(data?.already_completed)};
 }
 
 let syncQueue=Promise.resolve();
