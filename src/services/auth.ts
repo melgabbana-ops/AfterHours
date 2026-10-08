@@ -37,6 +37,13 @@ export async function signUpWithPassword(email:string,password:string){
  if(error)throw error;
 }
 
+export async function updatePassword(password:string){
+ if(!supabase)throw new Error("Backend is nog niet geconfigureerd.");
+ if(password.length<8)throw new Error("Je wachtwoord moet minimaal 8 tekens bevatten.");
+ const{error}=await supabase.auth.updateUser({password});
+ if(error)throw error;
+}
+
 export async function signOut(){
  if(!supabase)return;
  const{error}=await supabase.auth.signOut();
