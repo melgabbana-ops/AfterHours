@@ -289,4 +289,4 @@ function App(){
  <nav aria-label="Hoofdnavigatie"><button className={screen==="home"?"active":""} onClick={()=>setScreen("home")} aria-current={screen==="home"?"page":undefined}><Home/><span>Home</span></button><button className={screen==="game"?"active":""} onClick={()=>consent?setScreen("game"):setScreen("home")} aria-current={screen==="game"?"page":undefined} aria-disabled={!consent}><Timer/><span>Experience</span></button><button className={screen==="insights"?"active":""} onClick={()=>setScreen("insights")} aria-current={screen==="insights"?"page":undefined}><Sparkles/><span>Insights</span></button><button className={screen==="radio"?"active":""} onClick={()=>setScreen("radio")} aria-current={screen==="radio"?"page":undefined}><Radio/><span>Radio</span></button><button className={screen==="profile"?"active":""} onClick={()=>setScreen("profile")} aria-current={screen==="profile"?"page":undefined}><User/><span>Profiel</span></button></nav>
  </div>
 }
-createRoot(document.getElementById("root")!).render(<App/>);
+createRoot(document.getElementById("root")!).render(<AppErrorBoundary><App/></AppErrorBoundary>);
