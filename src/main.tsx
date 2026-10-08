@@ -170,6 +170,7 @@ function App(){
    const finish=async()=>{
     const remoteResult=syncUserId?await completeRemoteSession(state.session.id,rounds.length):{error:null,xpEarned:120};
     if(remoteResult.error){setProfileMessage("Sessie kon niet veilig worden afgerond: "+remoteResult.error);return;}
+    if(remoteResult.alreadyCompleted){setProfileMessage("Deze sessie was al server-side afgerond. Er is geen nieuwe XP toegekend.");setRunning(false);setScreen("home");return;}
     const earned=remoteResult.xpEarned;
     setState(s=>{const nextXp=s.profile.xp+earned;return {...s,profile:{...s.profile,xp:nextXp,level:levelFromXp(nextXp),sessions:s.profile.sessions+1},history:[{id:"session-"+Date.now(),completedAt,xpEarned:earned,rounds:rounds.length},...s.history].slice(0,12),notifications:[notificationEvents.message("Sessie voltooid","De volledige Experience is afgerond en veilig opgeslagen. +"+earned+" XP is toegevoegd."),...s.notifications].slice(0,20),session:{...s.session,round:0,status:"completed",startedAt:null,updatedAt:completedAt}}});
     setSeconds(rounds[0].time);
