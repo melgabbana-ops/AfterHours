@@ -120,6 +120,6 @@ export async function syncRemoteState(state:AfterHoursState):Promise<string|null
    await supabase.from("consent_records").insert({session_id:sessionId,status:"revoked",revoked_at:state.consent.revokedAt});
   }
  }
-}\n
+}
  return null;
 }
