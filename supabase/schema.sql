@@ -214,3 +214,8 @@ on conflict (slug) do update set
  duration_seconds=excluded.duration_seconds,
  sort_order=excluded.sort_order,
  active=true;
+
+-- Profile identity extension: safe to run on an existing AFTER HOURS database.
+alter table public.profiles add column if not exists avatar_style text not null default 'sigil';
+alter table public.profiles drop constraint if exists profiles_avatar_style_check;
+alter table public.profiles add constraint profiles_avatar_style_check check (avatar_style in ('sigil','collar','key','crown'));
