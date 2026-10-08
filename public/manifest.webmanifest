@@ -16,6 +16,6 @@
   "shortcuts":[
     {"name":"Experience","short_name":"Experience","url":"/?screen=game"},
     {"name":"Profiel","short_name":"Profiel","url":"/?screen=profile"},
-    {"name":"Control Room","short_name":"Control Room","url":"/?screen=admin"}
+    {"name":"Session control","short_name":"Session control","url":"/?screen=admin"}
   ]
 }
