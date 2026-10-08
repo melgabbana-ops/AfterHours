@@ -12,7 +12,7 @@ export const defaultState=():AfterHoursState=>{
   consent:{status:"pending",confirmedAt:null,revokedAt:null},
   safety:"green",
   profile:{id:PROFILE_ID,displayName:"Night Walker",
-   username:"nightwalker",avatarStyle:"sigil",level:4,xp:680,sessions:12,createdAt:now},
+   username:"nightwalker",avatarStyle:"sigil",level:1,xp:0,sessions:0,createdAt:now},
   session:{id:crypto.randomUUID(),profileId:PROFILE_ID,status:"ready",round:0,startedAt:null,updatedAt:now},
   history:[],
   notifications:[]
