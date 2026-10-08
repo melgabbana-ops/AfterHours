@@ -169,3 +169,11 @@ nav button.active:after{content:"";position:absolute;left:50%;bottom:3px;width:1
 .tarot-spread-card p{color:#aaa69d;font-size:11px;line-height:1.65;margin:0 0 18px}
 .tarot-spread-card strong{display:block;border-top:1px solid #30271b;padding-top:12px;color:#e4d7bd;font-size:10px;font-weight:500;line-height:1.6}
 @media(max-width:600px){.tarot-spread{grid-template-columns:1fr;gap:8px}.tarot-spread-card{padding:15px}.tarot-spread-card h4{margin:10px 0 7px}.tarot-spread-card p{margin-bottom:12px}}
+
+
+/* Copyable reflections across Tarot, Oracle and Astrology. */
+.insight-actions button,.astro-copy{display:inline-flex;align-items:center;justify-content:center;gap:7px}
+.insight-actions button svg,.astro-copy svg{width:14px;height:14px;flex:none}
+.astro-copy{margin-top:16px;border:1px solid #735b31;color:var(--gold);padding:12px 15px;font-size:10px;letter-spacing:.06em}
+.insight-actions button:focus-visible,.astro-copy:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+@media(max-width:520px){.insight-actions button{flex:1;min-width:calc(50% - 8px)}}
