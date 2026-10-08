@@ -344,6 +344,7 @@ as $func$
 declare
   v_session public.sessions%rowtype;
   v_result public.consent_records%rowtype;
+  v_now timestamptz := now();
 begin
   if auth.uid() is null then raise exception 'Niet ingelogd.'; end if;
   if p_status not in ('active','revoked') then raise exception 'Ongeldige consentstatus.'; end if;
@@ -352,22 +353,21 @@ begin
 
   if p_status='active' then
     if p_confirmed_at is null or p_revoked_at is not null then raise exception 'Ongeldige actieve consent.'; end if;
-    if exists (
-      select 1 from public.consent_records
-      where session_id=v_session.id
-        and status='active'
-        and confirmed_at=p_confirmed_at
-    ) then
-      select * into v_result from public.consent_records
-      where session_id=v_session.id and status='active' and confirmed_at=p_confirmed_at
-      limit 1;
-      return v_result;
-    end if;
+    select * into v_result from public.consent_records
+    where session_id=v_session.id and status='active'
+    order by created_at desc
+    limit 1;
+    if found then return v_result; end if;
     insert into public.consent_records(session_id,status,confirmed_at)
-    values(v_session.id,'active',p_confirmed_at)
+    values(v_session.id,'active',v_now)
     returning * into v_result;
   else
     if p_revoked_at is null or p_confirmed_at is not null then raise exception 'Ongeldige ingetrokken consent.'; end if;
+    select * into v_result from public.consent_records
+    where session_id=v_session.id and status='revoked'
+    order by created_at desc
+    limit 1;
+    if found then return v_result; end if;
     if not exists (
       select 1 from public.consent_records
       where session_id=v_session.id and status='active'
@@ -376,17 +376,8 @@ begin
     ) then
       raise exception 'Actieve consent ontbreekt.';
     end if;
-    if exists (
-      select 1 from public.consent_records
-      where session_id=v_session.id and status='revoked' and revoked_at=p_revoked_at
-    ) then
-      select * into v_result from public.consent_records
-      where session_id=v_session.id and status='revoked' and revoked_at=p_revoked_at
-      limit 1;
-      return v_result;
-    end if;
     insert into public.consent_records(session_id,status,revoked_at)
-    values(v_session.id,'revoked',p_revoked_at)
+    values(v_session.id,'revoked',v_now)
     returning * into v_result;
   end if;
   return v_result;
