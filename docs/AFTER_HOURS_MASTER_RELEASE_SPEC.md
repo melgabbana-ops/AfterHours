@@ -327,6 +327,18 @@ Aftercare must remain optional and non-judgmental.
 
 Payment architecture remains separate from the client and must use a compliant payment provider. Previous Tikkie/personal-payment concepts are not part of the production architecture.
 
+## Brand asset lock
+
+The approved AFTER HOURS master logo is locked as the single source of truth for all current and future builds. The corrected centered emblem and AFTER HOURS wordmark, with the clean capital H and approved black / deep-purple / champagne-gold treatment, must be used consistently across the app and production-facing assets.
+
+- Never regenerate, redraw or reinterpret the logo with generative AI.
+- Never alter the H, emblem geometry, typography, spacing or proportions.
+- Controlled derivatives are allowed only when derived from the same approved master asset.
+- Splash, auth, profile, Control Room, marketing, teaser/trailer end cards and other logo surfaces must use the same master asset.
+- Release QA must check for legacy/inconsistent logo references and verify the rendered logo against the approved master.
+
+See `docs/AFTER_HOURS_BRAND_ASSET_LOCK.md` for the complete locked-asset specification.
+
 ## Release gates
 
 Before production push:
