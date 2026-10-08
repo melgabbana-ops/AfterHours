@@ -82,6 +82,7 @@ nav button{min-height:44px;}
 .safety-controls{margin-top:14px;border-top:1px solid #25221c;padding-top:14px;text-align:left}.safety-controls>strong{display:block;font-size:11px;margin:5px 0 10px}.safety-controls>div{display:grid;grid-template-columns:1fr 1fr;gap:7px}.safety-controls button{border:1px solid #302b23;background:#0a0a0a;color:#9b9589;padding:11px;font-size:9px;letter-spacing:.1em;text-transform:uppercase}.safety-controls button.selected{border-color:#735b31;color:var(--gold);background:#11100c}@media(max-width:520px){.safety-controls button{min-height:44px}}
 
 .username-prefix{display:flex;align-items:center;padding:0 10px;border:1px solid #29251f;border-right:0;background:#090909;color:var(--gold);font-size:11px}.username-help{display:flex;align-items:center;padding:0 8px;border:1px solid #29251f;border-left:0;background:#090909;color:#625d53;font-size:8px;letter-spacing:.08em;text-transform:uppercase}.name-editor .username-prefix+input{border-left:0;border-right:0}.name-editor .username-help{white-space:nowrap}
+.profile-message{display:block;margin-top:9px;padding:9px 10px;border:1px solid #5a3f2a;background:#100d09;color:#c9a45c;font-size:9px;line-height:1.45;letter-spacing:.03em}
 
 .wordmark{display:flex;align-items:center;justify-content:center;width:92px;height:42px;padding:0;background:transparent;border:0}.wordmark img{display:block;width:54px;height:54px;object-fit:contain}.gate-logo{display:block;width:min(250px,68vw);height:auto;margin:0 auto 18px;filter:drop-shadow(0 8px 22px rgba(170,100,25,.18))}
 
