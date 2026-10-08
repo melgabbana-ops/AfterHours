@@ -96,7 +96,7 @@ async function syncRemoteStateNow(state:AfterHoursState):Promise<string|null>{
  if(!supabaseConfigured||!supabase)return null;
  if(state.session.status==="completed")return null;
  const{data:{user},error:userError}=await supabase.auth.getUser();
- if(userError||!user)return null;
+ if(userError||!user)return userError?.message??"Geen actieve gebruiker voor sessie-sync.";
 
  const{error:profileError}=await supabase.from("profiles").upsert({
   id:user.id,
