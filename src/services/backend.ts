@@ -76,9 +76,14 @@ export async function completeRemoteSession(sessionId:string,rounds:number):Prom
 }
 
 let syncQueue=Promise.resolve();
+let syncGeneration=0;
 
 export async function syncRemoteState(state:AfterHoursState):Promise<string|null>{
- const job=syncQueue.then(()=>syncRemoteStateNow(state));
+ const generation=++syncGeneration;
+ const job=syncQueue.then(()=>{
+  if(generation!==syncGeneration)return null;
+  return syncRemoteStateNow(state);
+ });
  syncQueue=job.then(()=>undefined,()=>undefined);
  return job;
 }
