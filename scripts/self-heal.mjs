@@ -23,4 +23,4 @@ for (const repair of repairs) {
   if (changed) fs.writeFileSync(repair.path, source);
 }
 
-console.log(`SELF_HEAL_CHANGED=${changed ? "1" : "0"}`);
+const value=changed ? "1" : "0";\nconsole.log(`SELF_HEAL_CHANGED=${value}`);\nif(process.env.GITHUB_OUTPUT)fs.appendFileSync(process.env.GITHUB_OUTPUT,`changed=${value}\\n`);
