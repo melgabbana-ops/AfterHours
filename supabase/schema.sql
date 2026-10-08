@@ -121,11 +121,7 @@ on public.sessions for insert
 to authenticated
 with check (profile_id = auth.uid());
 
-create policy "sessions_self_update"
-on public.sessions for update
-to authenticated
-using (profile_id = auth.uid())
-with check (profile_id = auth.uid());
+-- Session updates are server-authoritative through set_session_state / complete_session.
 
 drop policy if exists "consent_self_read" on public.consent_records;
 drop policy if exists "consent_self_insert" on public.consent_records;
@@ -227,6 +223,48 @@ alter table public.sessions drop constraint if exists sessions_round_check;
 alter table public.sessions add constraint sessions_round_check check (round between 0 and 2);
 alter table public.session_history drop constraint if exists session_history_rounds_check;
 alter table public.session_history add constraint session_history_rounds_check check (rounds between 0 and 3);
+
+-- Authoritative session state transitions. Browser clients cannot directly mutate sessions.
+create or replace function public.set_session_state(
+  p_session_id uuid,
+  p_status text,
+  p_round integer,
+  p_started_at timestamptz
+)
+returns public.sessions
+language plpgsql
+security definer
+set search_path = public
+as $func$
+declare
+  v_session public.sessions%rowtype;
+  v_result public.sessions%rowtype;
+begin
+  if auth.uid() is null then raise exception 'Niet ingelogd.'; end if;
+  if p_status not in ('ready','active','paused','completed','stopped') then raise exception 'Ongeldige sessiestatus.'; end if;
+  if p_round not between 0 and 2 then raise exception 'Ongeldige ronde.'; end if;
+  select * into v_session from public.sessions where id=p_session_id and profile_id=auth.uid() for update;
+  if not found then raise exception 'Sessie niet gevonden.'; end if;
+
+  if p_status='completed' then
+    raise exception 'Gebruik complete_session voor afronden.';
+  end if;
+  if p_status='active' and p_round <> v_session.round then
+    raise exception 'Ronde moet via de rondeflow worden gewijzigd.';
+  end if;
+  if p_status='ready' and p_round <> 0 then
+    raise exception 'Ready vereist ronde 0.';
+  end if;
+
+  update public.sessions
+  set status=p_status, round=p_round, started_at=p_started_at, updated_at=now()
+  where id=v_session.id
+  returning * into v_result;
+  return v_result;
+end;
+$func$;
+revoke all on function public.set_session_state(uuid,text,integer,timestamptz) from public;
+grant execute on function public.set_session_state(uuid,text,integer,timestamptz) to authenticated;
 
 -- Authoritative session completion. XP/history are awarded only once server-side.
 create or replace function public.complete_session(p_session_id uuid, p_rounds integer)
