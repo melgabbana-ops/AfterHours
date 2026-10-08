@@ -17,6 +17,8 @@ This is the backend-ready contract for the client.
 - round
 - startedAt
 - updatedAt
+- activeSeconds (server-authoritative)
+- activeStartedAt (server-authoritative)
 
 ## ConsentRecord
 - status: pending | active | revoked
@@ -24,7 +26,7 @@ This is the backend-ready contract for the client.
 - revokedAt
 
 ## AfterHoursState
-The client combines the above records for offline-first behavior.
+The client may cache a local state for UI continuity, but server-side XP, history, consent and session completion are authoritative when Supabase is configured. Offline completion does not award authoritative XP.
 
 ## Backend mapping
 
