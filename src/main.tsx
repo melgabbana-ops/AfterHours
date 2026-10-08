@@ -66,11 +66,13 @@ function App(){
  const[selectedTask,setSelectedTask]=useState<string|null>(null);
  const[notificationsOpen,setNotificationsOpen]=useState(false);
  const[guideIndex,setGuideIndex]=useState(()=>Math.floor(Math.random()*guidePrompts.length));
+ let hydrateGeneration=0;
  useEffect(()=>{let active=true;
+  const generation=++hydrateGeneration;
   const hydrate=async()=>{
    const localState=loadState();
    const user=await getCurrentUser();
-   if(!active)return;
+   if(!active||generation!==hydrateGeneration)return;
    setUserEmail(user?.email??null);
    setSyncUserId(null);
    if(!user){
@@ -83,11 +85,14 @@ function App(){
    }
    setAuthReady(false);
    const remoteRounds=await loadRemoteRounds();
+   if(!active||generation!==hydrateGeneration)return;
    const availableRounds=remoteRounds.length===3?remoteRounds.map(r=>({title:r.title,text:r.body,time:r.durationSeconds})):fallbackRounds;
    if(remoteRounds.length===3)setRounds(availableRounds);
    const remoteHistory=await loadRemoteHistory();
+   if(!active||generation!==hydrateGeneration)return;
    if(remoteHistory.length)setState(current=>({...current,history:remoteHistory}));
    const remote=await loadRemoteState();
+   if(!active||generation!==hydrateGeneration)return;
    if(remote){
     const sameAccount=localState.profile.id===user.id;
     const remoteIsNewer=!sameAccount||new Date(remote.session.updatedAt).getTime()>=new Date(localState.session.updatedAt).getTime();
@@ -112,7 +117,7 @@ function App(){
    setUserEmail(session?.user?.email??null);
    setSyncUserId(null);
    if(session?.user){
-    window.setTimeout(()=>{if(active)void hydrate()},0);
+    window.setTimeout(()=>{if(active&&generation===hydrateGeneration)void hydrate()},0);
    }
   });
   return()=>{active=false;sub?.data.subscription.unsubscribe()};
