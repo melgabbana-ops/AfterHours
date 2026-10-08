@@ -170,7 +170,7 @@ function App(){
    setScreen("home");
   }
  };
- const reset=()=>{clearTimer(state.profile.id);setSeconds(rounds[round].time);setRunning(false);saveTimer(state.profile.id,round,rounds[round].time,false);updateSession({status:"ready",startedAt:null})};
+ const reset=()=>{clearTimer(state.profile.id);setSeconds(rounds[0].time);setRunning(false);setSelectedTask(null);saveTimer(state.profile.id,0,rounds[0].time,false);setState(s=>({...s,session:{...s.session,round:0,status:"ready",startedAt:null,updatedAt:new Date().toISOString()}}))};
  const stop=()=>{const now=new Date().toISOString();clearTimer(state.profile.id);setRunning(false);setCheckIn("stop");setState(s=>({...s,notifications:[notificationEvents.safety("De sessie is veilig gestopt en staat klaar voor een volgende start."),...s.notifications].slice(0,20),session:{...s.session,status:"stopped",startedAt:null,updatedAt:now}}));setScreen("home")};
  const revokeConsent=()=>{clearTimer(state.profile.id);setRunning(false);setState(s=>({...s,consent:{status:"revoked",confirmedAt:s.consent.confirmedAt,revokedAt:new Date().toISOString()},session:{...s.session,status:"stopped",round:0,startedAt:null,updatedAt:new Date().toISOString()}}));setSeconds(rounds[0].time);saveTimer(state.profile.id,0,rounds[0].time,false);setScreen("home")};
  const confirmConsent=()=>{setCheckIn("clear");setState(s=>({...s,notifications:[notificationEvents.checkIn("Consent is bevestigd. De ervaring kan veilig worden gestart."),...s.notifications].slice(0,20),consent:{status:"active",confirmedAt:new Date().toISOString(),revokedAt:null}}));};
