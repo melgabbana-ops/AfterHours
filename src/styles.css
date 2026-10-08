@@ -143,7 +143,7 @@ nav button.active:after{content:"";position:absolute;left:50%;bottom:3px;width:1
 }
 
 
-.stop-controller{position:fixed;right:14px;bottom:82px;z-index:8;display:flex;align-items:center;gap:8px;padding:10px;background:rgba(8,7,6,.96);border:1px solid #493b27;box-shadow:0 12px 36px rgba(0,0,0,.55);backdrop-filter:blur(18px);max-width:calc(100vw - 28px)}
+.stop-controller{position:fixed;right:14px;bottom:calc(82px + env(safe-area-inset-bottom, 0px));z-index:8;display:flex;align-items:center;gap:8px;padding:10px;background:rgba(8,7,6,.96);border:1px solid #493b27;box-shadow:0 12px 36px rgba(0,0,0,.55);backdrop-filter:blur(18px);max-width:calc(100vw - 28px)}
 .stop-controller>div{min-width:0;padding:0 7px}
 .stop-controller>div span,.stop-controller>div strong{display:block}
 .stop-controller>div span{font-size:7px;letter-spacing:.16em;color:var(--gold)}
@@ -152,7 +152,7 @@ nav button.active:after{content:"";position:absolute;left:50%;bottom:3px;width:1
 .stop-controller button svg{width:13px;height:13px}
 .stop-controller-pause{border:1px solid #51452f;color:var(--gold)}
 .stop-controller-stop{border:1px solid #754242;background:#211010;color:#f0a5a5;font-weight:600}
-@media(max-width:390px){.stop-controller{left:10px;right:10px;bottom:78px;gap:5px;padding:7px}.stop-controller>div{flex:1;padding:0 3px}.stop-controller button{padding:0 9px;font-size:8px}}
+@media(max-width:390px){.stop-controller{left:10px;right:10px;bottom:calc(78px + env(safe-area-inset-bottom, 0px));gap:5px;padding:7px}.stop-controller>div{flex:1;padding:0 3px}.stop-controller button{padding:0 9px;font-size:8px}}
 
 
 /* Accessible keyboard focus and reduced-motion behavior for safety controls. */
