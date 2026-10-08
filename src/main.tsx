@@ -104,7 +104,7 @@ function App(){
 
  useEffect(()=>{saveState(state);if(!supabaseConfigured||syncUserId){void syncRemoteState(state).then(message=>{if(message)setProfileMessage(message)})}if(!syncUserId)return;const pending=state.history.filter(item=>!syncedHistoryIds.includes(item.id));if(pending.length){void Promise.all(pending.map(saveRemoteHistory)).then(()=>setSyncedHistoryIds(ids=>Array.from(new Set([...ids,...pending.map(item=>item.id)]))))}},[state,syncedHistoryIds,syncUserId]);
  useEffect(()=>{if(!running)return;const id=setInterval(()=>setSeconds(s=>{const next=Math.max(0,s-1);saveTimer(state.session.round,next,true);return next}),1000);return()=>clearInterval(id)},[running,state.session.round]);
- useEffect(()=>{if(seconds!==0||state.session.status!=="active")return;clearTimer();setRunning(false);setState(s=>({...s,notifications:[notificationEvents.checkIn("De tijd van deze ronde is voorbij. De sessie staat op pauze en kan veilig worden hervat."),...s.notifications].slice(0,20),session:{...s.session,status:"paused",updatedAt:new Date().toISOString()}}))},[seconds,state.session.status]);
+ useEffect(()=>{if(seconds!==0||state.session.status!=="active")return;clearTimer();setRunning(false);setSeconds(rounds[round].time);saveTimer(round,rounds[round].time,false);setState(s=>({...s,notifications:[notificationEvents.checkIn("De tijd van deze ronde is voorbij. De sessie staat op pauze en kan veilig worden hervat."),...s.notifications].slice(0,20),session:{...s.session,status:"paused",updatedAt:new Date().toISOString()}}))},[seconds,state.session.status,round,rounds]);
 
  const round=state.session.round;
  const consent=state.consent.status==="active";
