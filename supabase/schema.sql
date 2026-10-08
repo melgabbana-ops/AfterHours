@@ -235,6 +235,9 @@ begin
   if p_status not in ('ready','active','paused','completed','stopped') then raise exception 'Ongeldige sessiestatus.'; end if;
   if p_round not between 0 and 2 then raise exception 'Ongeldige ronde.'; end if;
   if p_updated_at is null then raise exception 'Ontbrekende state-versie.'; end if;
+  if p_updated_at > now() + interval '5 seconds' then
+    raise exception 'Ongeldige toekomstige state-versie.';
+  end if;
   select * into v_session from public.sessions where id=p_session_id and profile_id=auth.uid() for update;
   if not found then raise exception 'Sessie niet gevonden.'; end if;
 
