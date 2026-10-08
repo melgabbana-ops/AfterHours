@@ -73,6 +73,7 @@ function App(){
  const[passwordRecovery,setPasswordRecovery]=useState(false);
  const[syncUserId,setSyncUserId]=useState<string|null>(null);
  const[checkIn,setCheckIn]=useState<"clear"|"pause"|"stop">("clear");
+ const[aftercareChoice,setAftercareChoice]=useState<"land"|"talk"|"space"|null>(null);
  const[displayNameDraft,setDisplayNameDraft]=useState(()=>state.profile.displayName);
  const[usernameDraft,setUsernameDraft]=useState(()=>state.profile.username);
  const[profileMessage,setProfileMessage]=useState("");
@@ -191,6 +192,19 @@ function App(){
   saveTimer(state.profile.id,round,remaining,true);
   updateSession({status:"active",startedAt:state.session.startedAt||new Date().toISOString()});
  };
+ const finishSession=async()=>{
+  if(!aftercareChoice)return;
+  if(!syncUserId){setProfileMessage("Log in om een sessie server-side af te ronden en XP veilig op te slaan.");return;}
+  const completedAt=new Date().toISOString();
+  const remoteResult=await completeRemoteSession(state.session.id,rounds.length);
+  if(remoteResult.error){setProfileMessage("Sessie kon niet veilig worden afgerond: "+remoteResult.error);return;}
+  if(remoteResult.alreadyCompleted){setProfileMessage("Deze sessie was al server-side afgerond. Er is geen nieuwe XP toegekend.");setScreen("home");return;}
+  const earned=remoteResult.xpEarned;
+  setState(s=>{const nextXp=s.profile.xp+earned;return {...s,profile:{...s.profile,xp:nextXp,level:levelFromXp(nextXp),sessions:s.profile.sessions+1},history:[{id:"session-"+Date.now(),completedAt,xpEarned:earned,rounds:rounds.length},...s.history].slice(0,12),notifications:[notificationEvents.message("Sessie voltooid","De volledige Experience is afgerond en veilig opgeslagen. +"+earned+" XP is toegevoegd."),...s.notifications].slice(0,20),session:{...s.session,round:0,status:"completed",startedAt:null,updatedAt:completedAt}}});
+  setSeconds(rounds[0].time);
+  setAftercareChoice(null);
+  setScreen("home");
+ };
  const next=()=>{
   if(!consent){setRunning(false);setScreen("home");return}
   if(running)return;
@@ -205,22 +219,8 @@ function App(){
    setSeconds(rounds[n].time);
    saveTimer(state.profile.id,n,rounds[n].time,false);
   }else{
-   const completedAt=new Date().toISOString();
-   const finish=async()=>{
-    if(!syncUserId){
-     setProfileMessage("Log in om een sessie server-side af te ronden en XP veilig op te slaan.");
-     setRunning(false);
-     return;
-    }
-    const remoteResult=await completeRemoteSession(state.session.id,rounds.length);
-    if(remoteResult.error){setProfileMessage("Sessie kon niet veilig worden afgerond: "+remoteResult.error);return;}
-    if(remoteResult.alreadyCompleted){setProfileMessage("Deze sessie was al server-side afgerond. Er is geen nieuwe XP toegekend.");setRunning(false);setScreen("home");return;}
-    const earned=remoteResult.xpEarned;
-    setState(s=>{const nextXp=s.profile.xp+earned;return {...s,profile:{...s.profile,xp:nextXp,level:levelFromXp(nextXp),sessions:s.profile.sessions+1},history:[{id:"session-"+Date.now(),completedAt,xpEarned:earned,rounds:rounds.length},...s.history].slice(0,12),notifications:[notificationEvents.message("Sessie voltooid","De volledige Experience is afgerond en veilig opgeslagen. +"+earned+" XP is toegevoegd."),...s.notifications].slice(0,20),session:{...s.session,round:0,status:"completed",startedAt:null,updatedAt:completedAt}}});
-    setSeconds(rounds[0].time);
-    setScreen("home");
-   };
-   void finish();
+   setAftercareChoice(null);
+   setScreen("aftercare");
   }
  };
  const reset=()=>{clearTimer(state.profile.id);setSeconds(rounds[0].time);setRunning(false);setSelectedTask(null);saveTimer(state.profile.id,0,rounds[0].time,false);setState(s=>({...s,session:{...s.session,id:s.session.status==="completed"?crypto.randomUUID():s.session.id,round:0,status:"ready",startedAt:null,updatedAt:new Date().toISOString()}}))};
@@ -273,6 +273,8 @@ function App(){
  </main>}
 
  {screen==="game"&&<main className="experience-shell">{!consent?<section className="round"><span className="eyebrow">TOEGANG VEREIST</span><h2>Consent eerst.</h2><p>Bevestig jullie vrijwillige toestemming voordat de experience kan worden geopend.</p><button className="gold" onClick={()=>setScreen("home")}>Naar consent <ChevronRight/></button></section>:<><div className="game-top"><button onClick={stop} aria-label="Sessie verlaten"><LogOut/></button><span>ROUND {String(round+1).padStart(2,"0")} / {String(rounds.length).padStart(2,"0")}</span></div><div className="round-steps">{rounds.map((item,index)=><span key={item.title} className={index===round?"current":index<round?"done":""}>{String(index+1).padStart(2,"0")} · {item.title}</span>)}</div><div className="progress"><span style={{width:progress+"%"}}/></div><section className="round"><span className="eyebrow">AFTER HOURS</span><h2>{rounds[round].title}</h2><p>{rounds[round].text}</p><div className="task-card"><span className="eyebrow">{roundTasks[round]?.label}</span><strong>{roundTasks[round]?.question}</strong><div>{roundTasks[round]?.choices.map(choice=><button key={choice} className={selectedTask===choice?"selected":""} onClick={()=>setSelectedTask(choice)}>{choice}</button>)}</div><small>{selectedTask?"Keuze opgeslagen voor deze ronde. Jullie kunnen altijd van richting veranderen.":"Kies alleen wanneer dit voor beiden goed voelt."}</small></div><div className="timer"><Timer/><strong>{clock}</strong><small>TIJD OVER</small></div><div className="actions"><button className="gold" onClick={()=>running?pauseRound():startRound()}>{running?<Pause/>:<Play/>}{running?"Pauzeren":"Start ronde"}</button><button onClick={reset}><RotateCcw/> Reset</button><button className="stop" onClick={stop}><Square/> Stop sessie</button></div><div className="consent"><CheckCircle2/><div><strong>Consent bevestigd</strong><span>Jullie kunnen op elk moment stoppen.</span></div></div><div className="checkin"><span className="eyebrow">LIVE CHECK-IN</span><strong>Hoe voelt dit moment?</strong><div><button className={checkIn==="clear"?"selected":""} onClick={()=>handleCheckIn("clear")}>Goed</button><button className={checkIn==="pause"?"selected":""} onClick={()=>handleCheckIn("pause")}>Pauze</button><button className={checkIn==="stop"?"selected stop-choice":""} onClick={()=>handleCheckIn("stop")}>Stop</button></div></div></section><button className="next" onClick={next}>{round===rounds.length-1?"Afronden":"Volgende ronde"} <ChevronRight/></button></>}</main>}
+
+ {screen==="aftercare"&&<main className="aftercare-screen"><section className="aftercare-card"><span className="eyebrow">AFTER HOURS · AFTERCARE</span><h2>Land softly.</h2><p>De Experience is voorbij. Kies wat nu het beste past. Niets hoeft meteen.</p><div className="aftercare-options"><button className={aftercareChoice==="land"?"selected":""} onClick={()=>setAftercareChoice("land")}><strong>Rustig landen</strong><span>Even zitten, ademen en het tempo laten zakken.</span></button><button className={aftercareChoice==="talk"?"selected":""} onClick={()=>setAftercareChoice("talk")}><strong>Kort napraten</strong><span>Bespreek samen wat goed voelde en wat je wilt meenemen.</span></button><button className={aftercareChoice==="space"?"selected":""} onClick={()=>setAftercareChoice("space")}><strong>Ruimte & water</strong><span>Neem even afstand, drink iets en kom rustig terug.</span></button></div><div className="aftercare-note"><Shield/><span>Aftercare is geen verplichting om iets te delen. Een pauze, grens of stop blijft altijd geldig.</span></div><button className="gold aftercare-complete" disabled={!aftercareChoice} onClick={()=>void finishSession()}>Sessie veilig afronden</button><button className="back" onClick={()=>setScreen("home")}>← Terug</button></section></main>}
 
  {screen==="insights"&&<Insights onBack={()=>setScreen("home")}/>}
 
