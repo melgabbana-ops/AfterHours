@@ -293,6 +293,9 @@ begin
     return jsonb_build_object('xp_earned',0,'already_completed',true);
   end if;
   if v_session.status not in ('active','paused') or v_session.round <> 2 then raise exception 'Sessie kan nog niet worden afgerond.'; end if;
+  if v_session.started_at is null or extract(epoch from (now() - v_session.started_at)) < 3600 then
+    raise exception 'De volledige sessieduur van 60 minuten is nog niet verstreken.';
+  end if;
   if not exists (
     select 1
     from public.consent_records c
