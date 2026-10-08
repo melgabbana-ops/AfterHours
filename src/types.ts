@@ -49,6 +49,7 @@ export interface ConsentRecord{
 
 export interface AfterHoursState{
  ageConfirmed:boolean;
+ ageConfirmedFor:string|null;
  consent:ConsentRecord;
  safety:Safety;
  profile:UserProfile;
