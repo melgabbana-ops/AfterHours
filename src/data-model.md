@@ -5,6 +5,8 @@ This is the backend-ready contract for the client.
 ## UserProfile
 - id
 - displayName
+- username (unique account identity)
+- avatarStyle
 - level
 - xp
 - sessions
