@@ -6,7 +6,7 @@ import{Insights}from"./Insights";
 import{RadioRoom}from"./RadioRoom";
 import type{AfterHoursState,AvatarStyle,Screen,Safety,SessionHistoryEntry}from"./types";
 import{loadState,saveState,loadTimer,saveTimer,clearTimer,defaultState}from"./storage";
-import{loadRemoteState,loadRemoteRounds,syncRemoteState,loadRemoteHistory,saveRemoteHistory,updateRemoteUsername}from"./services/backend";
+import{loadRemoteState,loadRemoteRounds,syncRemoteState,loadRemoteHistory,updateRemoteUsername,completeRemoteSession}from"./services/backend";
 import{supabase,supabaseConfigured}from"./services/supabase";
 import{getCurrentUser,sendMagicLink,signInWithProvider,signOut}from"./services/auth";
 import{playNotificationSound}from"./services/notificationSound";
@@ -121,7 +121,7 @@ function App(){
   return()=>{active=false;sub?.data.subscription.unsubscribe()};
  },[]);
 
- useEffect(()=>{saveState(state);if(!supabaseConfigured||syncUserId){void syncRemoteState(state).then(message=>{if(message)setProfileMessage(message)})}if(!syncUserId)return;const pending=state.history.filter(item=>!syncedHistoryIds.includes(item.id));if(pending.length){void Promise.allSettled(pending.map(saveRemoteHistory)).then(results=>{const savedIds=results.flatMap((result,index)=>result.status==="fulfilled"?[pending[index].id]:[]);if(savedIds.length)setSyncedHistoryIds(ids=>Array.from(new Set([...ids,...savedIds])));if(results.some(result=>result.status==="rejected"))setProfileMessage("Sessiegeschiedenis kon niet volledig naar je account worden opgeslagen.")})}},[state,syncedHistoryIds,syncUserId]);
+ useEffect(()=>{saveState(state);if(!supabaseConfigured||syncUserId){void syncRemoteState(state).then(message=>{if(message)setProfileMessage(message)})}if(!syncUserId)return;},[state,syncedHistoryIds,syncUserId]);
  useEffect(()=>{if(!running)return;const id=setInterval(()=>setSeconds(s=>{const next=Math.max(0,s-1);saveTimer(state.profile.id,state.session.round,next,true);return next}),1000);return()=>clearInterval(id)},[running,state.session.round]);
  useEffect(()=>{if(seconds!==0||state.session.status!=="active")return;clearTimer(state.profile.id);setRunning(false);setSeconds(rounds[state.session.round].time);saveTimer(state.profile.id,state.session.round,rounds[state.session.round].time,false);setState(s=>({...s,notifications:[notificationEvents.checkIn("De tijd van deze ronde is voorbij. De sessie staat op pauze en kan veilig worden hervat."),...s.notifications].slice(0,20),session:{...s.session,status:"paused",updatedAt:new Date().toISOString()}}))},[seconds,state.session.status,rounds]);
 
@@ -165,9 +165,16 @@ function App(){
    setSeconds(rounds[n].time);
    saveTimer(state.profile.id,n,rounds[n].time,false);
   }else{
-   setState(s=>{const nextXp=s.profile.xp+120;const completedAt=new Date().toISOString();return {...s,profile:{...s.profile,xp:nextXp,level:levelFromXp(nextXp),sessions:s.profile.sessions+1},history:[{id:"session-"+Date.now(),completedAt,xpEarned:120,rounds:rounds.length},...s.history].slice(0,12),notifications:[notificationEvents.message("Sessie voltooid","De volledige Experience is afgerond en veilig opgeslagen. +120 XP is toegevoegd."),...s.notifications].slice(0,20),session:{...s.session,round:0,status:"completed",startedAt:null,updatedAt:completedAt}}});
-   setSeconds(rounds[0].time);
-   setScreen("home");
+   const completedAt=new Date().toISOString();
+   const finish=async()=>{
+    const remoteResult=syncUserId?await completeRemoteSession(state.session.id,rounds.length):{error:null,xpEarned:120};
+    if(remoteResult.error){setProfileMessage("Sessie kon niet veilig worden afgerond: "+remoteResult.error);return;}
+    const earned=remoteResult.xpEarned;
+    setState(s=>{const nextXp=s.profile.xp+earned;return {...s,profile:{...s.profile,xp:nextXp,level:levelFromXp(nextXp),sessions:s.profile.sessions+1},history:[{id:"session-"+Date.now(),completedAt,xpEarned:earned,rounds:rounds.length},...s.history].slice(0,12),notifications:[notificationEvents.message("Sessie voltooid","De volledige Experience is afgerond en veilig opgeslagen. +"+earned+" XP is toegevoegd."),...s.notifications].slice(0,20),session:{...s.session,round:0,status:"completed",startedAt:null,updatedAt:completedAt}}});
+    setSeconds(rounds[0].time);
+    setScreen("home");
+   };
+   void finish();
   }
  };
  const reset=()=>{clearTimer(state.profile.id);setSeconds(rounds[0].time);setRunning(false);setSelectedTask(null);saveTimer(state.profile.id,0,rounds[0].time,false);setState(s=>({...s,session:{...s.session,round:0,status:"ready",startedAt:null,updatedAt:new Date().toISOString()}}))};
