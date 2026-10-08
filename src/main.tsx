@@ -64,7 +64,6 @@ function App(){
  const[profileMessage,setProfileMessage]=useState("");
  useEffect(()=>{setDisplayNameDraft(state.profile.displayName);setUsernameDraft(state.profile.username)},[state.profile.displayName,state.profile.username]);
  const[selectedTask,setSelectedTask]=useState<string|null>(null);
- const[syncedHistoryIds,setSyncedHistoryIds]=useState<string[]>([]);
  const[notificationsOpen,setNotificationsOpen]=useState(false);
  const[guideIndex,setGuideIndex]=useState(()=>Math.floor(Math.random()*guidePrompts.length));
  useEffect(()=>{let active=true;
@@ -74,7 +73,6 @@ function App(){
    if(!active)return;
    setUserEmail(user?.email??null);
    setSyncUserId(null);
-   setSyncedHistoryIds([]);
    if(!user){
     clearTimer(localState.profile.id);
     setRunning(false);
@@ -113,7 +111,6 @@ function App(){
    if(!active)return;
    setUserEmail(session?.user?.email??null);
    setSyncUserId(null);
-   setSyncedHistoryIds([]);
    if(session?.user){
     window.setTimeout(()=>{if(active)void hydrate()},0);
    }
