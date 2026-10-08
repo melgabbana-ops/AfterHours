@@ -2,10 +2,10 @@ import fs from "node:fs";
 
 const repairs = [
   {
-    id: "auth-hydration-generation-ref",
+    id: "auth-hydration-generation-double-current",
     path: "src/main.tsx",
-    pattern: /generation([!=]=+)(?!\\.)hydrateGeneration/g,
-    replacement: "generation$1hydrateGeneration.current",
+    pattern: /hydrateGeneration\.current\.current/g,
+    replacement: "hydrateGeneration.current",
   },
 ];
 
