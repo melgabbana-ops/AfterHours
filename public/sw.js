@@ -1,4 +1,4 @@
-const CACHE_NAME="after-hours-v1";
+const CACHE_NAME="after-hours-v2";
 const APP_SHELL=["/","/manifest.webmanifest","/after-hours-logo.svg"];
 
 self.addEventListener("install",(event)=>{
@@ -11,11 +11,10 @@ self.addEventListener("fetch",(event)=>{
  if(event.request.method!=="GET")return;
  const url=new URL(event.request.url);
  if(url.origin!==self.location.origin)return;
- event.respondWith(caches.match(event.request).then(cached=>{
-  const network=fetch(event.request).then(response=>{
+ event.respondWith(
+  fetch(event.request).then(response=>{
    if(response.ok)caches.open(CACHE_NAME).then(cache=>cache.put(event.request,response.clone()));
    return response;
-  }).catch(()=>cached);
-  return cached||network;
- }));
+  }).catch(()=>caches.match(event.request))
+ );
 });
