@@ -63,7 +63,7 @@ export async function updateRemoteUsername(username:string):Promise<string|null>
 }
 
 export async function completeRemoteSession(sessionId:string,rounds:number):Promise<{error:string|null,xpEarned:number,alreadyCompleted:boolean}>{
- if(!supabaseConfigured||!supabase)return {error:null,xpEarned:120,alreadyCompleted:false};
+ if(!supabaseConfigured||!supabase)return {error:"Server-opslag is niet beschikbaar. Log in en probeer opnieuw.",xpEarned:0,alreadyCompleted:false};
  const{data:{user},error:userError}=await supabase.auth.getUser();
  if(userError||!user)return {error:userError?.message??"Geen actieve gebruiker.",xpEarned:0,alreadyCompleted:false};
  const{data,error}=await supabase.rpc("complete_session",{p_session_id:sessionId,p_rounds:rounds});
