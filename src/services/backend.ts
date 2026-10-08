@@ -99,6 +99,7 @@ export async function syncRemoteState(state:AfterHoursState):Promise<string|null
  }
 
  const sessionPayload={
+  ...(sessionId?{id:sessionId}:{}),
   profile_id:user.id,
   status:state.session.status,
   round:state.session.round,
