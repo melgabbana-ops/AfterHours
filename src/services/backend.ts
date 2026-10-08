@@ -21,7 +21,7 @@ export async function loadRemoteHistory():Promise<import("../types").SessionHist
  return data.map(row=>({id:row.id,completedAt:row.completed_at,xpEarned:row.xp_earned,rounds:row.rounds}));
 }
 
-export async function loadRemoteState():Promise<AfterHoursState|null>{
+export async function loadRemoteState(preferredSessionId?:string):Promise<AfterHoursState|null>{
  if(!supabaseConfigured||!supabase)return null;
  const{data:{user},error:userError}=await supabase.auth.getUser();
  if(userError||!user)return null;
@@ -29,9 +29,13 @@ export async function loadRemoteState():Promise<AfterHoursState|null>{
  const{data:profile,error:profileError}=await supabase.from("profiles").select("*").eq("id",user.id).maybeSingle();
  if(profileError||!profile)return null;
 
- const{data:session,error:sessionError}=await supabase.from("sessions").select("*").eq("profile_id",user.id).order("updated_at",{ascending:false}).limit(1).maybeSingle();
+ const legacyLocalSession=!preferredSessionId||preferredSessionId==="local-session";
+ const sessionQuery=legacyLocalSession
+  ?supabase.from("sessions").select("*").eq("profile_id",user.id).order("updated_at",{ascending:false}).limit(1).maybeSingle()
+  :supabase.from("sessions").select("*").eq("profile_id",user.id).eq("id",preferredSessionId).maybeSingle();
+ const{data:session,error:sessionError}=await sessionQuery;
  if(sessionError)return null;
-
+ if(!session&&!legacyLocalSession)return null;
  const effectiveSession=session??{
   id:crypto.randomUUID(),
   profile_id:user.id,
@@ -41,9 +45,9 @@ export async function loadRemoteState():Promise<AfterHoursState|null>{
   updated_at:profile.updated_at??profile.created_at
  };
 
- const{data:consent}=effectiveSession.id==="local-session"
-  ?{data:null}
-  :await supabase.from("consent_records").select("status,confirmed_at,revoked_at").eq("session_id",effectiveSession.id).order("created_at",{ascending:false}).limit(1).maybeSingle();
+ const{data:consent}=session
+  ?await supabase.from("consent_records").select("status,confirmed_at,revoked_at").eq("session_id",effectiveSession.id).order("created_at",{ascending:false}).limit(1).maybeSingle()
+  :{data:null};
  const{data:history}=await supabase.from("session_history").select("id,completed_at,xp_earned,rounds").eq("profile_id",user.id).order("completed_at",{ascending:false}).limit(12);
 
  return{
@@ -110,8 +114,8 @@ async function syncRemoteStateNow(state:AfterHoursState):Promise<string|null>{
   if(!owned)sessionId=null;
  }
  if(!sessionId){
-  const{data:existing}=await supabase.from("sessions").select("id").eq("profile_id",user.id).order("updated_at",{ascending:false}).limit(1).maybeSingle();
-  if(existing){sessionId=existing.id;remoteSessionExists=true;}else{sessionId=crypto.randomUUID();remoteSessionExists=false;}
+  sessionId=crypto.randomUUID();
+  remoteSessionExists=false;
  }
 
  const sessionPayload={
