@@ -22,9 +22,9 @@ export async function loadRemoteHistory():Promise<import("../types").SessionHist
 }
 
 export async function saveRemoteHistory(entry:import("../types").SessionHistoryEntry):Promise<void>{
- if(!supabaseConfigured||!supabase)return;
+ if(!supabaseConfigured||!supabase)return null;
  const{data:{user},error:userError}=await supabase.auth.getUser();
- if(userError||!user)return;
+ if(userError||!user)return null;
  await supabase.from("session_history").upsert({id:entry.id,profile_id:user.id,completed_at:entry.completedAt,xp_earned:entry.xpEarned,rounds:entry.rounds},{onConflict:"id"});
 }
 
@@ -64,7 +64,7 @@ export async function loadRemoteState():Promise<AfterHoursState|null>{
  };
 }
 
-export async function syncRemoteState(state:AfterHoursState):Promise<void>{
+export async function syncRemoteState(state:AfterHoursState):Promise<string|null>{
  if(!supabaseConfigured||!supabase)return;
  const{data:{user},error:userError}=await supabase.auth.getUser();
  if(userError||!user)return;
@@ -78,7 +78,7 @@ export async function syncRemoteState(state:AfterHoursState):Promise<void>{
   sessions:state.profile.sessions,
   avatar_style:state.profile.avatarStyle??"sigil"
  });
- if(profileError)return;
+ if(profileError)return profileError.code==="23505"?"Deze username is al in gebruik. Kies een andere username.":profileError.message;
 
  let sessionId=isUuid(state.session.id)?state.session.id:null;
  if(sessionId){
@@ -100,7 +100,7 @@ export async function syncRemoteState(state:AfterHoursState):Promise<void>{
 
  if(sessionId){
   const{error}=await supabase.from("sessions").update(sessionPayload).eq("id",sessionId).eq("profile_id",user.id);
-  if(error)return;
+  if(error)return error.message;
  }else{
   const{data:created,error}=await supabase.from("sessions").insert(sessionPayload).select("id").single();
   if(error||!created)return;
@@ -120,4 +120,4 @@ export async function syncRemoteState(state:AfterHoursState):Promise<void>{
    await supabase.from("consent_records").insert({session_id:sessionId,status:"revoked",revoked_at:state.consent.revokedAt});
   }
  }
-}
+}\n
