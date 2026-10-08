@@ -37,16 +37,27 @@ export async function loadRemoteState():Promise<AfterHoursState|null>{
  if(profileError||!profile)return null;
 
  const{data:session,error:sessionError}=await supabase.from("sessions").select("*").eq("profile_id",user.id).order("updated_at",{ascending:false}).limit(1).maybeSingle();
- if(sessionError||!session)return null;
+ if(sessionError)return null;
 
- const{data:consent}=await supabase.from("consent_records").select("status,confirmed_at,revoked_at").eq("session_id",session.id).order("created_at",{ascending:false}).limit(1).maybeSingle();
+ const effectiveSession=session??{
+  id:"local-session",
+  profile_id:user.id,
+  status:"ready",
+  round:0,
+  started_at:null,
+  updated_at:profile.updated_at??profile.created_at
+ };
+
+ const{data:consent}=effectiveSession.id==="local-session"
+  ?{data:null}
+  :await supabase.from("consent_records").select("status,confirmed_at,revoked_at").eq("session_id",effectiveSession.id).order("created_at",{ascending:false}).limit(1).maybeSingle();
  const{data:history}=await supabase.from("session_history").select("id,completed_at,xp_earned,rounds").eq("profile_id",user.id).order("completed_at",{ascending:false}).limit(12);
 
  return{
   ageConfirmed:false,
   safety:"green",
   profile:{id:profile.id,displayName:profile.display_name,username:profile.username??"night-walker",avatarStyle:profile.avatar_style==="collar"||profile.avatar_style==="key"||profile.avatar_style==="crown"?profile.avatar_style:"sigil",level:profile.level,xp:profile.xp,sessions:profile.sessions,createdAt:profile.created_at},
-  session:{id:session.id,profileId:session.profile_id,status:session.status,round:session.round,startedAt:session.started_at,updatedAt:session.updated_at},
+  session:{id:effectiveSession.id,profileId:effectiveSession.profile_id,status:effectiveSession.status,round:effectiveSession.round,startedAt:effectiveSession.started_at,updatedAt:effectiveSession.updated_at},
   history:(history??[]).map(row=>({id:row.id,completedAt:row.completed_at,xpEarned:row.xp_earned,rounds:row.rounds})),
   notifications:[],
   consent:consent?{status:consent.status==="active"?"active":"revoked",confirmedAt:consent.confirmed_at,revokedAt:consent.revoked_at}:{status:"pending",confirmedAt:null,revokedAt:null}
