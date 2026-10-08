@@ -127,19 +127,13 @@ async function syncRemoteStateNow(state:AfterHoursState):Promise<string|null>{
  }
 
  if(state.consent.status==="active"&&state.consent.confirmedAt){
-  const{data:existing}=await supabase.from("consent_records").select("id").eq("session_id",sessionId).eq("status","active").eq("confirmed_at",state.consent.confirmedAt).maybeSingle();
-  if(!existing){
-   const{error}=await supabase.rpc("set_consent_state",{p_session_id:sessionId,p_status:"active",p_confirmed_at:state.consent.confirmedAt,p_revoked_at:null});
-   if(error)return error.message;
-  }
+  const{error}=await supabase.rpc("set_consent_state",{p_session_id:sessionId,p_status:"active",p_confirmed_at:state.consent.confirmedAt,p_revoked_at:null});
+  if(error)return error.message;
  }
 
  if(state.consent.status==="revoked"&&state.consent.revokedAt){
-  const{data:existing}=await supabase.from("consent_records").select("id").eq("session_id",sessionId).eq("status","revoked").eq("revoked_at",state.consent.revokedAt).maybeSingle();
-  if(!existing){
-   const{error}=await supabase.rpc("set_consent_state",{p_session_id:sessionId,p_status:"revoked",p_confirmed_at:null,p_revoked_at:state.consent.revokedAt});
-   if(error)return error.message;
-  }
+  const{error}=await supabase.rpc("set_consent_state",{p_session_id:sessionId,p_status:"revoked",p_confirmed_at:null,p_revoked_at:state.consent.revokedAt});
+  if(error)return error.message;
  }
  return null;
 }
