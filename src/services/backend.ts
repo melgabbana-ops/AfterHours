@@ -59,7 +59,7 @@ export async function updateRemoteUsername(username:string):Promise<string|null>
  if(!supabaseConfigured||!supabase)return null;
  const{data:{user},error:userError}=await supabase.auth.getUser();
  if(userError||!user)return userError?.message??"Geen actieve gebruiker voor username-sync.";
- const{error}=await supabase.from("profiles").update({username}).eq("id",user.id);
+ const{error}=await supabase.from("profiles").update({username:normalized}).eq("id",user.id);
  if(error)return error.code==="23505"?"Deze username is al in gebruik. Kies een andere username.":error.message;
  return null;
 }
