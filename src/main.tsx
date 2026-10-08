@@ -74,16 +74,33 @@ function App(){
    setUserEmail(user?.email??null);
    setSyncUserId(null);
    setSyncedHistoryIds([]);
-   if(!user){setAuthReady(true);return;}
+   if(!user){
+    clearTimer();
+    setRunning(false);
+    setSeconds(fallbackRounds[0].time);
+    setState(current=>({...defaultState(),ageConfirmed:current.ageConfirmed,safety:current.safety}));
+    setAuthReady(true);
+    return;
+   }
    setAuthReady(false);
    const remoteRounds=await loadRemoteRounds();
-   if(remoteRounds.length===3)setRounds(remoteRounds.map(r=>({title:r.title,text:r.body,time:r.durationSeconds})));
+   const availableRounds=remoteRounds.length===3?remoteRounds.map(r=>({title:r.title,text:r.body,time:r.durationSeconds})):fallbackRounds;
+   if(remoteRounds.length===3)setRounds(availableRounds);
    const remoteHistory=await loadRemoteHistory();
    if(remoteHistory.length)setState(current=>({...current,history:remoteHistory}));
    const remote=await loadRemoteState();
    if(remote){
-    setState(current=>{const remoteIsNewer=new Date(remote.session.updatedAt).getTime()>=new Date(current.session.updatedAt).getTime();return {...remote,ageConfirmed:current.ageConfirmed,safety:current.safety,profile:{...remote.profile,username:remote.profile.username||current.profile.username},session:remoteIsNewer?remote.session:current.session,consent:remoteIsNewer?remote.consent:current.consent};});
+    const remoteIsNewer=new Date(remote.session.updatedAt).getTime()>=new Date(state.session.updatedAt).getTime();
+    setState(current=>({...remote,ageConfirmed:current.ageConfirmed,safety:current.safety,profile:{...remote.profile,username:remote.profile.username||current.profile.username},session:remoteIsNewer?remote.session:current.session,consent:remoteIsNewer?remote.consent:current.consent}));
+    if(remoteIsNewer){
+     const restoredRound=Math.min(Math.max(0,remote.session.round),availableRounds.length-1);
+     setRunning(remote.session.status==="active");
+     setSeconds(loadTimer(restoredRound,availableRounds[restoredRound].time));
+    }
    }else{
+    clearTimer();
+    setRunning(false);
+    setSeconds(availableRounds[0].time);
     setState(current=>({...defaultState(),ageConfirmed:current.ageConfirmed,safety:current.safety}));
    }
    setSyncUserId(user.id);
