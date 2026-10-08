@@ -45,7 +45,7 @@ export async function loadRemoteState():Promise<AfterHoursState|null>{
  return{
   ageConfirmed:false,
   safety:"green",
-  profile:{id:profile.id,displayName:profile.display_name,username:profile.username??"night-walker",level:profile.level,xp:profile.xp,sessions:profile.sessions,createdAt:profile.created_at},
+  profile:{id:profile.id,displayName:profile.display_name,username:profile.username??"night-walker",avatarStyle:profile.avatar_style==="collar"||profile.avatar_style==="key"||profile.avatar_style==="crown"?"${profile.avatar_style}" as import("../types").AvatarStyle:"sigil",level:profile.level,xp:profile.xp,sessions:profile.sessions,createdAt:profile.created_at},
   session:{id:session.id,profileId:session.profile_id,status:session.status,round:session.round,startedAt:session.started_at,updatedAt:session.updated_at},
   history:(history??[]).map(row=>({id:row.id,completedAt:row.completed_at,xpEarned:row.xp_earned,rounds:row.rounds})),
   notifications:[],
@@ -64,7 +64,8 @@ export async function syncRemoteState(state:AfterHoursState):Promise<void>{
   username:state.profile.username,
   level:state.profile.level,
   xp:state.profile.xp,
-  sessions:state.profile.sessions
+  sessions:state.profile.sessions,
+  avatar_style:state.profile.avatarStyle??"sigil"
  });
  if(profileError)return;
 
