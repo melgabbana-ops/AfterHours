@@ -205,7 +205,7 @@ function App(){
  };
  const next=()=>{
   if(!consent){setRunning(false);setScreen("home");return}
-  if(running)return;
+  if(running||state.session.status!=="paused")return;
   if(roundTasks[round]?.choices?.length&&!selectedTask)return;
   setRunning(false);
   clearTimer(state.profile.id);
