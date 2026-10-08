@@ -25,7 +25,7 @@ class AppErrorBoundary extends React.Component<React.PropsWithChildren, {hasErro
 const levelFromXp=(value:number)=>Math.max(1,Math.floor(Math.max(0,value)/200)+1);
 
 const rankFromLevel=(level:number)=>{
- const ranks=["Curious","Tease","Brat","Submissive","Plaything","Pet","Toy","Devotee","Collared","Obedient","Enthralled","Owned","Devoted","Property","Dark Devotion"];
+ const ranks=["Curious","Tease","Brat","Submissive","Plaything","Pet","Collared","Devotee","Owned","Obedient","Enthralled","Devoted","Property","Collared Devotion","Dark Devotion"];
  return ranks[Math.max(0,Math.min(ranks.length-1,level-1))];
 };
 
