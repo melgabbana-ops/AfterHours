@@ -65,9 +65,9 @@ export async function loadRemoteState():Promise<AfterHoursState|null>{
 }
 
 export async function syncRemoteState(state:AfterHoursState):Promise<string|null>{
- if(!supabaseConfigured||!supabase)return;
+ if(!supabaseConfigured||!supabase)return null;
  const{data:{user},error:userError}=await supabase.auth.getUser();
- if(userError||!user)return;
+ if(userError||!user)return null;
 
  const{error:profileError}=await supabase.from("profiles").upsert({
   id:user.id,
