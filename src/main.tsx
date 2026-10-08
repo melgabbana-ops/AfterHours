@@ -123,6 +123,7 @@ function App(){
     setScreen("admin");
    }
    if(event==="SIGNED_OUT"){
+    clearTimer(state.profile.id);
     clearTimer("local-profile");
     setUserEmail(null);
     setSyncUserId(null);
