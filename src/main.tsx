@@ -90,7 +90,8 @@ function App(){
    if(remoteHistory.length)setState(current=>({...current,history:remoteHistory}));
    const remote=await loadRemoteState();
    if(remote){
-    const remoteIsNewer=new Date(remote.session.updatedAt).getTime()>=new Date(state.session.updatedAt).getTime();
+    const sameAccount=state.profile.id===user.id;
+    const remoteIsNewer=!sameAccount||new Date(remote.session.updatedAt).getTime()>=new Date(state.session.updatedAt).getTime();
     setState(current=>({...remote,ageConfirmed:current.ageConfirmed,safety:current.safety,profile:{...remote.profile,username:remote.profile.username||current.profile.username},session:remoteIsNewer?remote.session:current.session,consent:remoteIsNewer?remote.consent:current.consent}));
     if(remoteIsNewer){
      const restoredRound=Math.min(Math.max(0,remote.session.round),availableRounds.length-1);
