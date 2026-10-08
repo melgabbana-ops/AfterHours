@@ -301,7 +301,7 @@ begin
   select c.status into v_consent_status
   from public.consent_records c
   where c.session_id = v_session.id
-  order by c.created_at desc
+  order by c.created_at desc, c.id desc
   limit 1;
   if v_consent_status is distinct from 'active' then
     raise exception 'Actieve consent ontbreekt.';
@@ -353,7 +353,7 @@ begin
     select c.* into v_result
     from public.consent_records c
     where c.session_id=v_session.id
-    order by c.created_at desc
+    order by c.created_at desc, c.id desc
     limit 1;
     if found and v_result.status='active' then return v_result; end if;
     insert into public.consent_records(session_id,status,confirmed_at)
