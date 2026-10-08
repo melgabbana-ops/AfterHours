@@ -8,7 +8,7 @@ import type{AfterHoursState,AvatarStyle,Screen,Safety,SessionHistoryEntry}from".
 import{loadState,saveState,loadTimer,saveTimer,clearTimer,defaultState}from"./storage";
 import{loadRemoteState,loadRemoteRounds,syncRemoteState,updateRemoteUsername,completeRemoteSession}from"./services/backend";
 import{supabase,supabaseConfigured}from"./services/supabase";
-import{getCurrentUser,sendMagicLink,signInWithProvider,signOut}from"./services/auth";
+import{getCurrentUser,sendMagicLink,signInWithProvider,signInWithPassword,signUpWithPassword,signOut}from"./services/auth";
 import{playNotificationSound}from"./services/notificationSound";
 import{notificationEvents}from"./services/notifications";
 
@@ -55,6 +55,8 @@ function App(){
  const[seconds,setSeconds]=useState(()=>loadTimer(state.profile.id,state.session.round,rounds[state.session.round]?.time||rounds[0].time));
  const[userEmail,setUserEmail]=useState<string|null>(null);
  const[authEmail,setAuthEmail]=useState("");
+ const[authPassword,setAuthPassword]=useState("");
+ const[authMode,setAuthMode]=useState<"magic"|"password">("magic");
  const[authBusy,setAuthBusy]=useState(false);
  const[authMessage,setAuthMessage]=useState("");
  const[syncUserId,setSyncUserId]=useState<string|null>(null);
@@ -194,10 +196,11 @@ function App(){
  const setSafety=(next:Safety)=>setState(s=>next===s.safety?s:{...s,notifications:[notificationEvents.safety(next==="green"?"Veiligheidsniveau bevestigd als GOED.":"Veiligheidsniveau staat op CHECK. Neem de afspraken opnieuw door."),...s.notifications].slice(0,20),safety:next});
  const signInProvider=async(provider:"google"|"apple")=>{setAuthMessage("");setAuthBusy(true);try{await signInWithProvider(provider)}catch(error){setAuthMessage(error instanceof Error?error.message:"Aanmelden mislukt.")}finally{setAuthBusy(false)}};
  const requestMagicLink=async()=>{setAuthMessage("");setAuthBusy(true);try{await sendMagicLink(authEmail.trim());setAuthMessage("Check je e-mail voor je veilige toegang.");}catch(error){setAuthMessage(error instanceof Error?error.message:"Aanmelden mislukt.")}finally{setAuthBusy(false)}};
+ const submitPasswordAuth=async(createAccount:boolean)=>{setAuthMessage("");setAuthBusy(true);try{if(createAccount){await signUpWithPassword(authEmail.trim(),authPassword);setAuthMessage("Account aangemaakt. Bevestig je e-mail als Supabase e-mailbevestiging actief is.");}else{await signInWithPassword(authEmail.trim(),authPassword);}}catch(error){setAuthMessage(error instanceof Error?error.message:"Aanmelden mislukt.")}finally{setAuthBusy(false)}};
  const handleSignOut=async()=>{setAuthMessage("");try{await signOut()}catch(error){setAuthMessage(error instanceof Error?error.message:"Uitloggen mislukt.")}};
 
  if(!authReady)return <div className="gate"><div className="gate-card"><span className="eyebrow">AFTER HOURS</span><h1>Sessie herstellen…</h1><p>Beveiligde toegang wordt gecontroleerd.</p></div></div>;
- if(!state.ageConfirmed)return <div className="gate"><img className="gate-logo" src="/after-hours-logo.svg" alt="AFTER HOURS" /><span className="eyebrow">PRIVATE EXPERIENCE · 18+</span><h1>AFTER<br/><i>HOURS</i></h1><p>Een premium interactieve ervaring voor volwassenen. Bewust. Afgesproken. Veilig.</p><button onClick={()=>setState(s=>({...s,ageConfirmed:true,ageConfirmedFor:userEmail??"local"}))}>Ik ben 18+ <ChevronRight/></button><small>Dit is een zelfverklaring, geen officiële leeftijdsverificatie. Consent wordt afzonderlijk gevraagd.</small></div>;
+ if(!state.ageConfirmed)return <div className="gate"><img className="gate-logo" src="/after-hours-logo.svg" alt="AFTER HOURS" /><span className="eyebrow">PRIVATE EXPERIENCE · 18+</span><h1>AFTER<br/><i>HOURS</i></h1><p>Een premium interactieve ervaring voor volwassenen. Bewust. Afgesproken. Veilig.</p><button onClick={()=>setState(s=>({...s,ageConfirmed:true,ageConfirmedFor:syncUserId??"local"}))}>Ik ben 18+ <ChevronRight/></button><small>Dit is een zelfverklaring, geen officiële leeftijdsverificatie. Consent wordt afzonderlijk gevraagd.</small></div>;
 
  return <div className="app">
  <header><button className="wordmark" onClick={()=>setScreen("home")} aria-label="AFTER HOURS home"><img src="/after-hours-logo.svg" alt="AFTER HOURS" /></button><div className="status"><span></span> privé sessie</div></header>
