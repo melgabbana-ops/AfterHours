@@ -3,7 +3,6 @@ import type{AfterHoursState}from"./types";
 const KEY="afterhours.state.v1";
 const TIMER_KEY="afterhours.timer.v1";
 const PROFILE_ID="local-profile";
-const SESSION_ID=crypto.randomUUID();
 
 export const defaultState=():AfterHoursState=>{
  const now=new Date().toISOString();
@@ -14,7 +13,7 @@ export const defaultState=():AfterHoursState=>{
   safety:"green",
   profile:{id:PROFILE_ID,displayName:"Night Walker",
    username:"nightwalker",avatarStyle:"sigil",level:4,xp:680,sessions:12,createdAt:now},
-  session:{id:SESSION_ID,profileId:PROFILE_ID,status:"ready",round:0,startedAt:null,updatedAt:now},
+  session:{id:crypto.randomUUID(),profileId:PROFILE_ID,status:"ready",round:0,startedAt:null,updatedAt:now},
   history:[],
   notifications:[]
  };
