@@ -72,6 +72,7 @@ function App(){
    if(!active)return;
    setUserEmail(user?.email??null);
    setSyncUserId(null);
+   setSyncedHistoryIds([]);
    if(!user){setAuthReady(true);return;}
    setAuthReady(false);
    const remoteRounds=await loadRemoteRounds();
@@ -92,6 +93,7 @@ function App(){
    if(!active)return;
    setUserEmail(session?.user?.email??null);
    setSyncUserId(null);
+   setSyncedHistoryIds([]);
    if(session?.user){
     window.setTimeout(()=>{if(active)void hydrate()},0);
    }
