@@ -119,7 +119,7 @@ using (profile_id = auth.uid());
 create policy "sessions_self_insert"
 on public.sessions for insert
 to authenticated
-with check (profile_id = auth.uid());
+with check (profile_id = auth.uid() and status = 'ready' and round = 0);
 
 -- Session updates are server-authoritative through set_session_state / complete_session.
 
@@ -251,6 +251,11 @@ begin
   end if;
   if p_status='active' and p_round <> v_session.round then
     raise exception 'Ronde moet via de rondeflow worden gewijzigd.';
+  end if;
+  if p_status='paused' and p_round <> v_session.round then
+    if v_session.status <> 'paused' or p_round <> v_session.round + 1 then
+      raise exception 'Ongeldige overgang naar de volgende ronde.';
+    end if;
   end if;
   if p_status='ready' and p_round <> 0 then
     raise exception 'Ready vereist ronde 0.';
