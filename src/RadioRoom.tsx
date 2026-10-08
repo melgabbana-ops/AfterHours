@@ -1,7 +1,7 @@
 import React,{useState}from"react";
-import{ChevronRight,Headphones,Radio,Volume2}from"lucide-react";
+import{ChevronRight,Radio,Volume2}from"lucide-react";
 
-const musicUrl=import.meta.env.VITE_AFTER_HOURS_MUSIC_URL as string|undefined;
+
 
 const moods=[
  {name:"Midnight",desc:"Donker, langzaam, cinematic",tracks:["Velvet After Dark","Nocturne Signals","Gold in the Shadows"]},
@@ -19,11 +19,11 @@ export function RadioRoom({onBack}:{onBack:()=>void}){
    <div className="radio-disc"><Radio/><span>AH</span></div>
    <span className="eyebrow">NOW PLAYING · {current.name.toUpperCase()}</span><h3>{current.tracks[track]}</h3><p>{current.name} · {current.desc}</p>
    <div className="radio-vibe"><span>01</span><strong>{current.name}</strong><small>{current.tracks.length} curated moods</small></div>
-   <div className="radio-controls"><button aria-label="Vorige sfeer" onClick={()=>setTrack((track+current.tracks.length-1)%current.tracks.length)}>‹</button><button className="radio-play" aria-label="Externe muziek openen" onClick={()=>musicUrl&&window.open(musicUrl,"_blank","noopener,noreferrer")} disabled={!musicUrl}><Headphones/></button><button aria-label="Volgende sfeer" onClick={()=>setTrack((track+1)%current.tracks.length)}>›</button></div>
+   <div className="radio-controls"><button aria-label="Vorige track" onClick={()=>setTrack((track+current.tracks.length-1)%current.tracks.length)}>‹</button><button className="radio-play" aria-label="Geselecteerde sfeer" aria-disabled="true">AH</button><button aria-label="Volgende track" onClick={()=>setTrack((track+1)%current.tracks.length)}>›</button></div>
    <div className="radio-volume"><Volume2/><span/><span/><span/><span/><span/></div>
   </section>
   <section className="moods"><div className="sectionhead"><span>CHOOSE YOUR FREQUENCY</span><em>{current.name}</em></div>{moods.map((item,index)=><button key={item.name} className={index===mood?"mood active":"mood"} onClick={()=>{setMood(index);setTrack(0)}}><span className="mood-number">0{index+1}</span><div><strong>{item.name}</strong><small>{item.desc}</small></div><ChevronRight/></button>)}</section>
-  <section className="radio-note"><Headphones/><div><strong>Externe muziek</strong><span>De ervaring bevat geen ingebouwde muziekstream. Configureer een officiële externe muzieklink via VITE_AFTER_HOURS_MUSIC_URL; AFTER HOURS neemt geen muzieklicentie over.</span></div></section>
+  <section className="radio-note"><Radio/><div><strong>Curated moodboard</strong><span>Deze ruimte kiest alleen de sfeer en tracknamen. AFTER HOURS levert geen muziekstream of gelicentieerde audio.</span></div></section>
   <button className="back" onClick={onBack}>← Terug</button>
  </main>
 }
