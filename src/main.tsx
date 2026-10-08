@@ -15,7 +15,7 @@ import{notificationEvents}from"./services/notifications";
 const levelFromXp=(value:number)=>Math.max(1,Math.floor(Math.max(0,value)/200)+1);
 
 const rankFromLevel=(level:number)=>{
- const ranks=["Curious","Tease","Plaything","Submissive","Brat","Toy","Pet","Thrall","Devotee","Obedient","Enthralled","Collared","Owned","Devoted","Dark Devotion"];
+ const ranks=["Curious","Tease","Brat","Submissive","Plaything","Pet","Toy","Devotee","Collared","Obedient","Enthralled","Owned","Devoted","Property","Dark Devotion"];
  return ranks[Math.max(0,Math.min(ranks.length-1,level-1))];
 };
 
