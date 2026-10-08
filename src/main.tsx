@@ -196,7 +196,16 @@ function App(){
   const completedAt=new Date().toISOString();
   const remoteResult=await completeRemoteSession(state.session.id,rounds.length);
   if(remoteResult.error){setProfileMessage("Sessie kon niet veilig worden afgerond: "+remoteResult.error);return;}
-  if(remoteResult.alreadyCompleted){setProfileMessage("Deze sessie was al server-side afgerond. Er is geen nieuwe XP toegekend.");setScreen("home");return;}
+  if(remoteResult.alreadyCompleted){
+   const remote=await loadRemoteState(state.session.id);
+   if(remote)setState(current=>({...remote,ageConfirmed:current.ageConfirmed,ageConfirmedFor:current.ageConfirmedFor,safety:current.safety}));
+   else setState(current=>({...current,session:{...current.session,round:0,status:"completed",startedAt:null,updatedAt:completedAt}}));
+   setRunning(false);
+   clearTimer(state.profile.id);
+   setProfileMessage("Deze sessie was al server-side afgerond. De opgeslagen status is opnieuw geladen; er is geen nieuwe XP toegekend.");
+   setScreen("home");
+   return;
+  }
   const earned=remoteResult.xpEarned;
   setState(s=>{const nextXp=s.profile.xp+earned;return {...s,profile:{...s.profile,xp:nextXp,level:levelFromXp(nextXp),sessions:s.profile.sessions+1},history:[{id:"session-"+Date.now(),completedAt,xpEarned:earned,rounds:rounds.length},...s.history].slice(0,12),notifications:[notificationEvents.message("Sessie voltooid","De volledige Experience is afgerond en veilig opgeslagen. +"+earned+" XP is toegevoegd."),...s.notifications].slice(0,20),session:{...s.session,round:0,status:"completed",startedAt:null,updatedAt:completedAt}}});
   setSeconds(rounds[0].time);
