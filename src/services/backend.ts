@@ -24,8 +24,10 @@ export async function loadRemoteHistory():Promise<import("../types").SessionHist
 export async function saveRemoteHistory(entry:import("../types").SessionHistoryEntry):Promise<void>{
  if(!supabaseConfigured||!supabase)return;
  const{data:{user},error:userError}=await supabase.auth.getUser();
- if(userError||!user)return;
- await supabase.from("session_history").upsert({id:entry.id,profile_id:user.id,completed_at:entry.completedAt,xp_earned:entry.xpEarned,rounds:entry.rounds},{onConflict:"id"});
+ if(userError)throw userError;
+ if(!user)throw new Error("Geen actieve gebruiker voor geschiedenis-sync.");
+ const{error}=await supabase.from("session_history").upsert({id:entry.id,profile_id:user.id,completed_at:entry.completedAt,xp_earned:entry.xpEarned,rounds:entry.rounds},{onConflict:"id"});
+ if(error)throw error;
 }
 
 export async function loadRemoteState():Promise<AfterHoursState|null>{
