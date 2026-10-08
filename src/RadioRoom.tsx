@@ -1,5 +1,5 @@
 import React,{useState}from"react";
-import{ChevronRight,Headphones,Pause,Play,Radio,Volume2}from"lucide-react";
+import{ChevronRight,Headphones,Radio,Volume2}from"lucide-react";
 
 const musicUrl=import.meta.env.VITE_AFTER_HOURS_MUSIC_URL as string|undefined;
 
