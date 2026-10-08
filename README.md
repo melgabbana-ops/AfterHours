@@ -31,7 +31,7 @@ Production build:
 npm run build
 ```
 
-The current client is the visual/interaction foundation. Authentication, persistent profiles, database-backed sessions and payment infrastructure should be connected before public production launch.
+Authentication, account-bound profiles, database-backed sessions, consent RPCs, session completion and password recovery are implemented when Supabase is configured. Payment infrastructure is intentionally not hard-coded into the client and still requires a configured payment provider and server-side checkout/webhook flow before public sales.
 
 ## Architecture
 
@@ -44,7 +44,9 @@ Copy `.env.example` to your local environment and configure:
 - `VITE_SUPABASE_URL`
 - `VITE_SUPABASE_ANON_KEY`
 
-The app uses Supabase Auth with magic links when configured. Without those variables it stays in offline/local mode.
+Provider configuration (Google/Apple), email confirmation and password-reset redirect URLs must be configured in Supabase Auth. Payment secrets must never be exposed as `VITE_*` browser variables.
+
+The app supports Supabase Auth with magic links, email/password, Google and Apple provider sign-in when the corresponding Supabase providers are configured. Password reset is also supported. Without the Supabase variables it stays in offline/local mode.
 
 The browser must only receive the public anon key. Never place a Supabase service-role key in Vite environment variables.
 
