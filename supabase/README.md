@@ -20,13 +20,13 @@ Row Level Security limits normal users to their own profile and sessions. Consen
 
 Admin actions are intentionally not exposed through a permissive browser policy. They must go through a server-side authenticated role check and create an audit entry.
 
-## Next integration step
+## Runtime configuration
 
 Configure:
 - `VITE_SUPABASE_URL`
 - `VITE_SUPABASE_ANON_KEY`
 
-Then add the Supabase client adapter behind the existing `AfterHoursState` interface. Local storage remains the offline fallback until a signed-in session is available.
+The Supabase adapter is already wired into the client. Local storage remains available for UI continuity, but offline state is not trusted for authoritative XP, history, consent or completion.
 
 ## Consent
 
