@@ -6,7 +6,7 @@ import{Insights}from"./Insights";
 import{RadioRoom}from"./RadioRoom";
 import type{AfterHoursState,AvatarStyle,Screen,Safety,SessionHistoryEntry}from"./types";
 import{loadState,saveState,loadTimer,saveTimer,clearTimer,defaultState}from"./storage";
-import{loadRemoteState,loadRemoteRounds,syncRemoteState,loadRemoteHistory,updateRemoteUsername,completeRemoteSession}from"./services/backend";
+import{loadRemoteState,loadRemoteRounds,syncRemoteState,updateRemoteUsername,completeRemoteSession}from"./services/backend";
 import{supabase,supabaseConfigured}from"./services/supabase";
 import{getCurrentUser,sendMagicLink,signInWithProvider,signOut}from"./services/auth";
 import{playNotificationSound}from"./services/notificationSound";
@@ -88,10 +88,7 @@ function App(){
    if(!active||generation!==hydrateGeneration.current)return;
    const availableRounds=remoteRounds.length===3?remoteRounds.map(r=>({title:r.title,text:r.body,time:r.durationSeconds})):fallbackRounds;
    if(remoteRounds.length===3)setRounds(availableRounds);
-   const remoteHistory=await loadRemoteHistory();
-   if(!active||generation!==hydrateGeneration.current)return;
-   if(remoteHistory.length)setState(current=>({...current,history:remoteHistory}));
-   const remote=await loadRemoteState();
+   const remote=await loadRemoteState(localState.session.id);
    if(!active||generation!==hydrateGeneration.current)return;
    if(remote){
     const sameAccount=localState.profile.id===user.id;
