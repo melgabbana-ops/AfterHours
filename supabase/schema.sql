@@ -282,6 +282,7 @@ declare
   v_session public.sessions%rowtype;
   v_xp integer := 120;
   v_completed_at timestamptz := now();
+  v_consent_status text;
 begin
   if auth.uid() is null then raise exception 'Niet ingelogd.'; end if;
   if p_rounds <> 3 then raise exception 'Ongeldige sessiegrootte.'; end if;
@@ -297,19 +298,12 @@ begin
   if v_session.active_seconds < 3600 then
     raise exception 'De sessie moet minimaal 60 minuten actieve speeltijd hebben.';
   end if;
-  if not exists (
-    select 1
-    from public.consent_records c
-    where c.session_id = v_session.id
-    order by c.created_at desc
-    limit 1
-  ) or (
-    select c.status
-    from public.consent_records c
-    where c.session_id = v_session.id
-    order by c.created_at desc
-    limit 1
-  ) <> 'active' then
+  select c.status into v_consent_status
+  from public.consent_records c
+  where c.session_id = v_session.id
+  order by c.created_at desc
+  limit 1;
+  if v_consent_status is distinct from 'active' then
     raise exception 'Actieve consent ontbreekt.';
   end if;
   update public.sessions set status='completed',round=0,started_at=null,active_started_at=null,active_seconds=v_session.active_seconds,updated_at=v_completed_at where id=v_session.id;
