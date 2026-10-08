@@ -99,7 +99,7 @@ function App(){
      setSeconds(loadTimer(user.id,restoredRound,availableRounds[restoredRound].time));
     }
    }else{
-    clearTimer();
+    clearTimer(state.profile.id);
     setRunning(false);
     setSeconds(availableRounds[0].time);
     setState(current=>({...defaultState(),ageConfirmed:current.ageConfirmed,safety:current.safety}));
@@ -122,7 +122,7 @@ function App(){
 
  useEffect(()=>{saveState(state);if(!supabaseConfigured||syncUserId){void syncRemoteState(state).then(message=>{if(message)setProfileMessage(message)})}if(!syncUserId)return;const pending=state.history.filter(item=>!syncedHistoryIds.includes(item.id));if(pending.length){void Promise.allSettled(pending.map(saveRemoteHistory)).then(results=>{const savedIds=results.flatMap((result,index)=>result.status==="fulfilled"?[pending[index].id]:[]);if(savedIds.length)setSyncedHistoryIds(ids=>Array.from(new Set([...ids,...savedIds])));if(results.some(result=>result.status==="rejected"))setProfileMessage("Sessiegeschiedenis kon niet volledig naar je account worden opgeslagen.")})}},[state,syncedHistoryIds,syncUserId]);
  useEffect(()=>{if(!running)return;const id=setInterval(()=>setSeconds(s=>{const next=Math.max(0,s-1);saveTimer(state.profile.id,state.session.round,next,true);return next}),1000);return()=>clearInterval(id)},[running,state.session.round]);
- useEffect(()=>{if(seconds!==0||state.session.status!=="active")return;clearTimer();setRunning(false);setSeconds(rounds[state.session.round].time);saveTimer(state.profile.id,state.session.round,rounds[state.session.round].time,false);setState(s=>({...s,notifications:[notificationEvents.checkIn("De tijd van deze ronde is voorbij. De sessie staat op pauze en kan veilig worden hervat."),...s.notifications].slice(0,20),session:{...s.session,status:"paused",updatedAt:new Date().toISOString()}}))},[seconds,state.session.status,rounds]);
+ useEffect(()=>{if(seconds!==0||state.session.status!=="active")return;clearTimer(state.profile.id);setRunning(false);setSeconds(rounds[state.session.round].time);saveTimer(state.profile.id,state.session.round,rounds[state.session.round].time,false);setState(s=>({...s,notifications:[notificationEvents.checkIn("De tijd van deze ronde is voorbij. De sessie staat op pauze en kan veilig worden hervat."),...s.notifications].slice(0,20),session:{...s.session,status:"paused",updatedAt:new Date().toISOString()}}))},[seconds,state.session.status,rounds]);
 
  const round=state.session.round;
  const consent=state.consent.status==="active";
@@ -155,7 +155,7 @@ function App(){
   if(running)return;
   if(roundTasks[round]?.choices?.length&&!selectedTask)return;
   setRunning(false);
-  clearTimer();
+  clearTimer(state.profile.id);
   if(round<rounds.length-1){
    const n=round+1;
    const now=new Date().toISOString();
@@ -169,11 +169,11 @@ function App(){
    setScreen("home");
   }
  };
- const reset=()=>{clearTimer();setSeconds(rounds[round].time);setRunning(false);saveTimer(state.profile.id,round,rounds[round].time,false);updateSession({status:"ready"})};
- const stop=()=>{const now=new Date().toISOString();clearTimer();setRunning(false);setCheckIn("stop");setState(s=>({...s,notifications:[notificationEvents.safety("De sessie is veilig gestopt en staat klaar voor een volgende start."),...s.notifications].slice(0,20),session:{...s.session,status:"stopped",updatedAt:now}}));setScreen("home")};
- const revokeConsent=()=>{clearTimer();setRunning(false);setState(s=>({...s,consent:{status:"revoked",confirmedAt:s.consent.confirmedAt,revokedAt:new Date().toISOString()},session:{...s.session,status:"stopped",round:0,startedAt:null,updatedAt:new Date().toISOString()}}));setSeconds(rounds[0].time);saveTimer(state.profile.id,0,rounds[0].time,false);setScreen("home")};
+ const reset=()=>{clearTimer(state.profile.id);setSeconds(rounds[round].time);setRunning(false);saveTimer(state.profile.id,round,rounds[round].time,false);updateSession({status:"ready"})};
+ const stop=()=>{const now=new Date().toISOString();clearTimer(state.profile.id);setRunning(false);setCheckIn("stop");setState(s=>({...s,notifications:[notificationEvents.safety("De sessie is veilig gestopt en staat klaar voor een volgende start."),...s.notifications].slice(0,20),session:{...s.session,status:"stopped",updatedAt:now}}));setScreen("home")};
+ const revokeConsent=()=>{clearTimer(state.profile.id);setRunning(false);setState(s=>({...s,consent:{status:"revoked",confirmedAt:s.consent.confirmedAt,revokedAt:new Date().toISOString()},session:{...s.session,status:"stopped",round:0,startedAt:null,updatedAt:new Date().toISOString()}}));setSeconds(rounds[0].time);saveTimer(state.profile.id,0,rounds[0].time,false);setScreen("home")};
  const confirmConsent=()=>{setCheckIn("clear");setState(s=>({...s,notifications:[notificationEvents.checkIn("Consent is bevestigd. De ervaring kan veilig worden gestart."),...s.notifications].slice(0,20),consent:{status:"active",confirmedAt:new Date().toISOString(),revokedAt:null}}));};
- const handleCheckIn=(choice:"clear"|"pause"|"stop")=>{setCheckIn(choice);void playNotificationSound(choice==="stop"?"safety":"checkin");if(choice==="pause"){setRunning(false);saveTimer(round,seconds,false);updateSession({status:"paused"})}if(choice==="stop"){stop()}};
+ const handleCheckIn=(choice:"clear"|"pause"|"stop")=>{setCheckIn(choice);void playNotificationSound(choice==="stop"?"safety":"checkin");if(choice==="pause"){setRunning(false);saveTimer(state.profile.id,round,seconds,false);updateSession({status:"paused"})}if(choice==="stop"){stop()}};
  const saveDisplayName=()=>{const name=displayNameDraft.trim().replace(/\s+/g," ");if(name.length<2)return;setState(s=>({...s,profile:{...s.profile,displayName:name}}));setDisplayNameDraft(name)};
  const saveUsername=()=>{const username=usernameDraft.trim().toLowerCase().replace(/[^a-z0-9_]/g,"").slice(0,20);if(username.length<3)return;setProfileMessage("");setState(s=>({...s,profile:{...s.profile,username}}));setUsernameDraft(username)};
  const setAvatarStyle=(avatarStyle:AvatarStyle)=>setState(s=>({...s,profile:{...s.profile,avatarStyle}}));
