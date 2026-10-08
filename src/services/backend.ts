@@ -103,7 +103,6 @@ async function syncRemoteStateNow(state:AfterHoursState):Promise<string|null>{
  if(sessionId){
   const{data:owned}=await supabase.from("sessions").select("id").eq("id",sessionId).eq("profile_id",user.id).maybeSingle();
   remoteSessionExists=Boolean(owned);
-  if(!owned)sessionId=null;
  }
  if(!sessionId){
   sessionId=crypto.randomUUID();
