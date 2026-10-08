@@ -256,7 +256,7 @@ begin
     if p_round <> v_session.round then
       raise exception 'Ronde moet via de rondeflow worden gewijzigd.';
     end if;
-    if v_session.status not in ('ready','active','paused','stopped','completed') then
+    if v_session.status not in ('ready','active','paused','stopped') then
       raise exception 'Ongeldige overgang naar actief.';
     end if;
   end if;
