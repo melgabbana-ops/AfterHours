@@ -8,14 +8,18 @@ export async function getCurrentUser(){
 
 export async function sendMagicLink(email:string){
  if(!supabase)throw new Error("Backend is nog niet geconfigureerd.");
- return supabase.auth.signInWithOtp({email,options:{emailRedirectTo:window.location.origin}});
+ const{error}=await supabase.auth.signInWithOtp({email,options:{emailRedirectTo:window.location.origin}});
+ if(error)throw error;
 }
 
 export async function signInWithProvider(provider:"google"|"apple"){
  if(!supabase)throw new Error("Backend is nog niet geconfigureerd.");
- return supabase.auth.signInWithOAuth({provider,options:{redirectTo:window.location.origin}});
+ const{error}=await supabase.auth.signInWithOAuth({provider,options:{redirectTo:window.location.origin}});
+ if(error)throw error;
 }
 
 export async function signOut(){
- if(supabase)await supabase.auth.signOut();
+ if(!supabase)return;
+ const{error}=await supabase.auth.signOut();
+ if(error)throw error;
 }
