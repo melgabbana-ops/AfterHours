@@ -54,6 +54,8 @@ export async function loadRemoteState(preferredSessionId?:string):Promise<AfterH
 }
 
 export async function updateRemoteUsername(username:string):Promise<string|null>{
+ const normalized=username.trim().toLowerCase();
+ if(!/^[a-z0-9_]{3,20}$/.test(normalized))return "Username moet 3-20 tekens bevatten: alleen a-z, 0-9 en _.";
  if(!supabaseConfigured||!supabase)return null;
  const{data:{user},error:userError}=await supabase.auth.getUser();
  if(userError||!user)return userError?.message??"Geen actieve gebruiker voor username-sync.";
