@@ -108,7 +108,7 @@ export async function syncRemoteState(state:AfterHoursState):Promise<string|null
  };
 
  if(sessionId){
-  const{error}=await supabase.from("sessions").update(sessionPayload).eq("id",sessionId).eq("profile_id",user.id);
+  const{error}=await supabase.rpc("set_session_state",{p_session_id:sessionId,p_status:state.session.status,p_round:state.session.round,p_started_at:state.session.startedAt});
   if(error)return error.message;
  }else{
   const{data:created,error}=await supabase.from("sessions").insert(sessionPayload).select("id").single();
