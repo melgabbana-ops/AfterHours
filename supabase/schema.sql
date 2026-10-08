@@ -348,11 +348,14 @@ begin
 
   if p_status='active' then
     if p_confirmed_at is null or p_revoked_at is not null then raise exception 'Ongeldige actieve consent.'; end if;
-    select * into v_result from public.consent_records
-    where session_id=v_session.id and status='active'
-    order by created_at desc
+    -- Treat the request as idempotent only when the latest consent state is active.
+    -- A later revocation must allow a fresh, explicit consent event.
+    select c.* into v_result
+    from public.consent_records c
+    where c.session_id=v_session.id
+    order by c.created_at desc
     limit 1;
-    if found then return v_result; end if;
+    if found and v_result.status='active' then return v_result; end if;
     insert into public.consent_records(session_id,status,confirmed_at)
     values(v_session.id,'active',v_now)
     returning * into v_result;
