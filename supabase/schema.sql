@@ -137,16 +137,7 @@ using (
   )
 );
 
-create policy "consent_self_insert"
-on public.consent_records for insert
-to authenticated
-with check (
-  exists (
-    select 1 from public.sessions s
-    where s.id = consent_records.session_id
-      and s.profile_id = auth.uid()
-  )
-);
+-- Consent writes are server-authoritative through set_consent_state.
 
 drop policy if exists "history_self_read" on public.session_history;
 drop policy if exists "history_self_insert" on public.session_history;
@@ -156,10 +147,7 @@ on public.session_history for select
 to authenticated
 using (profile_id = auth.uid());
 
-create policy "history_self_insert"
-on public.session_history for insert
-to authenticated
-with check (profile_id = auth.uid());
+-- History writes are server-authoritative through complete_session.
 
 drop policy if exists "rounds_public_read" on public.experience_rounds;
 
@@ -336,3 +324,71 @@ grant update (display_name, username, avatar_style) on public.profiles to authen
 -- Session history is created only by the authoritative completion function.
 drop policy if exists "history_self_insert" on public.session_history;
 revoke insert on public.session_history from authenticated;
+
+
+-- Authoritative consent state. Browser clients cannot forge consent events directly.
+create or replace function public.set_consent_state(
+  p_session_id uuid,
+  p_status text,
+  p_confirmed_at timestamptz,
+  p_revoked_at timestamptz
+)
+returns public.consent_records
+language plpgsql
+security definer
+set search_path = public
+as $func$
+declare
+  v_session public.sessions%rowtype;
+  v_result public.consent_records%rowtype;
+begin
+  if auth.uid() is null then raise exception 'Niet ingelogd.'; end if;
+  if p_status not in ('active','revoked') then raise exception 'Ongeldige consentstatus.'; end if;
+  select * into v_session from public.sessions where id=p_session_id and profile_id=auth.uid() for update;
+  if not found then raise exception 'Sessie niet gevonden.'; end if;
+
+  if p_status='active' then
+    if p_confirmed_at is null or p_revoked_at is not null then raise exception 'Ongeldige actieve consent.'; end if;
+    if exists (
+      select 1 from public.consent_records
+      where session_id=v_session.id
+        and status='active'
+        and confirmed_at=p_confirmed_at
+    ) then
+      select * into v_result from public.consent_records
+      where session_id=v_session.id and status='active' and confirmed_at=p_confirmed_at
+      limit 1;
+      return v_result;
+    end if;
+    insert into public.consent_records(session_id,status,confirmed_at)
+    values(v_session.id,'active',p_confirmed_at)
+    returning * into v_result;
+  else
+    if p_revoked_at is null or p_confirmed_at is not null then raise exception 'Ongeldige ingetrokken consent.'; end if;
+    if not exists (
+      select 1 from public.consent_records
+      where session_id=v_session.id and status='active'
+      order by created_at desc
+      limit 1
+    ) then
+      raise exception 'Actieve consent ontbreekt.';
+    end if;
+    if exists (
+      select 1 from public.consent_records
+      where session_id=v_session.id and status='revoked' and revoked_at=p_revoked_at
+    ) then
+      select * into v_result from public.consent_records
+      where session_id=v_session.id and status='revoked' and revoked_at=p_revoked_at
+      limit 1;
+      return v_result;
+    end if;
+    insert into public.consent_records(session_id,status,revoked_at)
+    values(v_session.id,'revoked',p_revoked_at)
+    returning * into v_result;
+  end if;
+  return v_result;
+end;
+$func$;
+revoke all on function public.set_consent_state(uuid,text,timestamptz,timestamptz) from public;
+grant execute on function public.set_consent_state(uuid,text,timestamptz,timestamptz) to authenticated;
+revoke insert on public.consent_records from authenticated;
