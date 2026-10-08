@@ -45,6 +45,7 @@ const guidePrompts=[
 ];
 
 function App(){
+ useEffect(()=>{if("serviceWorker" in navigator){void navigator.serviceWorker.register("/sw.js").catch(()=>{})}},[]);
  const[state,setState]=useState<AfterHoursState>(()=>loadState());
  const[authReady,setAuthReady]=useState(!supabaseConfigured);
  const[rounds,setRounds]=useState(fallbackRounds);
