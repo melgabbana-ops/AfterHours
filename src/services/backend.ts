@@ -21,12 +21,18 @@ export async function loadRemoteState(preferredSessionId?:string):Promise<AfterH
  if(profileError||!profile)return null;
 
  const legacyLocalSession=!preferredSessionId||preferredSessionId==="local-session";
- const sessionQuery=legacyLocalSession
+ let sessionQuery=legacyLocalSession
   ?supabase.from("sessions").select("*").eq("profile_id",user.id).order("updated_at",{ascending:false}).limit(1).maybeSingle()
   :supabase.from("sessions").select("*").eq("profile_id",user.id).eq("id",preferredSessionId).maybeSingle();
- const{data:session,error:sessionError}=await sessionQuery;
+ let{data:session,error:sessionError}=await sessionQuery;
  if(sessionError)return null;
- if(!session&&!legacyLocalSession)return null;
+ // A device-local session ID may not exist on this account. Recover the latest
+ // server-owned session before deciding that no remote session is available.
+ if(!session&&!legacyLocalSession){
+  const fallback=await supabase.from("sessions").select("*").eq("profile_id",user.id).order("updated_at",{ascending:false}).limit(1).maybeSingle();
+  if(fallback.error)return null;
+  session=fallback.data;
+ }
  const effectiveSession=session??{
   id:crypto.randomUUID(),
   profile_id:user.id,
