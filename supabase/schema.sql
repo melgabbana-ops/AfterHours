@@ -301,15 +301,17 @@ begin
     select 1
     from public.consent_records c
     where c.session_id = v_session.id
-      and c.status = 'active'
-      and c.confirmed_at is not null
-      and not exists (
-        select 1 from public.consent_records r
-        where r.session_id = v_session.id
-          and r.status = 'revoked'
-          and r.created_at > c.created_at
-      )
-  ) then raise exception 'Actieve consent ontbreekt.'; end if;
+    order by c.created_at desc
+    limit 1
+  ) or (
+    select c.status
+    from public.consent_records c
+    where c.session_id = v_session.id
+    order by c.created_at desc
+    limit 1
+  ) <> 'active' then
+    raise exception 'Actieve consent ontbreekt.';
+  end if;
   update public.sessions set status='completed',round=0,started_at=null,active_started_at=null,active_seconds=v_session.active_seconds,updated_at=v_completed_at where id=v_session.id;
   insert into public.session_history(profile_id,completed_at,xp_earned,rounds) values(auth.uid(),v_completed_at,v_xp,p_rounds);
   update public.profiles set xp=xp+v_xp,level=floor((xp+v_xp)/200)+1,sessions=sessions+1 where id=auth.uid();
