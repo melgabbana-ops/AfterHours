@@ -22,14 +22,14 @@ export async function loadRemoteState(preferredSessionId?:string):Promise<AfterH
 
  const legacyLocalSession=!preferredSessionId||preferredSessionId==="local-session";
  let sessionQuery=legacyLocalSession
-  ?supabase.from("sessions").select("*").eq("profile_id",user.id).order("updated_at",{ascending:false}).limit(1).maybeSingle()
+  ?supabase.from("sessions").select("*").eq("profile_id",user.id).order("updated_at",{ascending:false}).order("id",{ascending:false}).limit(1).maybeSingle()
   :supabase.from("sessions").select("*").eq("profile_id",user.id).eq("id",preferredSessionId).maybeSingle();
  let{data:session,error:sessionError}=await sessionQuery;
  if(sessionError)return null;
  // A device-local session ID may not exist on this account. Recover the latest
  // server-owned session before deciding that no remote session is available.
  if(!session&&!legacyLocalSession){
-  const fallback=await supabase.from("sessions").select("*").eq("profile_id",user.id).order("updated_at",{ascending:false}).limit(1).maybeSingle();
+  const fallback=await supabase.from("sessions").select("*").eq("profile_id",user.id).order("updated_at",{ascending:false}).order("id",{ascending:false}).limit(1).maybeSingle();
   if(fallback.error)return null;
   session=fallback.data;
  }
@@ -43,7 +43,7 @@ export async function loadRemoteState(preferredSessionId?:string):Promise<AfterH
  };
 
  const{data:consent}=session
-  ?await supabase.from("consent_records").select("status,confirmed_at,revoked_at").eq("session_id",effectiveSession.id).order("created_at",{ascending:false}).limit(1).maybeSingle()
+  ?await supabase.from("consent_records").select("status,confirmed_at,revoked_at").eq("session_id",effectiveSession.id).order("created_at",{ascending:false}).order("id",{ascending:false}).limit(1).maybeSingle()
   :{data:null};
  const{data:history}=await supabase.from("session_history").select("id,completed_at,xp_earned,rounds").eq("profile_id",user.id).order("completed_at",{ascending:false}).limit(12);
 
