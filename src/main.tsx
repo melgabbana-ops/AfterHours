@@ -12,6 +12,16 @@ import{getCurrentUser,sendMagicLink,signInWithProvider,signInWithPassword,signUp
 import{playNotificationSound}from"./services/notificationSound";
 import{notificationEvents}from"./services/notifications";
 
+class AppErrorBoundary extends React.Component<React.PropsWithChildren, {hasError:boolean}>{
+ state={hasError:false};
+ static getDerivedStateFromError(){return {hasError:true};}
+ componentDidCatch(){try{localStorage.setItem("afterhours.last-ui-error",new Date().toISOString())}catch{}}
+ render(){
+  if(this.state.hasError)return <div className="gate"><div className="gate-card"><span className="eyebrow">AFTER HOURS</span><h1>Veilige herstelmodus</h1><p>Er ging iets mis in de interface. Je lokale sessiestatus blijft behouden.</p><button onClick={()=>window.location.reload()}>Opnieuw laden</button></div></div>;
+  return this.props.children;
+ }
+}
+
 const levelFromXp=(value:number)=>Math.max(1,Math.floor(Math.max(0,value)/200)+1);
 
 const rankFromLevel=(level:number)=>{
