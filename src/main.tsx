@@ -122,6 +122,17 @@ function App(){
     setAuthBusy(false);
     setScreen("admin");
    }
+   if(event==="SIGNED_OUT"){
+    clearTimer("local-profile");
+    setUserEmail(null);
+    setSyncUserId(null);
+    setPasswordRecovery(false);
+    setAuthMessage("");
+    setAuthBusy(false);
+    setRunning(false);
+    setState(defaultState());
+    setScreen("home");
+   }
    if(session?.user){
     window.setTimeout(()=>{if(active&&generation===hydrateGeneration.current)void hydrate()},0);
    }
