@@ -121,3 +121,5 @@ export async function syncRemoteState(state:AfterHoursState):Promise<string|null
   }
  }
 }\n
+ return null;
+}
