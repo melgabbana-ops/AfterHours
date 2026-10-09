@@ -270,7 +270,22 @@ function App(){
  const confirmConsent=()=>{setCheckIn("clear");setState(s=>({...s,notifications:[notificationEvents.checkIn("Consent is bevestigd. De ervaring kan veilig worden gestart."),...s.notifications].slice(0,20),consent:{status:"active",confirmedAt:new Date().toISOString(),revokedAt:null}}));};
  const handleCheckIn=(choice:"clear"|"pause"|"stop")=>{setCheckIn(choice);void playNotificationSound(choice==="stop"?"safety":"checkin");if(choice==="pause"){setRunning(false);persistTimer(state.profile.id,round,seconds,false);updateSession({status:"paused"})}if(choice==="stop"){stop()}};
  const saveDisplayName=()=>{const name=displayNameDraft.trim().replace(/\s+/g," ");if(name.length<2)return;setState(s=>({...s,profile:{...s.profile,displayName:name}}));setDisplayNameDraft(name)};
- const saveUsername=async()=>{const username=usernameDraft.trim().toLowerCase().replace(/[^a-z0-9_]/g,"").slice(0,20);if(username.length<3)return;setProfileMessage("");if(supabaseConfigured&&syncUserId){const message=await updateRemoteUsername(username);if(message){setProfileMessage(message);return}}setState(s=>({...s,profile:{...s.profile,username}}));setUsernameDraft(username);setProfileMessage("Username opgeslagen.");};
+ const saveUsername=async()=>{
+  const username=usernameDraft.trim().toLowerCase().replace(/[^a-z0-9_]/g,"").slice(0,20);
+  if(username.length<3){setProfileMessage("Username moet minimaal 3 tekens bevatten.");return;}
+  setProfileMessage("");
+  try{
+   if(supabaseConfigured&&syncUserId){
+    const message=await updateRemoteUsername(username);
+    if(message){setProfileMessage(message);return;}
+   }
+   setState(s=>({...s,profile:{...s.profile,username}}));
+   setUsernameDraft(username);
+   setProfileMessage("Username opgeslagen.");
+  }catch(error){
+   setProfileMessage("Username kon niet worden opgeslagen. Controleer je verbinding en probeer het opnieuw.");
+  }
+ };
  const setAvatarStyle=(avatarStyle:AvatarStyle)=>setState(s=>({...s,profile:{...s.profile,avatarStyle}}));
  const avatarStyle=state.profile.avatarStyle??"sigil";
  const avatarSymbols:{style:AvatarStyle,label:string,symbol:string}[]=[
