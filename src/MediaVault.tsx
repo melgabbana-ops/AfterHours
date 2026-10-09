@@ -50,6 +50,7 @@ export default function MediaVault({ sessionId }: MediaVaultProps) {
         const { data, error } = await supabase.auth.getUser();
         if (error) throw error;
         if (data.user && active) await refresh();
+        else if (active) setMessage("Log in via Session control om je privékluis te openen.");
       } catch (error) {
         if (active) setMessage(error instanceof Error ? error.message : "Aanmelden is nodig voor privéopslag.");
       }
