@@ -76,6 +76,20 @@ export async function updateRemoteUsername(username:string):Promise<string|null>
  return null;
 }
 
+export async function revokeRemoteConsent(sessionId:string,revokedAt:string):Promise<string|null>{
+ if(!supabaseConfigured||!supabase||!isUuid(sessionId))return null;
+ const{data:{user},error:userError}=await supabase.auth.getUser();
+ if(userError||!user)return userError?.message??"Geen actieve gebruiker voor consent-sync.";
+ const{data:session,error:sessionError}=await supabase.from("sessions").select("id").eq("id",sessionId).eq("profile_id",user.id).maybeSingle();
+ if(sessionError)return sessionError.message;
+ if(!session)return null;
+ const{data:latest,error:consentError}=await supabase.from("consent_records").select("status").eq("session_id",sessionId).order("created_at",{ascending:false}).order("id",{ascending:false}).limit(1).maybeSingle();
+ if(consentError)return consentError.message;
+ if(latest?.status!=="active")return null;
+ const{error}=await supabase.rpc("set_consent_state",{p_session_id:sessionId,p_status:"revoked",p_confirmed_at:null,p_revoked_at:revokedAt});
+ return error?.message??null;
+}
+
 export async function completeRemoteSession(sessionId:string,rounds:number):Promise<{error:string|null,xpEarned:number,alreadyCompleted:boolean}>{
  if(!supabaseConfigured||!supabase)return {error:"Server-opslag is niet beschikbaar. Log in en probeer opnieuw.",xpEarned:0,alreadyCompleted:false};
  const{data:{user},error:userError}=await supabase.auth.getUser();
