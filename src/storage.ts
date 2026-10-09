@@ -80,5 +80,5 @@ export function loadTimer(profileId:string,round:number,initialSeconds:number):n
  }catch{return initialSeconds}
 }
 
-export function saveTimer(profileId:string,round:number,seconds:number,running=true){localStorage.setItem(timerKey(profileId),JSON.stringify({profileId,round,seconds,savedAt:Date.now(),running}))}
-export function clearTimer(profileId:string){localStorage.removeItem(timerKey(profileId))}
+export function saveTimer(profileId:string,round:number,seconds:number,running=true):boolean{try{localStorage.setItem(timerKey(profileId),JSON.stringify({profileId,round,seconds,savedAt:Date.now(),running}));return true}catch{return false}}
+export function clearTimer(profileId:string):boolean{try{localStorage.removeItem(timerKey(profileId));return true}catch{return false}}
