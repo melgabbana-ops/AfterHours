@@ -11,7 +11,7 @@ const moods=[
 export function RadioRoom({onBack}:{onBack:()=>void}){
  const[mood,setMood]=useState(0); const[track,setTrack]=useState(0);
  const current=moods[mood];
- const openSpotify=()=>window.open("https://open.spotify.com/search/"+encodeURIComponent(current.search)," _blank".trim(),"noopener,noreferrer");
+ const openSpotify=()=>window.open("https://open.spotify.com/search/"+encodeURIComponent(current.search),"_blank","noopener,noreferrer");
  const changeMood=(index:number)=>{setMood(index);setTrack(0)};
  return <main className="radio-room">
   <section className="radio-hero"><span className="eyebrow">AFTER HOURS · RADIO</span><h2>Set the mood.</h2><p>Kies jullie frequentie en open passende muziek in Spotify. De selectie blijft consent-first, zonder dat AFTER HOURS zelf muziek streamt.</p></section>
