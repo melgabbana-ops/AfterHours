@@ -107,7 +107,7 @@ function App(){
     return;
    }
    setAuthReady(false);
-   let remoteRounds=[];
+   let remoteRounds:Awaited<ReturnType<typeof loadRemoteRounds>>=[];
    try{
     remoteRounds=await loadRemoteRounds();
    }catch{
@@ -116,7 +116,7 @@ function App(){
    if(!active||generation!==hydrateGeneration.current)return;
    const availableRounds=remoteRounds.length===3?remoteRounds.map(r=>({title:r.title,text:r.body,time:r.durationSeconds})):fallbackRounds;
    if(remoteRounds.length===3)setRounds(availableRounds);
-   let remote=null;
+   let remote:AfterHoursState|null=null;
    try{
     remote=await loadRemoteState(localState.session.id);
    }catch{
