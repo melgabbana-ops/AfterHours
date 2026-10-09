@@ -12,6 +12,11 @@ export interface PrivateMediaItem {
   contentType: string | null;
 }
 
+export function validatePrivateMediaFile(file: Pick<File, "type" | "size">): void {
+  if (!ALLOWED_TYPES.test(file.type)) throw new Error("Kies een afbeelding of audiobestand.");
+  if (file.size <= 0 || file.size > MAX_FILE_BYTES) throw new Error("Bestanden moeten kleiner zijn dan 20 MB.");
+}
+
 function safeFileName(value: string): string {
   const normalized = value.normalize("NFKD").replace(/[^a-zA-Z0-9._-]+/g, "-").replace(/^-+|-+$/g, "").slice(-100);
   return normalized || "bestand";
@@ -56,8 +61,7 @@ export async function listPrivateMedia(): Promise<PrivateMediaItem[]> {
 }
 
 export async function uploadPrivateMedia(file: File, sessionId: string): Promise<void> {
-  if (!ALLOWED_TYPES.test(file.type)) throw new Error("Kies een afbeelding of audiobestand.");
-  if (file.size <= 0 || file.size > MAX_FILE_BYTES) throw new Error("Bestanden moeten kleiner zijn dan 20 MB.");
+  validatePrivateMediaFile(file);
   const userId = await currentUserId();
   const safeSessionId = safeFileName(sessionId || "general");
   const path = `${userId}/${safeSessionId}/${crypto.randomUUID()}-${safeFileName(file.name)}`;
