@@ -3,7 +3,6 @@ import { ArrowUpRight, LockKeyhole, Sparkles, ChevronRight, VolumeX, Play } from
 
 export default function Teaser() {
   const [introDismissed, setIntroDismissed] = React.useState(false);
-  const [showSoundHint, setShowSoundHint] = React.useState(false);
   return <main className="teaser-screen">
     <div className="teaser-noise" aria-hidden="true"/>
     {!introDismissed && <div className="teaser-intro" role="region" aria-label="AFTER HOURS video intro">
