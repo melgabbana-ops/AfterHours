@@ -55,7 +55,11 @@ export async function loadRemoteState(preferredSessionId?:string):Promise<AfterH
   session:{id:effectiveSession.id,profileId:effectiveSession.profile_id,status:effectiveSession.status,round:effectiveSession.round,startedAt:effectiveSession.started_at,updatedAt:effectiveSession.updated_at},
   history:(history??[]).map(row=>({id:row.id,completedAt:row.completed_at,xpEarned:row.xp_earned,rounds:row.rounds})),
   notifications:[],
-  consent:consent?{status:consent.status==="active"?"active":"revoked",confirmedAt:consent.confirmed_at,revokedAt:consent.revoked_at}:{status:"pending",confirmedAt:null,revokedAt:null}
+  consent:session&&(effectiveSession.status==="completed"||effectiveSession.status==="stopped")
+   ?{status:"pending",confirmedAt:null,revokedAt:null}
+   :consent
+    ?{status:consent.status==="active"?"active":consent.status==="revoked"?"revoked":"pending",confirmedAt:consent.confirmed_at,revokedAt:consent.revoked_at}
+    :{status:"pending",confirmedAt:null,revokedAt:null}
  };
 }
 
