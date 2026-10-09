@@ -388,8 +388,11 @@ function App(){
  </div>
 }
 const root=createRoot(document.getElementById("root")!);
+const teaserPreview=new URLSearchParams(window.location.search).get("teaser")==="1";
 const maintenancePreview=new URLSearchParams(window.location.search).get("maintenance")==="1";
-if(maintenancePreview){
+if(teaserPreview){
+ root.render(<Teaser/>);
+}else if(maintenancePreview){
  root.render(<UnderConstruction/>);
 }else{
  void fetch("/maintenance.json",{cache:"no-store"})
