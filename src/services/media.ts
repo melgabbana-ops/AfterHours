@@ -105,7 +105,7 @@ export async function createPrivateMediaUrl(path: string): Promise<string> {
 
 export async function deletePrivateMedia(path: string): Promise<void> {
   const userId = await currentUserId();
-  if (!path.startsWith(`${userId}/`)) throw new Error("Je hebt geen toegang tot dit bestand.");
+  if (!validatePrivateMediaPath(path, userId)) throw new Error("Je hebt geen toegang tot dit bestand.");
   const { error } = await supabase!.storage.from(BUCKET).remove([path]);
   if (error) throw error;
 }
