@@ -24,7 +24,7 @@ class AppErrorBoundary extends React.Component<React.PropsWithChildren, {hasErro
 
 const levelFromXp=(value:number)=>Math.max(1,Math.floor(Math.max(0,value)/200)+1);
 
-const rankNames=["Curious","Tease","Brat","Submissive","Plaything","Pet","Collared","Devotee","Owned","Obedient","Enthralled","Devoted","Property","Collared Devotion","Dark Devotion"];
+const rankNames=["CURIOUS","OBEDIENT","PLAYFUL","DEVOTED","ADDICTED","OWNED","LEGEND"];
 const rankFromLevel=(level:number)=>rankNames[Math.max(0,Math.min(rankNames.length-1,level-1))];
 
 const roundTasks=[
@@ -86,6 +86,17 @@ function App(){
   const generation=++hydrateGeneration.current;
   const hydrate=async()=>{
    const localState=loadState();
+   if(!supabaseConfigured){
+    if(!active||generation!==hydrateGeneration.current)return;
+    const localRound=Math.min(Math.max(0,localState.session.round),fallbackRounds.length-1);
+    setUserEmail(null);
+    setSyncUserId(null);
+    setState(localState);
+    setRunning(localState.session.status==="active"&&localState.consent.status==="active");
+    setSeconds(loadTimer(localState.profile.id,localRound,fallbackRounds[localRound].time));
+    setAuthReady(true);
+    return;
+   }
    let user;
    try{
     user=await getCurrentUser();
