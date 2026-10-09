@@ -55,7 +55,7 @@ describe("private media path validation", () => {
     ["an empty session segment", "user-123//file.jpg"],
     ["an extra path segment", "user-123/session/subfolder/file.jpg"],
     ["an absolute path", "/user-123/session/file.jpg"],
-    ["a Windows-style path", "user-123\\\\session\\\\file.jpg"],
+    ["a Windows-style path", "user-123\\session\\file.jpg"],
   ])("rejects %s", (_label, path) => {
     expect(validatePrivateMediaPath(path, owner)).toBe(false);
   });
