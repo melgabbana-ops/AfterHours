@@ -78,6 +78,8 @@ export default function MediaVault({ sessionId }: MediaVaultProps) {
   const openItem = async (item: PrivateMediaItem) => {
     setBusy(true);
     setMessage("");
+    // Never leave a previously signed URL visible if opening the next item fails.
+    setSignedUrl("");
     try {
       setSignedUrl(await createPrivateMediaUrl(item.path));
     } catch (error) {
