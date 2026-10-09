@@ -177,3 +177,26 @@ nav button.active:after{content:"";position:absolute;left:50%;bottom:3px;width:1
 .astro-copy{margin-top:16px;border:1px solid #735b31;color:var(--gold);padding:12px 15px;font-size:10px;letter-spacing:.06em}
 .insight-actions button:focus-visible,.astro-copy:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
 @media(max-width:520px){.insight-actions button{flex:1;min-width:calc(50% - 8px)}}
+
+
+/* Private media vault */
+.media-vault{text-align:left;border-radius:12px;margin:22px 0;padding:18px}
+.media-vault h3{font-family:"Playfair Display",serif;font-weight:500;font-size:25px;margin:0}
+.media-vault>p{color:var(--muted);font-size:11px;line-height:1.6;margin:8px 0 15px}
+.media-upload{display:flex;align-items:center;justify-content:center;min-height:46px;padding:12px;border:1px dashed #6b532e;color:var(--gold);font-size:10px;letter-spacing:.08em;text-align:center;cursor:pointer}
+.media-upload input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.media-vault-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:20px 0 6px}
+.media-vault-head strong{font-size:10px;color:#c5bdb1;font-weight:500}
+.media-vault-head button,.media-item-actions button{border:1px solid #302a21;padding:9px 10px;font-size:8px;letter-spacing:.06em;text-transform:uppercase;color:#c7b078}
+.media-vault-head button:disabled,.media-item-actions button:disabled{opacity:.45}
+.media-list{display:grid;gap:7px}
+.media-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid #211f1a}
+.media-item-copy{min-width:0;flex:1}
+.media-item-copy strong,.media-item-copy small{display:block;overflow-wrap:anywhere}
+.media-item-copy strong{font-size:10px;color:#d7d0c4;font-weight:500}
+.media-item-copy small{font-size:9px;color:var(--muted);margin-top:4px}
+.media-item-actions{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+.media-item-actions button{padding:8px}
+.media-signed-link{display:block;margin-top:13px;padding:12px;border:1px solid #735b31;color:var(--gold);font-size:10px;text-align:center;text-decoration:none;line-height:1.5}
+.media-vault [role="status"]{overflow-wrap:anywhere}
+@media(max-width:520px){.media-vault{padding:13px}.media-item{align-items:flex-start;flex-direction:column}.media-item-actions{justify-content:flex-start}.media-item-actions button{min-height:36px}}
