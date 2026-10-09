@@ -396,7 +396,21 @@ begin
     order by c.created_at desc, c.id desc
     limit 1;
 
-    if found and v_result.status='revoked' then return v_result; end if;
+    if found and v_result.status='revoked' then
+      -- Repair legacy/inconsistent state too: a repeated revoke must never leave a session running.
+      update public.sessions
+      set status='stopped',
+          started_at=null,
+          active_seconds=case
+            when status='active' and active_started_at is not null
+              then active_seconds+greatest(0,floor(extract(epoch from(v_now-active_started_at)))::integer)
+            else active_seconds
+          end,
+          active_started_at=null,
+          updated_at=v_now
+      where id=v_session.id and status in ('active','paused');
+      return v_result;
+    end if;
     if not found or v_result.status <> 'active' then
       raise exception 'Actieve consent ontbreekt.';
     end if;
