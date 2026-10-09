@@ -156,5 +156,13 @@ async function syncRemoteStateNow(state:AfterHoursState):Promise<string|null>{
   const{error}=await supabase.rpc("set_consent_state",{p_session_id:sessionId,p_status:"revoked",p_confirmed_at:null,p_revoked_at:state.consent.revokedAt});
   if(error)return error.message;
  }
+ if(state.consent.status==="pending"){
+  const{data:latestConsent,error:consentError}=await supabase.from("consent_records").select("status,confirmed_at,revoked_at").eq("session_id",sessionId).order("created_at",{ascending:false}).order("id",{ascending:false}).limit(1).maybeSingle();
+  if(consentError)return consentError.message;
+  if(latestConsent?.status==="active"){
+   const{error}=await supabase.rpc("set_consent_state",{p_session_id:sessionId,p_status:"revoked",p_confirmed_at:null,p_revoked_at:state.session.updatedAt});
+   if(error)return error.message;
+  }
+ }
  return null;
 }
