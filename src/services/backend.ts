@@ -134,19 +134,9 @@ async function syncRemoteStateNow(state:AfterHoursState):Promise<string|null>{
   updated_at:state.session.updatedAt
  };
 
- if(remoteSessionExists){
-  const{error}=await supabase.rpc("set_session_state",{p_session_id:sessionId,p_status:state.session.status,p_round:state.session.round,p_started_at:state.session.startedAt,p_updated_at:state.session.updatedAt});
-  if(error)return error.message;
- }else{
+ if(!remoteSessionExists){
   const{error}=await supabase.from("sessions").insert(sessionPayload);
   if(error)return error.message;
-  if(state.session.status==="active"){
-   const{error:transitionError}=await supabase.rpc("set_session_state",{p_session_id:sessionId,p_status:"active",p_round:0,p_started_at:null,p_updated_at:new Date().toISOString()});
-   if(transitionError)return transitionError.message;
-  }else if(state.session.status==="paused"||state.session.status==="stopped"){
-   const{error:transitionError}=await supabase.rpc("set_session_state",{p_session_id:sessionId,p_status:"ready",p_round:0,p_started_at:null,p_updated_at:new Date().toISOString()});
-   if(transitionError)return transitionError.message;
-  }
  }
 
  if(state.consent.status==="active"&&state.consent.confirmedAt){
@@ -165,6 +155,16 @@ async function syncRemoteStateNow(state:AfterHoursState):Promise<string|null>{
    const{error}=await supabase.rpc("set_consent_state",{p_session_id:sessionId,p_status:"revoked",p_confirmed_at:null,p_revoked_at:state.session.updatedAt});
    if(error)return error.message;
   }
+ }
+
+ // Persist consent before asking the server to activate or resume a session.
+ // The database rejects active state transitions unless the latest consent event is active.
+ if(remoteSessionExists){
+  const{error}=await supabase.rpc("set_session_state",{p_session_id:sessionId,p_status:state.session.status,p_round:state.session.round,p_started_at:state.session.startedAt,p_updated_at:state.session.updatedAt});
+  if(error)return error.message;
+ }else if(state.session.status==="active"){
+  const{error}=await supabase.rpc("set_session_state",{p_session_id:sessionId,p_status:"active",p_round:0,p_started_at:null,p_updated_at:new Date().toISOString()});
+  if(error)return error.message;
  }
  return null;
 }
