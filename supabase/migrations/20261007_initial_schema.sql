@@ -231,7 +231,7 @@ drop function if exists public.set_session_state(uuid,text,integer,timestamptz);
 
 create or replace function public.set_session_state(p_session_id uuid,p_status text,p_round integer,p_started_at timestamptz,p_updated_at timestamptz)
 returns public.sessions language plpgsql security definer set search_path=public as $func$
-declare v_session public.sessions%rowtype; v_result public.sessions%rowtype; v_active_seconds integer;
+declare v_session public.sessions%rowtype; v_result public.sessions%rowtype; v_active_seconds integer; v_consent_status text;
 begin
  if auth.uid() is null then raise exception 'Niet ingelogd.'; end if;
  if p_status not in ('ready','active','paused','completed','stopped') then raise exception 'Ongeldige sessiestatus.'; end if;
@@ -240,6 +240,19 @@ begin
  if p_updated_at > now()+interval '5 seconds' then raise exception 'Ongeldige toekomstige state-versie.'; end if;
  select * into v_session from public.sessions where id=p_session_id and profile_id=auth.uid() for update;
  if not found then raise exception 'Sessie niet gevonden.'; end if;
+
+ -- Consent must still be active even for a stale/retried activation request.
+ if p_status='active' then
+   select c.status into v_consent_status
+   from public.consent_records c
+   where c.session_id=v_session.id
+   order by c.created_at desc, c.id desc
+   limit 1;
+   if v_consent_status is distinct from 'active' then
+     raise exception 'Actieve consent vereist om een sessie te starten of te hervatten.';
+   end if;
+ end if;
+
  if p_updated_at <= v_session.updated_at then return v_session; end if;
  if p_status='completed' then raise exception 'Gebruik complete_session voor afronden.'; end if;
  if p_status='ready' and p_round<>0 then raise exception 'Ready vereist ronde 0.'; end if;
