@@ -139,7 +139,7 @@ function App(){
     setState(current=>({...remote,ageConfirmed:current.ageConfirmed&&(current.ageConfirmedFor===user.id),ageConfirmedFor:current.ageConfirmedFor===user.id?user.id:null,safety:current.safety,profile:{...remote.profile,username:remote.profile.username||current.profile.username},session:remoteIsNewer?remote.session:current.session,consent:remoteIsNewer?remote.consent:current.consent}));
     if(remoteIsNewer){
      const restoredRound=Math.min(Math.max(0,remote.session.round),availableRounds.length-1);
-     setRunning(remote.session.status==="active");
+     setRunning(remote.session.status==="active"&&remote.consent.status==="active");
      setSeconds(loadTimer(user.id,restoredRound,availableRounds[restoredRound].time));
     }
    }else{
@@ -147,7 +147,7 @@ function App(){
     const hasRecoverableLocalSession=localState.session.status!=="ready"||localState.session.round!==0;
     if(sameAccount&&hasRecoverableLocalSession){
      setState(localState);
-     setRunning(localState.session.status==="active");
+     setRunning(localState.session.status==="active"&&localState.consent.status==="active");
      const restoredRound=Math.min(Math.max(0,localState.session.round),availableRounds.length-1);
      setSeconds(loadTimer(localState.profile.id,restoredRound,availableRounds[restoredRound].time));
     }else{
