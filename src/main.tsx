@@ -86,7 +86,15 @@ function App(){
   const generation=++hydrateGeneration.current;
   const hydrate=async()=>{
    const localState=loadState();
-   const user=await getCurrentUser();
+   let user;
+   try{
+    user=await getCurrentUser();
+   }catch{
+    if(!active||generation!==hydrateGeneration.current)return;
+    setProfileMessage("Accountstatus kon niet worden gecontroleerd door een verbindingsfout. Je lokale gegevens blijven behouden; controleer je verbinding en laad opnieuw.");
+    setAuthReady(true);
+    return;
+   }
    if(!active||generation!==hydrateGeneration.current)return;
    setUserEmail(user?.email??null);
    setSyncUserId(null);
