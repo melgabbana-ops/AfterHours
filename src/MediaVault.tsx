@@ -120,7 +120,7 @@ export default function MediaVault({ sessionId }: MediaVaultProps) {
             <span>{busy ? "Even wachten…" : "Afbeelding of audio toevoegen"}</span>
             <input
               type="file"
-              accept="image/*,audio/*"
+              accept="image/jpeg,image/png,image/webp,image/gif,image/avif,audio/mpeg,audio/mp4,audio/aac,audio/wav,audio/x-wav,audio/ogg,audio/webm,audio/flac"
               disabled={busy}
               onChange={event => {
                 const file = event.currentTarget.files?.[0];
