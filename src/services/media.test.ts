@@ -54,7 +54,7 @@ describe("private media path validation", () => {
     ["a nested traversal segment", "user-123/session/../../secret.jpg"],
     ["URL-encoded traversal", "user-123/session/%2e%2e%2fsecret.jpg"],
     ["URL-encoded backslash", "user-123/session/file%5csecret.jpg"],
-    ["a control character", "user-123/session/file\\u0000.jpg"],
+    ["a control character", "user-123/session/file\u0000.jpg"],
     ["an empty session segment", "user-123//file.jpg"],
     ["an extra path segment", "user-123/session/subfolder/file.jpg"],
     ["an absolute path", "/user-123/session/file.jpg"],
