@@ -13,6 +13,7 @@ import{getCurrentUser,sendMagicLink,signInWithProvider,signInWithPassword,signUp
 import{playNotificationSound}from"./services/notificationSound";
 import{levelFromXp,rankFromXp,rankIndexFromXp,rankNames,rankThresholds}from"./progression";
 import{notificationEvents}from"./services/notifications";
+import{shouldResumeSession}from"./services/sessionSafety";
 
 class AppErrorBoundary extends React.Component<React.PropsWithChildren, {hasError:boolean}>{
  state={hasError:false};
@@ -91,7 +92,7 @@ function App(){
     setUserEmail(null);
     setSyncUserId(null);
     setState(localState);
-    setRunning(localState.session.status==="active"&&localState.consent.status==="active");
+    setRunning(shouldResumeSession(localState.session.status,localState.consent.status));
     setSeconds(loadTimer(localState.profile.id,localRound,fallbackRounds[localRound].time));
     setAuthReady(true);
     return;
@@ -139,7 +140,7 @@ function App(){
     setState(current=>({...remote,ageConfirmed:current.ageConfirmed&&(current.ageConfirmedFor===user.id),ageConfirmedFor:current.ageConfirmedFor===user.id?user.id:null,safety:current.safety,profile:{...remote.profile,username:remote.profile.username||current.profile.username},session:remoteIsNewer?remote.session:current.session,consent:remoteIsNewer?remote.consent:current.consent}));
     if(remoteIsNewer){
      const restoredRound=Math.min(Math.max(0,remote.session.round),availableRounds.length-1);
-     setRunning(remote.session.status==="active"&&remote.consent.status==="active");
+     setRunning(shouldResumeSession(remote.session.status,remote.consent.status));
      setSeconds(loadTimer(user.id,restoredRound,availableRounds[restoredRound].time));
     }
    }else{
