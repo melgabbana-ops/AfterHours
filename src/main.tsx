@@ -218,6 +218,7 @@ function App(){
  const updateSession=(patch:Partial<AfterHoursState["session"]>)=>setState(s=>({...s,session:{...s.session,...patch,updatedAt:new Date().toISOString()}}));
  const pauseRound=()=>{setRunning(false);persistTimer(state.profile.id,round,seconds,false);updateSession({status:"paused"})};
  const startRound=()=>{
+  if(supabaseConfigured&&!syncUserId){setAuthMessage("Log in voordat je een sessie start, zodat consent en actieve speeltijd veilig worden opgeslagen.");setScreen("admin");return}
   if(!consent){setScreen("home");return}
   const resume=state.session.status==="paused"||state.session.status==="active";
   const remaining=resume&&seconds>0?seconds:rounds[round].time;
@@ -287,7 +288,7 @@ function App(){
  const revokeConsentRemotely=(sessionId:string,revokedAt:string)=>{void revokeRemoteConsent(sessionId,revokedAt).then(error=>{if(error)setProfileMessage("De sessie is lokaal gestopt, maar de server kon consent niet bevestigen. Controleer je verbinding. "+error)}).catch(()=>setProfileMessage("De sessie is lokaal gestopt, maar de server kon consent niet bevestigen. Controleer je verbinding."))};
  const stop=()=>{const now=new Date().toISOString();revokeConsentRemotely(state.session.id,now);clearTimer(state.profile.id);setRunning(false);setCheckIn("stop");setState(s=>({...s,consent:{status:"revoked",confirmedAt:null,revokedAt:now},notifications:[notificationEvents.safety("De sessie is veilig gestopt. Bevestig consent opnieuw voordat jullie opnieuw starten."),...s.notifications].slice(0,20),session:{...s.session,status:"stopped",startedAt:null,updatedAt:now}}));setScreen("home")};
  const revokeConsent=()=>{const now=new Date().toISOString();revokeConsentRemotely(state.session.id,now);clearTimer(state.profile.id);setRunning(false);setState(s=>({...s,consent:{status:"revoked",confirmedAt:null,revokedAt:now},session:{...s.session,status:"stopped",startedAt:null,updatedAt:now}}));setSeconds(rounds[round].time);persistTimer(state.profile.id,round,rounds[round].time,false);setScreen("home")};
- const confirmConsent=()=>{setCheckIn("clear");setState(s=>({...s,notifications:[notificationEvents.checkIn("Consent is bevestigd. De ervaring kan veilig worden gestart."),...s.notifications].slice(0,20),consent:{status:"active",confirmedAt:new Date().toISOString(),revokedAt:null}}));};
+ const confirmConsent=()=>{if(supabaseConfigured&&!syncUserId){setAuthMessage("Log in om consent en sessievoortgang veilig aan je account te koppelen.");setScreen("admin");return;}setCheckIn("clear");setState(s=>({...s,notifications:[notificationEvents.checkIn("Consent is bevestigd. De ervaring kan veilig worden gestart."),...s.notifications].slice(0,20),consent:{status:"active",confirmedAt:new Date().toISOString(),revokedAt:null}}));};
  const handleCheckIn=(choice:"clear"|"pause"|"stop")=>{setCheckIn(choice);void playNotificationSound(choice==="stop"?"safety":"checkin");if(choice==="pause"){setRunning(false);persistTimer(state.profile.id,round,seconds,false);updateSession({status:"paused"})}if(choice==="stop"){stop()}};
  const saveDisplayName=()=>{const name=displayNameDraft.trim().replace(/\s+/g," ");if(name.length<2)return;setState(s=>({...s,profile:{...s.profile,displayName:name}}));setDisplayNameDraft(name)};
  const saveUsername=async()=>{
