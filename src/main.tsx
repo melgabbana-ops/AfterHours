@@ -148,7 +148,7 @@ function App(){
     const hasRecoverableLocalSession=localState.session.status!=="ready"||localState.session.round!==0;
     if(sameAccount&&hasRecoverableLocalSession){
      setState(localState);
-     setRunning(localState.session.status==="active"&&localState.consent.status==="active");
+     setRunning(shouldResumeSession(localState.session.status,localState.consent.status));
      const restoredRound=Math.min(Math.max(0,localState.session.round),availableRounds.length-1);
      setSeconds(loadTimer(localState.profile.id,restoredRound,availableRounds[restoredRound].time));
     }else{
