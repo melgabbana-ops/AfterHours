@@ -1,5 +1,5 @@
 import React from "react";
-import { ArrowUpRight, LockKeyhole, Sparkles } from "lucide-react";
+import { ArrowUpRight, LockKeyhole, Sparkles, ChevronRight } from "lucide-react";
 
 export default function Teaser() {
   return <main className="teaser-screen">
@@ -14,6 +14,7 @@ export default function Teaser() {
       <div className="teaser-terminal"><span className="teaser-live-dot"/><span>DESIGNING THE EXPERIENCE</span><span className="teaser-terminal-percent">IN PROGRESS</span></div>
       <div className="teaser-feature"><div><LockKeyhole/><span>Consent first</span></div><div><Sparkles/><span>Your rules. Your pace.</span></div></div>
       <p className="teaser-signoff">Not everything is meant to be revealed yet.</p>
+      <a className="teaser-enter" href="/?enter=1">ENTER THE PRIVATE PREVIEW <ChevronRight size={15}/></a>
     </section>
     <footer className="teaser-footer"><span>AFTER HOURS</span><span>THE NIGHT IS BEING BUILT <ArrowUpRight size={12}/></span></footer>
   </main>;
