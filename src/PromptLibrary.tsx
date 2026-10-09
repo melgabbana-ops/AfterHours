@@ -42,6 +42,17 @@ const prompts: PromptItem[] = [
   {id:"a03",kind:"Aftercare",intensity:"Reflectie",title:"Geen evaluatieplicht",text:"Je hoeft niet meteen te analyseren. Spreek af of je nu, later of helemaal niet wilt napraten."},
   {id:"a04",kind:"Aftercare",intensity:"Zacht",title:"De volgende dag",text:"Plan een vrijblijvende check-in voor later: 'Hoe voel je je nu terugkijkend, en is er iets dat je nodig hebt?'"},
   {id:"a05",kind:"Aftercare",intensity:"Reflectie",title:"Wat nemen we mee?",text:"Noem één ding dat goed voelde en één ding dat je volgende keer anders wilt. Allebei mogen ook passen."},
+  {id:"k15",kind:"Kinky opdrachten",intensity:"Stevig in taal",title:"Protocol op maat",text:"Kies samen één klein protocol voor deze ronde, zoals eerst vragen en dan handelen. Spreek af wanneer het geldt en wanneer je het mag onderbreken."},
+  {id:"k16",kind:"Kinky opdrachten",intensity:"Stevig in taal",title:"De aanspreekvorm",text:"Vraag of een afgesproken titel of aanspreekvorm vandaag welkom is. Gebruik die alleen na een duidelijk ja en stop meteen als het niet meer goed voelt."},
+  {id:"k17",kind:"Kinky opdrachten",intensity:"Zacht",title:"Dienstbaarheid, zelf gekozen",text:"Kies een kleine attentie of servicehandeling die de ander echt waardeert. Vraag eerst wat welkom is en maak er geen verplichting van."},
+  {id:"k18",kind:"Kinky opdrachten",intensity:"Stevig in taal",title:"De speelse uitdaging",text:"Bied een speelse, vooraf goedgekeurde uitdaging aan. De ander mag de uitdaging aannemen, aanpassen of overslaan zonder straf of schuldgevoel."},
+  {id:"k19",kind:"Kinky opdrachten",intensity:"Stevig in taal",title:"De grens van plagen",text:"Spreek één soort plagerige taal af die welkom is en één onderwerp dat verboden terrein blijft. Check daarna of de afspraak nog goed voelt."},
+  {id:"k20",kind:"Kinky opdrachten",intensity:"Zacht",title:"Regie overdragen",text:"Laat de ander voor één kleine, veilige keuze de regie nemen, zoals muziek of volgorde. Je kunt de keuze altijd terugnemen of opnieuw afstemmen."},
+  {id:"q11",kind:"Kinky vragen",intensity:"Reflectie",title:"Dominantie zonder druk",text:"Welke vorm van dominante taal voelt aantrekkelijk, en waaraan merk je dat het omslaat van spannend naar onprettig?"},
+  {id:"q12",kind:"Kinky vragen",intensity:"Reflectie",title:"Overgave met grenzen",text:"Wat helpt je om controle vrijwillig uit handen te geven, terwijl je weet dat je die altijd terug kunt nemen?"},
+  {id:"q13",kind:"Kinky vragen",intensity:"Reflectie",title:"Regels die werken",text:"Welke afspraak maakt een power dynamic leuker of duidelijker? Welke regel zou juist te beperkend voelen?"},
+  {id:"q14",kind:"Kinky vragen",intensity:"Reflectie",title:"Fantasie versus werkelijkheid",text:"Welke fantasie vind je prettig om over te praten, maar wil je niet uitvoeren? Allebei mogen waar zijn."},
+  {id:"q15",kind:"Kinky vragen",intensity:"Reflectie",title:"Herstel van vertrouwen",text:"Wat zou je nodig hebben als een afspraak per ongeluk wordt gemist, en hoe kan iemand verantwoordelijkheid nemen zonder je onder druk te zetten?"},
 ];
 
 const kinds: Array<"Alles" | PromptKind> = ["Alles","Kinky opdrachten","Kinky vragen","Vanille & verbinding","Aftercare"];
