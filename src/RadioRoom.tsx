@@ -22,7 +22,7 @@ export function RadioRoom({onBack}:{onBack:()=>void}){
    <div className="radio-controls"><button aria-label="Vorige sfeer" onClick={()=>setTrack((track+current.tracks.length-1)%current.tracks.length)}>‹</button><button className="radio-play" aria-label="Audio niet beschikbaar" disabled>AH</button><button aria-label="Volgende sfeer" onClick={()=>setTrack((track+1)%current.tracks.length)}>›</button></div>
    <div className="radio-volume" aria-label="Audio niet beschikbaar"><Volume2/><span>Geen audio stream</span></div>
   </section>
-  <section className="moods"><div className="sectionhead"><span>CHOOSE YOUR FREQUENCY</span><em>{current.name}</em></div>{moods.map((item,index)=><button key={item.name} className={index===mood?"mood active":"mood"} onClick={()=>{setMood(index);setTrack(0)}}><span className="mood-number">0{index+1}</span><div><strong>{item.name}</strong><small>{item.desc}</small></div><ChevronRight/></button>)}</section>
+  <section className="moods"><div className="sectionhead"><span>CHOOSE YOUR FREQUENCY</span><em>{current.name}</em></div>{moods.map((item,index)=><button key={item.name} className={index===mood?"mood active":"mood"} aria-pressed={index===mood} onClick={()=>{setMood(index);setTrack(0)}}><span className="mood-number">0{index+1}</span><div><strong>{item.name}</strong><small>{item.desc}</small></div><ChevronRight/></button>)}</section>
   <section className="radio-note"><Radio/><div><strong>Curated moodboard</strong><span>Deze ruimte kiest alleen de sfeer en tracknamen. AFTER HOURS levert geen muziekstream of gelicentieerde audio.</span></div></section>
   <button className="back" onClick={onBack}>← Terug</button>
  </main>
