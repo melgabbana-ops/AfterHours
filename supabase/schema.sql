@@ -404,6 +404,19 @@ begin
     insert into public.consent_records(session_id,status,revoked_at,created_at)
     values(v_session.id,'revoked',v_now,v_now)
     returning * into v_result;
+
+    -- Revocation is authoritative: stop a running or paused session in the same transaction.
+    update public.sessions
+    set status='stopped',
+        started_at=null,
+        active_seconds=case
+          when status='active' and active_started_at is not null
+            then active_seconds+greatest(0,floor(extract(epoch from(v_now-active_started_at)))::integer)
+          else active_seconds
+        end,
+        active_started_at=null,
+        updated_at=v_now
+    where id=v_session.id and status in ('active','paused');
   end if;
 
   return v_result;
