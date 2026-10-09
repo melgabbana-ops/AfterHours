@@ -1,0 +1,73 @@
+import { supabase, supabaseConfigured } from "./services/supabase";
+
+const BUCKET = "after-hours-private-media";
+const MAX_FILE_BYTES = 20 * 1024 * 1024;
+const ALLOWED_TYPES = /^(image\/|audio\/)/;
+
+export interface PrivateMediaItem {
+  name: string;
+  path: string;
+  size: number;
+  createdAt: string | null;
+  contentType: string | null;
+}
+
+function safeFileName(value: string): string {
+  const normalized = value.normalize("NFKD").replace(/[^a-zA-Z0-9._-]+/g, "-").replace(/^-+|-+$/g, "").slice(-100);
+  return normalized || "bestand";
+}
+
+async function currentUserId(): Promise<string> {
+  if (!supabaseConfigured || !supabase) throw new Error("Privéopslag is nog niet geconfigureerd.");
+  const { data, error } = await supabase.auth.getUser();
+  if (error) throw error;
+  if (!data.user) throw new Error("Log in om privébestanden te gebruiken.");
+  return data.user.id;
+}
+
+export async function listPrivateMedia(): Promise<PrivateMediaItem[]> {
+  const userId = await currentUserId();
+  const { data, error } = await supabase!.storage.from(BUCKET).list(userId, {
+    limit: 100,
+    sortBy: { column: "created_at", order: "desc" },
+  });
+  if (error) throw error;
+  return (data ?? [])
+    .filter(item => item.name && item.id)
+    .map(item => ({
+      name: item.name,
+      path: `${userId}/${item.name}`,
+      size: Number(item.metadata?.size ?? 0),
+      createdAt: item.created_at ?? null,
+      contentType: typeof item.metadata?.mimetype === "string" ? item.metadata.mimetype : null,
+    }));
+}
+
+export async function uploadPrivateMedia(file: File, sessionId: string): Promise<void> {
+  if (!ALLOWED_TYPES.test(file.type)) throw new Error("Kies een afbeelding of audiobestand.");
+  if (file.size <= 0 || file.size > MAX_FILE_BYTES) throw new Error("Bestanden moeten kleiner zijn dan 20 MB.");
+  const userId = await currentUserId();
+  const safeSessionId = safeFileName(sessionId || "general");
+  const path = `${userId}/${safeSessionId}/${crypto.randomUUID()}-${safeFileName(file.name)}`;
+  const { error } = await supabase!.storage.from(BUCKET).upload(path, file, {
+    cacheControl: "3600",
+    contentType: file.type,
+    upsert: false,
+  });
+  if (error) throw error;
+}
+
+export async function createPrivateMediaUrl(path: string): Promise<string> {
+  const userId = await currentUserId();
+  if (!path.startsWith(`${userId}/`)) throw new Error("Je hebt geen toegang tot dit bestand.");
+  const { data, error } = await supabase!.storage.from(BUCKET).createSignedUrl(path, 60);
+  if (error) throw error;
+  return data.signedUrl;
+}
+
+export async function deletePrivateMedia(path: string): Promise<void> {
+  const userId = await currentUserId();
+  if (!path.startsWith(`${userId}/`)) throw new Error("Je hebt geen toegang tot dit bestand.");
+  const { error } = await supabase!.storage.from(BUCKET).remove([path]);
+  if (error) throw error;
+}
