@@ -354,7 +354,7 @@ as $func$
 declare
   v_session public.sessions%rowtype;
   v_result public.consent_records%rowtype;
-  v_now timestamptz := now();
+  v_now timestamptz;
 begin
   if auth.uid() is null then raise exception 'Niet ingelogd.'; end if;
   if p_status not in ('active','revoked') then raise exception 'Ongeldige consentstatus.'; end if;
@@ -363,6 +363,10 @@ begin
   where id=p_session_id and profile_id=auth.uid()
   for update;
   if not found then raise exception 'Sessie niet gevonden.'; end if;
+
+  -- Timestamp the event after acquiring the session lock so concurrent consent changes
+  -- remain ordered by actual processing time, not transaction start time.
+  v_now := clock_timestamp();
 
   if p_status='active' then
     if p_confirmed_at is null or p_revoked_at is not null then
@@ -377,8 +381,8 @@ begin
 
     if found and v_result.status='active' then return v_result; end if;
 
-    insert into public.consent_records(session_id,status,confirmed_at)
-    values(v_session.id,'active',v_now)
+    insert into public.consent_records(session_id,status,confirmed_at,created_at)
+    values(v_session.id,'active',v_now,v_now)
     returning * into v_result;
   else
     if p_revoked_at is null or p_confirmed_at is not null then
@@ -396,8 +400,8 @@ begin
       raise exception 'Actieve consent ontbreekt.';
     end if;
 
-    insert into public.consent_records(session_id,status,revoked_at)
-    values(v_session.id,'revoked',v_now)
+    insert into public.consent_records(session_id,status,revoked_at,created_at)
+    values(v_session.id,'revoked',v_now,v_now)
     returning * into v_result;
   end if;
 
