@@ -38,7 +38,7 @@ begin
   end if;
   if v_session.status not in ('active','paused') or v_session.round <> 2 then raise exception 'Sessie kan nog niet worden afgerond.'; end if;
   if v_session.status='active' and v_session.active_started_at is not null then
-    v_session.active_seconds:=v_session.active_seconds+greatest(0,floor(extract(epoch from(now()-v_session.active_started_at)))::integer);
+    v_session.active_seconds:=v_session.active_seconds+greatest(0,floor(extract(epoch from(v_completed_at-v_session.active_started_at)))::integer);
   end if;
   if v_session.active_seconds < 3600 then
     raise exception 'De sessie moet minimaal 60 minuten actieve speeltijd hebben.';
