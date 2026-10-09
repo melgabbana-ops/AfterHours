@@ -305,3 +305,13 @@ img,svg,video,canvas{max-width:100%}
 .maintenance-status span{width:6px;height:6px;border-radius:50%;background:#c9a45c;box-shadow:0 0 12px #c9a45c}
 .maintenance-screen footer{margin-top:34px;color:#615b51;font-size:8px;letter-spacing:.2em;text-transform:uppercase}
 @media(prefers-reduced-motion:reduce){.maintenance-status span{animation:none}}
+
+
+.astro-label{display:block;margin:16px 0 8px;color:#b8ad9b;font-size:10px;letter-spacing:.09em;text-transform:uppercase}
+.astro-label span{display:block;margin-top:5px;color:#716b61;font-size:9px;letter-spacing:0;text-transform:none}
+.astro-card .astro-date{display:block;width:100%;min-height:48px;padding:12px 14px;border:1px solid #302a21;border-radius:10px;background:#080808;color:#ddd5c9;font:inherit;color-scheme:dark}
+.astro-date-help{margin:8px 0 12px;color:#777066;font-size:11px;line-height:1.55}
+.astro-daily{margin-top:18px;padding:14px;text-align:left;border-left:2px solid #a87827;background:#0b0a09}
+.astro-daily span{font-size:9px;letter-spacing:.1em;color:#b9944d}
+.astro-reading .astro-daily p{margin:8px 0 0;font-size:12px;line-height:1.65;color:#d0c6b6}
+.astro-card .astro-date:focus-visible,.astro-card select:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
