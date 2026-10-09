@@ -28,8 +28,10 @@ export interface PrivateMediaItem {
 
 export function validatePrivateMediaPath(path: string, userId: string): boolean {
   if (!userId || !path || path.includes("\\") || path.startsWith("/") || /[\u0000-\u001F\u007F]/.test(path)) return false;
-  // Storage paths must not smuggle separators or traversal through URL encoding.
-  if (/%(?:2f|5c|2e)/i.test(path)) return false;
+  // Uploaded paths are generated from a strict safe-name alphabet, so any percent
+  // sign is unexpected. Reject all percent encoding to block single- and double-encoded
+  // separators, traversal, and control characters before signing or deleting objects.
+  if (path.includes("%")) return false;
   const segments = path.split("/");
   return segments.length === 3
     && segments[0] === userId
