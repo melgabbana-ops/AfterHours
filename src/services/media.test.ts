@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { validatePrivateMediaFile } from "./media";
+import { validatePrivateMediaFile, validatePrivateMediaPath } from "./media";
 
 describe("private media upload validation", () => {
   it("accepts a non-empty image under the 20 MB limit", () => {
@@ -37,5 +37,26 @@ describe("private media upload validation", () => {
   it("rejects files larger than 20 MB", () => {
     expect(() => validatePrivateMediaFile({ type: "image/png", size: 20 * 1024 * 1024 + 1 }))
       .toThrow("Bestanden moeten kleiner zijn dan 20 MB.");
+  });
+});
+
+
+describe("private media path validation", () => {
+  const owner = "user-123";
+
+  it("accepts a path scoped to the owner, session and filename", () => {
+    expect(validatePrivateMediaPath(`${owner}/session-456/file.jpg`, owner)).toBe(true);
+  });
+
+  it.each([
+    ["another user's folder", "other-user/session/file.jpg"],
+    ["a parent traversal segment", "user-123/../secret.jpg"],
+    ["a nested traversal segment", "user-123/session/../../secret.jpg"],
+    ["an empty session segment", "user-123//file.jpg"],
+    ["an extra path segment", "user-123/session/subfolder/file.jpg"],
+    ["an absolute path", "/user-123/session/file.jpg"],
+    ["a Windows-style path", "user-123\\\\session\\\\file.jpg"],
+  ])("rejects %s", (_label, path) => {
+    expect(validatePrivateMediaPath(path, owner)).toBe(false);
   });
 });
