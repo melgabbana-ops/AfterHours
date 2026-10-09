@@ -10,6 +10,7 @@ import{loadRemoteState,loadRemoteRounds,syncRemoteState,updateRemoteUsername,com
 import{supabase,supabaseConfigured}from"./services/supabase";
 import{getCurrentUser,sendMagicLink,signInWithProvider,signInWithPassword,signUpWithPassword,resetPassword,updatePassword,signOut}from"./services/auth";
 import{playNotificationSound}from"./services/notificationSound";
+import{levelFromXp,rankFromXp,rankIndexFromXp,rankNames,rankThresholds}from"./progression";
 import{notificationEvents}from"./services/notifications";
 
 class AppErrorBoundary extends React.Component<React.PropsWithChildren, {hasError:boolean}>{
@@ -22,12 +23,7 @@ class AppErrorBoundary extends React.Component<React.PropsWithChildren, {hasErro
  }
 }
 
-const levelFromXp=(value:number)=>Math.max(1,Math.floor(Math.max(0,value)/200)+1);
 
-const rankNames=["CURIOUS","OBEDIENT","PLAYFUL","DEVOTED","ADDICTED","OWNED","LEGEND"];
-const rankThresholds=[0,250,600,1200,2000,3500,5000];
-const rankIndexFromXp=(value:number)=>rankThresholds.reduce((rank,threshold,index)=>value>=threshold?index:rank,0);
-const rankFromXp=(value:number)=>rankNames[rankIndexFromXp(value)];
 
 const roundTasks=[
  {label:"CHECK-IN · INTENTIE",question:"Welke energie spreken jullie samen af?",choices:["Rustig opbouwen","Bewust leiden","Eerst afstemmen"]},
