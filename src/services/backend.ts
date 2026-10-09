@@ -83,9 +83,9 @@ export async function revokeRemoteConsent(sessionId:string,revokedAt:string):Pro
  const{data:session,error:sessionError}=await supabase.from("sessions").select("id").eq("id",sessionId).eq("profile_id",user.id).maybeSingle();
  if(sessionError)return sessionError.message;
  if(!session)return null;
- const{data:latest,error:consentError}=await supabase.from("consent_records").select("status").eq("session_id",sessionId).order("created_at",{ascending:false}).order("id",{ascending:false}).limit(1).maybeSingle();
- if(consentError)return consentError.message;
- if(latest?.status!=="active")return null;
+ // Always ask the server to enforce revocation, even if the latest consent
+ // record already says revoked or is inconsistent with the session state.
+ // The database RPC is responsible for idempotently stopping active/paused sessions.
  const{error}=await supabase.rpc("set_consent_state",{p_session_id:sessionId,p_status:"revoked",p_confirmed_at:null,p_revoked_at:revokedAt});
  return error?.message??null;
 }
