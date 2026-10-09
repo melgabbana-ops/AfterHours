@@ -30,13 +30,15 @@ export default function MediaVault({ sessionId }: MediaVaultProps) {
   const [signedUrl, setSignedUrl] = useState("");
   const [deletingPath, setDeletingPath] = useState("");
 
-  const refresh = useCallback(async () => {
+  const refresh = useCallback(async (): Promise<boolean> => {
     setLoading(true);
     setMessage("");
     try {
       setItems(await listPrivateMedia());
+      return true;
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Privébestanden konden niet worden geladen.");
+      return false;
     } finally {
       setLoading(false);
     }
@@ -66,8 +68,12 @@ export default function MediaVault({ sessionId }: MediaVaultProps) {
     setSignedUrl("");
     try {
       await uploadPrivateMedia(file, sessionId);
-      await refresh();
-      setMessage("Bestand veilig geüpload naar je privékluis.");
+      const refreshed = await refresh();
+      setMessage(
+        refreshed
+          ? "Bestand veilig geüpload naar je privékluis."
+          : "Bestand is geüpload, maar de lijst kon niet worden vernieuwd. Tik op Vernieuwen om opnieuw te proberen.",
+      );
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Uploaden is mislukt.");
     } finally {
