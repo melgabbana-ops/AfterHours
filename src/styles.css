@@ -276,3 +276,18 @@ nav button.active:after{content:"";position:absolute;left:50%;bottom:3px;width:1
   .app{padding-top:env(safe-area-inset-top)}
   .home-hero{margin-top:0}
 }
+
+
+/* Cross-device mobile/PWA hardening: Android Chrome, iOS Safari and installed mode. */
+:root{color-scheme:dark; -webkit-text-size-adjust:100%; text-size-adjust:100%}
+html{min-height:100%; background:#050505; overscroll-behavior-y:none}
+body{min-height:100vh;min-height:100dvh;overscroll-behavior-y:none}
+.app{min-height:100vh;min-height:100dvh;padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+nav{padding-bottom:env(safe-area-inset-bottom,0px);height:calc(70px + env(safe-area-inset-bottom,0px));box-sizing:content-box}
+button,a,[role="button"]{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+button{min-width:0}
+input,textarea,select{font:inherit;font-size:16px;max-width:100%}
+img,svg,video,canvas{max-width:100%}
+@media(max-width:520px){main{padding-left:clamp(16px,5vw,22px);padding-right:clamp(16px,5vw,22px)}nav{left:0;right:0}nav button{min-width:0;flex:1;width:auto;padding:8px 2px} .timer strong{font-size:clamp(56px,17vw,72px)}}
+@media(hover:none) and (pointer:coarse){button{cursor:pointer}nav button{min-height:44px}.actions button,.gate button,.auth-panel button,.consent-panel button{min-height:44px}}
+@media(display-mode:standalone){body{min-height:100dvh}.app{min-height:100dvh}}
