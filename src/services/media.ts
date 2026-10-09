@@ -27,7 +27,7 @@ export interface PrivateMediaItem {
 }
 
 export function validatePrivateMediaPath(path: string, userId: string): boolean {
-  if (!userId || !path || path.includes("\\\\") || path.startsWith("/")) return false;
+  if (!userId || !path || path.includes("\\") || path.startsWith("/")) return false;
   const segments = path.split("/");
   return segments.length === 3
     && segments[0] === userId
