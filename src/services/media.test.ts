@@ -15,6 +15,20 @@ describe("private media upload validation", () => {
       .toThrow("Kies een afbeelding of audiobestand.");
   });
 
+  it.each(["image/svg+xml", "image/x-custom", "audio/x-custom", "application/octet-stream"])(
+    "rejects non-allowlisted MIME type %s",
+    (type) => {
+      expect(() => validatePrivateMediaFile({ type, size: 1024 }))
+        .toThrow("Kies een afbeelding of audiobestand.");
+    },
+  );
+
+  it("accepts MIME type casing without broadening the allowlist", () => {
+    expect(() => validatePrivateMediaFile({ type: "IMAGE/PNG", size: 1024 })).not.toThrow();
+    expect(() => validatePrivateMediaFile({ type: "IMAGE/SVG+XML", size: 1024 }))
+      .toThrow("Kies een afbeelding of audiobestand.");
+  });
+
   it("rejects empty files", () => {
     expect(() => validatePrivateMediaFile({ type: "image/png", size: 0 }))
       .toThrow("Bestanden moeten kleiner zijn dan 20 MB.");
