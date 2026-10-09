@@ -13,6 +13,7 @@ The canonical schema is in `supabase/schema.sql`. The ordered migration history 
 6. `20261009090300_consent_revocation_stops_session.sql` atomically stops an active or paused session when consent is revoked.
 7. `20261009090400_private_media_bucket.sql` creates a private media bucket with user-folder scoped read/write/delete policies and server-enforced upload limits.
 8. `20261009090500_session_activation_consent_guard.sql` requires active consent on the database server before a session can be started or resumed.
+9. `20261009090600_completion_revokes_consent.sql` revokes consent atomically when a session completes and repairs completed sessions with stale active consent.
 
 For a new Supabase project, review the SQL and apply migrations in timestamp order using the Supabase CLI or migration workflow before enabling remote persistence. For a project where `schema.sql` was already applied manually, inspect the live schema and migration history before running `db push`; baseline the existing database rather than blindly replaying an untracked schema. Existing databases that recorded the earlier date-only filenames need their migration history checked before applying the timestamped replacements.
 
