@@ -163,7 +163,7 @@ function App(){
  },[]);
 
  useEffect(()=>{try{saveState(state)}catch{setProfileMessage("Lokale opslag is niet beschikbaar. Gebruik een ingelogd account om sessiegegevens server-side op te slaan.")}if(!supabaseConfigured||syncUserId){void syncRemoteState(state).then(message=>{if(message)setProfileMessage(message)}).catch(()=>setProfileMessage("Synchronisatie is tijdelijk niet beschikbaar. Controleer je verbinding voordat je verdergaat."))}if(!syncUserId)return;},[state,syncUserId]);
- useEffect(()=>{if(!running)return;const id=setInterval(()=>setSeconds(s=>{const next=Math.max(0,s-1);saveTimer(state.profile.id,state.session.round,next,true);return next}),1000);return()=>clearInterval(id)},[running,state.session.round]);
+ useEffect(()=>{if(!running)return;const id=setInterval(()=>setSeconds(s=>{const next=Math.max(0,s-1);if(!saveTimer(state.profile.id,state.session.round,next,true))setProfileMessage(current=>current||"Timer kan niet lokaal worden opgeslagen. Houd deze pagina open en controleer je opslaginstellingen.");return next}),1000);return()=>clearInterval(id)},[running,state.session.round,state.profile.id]);
  useEffect(()=>{if(seconds!==0||state.session.status!=="active")return;clearTimer(state.profile.id);setRunning(false);setSeconds(rounds[state.session.round].time);saveTimer(state.profile.id,state.session.round,rounds[state.session.round].time,false);setState(s=>({...s,notifications:[notificationEvents.checkIn("De tijd van deze ronde is voorbij. De sessie staat op pauze en kan veilig worden hervat."),...s.notifications].slice(0,20),session:{...s.session,status:"paused",updatedAt:new Date().toISOString()}}))},[seconds,state.session.status,rounds]);
 
  const round=state.session.round;
