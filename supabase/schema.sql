@@ -368,6 +368,9 @@ begin
   where id=p_session_id and profile_id=auth.uid()
   for update;
   if not found then raise exception 'Sessie niet gevonden.'; end if;
+  if p_status='active' and v_session.status='completed' then
+    raise exception 'Een afgeronde sessie kan niet opnieuw worden geactiveerd.';
+  end if;
 
   -- Timestamp the event after acquiring the session lock so concurrent consent changes
   -- remain ordered by actual processing time, not transaction start time.
