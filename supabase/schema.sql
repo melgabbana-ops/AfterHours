@@ -240,6 +240,7 @@ begin
  if p_updated_at > now()+interval '5 seconds' then raise exception 'Ongeldige toekomstige state-versie.'; end if;
  select * into v_session from public.sessions where id=p_session_id and profile_id=auth.uid() for update;
  if not found then raise exception 'Sessie niet gevonden.'; end if;
+ if v_session.status='completed' then raise exception 'Een afgeronde sessie kan niet meer worden gewijzigd.'; end if;
 
  -- Consent must still be active even for a stale/retried activation request.
  if p_status='active' then
