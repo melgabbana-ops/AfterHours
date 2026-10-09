@@ -8,7 +8,9 @@ The canonical schema is in `supabase/schema.sql`. The ordered migration history 
 1. `20261007_initial_schema.sql` creates the base tables, RLS policies, indexes, triggers, and server-authoritative RPCs.
 2. `20261008_profile_update_privilege_hardening.sql` restricts browser updates to profile identity fields.
 3. `20261009_allow_renewed_consent.sql` supports a new explicit consent event after revocation.
-4. `20261009_private_media_bucket.sql` creates a private media bucket with user-folder scoped read/write/delete policies.
+4. `20261009_consent_event_ordering.sql` timestamps consent events after acquiring the session lock, preserving event order during concurrent changes.
+5. `20261009_private_media_bucket.sql` creates a private media bucket with user-folder scoped read/write/delete policies and server-enforced upload limits.
+6. `20261009_session_activation_consent_guard.sql` requires active consent on the database server before a session can be started or resumed.
 
 For a new Supabase project, review the SQL and apply migrations in timestamp order using the Supabase CLI or migration workflow before enabling remote persistence. For a project where `schema.sql` was already applied manually, inspect the live schema and migration history before running `db push`; baseline the existing database rather than blindly replaying an untracked schema.
 
