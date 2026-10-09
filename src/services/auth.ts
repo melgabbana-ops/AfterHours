@@ -2,7 +2,8 @@ import{supabase}from"./supabase";
 
 export async function getCurrentUser(){
  if(!supabase)return null;
- const{data}=await supabase.auth.getUser();
+ const{data,error}=await supabase.auth.getUser();
+ if(error)throw error;
  return data.user??null;
 }
 
