@@ -27,20 +27,32 @@ async function currentUserId(): Promise<string> {
 
 export async function listPrivateMedia(): Promise<PrivateMediaItem[]> {
   const userId = await currentUserId();
-  const { data, error } = await supabase!.storage.from(BUCKET).list(userId, {
+  const { data: folders, error: folderError } = await supabase!.storage.from(BUCKET).list(userId, {
     limit: 100,
-    sortBy: { column: "created_at", order: "desc" },
+    sortBy: { column: "name", order: "asc" },
   });
-  if (error) throw error;
-  return (data ?? [])
-    .filter(item => item.name && item.id)
-    .map(item => ({
-      name: item.name,
-      path: `${userId}/${item.name}`,
-      size: Number(item.metadata?.size ?? 0),
-      createdAt: item.created_at ?? null,
-      contentType: typeof item.metadata?.mimetype === "string" ? item.metadata.mimetype : null,
-    }));
+  if (folderError) throw folderError;
+  const items: PrivateMediaItem[] = [];
+  for (const folder of folders ?? []) {
+    if (!folder.name) continue;
+    const prefix = `${userId}/${folder.name}`;
+    const { data, error } = await supabase!.storage.from(BUCKET).list(prefix, {
+      limit: 100,
+      sortBy: { column: "created_at", order: "desc" },
+    });
+    if (error) throw error;
+    for (const item of data ?? []) {
+      if (!item.name || !item.id) continue;
+      items.push({
+        name: item.name,
+        path: `${prefix}/${item.name}`,
+        size: Number(item.metadata?.size ?? 0),
+        createdAt: item.created_at ?? null,
+        contentType: typeof item.metadata?.mimetype === "string" ? item.metadata.mimetype : null,
+      });
+    }
+  }
+  return items.sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? "")).slice(0, 100);
 }
 
 export async function uploadPrivateMedia(file: File, sessionId: string): Promise<void> {
