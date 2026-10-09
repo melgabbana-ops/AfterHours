@@ -4,7 +4,7 @@ import { ArrowUpRight, LockKeyhole, Sparkles, ChevronRight } from "lucide-react"
 export default function Teaser() {
   return <main className="teaser-screen">
     <div className="teaser-noise" aria-hidden="true"/>
-    <div className="teaser-top"><img className="teaser-logo" src="/after-hours-logo.svg" alt="AFTER HOURS logo"/><span className="teaser-private">18+ · PRIVATE PREVIEW</span></div>
+    <div className="teaser-top"><span className="teaser-private">18+ · PRIVATE PREVIEW</span></div>
     <section className="teaser-content">
       <span className="eyebrow"><Sparkles size={13}/> A NEW WORLD IS TAKING SHAPE</span>
       <h1>UNDER<br/><em>CONSTRUCTION</em></h1>
@@ -16,6 +16,6 @@ export default function Teaser() {
       <p className="teaser-signoff">Not everything is meant to be revealed yet.</p>
       <a className="teaser-enter" href="/?enter=1">ENTER THE PRIVATE PREVIEW <ChevronRight size={15}/></a>
     </section>
-    <footer className="teaser-footer"><span>AFTER HOURS</span><span>THE NIGHT IS BEING BUILT <ArrowUpRight size={12}/></span></footer>
+    <footer className="teaser-footer"><span>THE NIGHT IS BEING BUILT <ArrowUpRight size={12}/></span></footer>
   </main>;
 }
