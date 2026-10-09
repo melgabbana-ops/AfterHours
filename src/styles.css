@@ -390,3 +390,10 @@ img,svg,video,canvas{max-width:100%}
 
 .home-shortcuts{grid-template-columns:repeat(4,minmax(0,1fr))}
 @media(max-width:520px){.home-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+
+/* Private teaser entry: restrained, cinematic and thumb-friendly */
+.teaser-enter{display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:48px;margin-top:24px;padding:0 18px;border:1px solid #8e6b31;background:linear-gradient(115deg,#b48a42,#e0c17a);color:#100c05;text-decoration:none;font-size:9px;font-weight:600;letter-spacing:.16em;transition:filter .2s ease,transform .2s ease}
+.teaser-enter:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.teaser-enter:focus-visible{outline:2px solid #f0d18a;outline-offset:4px}
+@media(prefers-reduced-motion:reduce){.teaser-enter{transition:none}}
