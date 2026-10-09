@@ -2,15 +2,14 @@
 
 AFTER HOURS is structured for a Supabase/PostgreSQL backend.
 
-## Database
-The production schema is in `supabase/schema.sql`.
+## Database and migrations
+The canonical schema is in `supabase/schema.sql`. The ordered migration history lives in `supabase/migrations/`:
 
-It contains:
-- profiles
-- sessions
-- append-only consent records
-- versioned experience rounds
-- admin audit log
+1. `20261007_initial_schema.sql` creates the base tables, RLS policies, indexes, triggers, and server-authoritative RPCs.
+2. `20261008_profile_update_privilege_hardening.sql` restricts browser updates to profile identity fields.
+3. `20261009_allow_renewed_consent.sql` supports a new explicit consent event after revocation.
+
+For a new Supabase project, review the SQL and apply migrations in timestamp order using the Supabase CLI or migration workflow before enabling remote persistence. For a project where `schema.sql` was already applied manually, inspect the live schema and migration history before running `db push`; baseline the existing database rather than blindly replaying an untracked schema.
 
 ## Security model
 
