@@ -203,8 +203,8 @@ function App(){
    if(remoteResult.error){setProfileMessage("Sessie kon niet veilig worden afgerond: "+remoteResult.error);return;}
    if(remoteResult.alreadyCompleted){
     const remote=await loadRemoteState(state.session.id);
-    if(remote)setState(current=>({...remote,ageConfirmed:current.ageConfirmed,ageConfirmedFor:current.ageConfirmedFor,safety:current.safety}));
-    else setState(current=>({...current,session:{...current.session,round:0,status:"completed",startedAt:null,updatedAt:completedAt}}));
+    if(remote)setState(current=>({...remote,ageConfirmed:current.ageConfirmed,ageConfirmedFor:current.ageConfirmedFor,safety:current.safety,consent:{status:"pending",confirmedAt:null,revokedAt:null}}));
+    else setState(current=>({...current,consent:{status:"pending",confirmedAt:null,revokedAt:null},session:{...current.session,round:0,status:"completed",startedAt:null,updatedAt:completedAt}}));
     setRunning(false);
     clearTimer(state.profile.id);
     setProfileMessage("Deze sessie was al server-side afgerond. De opgeslagen status is opnieuw geladen; er is geen nieuwe XP toegekend.");
@@ -212,7 +212,7 @@ function App(){
     return;
    }
    const earned=remoteResult.xpEarned;
-   setState(s=>{const nextXp=s.profile.xp+earned;return {...s,profile:{...s.profile,xp:nextXp,level:levelFromXp(nextXp),sessions:s.profile.sessions+1},history:[{id:"session-"+Date.now(),completedAt,xpEarned:earned,rounds:rounds.length},...s.history].slice(0,12),notifications:[notificationEvents.message("Sessie voltooid","De volledige Experience is afgerond en veilig opgeslagen. +"+earned+" XP is toegevoegd."),...s.notifications].slice(0,20),session:{...s.session,round:0,status:"completed",startedAt:null,updatedAt:completedAt}}});
+   setState(s=>{const nextXp=s.profile.xp+earned;return {...s,consent:{status:"pending",confirmedAt:null,revokedAt:null},profile:{...s.profile,xp:nextXp,level:levelFromXp(nextXp),sessions:s.profile.sessions+1},history:[{id:"session-"+Date.now(),completedAt,xpEarned:earned,rounds:rounds.length},...s.history].slice(0,12),notifications:[notificationEvents.message("Sessie voltooid","De volledige Experience is afgerond en veilig opgeslagen. +"+earned+" XP is toegevoegd."),...s.notifications].slice(0,20),session:{...s.session,round:0,status:"completed",startedAt:null,updatedAt:completedAt}}});
    setSeconds(rounds[0].time);
    setAftercareChoice(null);
    setScreen("home");
@@ -242,7 +242,7 @@ function App(){
   }
  };
  const reset=()=>{clearTimer(state.profile.id);setSeconds(rounds[0].time);setRunning(false);setSelectedTask(null);saveTimer(state.profile.id,0,rounds[0].time,false);setState(s=>({...s,session:{...s.session,id:s.session.status==="completed"?crypto.randomUUID():s.session.id,round:0,status:"ready",startedAt:null,updatedAt:new Date().toISOString()}}))};
- const stop=()=>{const now=new Date().toISOString();clearTimer(state.profile.id);setRunning(false);setCheckIn("stop");setState(s=>({...s,notifications:[notificationEvents.safety("De sessie is veilig gestopt en staat klaar voor een volgende start."),...s.notifications].slice(0,20),session:{...s.session,status:"stopped",startedAt:null,updatedAt:now}}));setScreen("home")};
+ const stop=()=>{const now=new Date().toISOString();clearTimer(state.profile.id);setRunning(false);setCheckIn("stop");setState(s=>({...s,consent:{status:"pending",confirmedAt:null,revokedAt:null},notifications:[notificationEvents.safety("De sessie is veilig gestopt. Bevestig consent opnieuw voordat jullie opnieuw starten."),...s.notifications].slice(0,20),session:{...s.session,status:"stopped",startedAt:null,updatedAt:now}}));setScreen("home")};
  const revokeConsent=()=>{const now=new Date().toISOString();clearTimer(state.profile.id);setRunning(false);setState(s=>({...s,consent:{status:"revoked",confirmedAt:null,revokedAt:now},session:{...s.session,status:"stopped",startedAt:null,updatedAt:now}}));setSeconds(rounds[round].time);saveTimer(state.profile.id,round,rounds[round].time,false);setScreen("home")};
  const confirmConsent=()=>{setCheckIn("clear");setState(s=>({...s,notifications:[notificationEvents.checkIn("Consent is bevestigd. De ervaring kan veilig worden gestart."),...s.notifications].slice(0,20),consent:{status:"active",confirmedAt:new Date().toISOString(),revokedAt:null}}));};
  const handleCheckIn=(choice:"clear"|"pause"|"stop")=>{setCheckIn(choice);void playNotificationSound(choice==="stop"?"safety":"checkin");if(choice==="pause"){setRunning(false);saveTimer(state.profile.id,round,seconds,false);updateSession({status:"paused"})}if(choice==="stop"){stop()}};
