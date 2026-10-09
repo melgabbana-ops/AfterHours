@@ -1,4 +1,4 @@
-import { supabase, supabaseConfigured } from "./services/supabase";
+import { supabase, supabaseConfigured } from "./supabase";
 
 const BUCKET = "after-hours-private-media";
 const MAX_FILE_BYTES = 20 * 1024 * 1024;
