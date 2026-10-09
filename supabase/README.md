@@ -14,7 +14,7 @@ The canonical schema is in `supabase/schema.sql`. The ordered migration history 
 7. `20261009090400_private_media_bucket.sql` creates a private media bucket with user-folder scoped read/write/delete policies and server-enforced upload limits.
 8. `20261009090500_session_activation_consent_guard.sql` requires active consent on the database server before a session can be started or resumed.
 
-For a new Supabase project, review the SQL and apply migrations in timestamp order using the Supabase CLI or migration workflow before enabling remote persistence. For a project where `schema.sql` was already applied manually, inspect the live schema and migration history before running `db push`; baseline the existing database rather than blindly replaying an untracked schema.
+For a new Supabase project, review the SQL and apply migrations in timestamp order using the Supabase CLI or migration workflow before enabling remote persistence. For a project where `schema.sql` was already applied manually, inspect the live schema and migration history before running `db push`; baseline the existing database rather than blindly replaying an untracked schema. Existing databases that recorded the earlier date-only filenames need their migration history checked before applying the timestamped replacements.
 
 ## Security model
 
