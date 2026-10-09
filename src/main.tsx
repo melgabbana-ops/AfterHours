@@ -282,7 +282,7 @@ function App(){
    setState(s=>({...s,profile:{...s.profile,username}}));
    setUsernameDraft(username);
    setProfileMessage("Username opgeslagen.");
-  }catch(error){
+  }catch{
    setProfileMessage("Username kon niet worden opgeslagen. Controleer je verbinding en probeer het opnieuw.");
   }
  };
