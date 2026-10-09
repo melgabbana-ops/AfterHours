@@ -30,17 +30,22 @@ export default function MediaVault({ sessionId }: MediaVaultProps) {
   const [signedUrl, setSignedUrl] = useState("");
   const [deletingPath, setDeletingPath] = useState("");
 
-  const refresh = useCallback(async (): Promise<boolean> => {
-    setLoading(true);
-    setMessage("");
+  const refresh = useCallback(async (isActive: () => boolean = () => true): Promise<boolean> => {
+    if (isActive()) {
+      setLoading(true);
+      setMessage("");
+    }
     try {
-      setItems(await listPrivateMedia());
+      const nextItems = await listPrivateMedia();
+      if (isActive()) setItems(nextItems);
       return true;
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Privébestanden konden niet worden geladen.");
+      if (isActive()) {
+        setMessage(error instanceof Error ? error.message : "Privébestanden konden niet worden geladen.");
+      }
       return false;
     } finally {
-      setLoading(false);
+      if (isActive()) setLoading(false);
     }
   }, []);
 
@@ -51,7 +56,7 @@ export default function MediaVault({ sessionId }: MediaVaultProps) {
       try {
         const { data, error } = await supabase.auth.getUser();
         if (error) throw error;
-        if (data.user && active) await refresh();
+        if (data.user && active) await refresh(() => active);
         else if (active) setMessage("Log in via Session control om je privékluis te openen.");
       } catch (error) {
         if (active) setMessage(error instanceof Error ? error.message : "Aanmelden is nodig voor privéopslag.");
