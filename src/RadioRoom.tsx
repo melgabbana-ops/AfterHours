@@ -19,7 +19,7 @@ export function RadioRoom({onBack}:{onBack:()=>void}){
    <div className="radio-disc"><Radio/><span>AH</span></div>
    <span className="eyebrow">NOW PLAYING · {current.name.toUpperCase()}</span><h3>{current.tracks[track]}</h3><p>{current.name} · {current.desc}</p>
    <div className="radio-vibe"><span>01</span><strong>{current.name}</strong><small>{current.tracks.length} curated moods</small></div>
-   <div className="radio-controls"><button aria-label="Vorige sfeer" onClick={()=>setTrack((track+current.tracks.length-1)%current.tracks.length)}>‹</button><button className="radio-play" aria-label="Geselecteerde sfeer" aria-disabled="true">AH</button><button aria-label="Volgende sfeer" onClick={()=>setTrack((track+1)%current.tracks.length)}>›</button></div>
+   <div className="radio-controls"><button aria-label="Vorige sfeer" onClick={()=>setTrack((track+current.tracks.length-1)%current.tracks.length)}>‹</button><button className="radio-play" aria-label="Audio niet beschikbaar" disabled>AH</button><button aria-label="Volgende sfeer" onClick={()=>setTrack((track+1)%current.tracks.length)}>›</button></div>
    <div className="radio-volume" aria-label="Audio niet beschikbaar"><Volume2/><span>Geen audio stream</span></div>
   </section>
   <section className="moods"><div className="sectionhead"><span>CHOOSE YOUR FREQUENCY</span><em>{current.name}</em></div>{moods.map((item,index)=><button key={item.name} className={index===mood?"mood active":"mood"} onClick={()=>{setMood(index);setTrack(0)}}><span className="mood-number">0{index+1}</span><div><strong>{item.name}</strong><small>{item.desc}</small></div><ChevronRight/></button>)}</section>
