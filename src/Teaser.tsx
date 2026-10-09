@@ -7,7 +7,7 @@ export default function Teaser() {
   return <main className="teaser-screen">
     <div className="teaser-noise" aria-hidden="true"/>
     {!introDismissed && <div className="teaser-intro" role="region" aria-label="AFTER HOURS video intro">
-      <video className="teaser-intro-video" autoPlay muted playsInline preload="metadata" onEnded={() => setIntroDismissed(true)} poster="/IMG_7718.jpeg">
+      <video className="teaser-intro-video" autoPlay muted playsInline preload="metadata" onEnded={() => setIntroDismissed(true)} onError={() => setIntroDismissed(true)} poster="/IMG_7718.jpeg">
         <source src="/after-hours-intro.mp4" type="video/mp4"/>
       </video>
       <div className="teaser-intro-controls"><span><VolumeX size={13}/> SOUND OFF</span><button type="button" onClick={() => setIntroDismissed(true)}><Play size={13}/> SKIP INTRO</button></div>
