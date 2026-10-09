@@ -2,7 +2,21 @@ import { supabase, supabaseConfigured } from "./supabase";
 
 const BUCKET = "after-hours-private-media";
 const MAX_FILE_BYTES = 20 * 1024 * 1024;
-const ALLOWED_TYPES = /^(image\/|audio\/)/;
+const ALLOWED_TYPES = new Set([
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+  "image/avif",
+  "audio/mpeg",
+  "audio/mp4",
+  "audio/aac",
+  "audio/wav",
+  "audio/x-wav",
+  "audio/ogg",
+  "audio/webm",
+  "audio/flac",
+]);
 
 export interface PrivateMediaItem {
   name: string;
