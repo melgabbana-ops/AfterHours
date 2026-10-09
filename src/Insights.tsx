@@ -4,27 +4,27 @@ import{recordAchievement}from"./achievements";
 import{RefreshCw,Sparkles,Shield,Star,LockKeyhole,Copy,Check}from"lucide-react";
 
 const tarot=[
-{name:"The Collar",meaning:"Vertrouwen wordt sterker wanneer afspraken zichtbaar en vrijwillig blijven.",prompt:"Welke afspraak geeft jullie vandaag het meeste vertrouwen?"},
-{name:"The Key",meaning:"Toegang tot een nieuwe laag begint met een duidelijke keuze.",prompt:"Waarvoor willen jullie vandaag bewust toestemming vragen?"},
+{name:"The Collar",meaning:"Vertrouwen wordt sterker wanneer afspraken zichtbaar en vrijwillig blijven.",prompt:"Welke afspraak geeft je vandaag het meeste vertrouwen?"},
+{name:"The Key",meaning:"Toegang tot een nieuwe laag begint met een duidelijke keuze.",prompt:"Waarvoor wil je vandaag bewust toestemming vragen?"},
 {name:"The Crown",meaning:"Regie is iets dat je krijgt, niet iets dat je vanzelf bezit.",prompt:"Waar ligt vandaag de regie, en hoe kan die worden teruggegeven?"},
-{name:"The Brat",meaning:"Speelsheid werkt het best wanneer grenzen net zo duidelijk zijn als de uitdaging.",prompt:"Waar mag vandaag meer speelsheid zitten binnen jullie afspraken?"},
+{name:"The Brat",meaning:"Speelsheid werkt het best wanneer grenzen net zo duidelijk zijn als de uitdaging.",prompt:"Waar mag vandaag meer speelsheid zitten binnen de afgesproken grenzen?"},
 {name:"The Surrender",meaning:"Loslaten is geen verlies van controle wanneer beide mensen weten waar de grens ligt.",prompt:"Wat voelt veilig genoeg om bewust los te laten?"},
-{name:"The Safeword",meaning:"Een afgesproken stopwoord maakt ruimte voor vertrouwen, juist wanneer de spanning stijgt.",prompt:"Is jullie stopwoord nog helder en voor beiden paraat?"},
-{name:"The Tease",meaning:"Anticipatie kan op zichzelf al een bewuste vorm van verbinding zijn.",prompt:"Hoe kunnen jullie spanning opbouwen zonder een grens te overschrijden?"},
+{name:"The Safeword",meaning:"Een afgesproken stopwoord maakt ruimte voor vertrouwen, juist wanneer de spanning stijgt.",prompt:"Is je stopwoord nog helder en paraat?"},
+{name:"The Tease",meaning:"Anticipatie kan op zichzelf al een bewuste vorm van verbinding zijn.",prompt:"Hoe bouw je spanning op zonder een grens te overschrijden?"},
 {name:"The Boundary",meaning:"Een sterke grens maakt een vrije keuze mogelijk.",prompt:"Welke grens moet vandaag absoluut gerespecteerd worden?"},
-{name:"The Aftercare",meaning:"De ervaring eindigt niet wanneer de timer stopt. Aandacht erna telt mee.",prompt:"Wat hebben jullie na afloop nodig om goed te landen?"},
+{name:"The Aftercare",meaning:"De ervaring eindigt niet wanneer de timer stopt. Aandacht erna telt mee.",prompt:"Wat heb je na afloop nodig om goed te landen?"},
 {name:"The Mirror",meaning:"Kijk naar jezelf voordat je probeert te raden wat de ander voelt.",prompt:"Welke behoefte wil je vandaag hardop benoemen?"},
 {name:"The Lock",meaning:"Niet elke deur hoeft open. Een bewuste nee is een volledige keuze.",prompt:"Welke deur blijft vandaag gesloten?"},
-{name:"The Devotion",meaning:"Toewijding ontstaat door herhaaldelijk te kiezen voor vertrouwen, communicatie en zorg.",prompt:"Welke kleine actie laat vandaag zien dat jullie elkaar serieus nemen?"}
+{name:"The Devotion",meaning:"Toewijding ontstaat door herhaaldelijk te kiezen voor vertrouwen, communicatie en zorg.",prompt:"Welke kleine actie laat zien dat je de ander serieus neemt?"}
 ];
 
 const oracle=[
-{name:"Take Control",meaning:"Regie kan spannend zijn wanneer die bewust wordt gegeven en altijd kan worden teruggenomen.",prompt:"Welke vorm van regie voelt vandaag goed voor jullie beiden?"},
+{name:"Take Control",meaning:"Regie kan spannend zijn wanneer die bewust wordt gegeven en altijd kan worden teruggenomen.",prompt:"Welke vorm van regie voelt vandaag goed voor je?"},
 {name:"Give Control",meaning:"Vertrouwen groeit wanneer controle bewust wordt overgedragen binnen duidelijke grenzen.",prompt:"Welke grens blijft onvoorwaardelijk staan?"},
 {name:"Ask First",meaning:"Een korte vraag kan meer vertrouwen geven dan een grote aanname.",prompt:"Waar wil je vandaag eerst expliciet toestemming voor vragen?"},
-{name:"Tease",meaning:"Speelsheid mag spanning opbouwen zonder druk te creëren.",prompt:"Hoe kunnen jullie vandaag speels blijven én duidelijk communiceren?"},
-{name:"Pause",meaning:"Pauzeren is geen mislukking. Het is actief zorg dragen voor de ervaring.",prompt:"Welk signaal betekent voor jullie: even terug naar check-in?"},
-{name:"Aftercare",meaning:"Zorg na de ervaring hoort bij de ervaring.",prompt:"Wat helpt jullie om na afloop rustig te landen?"}
+{name:"Tease",meaning:"Speelsheid mag spanning opbouwen zonder druk te creëren.",prompt:"Hoe blijf je speels én duidelijk communiceren?"},
+{name:"Pause",meaning:"Pauzeren is geen mislukking. Het is actief zorg dragen voor de ervaring.",prompt:"Welk signaal betekent voor jou: even terug naar check-in?"},
+{name:"Aftercare",meaning:"Zorg na de ervaring hoort bij de ervaring.",prompt:"Wat helpt je om na afloop rustig te landen?"}
 ];
 
 const signs=[
