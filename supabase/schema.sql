@@ -295,13 +295,14 @@ as $func$
 declare
   v_session public.sessions%rowtype;
   v_xp integer := 120;
-  v_completed_at timestamptz := now();
+  v_completed_at timestamptz;
   v_consent_status text;
 begin
   if auth.uid() is null then raise exception 'Niet ingelogd.'; end if;
   if p_rounds <> 3 then raise exception 'Ongeldige sessiegrootte.'; end if;
   select * into v_session from public.sessions where id=p_session_id and profile_id=auth.uid() for update;
   if not found then raise exception 'Sessie niet gevonden.'; end if;
+  v_completed_at := clock_timestamp();
   if v_session.status='completed' then
     return jsonb_build_object('xp_earned',0,'already_completed',true);
   end if;
@@ -321,6 +322,9 @@ begin
     raise exception 'Actieve consent ontbreekt.';
   end if;
   update public.sessions set status='completed',round=0,started_at=null,active_started_at=null,active_seconds=v_session.active_seconds,updated_at=v_completed_at where id=v_session.id;
+  -- Completion ends the consent grant in the same transaction as the session.
+  insert into public.consent_records(session_id,status,revoked_at,created_at)
+  values(v_session.id,'revoked',v_completed_at,v_completed_at);
   insert into public.session_history(profile_id,completed_at,xp_earned,rounds) values(auth.uid(),v_completed_at,v_xp,p_rounds);
   update public.profiles set xp=xp+v_xp,level=floor((xp+v_xp)/200)+1,sessions=sessions+1 where id=auth.uid();
   return jsonb_build_object('xp_earned',v_xp,'already_completed',false);
