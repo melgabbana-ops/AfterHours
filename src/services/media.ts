@@ -26,6 +26,14 @@ export interface PrivateMediaItem {
   contentType: string | null;
 }
 
+export function validatePrivateMediaPath(path: string, userId: string): boolean {
+  if (!userId || !path || path.includes("\\\\") || path.startsWith("/")) return false;
+  const segments = path.split("/");
+  return segments.length === 3
+    && segments[0] === userId
+    && segments.every((segment) => segment.length > 0 && segment !== "." && segment !== "..");
+}
+
 export function validatePrivateMediaFile(file: Pick<File, "type" | "size">): void {
   if (!ALLOWED_TYPES.has(file.type.toLowerCase())) throw new Error("Kies een afbeelding of audiobestand.");
   if (file.size <= 0 || file.size > MAX_FILE_BYTES) throw new Error("Bestanden moeten kleiner zijn dan 20 MB.");
@@ -89,7 +97,7 @@ export async function uploadPrivateMedia(file: File, sessionId: string): Promise
 
 export async function createPrivateMediaUrl(path: string): Promise<string> {
   const userId = await currentUserId();
-  if (!path.startsWith(`${userId}/`)) throw new Error("Je hebt geen toegang tot dit bestand.");
+  if (!validatePrivateMediaPath(path, userId)) throw new Error("Je hebt geen toegang tot dit bestand.");
   const { data, error } = await supabase!.storage.from(BUCKET).createSignedUrl(path, 60);
   if (error) throw error;
   return data.signedUrl;
