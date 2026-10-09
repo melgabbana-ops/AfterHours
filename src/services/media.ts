@@ -27,7 +27,7 @@ export interface PrivateMediaItem {
 }
 
 export function validatePrivateMediaPath(path: string, userId: string): boolean {
-  if (!userId || !path || path.includes("\\") || path.startsWith("/") || /[\\u0000-\\u001F\\u007F]/.test(path)) return false;
+  if (!userId || !path || path.includes("\\") || path.startsWith("/") || /[\u0000-\u001F\u007F]/.test(path)) return false;
   // Storage paths must not smuggle separators or traversal through URL encoding.
   if (/%(?:2f|5c|2e)/i.test(path)) return false;
   const segments = path.split("/");
