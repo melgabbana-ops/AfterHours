@@ -13,7 +13,7 @@ export interface PrivateMediaItem {
 }
 
 export function validatePrivateMediaFile(file: Pick<File, "type" | "size">): void {
-  if (!ALLOWED_TYPES.test(file.type)) throw new Error("Kies een afbeelding of audiobestand.");
+  if (!ALLOWED_TYPES.has(file.type.toLowerCase())) throw new Error("Kies een afbeelding of audiobestand.");
   if (file.size <= 0 || file.size > MAX_FILE_BYTES) throw new Error("Bestanden moeten kleiner zijn dan 20 MB.");
 }
 
