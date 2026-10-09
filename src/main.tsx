@@ -107,11 +107,21 @@ function App(){
     return;
    }
    setAuthReady(false);
-   const remoteRounds=await loadRemoteRounds();
+   let remoteRounds=[];
+   try{
+    remoteRounds=await loadRemoteRounds();
+   }catch{
+    setProfileMessage("De online ervaringsrondes konden niet worden geladen. De standaardrondes blijven beschikbaar.");
+   }
    if(!active||generation!==hydrateGeneration.current)return;
    const availableRounds=remoteRounds.length===3?remoteRounds.map(r=>({title:r.title,text:r.body,time:r.durationSeconds})):fallbackRounds;
    if(remoteRounds.length===3)setRounds(availableRounds);
-   const remote=await loadRemoteState(localState.session.id);
+   let remote=null;
+   try{
+    remote=await loadRemoteState(localState.session.id);
+   }catch{
+    setProfileMessage("Online sessiegegevens zijn tijdelijk niet bereikbaar. De app probeert opnieuw en gebruikt intussen beschikbare lokale gegevens.");
+   }
    if(!active||generation!==hydrateGeneration.current)return;
    if(remote){
     const sameAccount=localState.profile.id===user.id;
