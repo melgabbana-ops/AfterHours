@@ -1,18 +1,32 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+<title id="title">AFTER HOURS</title><desc id="desc">Gold circular emblem, crescent moon and AH monogram on black and deep purple velvet.</desc>
 <defs>
- <radialGradient id="bg" cx="50%" cy="45%" r="70%"><stop offset="0" stop-color="#16051d"/><stop offset=".58" stop-color="#080208"/><stop offset="1" stop-color="#000"/></radialGradient>
- <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff1a8"/><stop offset=".2" stop-color="#d99a27"/><stop offset=".48" stop-color="#fff0a0"/><stop offset=".72" stop-color="#b96b12"/><stop offset="1" stop-color="#ffe89a"/></linearGradient>
- <filter id="glow"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+ <radialGradient id="night" cx="50%" cy="42%" r="72%"><stop stop-color="#26072c"/><stop offset=".52" stop-color="#100612"/><stop offset="1" stop-color="#020202"/></radialGradient>
+ <linearGradient id="gold" x1="0" y1="0" x2="1" y2=".9"><stop stop-color="#fff5bd"/><stop offset=".14" stop-color="#e9a83d"/><stop offset=".28" stop-color="#fff1a2"/><stop offset=".48" stop-color="#a95b16"/><stop offset=".65" stop-color="#ffda70"/><stop offset=".83" stop-color="#fff2b0"/><stop offset="1" stop-color="#a95e1a"/></linearGradient>
+ <linearGradient id="goldEdge" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff8ce"/><stop offset=".45" stop-color="#b86a1c"/><stop offset=".7" stop-color="#ffe89a"/><stop offset="1" stop-color="#7b3a0b"/></linearGradient>
+ <filter id="shine" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="7" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+ <filter id="shadow"><feGaussianBlur stdDeviation="10"/></filter>
+ <linearGradient id="velvet" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#7e1a75"/><stop offset=".3" stop-color="#1c061e"/><stop offset=".56" stop-color="#56104f"/><stop offset=".8" stop-color="#120516"/><stop offset="1" stop-color="#6b155d"/></linearGradient>
 </defs>
 <rect width="1024" height="1024" fill="#000"/>
-<circle cx="512" cy="512" r="475" fill="url(#bg)" stroke="url(#gold)" stroke-width="18"/>
-<circle cx="512" cy="512" r="449" fill="none" stroke="#8b4f12" stroke-width="2" opacity=".8"/>
-<path d="M690 110c-205 28-350 190-350 365 0 190 158 335 360 350-52 21-108 32-166 32-235 0-425-166-425-371S299 120 534 120c54 0 107 7 156 20z" fill="none" stroke="url(#gold)" stroke-width="24" filter="url(#glow)"/>
-<g fill="url(#gold)" stroke="#8b4f12" stroke-width="2">
- <path d="M300 585 444 285h38l150 300h-57l-35-76H390l-35 76h-55zm112-119h110l-55-126-55 126z"/>
- <path d="M640 303h48v119h133V303h48v282h-48V469H688v116h-48z"/>
+<circle cx="512" cy="490" r="465" fill="url(#night)"/>
+<g opacity=".78" fill="none" stroke="url(#velvet)" stroke-linecap="round">
+ <path d="M95 335Q220 230 360 340T635 315T930 380" stroke-width="84"/>
+ <path d="M55 475Q210 390 360 505T670 500T965 455" stroke-width="105"/>
+ <path d="M90 670Q235 575 365 700T650 690T940 635" stroke-width="90"/>
+ <path d="M250 95Q390 230 520 160T760 150" stroke-width="42"/>
 </g>
-<text x="512" y="705" text-anchor="middle" fill="url(#gold)" font-family="Georgia, 'Times New Roman', serif" font-size="73" letter-spacing="6">AFTER HOURS</text>
-<path d="M250 753h235" stroke="url(#gold)" stroke-width="3"/><path d="M539 753h235" stroke="url(#gold)" stroke-width="3"/>
-<path d="m512 728 18 25-18 25-18-25z" fill="url(#gold)"/>
+<circle cx="512" cy="490" r="466" fill="none" stroke="#7a3a10" stroke-width="20"/>
+<circle cx="512" cy="490" r="466" fill="none" stroke="url(#gold)" stroke-width="12"/>
+<circle cx="512" cy="490" r="450" fill="none" stroke="url(#goldEdge)" stroke-width="3"/>
+<path d="M596 116C409 131 264 282 264 463c0 183 151 327 337 337-46 18-96 28-149 28-219 0-397-160-397-357S233 114 452 114c51 0 99 0 144 2Z" fill="url(#gold)" stroke="#8d4a10" stroke-width="3" filter="url(#shine)"/>
+<path d="M590 116C420 150 300 292 300 463c0 157 117 289 275 325" fill="none" stroke="#fff1a0" stroke-width="3" opacity=".8"/>
+<g fill="url(#gold)" stroke="#8d4a10" stroke-width="2.5" stroke-linejoin="round">
+ <path d="M300 600 455 244h30l171 356h-58l-43-93H398l-39 93h-59zm119-140h115l-58-135-57 135z"/>
+ <path d="M650 350h49v128h134V350h49v250h-49V521H699v79h-49z"/>
+</g>
+<text x="512" y="755" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-size="69" letter-spacing="2.5" fill="url(#gold)" stroke="#7d3d0d" stroke-width="1.5">AFTER HOURS</text>
+<path d="M185 796H465M559 796H839" stroke="url(#gold)" stroke-width="4"/>
+<path d="m512 768 24 28-24 28-24-28z" fill="url(#gold)" stroke="#8b4d17" stroke-width="2"/>
+<g fill="#fff0a2" filter="url(#shine)"><path d="M864 133l5 16 16 5-16 5-5 16-5-16-16-5 16-5z"/><path d="M230 242l4 12 12 4-12 4-4 12-4-12-12-4 12-4z"/></g>
 </svg>
