@@ -389,8 +389,8 @@ function App(){
 }
 const root=createRoot(document.getElementById("root")!);
 const entryParams=new URLSearchParams(window.location.search);
-const teaserPreview=entryParams.get("teaser")==="1"||!enterApp;
 const enterApp=entryParams.get("enter")==="1";
+const teaserPreview=entryParams.get("teaser")==="1"||!enterApp;
 const maintenancePreview=new URLSearchParams(window.location.search).get("maintenance")==="1";
 if(teaserPreview){
  root.render(<Teaser/>);
