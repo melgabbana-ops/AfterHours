@@ -1,4 +1,5 @@
 import React,{useEffect,useMemo,useRef,useState}from"react";
+import UnderConstruction from "./UnderConstruction";
 import{createRoot}from"react-dom/client";
 import{Shield,Lock,Play,Pause,RotateCcw,ChevronRight,User,Settings,Home,Timer,CheckCircle2,Square,Activity,LogOut,Sparkles,Radio,Bell}from"lucide-react";
 import"./styles.css";
@@ -377,4 +378,13 @@ function App(){
  <nav aria-label="Hoofdnavigatie"><button className={screen==="home"?"active":""} onClick={()=>setScreen("home")} aria-current={screen==="home"?"page":undefined}><Home/><span>Home</span></button><button className={screen==="game"?"active":""} onClick={()=>consent?setScreen("game"):setScreen("home")} aria-current={screen==="game"?"page":undefined} aria-disabled={!consent}><Timer/><span>Games</span></button><button className={screen==="insights"?"active":""} onClick={()=>setScreen("insights")} aria-current={screen==="insights"?"page":undefined}><Sparkles/><span>Insights</span></button><button className={screen==="radio"?"active":""} onClick={()=>setScreen("radio")} aria-current={screen==="radio"?"page":undefined}><Radio/><span>Radio</span></button><button className={screen==="profile"?"active":""} onClick={()=>setScreen("profile")} aria-current={screen==="profile"?"page":undefined}><User/><span>Profiel</span></button></nav>
  </div>
 }
-createRoot(document.getElementById("root")!).render(<AppErrorBoundary><App/></AppErrorBoundary>);
+const root=createRoot(document.getElementById("root")!);
+const maintenancePreview=new URLSearchParams(window.location.search).get("maintenance")==="1";
+if(maintenancePreview){
+ root.render(<UnderConstruction/>);
+}else{
+ void fetch("/maintenance.json",{cache:"no-store"})
+  .then(response=>response.ok?response.json():{enabled:false})
+  .catch(()=>({enabled:false}))
+  .then(config=>root.render(config?.enabled===true?<UnderConstruction/>:<AppErrorBoundary><App/></AppErrorBoundary>));
+}
