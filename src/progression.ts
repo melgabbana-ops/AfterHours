@@ -11,7 +11,7 @@ export const rankNames = [
 export const rankThresholds = [0, 250, 600, 1200, 2000, 3500, 5000] as const;
 
 export function rankIndexFromXp(value: number): number {
-  return rankThresholds.reduce(
+  return rankThresholds.reduce<number>(
     (rank, threshold, index) => (value >= threshold ? index : rank),
     0,
   );
