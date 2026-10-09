@@ -386,3 +386,7 @@ img,svg,video,canvas{max-width:100%}
 .badge-showcase-footnote{margin:14px 0 0;font-size:9px}
 @media(max-width:440px){.badge-grid{grid-template-columns:1fr}.prompt-actions button{font-size:9px;padding-inline:8px}.prompt-count{font-size:9px}.teaser-terminal{font-size:8px}}
 @media(min-width:768px){.prompt-hero{padding-top:54px}.prompt-card{padding:38px}.badge-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+
+.home-shortcuts{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(max-width:520px){.home-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr))}}
