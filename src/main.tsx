@@ -59,7 +59,6 @@ const guidePrompts=[
 
 function App(){
  useEffect(()=>{if("serviceWorker" in navigator){void navigator.serviceWorker.register("/sw.js").catch(()=>{})}},[]);
- useEffect(()=>{if(syncUserId)recordAchievement("login")},[syncUserId]);
  const[state,setState]=useState<AfterHoursState>(()=>loadState());
  const[authReady,setAuthReady]=useState(!supabaseConfigured);
  const[rounds,setRounds]=useState(fallbackRounds);
@@ -76,6 +75,7 @@ function App(){
  const[authMessage,setAuthMessage]=useState("");
  const[passwordRecovery,setPasswordRecovery]=useState(false);
  const[syncUserId,setSyncUserId]=useState<string|null>(null);
+ useEffect(()=>{if(syncUserId)recordAchievement("login")},[syncUserId]);
  const[checkIn,setCheckIn]=useState<"clear"|"pause"|"stop">("clear");
  const[aftercareChoice,setAftercareChoice]=useState<"land"|"talk"|"space"|null>(null);
  const[finishing,setFinishing]=useState(false);
