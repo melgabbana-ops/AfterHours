@@ -7,7 +7,7 @@ import{RadioRoom}from"./RadioRoom";
 import MediaVault from"./MediaVault";
 import type{AfterHoursState,AvatarStyle,Screen,Safety,SessionHistoryEntry}from"./types";
 import{loadState,saveState,loadTimer,saveTimer,clearTimer,defaultState}from"./storage";
-import{loadRemoteState,loadRemoteRounds,syncRemoteState,updateRemoteUsername,completeRemoteSession}from"./services/backend";
+import{loadRemoteState,loadRemoteRounds,syncRemoteState,updateRemoteUsername,completeRemoteSession,revokeRemoteConsent}from"./services/backend";
 import{supabase,supabaseConfigured}from"./services/supabase";
 import{getCurrentUser,sendMagicLink,signInWithProvider,signInWithPassword,signUpWithPassword,resetPassword,updatePassword,signOut}from"./services/auth";
 import{playNotificationSound}from"./services/notificationSound";
@@ -274,7 +274,15 @@ function App(){
    setScreen("aftercare");
   }
  };
- const reset=()=>{clearTimer(state.profile.id);setSeconds(rounds[0].time);setRunning(false);setSelectedTask(null);persistTimer(state.profile.id,0,rounds[0].time,false);const now=new Date().toISOString();setState(s=>({...s,consent:{status:"pending",confirmedAt:null,revokedAt:null},session:{...s.session,id:crypto.randomUUID(),round:0,status:"ready",startedAt:null,updatedAt:now}}))};
+ const reset=async()=>{
+  const now=new Date().toISOString();
+  if(state.consent.status==="active"){
+   const error=await revokeRemoteConsent(state.session.id,now);
+   if(error){setProfileMessage("Consent kon niet veilig worden ingetrokken op de server. De sessie is niet gereset; probeer opnieuw. "+error);return}
+  }
+  clearTimer(state.profile.id);setSeconds(rounds[0].time);setRunning(false);setSelectedTask(null);persistTimer(state.profile.id,0,rounds[0].time,false);
+  setState(s=>({...s,consent:{status:"pending",confirmedAt:null,revokedAt:null},session:{...s.session,id:crypto.randomUUID(),round:0,status:"ready",startedAt:null,updatedAt:now}}))
+ };
  const stop=()=>{const now=new Date().toISOString();clearTimer(state.profile.id);setRunning(false);setCheckIn("stop");setState(s=>({...s,consent:{status:"revoked",confirmedAt:null,revokedAt:now},notifications:[notificationEvents.safety("De sessie is veilig gestopt. Bevestig consent opnieuw voordat jullie opnieuw starten."),...s.notifications].slice(0,20),session:{...s.session,status:"stopped",startedAt:null,updatedAt:now}}));setScreen("home")};
  const revokeConsent=()=>{const now=new Date().toISOString();clearTimer(state.profile.id);setRunning(false);setState(s=>({...s,consent:{status:"revoked",confirmedAt:null,revokedAt:now},session:{...s.session,status:"stopped",startedAt:null,updatedAt:now}}));setSeconds(rounds[round].time);persistTimer(state.profile.id,round,rounds[round].time,false);setScreen("home")};
  const confirmConsent=()=>{setCheckIn("clear");setState(s=>({...s,notifications:[notificationEvents.checkIn("Consent is bevestigd. De ervaring kan veilig worden gestart."),...s.notifications].slice(0,20),consent:{status:"active",confirmedAt:new Date().toISOString(),revokedAt:null}}));};
