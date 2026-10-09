@@ -1,5 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { validatePrivateMediaFile, validatePrivateMediaPath } from "./media";
+import { safeMediaSessionFolder, validatePrivateMediaFile, validatePrivateMediaPath } from "./media";
+
+describe("private media session folder safety", () => {
+  it("uses a general folder for dot path segments", () => {
+    expect(safeMediaSessionFolder(".")).toBe("general");
+    expect(safeMediaSessionFolder("..")).toBe("general");
+  });
+
+  it("keeps normal session identifiers in a safe folder", () => {
+    expect(safeMediaSessionFolder("session-456")).toBe("session-456");
+    expect(safeMediaSessionFolder("session/456")).toBe("session-456");
+  });
+});
 
 describe("private media upload validation", () => {
   it("accepts a non-empty image under the 20 MB limit", () => {
