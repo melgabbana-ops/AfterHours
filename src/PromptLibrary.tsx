@@ -46,11 +46,12 @@ const prompts: PromptItem[] = [
 
 const kinds: Array<"Alles" | PromptKind> = ["Alles","Kinky opdrachten","Kinky vragen","Vanille & verbinding","Aftercare"];
 
-export default function PromptLibrary() {
+export default function PromptLibrary({ onBack, onComplete }: { onBack: () => void; onComplete: () => void }) {
   const [kind, setKind] = useState<(typeof kinds)[number]>("Alles");
   const [index, setIndex] = useState(0);
   const [saved, setSaved] = useState<string[]>([]);
   const [copied, setCopied] = useState(false);
+  const [completed, setCompleted] = useState<string[]>([]);
   const pool = useMemo(() => prompts.filter((item) => kind === "Alles" || item.kind === kind), [kind]);
   const current = pool[index % Math.max(1, pool.length)];
 
@@ -71,9 +72,9 @@ export default function PromptLibrary() {
       <div className="prompt-glyph" aria-hidden="true">✦</div><h3>{current.title}</h3><p>{current.text}</p>
       {current.note && <p className="prompt-note">{current.note}</p>}
       <div className="prompt-consent"><ShieldCheck/><span>18+ · Vrijwillig · Je mag altijd passen of stoppen.</span></div>
-      <div className="prompt-actions"><button className="gold" onClick={next}><Shuffle/> Volgende kaart</button><button onClick={toggleSaved}><Heart fill={saved.includes(current.id) ? "currentColor" : "none"}/>{saved.includes(current.id) ? "Bewaard" : "Bewaar"}</button><button onClick={() => void copy()}>{copied ? <Check/> : <Copy/>}{copied ? "Gekopieerd" : "Kopieer"}</button></div>
+      <div className="prompt-actions"><button className="gold" onClick={next}><Shuffle/> Volgende kaart</button><button onClick={toggleSaved}><Heart fill={saved.includes(current.id) ? "currentColor" : "none"}/>{saved.includes(current.id) ? "Bewaard" : "Bewaar"}</button><button onClick={() => { if (!completed.includes(current.id)) { setCompleted((items) => [...items, current.id]); onComplete(); } }}>{completed.includes(current.id) ? <Check/> : <ArrowRight/>}{completed.includes(current.id) ? "Gedaan" : "Markeer gedaan"}</button><button onClick={() => void copy()}>{copied ? <Check/> : <Copy/>}{copied ? "Gekopieerd" : "Kopieer"}</button></div>
     </section>
     <section className="prompt-count"><span>{pool.length} kaarten in deze selectie</span><span>{saved.length} lokaal bewaard</span></section>
-    <button className="prompt-back" onClick={() => window.history.length > 1 ? window.history.back() : window.location.assign("/") }><ArrowRight/> Terug</button>
+    <button className="prompt-back" onClick={onBack}><ArrowRight/> Terug</button>
   </main>;
 }
