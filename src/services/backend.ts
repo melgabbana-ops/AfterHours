@@ -42,10 +42,12 @@ export async function loadRemoteState(preferredSessionId?:string):Promise<AfterH
   updated_at:profile.updated_at??profile.created_at
  };
 
- const{data:consent}=session
+ const{data:consent,error:consentError}=session
   ?await supabase.from("consent_records").select("status,confirmed_at,revoked_at").eq("session_id",effectiveSession.id).order("created_at",{ascending:false}).order("id",{ascending:false}).limit(1).maybeSingle()
-  :{data:null};
- const{data:history}=await supabase.from("session_history").select("id,completed_at,xp_earned,rounds").eq("profile_id",user.id).order("completed_at",{ascending:false}).limit(12);
+  :{data:null,error:null};
+ if(consentError)return null;
+ const{data:history,error:historyError}=await supabase.from("session_history").select("id,completed_at,xp_earned,rounds").eq("profile_id",user.id).order("completed_at",{ascending:false}).limit(12);
+ if(historyError)return null;
 
  return{
   ageConfirmed:false,
