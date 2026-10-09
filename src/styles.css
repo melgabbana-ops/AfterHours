@@ -200,3 +200,47 @@ nav button.active:after{content:"";position:absolute;left:50%;bottom:3px;width:1
 .media-signed-link{display:block;margin-top:13px;padding:12px;border:1px solid #735b31;color:var(--gold);font-size:10px;text-align:center;text-decoration:none;line-height:1.5}
 .media-vault [role="status"]{overflow-wrap:anywhere}
 @media(max-width:520px){.media-vault{padding:13px}.media-item{align-items:flex-start;flex-direction:column}.media-item-actions{justify-content:flex-start}.media-item-actions button{min-height:36px}}
+
+
+/* Approved AFTER HOURS visual direction: editorial black, warm gold, compact iPhone dashboard */
+@media(max-width:520px){
+  .app{background:radial-gradient(ellipse at 50% 0%,#21160d 0,#090807 31%,#050505 66%);}
+  header{height:calc(58px + env(safe-area-inset-top));padding-left:18px;padding-right:18px;border-bottom-color:#302315;background:rgba(5,5,5,.92);}
+  .wordmark{width:110px;height:42px;justify-content:flex-start}
+  .wordmark img{width:72px;height:48px;object-position:left center}
+  .status{font-size:8px;letter-spacing:.1em}
+  main:has(>.support-card){display:flex;flex-direction:column;padding:12px 18px 34px}
+  main:has(>.support-card)>.support-card{order:8;margin:18px 0 0;border-radius:2px;padding:14px 15px;background:linear-gradient(145deg,#100d09,#070707);border-color:#5b4528}
+  main:has(>.support-card)>.guide-card{order:7;margin:14px 0 0;border-radius:2px;padding:16px;background:#090807;border-color:#4e3c25}
+  main:has(>.support-card)>.notification-bar{order:0;align-self:flex-end;min-height:28px;margin:0 0 4px}
+  main:has(>.support-card)>.hero{order:1;padding:18px 2px 22px}
+  main:has(>.support-card)>section:has(.gamecard){order:2}
+  main:has(>.support-card)>.grid{order:3;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:14px}
+  main:has(>.support-card)>.consent-panel{order:4;margin-top:14px;border-radius:2px}
+  main:has(>.support-card)>.resume-panel{order:5;margin-top:14px;border-radius:2px}
+  .hero h2{font-family:"Playfair Display",serif;font-size:36px;line-height:1.02;letter-spacing:.015em;margin-bottom:10px}
+  .hero p{font-size:12px;line-height:1.55;max-width:310px;margin:0;color:#b5aa98}
+  .safety{margin-top:18px;padding:12px 13px;border-color:#4a3923;background:rgba(10,9,7,.8)}
+  .gamecard{min-height:150px;padding:17px;border-color:#5b4528;border-radius:2px;background:linear-gradient(140deg,#1a120a,#080807)}
+  .gamecard h3{font-size:24px;margin:8px 0 5px}
+  .gamecard p{font-size:11px;margin:0;line-height:1.45}
+  .gamecard button{width:44px;height:44px;flex:none}
+  .sectionhead{font-size:8px;letter-spacing:.12em}
+  .grid .tile{min-height:92px;padding:11px 8px;border-radius:2px;border-color:#4a3924;background:linear-gradient(150deg,#100d09,#070707);text-align:center}
+  .grid .tile svg{width:17px;height:17px;margin:0 auto 10px}
+  .grid .tile span{font-size:10px;color:#e3cfaa}
+  .grid .tile small{font-size:8px;line-height:1.35}
+  nav{height:calc(64px + env(safe-area-inset-bottom));gap:0;justify-content:space-around;background:rgba(5,5,5,.97);border-top:1px solid #4a3924}
+  nav button{width:20%;min-width:0;font-size:8px;gap:3px;color:#777066}
+  nav button.active{color:#e8bd70}
+  nav button.active svg{filter:drop-shadow(0 0 5px rgba(219,170,84,.4))}
+  nav svg{width:16px;height:16px}
+  .support-card,.guide-card,.gamecard,.tile,.consent-panel,.resume-panel{box-shadow:none}
+  .experience-shell .round{text-align:left}
+  .experience-shell .round>p{margin:0;line-height:1.6}
+  .experience-shell .timer{margin:26px auto}
+  .experience-shell .timer strong{font-size:58px}
+  .round-steps span{font-size:7px;letter-spacing:0}
+  .aftercare-card{border-radius:2px}
+  .aftercare-options button{border-radius:2px}
+}
