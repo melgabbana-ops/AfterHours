@@ -8,7 +8,7 @@ export const rankNames = [
   "AFTER HOURS",
 ] as const;
 
-export const rankThresholds = [0, 100, 450, 1000, 1800, 2800, 5000] as const;
+export const rankThresholds = [0, 250, 600, 1200, 2000, 3500, 5000] as const;
 
 export function rankIndexFromXp(value: number): number {
   return rankThresholds.reduce<number>(
