@@ -1,0 +1,31 @@
+/** Canonical AFTER HOURS brand language. These strings are protected from UI translation. */
+export const AFTER_HOURS_BRAND = Object.freeze({
+  name: "AFTER HOURS",
+  teaserSignoff: "AFTER HOURS · ENTER AFTER DARK",
+  primaryPunchline: "YOUR RULES. YOUR LIMITS. YOUR EXPERIENCE.",
+  privateExperience: "A PRIVATE 18+ EXPERIENCE",
+  enter: "ENTER AFTER HOURS",
+  startExperience: "START EXPERIENCE",
+  tryFreeDemo: "TRY FREE DEMO",
+  watchTrailer: "WATCH TRAILER",
+  randomKink: "RANDOM KINK",
+  surpriseMe: "SURPRISE ME",
+  dailyKink: "DAILY KINK",
+  ranks: [
+    "THE CURIOUS",
+    "THE INITIATE",
+    "THE DEVOTED",
+    "THE DISCIPLINED",
+    "THE ENTHRALLED",
+    "THE BOUND",
+    "AFTER HOURS",
+  ],
+  terms: [
+    "STORY", "RANDOM", "SURPRISE", "CUSTOM", "BOSS", "THE GUIDE",
+    "CHARACTER CREATION", "RANKS & XP", "ORACLE", "EXPERIENCES",
+    "TIMER", "PAUSE", "PASS", "STOP", "CONTINUE", "RADIO",
+    "DAILY AFTER HOURS", "ACHIEVEMENTS & COLLECTION", "THE AFTER HOURS ARCHIVE",
+    "AFTERCARE MODE", "PRIVACY MODE", "HELP CENTER & SUPPORT",
+    "AFTER HOURS INBOX", "CONTROL ROOM",
+  ],
+} as const);
