@@ -24,7 +24,17 @@ export const dailyReflectionThemes = [
   { title: "Zorg na afloop", prompt: "Spreek af hoe jullie na een intens moment weer rustig bij elkaar kunnen landen." },
 ] as const;
 
-/** Returns a Dutch zodiac sign from YYYY-MM-DD without storing the birth date. */
+const englishDailyReflectionThemes = [
+  { title: "Clear Intention", prompt: "Say out loud what you hope to experience today, without expecting the other person to guess." },
+  { title: "Room for No", prompt: "Make deliberate room for an honest no today and treat it as valuable information." },
+  { title: "Curiosity", prompt: "Ask one open question before making an assumption about what the other person wants." },
+  { title: "Calm and Rhythm", prompt: "Choose a pace that makes it easy for everyone to pause and change their mind." },
+  { title: "Trust", prompt: "Name one concrete agreement that helps you feel safe and heard." },
+  { title: "Playful Discovery", prompt: "Explore one small new possibility, but only if it feels welcome to everyone." },
+  { title: "Care Afterwards", prompt: "Agree how you can help each other settle after an intense moment." },
+] as const;
+
+/** Returns a zodiac sign from YYYY-MM-DD without storing the birth date. from YYYY-MM-DD without storing the birth date. */
 export function zodiacSignForBirthDate(value: string): string | null {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
   const [year, month, day] = value.split("-").map(Number);
@@ -39,9 +49,9 @@ export function zodiacSignForBirthDate(value: string): string | null {
 }
 
 /** Stable per local calendar day and sign; a reflective prompt, not a prediction. */
-export function dailyReflectionFor(sign: string, date = new Date()) {
+export function dailyReflectionFor(sign: string, date = new Date(), language: "nl" | "en" = "nl") {
   const signIndex = ["Ram", "Stier", "Tweelingen", "Kreeft", "Leeuw", "Maagd", "Weegschaal", "Schorpioen", "Boogschutter", "Steenbok", "Waterman", "Vissen"].indexOf(sign);
   const dayKey = date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate();
   const index = ((dayKey + Math.max(0, signIndex)) % dailyReflectionThemes.length);
-  return dailyReflectionThemes[index];
+  return language === "en" ? englishDailyReflectionThemes[index] : dailyReflectionThemes[index];
 }
