@@ -12,9 +12,9 @@ export default function Teaser() {
     <div className="teaser-noise" aria-hidden="true"/>
     <div className="teaser-top"><img className="teaser-logo" src="/after-hours-logo.svg" alt="AFTER HOURS" /><div className="teaser-top-actions"><span className="teaser-private">18+ · {t("PRIVÉPREVIEW","PRIVATE PREVIEW")}</span><button className="language-toggle teaser-language-toggle" type="button" aria-label={t("Taal wijzigen","Change language")} onClick={() => setLanguage(language === "nl" ? "en" : "nl")}><span className={language === "nl" ? "language-active" : ""}>NL</span><span className="language-divider">/</span><span className={language === "en" ? "language-active" : ""}>EN</span></button></div></div>
     {!introUnavailable && !introEnded && <section className="teaser-film" aria-label={t("AFTER HOURS-intro","AFTER HOURS intro")}>
-      <video className="teaser-film-video" autoPlay muted playsInline preload="metadata" poster="/IMG_7718.jpeg"
+      <video className="teaser-film-video" autoPlay muted playsInline preload="metadata" poster="https://gcdn.picsart.com/cloud-storage/ea428271-664f-4cd5-a566-5bdebb64f775.jpg"
         onEnded={() => setIntroEnded(true)} onError={() => setIntroUnavailable(true)}>
-        <source src="/after-hours-intro.mp4" type="video/mp4"/>
+        <source src="https://gcdn.picsart.com/editing-temp/a18ef45a-9ae8-4ce4-93b4-68e40401defc.mp4" type="video/mp4"/>
       </video>
       <button className="teaser-film-skip" type="button" onClick={() => setIntroEnded(true)}>{t("INTRO OVERSLAAN","SKIP INTRO")}</button>
     </section>}
