@@ -9,6 +9,8 @@ export default function BadgeShowcase() {
   const badgeCopy: Record<string, {description: string}> = {
     first_login: {description: "Your first secure sign-in."},
     sky_watcher: {description: "You explored your astrology reflection."},
+    tarot_reader: {description: "You drew your first Kinky Tarot card."},
+    oracle_seeker: {description: "You opened your first Oracle message."},
     daily_orbit: {description: "You opened today's star reflection."},
     consent_first: {description: "You confirmed the consent check."},
     first_session: {description: "You completed your first session."},
