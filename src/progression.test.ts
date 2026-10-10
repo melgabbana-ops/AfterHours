@@ -7,40 +7,66 @@ import {
   rankThresholds,
 } from "./progression";
 
-describe("AFTER HOURS rank progression", () => {
-  it("keeps the seven approved brand ranks in order", () => {
+describe("AFTER HOURS player rank progression", () => {
+  it("preserves the previously approved 15 player ranks in order", () => {
     expect(rankNames).toEqual([
       "CURIOUS",
+      "TEASE",
+      "PLAYTHING",
+      "SUBMISSIVE",
+      "BRAT",
+      "TOY",
+      "PET",
+      "THRALL",
+      "DEVOTEE",
       "OBEDIENT",
-      "PLAYFUL",
-      "DEVOTED",
-      "ADDICTED",
+      "ENTHRALLED",
+      "COLLARED",
       "OWNED",
-      "LEGEND",
+      "DEVOTED",
+      "DARK DEVOTION",
     ]);
   });
 
   it.each([
     [0, "CURIOUS"],
-    [249, "CURIOUS"],
-    [250, "OBEDIENT"],
-    [599, "OBEDIENT"],
-    [600, "PLAYFUL"],
-    [1199, "PLAYFUL"],
-    [1200, "DEVOTED"],
-    [1999, "DEVOTED"],
-    [2000, "ADDICTED"],
-    [3499, "ADDICTED"],
-    [3500, "OWNED"],
-    [4999, "OWNED"],
-    [5000, "LEGEND"],
+    [99, "CURIOUS"],
+    [100, "TEASE"],
+    [249, "TEASE"],
+    [250, "PLAYTHING"],
+    [449, "PLAYTHING"],
+    [450, "SUBMISSIVE"],
+    [699, "SUBMISSIVE"],
+    [700, "BRAT"],
+    [999, "BRAT"],
+    [1000, "TOY"],
+    [1399, "TOY"],
+    [1400, "PET"],
+    [1799, "PET"],
+    [1800, "THRALL"],
+    [2299, "THRALL"],
+    [2300, "DEVOTEE"],
+    [2799, "DEVOTEE"],
+    [2800, "OBEDIENT"],
+    [3399, "OBEDIENT"],
+    [3400, "ENTHRALLED"],
+    [3899, "ENTHRALLED"],
+    [3900, "COLLARED"],
+    [4349, "COLLARED"],
+    [4350, "OWNED"],
+    [4699, "OWNED"],
+    [4700, "DEVOTED"],
+    [4999, "DEVOTED"],
+    [5000, "DARK DEVOTION"],
   ] as const)("maps %i XP to rank %s", (xp, expectedRank) => {
     expect(rankFromXp(xp)).toBe(expectedRank);
   });
 
-  it("uses the approved XP thresholds", () => {
-    expect(rankThresholds).toEqual([0, 250, 600, 1200, 2000, 3500, 5000]);
-    expect(rankIndexFromXp(3500)).toBe(5);
+  it("uses the 15-rank XP thresholds in ascending order", () => {
+    expect(rankThresholds).toEqual([
+      0, 100, 250, 450, 700, 1000, 1400, 1800, 2300, 2800, 3400, 3900, 4350, 4700, 5000,
+    ]);
+    expect(rankIndexFromXp(5000)).toBe(14);
   });
 
   it("keeps level progression separate from rank progression", () => {
