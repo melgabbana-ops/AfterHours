@@ -506,3 +506,34 @@ img,svg,video,canvas{max-width:100%}
 .safety-plan-message svg{width:15px;height:15px;flex:none}
 .safety-plan-footnote{border-top:1px solid #282116;padding-top:14px;margin-top:20px;font-size:10px}
 @media(max-width:520px){.safety-shortcut{width:40px;height:40px}.safety-plan{padding:17px}.safety-plan-actions button{flex:1}}
+
+/* AFTER HOURS collections / transparent monetization page */
+.monetization-screen{width:min(100% - 28px,920px);margin:0 auto;padding:clamp(24px,5vw,52px) 0 44px;color:#f4f0e8}
+.monetization-heading{display:block!important;border:0!important;background:transparent!important;padding:0 0 20px!important;margin:0 0 18px}
+.monetization-heading .eyebrow{display:flex;align-items:center;gap:8px;color:#c9a96a;letter-spacing:.18em;font-size:10px}
+.monetization-heading h1{font-family:"Playfair Display",Georgia,serif;font-size:clamp(34px,7vw,58px);font-weight:500;line-height:1.05;letter-spacing:-.03em;margin:18px 0 14px}
+.monetization-heading p{max-width:650px;color:#a8a092;font-size:13px;line-height:1.8}
+.monetization-free,.monetization-product{position:relative;min-width:0;border:1px solid #342a1b;background:linear-gradient(145deg,rgba(24,19,12,.9),rgba(7,7,6,.98));padding:clamp(18px,3.5vw,28px);box-shadow:0 16px 44px rgba(0,0,0,.2)}
+.monetization-free{margin:0 0 14px;border-color:#4b3a21}
+.monetization-products{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.monetization-product.featured{border-color:#8a6935;background:radial-gradient(ellipse at 100% 0%,rgba(94,62,23,.22),transparent 55%),linear-gradient(145deg,#181209,#080807)}
+.monetization-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.monetization-card-top .eyebrow{font-size:9px;letter-spacing:.16em;color:#ad956b}
+.monetization-price{font-family:"Playfair Display",Georgia,serif;font-size:clamp(25px,5vw,36px);line-height:1;color:#e5c781;white-space:nowrap}
+.monetization-screen h2{font-family:"Playfair Display",Georgia,serif;font-size:clamp(21px,3vw,28px);font-weight:500;margin:19px 0 9px}
+.monetization-screen p{color:#a9a092;font-size:12px;line-height:1.75}
+.monetization-screen ul{list-style:none;padding:0;margin:20px 0;display:grid;gap:12px}
+.monetization-screen li{display:flex;align-items:flex-start;gap:9px;color:#d5cdbf;font-size:12px;line-height:1.5}
+.monetization-screen li svg{width:15px;height:15px;flex:none;color:#d3b56e}
+.monetization-button{width:100%;min-height:46px;padding:12px 15px;border:1px solid #8a6935;border-radius:8px;background:linear-gradient(145deg,#33230d,#171006);color:#f0d69a;font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase}
+.monetization-button:hover,.monetization-button:focus-visible{border-color:#e0bd71;outline:2px solid rgba(224,189,113,.16);outline-offset:2px}
+.monetization-button.secondary{background:#0b0b09;border-color:#4b4030;color:#ddd3bf}
+.monetization-ribbon{position:absolute;top:0;right:0;background:#a17a39;color:#0b0906;padding:7px 10px;font-size:8px;letter-spacing:.12em;font-weight:800}
+.monetization-product.featured .monetization-card-top{padding-top:17px}
+.monetization-notice{border:1px solid #514125;background:#151108;padding:12px 14px;color:#d8c18b!important}
+.monetization-trust{display:flex;align-items:flex-start;gap:12px;margin:18px 0 24px;padding:16px;border:1px solid #332a1e;background:#0b0b09}
+.monetization-trust>svg{width:20px;height:20px;flex:none;color:#d0ae67}
+.monetization-trust strong{font-size:12px;color:#e5d7b8}
+.monetization-trust p{margin:6px 0 0;font-size:11px}
+.monetization-back{margin-bottom:20px}
+@media(max-width:640px){.monetization-products{grid-template-columns:1fr}.monetization-screen{width:min(100% - 24px,520px)}.monetization-free,.monetization-product{padding:18px}.monetization-heading h1{font-size:36px}}
