@@ -476,3 +476,7 @@ img,svg,video,canvas{max-width:100%}
 .language-toggle .language-active{color:#e3c27a;font-weight:700}
 .language-divider{color:#4f483b}
 @media(max-width:520px){header{padding-inline:14px}.header-tools{gap:8px}.language-toggle{min-height:40px;padding:0 9px}.status{font-size:8px;letter-spacing:.08em}}
+
+.teaser-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.teaser-language-toggle{flex:0 0 auto;position:relative;z-index:5;background:rgba(8,7,6,.8)}
+@media(max-width:420px){.teaser-top{gap:8px}.teaser-language-toggle{min-height:36px;padding-inline:8px}}
