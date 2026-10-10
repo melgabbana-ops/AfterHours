@@ -121,7 +121,7 @@ export default function PromptLibrary({ onBack, onComplete }: { onBack: () => vo
     </section>
 
     </>}
-    {mode === "cards" && section className="prompt-count"><span>{pool.length} kaarten in deze selectie</span><span>{saved.length} lokaal bewaard</span></section}
+    {mode === "cards" && <section className="prompt-count"><span>{pool.length} kaarten in deze selectie</span><span>{saved.length} lokaal bewaard</span></section>}
     <button className="prompt-back" onClick={onBack}><ArrowRight/> Terug</button>
   </main>;
 }
