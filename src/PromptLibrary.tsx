@@ -159,7 +159,9 @@ const roundChallengeVariants: Record<string, string[]> = {
 
 
 
-export default function PromptLibrary({ onBack, onComplete, playerId = "local-profile" }: { onBack: () => void; onComplete: () => void; playerId?: string }) {
+export default function PromptLibrary({ onBack, onComplete, playerId = "local-profile", language = "nl" }: { onBack: () => void; onComplete: () => void; playerId?: string; language?: "nl" | "en" }) {
+  const t = (nl: string, en: string) => language === "nl" ? nl : en;
+  const speechLocale = language === "nl" ? "nl-NL" : "en-US";
   const historyKey = `afterhours.prompt-history.v2:${playerId}`;
   const gameHistoryKey = `afterhours.game-variant-history.v1:${playerId}`;
   const domPreferenceKey = `afterhours.dom-preference.v1:${playerId}`;
@@ -203,21 +205,24 @@ export default function PromptLibrary({ onBack, onComplete, playerId = "local-pr
   }, []);
   const createDomReply = (spoken: string) => {
     const message = spoken.toLowerCase();
-    if (/stop|rood|ik wil niet|beëindig|beeindig|klaar ermee/.test(message)) { try { window.speechSynthesis?.cancel(); recognitionRef.current?.stop(); } catch { /* Stop must work even if browser speech is already idle. */ } setVoiceListening(false); return "We stoppen nu. Je hoeft niets uit te leggen. De scène is voorbij. Wil je aftercare of liever even stilte?"; }
-    if (/geel|pauze|twijfel|langzamer|aanpassen|anders/.test(message)) return "We pauzeren. Dank je dat je het zegt. Wat wil je aanpassen? We gaan pas verder als jij daar duidelijk voor kiest.";
-    if (/groen|doorgaan|verder|ja, graag|ik wil wel/.test(message)) return "Ik hoor je. We blijven binnen de afspraken die je hebt gekozen. Wil je dezelfde opdracht voortzetten of een andere veilige optie kiezen?";
-    if (/nee|pass|overslaan|niet doen/.test(message)) return "Begrepen. Je mag passen zonder reden en zonder straf. Ik bied je een andere opdracht aan, of we stoppen hier.";
-    if (/help|onveilig|bang|pijn|niet prettig/.test(message)) return "We stoppen de opdracht en checken eerst hoe het met je gaat. Je hoeft niets te bewijzen. Kies stoppen, pauzeren of aftercare.";
-    return selectedDom === "masculine"
-      ? "Ik heb je gehoord. Vertel me alleen wat je wilt delen. Wil je doorgaan, de opdracht aanpassen of pauzeren? Je grenzen blijven leidend."
-      : "Ik heb je gehoord. Vertel me alleen wat je wilt delen. Wil je doorgaan, de opdracht aanpassen of pauzeren? Je grenzen blijven leidend.";
+    const stopIntent = language === "nl" ? /stop|rood|ik wil niet|beëindig|beeindig|klaar ermee/ : /stop|red|i don't want to|i do not want to|end it|finish now/;
+    const pauseIntent = language === "nl" ? /geel|pauze|twijfel|langzamer|aanpassen|anders/ : /yellow|pause|not sure|slower|change|adjust/;
+    const goIntent = language === "nl" ? /groen|doorgaan|verder|ja, graag|ik wil wel/ : /green|continue|go on|yes please|i want to/;
+    const passIntent = language === "nl" ? /nee|pass|overslaan|niet doen/ : /no|pass|skip|don't do that|do not do that/;
+    const helpIntent = language === "nl" ? /help|onveilig|bang|pijn|niet prettig/ : /help|unsafe|scared|pain|uncomfortable/;
+    if (stopIntent.test(message)) { try { window.speechSynthesis?.cancel(); recognitionRef.current?.stop(); } catch { /* Stop must work even if browser speech is already idle. */ } setVoiceListening(false); return t("We stoppen nu. Je hoeft niets uit te leggen. De scène is voorbij. Wil je aftercare of liever even stilte?", "We stop now. You don't need to explain. The scene is over. Would you like aftercare or a quiet moment?"); }
+    if (pauseIntent.test(message)) return t("We pauzeren. Dank je dat je het zegt. Wat wil je aanpassen? We gaan pas verder als jij daar duidelijk voor kiest.", "We are pausing. Thank you for telling me. What would you like to change? We will only continue when you clearly choose to.");
+    if (goIntent.test(message)) return t("Ik hoor je. We blijven binnen de afspraken die je hebt gekozen. Wil je dezelfde opdracht voortzetten of een andere veilige optie kiezen?", "I hear you. We will stay within the boundaries you chose. Would you like to continue this task or choose another safe option?");
+    if (passIntent.test(message)) return t("Begrepen. Je mag passen zonder reden en zonder straf. Ik bied je een andere opdracht aan, of we stoppen hier.", "Understood. You can pass without a reason or penalty. I can offer another task, or we can stop here.");
+    if (helpIntent.test(message)) return t("We stoppen de opdracht en checken eerst hoe het met je gaat. Je hoeft niets te bewijzen. Kies stoppen, pauzeren of aftercare.", "We are stopping the task and checking how you feel first. You have nothing to prove. Choose stop, pause, or aftercare.");
+    return t("Ik heb je gehoord. Vertel me alleen wat je wilt delen. Wil je doorgaan, de opdracht aanpassen of pauzeren? Je grenzen blijven leidend.", "I hear you. Share only what you feel comfortable sharing. Would you like to continue, change the task, or pause? Your boundaries come first.");
   };
   const speakAsDom = (text: string) => {
     if (!("speechSynthesis" in window)) return;
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "nl-NL";
-    const voices = window.speechSynthesis.getVoices().filter((voice) => voice.lang.toLowerCase().startsWith("nl"));
+    utterance.lang = speechLocale;
+    const voices = window.speechSynthesis.getVoices().filter((voice) => voice.lang.toLowerCase().startsWith(language));
     const genderTerms = selectedDom === "masculine" ? /male|man|martijn|ruben|xander/i : /female|vrouw|sara|claire|ellen|lotte/i;
     utterance.voice = voices.find((voice) => genderTerms.test(voice.name)) ?? voices[0] ?? null;
     utterance.rate = selectedDom === "masculine" ? 0.91 : 0.96;
@@ -226,13 +231,13 @@ export default function PromptLibrary({ onBack, onComplete, playerId = "local-pr
   };
   const readAssignment = (text: string) => {
     setVoiceError("");
-    if (!("speechSynthesis" in window)) { setVoiceError("Voorlezen wordt niet ondersteund in deze browser."); return; }
+    if (!("speechSynthesis" in window)) { setVoiceError(t("Voorlezen wordt niet ondersteund in deze browser.", "Text-to-speech is not supported in this browser.")); return; }
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "nl-NL";
+    utterance.lang = speechLocale;
     utterance.rate = selectedDom === "masculine" ? 0.9 : 0.96;
     utterance.pitch = selectedDom === "masculine" ? 0.84 : 1.08;
-    const voices = window.speechSynthesis.getVoices().filter((voice) => voice.lang.toLowerCase().startsWith("nl"));
+    const voices = window.speechSynthesis.getVoices().filter((voice) => voice.lang.toLowerCase().startsWith(language));
     const genderTerms = selectedDom === "masculine" ? /male|man|martijn|ruben|xander/i : /female|vrouw|sara|claire|ellen|lotte/i;
     utterance.voice = voices.find((voice) => genderTerms.test(voice.name)) ?? voices[0] ?? null;
     window.speechSynthesis.speak(utterance);
@@ -241,19 +246,19 @@ export default function PromptLibrary({ onBack, onComplete, playerId = "local-pr
     setVoiceError("");
     const speechWindow = window as any;
     const Recognition = speechWindow.SpeechRecognition || speechWindow.webkitSpeechRecognition;
-    if (!Recognition) { setVoiceSupported(false); setVoiceError("Spraakherkenning wordt niet ondersteund in deze browser. Probeer Safari of Chrome en controleer de microfoonrechten."); return; }
+    if (!Recognition) { setVoiceSupported(false); setVoiceError(t("Spraakherkenning wordt niet ondersteund in deze browser. Probeer Safari of Chrome en controleer de microfoonrechten.", "Speech recognition is not supported in this browser. Try Safari or Chrome and check microphone permissions.")); return; }
     try {
       const recognition = new Recognition();
       recognitionRef.current = recognition;
-      recognition.lang = "nl-NL";
+      recognition.lang = speechLocale;
       recognition.interimResults = false;
       recognition.maxAlternatives = 1;
       recognition.onstart = () => setVoiceListening(true);
       recognition.onend = () => setVoiceListening(false);
-      recognition.onerror = (event: any) => { setVoiceListening(false); setVoiceError(event?.error === "not-allowed" ? "Microfoontoegang is geblokkeerd. Geef AFTER HOURS toestemming in je browserinstellingen." : "Ik kon je niet goed verstaan. Probeer het opnieuw of controleer je microfoon."); };
+      recognition.onerror = (event: any) => { setVoiceListening(false); setVoiceError(event?.error === "not-allowed" ? t("Microfoontoegang is geblokkeerd. Geef AFTER HOURS toestemming in je browserinstellingen.", "Microphone access is blocked. Allow AFTER HOURS in your browser settings.") : t("Ik kon je niet goed verstaan. Probeer het opnieuw of controleer je microfoon.", "I couldn’t understand that. Please try again or check your microphone.")); };
       recognition.onresult = (event: any) => {
         const transcript = String(event?.results?.[0]?.[0]?.transcript ?? "").trim();
-        if (!transcript) { setVoiceError("Ik heb geen spraak herkend. Probeer het nog eens."); return; }
+        if (!transcript) { setVoiceError(t("Ik heb geen spraak herkend. Probeer het nog eens.", "No speech was detected. Please try again.")); return; }
         setVoiceTranscript(transcript);
         const reply = createDomReply(transcript);
         setDomReply(reply);
