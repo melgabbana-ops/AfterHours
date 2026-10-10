@@ -1,11 +1,11 @@
 export const rankNames = [
-  "CURIOUS",
-  "OBEDIENT",
-  "PLAYFUL",
-  "DEVOTED",
-  "ADDICTED",
-  "OWNED",
-  "LEGEND",
+  "THE CURIOUS",
+  "THE INITIATE",
+  "THE DEVOTED",
+  "THE DISCIPLINED",
+  "THE ENTHRALLED",
+  "THE BOUND",
+  "AFTER HOURS",
 ] as const;
 
 export const rankThresholds = [0, 250, 600, 1200, 2000, 3500, 5000] as const;
