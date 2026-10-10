@@ -1,25 +1,14 @@
 export const rankNames = [
-  "CURIOUS",
-  "TEASE",
-  "PLAYTHING",
-  "SUBMISSIVE",
-  "BRAT",
-  "TOY",
-  "PET",
-  "THRALL",
-  "DEVOTEE",
-  "OBEDIENT",
-  "ENTHRALLED",
-  "COLLARED",
-  "OWNED",
-  "DEVOTED",
-  "DARK DEVOTION",
+  "THE CURIOUS",
+  "THE INITIATE",
+  "THE DEVOTED",
+  "THE DISCIPLINED",
+  "THE ENTHRALLED",
+  "THE BOUND",
+  "AFTER HOURS",
 ] as const;
 
-// Fifteen approved player ranks; the final title unlocks at 5,000 XP.
-export const rankThresholds = [
-  0, 100, 250, 450, 700, 1000, 1400, 1800, 2300, 2800, 3400, 3900, 4350, 4700, 5000,
-] as const;
+export const rankThresholds = [0, 100, 450, 1000, 1800, 2800, 5000] as const;
 
 export function rankIndexFromXp(value: number): number {
   return rankThresholds.reduce<number>(
