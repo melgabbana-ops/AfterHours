@@ -10,7 +10,7 @@ export default function Teaser() {
 
   return <main className="teaser-screen">
     <div className="teaser-noise" aria-hidden="true"/>
-    <div className="teaser-top"><span className="teaser-private">18+ · {t("PRIVÉPREVIEW","PRIVATE PREVIEW")}</span><button className="language-toggle teaser-language-toggle" type="button" aria-label={t("Taal wijzigen","Change language")} onClick={() => setLanguage(language === "nl" ? "en" : "nl")}><span className={language === "nl" ? "language-active" : ""}>NL</span><span className="language-divider">/</span><span className={language === "en" ? "language-active" : ""}>EN</span></button></div>
+    <div className="teaser-top"><img className="teaser-logo" src="/after-hours-logo.svg" alt="AFTER HOURS" /><div className="teaser-top-actions"><span className="teaser-private">18+ · {t("PRIVÉPREVIEW","PRIVATE PREVIEW")}</span><button className="language-toggle teaser-language-toggle" type="button" aria-label={t("Taal wijzigen","Change language")} onClick={() => setLanguage(language === "nl" ? "en" : "nl")}><span className={language === "nl" ? "language-active" : ""}>NL</span><span className="language-divider">/</span><span className={language === "en" ? "language-active" : ""}>EN</span></button></div></div>
     {!introUnavailable && !introEnded && <section className="teaser-film" aria-label={t("AFTER HOURS-intro","AFTER HOURS intro")}>
       <video className="teaser-film-video" autoPlay muted playsInline preload="metadata" poster="/IMG_7718.jpeg"
         onEnded={() => setIntroEnded(true)} onError={() => setIntroUnavailable(true)}>
