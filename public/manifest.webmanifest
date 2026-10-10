@@ -1,12 +1,12 @@
 {
   "name":"AFTER HOURS",
   "short_name":"AFTER HOURS",
-  "description":"Premium interactieve ervaring met een cinematic black-and-gold interface.",
+  "description":"AFTER HOURS: installeerbare, touch-first ervaring voor iPhone, Android, iPad en tablets.",
   "lang":"nl",
   "start_url":"/",
   "scope":"/",
   "display":"standalone",
-  "display_override":["window-controls-overlay","standalone"],
+  "display_override":["standalone"],
   "orientation":"any",
   "background_color":"#050505",
   "theme_color":"#050505",
@@ -16,6 +16,8 @@
   "shortcuts":[
     {"name":"Experience","short_name":"Experience","url":"/?screen=game"},
     {"name":"Profiel","short_name":"Profiel","url":"/?screen=profile"},
-    {"name":"Session control","short_name":"Session control","url":"/?screen=admin"}
+    {"name":"Session control","short_name":"Session control","url":"/?screen=admin"},
+    {"name":"The Deck","short_name":"The Deck","url":"/?screen=prompts"},
+    {"name":"Radio","short_name":"Radio","url":"/?screen=radio"}
   ]
 }
