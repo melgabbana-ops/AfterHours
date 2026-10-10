@@ -9,18 +9,18 @@ describe("AFTER HOURS player rank progression", () => {
     ]);
   });
   it.each([
-    [0, "THE CURIOUS"], [99, "THE CURIOUS"],
-    [100, "THE INITIATE"], [449, "THE INITIATE"],
-    [450, "THE DEVOTED"], [999, "THE DEVOTED"],
-    [1000, "THE DISCIPLINED"], [1799, "THE DISCIPLINED"],
-    [1800, "THE ENTHRALLED"], [2799, "THE ENTHRALLED"],
-    [2800, "THE BOUND"], [4999, "THE BOUND"],
+    [0, "THE CURIOUS"], [249, "THE CURIOUS"],
+    [250, "THE INITIATE"], [599, "THE INITIATE"],
+    [600, "THE DEVOTED"], [1199, "THE DEVOTED"],
+    [1200, "THE DISCIPLINED"], [1999, "THE DISCIPLINED"],
+    [2000, "THE ENTHRALLED"], [3499, "THE ENTHRALLED"],
+    [3500, "THE BOUND"], [4999, "THE BOUND"],
     [5000, "AFTER HOURS"],
   ] as const)("maps %i XP to rank %s", (xp, expected) => {
     expect(rankFromXp(xp)).toBe(expected);
   });
-  it("keeps seven ascending thresholds and unlocks AFTER HOURS at 5,000 XP", () => {
-    expect(rankThresholds).toEqual([0, 100, 450, 1000, 1800, 2800, 5000]);
+  it("matches the master spec's seven XP thresholds", () => {
+    expect(rankThresholds).toEqual([0, 250, 600, 1200, 2000, 3500, 5000]);
     expect(rankIndexFromXp(5000)).toBe(6);
   });
   it("keeps level progression separate from rank progression", () => {
