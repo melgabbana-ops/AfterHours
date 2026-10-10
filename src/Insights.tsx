@@ -33,7 +33,8 @@ const signs=[
 ["Boogschutter","Nieuwsgierigheid mag de deur openen. Houd de grenzen zichtbaar terwijl je samen iets nieuws verkent."],["Steenbok","Structuur kan surrender juist veiliger maken. Spreek de kaders af en laat binnen die kaders ruimte ontstaan."],["Waterman","Breek met routine, niet met grenzen. Een onverwachte keuze werkt alleen wanneer iedereen bewust meedoet."],["Vissen","Intuïtie is mooi, maar gedachten lezen bestaat niet. Vraag na, luister en laat aftercare de cirkel sluiten."]
 ];
 
-export function Insights({onBack}:{onBack:()=>void}){
+export function Insights({onBack,language="nl"}:{onBack:()=>void;language?:"nl"|"en"}){
+ const t=(nl:string,en:string)=>language==="nl"?nl:en;
  const[tab,setTab]=useState<"tarot"|"oracle"|"astro">("tarot");
  const[cardIndex,setCardIndex]=useState(()=>Math.floor(Math.random()*tarot.length));
  const[oracleIndex,setOracleIndex]=useState(()=>Math.floor(Math.random()*oracle.length));
