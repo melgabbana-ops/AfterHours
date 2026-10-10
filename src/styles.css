@@ -398,7 +398,7 @@ img,svg,video,canvas{max-width:100%}
 .teaser-enter:focus-visible{outline:2px solid #f0d18a;outline-offset:4px}
 @media(prefers-reduced-motion:reduce){.teaser-enter{transition:none}}
 
-.teaser-top{align-items:flex-start}.teaser-logo{display:block;width:clamp(84px,19vw,132px);height:auto;object-fit:contain;filter:drop-shadow(0 0 18px rgba(177,117,42,.18))}.teaser-top .teaser-private{padding-top:12px;text-align:right}
+.teaser-top{align-items:flex-start}.teaser-logo{display:block;width:clamp(84px,19vw,132px);height:auto;object-fit:contain;filter:drop-shadow(0 0 18px rgba(177,117,42,.18))}.teaser-top .teaser-private{padding-top:12px;text-align:right}.teaser-top-actions{display:flex;align-items:flex-start;justify-content:flex-end;gap:10px;min-width:0}
 @media(max-width:420px){.teaser-logo{width:76px}.teaser-private{font-size:8px;letter-spacing:.12em}}
 
 /* Skippable cinematic brand intro */
