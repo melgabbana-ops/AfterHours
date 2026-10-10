@@ -8,39 +8,39 @@ import {
 } from "./progression";
 
 describe("AFTER HOURS player rank progression", () => {
-  it("uses the seven approved brand ranks in order", () => {
+  it("preserves the previously approved 15 player ranks in order", () => {
     expect(rankNames).toEqual([
-      "THE CURIOUS",
-      "THE INITIATE",
-      "THE DEVOTED",
-      "THE DISCIPLINED",
-      "THE ENTHRALLED",
-      "THE BOUND",
-      "AFTER HOURS",
+      "CURIOUS", "TEASE", "PLAYTHING", "SUBMISSIVE", "BRAT",
+      "TOY", "PET", "THRALL", "DEVOTEE", "OBEDIENT",
+      "ENTHRALLED", "COLLARED", "OWNED", "DEVOTED", "DARK DEVOTION",
     ]);
   });
 
   it.each([
-    [0, "THE CURIOUS"],
-    [99, "THE CURIOUS"],
-    [100, "THE INITIATE"],
-    [449, "THE INITIATE"],
-    [450, "THE DEVOTED"],
-    [999, "THE DEVOTED"],
-    [1000, "THE DISCIPLINED"],
-    [1799, "THE DISCIPLINED"],
-    [1800, "THE ENTHRALLED"],
-    [2799, "THE ENTHRALLED"],
-    [2800, "THE BOUND"],
-    [4999, "THE BOUND"],
-    [5000, "AFTER HOURS"],
+    [0, "CURIOUS"], [99, "CURIOUS"],
+    [100, "TEASE"], [249, "TEASE"],
+    [250, "PLAYTHING"], [449, "PLAYTHING"],
+    [450, "SUBMISSIVE"], [699, "SUBMISSIVE"],
+    [700, "BRAT"], [999, "BRAT"],
+    [1000, "TOY"], [1399, "TOY"],
+    [1400, "PET"], [1799, "PET"],
+    [1800, "THRALL"], [2299, "THRALL"],
+    [2300, "DEVOTEE"], [2799, "DEVOTEE"],
+    [2800, "OBEDIENT"], [3399, "OBEDIENT"],
+    [3400, "ENTHRALLED"], [3899, "ENTHRALLED"],
+    [3900, "COLLARED"], [4349, "COLLARED"],
+    [4350, "OWNED"], [4699, "OWNED"],
+    [4700, "DEVOTED"], [4999, "DEVOTED"],
+    [5000, "DARK DEVOTION"],
   ] as const)("maps %i XP to rank %s", (xp, expectedRank) => {
     expect(rankFromXp(xp)).toBe(expectedRank);
   });
 
-  it("uses seven ascending XP thresholds with the final rank at 5,000 XP", () => {
-    expect(rankThresholds).toEqual([0, 100, 450, 1000, 1800, 2800, 5000]);
-    expect(rankIndexFromXp(5000)).toBe(6);
+  it("uses the 15-rank XP thresholds in ascending order", () => {
+    expect(rankThresholds).toEqual([
+      0, 100, 250, 450, 700, 1000, 1400, 1800, 2300, 2800, 3400, 3900, 4350, 4700, 5000,
+    ]);
+    expect(rankIndexFromXp(5000)).toBe(14);
   });
 
   it("keeps level progression separate from rank progression", () => {
@@ -51,7 +51,7 @@ describe("AFTER HOURS player rank progression", () => {
   });
 
   it("does not assign negative XP to a higher rank or level", () => {
-    expect(rankFromXp(-100)).toBe("THE CURIOUS");
+    expect(rankFromXp(-100)).toBe("CURIOUS");
     expect(levelFromXp(-100)).toBe(1);
   });
 });
