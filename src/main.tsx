@@ -368,7 +368,7 @@ function App(){
 
  {screen==="aftercare"&&<main className="aftercare-screen"><section className="aftercare-card"><span className="eyebrow">AFTER HOURS · AFTERCARE</span><h2>Land softly.</h2><p>De Experience is voorbij. Kies wat nu het beste past. Niets hoeft meteen.</p><div className="aftercare-options"><button className={aftercareChoice==="land"?"selected":""} onClick={()=>setAftercareChoice("land")}><strong>Rustig landen</strong><span>Even zitten, ademen en het tempo laten zakken.</span></button><button className={aftercareChoice==="talk"?"selected":""} onClick={()=>setAftercareChoice("talk")}><strong>Kort napraten</strong><span>Bespreek samen wat goed voelde en wat je wilt meenemen.</span></button><button className={aftercareChoice==="space"?"selected":""} onClick={()=>setAftercareChoice("space")}><strong>Ruimte & water</strong><span>Neem even afstand, drink iets en kom rustig terug.</span></button></div><div className="aftercare-note"><Shield/><span>Aftercare is geen verplichting om iets te delen. Een pauze, grens of stop blijft altijd geldig.</span></div><button className="gold aftercare-complete" onClick={()=>void finishSession()} disabled={!aftercareChoice||finishing}>{finishing?"Veilig afronden…":"Sessie veilig afronden"}</button><button className="back" onClick={()=>setScreen("home")}>← Terug</button></section></main>}
 
- {screen==="prompts"&&<PromptLibrary onBack={()=>setScreen("home")} onComplete={()=>recordAchievement("prompt_complete")}/>}
+ {screen==="prompts"&&<PromptLibrary playerId={state.profile.id} onBack={()=>setScreen("home")} onComplete={()=>recordAchievement("prompt_complete")}/>}
 
  {screen==="insights"&&<Insights onBack={()=>setScreen("home")}/>}
 
