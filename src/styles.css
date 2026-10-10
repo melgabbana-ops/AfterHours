@@ -413,3 +413,25 @@ img,svg,video,canvas{max-width:100%}
 /* Guided experience catalog */
 .experience-intro{margin:10px 0 24px}.experience-intro h3{font-family:"Playfair Display",serif;font-size:32px;font-weight:500;margin:0 0 10px}.experience-intro p{max-width:650px;color:var(--muted);font-size:12px;line-height:1.8}.experience-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.experience-card{min-height:100%;display:flex;flex-direction:column;align-items:stretch;gap:12px}.experience-card h3,.experience-play h3{font-family:"Playfair Display",serif;font-size:27px;font-weight:500;margin:0}.experience-card p,.experience-play p{color:#aaa69d;font-size:12px;line-height:1.8}.experience-card .prompt-consent{margin-top:auto}.experience-card>button,.experience-play .prompt-actions button{min-height:44px;border:1px solid #6e5930;color:var(--gold);padding:12px 16px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:10px;letter-spacing:.08em}.experience-card>button svg,.experience-play .prompt-actions svg{width:15px}.experience-play{max-width:680px;margin:0 auto}.experience-play p strong{display:inline-block;color:var(--gold);font-size:9px;letter-spacing:.14em;margin-bottom:6px}.experience-play .prompt-actions{display:flex;justify-content:space-between;gap:10px;margin-top:24px}.experience-play .prompt-actions button{flex:1}.experience-play .prompt-actions button.gold{background:linear-gradient(135deg,#241b0c,#100d08)}
 @media(max-width:560px){.experience-grid{grid-template-columns:1fr}.experience-intro h3{font-size:29px}.experience-play .prompt-actions{flex-direction:column}.experience-play .prompt-actions button{width:100%}}
+
+
+/* AFTER HOURS · touch-first iOS, Android and tablet experience */
+.dom-picker{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:24px 0 8px;padding:16px;border:1px solid #30271b;border-radius:16px;background:linear-gradient(135deg,rgba(201,164,92,.07),rgba(8,7,6,.86))}
+.dom-picker>div{grid-column:1/-1}
+.dom-picker>div p{margin:7px 0 4px;color:#a7a094;font-size:12px;line-height:1.65}
+.dom-picker>button{display:flex;align-items:center;gap:11px;min-width:0;min-height:68px;padding:12px;border:1px solid #302a20;border-radius:12px;background:#090807;text-align:left;transition:border-color .18s ease,background .18s ease}
+.dom-picker>button.selected{border-color:#c9a45c;background:linear-gradient(135deg,rgba(201,164,92,.14),rgba(10,9,8,.96));box-shadow:inset 0 0 0 1px rgba(201,164,92,.12)}
+.dom-picker-symbol{display:grid;place-items:center;flex:0 0 38px;width:38px;height:38px;border:1px solid #4a3920;border-radius:50%;color:#d7b66f;font-size:19px}
+.dom-picker>button>span:nth-child(2){display:flex;flex-direction:column;gap:5px;min-width:0}
+.dom-picker>button strong{font-size:12px;font-weight:600;color:#f1e8d6}
+.dom-picker>button small{font-size:10px;color:#999184;line-height:1.35}
+.dom-picker-check{margin-left:auto;color:#c9a45c;font-size:16px}
+.dom-voice{padding:14px 16px!important;border:1px solid #4b3920;border-radius:12px;background:linear-gradient(135deg,rgba(201,164,92,.09),rgba(8,7,6,.7));text-align:left!important}
+.dom-voice strong{color:#dfbd73!important;letter-spacing:.12em}
+.prompt-library,.experience-catalog,.experience-grid,.experience-card,.experience-play{min-width:0}
+.prompt-library button{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+@media(min-width:700px) and (max-width:1180px){.prompt-library{max-width:980px;padding-left:clamp(20px,4vw,42px);padding-right:clamp(20px,4vw,42px)}.experience-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.experience-card{padding:28px}.dom-picker{padding:20px}}
+@media(max-width:560px){.dom-picker{grid-template-columns:1fr;padding:13px}.dom-picker>div{grid-column:auto}.dom-picker>button{min-height:64px}.dom-picker>button strong{font-size:12px}.dom-picker>button small{font-size:10px}.prompt-actions button,.prompt-filters button{min-height:44px}}
+@media(orientation:landscape) and (max-height:560px){.prompt-hero{padding-top:20px}.dom-picker{margin-top:12px}.teaser-film-video{max-height:100dvh}}
+@supports(padding:max(0px)){.prompt-library{padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right));padding-bottom:max(110px,calc(90px + env(safe-area-inset-bottom)))}}
+@media(prefers-reduced-motion:reduce){.dom-picker>button{transition:none}}
