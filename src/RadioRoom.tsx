@@ -8,7 +8,8 @@ const moods=[
  {name:"Pulse",desc:"Meer energie, meer beweging",tracks:["Night drive","Dark electronic","Deep techno"],search:"dark electronic night drive playlist"}
 ];
 
-export function RadioRoom({onBack}:{onBack:()=>void}){
+export function RadioRoom({onBack,language="nl"}:{onBack:()=>void;language?:"nl"|"en"}){
+ const t=(nl:string,en:string)=>language==="nl"?nl:en;
  const[mood,setMood]=useState(0); const[track,setTrack]=useState(0);
  const current=moods[mood];
  const openSpotify=()=>window.open("https://open.spotify.com/search/"+encodeURIComponent(current.search),"_blank","noopener,noreferrer");
