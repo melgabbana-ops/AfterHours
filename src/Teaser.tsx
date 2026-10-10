@@ -2,7 +2,7 @@ import React from "react";
 import { ArrowUpRight, LockKeyhole, Sparkles, ChevronRight } from "lucide-react";
 
 export default function Teaser() {
-  const [language, setLanguage] = React.useState<"nl"|"en">(() => { try { return localStorage.getItem("afterhours.language") === "en" ? "en" : "nl"; } catch { return "en"; } });
+  const [language, setLanguage] = React.useState<"nl"|"en">(() => { try { return localStorage.getItem("afterhours.language") === "nl" ? "nl" : "en"; } catch { return "en"; } });
   React.useEffect(() => { try { localStorage.setItem("afterhours.language", language); document.documentElement.lang = language; } catch { /* Language preference is optional. */ } }, [language]);
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
   const [introUnavailable, setIntroUnavailable] = React.useState(false);
