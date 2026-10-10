@@ -75,7 +75,7 @@ export default function PromptLibrary({ onBack, onComplete }: { onBack: () => vo
   };
 
   return <main className="prompt-library">
-    <section className="prompt-hero"><span className="eyebrow">AFTER HOURS · PROMPT DECK</span><h2>Choose your tension.</h2><p>Van zachte verbinding tot duidelijke power dynamics. Jij kiest wat past, wat niet past en wanneer je stopt.</p>
+    <section className="prompt-hero"><span className="eyebrow">AFTER HOURS · THE DECK</span><h2>Choose your tension.</h2><p>Van zachte verbinding tot duidelijke power dynamics. Jij kiest wat past, wat niet past en wanneer je stopt.</p>
       <div className="prompt-filters" role="group" aria-label="Filter opdrachten">{kinds.map((item) => <button key={item} className={kind === item ? "active" : ""} onClick={() => changeKind(item)}>{item}</button>)}</div>
     </section>
     <section className="prompt-card">
