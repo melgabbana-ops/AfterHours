@@ -5,12 +5,13 @@ import PromptLibrary from "./PromptLibrary";
 import BadgeShowcase from "./BadgeShowcase";
 import { recordAchievement } from "./achievements";
 import{createRoot}from"react-dom/client";
-import{Shield,Lock,Play,Pause,RotateCcw,ChevronRight,User,Settings,Home,Timer,CheckCircle2,Square,Activity,LogOut,Sparkles,Radio,Bell,BookOpen,EyeOff}from"lucide-react";
+import{Shield,Lock,Play,Pause,RotateCcw,ChevronRight,User,Settings,Home,Timer,CheckCircle2,Square,Activity,LogOut,Sparkles,Radio,Bell,BookOpen,EyeOff,ShoppingBag}from"lucide-react";
 import"./styles.css";
 import{Insights}from"./Insights";
 import{RadioRoom}from"./RadioRoom";
 import MediaVault from"./MediaVault";
 import SafetyPlan from"./SafetyPlan";
+import Monetization from "./Monetization";
 import type{AfterHoursState,AvatarStyle,Screen,Safety,SessionHistoryEntry}from"./types";
 import{loadState,saveState,loadTimer,saveTimer,clearTimer,defaultState}from"./storage";
 import{loadRemoteState,loadRemoteRounds,syncRemoteState,updateRemoteUsername,completeRemoteSession,revokeRemoteConsent}from"./services/backend";
@@ -66,7 +67,7 @@ function App(){
  const[state,setState]=useState<AfterHoursState>(()=>loadState());
  const[authReady,setAuthReady]=useState(!supabaseConfigured);
  const[rounds,setRounds]=useState(fallbackRounds);
- const initialScreen=(()=>{const value=new URLSearchParams(window.location.search).get("screen");if(value==="game"||value==="profile"||value==="admin"||value==="insights"||value==="radio"||value==="prompts"||value==="safety")return value;return "home" as Screen})();
+ const initialScreen=(()=>{const value=new URLSearchParams(window.location.search).get("screen");if(value==="game"||value==="profile"||value==="admin"||value==="insights"||value==="radio"||value==="prompts"||value==="safety"||value==="store")return value;return "home" as Screen})();
  const[screen,setScreen]=useState<Screen>(initialScreen);
  const[privacyMode,setPrivacyMode]=useState(false);
  useEffect(()=>{if(new URLSearchParams(window.location.search).has("screen"))window.history.replaceState({},document.title,window.location.pathname+window.location.hash)},[]);
@@ -364,6 +365,7 @@ function App(){
    <button className="tile" onClick={()=>setScreen("insights")}><Activity/><span>{t("Horoscoop","Horoscope")}</span></button>
    <button className="tile" onClick={()=>setScreen("radio")}><Radio/><span>Radio</span></button>
    <button className="tile" onClick={()=>setScreen("prompts")}><BookOpen/><span>The Deck</span></button>
+   <button className="tile" onClick={()=>setScreen("store")}><ShoppingBag/><span>{t("Collecties & prijzen","Collections & pricing")}</span></button>
   </section>
   {!consent&&<section id="consent" className="consent-panel"><Shield/><div><strong>{t("Consent is vereist","Consent is required")}</strong><span>{t("Bevestig je vrijwillige toestemming voordat je een ervaring start.","Confirm your voluntary consent before starting an experience.")}</span></div><button onClick={confirmConsent}>{t("Bevestigen","Confirm")}</button></section>}
   {(consent&&(state.session.status==="active"||state.session.status==="paused"))&&<section className="resume-panel"><Activity/><div><strong>{state.session.status==="active"?t("Sessie hervatbaar","Session ready to resume"):t("Sessie gepauzeerd","Session paused")}</strong><span>{state.session.status==="active"?t("De timer loopt verder vanaf de opgeslagen positie.","The timer resumes from its saved position."):t("Je kunt doorgaan vanaf de opgeslagen positie.","You can continue from the saved position.")}</span></div><button onClick={()=>setScreen("game")}>{state.session.status==="active"?t("Ga verder","Continue"):t("Hervatten","Resume")} <ChevronRight/></button></section>}
@@ -380,6 +382,8 @@ function App(){
  {screen==="radio"&&<RadioRoom language={language} onBack={()=>setScreen("home")}/>}
 
  {screen==="safety"&&<main className="safety-screen"><SafetyPlan language={language}/><button className="back" onClick={()=>setScreen("home")}>← {t("Terug","Back")}</button></main>}
+
+ {screen==="store"&&<Monetization language={language} onBack={()=>setScreen("home")} onStartFree={()=>setScreen("home")}/> }
 
  {screen==="profile"&&<main><section className="profile"><div className={`avatar identity-avatar avatar-${avatarStyle}`}><div className="avatar-sigil">{avatarSymbols.find(item=>item.style===avatarStyle)?.symbol??"✦"}</div><div className="avatar-initials">{state.profile.displayName.trim().split(/\s+/).map(part=>part[0]).join("").slice(0,2).toUpperCase()}</div><span>{rankFromXp(xp)}</span></div><span className="eyebrow">YOUR PROFILE · AFTER HOURS IDENTITY</span><h2>{state.profile.displayName}</h2><p>@{state.profile.username} · Level {state.profile.level} · {xp} XP</p><div className="avatar-picker" aria-label={t("Kies je AFTER HOURS identity","Choose your AFTER HOURS identity")}><span className="eyebrow">IDENTITY SIGIL</span><div className="avatar-options">{avatarSymbols.map(item=><button key={item.style} className={avatarStyle===item.style?"selected":""} onClick={()=>setAvatarStyle(item.style)} aria-pressed={avatarStyle===item.style}><span>{item.symbol}</span><small>{item.label}</small></button>)}</div></div><MediaVault sessionId={state.session.id} language={language}/><div className="name-editor"><label htmlFor="display-name">AFTER HOURS-NAAM</label><div><input id="display-name" value={displayNameDraft} onChange={e=>setDisplayNameDraft(e.target.value)} maxLength={24} autoComplete="nickname"/><button onClick={saveDisplayName} disabled={displayNameDraft.trim().length<2}>{t("Opslaan","Save")}</button></div></div><div className="name-editor"><label htmlFor="after-hours-username">AFTER HOURS-USERNAME</label><div><span className="username-prefix">@</span><input id="after-hours-username" value={usernameDraft} onChange={e=>setUsernameDraft(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g,"").slice(0,20))} maxLength={20} autoComplete="username" aria-describedby="username-help"/><button onClick={saveUsername} disabled={usernameDraft.trim().length<3}>{t("Opslaan","Save")}</button><span id="username-help" className="username-help">{t("uniek","unique")}</span></div>{profileMessage&&<small className="profile-message" role="status">{profileMessage}</small>}</div><span className="profile-rank">{rankFromXp(xp)}</span><div className="xp"><span style={{width:levelProgress+"%"}}/></div><small className="xp-label">{Math.max(0,nextLevelFloor-xp)} XP {t("tot Level","to Level")} {currentLevel+1}</small><div className="rank-ladder"><span className="eyebrow">RANK LADDER</span><div>{rankNames.map((rank,index)=><span key={rank} className={index===rankIndexFromXp(xp)?"current":index<rankIndexFromXp(xp)?"passed":""}>{String(index+1).padStart(2,"0")} {rank} · {rankThresholds[index]} XP</span>)}</div></div><div className="stats"><div><b>{String(state.profile.level).padStart(2,"0")}</b><small>LEVEL</small></div><div><b>{String(state.profile.sessions).padStart(2,"0")}</b><small>{t("SESSIES","SESSIONS")}</small></div><div><b>{xp}</b><small>XP</small></div></div><div className="history"><span className="eyebrow">{t("RECENTE SESSIES","RECENT SESSIONS")}</span>{state.history.length===0?<small className="history-empty">{t("Nog geen afgeronde sessies.","No completed sessions yet.")}</small>:state.history.slice(0,4).map(item=><div className="history-row" key={item.id}><div><strong>AFTER HOURS Experience</strong><small>{new Date(item.completedAt).toLocaleDateString("nl-NL")} · {item.rounds} {t("rondes","rounds")}</small></div><b>+{item.xpEarned} XP</b></div>)}</div><BadgeShowcase/></section><button className="back" onClick={()=>setScreen("home")}>← {t("Terug","Back")}</button></main>}
 
