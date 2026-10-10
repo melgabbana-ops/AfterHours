@@ -1,4 +1,4 @@
-export type Screen="home"|"game"|"profile"|"admin"|"insights"|"radio"|"aftercare"|"prompts"|"safety"|"store";
+export type Screen="home"|"game"|"profile"|"admin"|"insights"|"radio"|"aftercare"|"prompts"|"safety"|"store"|"onboarding";
 export type Safety="green"|"amber";
 export type ConsentStatus="pending"|"active"|"revoked";
 export type AvatarStyle="sigil"|"collar"|"key"|"crown";
