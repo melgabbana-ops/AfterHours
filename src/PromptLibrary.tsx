@@ -52,7 +52,50 @@ const prompts: PromptItem[] = [
   {id:"q12",kind:"Kinky vragen",intensity:"Reflectie",title:"Overgave met grenzen",text:"Wat helpt je om controle vrijwillig uit handen te geven, terwijl je weet dat je die altijd terug kunt nemen?"},
   {id:"q13",kind:"Kinky vragen",intensity:"Reflectie",title:"Regels die werken",text:"Welke afspraak maakt een power dynamic leuker of duidelijker? Welke regel zou juist te beperkend voelen?"},
   {id:"q14",kind:"Kinky vragen",intensity:"Reflectie",title:"Fantasie versus werkelijkheid",text:"Welke fantasie vind je prettig om over te praten, maar wil je niet uitvoeren? Allebei mogen waar zijn."},
-  {id:"q15",kind:"Kinky vragen",intensity:"Reflectie",title:"Herstel van vertrouwen",text:"Wat zou je nodig hebben als een afspraak per ongeluk wordt gemist, en hoe kan iemand verantwoordelijkheid nemen zonder je onder druk te zetten?"},
+  {id:"q15",kind:"Kinky vragen",intensity:"Reflectie",title:"Herstel van vertrouwen",text:"Wat zou je nodig hebben als een afspraak per ongeluk wordt gemist, en hoe kan iemand verantwoordelijkheid nemen zonder je onder druk te zetten?"},,
+  {id:"k21",kind:"Kinky opdrachten",intensity:"Stevig in taal",title:"De formele begroeting",text:"De Dom kiest een vooraf afgesproken titel en zegt: 'Je hebt mijn aandacht. Begroet me op de manier die we hebben afgesproken.' De speler voert dit alleen uit als het nog welkom voelt; anders kiest die een andere begroeting."},
+  {id:"k22",kind:"Kinky opdrachten",intensity:"Stevig in taal",title:"Drie duidelijke keuzes",text:"De Dom biedt drie veilige keuzes aan: muziek kiezen, een korte reflectie beantwoorden of een eenvoudig servicegebaar doen. De speler kiest één, stelt een alternatief voor of past."},
+  {id:"k23",kind:"Kinky opdrachten",intensity:"Zacht",title:"De toestemmingstest",text:"Voordat de scène verdergaat, vraagt de Dom: 'Wil je doorgaan, aanpassen of stoppen?' Alleen een duidelijke, vrijwillige keuze betekent doorgaan."},
+  {id:"k24",kind:"Kinky opdrachten",intensity:"Stevig in taal",title:"Het protocol herhalen",text:"De Dom vraagt de speler de afgesproken regels in eigen woorden te herhalen. Corrigeer rustig eventuele misverstanden en begin pas wanneer iedereen dezelfde afspraak bedoelt."},
+  {id:"k25",kind:"Kinky opdrachten",intensity:"Zacht",title:"De keuze van de Dom",text:"De Dom kiest één van twee vooraf goedgekeurde, alledaagse opdrachten. De speler mag zonder uitleg weigeren of de opdracht vervangen."},
+  {id:"k26",kind:"Kinky opdrachten",intensity:"Stevig in taal",title:"De houding kiezen",text:"De Dom vraagt: 'Kies een houding waarin jij je comfortabel en aanwezig voelt.' Geen knielen, langdurig staan of fysieke belasting tenzij dit vooraf besproken én prettig is."},
+  {id:"k27",kind:"Kinky opdrachten",intensity:"Zacht",title:"De stilte doorbreken",text:"Na maximaal dertig seconden comfortabele stilte vraagt de Dom: 'Wat wil je dat ik op dit moment weet?' Antwoorden, passen en stoppen zijn allemaal geldige keuzes."},
+  {id:"k28",kind:"Kinky opdrachten",intensity:"Stevig in taal",title:"De verdiende titel",text:"Kies samen een speelse titel voor deze sessie. De Dom legt uit wat die titel betekent en vraagt of de speler ermee aangesproken wil worden voordat die hem gebruikt."},
+  {id:"k29",kind:"Kinky opdrachten",intensity:"Stevig in taal",title:"Het bevel met een uitweg",text:"De Dom formuleert een korte opdracht en voegt toe: 'Je mag aanpassen of passen.' De opdracht is alleen een spelvoorstel, nooit een test van liefde of loyaliteit."},
+  {id:"k30",kind:"Kinky opdrachten",intensity:"Zacht",title:"De toewijdingskaart",text:"Kies een kaart, voorwerp of woord dat de dynamiek symboliseert. Vertel wat het betekent en spreek af dat je het op elk moment kunt neerleggen."},
+  {id:"k31",kind:"Kinky opdrachten",intensity:"Stevig in taal",title:"De complimentenregel",text:"De Dom geeft één concrete opdracht: benoem één keuze waar je trots op bent. De Dom luistert en reageert zonder de ervaring van de speler over te nemen."},
+  {id:"k32",kind:"Kinky opdrachten",intensity:"Zacht",title:"Service op bestelling",text:"De Dom vraagt om één kleine servicehandeling uit een vooraf afgesproken lijst. De speler kiest de taak, doet een alternatief of past; de Dom bedankt zonder aanspraak te maken op meer."},
+  {id:"k33",kind:"Kinky opdrachten",intensity:"Stevig in taal",title:"De grens bevestigen",text:"De Dom noemt één afgesproken grens en vraagt: 'Staat deze grens nog steeds?' Bij twijfel wordt de scène gepauzeerd en de afspraak aangepast."},
+  {id:"k34",kind:"Kinky opdrachten",intensity:"Zacht",title:"De zachte landing",text:"De Dom beëindigt de rol met een afgesproken zin. Beide spelers noemen daarna één behoefte voor aftercare en kiezen samen wat haalbaar voelt."},
+  {id:"k35",kind:"Kinky opdrachten",intensity:"Stevig in taal",title:"De rolwissel",text:"Wissel voor één ronde alleen de regie over een onschuldige keuze, bijvoorbeeld muziek of volgorde. De oorspronkelijke rol keert pas terug na een duidelijke check-in."},
+  {id:"k36",kind:"Kinky opdrachten",intensity:"Stevig in taal",title:"De plagerige uitdaging",text:"Gebruik uitsluitend plagerige woorden die vooraf als welkom zijn gekozen. De speler mag een woord direct schrappen; stop met die formulering zonder discussie."},
+  {id:"k37",kind:"Kinky opdrachten",intensity:"Zacht",title:"De spiegel van vertrouwen",text:"Iedere speler noemt één ding dat vertrouwen opbouwt en één ding dat het zou schaden. Herhaal elkaars antwoord om te laten zien dat je hebt geluisterd."},
+  {id:"k38",kind:"Kinky opdrachten",intensity:"Stevig in taal",title:"De drie-stappenopdracht",text:"Geef maximaal drie kleine stappen, één voor één. Wacht na elke stap op toestemming en geef de volgende pas als de speler daar nog steeds voor kiest."},
+  {id:"k39",kind:"Kinky opdrachten",intensity:"Zacht",title:"De afsluitende buiging",text:"Als dit prettig voelt, sluit af met een afgesproken gebaar. Het gebaar is symbolisch en kan altijd worden vervangen door een woord of helemaal worden overgeslagen."},
+  {id:"k40",kind:"Kinky opdrachten",intensity:"Stevig in taal",title:"De stem van de Dom",text:"De Dom kiest een rustige, lage of formele spreekstijl en geeft één eenvoudige instructie. Vraag daarna welke toon prettig was en pas die aan."},
+  {id:"m01",kind:"Kinky opdrachten",intensity:"Zacht",title:"Photo Challenge · The Detail",text:"Kies samen één niet-intiem detail, zoals een ring, handschoen, schoen, sleutel of stofstructuur. Maak optioneel één foto in zacht licht. Bekijk samen en kies bewaren of verwijderen."},
+  {id:"m02",kind:"Kinky opdrachten",intensity:"Stevig in taal",title:"Photo Challenge · The Pose",text:"De Dom geeft maximaal twee regie-aanwijzingen voor een volledig geklede, comfortabele pose. Eerst oefenen zonder camera; pas daarna een foto maken als iedereen opnieuw akkoord is."},
+  {id:"m03",kind:"Kinky opdrachten",intensity:"Zacht",title:"Photo Challenge · The Silhouette",text:"Maak optioneel een silhouet tegen een rustige achtergrond. Controleer of gezichten, spiegels, ramen, locatiegegevens en andere herkenbare details buiten beeld blijven als dat de afspraak is."},
+  {id:"m04",kind:"Kinky opdrachten",intensity:"Stevig in taal",title:"Video Challenge · Ten Seconds",text:"Neem alleen na een nieuwe duidelijke ja een clip van maximaal tien seconden op. Gebruik drie aanwijzingen: beginpositie, langzame beweging en eindbeeld. Geen verborgen opname of automatische upload."},
+  {id:"m05",kind:"Kinky opdrachten",intensity:"Zacht",title:"Video Challenge · The Object",text:"Film optioneel een afgesproken voorwerp of outfitdetail in één rustige beweging. Neem geen stem of herkenbaar gezicht op tenzij dat apart is goedgekeurd."},
+  {id:"m06",kind:"Kinky opdrachten",intensity:"Stevig in taal",title:"Video Challenge · Director's Cut",text:"De Dom geeft een korte creatieve aanwijzing over licht, kadrering of tempo. De speler mag 'cut' zeggen, waarna de opname onmiddellijk stopt en samen wordt besloten wat er met het bestand gebeurt."},
+  {id:"m07",kind:"Kinky opdrachten",intensity:"Zacht",title:"The Private Premiere",text:"Bekijk een zelfgekozen foto of clip samen. Iedere betrokkene kiest zelfstandig: bewaren, opnieuw maken of verwijderen. Toestemming om te maken betekent nooit automatisch toestemming om te delen."},
+  {id:"m08",kind:"Kinky opdrachten",intensity:"Stevig in taal",title:"The Prop Challenge",text:"Kies één veilig rekwisiet dat al is goedgekeurd. De Dom geeft een creatieve opdracht voor een foto van het voorwerp, zonder dat iemand het hoeft te dragen of gebruiken."},
+  {id:"ai01",kind:"Kinky opdrachten",intensity:"Stevig in taal",title:"AI Dom · First Order",text:"Voorbeeldscript: 'Kies je toon: kalm, streng of plagerig. Noem je grenzen en kies een stopwoord. Daarna geef ik één opdracht die je mag aanpassen of overslaan.' Live AI-reacties vereisen een aangesloten AI-backend."},
+  {id:"ai02",kind:"Kinky opdrachten",intensity:"Stevig in taal",title:"AI Dom · The Choice",text:"Voorbeeldscript: 'Je krijgt twee veilige opties: beschrijf je stemming in één zin of kies de soundtrack. Kies één, stel iets anders voor of zeg PASS.' De AI mag weigering nooit als toestemming interpreteren."},
+  {id:"ai03",kind:"Kinky opdrachten",intensity:"Reflectie",title:"AI Dom · Mood Check",text:"Kies groen, geel of rood voordat de AI Dom verdergaat. Groen: ga door binnen afspraken. Geel: pauzeer en pas aan. Rood: beëindig de scène en schakel over naar aftercare."},
+  {id:"ai04",kind:"Kinky opdrachten",intensity:"Stevig in taal",title:"AI Dom · The Protocol",text:"Voorbeeldscript: 'Herhaal de drie afspraken voor deze ronde. Ik volg die afspraken, niet andersom. Wil je doorgaan, aanpassen of stoppen?' Ga alleen verder wanneer de speler duidelijk kiest voor doorgaan."},
+  {id:"ai05",kind:"Kinky opdrachten",intensity:"Zacht",title:"AI Dom · Debrief",text:"Voorbeeldscript: 'De rol is voorbij. Wil je rust, reflectie of afsluiten zonder vragen?' Sla gevoelige antwoorden niet op zonder duidelijke keuze en bied altijd een eenvoudige stopoptie."},
+  {id:"q16",kind:"Kinky vragen",intensity:"Reflectie",title:"Welke titel past?",text:"Welke aanspreekvorm past bij jouw fantasie en welke zou nooit goed voelen? Wil je die altijd, alleen tijdens een scène of helemaal niet?"},
+  {id:"q17",kind:"Kinky vragen",intensity:"Reflectie",title:"Wat maakt een opdracht spannend?",text:"Is het de toon, het wachten, de structuur, het rollenspel of het gevoel gezien te worden? Wat haalt de spanning juist weg?"},
+  {id:"q18",kind:"Kinky vragen",intensity:"Reflectie",title:"Beeld en privacy",text:"Welke beelden wil je eventueel maken, wie mag ze bekijken en wanneer moeten ze verwijderd worden? Wat mag nooit worden opgenomen of gedeeld?"},
+  {id:"q19",kind:"Kinky vragen",intensity:"Reflectie",title:"AI-grenzen",text:"Welke rol mag een AI Dom aannemen en welke onderwerpen, opdrachten of aannames moeten altijd geblokkeerd blijven?"},
+  {id:"q20",kind:"Kinky vragen",intensity:"Reflectie",title:"Na de scène",text:"Wil je direct praten, eerst ontprikkelen of later terugkomen op de ervaring? Welke afspraak maakt die keuze makkelijk?"},
+  {id:"a06",kind:"Aftercare",intensity:"Reflectie",title:"De lichaamsscan",text:"Zonder iets te forceren: merk op of je behoefte hebt aan zitten, bewegen, water, warmte of rust. Je hoeft niets te verklaren."},
+  {id:"a07",kind:"Aftercare",intensity:"Reflectie",title:"De rol loslaten",text:"Gebruik een afgesproken afsluitzin en spreek elkaar weer aan buiten de rol. Vraag of ieder zich klaar voelt om af te ronden."},
+  {id:"a08",kind:"Aftercare",intensity:"Zacht",title:"De privacycheck",text:"Controleer samen of er beelden of notities zijn gemaakt en wat ermee gebeurt. Verwijder alles wat iemand niet meer wil bewaren."},
+  {id:"a09",kind:"Aftercare",intensity:"Reflectie",title:"Een check-in later",text:"Kies of je later vandaag of morgen wilt inchecken. Geen antwoordplicht en geen verwachting dat iedereen hetzelfde voelt."}
+
 ];
 
 const kinds: Array<"Alles" | PromptKind> = ["Alles","Kinky opdrachten","Kinky vragen","Vanille & verbinding","Aftercare"];
@@ -93,21 +136,90 @@ const experienceGames: ExperienceGame[] = [
 
 ];
 
+const roundChallengeVariants: Record<string, string[]> = {
+ "protocol-0": ["Laat de speler zelf één protocolregel formuleren en vraag de Dom die letterlijk te herhalen.", "Kies samen een openingszin en oefen die tweemaal: eerst buiten de rol, daarna alleen als beiden dat willen.", "Laat de speler één afspraak kiezen die deze ronde extra duidelijk wordt nageleefd."],
+ "protocol-1": ["Geef één opdracht over muziek of sfeer en wacht op een expliciet akkoord.", "Vraag de speler een veilige voorkeur te kiezen uit twee opties en bevestig de keuze rustig.", "Gebruik een afgesproken aanspreekvorm en vraag na de opdracht of die nog prettig voelt."],
+ "protocol-2": ["Laat de speler het ritueel afronden met een eigen gekozen zin en een check-in.", "Wissel de volgorde van het ritueel en de reflectie, mits beiden akkoord zijn.", "Sluit af met een korte waardering voor duidelijke communicatie en kies aftercare."],
+ "command-0": ["Kies een formele aanspreekvorm en test die met drie verschillende, vooraf goedgekeurde zinnen.", "De Dom beschrijft de gewenste sfeer in één zin; de speler kiest wat behouden of aangepast wordt.", "Spreek één verboden woord af en laat de Dom een alternatieve formulering gebruiken."],
+ "command-1": ["Geef één creatieve opdracht rond muziek, een voorwerp of een korte reflectie.", "Bied twee veilige taken aan en laat de speler kiezen, aanpassen of passen.", "Geef de instructie in een andere afgesproken toon en check of die beter werkt."],
+ "command-2": ["De speler kiest een eigen eindzin waarmee de rol wordt afgesloten.", "De speler geeft de Dom één concrete aanwijzing voor een betere volgende ronde.", "Rond af met groen/geel/rood en kies samen of er aftercare nodig is."],
+ "service-0": ["Kies een servicehandeling uit een lijst van drie kleine, veilige gebaren.", "Vraag welke vorm van aandacht welkom is: praktisch, creatief of verbaal.", "Laat de speler zelf een attent gebaar bedenken en vraag vóór uitvoering toestemming."],
+ "service-1": ["Maak een optioneel begroetingsritueel met een voorwerp of afgesproken zin.", "Laat de speler twee mogelijke rituelen vergelijken en er één kiezen of beide afwijzen.", "Verander één detail van het ritueel en check of het nog steeds betekenisvol voelt."],
+ "service-2": ["Geef waardering voor aandacht, communicatie of creativiteit, niet voor gehoorzaamheid op zich.", "Laat beide spelers één ding benoemen dat ze van de ander geleerd hebben.", "Sluit af met een zelfgekozen aftercare-optie en bespreek wat je wilt bewaren."],
+ "trust-0": ["Bespreek een grens rond taal, aanraking en privacy afzonderlijk.", "Laat iedereen één 'misschien' omzetten naar ja, nee of eerst meer informatie.", "Oefen één keer met pauzeren en hervatten nadat een afspraak is verduidelijkt."],
+ "trust-1": ["Speel een formele begroeting of een veilige opdrachtenscène van maximaal twee minuten.", "Oefen een rollenspel waarin de speler een opdracht aanpast en de Dom dat direct respecteert.", "Laat de Dom drie mogelijke opdrachten noemen; de speler kiest alleen wat welkom is."],
+ "trust-2": ["Iedereen kiest één aftercare-optie en mag die zonder uitleg veranderen.", "Geef een korte terugkoppeling: één prettig detail en één aanpassing voor later.", "Sluit af met de vraag: wil je afronden, pauzeren of een vervolg plannen?"],
+ "camera-director-0": ["Maak een testcompositie van een afgesproken rekwisiet en controleer de achtergrond op herkenbare details.", "Kies samen tussen close-up, zijaanzicht of silhouet; maak pas een foto na een nieuwe ja.", "Laat de speler zelf de kadrering bepalen en vraag de Dom alleen om feedback als die welkom is."],
+ "camera-director-1": ["Film maximaal tien seconden van een afgesproken object met één langzame camerabeweging.", "Maak eerst een proefronde zonder opname; start daarna alleen na opnieuw bevestigde toestemming.", "Kies een beginbeeld, één beweging en een eindbeeld; controleer daarna samen of de clip bewaard mag worden."],
+ "camera-director-2": ["Bekijk het materiaal één keer en kies bewust bewaren, opnieuw maken of verwijderen.", "Controleer metadata, achtergrond en herkenbaarheid voordat je besluit iets privé te bewaren.", "Bevestig afzonderlijk toestemming voor opslag en voor eventueel delen; standaard is niet delen."],
+ "ai-dom-0": ["Laat de speler eerst toon, aanspreekvorm en drie grenzen kiezen voordat de persona spreekt.", "Begin met een korte check-in en laat de speler één thema voor deze ronde selecteren.", "Laat de AI Dom de afspraken samenvatten en vraag de speler of de samenvatting klopt."],
+ "ai-dom-1": ["Geef één korte opdracht met twee veilige keuzes en een expliciete PASS-optie.", "Bied een service-, reflectie- of creatieve opdracht aan; laat de speler kiezen zonder druk.", "Vraag na één opdracht of de toon kalmer, strenger, speelser of helemaal uit moet."],
+ "ai-dom-2": ["Laat de speler kiezen tussen aftercare, reflectie of meteen afsluiten.", "Vraag één optionele feedbackvraag en bied daarnaast een knop om niets te delen.", "Beëindig de rol expliciet en wis tijdelijke prompts als de speler daarvoor kiest."]
+};
 
-export default function PromptLibrary({ onBack, onComplete }: { onBack: () => void; onComplete: () => void }) {
+
+
+export default function PromptLibrary({ onBack, onComplete, playerId = "local-profile" }: { onBack: () => void; onComplete: () => void; playerId?: string }) {
+  const historyKey = `afterhours.prompt-history.v2:${playerId}`;
+  const gameHistoryKey = `afterhours.game-variant-history.v1:${playerId}`;
   const [kind, setKind] = useState<(typeof kinds)[number]>("Alles");
   const [mode, setMode] = useState<"games" | "cards">("games");
   const [activeGame, setActiveGame] = useState<string | null>(null);
   const [gameRound, setGameRound] = useState(0);
-  const [index, setIndex] = useState(0);
+  const [selectedPromptId, setSelectedPromptId] = useState<string | null>(null);
+  const [seenPromptIds, setSeenPromptIds] = useState<string[]>(() => { try { return JSON.parse(localStorage.getItem(historyKey) || "[]").filter((id: unknown) => typeof id === "string"); } catch { return []; } });
+  const [seenGameVariants, setSeenGameVariants] = useState<string[]>(() => { try { return JSON.parse(localStorage.getItem(gameHistoryKey) || "[]").filter((id: unknown) => typeof id === "string"); } catch { return []; } });
+  const [activeVariant, setActiveVariant] = useState<{ key: string; text: string } | null>(null);
   const [saved, setSaved] = useState<string[]>([]);
   const [copied, setCopied] = useState(false);
   const [completed, setCompleted] = useState<string[]>([]);
   const pool = useMemo(() => prompts.filter((item) => kind === "Alles" || item.kind === kind), [kind]);
-  const current = pool[index % Math.max(1, pool.length)];
+  const recentPromptIds = seenPromptIds.slice(-Math.max(3, Math.min(12, Math.ceil(pool.length / 4))));
+  const current = pool.find((item) => item.id === selectedPromptId) ?? pool.find((item) => !seenPromptIds.includes(item.id)) ?? pool.find((item) => !recentPromptIds.includes(item.id)) ?? pool[0];
 
-  const changeKind = (next: (typeof kinds)[number]) => { setKind(next); setIndex(0); setCopied(false); };
-  const next = () => { setIndex((value) => pool.length > 1 ? (value + 1 + Math.floor(Math.random() * (pool.length - 1))) % pool.length : 0); setCopied(false); };
+  React.useEffect(() => {
+    if (!current) return;
+    setSeenPromptIds((previous) => {
+      const nextHistory = previous[previous.length - 1] === current.id ? previous : [...previous, current.id].slice(-1000);
+      try { localStorage.setItem(historyKey, JSON.stringify(nextHistory)); } catch { /* Local history is optional. */ }
+      return nextHistory;
+    });
+  }, [current?.id, historyKey]);
+
+  React.useEffect(() => { try { localStorage.setItem(gameHistoryKey, JSON.stringify(seenGameVariants.slice(-1000))); } catch { /* Local history is optional. */ } }, [gameHistoryKey, seenGameVariants]);
+
+  const changeKind = (next: (typeof kinds)[number]) => { setKind(next); setSelectedPromptId(null); setCopied(false); };
+  const next = () => {
+    if (!pool.length) return;
+    const recent = seenPromptIds.slice(-Math.max(3, Math.min(12, Math.ceil(pool.length / 4))));
+    const unused = pool.filter((item) => !seenPromptIds.includes(item.id) && item.id !== current?.id);
+    const cycle = pool.filter((item) => !recent.includes(item.id) && item.id !== current?.id);
+    const candidates = unused.length ? unused : cycle.length ? cycle : pool.filter((item) => item.id !== current?.id);
+    const choice = candidates[Math.floor(Math.random() * candidates.length)] ?? pool[0];
+    setSelectedPromptId(choice.id);
+    setCopied(false);
+  };
+
+  const startGame = (gameId: string) => {
+    const game = experienceGames.find((item) => item.id === gameId);
+    if (!game) return;
+    setActiveGame(gameId);
+    setGameRound(0);
+    chooseGameVariant(gameId, 0);
+  };
+
+  const chooseGameVariant = (gameId: string, roundIndex: number) => {
+    const key = `${gameId}-${roundIndex}`;
+    const variants = roundChallengeVariants[key] ?? [];
+    if (!variants.length) { setActiveVariant(null); return; }
+    const unused = variants.map((text, i) => ({ key: `${key}-v${i}`, text })).filter((variant) => !seenGameVariants.includes(variant.key));
+    const recent = seenGameVariants.slice(-12);
+    const fallback = variants.map((text, i) => ({ key: `${key}-v${i}`, text })).filter((variant) => !recent.includes(variant.key));
+    const options = unused.length ? unused : fallback.length ? fallback : variants.map((text, i) => ({ key: `${key}-v${i}`, text }));
+    const chosen = options[Math.floor(Math.random() * options.length)];
+    setActiveVariant(chosen);
+    setSeenGameVariants((previous) => [...previous, chosen.key].slice(-1000));
+  };
   const toggleSaved = () => setSaved((items) => items.includes(current.id) ? items.filter((id) => id !== current.id) : [...items, current.id]);
   const copy = async () => {
     try { await navigator.clipboard.writeText(`AFTER HOURS · ${current.kind.toUpperCase()}\n${current.title}\n\n${current.text}\n\nAlleen met vrije, expliciete en herroepbare toestemming.`); setCopied(true); }
@@ -120,19 +232,19 @@ export default function PromptLibrary({ onBack, onComplete }: { onBack: () => vo
     </section>
     {mode === "games" ? <section className="experience-catalog">
       {!activeGame ? <><div className="experience-intro"><span className="eyebrow">THE EXPERIENCE COLLECTION</span><h3>Choose your game.</h3><p>Volledige, begeleide scenario's met drie rondes, concrete opdrachten en een bewuste afsluiting. Alle deelnemers zijn 18+, stemmen vrij in en mogen op ieder moment passen of stoppen.</p></div>
-        <div className="experience-grid">{experienceGames.map((game) => <article className="prompt-card experience-card" key={game.id}><div className="prompt-card-top"><span className="eyebrow">{game.subtitle}</span><span className="prompt-intensity">{game.duration}</span></div><div className="prompt-glyph" aria-hidden="true">✦</div><h3>{game.title}</h3><p>{game.description}</p><div className="prompt-consent"><ShieldCheck/><span>{game.rounds.length} rounds · Consent-first · {game.level}</span></div><button className="gold" onClick={() => {setActiveGame(game.id);setGameRound(0)}}><ArrowRight/> Start preview</button></article>)}</div>
-      </> : (() => { const game = experienceGames.find((item) => item.id === activeGame)!; const round = game.rounds[gameRound]; return <article className="prompt-card experience-play"><div className="prompt-card-top"><span className="eyebrow">{game.title}</span><span className="prompt-intensity">ROUND {gameRound + 1} / {game.rounds.length}</span></div><div className="prompt-glyph" aria-hidden="true">✦</div><h3>{round.title}</h3><p><strong>SET THE SCENE</strong><br/>{round.setup}</p><p><strong>YOUR ASSIGNMENT</strong><br/>{round.task}</p><p><strong>CHECK-IN & DEBRIEF</strong><br/>{round.debrief}</p><div className="prompt-consent"><ShieldCheck/><span>Stopwoord en non-verbaal signaal blijven actief. Geel = pauze en afstemmen. Rood = direct stoppen.</span></div><div className="prompt-actions"><button onClick={() => {setActiveGame(null);setGameRound(0)}}>Exit game</button>{gameRound < game.rounds.length - 1 ? <button className="gold" onClick={() => setGameRound((value) => value + 1)}><ArrowRight/> Next round</button> : <button className="gold" onClick={() => {setActiveGame(null);setGameRound(0);onComplete()}}><Check/> Complete experience</button>}</div></article>; })()}
+        <div className="experience-grid">{experienceGames.map((game) => <article className="prompt-card experience-card" key={game.id}><div className="prompt-card-top"><span className="eyebrow">{game.subtitle}</span><span className="prompt-intensity">{game.duration}</span></div><div className="prompt-glyph" aria-hidden="true">✦</div><h3>{game.title}</h3><p>{game.description}</p><div className="prompt-consent"><ShieldCheck/><span>{game.rounds.length} rounds · Consent-first · {game.level}</span></div><button className="gold" onClick={() => startGame(game.id)}><ArrowRight/> Start experience</button></article>)}</div>
+      </> : (() => { const game = experienceGames.find((item) => item.id === activeGame)!; const round = game.rounds[gameRound]; return <article className="prompt-card experience-play"><div className="prompt-card-top"><span className="eyebrow">{game.title}</span><span className="prompt-intensity">ROUND {gameRound + 1} / {game.rounds.length}</span></div><div className="prompt-glyph" aria-hidden="true">✦</div><h3>{round.title}</h3><p><strong>SET THE SCENE</strong><br/>{round.setup}</p><p><strong>YOUR ASSIGNMENT</strong><br/>{activeVariant?.text ?? round.task}</p><p><strong>CHECK-IN & DEBRIEF</strong><br/>{round.debrief}</p><div className="prompt-consent"><ShieldCheck/><span>Stopwoord en non-verbaal signaal blijven actief. Geel = pauze en afstemmen. Rood = direct stoppen.</span></div><div className="prompt-actions"><button onClick={() => {setActiveGame(null);setGameRound(0);setActiveVariant(null)}}>Exit game</button>{gameRound < game.rounds.length - 1 ? <button className="gold" onClick={() => { const nextRound = gameRound + 1; setGameRound(nextRound); chooseGameVariant(game.id, nextRound); }}><ArrowRight/> Next round</button> : <button className="gold" onClick={() => {setActiveGame(null);setGameRound(0);setActiveVariant(null);onComplete()}}><Check/> Complete experience</button>}</div></article>; })()}
     </section> : <>
     <section className="prompt-card">
       <div className="prompt-card-top"><span className="eyebrow">{current.kind.toUpperCase()}</span><span className="prompt-intensity">{current.intensity}</span></div>
       <div className="prompt-glyph" aria-hidden="true">✦</div><h3>{current.title}</h3><p>{current.text}</p>
       {current.note && <p className="prompt-note">{current.note}</p>}
-      <div className="prompt-consent"><ShieldCheck/><span>18+ · Vrijwillig · Je mag altijd passen of stoppen.</span></div>
+      <div className="prompt-consent"><ShieldCheck/><span>18+ · Vrijwillig · Je mag altijd passen of stoppen. Nieuwe kaarten worden per speler lokaal bijgehouden om herhaling te beperken.</span></div>
       <div className="prompt-actions"><button className="gold" onClick={next}><Shuffle/> Volgende kaart</button><button onClick={toggleSaved}><Heart fill={saved.includes(current.id) ? "currentColor" : "none"}/>{saved.includes(current.id) ? "Bewaard" : "Bewaar"}</button><button onClick={() => { if (!completed.includes(current.id)) { setCompleted((items) => [...items, current.id]); onComplete(); } }}>{completed.includes(current.id) ? <Check/> : <ArrowRight/>}{completed.includes(current.id) ? "Gedaan" : "Markeer gedaan"}</button><button onClick={() => void copy()}>{copied ? <Check/> : <Copy/>}{copied ? "Gekopieerd" : "Kopieer"}</button></div>
     </section>
 
     </>}
-    {mode === "cards" && <section className="prompt-count"><span>{pool.length} kaarten in deze selectie</span><span>{saved.length} lokaal bewaard</span></section>}
+    {mode === "cards" && <section className="prompt-count"><span>{pool.length} kaarten in deze selectie</span><span>{pool.filter((item) => !seenPromptIds.includes(item.id)).length} nog niet gezien</span><span>{saved.length} lokaal bewaard</span></section>}
     <button className="prompt-back" onClick={onBack}><ArrowRight/> Terug</button>
   </main>;
 }
