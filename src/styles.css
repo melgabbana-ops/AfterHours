@@ -459,3 +459,12 @@ img,svg,video,canvas{max-width:100%}
 @keyframes voice-pulse{0%,100%{box-shadow:0 0 0 0 rgba(165,75,75,.1)}50%{box-shadow:0 0 0 5px rgba(165,75,75,.12)}}
 @media(max-width:520px){.voice-dom-panel{margin:18px 0;padding:15px}.voice-dom-heading h3{font-size:22px}.voice-dom-controls{display:grid;grid-template-columns:1fr}.voice-dom-controls button{width:100%;min-height:48px}.voice-dom-controls .voice-listen{min-height:54px}}
 @media(prefers-reduced-motion:reduce){.voice-dom-controls .voice-listen.listening{animation:none}}
+
+
+/* Assignment captions and read-aloud controls */
+.assignment-captions{position:relative;padding:14px 15px!important;border-left:2px solid #c9a45c;background:rgba(201,164,92,.055);border-radius:0 10px 10px 0;text-align:left!important;white-space:pre-wrap}
+.assignment-captions strong{display:inline-block;color:#dfbd73;font-size:10px;letter-spacing:.13em;margin-bottom:6px}
+.read-assignment{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:46px;margin:10px 0 16px;padding:12px 15px;border:1px solid #5a4525;border-radius:10px;background:#100d08;color:#e5c783;font-size:11px;letter-spacing:.035em;touch-action:manipulation}
+.read-assignment:active{background:#21180a}
+.read-assignment:focus-visible{outline:2px solid #dfbd73;outline-offset:3px}
+@media(max-width:520px){.read-assignment{min-height:48px;font-size:12px}.assignment-captions{padding:13px!important}}
