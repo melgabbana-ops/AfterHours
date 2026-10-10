@@ -23,12 +23,13 @@ export default function Teaser() {
       <h1>{t("IN","UNDER")}<br/><em>{t("AANBOUW","CONSTRUCTION")}</em></h1>
       <div className="teaser-divider"><span/></div>
       <p className="teaser-kicker">{t("WE BOUWEN AAN KINKY ERVARINGEN.","BUILDING KINKY STUFF.")}</p>
+      <p className="teaser-brand-punchline">YOUR RULES. YOUR LIMITS. YOUR EXPERIENCE.</p>
       <p className="teaser-copy">{t("Een privéwereld vol verlangen, ontdekking en bewuste keuzes is in de maak.","A private world of desire, discovery and deliberate choices is in the making.")}</p>
       <div className="teaser-terminal"><span className="teaser-live-dot"/><span>{t("DE ERVARING WORDT ONTWORPEN","DESIGNING THE EXPERIENCE")}</span><span className="teaser-terminal-percent">{t("IN ONTWIKKELING","IN PROGRESS")}</span></div>
-      <div className="teaser-feature"><div><LockKeyhole/><span>{t("Toestemming eerst","Consent first")}</span></div><div><Sparkles/><span>{t("Jouw regels. Jouw tempo.","Your rules. Your pace.")}</span></div></div>
+      <div className="teaser-feature"><div><LockKeyhole/><span>{t("Toestemming eerst","Consent first")}</span></div><div><Sparkles/><span>A PRIVATE 18+ EXPERIENCE</span></div></div>
       <p className="teaser-signoff">{t("Nog niet alles wordt onthuld.","Not everything is meant to be revealed yet.")}</p>
       <a className="teaser-enter" href="/?enter=1">{t("OPEN DE PRIVÉPREVIEW","ENTER THE PRIVATE PREVIEW")} <ChevronRight size={15}/></a>
     </section>
-    <footer className="teaser-footer"><span>{t("DE NACHT WORDT GEBOUWD","THE NIGHT IS BEING BUILT")} <ArrowUpRight size={12}/></span></footer>
+    <footer className="teaser-footer"><span>AFTER HOURS · ENTER AFTER DARK <ArrowUpRight size={12}/></span></footer>
   </main>;
 }
