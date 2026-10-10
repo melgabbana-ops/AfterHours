@@ -80,7 +80,7 @@ The generic placeholder/default profile silhouette must be replaced by the custo
 6. THE BOUND
 7. AFTER HOURS
 
-Use these exact names in this order in every current build. Do not replace them with the older 15-rank draft or translate them in the Dutch UI. XP thresholds in the app are 0, 100, 450, 1,000, 1,800, 2,800 and 5,000 respectively. Ranks may unlock cosmetic identity rewards, but must never make consent, safety or core progression pay-to-win.
+Use these exact names in this order in every current build. Do not replace them with the older 15-rank draft or translate them in the Dutch UI. XP thresholds in the app are 0, 250, 600, 1,200, 2,000, 3,500 and 5,000 respectively, matching the approved master prompt. Ranks may unlock cosmetic identity rewards, but must never make consent, safety or core progression pay-to-win.
 
 ## Experience engine
 
