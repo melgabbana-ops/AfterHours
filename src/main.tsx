@@ -358,7 +358,7 @@ function App(){
    <button className="tile" onClick={()=>setScreen("insights")}><Sparkles/><span>Kinky Tarot</span></button>
    <button className="tile" onClick={()=>setScreen("insights")}><Activity/><span>Horoscoop</span></button>
    <button className="tile" onClick={()=>setScreen("radio")}><Radio/><span>Radio</span></button>
-   <button className="tile" onClick={()=>setScreen("prompts")}><BookOpen/><span>Prompt Deck</span></button>
+   <button className="tile" onClick={()=>setScreen("prompts")}><BookOpen/><span>The Deck</span></button>
   </section>
   {!consent&&<section id="consent" className="consent-panel"><Shield/><div><strong>Consent is vereist</strong><span>Bevestig je vrijwillige toestemming voordat je een ervaring start.</span></div><button onClick={confirmConsent}>Bevestigen</button></section>}
   {(consent&&(state.session.status==="active"||state.session.status==="paused"))&&<section className="resume-panel"><Activity/><div><strong>{state.session.status==="active"?"Sessie hervatbaar":"Sessie gepauzeerd"}</strong><span>{state.session.status==="active"?"De timer loopt verder vanaf de opgeslagen positie.":"Je kunt doorgaan vanaf de opgeslagen positie."}</span></div><button onClick={()=>setScreen("game")}>{state.session.status==="active"?"Ga verder":"Hervatten"} <ChevronRight/></button></section>}
