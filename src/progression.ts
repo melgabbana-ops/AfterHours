@@ -1,14 +1,25 @@
 export const rankNames = [
-  "THE CURIOUS",
-  "THE INITIATE",
-  "THE DEVOTED",
-  "THE DISCIPLINED",
-  "THE ENTHRALLED",
-  "THE BOUND",
-  "AFTER HOURS",
+  "CURIOUS",
+  "TEASE",
+  "PLAYTHING",
+  "SUBMISSIVE",
+  "BRAT",
+  "TOY",
+  "PET",
+  "THRALL",
+  "DEVOTEE",
+  "OBEDIENT",
+  "ENTHRALLED",
+  "COLLARED",
+  "OWNED",
+  "DEVOTED",
+  "DARK DEVOTION",
 ] as const;
 
-export const rankThresholds = [0, 250, 600, 1200, 2000, 3500, 5000] as const;
+// A gradual 15-rank ladder, with the final title reserved for 5,000 XP.
+export const rankThresholds = [
+  0, 100, 250, 450, 700, 1000, 1400, 1800, 2300, 2800, 3400, 3900, 4350, 4700, 5000,
+] as const;
 
 export function rankIndexFromXp(value: number): number {
   return rankThresholds.reduce<number>(
