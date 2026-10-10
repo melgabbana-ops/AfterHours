@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { englishPromptCopy } from "./promptTranslations";
 import { ArrowRight, Check, Copy, Heart, Shuffle, ShieldCheck } from "lucide-react";
 
 type PromptKind = "Kinky opdrachten" | "Kinky vragen" | "Vanille & verbinding" | "Aftercare";
@@ -226,6 +227,7 @@ export default function PromptLibrary({ onBack, onComplete, playerId = "local-pr
   const displayIntensity = (value: string) => language === "en" ? ({ "Zacht": "Gentle", "Stevig in taal": "Firm language", "Reflectie": "Reflection" } as Record<string,string>)[value] ?? value : value;
   const recentPromptIds = seenPromptIds.slice(-Math.max(3, Math.min(12, Math.ceil(pool.length / 4))));
   const current = pool.find((item) => item.id === selectedPromptId) ?? pool.find((item) => !seenPromptIds.includes(item.id)) ?? pool.find((item) => !recentPromptIds.includes(item.id)) ?? pool[0];
+  const displayCurrent = language === "en" ? { ...current, ...(englishPromptCopy[current.id] ?? {}) } : current;
 
   React.useEffect(() => {
     if (!current) return;
@@ -349,7 +351,7 @@ export default function PromptLibrary({ onBack, onComplete, playerId = "local-pr
   };
   const toggleSaved = () => setSaved((items) => items.includes(current.id) ? items.filter((id) => id !== current.id) : [...items, current.id]);
   const copy = async () => {
-    try { await navigator.clipboard.writeText(`AFTER HOURS · ${displayKind(current.kind).toUpperCase()}\n${current.title}\n\n${current.text}\n\nAlleen met vrije, expliciete en herroepbare toestemming.`); setCopied(true); }
+    try { await navigator.clipboard.writeText(`AFTER HOURS · ${displayKind(current.kind).toUpperCase()}\n${displayCurrent.title}\n\n${displayCurrent.text}\n\nAlleen met vrije, expliciete en herroepbare toestemming.`); setCopied(true); }
     catch { setCopied(false); }
   };
 
@@ -369,8 +371,8 @@ export default function PromptLibrary({ onBack, onComplete, playerId = "local-pr
     </section> : <>
     <section className="prompt-card">
       <div className="prompt-card-top"><span className="eyebrow">{current.kind.toUpperCase()}</span><span className="prompt-intensity">{displayIntensity(current.intensity)}</span></div>
-      <div className="prompt-glyph" aria-hidden="true">✦</div><h3>{current.title}</h3>{current.title.startsWith("AI Dom") && <p className="dom-voice"><strong>{domTitle.toUpperCase()} · AI PERSONA</strong><br/>{domGreeting}</p>}<p className="assignment-captions">{current.text}</p><button type="button" className="read-assignment" onClick={() => readAssignment(`${current.title}. ${current.text}`)} aria-label="Lees deze opdracht hardop voor">🔊 Lees opdracht hardop voor</button>
-      {current.note && <p className="prompt-note">{current.note}</p>}
+      <div className="prompt-glyph" aria-hidden="true">✦</div><h3>{displayCurrent.title}</h3>{displayCurrent.title.startsWith("AI Dom") && <p className="dom-voice"><strong>{domTitle.toUpperCase()} · AI PERSONA</strong><br/>{domGreeting}</p>}<p className="assignment-captions">{displayCurrent.text}</p><button type="button" className="read-assignment" onClick={() => readAssignment(`${displayCurrent.title}. ${displayCurrent.text}`)} aria-label="Lees deze opdracht hardop voor">🔊 Lees opdracht hardop voor</button>
+      {displayCurrent.note && <p className="prompt-note">{displayCurrent.note}</p>}
       <div className="prompt-consent"><ShieldCheck/><span>{t("18+ · Vrijwillig · Je mag altijd passen of stoppen. Nieuwe kaarten worden per speler lokaal bijgehouden om herhaling te beperken.","18+ · Voluntary · You can always pass or stop. Cards are tracked locally per player to reduce repetition.")}</span></div>
       <div className="prompt-actions"><button className="gold" onClick={next}><Shuffle/> Volgende kaart</button><button onClick={toggleSaved}><Heart fill={saved.includes(current.id) ? "currentColor" : "none"}/>{saved.includes(current.id) ? t("Bewaard","Saved") : t("Bewaar","Save")}</button><button onClick={() => { if (!completed.includes(current.id)) { setCompleted((items) => [...items, current.id]); onComplete(); } }}>{completed.includes(current.id) ? <Check/> : <ArrowRight/>}{completed.includes(current.id) ? "Gedaan" : "Markeer gedaan"}</button><button onClick={() => void copy()}>{copied ? <Check/> : <Copy/>}{copied ? "Gekopieerd" : "Kopieer"}</button></div>
     </section>
