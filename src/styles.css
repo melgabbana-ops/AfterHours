@@ -480,3 +480,29 @@ img,svg,video,canvas{max-width:100%}
 .teaser-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .teaser-language-toggle{flex:0 0 auto;position:relative;z-index:5;background:rgba(8,7,6,.8)}
 @media(max-width:420px){.teaser-top{gap:8px}.teaser-language-toggle{min-height:36px;padding-inline:8px}}
+
+
+/* Personal safety plan: always accessible, styled in the approved black / gold system. */
+.safety-shortcut{display:grid;place-items:center;flex:none;width:38px;height:38px;border:1px solid #4b3a20;border-radius:9px;color:#d8b66a;background:linear-gradient(145deg,#14100a,#080807)}
+.safety-shortcut:hover,.safety-shortcut:focus-visible{border-color:#9a7740;color:#f0d89a;outline:none}
+.safety-screen{max-width:720px!important}
+.safety-plan{margin:8px 0 24px;border:1px solid #342a1b;background:linear-gradient(145deg,rgba(20,16,10,.94),rgba(7,7,6,.98));padding:clamp(18px,4vw,28px);box-shadow:0 22px 70px rgba(0,0,0,.24)}
+.safety-plan-heading{display:flex;align-items:center;gap:13px;margin-bottom:16px}
+.safety-plan-heading>svg{width:22px;height:22px;flex:none;color:#d0aa60}
+.safety-plan-heading .eyebrow{margin:0 0 5px}
+.safety-plan-heading h3{margin:0;font-family:"Playfair Display",Georgia,serif;font-weight:500;font-size:clamp(23px,5vw,31px);color:#f4f0e8}
+.safety-plan-intro,.safety-plan-footnote{color:#a49b8d;font-size:12px;line-height:1.75}
+.safety-plan label{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:6px;margin:22px 0 8px;color:#e8dfce;font-size:12px}
+.safety-plan label span{color:#82796a;font-size:10px}
+.safety-plan input,.safety-plan textarea{display:block;width:100%;border:1px solid #3a3021;border-radius:8px;background:#080807;color:#f4f0e8;padding:13px 14px;font:inherit;font-size:13px;outline:none}
+.safety-plan textarea{resize:vertical;min-height:94px;line-height:1.6}
+.safety-plan input:focus,.safety-plan textarea:focus{border-color:#9b7840;box-shadow:0 0 0 2px rgba(201,164,92,.09)}
+.safety-plan input::placeholder,.safety-plan textarea::placeholder{color:#625b50}
+.safety-plan-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:18px}
+.safety-plan-actions button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:42px;padding:0 14px;border:1px solid #3a3021;border-radius:8px;color:#c9c0b1;font-size:10px;letter-spacing:.06em}
+.safety-plan-actions button.gold{border-color:#806132;color:#e4c77f;background:linear-gradient(145deg,#21180b,#100d08)}
+.safety-plan-actions button svg{width:15px;height:15px}
+.safety-plan-message{display:flex;align-items:center;gap:8px;color:#c7b78f;font-size:11px;line-height:1.6}
+.safety-plan-message svg{width:15px;height:15px;flex:none}
+.safety-plan-footnote{border-top:1px solid #282116;padding-top:14px;margin-top:20px;font-size:10px}
+@media(max-width:520px){.safety-shortcut{width:40px;height:40px}.safety-plan{padding:17px}.safety-plan-actions button{flex:1}}
