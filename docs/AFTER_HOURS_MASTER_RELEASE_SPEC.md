@@ -70,25 +70,17 @@ The generic placeholder/default profile silhouette must be replaced by the custo
 - Do not use generic stock avatars or unrelated emoji avatars as the default experience.
 - The character system must remain cohesive with the approved moodboard and premium black/deep-purple/gold visual system.
 
-### Approved BDSM-themed ranks
+### Approved BDSM-themed ranks (October 10 approved set)
 
-1. Curious
-2. Tease
-3. Plaything
-4. Submissive
-5. Brat
-6. Toy
-7. Pet
-8. Thrall
-9. Devotee
-10. Obedient
-11. Enthralled
-12. Collared
-13. Owned
-14. Devoted
-15. Dark Devotion
+1. THE CURIOUS
+2. THE INITIATE
+3. THE DEVOTED
+4. THE DISCIPLINED
+5. THE ENTHRALLED
+6. THE BOUND
+7. AFTER HOURS
 
-Ranks should unlock visual identity elements and progression rewards without turning progression into a pay-to-win mechanic.
+Use these exact names in this order in every current build. Do not replace them with the older 15-rank draft or translate them in the Dutch UI. XP thresholds in the app are 0, 100, 450, 1,000, 1,800, 2,800 and 5,000 respectively. Ranks may unlock cosmetic identity rewards, but must never make consent, safety or core progression pay-to-win.
 
 ## Experience engine
 
@@ -369,3 +361,14 @@ The current client is the visual/interaction foundation. Authentication, persist
 ## Release rule
 
 Do not push or merge to main until the release gates above are satisfied and the user explicitly asks to push/merge.
+
+
+## Monetization — approved October 10 plan
+
+- Free Access: €0.
+- Single Experience: €9.99 one-time purchase.
+- The 3-Game Collection: €24.99 one-time purchase (save €4.98 versus three singles).
+- No mandatory subscription and no ads.
+- Consent, boundaries, safety plan, Pause/PASS/STOP and aftercare always remain free.
+- Checkout is not live until a server-side provider is confirmed to explicitly permit adult BDSM-related digital content and legal/tax requirements are reviewed.
+- See `docs/MONETIZATION_PLAN.md` on main for offer copy, validation goal, illustrative revenue scenarios and production payment gates.
