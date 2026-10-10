@@ -10,6 +10,7 @@ import { supabase, supabaseConfigured } from "./services/supabase";
 
 interface MediaVaultProps {
   sessionId: string;
+  language?: "nl" | "en";
 }
 
 function displayName(name: string): string {
@@ -22,7 +23,8 @@ function formatSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-export default function MediaVault({ sessionId }: MediaVaultProps) {
+export default function MediaVault({ sessionId, language = "nl" }: MediaVaultProps) {
+  const t = (nl: string, en: string) => language === "nl" ? nl : en;
   const [items, setItems] = useState<PrivateMediaItem[]>([]);
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -41,13 +43,13 @@ export default function MediaVault({ sessionId }: MediaVaultProps) {
       return true;
     } catch (error) {
       if (isActive()) {
-        setMessage(error instanceof Error ? error.message : "Privébestanden konden niet worden geladen.");
+        setMessage(error instanceof Error ? error.message : t("Privébestanden konden niet worden geladen.", "Private files could not be loaded."));
       }
       return false;
     } finally {
       if (isActive()) setLoading(false);
     }
-  }, []);
+  }, [language]);
 
   useEffect(() => {
     let active = true;
@@ -57,14 +59,14 @@ export default function MediaVault({ sessionId }: MediaVaultProps) {
         const { data, error } = await supabase.auth.getUser();
         if (error) throw error;
         if (data.user && active) await refresh(() => active);
-        else if (active) setMessage("Log in via Session control om je privékluis te openen.");
+        else if (active) setMessage(t("Log in via Session Control om je privékluis te openen.", "Sign in through Session Control to open your private vault."));
       } catch (error) {
-        if (active) setMessage(error instanceof Error ? error.message : "Aanmelden is nodig voor privéopslag.");
+        if (active) setMessage(error instanceof Error ? error.message : t("Aanmelden is nodig voor privéopslag.", "Sign-in is required for private storage."));
       }
     }
     void load();
     return () => { active = false; };
-  }, [refresh]);
+  }, [refresh, language]);
 
   const upload = async (file?: File) => {
     if (!file) return;
@@ -76,11 +78,11 @@ export default function MediaVault({ sessionId }: MediaVaultProps) {
       const refreshed = await refresh();
       setMessage(
         refreshed
-          ? "Bestand veilig geüpload naar je privékluis."
-          : "Bestand is geüpload, maar de lijst kon niet worden vernieuwd. Tik op Vernieuwen om opnieuw te proberen.",
+          ? t("Bestand veilig geüpload naar je privékluis.", "File safely uploaded to your private vault.")
+          : t("Bestand is geüpload, maar de lijst kon niet worden vernieuwd. Tik op Vernieuwen om opnieuw te proberen.", "The file uploaded, but the list could not refresh. Tap Refresh to try again."),
       );
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Uploaden is mislukt.");
+      setMessage(error instanceof Error ? error.message : t("Uploaden is mislukt.", "Upload failed."));
     } finally {
       setBusy(false);
     }
@@ -89,12 +91,11 @@ export default function MediaVault({ sessionId }: MediaVaultProps) {
   const openItem = async (item: PrivateMediaItem) => {
     setBusy(true);
     setMessage("");
-    // Never leave a previously signed URL visible if opening the next item fails.
     setSignedUrl("");
     try {
       setSignedUrl(await createPrivateMediaUrl(item.path));
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Het bestand kon niet worden geopend.");
+      setMessage(error instanceof Error ? error.message : t("Het bestand kon niet worden geopend.", "The file could not be opened."));
     } finally {
       setBusy(false);
     }
@@ -112,9 +113,9 @@ export default function MediaVault({ sessionId }: MediaVaultProps) {
       setItems(current => current.filter(item => item.path !== path));
       setDeletingPath("");
       setSignedUrl("");
-      setMessage("Bestand verwijderd.");
+      setMessage(t("Bestand verwijderd.", "File deleted."));
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Verwijderen is mislukt.");
+      setMessage(error instanceof Error ? error.message : t("Verwijderen is mislukt.", "Could not delete the file."));
     } finally {
       setBusy(false);
     }
@@ -122,15 +123,15 @@ export default function MediaVault({ sessionId }: MediaVaultProps) {
 
   return (
     <section className="media-vault auth-panel" aria-labelledby="media-vault-title">
-      <span className="eyebrow">PRIVATE STORAGE</span>
-      <h3 id="media-vault-title">Mijn privékluis</h3>
-      <p>Afbeeldingen en audio blijven privé. Open-links zijn maximaal 60 seconden geldig.</p>
+      <span className="eyebrow">{t("PRIVÉOPSLAG", "PRIVATE STORAGE")}</span>
+      <h3 id="media-vault-title">{t("Mijn privékluis", "My private vault")}</h3>
+      <p>{t("Afbeeldingen en audio blijven privé. Open-links zijn maximaal 60 seconden geldig.", "Images and audio stay private. Open links are valid for up to 60 seconds.")}</p>
       {!supabaseConfigured ? (
-        <small role="status">Privéopslag verschijnt zodra Supabase is geconfigureerd.</small>
+        <small role="status">{t("Privéopslag verschijnt zodra Supabase is geconfigureerd.", "Private storage will appear once Supabase is configured.")}</small>
       ) : (
         <>
           <label className="media-upload">
-            <span>{busy ? "Even wachten…" : "Afbeelding of audio toevoegen"}</span>
+            <span>{busy ? t("Even wachten…", "Please wait…") : t("Afbeelding of audio toevoegen", "Add image or audio")}</span>
             <input
               type="file"
               accept="image/jpeg,image/png,image/webp,image/gif,image/avif,audio/mpeg,audio/mp4,audio/aac,audio/wav,audio/x-wav,audio/ogg,audio/webm,audio/flac"
@@ -143,37 +144,37 @@ export default function MediaVault({ sessionId }: MediaVaultProps) {
             />
           </label>
           <div className="media-vault-head">
-            <strong>Opgeslagen bestanden</strong>
+            <strong>{t("Opgeslagen bestanden", "Saved files")}</strong>
             <button type="button" onClick={() => void refresh()} disabled={loading || busy}>
-              {loading ? "Laden…" : "Vernieuwen"}
+              {loading ? t("Laden…", "Loading…") : t("Vernieuwen", "Refresh")}
             </button>
           </div>
-          {loading ? <small>Privébestanden laden…</small> : items.length === 0 ? (
-            <small>Nog geen bestanden gevonden. Je bestanden zijn alleen zichtbaar na veilig inloggen.</small>
+          {loading ? <small>{t("Privébestanden laden…", "Loading private files…")}</small> : items.length === 0 ? (
+            <small>{t("Nog geen bestanden gevonden. Je bestanden zijn alleen zichtbaar na veilig inloggen.", "No files yet. Your files are only visible after you sign in securely.")}</small>
           ) : (
             <div className="media-list">
               {items.map(item => (
                 <div className="media-item" key={item.path}>
                   <div className="media-item-copy">
                     <strong>{displayName(item.name)}</strong>
-                    <small>{item.contentType ?? "Privébestand"} · {formatSize(item.size)}</small>
+                    <small>{item.contentType ?? t("Privébestand", "Private file")} · {formatSize(item.size)}</small>
                   </div>
                   {deletingPath === item.path ? (
                     <div className="media-item-actions">
-                      <button type="button" onClick={() => void removeItem(item.path)} disabled={busy}>Bevestig</button>
-                      <button type="button" onClick={() => setDeletingPath("")} disabled={busy}>Annuleer</button>
+                      <button type="button" onClick={() => void removeItem(item.path)} disabled={busy}>{t("Bevestig", "Confirm")}</button>
+                      <button type="button" onClick={() => setDeletingPath("")} disabled={busy}>{t("Annuleer", "Cancel")}</button>
                     </div>
                   ) : (
                     <div className="media-item-actions">
-                      <button type="button" onClick={() => void openItem(item)} disabled={busy}>Open</button>
-                      <button type="button" onClick={() => void removeItem(item.path)} disabled={busy}>Verwijder</button>
+                      <button type="button" onClick={() => void openItem(item)} disabled={busy}>{t("Open", "Open")}</button>
+                      <button type="button" onClick={() => void removeItem(item.path)} disabled={busy}>{t("Verwijder", "Delete")}</button>
                     </div>
                   )}
                 </div>
               ))}
             </div>
           )}
-          {signedUrl && <a className="media-signed-link" href={signedUrl} target="_blank" rel="noopener noreferrer">Open privébestand (link verloopt na 60 seconden)</a>}
+          {signedUrl && <a className="media-signed-link" href={signedUrl} target="_blank" rel="noopener noreferrer">{t("Open privébestand (link verloopt na 60 seconden)", "Open private file (link expires after 60 seconds)")}</a>}
           {message && <small role="status">{message}</small>}
         </>
       )}
