@@ -175,6 +175,12 @@ export default function PromptLibrary({ onBack, onComplete, playerId = "local-pr
   const [saved, setSaved] = useState<string[]>([]);
   const [copied, setCopied] = useState(false);
   const [completed, setCompleted] = useState<string[]>([]);
+  const [voiceListening, setVoiceListening] = useState(false);
+  const [voiceSupported, setVoiceSupported] = useState(true);
+  const [voiceTranscript, setVoiceTranscript] = useState("");
+  const [domReply, setDomReply] = useState("");
+  const [voiceError, setVoiceError] = useState("");
+  const recognitionRef = React.useRef<any>(null);
   const pool = useMemo(() => prompts.filter((item) => kind === "Alles" || item.kind === kind), [kind]);
   const recentPromptIds = seenPromptIds.slice(-Math.max(3, Math.min(12, Math.ceil(pool.length / 4))));
   const current = pool.find((item) => item.id === selectedPromptId) ?? pool.find((item) => !seenPromptIds.includes(item.id)) ?? pool.find((item) => !recentPromptIds.includes(item.id)) ?? pool[0];
@@ -190,6 +196,61 @@ export default function PromptLibrary({ onBack, onComplete, playerId = "local-pr
 
   React.useEffect(() => { try { localStorage.setItem(gameHistoryKey, JSON.stringify(seenGameVariants.slice(-1000))); } catch { /* Local history is optional. */ } }, [gameHistoryKey, seenGameVariants]);
   React.useEffect(() => { try { localStorage.setItem(domPreferenceKey, selectedDom); } catch { /* Preference is optional. */ } }, [domPreferenceKey, selectedDom]);
+  React.useEffect(() => {
+    const speechWindow = window as any;
+    if (!speechWindow.SpeechRecognition && !speechWindow.webkitSpeechRecognition) setVoiceSupported(false);
+    return () => { try { recognitionRef.current?.stop(); } catch { /* Recognition may already be stopped. */ } };
+  }, []);
+  const createDomReply = (spoken: string) => {
+    const message = spoken.toLowerCase();
+    if (/stop|rood|ik wil niet|beëindig|beeindig|klaar ermee/.test(message)) return "We stoppen nu. Je hoeft niets uit te leggen. De scène is voorbij. Wil je aftercare of liever even stilte?";
+    if (/geel|pauze|twijfel|langzamer|aanpassen|anders/.test(message)) return "We pauzeren. Dank je dat je het zegt. Wat wil je aanpassen? We gaan pas verder als jij daar duidelijk voor kiest.";
+    if (/groen|doorgaan|verder|ja, graag|ik wil wel/.test(message)) return "Ik hoor je. We blijven binnen de afspraken die je hebt gekozen. Wil je dezelfde opdracht voortzetten of een andere veilige optie kiezen?";
+    if (/nee|pass|overslaan|niet doen/.test(message)) return "Begrepen. Je mag passen zonder reden en zonder straf. Ik bied je een andere opdracht aan, of we stoppen hier.";
+    if (/help|onveilig|bang|pijn|niet prettig/.test(message)) return "We stoppen de opdracht en checken eerst hoe het met je gaat. Je hoeft niets te bewijzen. Kies stoppen, pauzeren of aftercare.";
+    return selectedDom === "masculine"
+      ? "Ik heb je gehoord. Vertel me alleen wat je wilt delen. Wil je doorgaan, de opdracht aanpassen of pauzeren? Je grenzen blijven leidend."
+      : "Ik heb je gehoord. Vertel me alleen wat je wilt delen. Wil je doorgaan, de opdracht aanpassen of pauzeren? Je grenzen blijven leidend.";
+  };
+  const speakAsDom = (text: string) => {
+    if (!("speechSynthesis" in window)) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "nl-NL";
+    const voices = window.speechSynthesis.getVoices().filter((voice) => voice.lang.toLowerCase().startsWith("nl"));
+    const genderTerms = selectedDom === "masculine" ? /male|man|martijn|ruben|xander/i : /female|vrouw|sara|claire|ellen|lotte/i;
+    utterance.voice = voices.find((voice) => genderTerms.test(voice.name)) ?? voices[0] ?? null;
+    utterance.rate = selectedDom === "masculine" ? 0.91 : 0.96;
+    utterance.pitch = selectedDom === "masculine" ? 0.82 : 1.08;
+    window.speechSynthesis.speak(utterance);
+  };
+  const startVoiceReply = () => {
+    setVoiceError("");
+    const speechWindow = window as any;
+    const Recognition = speechWindow.SpeechRecognition || speechWindow.webkitSpeechRecognition;
+    if (!Recognition) { setVoiceSupported(false); setVoiceError("Spraakherkenning wordt niet ondersteund in deze browser. Probeer Safari of Chrome en controleer de microfoonrechten."); return; }
+    try {
+      const recognition = new Recognition();
+      recognitionRef.current = recognition;
+      recognition.lang = "nl-NL";
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+      recognition.onstart = () => setVoiceListening(true);
+      recognition.onend = () => setVoiceListening(false);
+      recognition.onerror = (event: any) => { setVoiceListening(false); setVoiceError(event?.error === "not-allowed" ? "Microfoontoegang is geblokkeerd. Geef AFTER HOURS toestemming in je browserinstellingen." : "Ik kon je niet goed verstaan. Probeer het opnieuw of controleer je microfoon."); };
+      recognition.onresult = (event: any) => {
+        const transcript = String(event?.results?.[0]?.[0]?.transcript ?? "").trim();
+        if (!transcript) { setVoiceError("Ik heb geen spraak herkend. Probeer het nog eens."); return; }
+        setVoiceTranscript(transcript);
+        const reply = createDomReply(transcript);
+        setDomReply(reply);
+        speakAsDom(reply);
+      };
+      recognition.start();
+    } catch { setVoiceListening(false); setVoiceError("De microfoon kon niet starten. Controleer de browserrechten en probeer opnieuw."); }
+  };
+  const stopVoiceReply = () => { try { recognitionRef.current?.stop(); } catch { /* Already stopped. */ } setVoiceListening(false); };
+
   const domTitle = selectedDom === "masculine" ? "Meester" : "Meesteres";
   const domGreeting = selectedDom === "masculine"
     ? "Ik neem de leiding binnen de grenzen die jij hebt gekozen. Je mag altijd aanpassen, pauzeren of stoppen."
@@ -259,6 +320,16 @@ export default function PromptLibrary({ onBack, onComplete, playerId = "local-pr
     </section>
 
     </>}
+    {((mode === "games" && !!activeGame) || mode === "cards") && <section className="voice-dom-panel" aria-label="Praat met je Dom">
+      <div className="voice-dom-heading"><span className="voice-dom-orb" aria-hidden="true">{selectedDom === "masculine" ? "♜" : "♛"}</span><div><span className="eyebrow">HANDS-FREE · VOICE MODE</span><h3>Praat met {domTitle}</h3><p>Reageer hardop in het Nederlands. Je hoeft niets te typen.</p></div></div>
+      <div className="voice-dom-controls"><button type="button" className={voiceListening ? "voice-listen listening" : "voice-listen"} onClick={voiceListening ? stopVoiceReply : startVoiceReply} aria-pressed={voiceListening}>{voiceListening ? "■ Stop luisteren" : "🎙️ Spreek je antwoord in"}</button><button type="button" className="voice-replay" disabled={!domReply} onClick={() => speakAsDom(domReply)}>▶ Herhaal stem</button></div>
+      {voiceListening && <p className="voice-status" role="status">Ik luister… spreek rustig en zeg duidelijk “geel” voor pauze of “rood” om te stoppen.</p>}
+      {voiceTranscript && <div className="voice-transcript"><span className="eyebrow">JOUW ANTWOORD</span><p>{voiceTranscript}</p></div>}
+      {domReply && <div className="voice-reply"><span className="eyebrow">{domTitle.toUpperCase()} ANTWOORDT</span><p>{domReply}</p></div>}
+      {voiceError && <p className="voice-error" role="alert">{voiceError}</p>}
+      {!voiceSupported && <p className="voice-error">Deze browser ondersteunt geen ingebouwde spraakherkenning. Gebruik een actuele Safari- of Chrome-browser en sta microfoontoegang toe.</p>}
+      <p className="voice-privacy">Microfoon wordt alleen gebruikt wanneer je op de spreekknop drukt. Browser-spraakherkenning kan afhankelijk van je toestel via de spraakdienst van de browser verlopen. Stoppen, geel en rood worden altijd als pauze- of stopintentie behandeld.</p>
+    </section>}
     {mode === "cards" && <section className="prompt-count"><span>{pool.length} kaarten in deze selectie</span><span>{pool.filter((item) => !seenPromptIds.includes(item.id)).length} nog niet gezien</span><span>{saved.length} lokaal bewaard</span></section>}
     <button className="prompt-back" onClick={onBack}><ArrowRight/> Terug</button>
   </main>;
