@@ -338,17 +338,17 @@ export default function PromptLibrary({ onBack, onComplete, playerId = "local-pr
     </section>
 
     </>}
-    {((mode === "games" && !!activeGame) || mode === "cards") && <section className="voice-dom-panel" aria-label="Praat met je Dom">
+    {((mode === "games" && !!activeGame) || mode === "cards") && <section className="voice-dom-panel" aria-label={t("Praat met je Dom","Talk to your Dom")}>
       <div className="voice-dom-heading"><span className="voice-dom-orb" aria-hidden="true">{selectedDom === "masculine" ? "♜" : "♛"}</span><div><span className="eyebrow">HANDS-FREE · VOICE MODE</span><h3>{t("Praat met","Talk to")} {domTitle}</h3><p>{t("Reageer hardop in het Nederlands. Je hoeft niets te typen.","Speak your response in English. No typing needed.")}</p></div></div>
-      <div className="voice-dom-controls"><button type="button" className={voiceListening ? "voice-listen listening" : "voice-listen"} onClick={voiceListening ? stopVoiceReply : startVoiceReply} aria-pressed={voiceListening}>{voiceListening ? "■ Stop luisteren" : "🎙️ Spreek je antwoord in"}</button><button type="button" className="voice-replay" disabled={!domReply} onClick={() => speakAsDom(domReply)}>{t("▶ Herhaal stem","▶ Replay voice")}</button></div>
+      <div className="voice-dom-controls"><button type="button" className={voiceListening ? "voice-listen listening" : "voice-listen"} onClick={voiceListening ? stopVoiceReply : startVoiceReply} aria-pressed={voiceListening}>{voiceListening ? t("■ Stop luisteren","■ Stop listening") : t("🎙️ Spreek je antwoord in","🎙️ Speak your response")}</button><button type="button" className="voice-replay" disabled={!domReply} onClick={() => speakAsDom(domReply)}>{t("▶ Herhaal stem","▶ Replay voice")}</button></div>
       {voiceListening && <p className="voice-status" role="status">{t("Ik luister… spreek rustig en zeg duidelijk “geel” voor pauze of “rood” om te stoppen.","Listening… speak clearly and say “yellow” to pause or “red” to stop.")}</p>}
       {voiceTranscript && <div className="voice-transcript"><span className="eyebrow">{t("JOUW ANTWOORD","YOUR RESPONSE")}</span><p>{voiceTranscript}</p></div>}
       {domReply && <div className="voice-reply"><span className="eyebrow">{domTitle.toUpperCase()} {t("ANTWOORDT","REPLIES")}</span><p>{domReply}</p></div>}
       {voiceError && <p className="voice-error" role="alert">{voiceError}</p>}
-      {!voiceSupported && <p className="voice-error">Deze browser ondersteunt geen ingebouwde spraakherkenning. Gebruik een actuele Safari- of Chrome-browser en sta microfoontoegang toe.</p>}
-      <p className="voice-privacy">Microfoon wordt alleen gebruikt wanneer je op de spreekknop drukt. Browser-spraakherkenning kan afhankelijk van je toestel via de spraakdienst van de browser verlopen. Stoppen, geel en rood worden altijd als pauze- of stopintentie behandeld.</p>
+      {!voiceSupported && <p className="voice-error">{t("Deze browser ondersteunt geen ingebouwde spraakherkenning. Gebruik een actuele Safari- of Chrome-browser en sta microfoontoegang toe.","This browser does not support built-in speech recognition. Use an up-to-date Safari or Chrome browser and allow microphone access.")}</p>}
+      <p className="voice-privacy">{t("Microfoon wordt alleen gebruikt wanneer je op de spreekknop drukt. Browser-spraakherkenning kan afhankelijk van je toestel via de spraakdienst van de browser verlopen. Stoppen, geel en rood worden altijd als pauze- of stopintentie behandeld.","The microphone is used only when you tap the speak button. Depending on your device, browser speech recognition may use the browser’s speech service. Stop, yellow and red are treated as pause or stop intents.")}</p>
     </section>}
-    {mode === "cards" && <section className="prompt-count"><span>{pool.length} kaarten in deze selectie</span><span>{pool.filter((item) => !seenPromptIds.includes(item.id)).length} nog niet gezien</span><span>{saved.length} lokaal bewaard</span></section>}
+    {mode === "cards" && <section className="prompt-count"><span>{pool.length} {t("kaarten in deze selectie","cards in this selection")}</span><span>{pool.filter((item) => !seenPromptIds.includes(item.id)).length} {t("nog niet gezien","not seen yet")}</span><span>{saved.length} {t("lokaal bewaard","saved locally")}</span></section>}
     <button className="prompt-back" onClick={onBack}><ArrowRight/> Terug</button>
   </main>;
 }
