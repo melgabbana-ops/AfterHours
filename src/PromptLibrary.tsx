@@ -57,8 +57,37 @@ const prompts: PromptItem[] = [
 
 const kinds: Array<"Alles" | PromptKind> = ["Alles","Kinky opdrachten","Kinky vragen","Vanille & verbinding","Aftercare"];
 
+type GameRound = { title: string; setup: string; task: string; debrief: string };
+type ExperienceGame = { id: string; title: string; subtitle: string; level: string; duration: string; description: string; rounds: GameRound[] };
+const experienceGames: ExperienceGame[] = [
+ {id:"protocol",title:"The Protocol",subtitle:"Power exchange · Beginner",level:"Beginner",duration:"20–30 min",description:"Bouw een duidelijke D/s-dynamiek op met afgesproken aanspreekvormen, opdrachten en een bewust einde.",rounds:[
+  {title:"01 · The Contract",setup:"Ga tegenover elkaar zitten. De leidende partner leest de afspraken rustig voor; de ontvangende partner mag elke regel wijzigen of weigeren.",task:"Spreek één aanspreekvorm, één gewenste vorm van leiding en twee grenzen af. Kies ook een stopwoord en een non-verbaal stopsignaal. Laat ieder de afspraken in eigen woorden herhalen.",debrief:"Vraag: voelt dit als een vrije keuze? Verander of schrap alles waar twijfel over bestaat."},
+  {title:"02 · The First Instruction",setup:"De leidende partner gebruikt een kalme, duidelijke stem. Geen geschreeuw, vernedering of onverwachte aanrakingen.",task:"Geef maximaal drie concrete, niet-fysieke opdrachten binnen de afgesproken grenzen, bijvoorbeeld: leg je telefoon weg, kies de soundtrack en beschrijf welke rol je vandaag wilt aannemen. Na elke opdracht wacht je op een duidelijk akkoord.",debrief:"Bespreek welke toon en formulering prettig, spannend of juist niet passend voelde. Een opdracht overslaan heeft geen straf of consequentie."},
+  {title:"03 · The Protocol",setup:"Kies samen één klein ritueel, zoals toestemming vragen vóór een volgende stap of een afgesproken begroeting.",task:"Voer het ritueel drie keer rustig uit. De leidende partner checkt tussendoor: groen, geel of rood? Geel betekent pauzeren en heronderhandelen; rood betekent direct stoppen.",debrief:"Beëindig de rollen bewust. Kies aftercare: water, stilte, een gesprek of ruimte. Leg vast wat je volgende keer wilt behouden of aanpassen."}
+ ]},
+ {id:"command",title:"The Command Room",subtitle:"Dominant language · Intermediate",level:"Intermediate",duration:"25–35 min",description:"Oefen met dominante taal, duidelijke opdrachten en vrijwillige overgave zonder druk of onverwachte escalatie.",rounds:[
+  {title:"01 · Set the Tone",setup:"Kies vooraf welke aanspreekvormen en soorten dominante taal welkom zijn. Noteer verboden woorden of thema's.",task:"De leidende partner zegt drie korte, zelfverzekerde zinnen die binnen de afspraken vallen. De ontvangende partner geeft na elke zin feedback met groen, geel of rood. Geen enkele zin verplicht tot een handeling.",debrief:"Welke woorden gaven de gewenste sfeer? Welke woorden moeten uit het script blijven?"},
+  {title:"02 · Three Commands",setup:"Kies alleen al goedgekeurde, alledaagse en risicoloze opdrachten. Spreek af dat 'pass' altijd voldoende is.",task:"Geef om de beurt maximaal drie opdrachten, zoals: kies een nummer, ga op een comfortabele plek zitten of beschrijf één behoefte. Wacht na iedere opdracht op een expliciet ja. Accepteer een nee direct en zonder discussie.",debrief:"Bespreek tempo, toon en keuzevrijheid. Was er ergens druk, verwarring of een onverwachte verwachting? Pas het script aan."},
+  {title:"03 · Reclaim the Choice",setup:"De ontvangende partner krijgt bewust de regie terug.",task:"De ontvangende partner kiest hoe de scène eindigt: afronden, een rustige check-in doen of stoppen. De leidende partner bevestigt de keuze en bedankt voor de duidelijke communicatie.",debrief:"Sluit af met aftercare en een korte check-in later. Geen punten of beloningen worden toegekend voor het negeren van grenzen."}
+ ]},
+ {id:"service",title:"The Service Ritual",subtitle:"Service & devotion · Beginner",level:"Beginner",duration:"15–25 min",description:"Maak van vrijwillige dienstbaarheid een persoonlijk ritueel met aandacht, keuze en duidelijke waardering.",rounds:[
+  {title:"01 · What Service Means",setup:"Iedereen benoemt wat dienstbaarheid voor hem of haar betekent en wat nadrukkelijk niet gewenst is.",task:"De ontvangende partner kiest één van twee vooraf afgesproken, eenvoudige gebaren, bijvoorbeeld de muziek kiezen of een drankje klaarzetten. De ander vraagt eerst toestemming en voert alleen de gekozen taak uit.",debrief:"Was de taak attent en welkom? Vermijd aannames dat een rol automatisch toegang of gehoorzaamheid geeft."},
+  {title:"02 · The Presentation",setup:"Kies een optioneel presentatie- of begroetingsritueel, zoals een buiging, een formele zin of een moment stilte.",task:"Voer het ritueel uit en spreek daarna ieder één zin uit: wat voelde passend en wat wil je veranderen? Herhaal alleen als iedereen dat wil.",debrief:"Een ritueel is een gezamenlijke afspraak, geen verplichting buiten de afgesproken context."},
+  {title:"03 · Recognition",setup:"De leidende partner erkent de aandacht en inzet; de ontvangende partner mag aangeven hoe waardering prettig voelt.",task:"Geef één concreet compliment over de zorg, communicatie of aandacht die je zag. Wissel daarna van rol of sluit de ervaring af.",debrief:"Kies aftercare en benoem één ding dat je waardeerde. Vraag toestemming voordat je persoonlijke feedback deelt of bewaart."}
+ ]},
+ {id:"trust",title:"The Trust Exercise",subtitle:"Boundaries & connection · All levels",level:"All levels",duration:"20–30 min",description:"Een intensieve gespreksgame waarin grenzen, spanning en vertrouwen expliciet worden gemaakt voordat je iets uitvoert.",rounds:[
+  {title:"01 · Green / Amber / Red",setup:"Iedereen kiest een stopwoord en een non-verbaal signaal dat ook werkt als spreken lastig wordt.",task:"Noem om de beurt drie categorieën: welkom, misschien na overleg en niet toegestaan. De ander vat samen zonder te onderhandelen. Elke twijfel blijft buiten de scène.",debrief:"Controleer of de lijst klopt en makkelijk terug te vinden is. Geen toestemming betekent niet doorgaan."},
+  {title:"02 · The Scenario",setup:"Kies een fictieve, niet-fysieke D/s-situatie, bijvoorbeeld een formeel protocol of een rollenspel met opdrachten.",task:"Speel de situatie twee minuten na met alleen vooraf goedgekeurde taal en eenvoudige handelingen. Stop halverwege bewust voor een check-in en vraag wat aangepast moet worden.",debrief:"Benoem het verschil tussen fantasie, toestemming voor een specifieke handeling en toestemming voor iets anders."},
+  {title:"03 · Close with Care",setup:"Laat de rollen los en spreek elkaar weer als gelijken aan.",task:"Iedereen maakt de zin af: 'Op dit moment heb ik behoefte aan…' Kies samen water, rust, praten of ruimte. Plan alleen een vervolg als dat voor beiden welkom is.",debrief:"Een check-in achteraf is geen beoordeling. Geef ruimte voor gemengde gevoelens en verander toekomstige afspraken waar nodig."}
+ ]}
+];
+
+
 export default function PromptLibrary({ onBack, onComplete }: { onBack: () => void; onComplete: () => void }) {
   const [kind, setKind] = useState<(typeof kinds)[number]>("Alles");
+  const [mode, setMode] = useState<"games" | "cards">("games");
+  const [activeGame, setActiveGame] = useState<string | null>(null);
+  const [gameRound, setGameRound] = useState(0);
   const [index, setIndex] = useState(0);
   const [saved, setSaved] = useState<string[]>([]);
   const [copied, setCopied] = useState(false);
@@ -76,8 +105,13 @@ export default function PromptLibrary({ onBack, onComplete }: { onBack: () => vo
 
   return <main className="prompt-library">
     <section className="prompt-hero"><span className="eyebrow">AFTER HOURS · THE DECK</span><h2>Choose your tension.</h2><p>Van zachte verbinding tot duidelijke power dynamics. Jij kiest wat past, wat niet past en wanneer je stopt.</p>
-      <div className="prompt-filters" role="group" aria-label="Filter opdrachten">{kinds.map((item) => <button key={item} className={kind === item ? "active" : ""} onClick={() => changeKind(item)}>{item}</button>)}</div>
+      <div className="prompt-filters" role="group" aria-label="Kies weergave"><button className={mode === "games" ? "active" : ""} onClick={() => {setMode("games");setActiveGame(null)}}>Complete games</button><button className={mode === "cards" ? "active" : ""} onClick={() => {setMode("cards");setActiveGame(null)}}>Losse kaarten</button></div>{mode === "cards" && <div className="prompt-filters" role="group" aria-label="Filter opdrachten">{kinds.map((item) => <button key={item} className={kind === item ? "active" : ""} onClick={() => changeKind(item)}>{item}</button>)}</div>}
     </section>
+    {mode === "games" ? <section className="experience-catalog">
+      {!activeGame ? <><div className="experience-intro"><span className="eyebrow">THE EXPERIENCE COLLECTION</span><h3>Choose your game.</h3><p>Volledige, begeleide scenario's met drie rondes, concrete opdrachten en een bewuste afsluiting. Alle deelnemers zijn 18+, stemmen vrij in en mogen op ieder moment passen of stoppen.</p></div>
+        <div className="experience-grid">{experienceGames.map((game) => <article className="prompt-card experience-card" key={game.id}><div className="prompt-card-top"><span className="eyebrow">{game.subtitle}</span><span className="prompt-intensity">{game.duration}</span></div><div className="prompt-glyph" aria-hidden="true">✦</div><h3>{game.title}</h3><p>{game.description}</p><div className="prompt-consent"><ShieldCheck/><span>{game.rounds.length} rounds · Consent-first · {game.level}</span></div><button className="gold" onClick={() => {setActiveGame(game.id);setGameRound(0)}}><ArrowRight/> Start preview</button></article>)}</div>
+      </> : (() => { const game = experienceGames.find((item) => item.id === activeGame)!; const round = game.rounds[gameRound]; return <article className="prompt-card experience-play"><div className="prompt-card-top"><span className="eyebrow">{game.title}</span><span className="prompt-intensity">ROUND {gameRound + 1} / {game.rounds.length}</span></div><div className="prompt-glyph" aria-hidden="true">✦</div><h3>{round.title}</h3><p><strong>SET THE SCENE</strong><br/>{round.setup}</p><p><strong>YOUR ASSIGNMENT</strong><br/>{round.task}</p><p><strong>CHECK-IN & DEBRIEF</strong><br/>{round.debrief}</p><div className="prompt-consent"><ShieldCheck/><span>Stopwoord en non-verbaal signaal blijven actief. Geel = pauze en afstemmen. Rood = direct stoppen.</span></div><div className="prompt-actions"><button onClick={() => {setActiveGame(null);setGameRound(0)}}>Exit game</button>{gameRound < game.rounds.length - 1 ? <button className="gold" onClick={() => setGameRound((value) => value + 1)}><ArrowRight/> Next round</button> : <button className="gold" onClick={() => {setActiveGame(null);setGameRound(0);onComplete()}}><Check/> Complete experience</button>}</div></article>; })()}
+    </section> : <>
     <section className="prompt-card">
       <div className="prompt-card-top"><span className="eyebrow">{current.kind.toUpperCase()}</span><span className="prompt-intensity">{current.intensity}</span></div>
       <div className="prompt-glyph" aria-hidden="true">✦</div><h3>{current.title}</h3><p>{current.text}</p>
@@ -85,7 +119,9 @@ export default function PromptLibrary({ onBack, onComplete }: { onBack: () => vo
       <div className="prompt-consent"><ShieldCheck/><span>18+ · Vrijwillig · Je mag altijd passen of stoppen.</span></div>
       <div className="prompt-actions"><button className="gold" onClick={next}><Shuffle/> Volgende kaart</button><button onClick={toggleSaved}><Heart fill={saved.includes(current.id) ? "currentColor" : "none"}/>{saved.includes(current.id) ? "Bewaard" : "Bewaar"}</button><button onClick={() => { if (!completed.includes(current.id)) { setCompleted((items) => [...items, current.id]); onComplete(); } }}>{completed.includes(current.id) ? <Check/> : <ArrowRight/>}{completed.includes(current.id) ? "Gedaan" : "Markeer gedaan"}</button><button onClick={() => void copy()}>{copied ? <Check/> : <Copy/>}{copied ? "Gekopieerd" : "Kopieer"}</button></div>
     </section>
-    <section className="prompt-count"><span>{pool.length} kaarten in deze selectie</span><span>{saved.length} lokaal bewaard</span></section>
+
+    </>}
+    {mode === "cards" && section className="prompt-count"><span>{pool.length} kaarten in deze selectie</span><span>{saved.length} lokaal bewaard</span></section}
     <button className="prompt-back" onClick={onBack}><ArrowRight/> Terug</button>
   </main>;
 }
