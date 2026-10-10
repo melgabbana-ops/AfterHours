@@ -1,17 +1,20 @@
 import React from "react";
-import { ArrowUpRight, LockKeyhole, Sparkles, ChevronRight, VolumeX, Play } from "lucide-react";
+import { ArrowUpRight, LockKeyhole, Sparkles, ChevronRight } from "lucide-react";
 
 export default function Teaser() {
-  const [introDismissed, setIntroDismissed] = React.useState(false);
+  const [introUnavailable, setIntroUnavailable] = React.useState(false);
+  const [introEnded, setIntroEnded] = React.useState(false);
+
   return <main className="teaser-screen">
     <div className="teaser-noise" aria-hidden="true"/>
-    {!introDismissed && <div className="teaser-intro" role="region" aria-label="AFTER HOURS video intro">
-      <video className="teaser-intro-video" autoPlay muted playsInline preload="metadata" onEnded={() => setIntroDismissed(true)} onError={() => setIntroDismissed(true)} poster="/IMG_7718.jpeg">
+    <div className="teaser-top"><span className="teaser-private">18+ · PRIVATE PREVIEW</span></div>
+    {!introUnavailable && !introEnded && <section className="teaser-film" aria-label="AFTER HOURS intro">
+      <video className="teaser-film-video" autoPlay muted playsInline preload="metadata" poster="/IMG_7718.jpeg"
+        onEnded={() => setIntroEnded(true)} onError={() => setIntroUnavailable(true)}>
         <source src="/after-hours-intro.mp4" type="video/mp4"/>
       </video>
-      <div className="teaser-intro-controls"><span><VolumeX size={13}/> SOUND OFF</span><button type="button" onClick={() => setIntroDismissed(true)}><Play size={13}/> SKIP INTRO</button></div>
-    </div> }
-    <div className="teaser-top"><span className="teaser-private">18+ · PRIVATE PREVIEW</span></div>
+      <button className="teaser-film-skip" type="button" onClick={() => setIntroEnded(true)}>SKIP INTRO</button>
+    </section>}
     <section className="teaser-content">
       <span className="eyebrow"><Sparkles size={13}/> A NEW WORLD IS TAKING SHAPE</span>
       <h1>UNDER<br/><em>CONSTRUCTION</em></h1>

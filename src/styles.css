@@ -403,3 +403,9 @@ img,svg,video,canvas{max-width:100%}
 
 /* Skippable cinematic brand intro */
 .teaser-intro{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:#030203;padding:0;animation:teaser-intro-fade .5s ease both}.teaser-intro-video{width:100%;height:100%;object-fit:contain;background:#030203}.teaser-intro-controls{position:absolute;left:0;right:0;bottom:max(22px,env(safe-area-inset-bottom));display:flex;align-items:center;justify-content:space-between;padding:0 clamp(18px,5vw,48px);color:#c9b98d;font-size:9px;letter-spacing:.16em}.teaser-intro-controls span,.teaser-intro-controls button{display:flex;align-items:center;gap:8px}.teaser-intro-controls button{min-height:42px;padding:0 14px;border:1px solid #73572d;background:rgba(8,7,7,.82);color:#ead29a;font:inherit;letter-spacing:inherit}.teaser-intro-controls button:focus-visible{outline:2px solid #ead29a;outline-offset:3px}@keyframes teaser-intro-fade{from{opacity:0}to{opacity:1}}@media(prefers-reduced-motion:reduce){.teaser-intro{animation:none}}
+
+/* Inline intro keeps the teaser on one screen instead of covering it with a separate full-screen layer. */
+.teaser-film{position:relative;width:min(100% - 36px,560px);margin:18px auto 0;aspect-ratio:16/9;overflow:hidden;border:1px solid #73572d;background:#030203}
+.teaser-film-video{display:block;width:100%;height:100%;object-fit:contain;background:#030203}
+.teaser-film-skip{position:absolute;right:12px;bottom:12px;min-height:36px;padding:0 12px;border:1px solid #73572d;background:rgba(8,7,7,.88);color:#ead29a;font-size:9px;letter-spacing:.14em}
+.teaser-film-skip:focus-visible{outline:2px solid #ead29a;outline-offset:3px}
