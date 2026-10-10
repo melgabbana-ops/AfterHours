@@ -5,7 +5,7 @@ import PromptLibrary from "./PromptLibrary";
 import BadgeShowcase from "./BadgeShowcase";
 import { recordAchievement } from "./achievements";
 import{createRoot}from"react-dom/client";
-import{Shield,Lock,Play,Pause,RotateCcw,ChevronRight,User,Settings,Home,Timer,CheckCircle2,Square,Activity,LogOut,Sparkles,Radio,Bell,BookOpen}from"lucide-react";
+import{Shield,Lock,Play,Pause,RotateCcw,ChevronRight,User,Settings,Home,Timer,CheckCircle2,Square,Activity,LogOut,Sparkles,Radio,Bell,BookOpen,EyeOff}from"lucide-react";
 import"./styles.css";
 import{Insights}from"./Insights";
 import{RadioRoom}from"./RadioRoom";
@@ -68,6 +68,7 @@ function App(){
  const[rounds,setRounds]=useState(fallbackRounds);
  const initialScreen=(()=>{const value=new URLSearchParams(window.location.search).get("screen");if(value==="game"||value==="profile"||value==="admin"||value==="insights"||value==="radio"||value==="prompts"||value==="safety")return value;return "home" as Screen})();
  const[screen,setScreen]=useState<Screen>(initialScreen);
+ const[privacyMode,setPrivacyMode]=useState(false);
  useEffect(()=>{if(new URLSearchParams(window.location.search).has("screen"))window.history.replaceState({},document.title,window.location.pathname+window.location.hash)},[]);
  const[running,setRunning]=useState(()=>shouldResumeSession(state.session.status,state.consent.status));
  const[seconds,setSeconds]=useState(()=>loadTimer(state.profile.id,state.session.round,rounds[state.session.round]?.time||rounds[0].time));
@@ -338,8 +339,8 @@ function App(){
  if(!authReady)return <div className="gate"><div className="gate-card"><span className="eyebrow">AFTER HOURS</span><h1>Sessie herstellen…</h1><p>Beveiligde toegang wordt gecontroleerd.</p></div></div>;
  if(!state.ageConfirmed)return <div className="gate"><img className="gate-logo" src="/after-hours-logo.svg" alt="AFTER HOURS" /><span className="eyebrow">PRIVATE EXPERIENCE · 18+</span><h1>AFTER<br/><i>HOURS</i></h1><p>Een premium interactieve ervaring voor volwassenen. Bewust. Afgesproken. Veilig.</p><button onClick={()=>setState(s=>({...s,ageConfirmed:true,ageConfirmedFor:syncUserId??"local"}))}>Ik ben 18+ <ChevronRight/></button><small>Dit is een zelfverklaring, geen officiële leeftijdsverificatie. Consent wordt afzonderlijk gevraagd.</small></div>;
 
- return <div className="app">
- <header><button className="wordmark" onClick={()=>setScreen("home")} aria-label="AFTER HOURS home"><img src="/after-hours-logo.svg" alt="AFTER HOURS" /></button><div className="header-tools"><button type="button" className="safety-shortcut" aria-label={t("Veiligheidsplan openen","Open safety plan")} title={t("Veiligheidsplan","Safety plan")} onClick={()=>setScreen("safety")}><Shield size={17}/></button><button type="button" className="language-toggle" aria-label={t("Taal wijzigen","Change language")} onClick={()=>setLanguage(language==="nl"?"en":"nl")}><span className={language==="nl"?"language-active":""}>NL</span><span className="language-divider">/</span><span className={language==="en"?"language-active":""}>EN</span></button><div className="status"><span></span> {t("privé sessie","private session")}</div></div></header>
+ return <div className={`app ${privacyMode?"privacy-mode":""}`}>
+ <header><button className="wordmark" onClick={()=>setScreen("home")} aria-label="AFTER HOURS home"><img src="/after-hours-logo.svg" alt="AFTER HOURS" /></button><div className="header-tools"><button type="button" className="safety-shortcut" aria-label={t("Veiligheidsplan openen","Open safety plan")} title={t("Veiligheidsplan","Safety plan")} onClick={()=>setScreen("safety")}><Shield size={17}/></button><button type="button" className="privacy-shortcut" aria-label={privacyMode?t("Privémodus uitschakelen","Turn privacy mode off"):t("Privémodus inschakelen","Turn privacy mode on")} title={privacyMode?t("Privémodus uitschakelen","Turn privacy mode off"):t("Privémodus","Privacy mode")} aria-pressed={privacyMode} onClick={()=>setPrivacyMode(value=>!value)}><EyeOff size={16}/></button><button type="button" className="language-toggle" aria-label={t("Taal wijzigen","Change language")} onClick={()=>setLanguage(language==="nl"?"en":"nl")}><span className={language==="nl"?"language-active":""}>NL</span><span className="language-divider">/</span><span className={language==="en"?"language-active":""}>EN</span></button><div className="status"><span></span> {t("privé sessie","private session")}</div></div></header>
 
  {screen==="home"&&<main>  {authReady&&(!supabaseConfigured||!syncUserId)&&<section className="consent-panel" role="status"><Lock/><div><strong>{supabaseConfigured?t("Niet ingelogd","Not signed in"):t("Lokale demo-modus","Local demo mode")}</strong><span>{supabaseConfigured?t("Je kunt de experience bekijken, maar log in voordat je begint om sessievoortgang en XP aan je account te koppelen.","You can preview the experience, but sign in before starting to link session progress and XP to your account."):t("De Supabase-backend is niet ingesteld. Voortgang blijft lokaal op dit apparaat; sessies kunnen niet server-side worden afgerond en leveren geen opgeslagen XP op.","The Supabase backend is not configured. Progress stays on this device; sessions cannot be completed server-side and XP will not be saved.")}</span></div>{supabaseConfigured&&!syncUserId&&<button onClick={()=>setScreen("admin")}>{t("Inloggen","Sign in")}</button>}</section>}
   <div className="notification-bar">
