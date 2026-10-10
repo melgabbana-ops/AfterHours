@@ -29,7 +29,7 @@ class AppErrorBoundary extends React.Component<React.PropsWithChildren, {hasErro
  static getDerivedStateFromError(){return {hasError:true};}
  componentDidCatch(){try{localStorage.setItem("afterhours.last-ui-error",new Date().toISOString())}catch{}}
  render(){
-  if(this.state.hasError)return <div className="gate"><div className="gate-card"><span className="eyebrow">AFTER HOURS</span><h1>Veilige herstelmodus</h1><p>Er ging iets mis in de interface. Je lokale sessiestatus blijft behouden.</p><button onClick={()=>window.location.reload()}>Opnieuw laden</button></div></div>;
+  if(this.state.hasError)return <div className="gate"><div className="gate-card"><img className="gate-logo" src="/after-hours-logo.svg" alt="AFTER HOURS" /><h1>Veilige herstelmodus</h1><p>Er ging iets mis in de interface. Je lokale sessiestatus blijft behouden.</p><button onClick={()=>window.location.reload()}>Opnieuw laden</button></div></div>;
   return this.props.children;
  }
 }
@@ -339,7 +339,7 @@ function App(){
  const requestPasswordReset=async()=>{setAuthMessage("");setAuthBusy(true);try{await resetPassword(authEmail.trim());setAuthMessage("Als dit e-mailadres bekend is, ontvang je een link om je wachtwoord opnieuw in te stellen.");}catch(error){setAuthMessage(error instanceof Error?error.message:"Resetten mislukt.")}finally{setAuthBusy(false)}};
  const saveRecoveredPassword=async()=>{setAuthMessage("");setAuthBusy(true);try{await updatePassword(authPassword);setAuthMessage("Je wachtwoord is bijgewerkt.");setAuthPassword("");setPasswordRecovery(false);}catch(error){setAuthMessage(error instanceof Error?error.message:"Wachtwoord bijwerken mislukt.")}finally{setAuthBusy(false)}};
 
- if(!authReady)return <div className="gate"><div className="gate-card"><span className="eyebrow">AFTER HOURS</span><h1>Sessie herstellen…</h1><p>Beveiligde toegang wordt gecontroleerd.</p></div></div>;
+ if(!authReady)return <div className="gate"><div className="gate-card"><img className="gate-logo" src="/after-hours-logo.svg" alt="AFTER HOURS" /><h1>Sessie herstellen…</h1><p>Beveiligde toegang wordt gecontroleerd.</p></div></div>;
  if(!state.ageConfirmed)return <div className="gate"><img className="gate-logo" src="/after-hours-logo.svg" alt="AFTER HOURS" /><span className="eyebrow">PRIVATE EXPERIENCE · 18+</span><h1>AFTER<br/><i>HOURS</i></h1><p>Een premium interactieve ervaring voor volwassenen. Bewust. Afgesproken. Veilig.</p><button onClick={()=>{setState(s=>({...s,ageConfirmed:true,ageConfirmedFor:syncUserId??"local"}));try{if(localStorage.getItem("afterhours.onboarding.completed")!=="1")setScreen("onboarding")}catch{setScreen("onboarding")}}}>Ik ben 18+ <ChevronRight/></button><small>Dit is een zelfverklaring, geen officiële leeftijdsverificatie. Consent wordt afzonderlijk gevraagd.</small></div>;
 
  return <div className={`app ${privacyMode?"privacy-mode":""}`}>
