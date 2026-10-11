@@ -97,6 +97,18 @@ const prompts: PromptItem[] = [
   {id:"a08",kind:"Aftercare",intensity:"Zacht",title:"De privacycheck",text:"Controleer samen of er beelden of notities zijn gemaakt en wat ermee gebeurt. Verwijder alles wat iemand niet meer wil bewaren."},
   {id:"a09",kind:"Aftercare",intensity:"Reflectie",title:"Een check-in later",text:"Kies of je later vandaag of morgen wilt inchecken. Geen antwoordplicht en geen verwachting dat iedereen hetzelfde voelt."}
 
+  {id:"k41",kind:"Kinky opdrachten",intensity:"Zacht",title:"De intentiekaart",text:"Kies één woord voor de sfeer die je vandaag wilt uitnodigen. De ander herhaalt het woord en vraagt wat het concreet betekent; je mag het woord altijd veranderen."},
+  {id:"k42",kind:"Kinky opdrachten",intensity:"Stevig in taal",title:"De duidelijke instructie",text:"Geef één korte instructie over een veilige, alledaagse keuze. Vraag expliciet of die welkom is en bied meteen de opties aan om aan te passen of te passen."},
+  {id:"k43",kind:"Kinky opdrachten",intensity:"Zacht",title:"De stille check-in",text:"Neem samen dertig seconden om te voelen hoe het gaat. Geef daarna ieder een woord of kies ervoor niets te zeggen. Stilte is geen toestemming om verder te gaan."},
+  {id:"k44",kind:"Kinky opdrachten",intensity:"Stevig in taal",title:"De regie teruggeven",text:"De leidende partner zegt: 'Jij houdt altijd de keuze.' Nodig de ander uit om één ding te behouden, aan te passen of te stoppen. Volg het antwoord zonder discussie."},
+  {id:"k45",kind:"Kinky opdrachten",intensity:"Zacht",title:"Het symbolische contract",text:"Kies één vrijwillig ritueel dat de afgesproken dynamiek symboliseert. Benoem wanneer het begint en eindigt en oefen hoe je het direct onderbreekt."},
+  {id:"k46",kind:"Kinky opdrachten",intensity:"Stevig in taal",title:"De toon afstemmen",text:"Kies samen een toon: rustig, formeel of speels. Zeg één korte, vooraf toegestane zin en vraag of de toon goed voelt voordat je verdergaat."},
+  {id:"k47",kind:"Kinky opdrachten",intensity:"Zacht",title:"Een keuze cadeau doen",text:"Bied één kleine attentie aan, zoals muziek kiezen, een drankje pakken of een lief bericht schrijven. Vraag wat welkom is; 'nee bedankt' is ook een volledige uitkomst."},
+  {id:"k48",kind:"Kinky opdrachten",intensity:"Stevig in taal",title:"De PASS-oefening",text:"Oefen samen met één fictieve opdracht. De ontvanger zegt bewust 'PASS' en de ander antwoordt direct: 'Begrepen.' Er volgt geen straf, overtuiging of extra vraag."},
+  {id:"k49",kind:"Kinky opdrachten",intensity:"Zacht",title:"De afspraak herschrijven",text:"Kies één afspraak die duidelijker kan. Schrijf samen een nieuwe versie die benoemt wat wel, niet en misschien is. De nieuwe afspraak geldt pas wanneer iedereen akkoord is."},
+  {id:"k50",kind:"Kinky opdrachten",intensity:"Stevig in taal",title:"Het einde op jouw teken",text:"Kies vooraf een korte zin of handgebaar dat de rol beëindigt. Oefen het één keer en stop direct zodra het signaal wordt gebruikt, zonder eerst de opdracht af te maken."},
+  {id:"q21",kind:"Kinky vragen",intensity:"Reflectie",title:"Wat maakt een opdracht welkom?",text:"Welke drie dingen maken een opdracht voor jou aantrekkelijk en veilig? Welke signalen betekenen dat je eerst wilt pauzeren of meer uitleg wilt?"},
+  {id:"a10",kind:"Aftercare",intensity:"Reflectie",title:"De check-in van morgen",text:"Kies of je morgen wilt inchecken, en zo ja via welk kanaal en op welk moment. Je mag het plan later aanpassen of helemaal afzeggen."},
 ];
 
 const kinds: Array<"Alles" | PromptKind> = ["Alles","Kinky opdrachten","Kinky vragen","Vanille & verbinding","Aftercare"];
