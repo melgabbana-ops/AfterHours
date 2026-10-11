@@ -18,13 +18,17 @@ describe("private media upload validation", () => {
     expect(() => validatePrivateMediaFile({ type: "image/jpeg", size: 1024 })).not.toThrow();
   });
 
+  it("accepts a non-empty video file under the 20 MB limit", () => {
+    expect(() => validatePrivateMediaFile({ type: "video/webm", size: 1024 })).not.toThrow();
+  });
+
   it("accepts a non-empty audio file under the 20 MB limit", () => {
     expect(() => validatePrivateMediaFile({ type: "audio/mpeg", size: 1024 })).not.toThrow();
   });
 
   it("rejects unsupported file types", () => {
     expect(() => validatePrivateMediaFile({ type: "application/pdf", size: 1024 }))
-      .toThrow("Kies een afbeelding of audiobestand.");
+      .toThrow("Kies een afbeelding, audio- of videobestand.");
   });
 
   it.each(["image/svg+xml", "image/x-custom", "audio/x-custom", "application/octet-stream"])(
