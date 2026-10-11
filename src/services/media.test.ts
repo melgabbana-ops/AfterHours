@@ -35,14 +35,14 @@ describe("private media upload validation", () => {
     "rejects non-allowlisted MIME type %s",
     (type) => {
       expect(() => validatePrivateMediaFile({ type, size: 1024 }))
-        .toThrow("Kies een afbeelding of audiobestand.");
+        .toThrow("Kies een afbeelding, audio- of videobestand.");
     },
   );
 
   it("accepts MIME type casing without broadening the allowlist", () => {
     expect(() => validatePrivateMediaFile({ type: "IMAGE/PNG", size: 1024 })).not.toThrow();
     expect(() => validatePrivateMediaFile({ type: "IMAGE/SVG+XML", size: 1024 }))
-      .toThrow("Kies een afbeelding of audiobestand.");
+      .toThrow("Kies een afbeelding, audio- of videobestand.");
   });
 
   it("rejects empty files", () => {
