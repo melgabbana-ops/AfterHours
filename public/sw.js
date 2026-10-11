@@ -11,7 +11,6 @@ self.addEventListener("install", (event) => {
       .then((cache) => Promise.all(APP_SHELL.map(async (asset) => {
         try { await cache.add(asset); } catch { /* Keep install resilient if an optional asset is unavailable. */ }
       })))
-      .then(() => self.skipWaiting())
   );
 });
 
