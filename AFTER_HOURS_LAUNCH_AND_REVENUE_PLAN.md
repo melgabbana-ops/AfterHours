@@ -57,14 +57,17 @@ The app now has a user-initiated **Invite via WhatsApp** action. It shares only 
 - [x] Dutch and English Tarot, Oracle and daily astrology copy.
 - [x] Hand-operated WhatsApp share link that does not include private user data.
 - [x] Supabase schema source includes row-level security, server-authoritative session/consent procedures and private media storage rules.
-- [x] An idempotent SQL migration for localized experience-round content is included at supabase/migrate_localized_experience_rounds.sql.
-- [ ] **Run the localized-round migration in the correct production Supabase project.** It is committed to GitHub, but cannot be considered deployed just because the SQL file exists.
+- [x] Idempotent migration for localized experience-round content: supabase/migrate_localized_experience_rounds.sql.
+- [x] Role-protected admin console source with aggregate metrics, bilingual round editor and server-side audit logging.
+- [x] Admin migration source with allowlist table, restricted grants and audit trail: supabase/migrate_admin_dashboard.sql.
+- [ ] **Run both SQL migrations in the correct production Supabase project.** The localized-round and admin-console SQL are committed, but are not deployed merely because their files exist. After the admin migration, add the verified owner auth UUID to public.app_admins from the SQL Editor; never expose a self-service admin grant.
 - [ ] **Confirm production Supabase configuration and provider login callbacks.** The Vercel environment-variable endpoint denied access to the current connector, so production environment values and Supabase readiness could not be verified from this session.
 - [ ] **Confirm the public production URL opens without Vercel team SSO.** Earlier project metadata showed SSO protection on non-custom deployment domains. Current Vercel project settings could not be re-checked because the Vercel connector returned a scope/authorization 403. Do not send the teaser QR to a public audience until that external access setting is verified.
 - [ ] **Select and approve the adult-compatible payment processor**, implement the server-side checkout and signed webhooks, and test cancellations/refunds before switching the Store from “interest only” to “buy”.
-- [ ] **Finish a real admin dashboard.** The current screen called Session Control is a user session/security screen, not a role-protected business admin console. Production admin tools must enforce roles on the server and write audit logs; do not rely on hiding frontend buttons.
+- [ ] **Activate the admin console in production.** Its React interface and server-side authorization/audit SQL are now in source. It will remain closed until the SQL migration runs and the owner auth UUID is allowlisted.
 - [ ] **Age verification review.** The current 18+ gate is a self-declaration, not identity or third-party age verification. Choose a privacy-preserving approach that meets the actual legal and platform requirements before a full public adult launch. The European Commission published its age-verification blueprint and marked it feature-ready in April 2026: [EU age-verification approach](https://digital-strategy.ec.europa.eu/en/policies/eu-age-verification).
-- [ ] **Produce the full cinematic QR-scan-to-phone reveal.** The existing verified deliverable is a QR invitation card with gentle motion, not a new film scene showing a person scanning the card and the app opening. No extra Runway/Picsart credits were spent or purchased.
+- [x] Updated QR invite card and a 9-second branded motion teaser with the official logo end card; its QR opens the app-entry route and was decoded successfully in seven sampled video frames.
+- [ ] **Full physical scan animation remains a separate creative task.** The current teaser is a motion-graphics treatment of a generated cinematic still, not a sequence of distinct filmed/AI-generated frames showing the hand movement and the app opening in real time. No extra Runway/Picsart credits were purchased.
 
 ## Safe launch order
 
