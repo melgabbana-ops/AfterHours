@@ -1,5 +1,5 @@
-import React,{useEffect,useState}from"react";
-import{Activity,AlertCircle,ArrowLeft,CheckCircle2,RefreshCw,Save,ShieldCheck,Users,Timer,Database}from"lucide-react";
+import{useEffect,useState}from"react";
+import{Activity,AlertCircle,ArrowLeft,CheckCircle2,Save,ShieldCheck,Users,Timer,Database}from"lucide-react";
 import{supabase,supabaseConfigured}from"./services/supabase";
 
 type Locale="nl"|"en";
