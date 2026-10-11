@@ -33,7 +33,7 @@
 - [ ] Preserve current approved navigation and screen hierarchy; avoid regressions while adding features.
 
 ## B. App icon, PWA shell, splash, onboarding, age gate and trailer
-- [ ] Official AH monogram assets exported/used at 192×192 and 512×512, Apple touch icon and favicon.
+- [~] Square AH-style PNG icon assets at 192×192 and 512×512, Apple touch PNG reference and favicon are present; verify exact official logo match and iOS/Android device rendering.
 - [ ] Web app manifest: name and short name AFTER HOURS, display `standalone`, theme/background colors from the locked design system.
 - [ ] Cinematic splash: dark background, official AH logo, purple glow, gold loading indicator and smooth transition into the app.
 - [ ] First-open onboarding sequence, with completion state persisted so it does not repeat automatically.
@@ -90,7 +90,7 @@
 - [ ] Story progression, selected mode, completed chapters, favorites and session history persist accurately.
 - [ ] Random/surprise events from master prompt: MYSTERY COMMAND, DOUBLE XP, SECOND CHANCE, HIDDEN TIMER, SILENCE, CHOICE EVENT, BONUS ROUND. Use sparingly, explain outcomes and never override safety or consent.
 - [ ] Boss rounds are optional multi-stage rounds every several commands, with five steps, which may be text, timer, choice, voice, photo or video where the user expressly opts in; completion bonus in master spec is +75 XP.
-- [ ] **Command Library target: at least 100 non-explicit, adult-only, consensual challenges**, organized at least into DOMINANCE, SUBMISSION, DISCIPLINE, TEASE, ANTICIPATION, MIND GAMES, ROLEPLAY, PET PLAY, SERVICE, PHOTO, VIDEO, VOICE and CHOICE.
+- [~] The feature branch now has 100 entries in the Kinky opdrachten category (139 prompt items total) with English text and uniqueness/count tests. Still map prompts into all approved categories (DOMINANCE, SUBMISSION, DISCIPLINE, TEASE, ANTICIPATION, MIND GAMES, ROLEPLAY, PET PLAY, SERVICE, PHOTO, VIDEO, VOICE and CHOICE) and verify eligibility metadata, hard/soft limits, media permissions and admin editing.
 - [ ] Each command has: id, title, instruction, category, difficulty, duration, xp, type, requires_photo, requires_video, requires_voice, requires_mood_check, premium, active and tags.
 - [ ] Command eligibility checks hard/soft limits, user-selected boundaries, mode, consent and any media permissions. Hard limits must never be preselected.
 - [ ] Admin can add/edit/activate/deactivate commands and users see only active, eligible commands.
@@ -307,12 +307,12 @@
 - [ ] Do not merge to `main`, deploy to production, apply production Supabase migrations or activate real payment/push features without the relevant approval and verified prerequisites.
 
 ## Known code/release gaps to track now
-- [~] Missions exist in `src/Missions.tsx`, currently using local storage and separate mission points; verify real completion and progression integration.
-- [~] Service-worker update notice and user-approved activation are wired in the feature branch; CI and real iOS/Android waiting-worker behavior still need verification.
+- [~] Missions now call server-side `get_mission_progress` / `complete_mission` RPCs when Supabase is configured; `supabase/migrations/20261012090000_mission_progress.sql` implements idempotent points. The migration is not applied to a live project, demo mode remains local and mission points are not XP.
+- [~] Service-worker update notice and user-approved activation are wired in the feature branch; square PNG icons and manifest references are present. CI and real iOS/Android waiting-worker/install behavior still need verification.
 - [~] Maintenance config now includes validated scheduling, advance warnings, localized messages, displayed expected end time and automatic maintenance lockout; CI is running and mobile/time-zone behavior still needs verification.
 - [~] Admin dashboard code exists, but real availability depends on Supabase configuration, migrations/RPC, admin allowlisting, RLS and live data verification.
 - [~] Monetization screen displays prices and stores local interest only; no payment starts.
 - [~] Media vault, Radio, profile/avatars, sessions, insights and auth each need the specific acceptance tests above rather than being treated as complete solely because components exist.
 - [ ] Verify all master-prompt screens/components against the current source code, including onboarding/trailer, character creation/evolution, game modes/100+ command library, mood history/private notes, private media capture, music/SFX/haptics, socials/templates, admin ranks/products/test mode, legal pages and pricing/credit consistency.
-- [ ] Build a file-by-file feature matrix linking each requirement to its UI/component, data model/persistence, backend/RLS, automated/manual test and observed status. Do not infer missing features merely from the old 9 Oct report, which itself noted it had not yet inspected all code.
-- [ ] After this scope audit, re-run CI on the latest PR commit and report the tested commit SHA. Keep changes on the feature branch until explicitly approved for merge/release.
+- [x] Build `docs/FEATURE_IMPLEMENTATION_MATRIX.md`, linking approved requirements to source files and explicitly marking partial, missing, unverified and external-prerequisite work. Keep the matrix updated as implementation changes. Do not infer missing features merely from the old 9 Oct report, which itself noted it had not yet inspected all code.
+- [~] CI has been rerun repeatedly through each implementation change. Final status must be checked against the latest PR commit SHA before reporting completion. Keep changes on the feature branch until explicitly approved for merge/release.
