@@ -2,7 +2,7 @@ import React from "react";
 import { moodCatalog, type MoodCode, type MoodPhase } from "./services/moods";
 
 type Language = "nl" | "en";
-const copy: Record<MoodPhase, Record<MoodCode, [string,string]>> = {
+const copy: Record<MoodPhase, Partial<Record<MoodCode, [string,string]>>> = {
  before: {
   KINKY:["Kinky","Kinky"], EXCITED:["Opgewonden","Excited"], CURIOUS:["Nieuwsgierig","Curious"],
   CALM:["Rustig","Calm"], PLAYFUL:["Speels","Playful"], CONFIDENT:["Zelfverzekerd","Confident"], UNSURE:["Onzeker / twijfel","Unsure"]
@@ -28,7 +28,7 @@ export default function MoodCheckIn({phase,language,selected,onSelect}:{
   <span className="eyebrow">AFTER HOURS · {phase.toUpperCase()} CHECK-IN</span>
   <h3>{t(...headings[phase])}</h3><p>{t(...detail[phase])}</p>
   <div className="mood-choice-grid">{moodCatalog[phase].map(mood=>{
-   const label=copy[phase][mood][language==="nl"?0:1];
+   const label=copy[phase][mood]?.[language==="nl"?0:1] ?? mood;
    const urgent=mood==="STOP"||mood==="OVERWHELMED"||mood==="NEED A PAUSE";
    return <button type="button" key={mood} className={(selected===mood?"selected ":"")+(urgent?"mood-urgent":"")} aria-pressed={selected===mood} onClick={()=>onSelect(mood)}>{label}</button>;
   })}</div>
