@@ -786,3 +786,5 @@ img,svg,video,canvas{max-width:100%}
 .media-pending-preview .media-item-actions button{width:100%;min-height:44px}
 .media-upload:focus-within{outline:2px solid #c89445;outline-offset:3px}
 @media(max-width:520px){.media-capture{padding:12px}.media-pending-preview .media-item-actions{grid-template-columns:1fr}}
+
+.media-pending-preview img{display:block;width:100%;max-height:360px;object-fit:contain;border:1px solid #3a2d43;border-radius:7px;background:#050405}
