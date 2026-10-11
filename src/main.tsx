@@ -25,6 +25,7 @@ import{playNotificationSound}from"./services/notificationSound";
 import{levelFromXp,rankFromXp,rankIndexFromXp,rankNames,rankThresholds}from"./progression";
 import{notificationEvents}from"./services/notifications";
 import{shouldResumeSession}from"./services/sessionSafety";
+import {getMaintenanceStatus,formatMaintenanceDate,type MaintenanceConfig} from "./maintenance";
 
 class AppErrorBoundary extends React.Component<React.PropsWithChildren, {hasError:boolean}>{
  state={hasError:false};
@@ -73,7 +74,10 @@ const guidePrompts=[
  {title:"Na de ervaring",body:"Neem tijd voor aftercare. Sta stil bij wat goed voelde en wat je wilt meenemen.",action:"Open profiel"}
 ];
 
-function App(){
+function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
+ const [maintenanceNow,setMaintenanceNow]=useState(()=>Date.now());
+ useEffect(()=>{const id=window.setInterval(()=>setMaintenanceNow(Date.now()),30_000);return()=>window.clearInterval(id)},[]);
+ const maintenanceStatus=useMemo(()=>getMaintenanceStatus(maintenanceConfig,maintenanceNow),[maintenanceConfig,maintenanceNow]);
  const [appUpdateReady,setAppUpdateReady]=useState(false);
  useEffect(()=>{
   if(!("serviceWorker" in navigator))return;
@@ -374,11 +378,13 @@ function App(){
  const requestPasswordReset=async()=>{setAuthMessage("");setAuthBusy(true);try{await resetPassword(authEmail.trim());setAuthMessage(t("Als dit e-mailadres bekend is, ontvang je een link om je wachtwoord opnieuw in te stellen.","If this email address is registered, you will receive a link to reset your password."));}catch(error){setAuthMessage(error instanceof Error?error.message:"Resetten mislukt.")}finally{setAuthBusy(false)}};
  const saveRecoveredPassword=async()=>{setAuthMessage("");setAuthBusy(true);try{await updatePassword(authPassword);setAuthMessage(t("Je wachtwoord is bijgewerkt.","Your password has been updated."));setAuthPassword("");setPasswordRecovery(false);}catch(error){setAuthMessage(error instanceof Error?error.message:"Wachtwoord bijwerken mislukt.")}finally{setAuthBusy(false)}};
 
+ if(maintenanceStatus.active)return <UnderConstruction config={maintenanceConfig} language={language}/>;
  if(!authReady)return <div className="gate"><div className="gate-card"><img className="gate-logo" src="/after-hours-logo.svg" alt="AFTER HOURS" /><h1>{t("Sessie herstellen…","Restoring session…")}</h1><p>{t("Beveiligde toegang wordt gecontroleerd.","Checking secure access.")}</p></div></div>;
  if(!state.ageConfirmed)return <div className="gate"><img className="gate-logo" src="/after-hours-logo.svg" alt="AFTER HOURS" /><span className="eyebrow">PRIVATE EXPERIENCE · 18+</span><h1>AFTER<br/><i>HOURS</i></h1><p>Een premium interactieve ervaring voor volwassenen. Bewust. Afgesproken. Veilig.</p><button onClick={()=>{setState(s=>({...s,ageConfirmed:true,ageConfirmedFor:syncUserId??"local"}));try{if(localStorage.getItem("afterhours.onboarding.completed")!=="1")setScreen("onboarding")}catch{setScreen("onboarding")}}}>Ik ben 18+ <ChevronRight/></button><small>Dit is een zelfverklaring, geen officiële leeftijdsverificatie. Consent wordt afzonderlijk gevraagd.</small></div>;
 
  return <div className={`app ${privacyMode?"privacy-mode":""}`}>
  {appUpdateReady&&<aside className="app-update-notice" role="status"><span>{t("Een nieuwe versie van AFTER HOURS staat klaar.","A new version of AFTER HOURS is ready.")}</span><button type="button" onClick={applyAppUpdate}>{t("Nu vernieuwen","Refresh now")}</button><button type="button" aria-label={t("Melding sluiten","Dismiss update notice")} onClick={()=>setAppUpdateReady(false)}>×</button></aside>}
+ {maintenanceStatus.warning&&<aside className="maintenance-warning" role="status" aria-live="polite"><div><strong>{t("Gepland onderhoud komt eraan","Scheduled maintenance is coming up")}</strong><span>{language==="nl"?maintenanceStatus.messageNL:maintenanceStatus.messageEN}</span><small>{t("Start: ","Starts: ")}{maintenanceStatus.startsAtMs===null?"":formatMaintenanceDate(maintenanceStatus.startsAtMs,language)}{maintenanceStatus.endsAtMs!==null?" · "+t("verwacht einde: ","expected finish: ")+formatMaintenanceDate(maintenanceStatus.endsAtMs,language):""}</small></div></aside>}
  <header><button className="wordmark" onClick={()=>setScreen("home")} aria-label="AFTER HOURS home"><img src="/after-hours-logo.svg" alt="AFTER HOURS" /></button><div className="header-tools"><button type="button" className="safety-shortcut" aria-label={t("Veiligheidsplan openen","Open safety plan")} title={t("Veiligheidsplan","Safety plan")} onClick={()=>setScreen("safety")}><Shield size={17}/></button><button type="button" className="privacy-shortcut" aria-label={privacyMode?t("Privémodus uitschakelen","Turn privacy mode off"):t("Privémodus inschakelen","Turn privacy mode on")} title={privacyMode?t("Privémodus uitschakelen","Turn privacy mode off"):t("Privémodus","Privacy mode")} aria-pressed={privacyMode} onClick={()=>setPrivacyMode(value=>!value)}><EyeOff size={16}/></button><button type="button" className="language-toggle" aria-label={t("Taal wijzigen","Change language")} onClick={()=>setLanguage(language==="nl"?"en":"nl")}><span className={language==="nl"?"language-active":""}>NL</span><span className="language-divider">/</span><span className={language==="en"?"language-active":""}>EN</span></button><div className="status"><span></span> {t("privé sessie","private session")}</div></div></header>
 
  {screen==="home"&&<main>  {authReady&&(!supabaseConfigured||!syncUserId)&&<section className="consent-panel" role="status"><Lock/><div><strong>{supabaseConfigured?t("Niet ingelogd","Not signed in"):t("Lokale demo-modus","Local demo mode")}</strong><span>{supabaseConfigured?t("Je kunt de experience bekijken, maar log in voordat je begint om sessievoortgang en XP aan je account te koppelen.","You can preview the experience, but sign in before starting to link session progress and XP to your account."):t("De Supabase-backend is niet ingesteld. Voortgang blijft lokaal op dit apparaat; sessies kunnen niet server-side worden afgerond en leveren geen opgeslagen XP op.","The Supabase backend is not configured. Progress stays on this device; sessions cannot be completed server-side and XP will not be saved.")}</span></div>{supabaseConfigured&&!syncUserId&&<button onClick={()=>setScreen("admin")}>{t("Inloggen","Sign in")}</button>}</section>}
@@ -457,12 +463,11 @@ if(teaserPreview){
  void fetch("/maintenance.json",{cache:"no-store"})
   .then(response=>response.ok?response.json():{enabled:false})
   .catch(()=>({enabled:false}))
-  .then(config=>{
-   const now=Date.now();
-   const startsAt=typeof config?.startsAt==="string"?Date.parse(config.startsAt):NaN;
-   const endsAt=typeof config?.endsAt==="string"?Date.parse(config.endsAt):NaN;
-   const scheduled=Number.isFinite(startsAt)&&Number.isFinite(endsAt)&&endsAt>startsAt&&now>=startsAt&&now<endsAt;
-   const maintenanceActive=config?.enabled===true||scheduled;
-   root.render(maintenanceActive?<UnderConstruction/>:<AppErrorBoundary><App/></AppErrorBoundary>);
+  .then(rawConfig=>{
+   const config=rawConfig as MaintenanceConfig;
+   const maintenance=getMaintenanceStatus(config);
+   root.render(maintenance.active
+    ?<UnderConstruction config={config}/>
+    :<AppErrorBoundary><App maintenanceConfig={config}/></AppErrorBoundary>);
   });
 }
