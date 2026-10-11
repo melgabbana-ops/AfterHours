@@ -308,8 +308,8 @@
 
 ## Known code/release gaps to track now
 - [~] Missions exist in `src/Missions.tsx`, currently using local storage and separate mission points; verify real completion and progression integration.
-- [~] Service-worker update notice exists in the feature branch; test the waiting-worker flow and app reload on actual mobile browsers.
-- [~] Maintenance config currently exists, and active-window scheduling is parsed, but advance warning and configured localized maintenance text/end-time still need full user-facing implementation.
+- [~] Service-worker update notice and user-approved activation are wired in the feature branch; CI and real iOS/Android waiting-worker behavior still need verification.
+- [~] Maintenance config now includes validated scheduling, advance warnings, localized messages, displayed expected end time and automatic maintenance lockout; CI is running and mobile/time-zone behavior still needs verification.
 - [~] Admin dashboard code exists, but real availability depends on Supabase configuration, migrations/RPC, admin allowlisting, RLS and live data verification.
 - [~] Monetization screen displays prices and stores local interest only; no payment starts.
 - [~] Media vault, Radio, profile/avatars, sessions, insights and auth each need the specific acceptance tests above rather than being treated as complete solely because components exist.
