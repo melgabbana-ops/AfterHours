@@ -92,8 +92,8 @@ export default function MediaVault({ sessionId, language = "nl" }: MediaVaultPro
     return () => { active = false; };
   }, [refresh, language]);
 
-  const upload = async (file?: File) => {
-    if (!file) return;
+  const upload = async (file?: File): Promise<boolean> => {
+    if (!file) return false;
     setBusy(true);
     setMessage("");
     setSignedUrl("");
@@ -105,8 +105,10 @@ export default function MediaVault({ sessionId, language = "nl" }: MediaVaultPro
           ? t("Bestand veilig geüpload naar je privékluis.", "File safely uploaded to your private vault.")
           : t("Bestand is geüpload, maar de lijst kon niet worden vernieuwd. Tik op Vernieuwen om opnieuw te proberen.", "The file uploaded, but the list could not refresh. Tap Refresh to try again."),
       );
+      return true;
     } catch (error) {
       setMessage(error instanceof Error ? error.message : t("Uploaden is mislukt.", "Upload failed."));
+      return false;
     } finally {
       setBusy(false);
     }
@@ -185,7 +187,8 @@ export default function MediaVault({ sessionId, language = "nl" }: MediaVaultPro
 
   const saveCapture=async()=>{
     if(!pendingCapture)return;
-    await upload(pendingCapture);
+    const saved=await upload(pendingCapture);
+    if(!saved)return;
     setPendingCapture(null);
     if(pendingUrl){URL.revokeObjectURL(pendingUrl);setPendingUrl("");}
     setCaptureConsent(false);
