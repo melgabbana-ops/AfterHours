@@ -123,6 +123,16 @@ export default function MediaVault({ sessionId, language = "nl" }: MediaVaultPro
     if(captureTimeoutRef.current!==undefined){window.clearTimeout(captureTimeoutRef.current);captureTimeoutRef.current=undefined;}
   };
 
+  const uploadSelectedFile=async(file?:File)=>{
+    if(!file)return;
+    if(!captureConsent){
+      setMessage(t("Bevestig eerst dat de betrokkenen akkoord zijn met deze media en privéopslag.","First confirm that the people involved agree to this media and private storage."));
+      return;
+    }
+    const saved=await upload(file);
+    if(saved)setCaptureConsent(false);
+  };
+
   const startCapture=async()=>{
     if(!captureConsent){
       setMessage(t("Bevestig eerst dat iedereen op de opname expliciet akkoord is met opnemen én privé opslaan.","First confirm that everyone recorded explicitly agrees to recording and private storage."));
@@ -251,7 +261,7 @@ export default function MediaVault({ sessionId, language = "nl" }: MediaVaultPro
               disabled={busy}
               onChange={event => {
                 const file = event.currentTarget.files?.[0];
-                void upload(file);
+                void uploadSelectedFile(file);
                 event.currentTarget.value = "";
               }}
             />
@@ -260,9 +270,13 @@ export default function MediaVault({ sessionId, language = "nl" }: MediaVaultPro
             <span className="eyebrow">{t("CAMERA & STEM","CAMERA & VOICE")}</span>
             <h4 id="media-capture-title">{t("Maak een privéopname","Create a private recording")}</h4>
             <p>{t("Opnames zijn optioneel. Geef alleen toestemming wanneer iedereen vrij en duidelijk akkoord is. De opname wordt eerst lokaal getoond en pas na jouw keuze geüpload.","Recordings are optional. Proceed only when everyone freely and clearly agrees. The recording is previewed locally and uploaded only after you choose to save it.")}</p>
+            <label className="media-upload media-photo-capture">
+              <span>{t("Maak een foto met de camera","Take a photo with the camera")}</span>
+              <input type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/avif" capture="environment" disabled={busy||isRecording||!!pendingCapture} onChange={event=>{const file=event.currentTarget.files?.[0];void uploadSelectedFile(file);event.currentTarget.value="";}}/>
+            </label>
             <div className="media-capture-controls">
               <label>{t("Opnametype","Recording type")}<select value={captureKind} disabled={isRecording||busy} onChange={e=>setCaptureKind(e.target.value as "video"|"voice")}><option value="video">{t("Video met camera","Video with camera")}</option><option value="voice">{t("Alleen stem","Voice only")}</option></select></label>
-              <label className="media-consent-check"><input type="checkbox" checked={captureConsent} disabled={isRecording||busy||!!pendingCapture} onChange={e=>setCaptureConsent(e.target.checked)}/><span>{t("Ik bevestig dat iedereen die wordt opgenomen expliciet akkoord is met deze opname en privéopslag. Delen vereist aparte toestemming.","I confirm that everyone recorded explicitly agrees to this recording and private storage. Sharing requires separate consent.")}</span></label>
+              <label className="media-consent-check"><input type="checkbox" checked={captureConsent} disabled={isRecording||busy||!!pendingCapture} onChange={e=>setCaptureConsent(e.target.checked)}/><span>{t("Ik bevestig dat de betrokkenen akkoord zijn met het maken of uploaden van deze media en privéopslag. Delen vereist aparte toestemming.","I confirm that everyone involved agrees to capture or upload this media and store it privately. Sharing requires separate consent.")}</span></label>
               {!isRecording&&!pendingCapture&&<button type="button" onClick={()=>void startCapture()} disabled={busy||!captureConsent}>{t("Start opname · max. 60 sec.","Start recording · max 60 sec")}</button>}
               {isRecording&&<button type="button" className="media-stop-recording" onClick={stopCapture}>{t("Stop opname","Stop recording")}</button>}
             </div>
