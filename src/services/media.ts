@@ -8,6 +8,8 @@ const ALLOWED_TYPES = new Set([
   "image/webp",
   "image/gif",
   "image/avif",
+  "video/webm",
+  "video/mp4",
   "audio/mpeg",
   "audio/mp4",
   "audio/aac",
@@ -39,7 +41,7 @@ export function validatePrivateMediaPath(path: string, userId: string): boolean 
 }
 
 export function validatePrivateMediaFile(file: Pick<File, "type" | "size">): void {
-  if (!ALLOWED_TYPES.has(file.type.toLowerCase())) throw new Error("Kies een afbeelding of audiobestand.");
+  if (!ALLOWED_TYPES.has(file.type.toLowerCase())) throw new Error("Kies een afbeelding, audio- of videobestand.");
   if (file.size <= 0 || file.size > MAX_FILE_BYTES) throw new Error("Bestanden moeten kleiner zijn dan 20 MB.");
 }
 
