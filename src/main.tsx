@@ -429,7 +429,6 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
 
  {screen==="prompts"&&<PromptLibrary playerId={state.profile.id} language={language} onBack={()=>setScreen("home")} onComplete={()=>recordAchievement("prompt_complete")}/>}
  {screen==="missions"&&<Missions language={language} onBack={()=>setScreen("home")} onExplore={(destination)=>setScreen((destination==="aftercare"?"aftercare":destination==="safety"?"safety":destination==="insights"?"insights":destination==="prompts"?"prompts":"home"))}/> }
- {screen==="legal"&&<LegalCenter language={language} onBack={()=>setScreen("home")}/>}
  {screen==="social"&&<SocialStudio language={language} onBack={()=>setScreen("home")}/>}
 
  {screen==="insights"&&<Insights language={language} onBack={()=>setScreen("home")}/>}
