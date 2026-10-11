@@ -14,6 +14,7 @@ import SafetyPlan from"./SafetyPlan";
 import Monetization from "./Monetization";
 import CharacterStudio from "./CharacterStudio";
 import Onboarding from "./Onboarding";
+import Missions from "./Missions";
 import AdminDashboard from "./AdminDashboard";
 import type{AfterHoursState,AvatarStyle,Screen,Safety,SessionHistoryEntry}from"./types";
 import{loadState,saveState,loadTimer,saveTimer,clearTimer,defaultState}from"./storage";
@@ -383,6 +384,7 @@ function App(){
    <button className="tile" onClick={()=>setScreen("insights")}><Activity/><span>{t("Horoscoop","Horoscope")}</span></button>
    <button className="tile" onClick={()=>setScreen("radio")}><Radio/><span>Radio</span></button>
    <button className="tile" onClick={()=>setScreen("prompts")}><BookOpen/><span>The Deck</span></button>
+   <button className="tile" onClick={()=>setScreen("missions")}><Activity/><span>{t("Missies","Missions")}</span></button>
    <button className="tile" onClick={()=>setScreen("store")}><ShoppingBag/><span>{t("Collecties & prijzen","Collections & pricing")}</span></button>
    <button className="tile" onClick={shareWhatsAppInvite}><MessageCircle/><span>{t("Deel via WhatsApp","Invite via WhatsApp")}</span></button>
    {isBusinessAdmin&&<button className="tile admin-launch-tile" onClick={()=>setScreen("controlroom")}><Shield/><span>{t("Beheerpaneel","Admin dashboard")}</span></button>}
@@ -396,6 +398,7 @@ function App(){
  {screen==="aftercare"&&<main className="aftercare-screen"><section className="aftercare-card"><span className="eyebrow">AFTER HOURS · AFTERCARE</span><h2>{t("Rustig landen","Land softly.")}</h2><p>{t("De Experience is voorbij. Kies wat nu het beste past. Niets hoeft meteen.","The Experience is over. Choose what feels right now. Nothing has to happen immediately.")}</p><div className="aftercare-options"><button className={aftercareChoice==="land"?"selected":""} onClick={()=>setAftercareChoice("land")}><strong>{t("Rustig landen","Land softly")}</strong><span>{t("Even zitten, ademen en het tempo laten zakken.","Sit for a moment, breathe, and let the pace settle.")}</span></button><button className={aftercareChoice==="talk"?"selected":""} onClick={()=>setAftercareChoice("talk")}><strong>{t("Kort napraten","Talk it through")}</strong><span>{t("Bespreek samen wat goed voelde en wat je wilt meenemen.","Share what felt good and what you want to carry forward.")}</span></button><button className={aftercareChoice==="space"?"selected":""} onClick={()=>setAftercareChoice("space")}><strong>{t("Ruimte & water","Space & water")}</strong><span>{t("Neem even afstand, drink iets en kom rustig terug.","Take a little space, have some water, and return at your own pace.")}</span></button></div><div className="aftercare-note"><Shield/><span>{t("Aftercare is geen verplichting om iets te delen. Een pauze, grens of stop blijft altijd geldig.","Aftercare never obliges you to share. A pause, boundary, or stop is always valid.")}</span></div><button className="gold aftercare-complete" onClick={()=>void finishSession()} disabled={!aftercareChoice||finishing}>{finishing?t("Veilig afronden…","Finishing safely…"):t("Sessie veilig afronden","Finish session safely")}</button><button className="back" onClick={()=>setScreen("home")}>← {t("Terug","Back")}</button></section></main>}
 
  {screen==="prompts"&&<PromptLibrary playerId={state.profile.id} language={language} onBack={()=>setScreen("home")} onComplete={()=>recordAchievement("prompt_complete")}/>}
+ {screen==="missions"&&<Missions language={language} onBack={()=>setScreen("home")} onExplore={(destination)=>setScreen((destination==="aftercare"?"aftercare":destination==="safety"?"safety":destination==="insights"?"insights":destination==="prompts"?"prompts":"home"))}/> }
 
  {screen==="insights"&&<Insights language={language} onBack={()=>setScreen("home")}/>}
 
