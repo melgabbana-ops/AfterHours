@@ -676,3 +676,10 @@ img,svg,video,canvas{max-width:100%}
 .mission-complete{display:inline-flex;align-items:center;gap:7px;margin-top:12px;background:linear-gradient(135deg,#d9b875,#b68b48);color:#171018;border:0}.mission-complete:disabled{opacity:.72;cursor:default}
 .mission-safety-note{display:flex;align-items:flex-start;gap:12px;margin-top:20px;padding:16px;border:1px solid rgba(174,139,199,.28);border-radius:16px;background:rgba(66,43,75,.22);color:#cfc1d5}.mission-safety-note svg{flex:0 0 auto;color:#d9bb7a}.mission-safety-note p{margin:0;font-size:.82rem;line-height:1.65}
 @media(max-width:420px){.missions-screen{padding:14px 12px 100px}.missions-hero{padding:18px}.mission-card{padding:13px;grid-template-columns:30px minmax(0,1fr);gap:9px}.mission-icon{width:30px;height:30px}.mission-tabs button{padding:11px 8px}.mission-tabs small{font-size:.59rem}}
+
+
+/* In-app update notice */
+.app-update-notice{position:sticky;top:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;margin:0 auto;background:linear-gradient(110deg,#21101f,#100d12);border:1px solid rgba(207,169,91,.65);border-radius:12px;color:#f7f0e4;box-shadow:0 8px 28px rgba(0,0,0,.28);font-size:.9rem}
+.app-update-notice button{flex:0 0 auto;border:1px solid #cfa95b;border-radius:999px;padding:8px 13px;background:#cfa95b;color:#171017;font-weight:700;cursor:pointer}
+.app-update-notice button:last-child{border-color:transparent;background:transparent;color:#f7f0e4;font-size:1.25rem;padding:4px 8px}
+@media(max-width:560px){.app-update-notice{align-items:flex-start;flex-wrap:wrap}.app-update-notice span{flex-basis:calc(100% - 20px)}.app-update-notice button:nth-of-type(1){margin-right:auto}}
