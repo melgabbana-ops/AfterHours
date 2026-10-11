@@ -16,7 +16,7 @@ function readLocal(profileId:string):LocalMoodEvent[]{
   if(!Array.isArray(raw))return [];
   return raw.filter((item):item is LocalMoodEvent=>Boolean(item)&&typeof item.id==="string"&&typeof item.session_id==="string"
    &&(item.phase==="before"||item.phase==="during"||item.phase==="after")
-   &&typeof item.mood==="string"&&Object.hasOwn(label,item.mood)
+   &&typeof item.mood==="string"&&Object.prototype.hasOwnProperty.call(label,item.mood)
    &&typeof item.created_at==="string");
  }catch{return []}
 }
