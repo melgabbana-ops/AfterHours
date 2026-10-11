@@ -16,6 +16,8 @@ import CharacterStudio from "./CharacterStudio";
 import Onboarding from "./Onboarding";
 import Missions from "./Missions";
 import AdminDashboard from "./AdminDashboard";
+import LegalCenter from "./LegalCenter";
+import SocialStudio from "./SocialStudio";
 import type{AfterHoursState,AvatarStyle,Screen,Safety,SessionHistoryEntry}from"./types";
 import{loadState,saveState,loadTimer,saveTimer,clearTimer,defaultState}from"./storage";
 import{loadRemoteState,loadRemoteRounds,syncRemoteState,updateRemoteUsername,completeRemoteSession,revokeRemoteConsent}from"./services/backend";
@@ -106,7 +108,7 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
  const[authReady,setAuthReady]=useState(!supabaseConfigured);
  const[rounds,setRounds]=useState(fallbackRounds);
  useEffect(()=>{let active=true;const refreshRounds=async()=>{if(!supabaseConfigured){setRounds(language==="en"?fallbackRoundsEnglish:fallbackRounds);return;}try{const remote=await loadRemoteRounds(language);if(!active)return;setRounds(remote.length===3?remote.map(item=>({title:item.title,text:item.body,time:item.durationSeconds})):(language==="en"?fallbackRoundsEnglish:fallbackRounds));}catch{if(active)setRounds(language==="en"?fallbackRoundsEnglish:fallbackRounds);}};void refreshRounds();return()=>{active=false}},[language]);
- const initialScreen=(()=>{const value=new URLSearchParams(window.location.search).get("screen");if(value==="game"||value==="profile"||value==="admin"||value==="insights"||value==="radio"||value==="prompts"||value==="safety"||value==="store"||value==="onboarding"||value==="controlroom")return value;return "home" as Screen})();
+ const initialScreen=(()=>{const value=new URLSearchParams(window.location.search).get("screen");if(value==="game"||value==="profile"||value==="admin"||value==="insights"||value==="radio"||value==="prompts"||value==="safety"||value==="store"||value==="onboarding"||value==="controlroom"||value==="legal"||value==="social")return value;return "home" as Screen})();
  const[screen,setScreen]=useState<Screen>(initialScreen);
  const[privacyMode,setPrivacyMode]=useState(false);
  useEffect(()=>{if(new URLSearchParams(window.location.search).has("screen"))window.history.replaceState({},document.title,window.location.pathname+window.location.hash)},[]);
@@ -254,7 +256,7 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
  const unreadNotifications=state.notifications.filter(item=>!item.read).length;
  const markNotificationRead=(id:string)=>setState(s=>({...s,notifications:s.notifications.map(item=>item.id===id?{...item,read:true}:item)}));
  const markAllNotificationsRead=()=>setState(s=>({...s,notifications:s.notifications.map(item=>({...item,read:true}))}));
- useEffect(()=>{if(screen==="home")return;if(!state.ageConfirmed){setScreen("home");return}if(screen==="game"&&state.consent.status!=="active"){setScreen("home")}},[screen,state.ageConfirmed,state.consent.status]);
+ useEffect(()=>{if(screen==="home"||screen==="legal")return;if(!state.ageConfirmed){setScreen("home");return}if(screen==="game"&&state.consent.status!=="active"){setScreen("home")}},[screen,state.ageConfirmed,state.consent.status]);
  const xp=state.profile.xp;
  const currentLevel=Math.max(1,state.profile.level);
  const levelFloor=(currentLevel-1)*200;
@@ -380,7 +382,8 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
 
  if(maintenanceStatus.active)return <UnderConstruction config={maintenanceConfig} language={language}/>;
  if(!authReady)return <div className="gate"><div className="gate-card"><img className="gate-logo" src="/after-hours-logo.svg" alt="AFTER HOURS" /><h1>{t("Sessie herstellen…","Restoring session…")}</h1><p>{t("Beveiligde toegang wordt gecontroleerd.","Checking secure access.")}</p></div></div>;
- if(!state.ageConfirmed)return <div className="gate"><img className="gate-logo" src="/after-hours-logo.svg" alt="AFTER HOURS" /><span className="eyebrow">PRIVATE EXPERIENCE · 18+</span><h1>AFTER<br/><i>HOURS</i></h1><p>Een premium interactieve ervaring voor volwassenen. Bewust. Afgesproken. Veilig.</p><button onClick={()=>{setState(s=>({...s,ageConfirmed:true,ageConfirmedFor:syncUserId??"local"}));try{if(localStorage.getItem("afterhours.onboarding.completed")!=="1")setScreen("onboarding")}catch{setScreen("onboarding")}}}>Ik ben 18+ <ChevronRight/></button><small>Dit is een zelfverklaring, geen officiële leeftijdsverificatie. Consent wordt afzonderlijk gevraagd.</small></div>;
+ if(screen==="legal")return <LegalCenter language={language} onBack={()=>setScreen("home")}/>;
+ if(!state.ageConfirmed)return <div className="gate"><img className="gate-logo" src="/after-hours-logo.svg" alt="AFTER HOURS" /><span className="eyebrow">PRIVATE EXPERIENCE · 18+</span><h1>AFTER<br/><i>HOURS</i></h1><p>Een premium interactieve ervaring voor volwassenen. Bewust. Afgesproken. Veilig.</p><button onClick={()=>{setState(s=>({...s,ageConfirmed:true,ageConfirmedFor:syncUserId??"local"}));try{if(localStorage.getItem("afterhours.onboarding.completed")!=="1")setScreen("onboarding")}catch{setScreen("onboarding")}}}>Ik ben 18+ <ChevronRight/></button><small>Dit is een zelfverklaring, geen officiële leeftijdsverificatie. Consent wordt afzonderlijk gevraagd.</small><div className="gate-legal-links"><button type="button" onClick={()=>setScreen("legal")}>Juridische informatie / Privacy</button></div></div>;
 
  return <div className={`app ${privacyMode?"privacy-mode":""}`}>
  {appUpdateReady&&<aside className="app-update-notice" role="status"><span>{t("Een nieuwe versie van AFTER HOURS staat klaar.","A new version of AFTER HOURS is ready.")}</span><button type="button" onClick={applyAppUpdate}>{t("Nu vernieuwen","Refresh now")}</button><button type="button" aria-label={t("Melding sluiten","Dismiss update notice")} onClick={()=>setAppUpdateReady(false)}>×</button></aside>}
@@ -411,6 +414,8 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
    <button className="tile" onClick={()=>setScreen("prompts")}><BookOpen/><span>The Deck</span></button>
    <button className="tile" onClick={()=>setScreen("missions")}><Activity/><span>{t("Missies","Missions")}</span></button>
    <button className="tile" onClick={()=>setScreen("store")}><ShoppingBag/><span>{t("Collecties & prijzen","Collections & pricing")}</span></button>
+   <button className="tile" onClick={()=>setScreen("social")}><MessageCircle/><span>{t("Social studio","Social studio")}</span></button>
+   <button className="tile" onClick={()=>setScreen("legal")}><BookOpen/><span>{t("Juridische info","Legal information")}</span></button>
    <button className="tile" onClick={shareWhatsAppInvite}><MessageCircle/><span>{t("Deel via WhatsApp","Invite via WhatsApp")}</span></button>
    {isBusinessAdmin&&<button className="tile admin-launch-tile" onClick={()=>setScreen("controlroom")}><Shield/><span>{t("Beheerpaneel","Admin dashboard")}</span></button>}
   </section>
@@ -424,6 +429,8 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
 
  {screen==="prompts"&&<PromptLibrary playerId={state.profile.id} language={language} onBack={()=>setScreen("home")} onComplete={()=>recordAchievement("prompt_complete")}/>}
  {screen==="missions"&&<Missions language={language} onBack={()=>setScreen("home")} onExplore={(destination)=>setScreen((destination==="aftercare"?"aftercare":destination==="safety"?"safety":destination==="insights"?"insights":destination==="prompts"?"prompts":"home"))}/> }
+ {screen==="legal"&&<LegalCenter language={language} onBack={()=>setScreen("home")}/>}
+ {screen==="social"&&<SocialStudio language={language} onBack={()=>setScreen("home")}/>}
 
  {screen==="insights"&&<Insights language={language} onBack={()=>setScreen("home")}/>}
 
