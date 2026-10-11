@@ -5,11 +5,11 @@ const isUuid=(value:string)=>/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0
 
 export interface RemoteRound{slug:string;title:string;body:string;durationSeconds:number}
 
-export async function loadRemoteRounds():Promise<RemoteRound[]>{
+export async function loadRemoteRounds(language:"nl"|"en"="nl"):Promise<RemoteRound[]>{
  if(!supabaseConfigured||!supabase)return [];
- const{data,error}=await supabase.from("experience_rounds").select("slug,title,body,duration_seconds").eq("active",true).order("sort_order",{ascending:true});
+ const{data,error}=await supabase.from("experience_rounds").select("slug,title_nl,body_nl,title_en,body_en,duration_seconds").eq("active",true).order("sort_order",{ascending:true});
  if(error||!data||data.length===0)return [];
- return data.filter(row=>Number.isInteger(row.duration_seconds)&&row.duration_seconds>0).map(row=>({slug:row.slug,title:row.title,body:row.body,durationSeconds:row.duration_seconds}));
+ return data.filter(row=>Number.isInteger(row.duration_seconds)&&row.duration_seconds>0).map(row=>({slug:row.slug,title:language==="en"?row.title_en:row.title_nl,body:language==="en"?row.body_en:row.body_nl,durationSeconds:row.duration_seconds})).filter(row=>typeof row.title==="string"&&row.title.length>0&&typeof row.body==="string"&&row.body.length>0);
 }
 
 export async function loadRemoteState(preferredSessionId?:string):Promise<AfterHoursState|null>{
