@@ -18,6 +18,7 @@ export default function Teaser() {
       </video>
       <button className="teaser-film-skip" type="button" onClick={() => setIntroEnded(true)}>{t("INTRO OVERSLAAN","SKIP INTRO")}</button>
     </section>}
+    {(introEnded || introUnavailable) && <section className="teaser-film teaser-film-endcard" aria-label={t("AFTER HOURS-logo","AFTER HOURS logo")}><img src="/after-hours-logo.svg" alt="AFTER HOURS" /><p>YOUR RULES. YOUR LIMITS. YOUR EXPERIENCE.</p><span>18+ · PRIVATE EXPERIENCE</span></section>}
     <section className="teaser-content">
       <span className="eyebrow"><Sparkles size={13}/> {t("EEN NIEUWE WERELD KRIJGT VORM","A NEW WORLD IS TAKING SHAPE")}</span>
       <h1>{t("IN","UNDER")}<br/><em>{t("AANBOUW","CONSTRUCTION")}</em></h1>
