@@ -50,7 +50,10 @@ export default function MediaVault({ sessionId, language = "nl" }: MediaVaultPro
   useEffect(()=>()=> {
     if(captureTimeoutRef.current!==undefined) window.clearTimeout(captureTimeoutRef.current);
     streamRef.current?.getTracks().forEach(track=>track.stop());
-    if(pendingUrl) URL.revokeObjectURL(pendingUrl);
+  },[]);
+  useEffect(()=>{
+    const currentUrl=pendingUrl;
+    return ()=>{if(currentUrl)URL.revokeObjectURL(currentUrl);};
   },[pendingUrl]);
 
   const refresh = useCallback(async (isActive: () => boolean = () => true): Promise<boolean> => {
