@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { ArrowLeft, Copy, Check, RefreshCw } from "lucide-react";
+import { ArrowLeft, Copy, Check, RefreshCw, Download } from "lucide-react";
 
 type Language = "nl" | "en";
 type Platform = "Instagram" | "TikTok" | "Facebook" | "YouTube" | "X" | "Pinterest" | "Threads" | "Website";
@@ -19,7 +19,7 @@ const copyBank: Record<Format,{nl:{headline:string;body:string;cta:string};en:{h
  "COUNTDOWN":{nl:{headline:"NOG EVEN…",body:"AFTER HOURS is in ontwikkeling. We delen pas een lanceringsdatum wanneer die bevestigd is.",cta:"Blijf op de hoogte."},en:{headline:"JUST A LITTLE LONGER…",body:"AFTER HOURS is in development. We will share a launch date only when it is confirmed.",cta:"Stay tuned."}}
 };
 
-function renderText(platform:Platform,format:Format,language:Language,headline:string,body:string,cta:string):string{
+export function renderText(platform:Platform,format:Format,language:Language,headline:string,body:string,cta:string):string{
  const tag=platform==="YouTube"?"#YouTube":platform==="Pinterest"?"#Pinterest":platform==="TikTok"?"#TikTok":"#AfterHours";
  const hashtag="#AFTERHOURS #18PLUS #CONSENTFIRST";
  if(platform==="X")return headline+"\n\n"+body+"\n"+cta+"\n"+tag;
@@ -28,6 +28,10 @@ function renderText(platform:Platform,format:Format,language:Language,headline:s
  if(platform==="Pinterest")return headline+"\n\n"+body+"\n\n"+cta+"\n"+hashtag;
  if(format==="STORY"||format==="REEL COVER"||format==="TRAILER COVER")return headline+"\n"+body+"\n"+cta;
  return headline+"\n\n"+body+"\n\n"+cta+"\n\n"+hashtag+" "+tag;
+}
+
+function safeExportName(value:string):string {
+ return value.normalize("NFKD").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,48)||"after-hours";
 }
 
 export default function SocialStudio({language="nl",onBack}:{language?:Language;onBack:()=>void}){
@@ -45,6 +49,18 @@ export default function SocialStudio({language="nl",onBack}:{language?:Language;
  const output=useMemo(()=>renderText(platform,format,language,currentHeadline,currentBody,currentCta),[platform,format,language,currentHeadline,currentBody,currentCta]);
  const reset=()=>{setHeadline("");setBody("");setCta("");setCopied(false)};
  const copy=async()=>{try{await navigator.clipboard.writeText(output);setCopied(true)}catch{setCopied(false)}};
+ const download=()=>{
+  const blob=new Blob([output+"\n"],{type:"text/plain;charset=utf-8"});
+  const url=URL.createObjectURL(blob);
+  const anchor=document.createElement("a");
+  anchor.href=url;
+  anchor.download=safeExportName("after-hours-"+platform+"-"+format)+"-"+language+".txt";
+  anchor.style.display="none";
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  window.setTimeout(()=>URL.revokeObjectURL(url),1000);
+ };
  return <main className="social-screen">
   <header className="social-heading"><button type="button" className="back" onClick={onBack}><ArrowLeft size={16}/>{t("Terug","Back")}</button><span className="eyebrow">AFTER HOURS · CREATOR STUDIO</span><h1>{t("Social studio","Social studio")}</h1><p>{t("Pas de boodschap aan en kopieer tekst voor je platform. Dit maakt tekst, geen kant-en-klare beeld- of videobestanden.","Adapt the message and copy text for your platform. This creates text, not finished image or video files.")}</p></header>
   <section className="social-editor"><label>{t("Platform","Platform")}<select value={platform} onChange={e=>{setPlatform(e.target.value as Platform);setCopied(false)}}>{platforms.map(item=><option key={item}>{item}</option>)}</select></label>
@@ -53,7 +69,7 @@ export default function SocialStudio({language="nl",onBack}:{language?:Language;
    <label>{t("Berichttekst","Post copy")}<textarea value={currentBody} onChange={e=>{setBody(e.target.value);setCopied(false)}} rows={5} maxLength={2000}/></label>
    <label>{t("Call to action","Call to action")}<input value={currentCta} onChange={e=>{setCta(e.target.value);setCopied(false)}} maxLength={180}/></label>
   </section>
-  <section className="social-preview"><span className="eyebrow">{platform.toUpperCase()} · {format}</span><h2>{currentHeadline}</h2><p>{currentBody}</p><strong>{currentCta}</strong><div className="social-output"><pre>{output}</pre><small>{output.length} {t("tekens","characters")}</small></div><div className="social-actions"><button type="button" onClick={copy}>{copied?<Check size={15}/>:<Copy size={15}/>} {copied?t("Gekopieerd","Copied"):t("Kopieer tekst","Copy text")}</button><button type="button" onClick={reset}><RefreshCw size={15}/>{t("Template herstellen","Reset template")}</button></div>{copied&&<small role="status">{t("Tekst staat op je klembord.","Copy is on your clipboard.")}</small>}</section>
+  <section className="social-preview"><span className="eyebrow">{platform.toUpperCase()} · {format}</span><h2>{currentHeadline}</h2><p>{currentBody}</p><strong>{currentCta}</strong><div className="social-output"><pre>{output}</pre><small>{output.length} {t("tekens","characters")}</small></div><div className="social-actions"><button type="button" onClick={copy}>{copied?<Check size={15}/>:<Copy size={15}/>} {copied?t("Gekopieerd","Copied"):t("Kopieer tekst","Copy text")}</button><button type="button" onClick={download}><Download size={15}/>{t("Download .txt","Download .txt")}</button><button type="button" onClick={reset}><RefreshCw size={15}/>{t("Template herstellen","Reset template")}</button></div>{copied&&<small role="status">{t("Tekst staat op je klembord.","Copy is on your clipboard.")}</small>}</section>
   <p className="social-note">{t("Controleer platformregels, auteursrechten en eventuele advertentiebeperkingen voordat je publiceert. Gebruik geen niet-consensuele beelden of herkenbare media zonder aparte toestemming.","Check platform rules, copyright and advertising restrictions before publishing. Never use non-consensual or identifiable media without separate permission.")}</p>
  </main>
 }
