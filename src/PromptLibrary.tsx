@@ -410,7 +410,7 @@ export default function PromptLibrary({ onBack, onComplete, playerId = "local-pr
     setActiveStoryChapter(null);
     setActiveGame(null);
     if (nextMode === "story") { setMode("games"); return; }
-    if (nextMode === "random") { setMode("cards"); setKind("Kinky opdrachten"); setSelectedPromptId(null); return; }
+    if (nextMode === "random") { const candidates = prompts.filter((item) => item.kind === "Kinky opdrachten"); const chosenId = pickRandomId(candidates); setMode("cards"); setKind("Kinky opdrachten"); setSelectedPromptId(chosenId); setCopied(false); return; }
     if (nextMode === "custom") { setMode("cards"); setKind("Alles"); setSelectedPromptId(null); return; }
     if (nextMode === "surprise") {
       setMode("games");
