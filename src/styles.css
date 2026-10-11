@@ -723,3 +723,42 @@ img,svg,video,canvas{max-width:100%}
 .app-update-notice button{flex:0 0 auto;border:1px solid #cfa95b;border-radius:999px;padding:8px 13px;background:#cfa95b;color:#171017;font-weight:700;cursor:pointer}
 .app-update-notice button:last-child{border-color:transparent;background:transparent;color:#f7f0e4;font-size:1.25rem;padding:4px 8px}
 @media(max-width:560px){.app-update-notice{align-items:flex-start;flex-wrap:wrap}.app-update-notice span{flex-basis:calc(100% - 20px)}.app-update-notice button:nth-of-type(1){margin-right:auto}}
+
+
+/* Legal center and social copy studio: premium, responsive and visibly draft-only */
+.legal-screen,.social-screen{width:min(900px,100%);margin:0 auto;padding:36px 22px 110px;color:#eee3d4}
+.legal-heading,.social-heading{margin-bottom:18px}
+.legal-heading h1,.social-heading h1{font-family:"Playfair Display",Georgia,serif;font-size:clamp(34px,6vw,54px);font-weight:500;line-height:1.08;margin:18px 0 12px;color:#f1dfba}
+.legal-heading p,.social-heading p{max-width:710px;color:#aa9fad;font-size:12px;line-height:1.8}
+.legal-draft-alert{display:grid;gap:7px;border:1px solid #80613a;background:linear-gradient(135deg,rgba(69,45,18,.28),rgba(15,10,17,.94));padding:14px 15px;margin:18px 0;color:#cfc0a7;border-radius:9px}
+.legal-draft-alert strong{font-size:10px;letter-spacing:.13em;color:#e6bf75}
+.legal-draft-alert span{font-size:11px;line-height:1.7}
+.legal-doc-tabs{display:flex;gap:7px;flex-wrap:wrap;padding:0 0 16px;border-bottom:1px solid #33273a}
+.legal-doc-tabs button{min-height:42px;padding:9px 12px;border:1px solid #3a2c41;border-radius:7px;background:#100b14;color:#b9aebf;font-size:10px}
+.legal-doc-tabs button.selected,.legal-doc-tabs button:focus-visible{border-color:#c89445;color:#ebd09a;outline:2px solid rgba(200,148,69,.16);outline-offset:2px}
+.legal-document{padding:23px 0 28px}
+.legal-document h2{margin:9px 0;font:500 clamp(24px,4vw,32px)/1.2 "Playfair Display",Georgia,serif;color:#f0dfbd}
+.legal-document .legal-intro{color:#c1a36f;font-size:11px;line-height:1.75}
+.legal-document section{padding:17px 0;border-top:1px solid #241d2a;margin-top:15px}
+.legal-document h3{font-size:13px;font-weight:600;color:#ddc38b;letter-spacing:.025em}
+.legal-document section p{color:#b1a8b6;font-size:12px;line-height:1.8;margin:9px 0}
+.gate-legal-links{display:flex;justify-content:center;margin-top:16px}
+.gate-legal-links button{min-height:44px;border:1px solid #5b4728;background:transparent;padding:10px 14px;color:#cbb27c;font-size:10px;letter-spacing:.05em}
+.social-editor{display:grid;gap:14px;padding:18px;border:1px solid #3d2c45;border-radius:12px;background:linear-gradient(145deg,rgba(24,11,29,.74),rgba(10,8,12,.94))}
+.social-editor label{display:grid;gap:7px;color:#d7bd81;font-size:10px;letter-spacing:.06em;text-transform:uppercase}
+.social-editor input,.social-editor textarea,.social-editor select{width:100%;min-width:0;box-sizing:border-box;border:1px solid #392c40;background:#08070b;color:#eee2d4;padding:12px;border-radius:6px;font:inherit;font-size:12px;outline:none}
+.social-editor input:focus,.social-editor textarea:focus,.social-editor select:focus{border-color:#c89445;box-shadow:0 0 0 2px rgba(200,148,69,.12)}
+.social-editor textarea{resize:vertical;line-height:1.7}
+.social-preview{margin-top:17px;padding:20px;border:1px solid rgba(200,148,69,.35);border-radius:12px;background:radial-gradient(ellipse at 100% 0%,rgba(109,22,143,.15),transparent 52%),#0a080c}
+.social-preview h2{font:500 27px/1.2 "Playfair Display",Georgia,serif;color:#ecd29c;margin:14px 0}
+.social-preview>p{color:#c2b5c8;font-size:12px;line-height:1.8;white-space:pre-wrap}
+.social-preview>strong{display:block;margin-top:14px;color:#d7b76f;font-size:11px;letter-spacing:.06em}
+.social-output{margin-top:18px;padding:13px;border:1px solid #302536;background:#08070a;border-radius:8px}
+.social-output pre{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.7 ui-monospace,SFMono-Regular,Menlo,monospace;color:#d7cfda}
+.social-output small{display:block;text-align:right;margin-top:8px;color:#897e8d;font-size:9px}
+.social-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}
+.social-actions button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;border:1px solid #755b32;background:#120e09;color:#e0c17e;padding:10px 13px;font-size:10px}
+.social-note{font-size:10px;color:#857a89;line-height:1.75;margin-top:16px}
+.legal-screen .back,.social-screen .back{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:10px 0;color:#c7ae75}
+@media(max-width:520px){.legal-screen,.social-screen{padding:24px 16px 105px}.legal-doc-tabs{gap:6px}.legal-doc-tabs button{flex:1 1 42%;text-align:center}.social-editor,.social-preview{padding:13px}.social-actions button{width:100%}}
+@media(prefers-reduced-motion:reduce){.legal-doc-tabs button,.social-actions button{transition:none}}
