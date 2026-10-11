@@ -95,7 +95,7 @@ const prompts: PromptItem[] = [
   {id:"a06",kind:"Aftercare",intensity:"Reflectie",title:"De lichaamsscan",text:"Zonder iets te forceren: merk op of je behoefte hebt aan zitten, bewegen, water, warmte of rust. Je hoeft niets te verklaren."},
   {id:"a07",kind:"Aftercare",intensity:"Reflectie",title:"De rol loslaten",text:"Gebruik een afgesproken afsluitzin en spreek elkaar weer aan buiten de rol. Vraag of ieder zich klaar voelt om af te ronden."},
   {id:"a08",kind:"Aftercare",intensity:"Zacht",title:"De privacycheck",text:"Controleer samen of er beelden of notities zijn gemaakt en wat ermee gebeurt. Verwijder alles wat iemand niet meer wil bewaren."},
-  {id:"a09",kind:"Aftercare",intensity:"Reflectie",title:"Een check-in later",text:"Kies of je later vandaag of morgen wilt inchecken. Geen antwoordplicht en geen verwachting dat iedereen hetzelfde voelt."}
+  {id:"a09",kind:"Aftercare",intensity:"Reflectie",title:"Een check-in later",text:"Kies of je later vandaag of morgen wilt inchecken. Geen antwoordplicht en geen verwachting dat iedereen hetzelfde voelt."},
 
   {id:"k41",kind:"Kinky opdrachten",intensity:"Zacht",title:"De intentiekaart",text:"Kies één woord voor de sfeer die je vandaag wilt uitnodigen. De ander herhaalt het woord en vraagt wat het concreet betekent; je mag het woord altijd veranderen."},
   {id:"k42",kind:"Kinky opdrachten",intensity:"Stevig in taal",title:"De duidelijke instructie",text:"Geef één korte instructie over een veilige, alledaagse keuze. Vraag expliciet of die welkom is en bied meteen de opties aan om aan te passen of te passen."},
