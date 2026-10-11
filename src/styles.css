@@ -648,3 +648,31 @@ img,svg,video,canvas{max-width:100%}
  .admin-audit-row{flex-direction:column;gap:5px}
  .admin-audit-row time{text-align:left;white-space:normal}
 }
+
+
+/* AFTER HOURS missions: cinematic plum, black and gold */
+.missions-screen{max-width:760px;margin:0 auto;padding:20px 16px 110px;color:var(--text,#f6f0e8)}
+.missions-hero{position:relative;overflow:hidden;border:1px solid rgba(214,177,104,.34);border-radius:24px;padding:22px;background:radial-gradient(ellipse at 90% 0%,rgba(104,57,112,.35),transparent 48%),linear-gradient(145deg,#17101c,#09090d 70%);box-shadow:0 18px 50px rgba(0,0,0,.28)}
+.missions-hero>.back{display:inline-flex;align-items:center;gap:7px;margin:0 0 24px}
+.missions-hero .eyebrow{color:#d6b168;letter-spacing:.2em;font-size:.7rem}
+.missions-hero h1{font-family:inherit;font-size:clamp(2rem,7vw,3.2rem);line-height:1.04;letter-spacing:-.04em;margin:12px 0}
+.missions-hero>p{color:#c6bbc9;line-height:1.65;max-width:52ch}
+.missions-progress{margin-top:22px;padding:15px;border:1px solid rgba(214,177,104,.2);border-radius:16px;background:rgba(0,0,0,.25)}
+.missions-progress>div:first-child{display:flex;justify-content:space-between;align-items:center;gap:12px}.missions-progress span,.missions-progress small{font-size:.78rem;color:#b9acbd}.missions-progress strong{color:#e7c67e;font-variant-numeric:tabular-nums}
+.missions-progress-track{height:5px;background:#322737;border-radius:10px;overflow:hidden;margin:12px 0 8px}.missions-progress-track i{display:block;height:100%;background:linear-gradient(90deg,#8860a0,#e3bd70);border-radius:10px;transition:width .25s ease}
+.mission-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:18px 0 12px}
+.mission-tabs button{display:flex;flex-direction:column;align-items:flex-start;gap:5px;text-align:left;padding:13px 12px;border:1px solid rgba(214,177,104,.23);border-radius:14px;background:#151019;color:#e9dfe9;font-weight:700}
+.mission-tabs button.active{border-color:#d6b168;background:linear-gradient(145deg,rgba(102,64,112,.36),rgba(21,16,25,.98));box-shadow:inset 0 0 0 1px rgba(214,177,104,.1)}
+.mission-tabs small{font-size:.65rem;font-weight:400;color:#b9acbd;line-height:1.35}
+.mission-category-subtitle{color:#c2b5c8;font-size:.88rem;margin:12px 2px 16px}
+.mission-list{display:grid;gap:12px}
+.mission-card{display:grid;grid-template-columns:38px minmax(0,1fr);gap:12px;padding:16px;border:1px solid rgba(214,177,104,.2);border-radius:18px;background:linear-gradient(145deg,#17121b,#0d0c11);transition:border-color .2s}
+.mission-card.completed{border-color:rgba(214,177,104,.55);background:linear-gradient(145deg,rgba(75,53,79,.4),#0d0c11)}
+.mission-icon{width:36px;height:36px;display:grid;place-items:center;border-radius:50%;color:#e4bf72;background:rgba(214,177,104,.1)}.mission-icon svg{width:19px;height:19px}
+.mission-copy{min-width:0}.mission-card-meta{display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:.64rem;letter-spacing:.12em;color:#bba9c0}.mission-card-meta strong{white-space:nowrap;color:#e6c47a;letter-spacing:0;font-size:.75rem}
+.mission-copy h2{font-size:1.08rem;margin:9px 0 6px;color:#f4eaf4}.mission-copy>p{font-size:.88rem;line-height:1.6;color:#c2b7c6;margin:0 0 13px}
+.mission-card-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.mission-card-footer>span{display:flex;align-items:center;gap:5px;color:#a99bad;font-size:.74rem}
+.mission-card-footer button,.mission-complete{border:1px solid rgba(214,177,104,.4);border-radius:999px;padding:8px 12px;background:rgba(214,177,104,.08);color:#e8ca89;font-size:.76rem;font-weight:700}.mission-card-footer button:focus-visible,.mission-complete:focus-visible,.mission-tabs button:focus-visible{outline:2px solid #e8ca89;outline-offset:3px}
+.mission-complete{display:inline-flex;align-items:center;gap:7px;margin-top:12px;background:linear-gradient(135deg,#d9b875,#b68b48);color:#171018;border:0}.mission-complete:disabled{opacity:.72;cursor:default}
+.mission-safety-note{display:flex;align-items:flex-start;gap:12px;margin-top:20px;padding:16px;border:1px solid rgba(174,139,199,.28);border-radius:16px;background:rgba(66,43,75,.22);color:#cfc1d5}.mission-safety-note svg{flex:0 0 auto;color:#d9bb7a}.mission-safety-note p{margin:0;font-size:.82rem;line-height:1.65}
+@media(max-width:420px){.missions-screen{padding:14px 12px 100px}.missions-hero{padding:18px}.mission-card{padding:13px;grid-template-columns:30px minmax(0,1fr);gap:9px}.mission-icon{width:30px;height:30px}.mission-tabs button{padding:11px 8px}.mission-tabs small{font-size:.59rem}}
