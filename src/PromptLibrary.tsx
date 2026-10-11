@@ -147,6 +147,8 @@ const prompts: PromptItem[] = [
   {id:"k86",kind:"Kinky opdrachten",intensity:"Zacht",title:"De rol afsluiten",text:"Zeg de afgesproken afsluitzin, leg eventuele symbolische attributen weg en spreek elkaar weer aan als gelijkwaardige partners. Vraag wat nu prettig voelt."},
   {id:"k87",kind:"Kinky opdrachten",intensity:"Reflectie",title:"De afspraak voor later",text:"Vraag of een rustige check-in later welkom is. Spreek alleen een moment af wanneer dat beiden helpt; geen antwoord of een nee is volledig geldig."},
 ];
+export const promptLibrary: readonly PromptItem[] = prompts;
+
 
 const kinds: Array<"Alles" | PromptKind> = ["Alles","Kinky opdrachten","Kinky vragen","Vanille & verbinding","Aftercare"];
 
