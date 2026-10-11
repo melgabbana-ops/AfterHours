@@ -129,7 +129,7 @@ function App(){
     user=await getCurrentUser();
    }catch{
     if(!active||generation!==hydrateGeneration.current)return;
-    setProfileMessage("Accountstatus kon niet worden gecontroleerd door een verbindingsfout. Je lokale gegevens blijven behouden; controleer je verbinding en laad opnieuw.");
+    setProfileMessage(t("Accountstatus kon niet worden gecontroleerd door een verbindingsfout. Je lokale gegevens blijven behouden; controleer je verbinding en laad opnieuw.","Account status could not be checked because of a connection error. Your local data is preserved; check your connection and reload."));
     setAuthReady(true);
     return;
    }
@@ -149,7 +149,7 @@ function App(){
    try{
     remoteRounds=await loadRemoteRounds(language);
    }catch{
-    setProfileMessage("De online ervaringsrondes konden niet worden geladen. De standaardrondes blijven beschikbaar.");
+    setProfileMessage(t("De online ervaringsrondes konden niet worden geladen. De standaardrondes blijven beschikbaar.","Online experience rounds could not be loaded. The default rounds remain available."));
    }
    if(!active||generation!==hydrateGeneration.current)return;
    const availableRounds=remoteRounds.length===3?remoteRounds.map(r=>({title:r.title,text:r.body,time:r.durationSeconds})):fallbackRounds;
@@ -158,7 +158,7 @@ function App(){
    try{
     remote=await loadRemoteState(localState.session.id);
    }catch{
-    setProfileMessage("Online sessiegegevens zijn tijdelijk niet bereikbaar. De app probeert opnieuw en gebruikt intussen beschikbare lokale gegevens.");
+    setProfileMessage(t("Online sessiegegevens zijn tijdelijk niet bereikbaar. De app probeert opnieuw en gebruikt intussen beschikbare lokale gegevens.","Online session data is temporarily unavailable. The app will retry and use available local data in the meantime."));
    }
    if(!active||generation!==hydrateGeneration.current)return;
    if(remote){
@@ -218,9 +218,9 @@ function App(){
   return()=>{active=false;sub?.data.subscription.unsubscribe()};
  },[]);
 
- useEffect(()=>{try{saveState(state)}catch{setProfileMessage("Lokale opslag is niet beschikbaar. Gebruik een ingelogd account om sessiegegevens server-side op te slaan.")}if(!supabaseConfigured||syncUserId){void syncRemoteState(state).then(message=>{if(message)setProfileMessage(message)}).catch(()=>setProfileMessage("Synchronisatie is tijdelijk niet beschikbaar. Controleer je verbinding voordat je verdergaat."))}if(!syncUserId)return;},[state,syncUserId]);
- useEffect(()=>{if(!running)return;const id=setInterval(()=>setSeconds(s=>{const next=Math.max(0,s-1);if(!saveTimer(state.profile.id,state.session.round,next,true))setProfileMessage(current=>current||"Timer kan niet lokaal worden opgeslagen. Houd deze pagina open en controleer je opslaginstellingen.");return next}),1000);return()=>clearInterval(id)},[running,state.session.round,state.profile.id]);
- useEffect(()=>{if(seconds!==0||state.session.status!=="active")return;clearTimer(state.profile.id);setRunning(false);saveTimer(state.profile.id,state.session.round,0,false);void playNotificationSound("checkin");setState(s=>({...s,notifications:[notificationEvents.checkIn("De tijd van deze ronde is voorbij. De sessie staat op pauze en kan veilig worden hervat."),...s.notifications].slice(0,20),session:{...s.session,status:"paused",updatedAt:new Date().toISOString()}}))},[seconds,state.session.status,rounds]);
+ useEffect(()=>{try{saveState(state)}catch{setProfileMessage(t("Lokale opslag is niet beschikbaar. Gebruik een ingelogd account om sessiegegevens server-side op te slaan.","Local storage is unavailable. Sign in to save session data on the server."))}if(!supabaseConfigured||syncUserId){void syncRemoteState(state).then(message=>{if(message)setProfileMessage(message)}).catch(()=>setProfileMessage(t("Synchronisatie is tijdelijk niet beschikbaar. Controleer je verbinding voordat je verdergaat.","Sync is temporarily unavailable. Check your connection before continuing.")))}if(!syncUserId)return;},[state,syncUserId]);
+ useEffect(()=>{if(!running)return;const id=setInterval(()=>setSeconds(s=>{const next=Math.max(0,s-1);if(!saveTimer(state.profile.id,state.session.round,next,true))setProfileMessage(current=>current||t("Timer kan niet lokaal worden opgeslagen. Houd deze pagina open en controleer je opslaginstellingen.","The timer cannot be saved locally. Keep this page open and check your storage settings."));return next}),1000);return()=>clearInterval(id)},[running,state.session.round,state.profile.id]);
+ useEffect(()=>{if(seconds!==0||state.session.status!=="active")return;clearTimer(state.profile.id);setRunning(false);saveTimer(state.profile.id,state.session.round,0,false);void playNotificationSound("checkin");setState(s=>({...s,notifications:[notificationEvents.checkIn(t("De tijd van deze ronde is voorbij. De sessie staat op pauze en kan veilig worden hervat.","Time is up for this round. The session is paused and can be safely resumed.")),...s.notifications].slice(0,20),session:{...s.session,status:"paused",updatedAt:new Date().toISOString()}}))},[seconds,state.session.status,rounds]);
 
  const round=state.session.round;
  const consent=state.consent.status==="active";
@@ -238,14 +238,14 @@ function App(){
  const clock=useMemo(()=>String(Math.floor(seconds/60)).padStart(2,"0")+":"+String(seconds%60).padStart(2,"0"),[seconds]);
  const persistTimer=(profileId:string,roundIndex:number,value:number,isRunning:boolean)=>{
   if(!saveTimer(profileId,roundIndex,value,isRunning)){
-   setProfileMessage("Timer kon niet lokaal worden opgeslagen. Houd deze pagina open en controleer je opslaginstellingen.");
+   setProfileMessage(t("Timer kon niet lokaal worden opgeslagen. Houd deze pagina open en controleer je opslaginstellingen.","The timer could not be saved locally. Keep this page open and check your storage settings."));
   }
  };
 
  const updateSession=(patch:Partial<AfterHoursState["session"]>)=>setState(s=>({...s,session:{...s.session,...patch,updatedAt:new Date().toISOString()}}));
  const pauseRound=()=>{setRunning(false);persistTimer(state.profile.id,round,seconds,false);updateSession({status:"paused"})};
  const startRound=()=>{
-  if(supabaseConfigured&&!syncUserId){setAuthMessage("Log in voordat je een sessie start, zodat consent en actieve speeltijd veilig worden opgeslagen.");setScreen("admin");return}
+  if(supabaseConfigured&&!syncUserId){setAuthMessage(t("Log in voordat je een sessie start, zodat consent en actieve speeltijd veilig worden opgeslagen.","Sign in before starting a session so consent and active play time can be saved securely."));setScreen("admin");return}
   if(!consent){setScreen("home");return}
   const resume=state.session.status==="paused"||state.session.status==="active";
   const remaining=resume&&seconds>0?seconds:rounds[round].time;
@@ -256,32 +256,32 @@ function App(){
  };
  const finishSession=async()=>{
   if(finishingSession.current||!aftercareChoice)return;
-  if(!syncUserId){setProfileMessage("Log in om een sessie server-side af te ronden en XP veilig op te slaan.");return;}
+  if(!syncUserId){setProfileMessage(t("Log in om een sessie server-side af te ronden en XP veilig op te slaan.","Sign in to finish a session on the server and save XP securely."));return;}
   finishingSession.current=true;
   setFinishing(true);
   try{
    const completedAt=new Date().toISOString();
    const remoteResult=await completeRemoteSession(state.session.id,rounds.length);
-   if(remoteResult.error){setProfileMessage("Sessie kon niet veilig worden afgerond: "+remoteResult.error);return;}
+   if(remoteResult.error){setProfileMessage(t("Sessie kon niet veilig worden afgerond: ","The session could not be finished safely: ")+remoteResult.error);return;}
    if(remoteResult.alreadyCompleted){
     const remote=await loadRemoteState(state.session.id);
     if(remote)setState(current=>({...remote,ageConfirmed:current.ageConfirmed,ageConfirmedFor:current.ageConfirmedFor,safety:current.safety,consent:{status:"pending",confirmedAt:null,revokedAt:null}}));
     else setState(current=>({...current,consent:{status:"pending",confirmedAt:null,revokedAt:null},session:{...current.session,round:0,status:"completed",startedAt:null,updatedAt:completedAt}}));
     setRunning(false);
     clearTimer(state.profile.id);
-    setProfileMessage("Deze sessie was al server-side afgerond. De opgeslagen status is opnieuw geladen; er is geen nieuwe XP toegekend.");
+    setProfileMessage(t("Deze sessie was al server-side afgerond. De opgeslagen status is opnieuw geladen; er is geen nieuwe XP toegekend.","This session was already completed on the server. Its saved state was reloaded; no extra XP was awarded."));
     setScreen("home");
     return;
    }
    const earned=remoteResult.xpEarned;
    recordAchievement("session_complete",{completedSessions:state.profile.sessions+1});
    void playNotificationSound("message");
-   setState(s=>{const nextXp=s.profile.xp+earned;return {...s,consent:{status:"pending",confirmedAt:null,revokedAt:null},profile:{...s.profile,xp:nextXp,level:levelFromXp(nextXp),sessions:s.profile.sessions+1},history:[{id:"session-"+Date.now(),completedAt,xpEarned:earned,rounds:rounds.length},...s.history].slice(0,12),notifications:[notificationEvents.message("Sessie voltooid","De volledige Experience is afgerond en veilig opgeslagen. +"+earned+" XP is toegevoegd."),...s.notifications].slice(0,20),session:{...s.session,round:0,status:"completed",startedAt:null,updatedAt:completedAt}}});
+   setState(s=>{const nextXp=s.profile.xp+earned;return {...s,consent:{status:"pending",confirmedAt:null,revokedAt:null},profile:{...s.profile,xp:nextXp,level:levelFromXp(nextXp),sessions:s.profile.sessions+1},history:[{id:"session-"+Date.now(),completedAt,xpEarned:earned,rounds:rounds.length},...s.history].slice(0,12),notifications:[notificationEvents.message(t("Sessie voltooid","Session complete"),t("De volledige Experience is afgerond en veilig opgeslagen. +","The full experience has been completed and saved securely. +")+earned+" XP "+t("is toegevoegd.","has been awarded.")),...s.notifications].slice(0,20),session:{...s.session,round:0,status:"completed",startedAt:null,updatedAt:completedAt}}});
    setSeconds(rounds[0].time);
    setAftercareChoice(null);
    setScreen("home");
   }catch(error){
-   setProfileMessage("Sessie kon niet veilig worden afgerond: "+(error instanceof Error?error.message:"onbekende fout"));
+   setProfileMessage(t("Sessie kon niet veilig worden afgerond: ","The session could not be finished safely: ")+(error instanceof Error?error.message:t("onbekende fout","unknown error")));
   }finally{
    finishingSession.current=false;
    setFinishing(false);
@@ -315,14 +315,14 @@ function App(){
   setState(s=>({...s,consent:{status:"pending",confirmedAt:null,revokedAt:null},session:{...s.session,id:crypto.randomUUID(),round:0,status:"ready",startedAt:null,updatedAt:now}}))
  };
  const revokeConsentRemotely=(sessionId:string,revokedAt:string)=>{void revokeRemoteConsent(sessionId,revokedAt).then(error=>{if(error)setProfileMessage("De sessie is lokaal gestopt, maar de server kon consent niet bevestigen. Controleer je verbinding. "+error)}).catch(()=>setProfileMessage("De sessie is lokaal gestopt, maar de server kon consent niet bevestigen. Controleer je verbinding."))};
- const stop=()=>{const now=new Date().toISOString();revokeConsentRemotely(state.session.id,now);clearTimer(state.profile.id);setRunning(false);setCheckIn("stop");setState(s=>({...s,consent:{status:"revoked",confirmedAt:null,revokedAt:now},notifications:[notificationEvents.safety("De sessie is veilig gestopt. Bevestig consent opnieuw voordat je opnieuw start."),...s.notifications].slice(0,20),session:{...s.session,status:"stopped",startedAt:null,updatedAt:now}}));setScreen("home")};
+ const stop=()=>{const now=new Date().toISOString();revokeConsentRemotely(state.session.id,now);clearTimer(state.profile.id);setRunning(false);setCheckIn("stop");setState(s=>({...s,consent:{status:"revoked",confirmedAt:null,revokedAt:now},notifications:[notificationEvents.safety(t("De sessie is veilig gestopt. Bevestig consent opnieuw voordat je opnieuw start.","The session has been safely stopped. Confirm consent again before restarting.")),...s.notifications].slice(0,20),session:{...s.session,status:"stopped",startedAt:null,updatedAt:now}}));setScreen("home")};
  const revokeConsent=()=>{const now=new Date().toISOString();revokeConsentRemotely(state.session.id,now);clearTimer(state.profile.id);setRunning(false);setState(s=>({...s,consent:{status:"revoked",confirmedAt:null,revokedAt:now},session:{...s.session,status:"stopped",startedAt:null,updatedAt:now}}));setSeconds(rounds[round].time);persistTimer(state.profile.id,round,rounds[round].time,false);setScreen("home")};
- const confirmConsent=()=>{if(supabaseConfigured&&!syncUserId){setAuthMessage("Log in om consent en sessievoortgang veilig aan je account te koppelen.");setScreen("admin");return;}setCheckIn("clear");recordAchievement("consent_confirmed");void playNotificationSound("checkin");setState(s=>({...s,notifications:[notificationEvents.checkIn("Je toestemming is bevestigd. Je kunt de experience veilig starten."),...s.notifications].slice(0,20),consent:{status:"active",confirmedAt:new Date().toISOString(),revokedAt:null}}));};
+ const confirmConsent=()=>{if(supabaseConfigured&&!syncUserId){setAuthMessage(t("Log in om consent en sessievoortgang veilig aan je account te koppelen.","Sign in to securely link consent and session progress to your account."));setScreen("admin");return;}setCheckIn("clear");recordAchievement("consent_confirmed");void playNotificationSound("checkin");setState(s=>({...s,notifications:[notificationEvents.checkIn(t("Je toestemming is bevestigd. Je kunt de experience veilig starten.","Your consent is confirmed. You can safely start the experience.")),...s.notifications].slice(0,20),consent:{status:"active",confirmedAt:new Date().toISOString(),revokedAt:null}}));};
  const handleCheckIn=(choice:"clear"|"pause"|"stop")=>{setCheckIn(choice);void playNotificationSound(choice==="stop"?"safety":"checkin");if(choice==="pause"){setRunning(false);persistTimer(state.profile.id,round,seconds,false);updateSession({status:"paused"})}if(choice==="stop"){stop()}};
  const saveDisplayName=()=>{const name=displayNameDraft.trim().replace(/\s+/g," ");if(name.length<2)return;setState(s=>({...s,profile:{...s.profile,displayName:name}}));setDisplayNameDraft(name)};
  const saveUsername=async()=>{
   const username=usernameDraft.trim().toLowerCase().replace(/[^a-z0-9_]/g,"").slice(0,20);
-  if(username.length<3){setProfileMessage("Username moet minimaal 3 tekens bevatten.");return;}
+  if(username.length<3){setProfileMessage(t("Username moet minimaal 3 tekens bevatten.","Your username must contain at least 3 characters."));return;}
   setProfileMessage("");
   try{
    if(supabaseConfigured&&syncUserId){
@@ -331,9 +331,9 @@ function App(){
    }
    setState(s=>({...s,profile:{...s.profile,username}}));
    setUsernameDraft(username);
-   setProfileMessage("Username opgeslagen.");
+   setProfileMessage(t("Username opgeslagen.","Username saved."));
   }catch{
-   setProfileMessage("Username kon niet worden opgeslagen. Controleer je verbinding en probeer het opnieuw.");
+   setProfileMessage(t("Username kon niet worden opgeslagen. Controleer je verbinding en probeer het opnieuw.","Your username could not be saved. Check your connection and try again."));
   }
  };
  const setAvatarStyle=(avatarStyle:AvatarStyle)=>setState(s=>({...s,profile:{...s.profile,avatarStyle}}));
@@ -345,14 +345,14 @@ function App(){
   {style:"crown",label:"Crown",symbol:"♛"}
  ];
  const setSafety=(next:Safety)=>setState(s=>next===s.safety?s:{...s,notifications:[notificationEvents.safety(next==="green"?"Veiligheidsniveau bevestigd als GOED.":"Veiligheidsniveau staat op CHECK. Neem de afspraken opnieuw door."),...s.notifications].slice(0,20),safety:next});
- const signInProvider=async(provider:"google"|"apple")=>{setAuthMessage("");setAuthBusy(true);try{await signInWithProvider(provider)}catch(error){setAuthMessage(error instanceof Error?error.message:"Aanmelden mislukt.")}finally{setAuthBusy(false)}};
- const requestMagicLink=async()=>{setAuthMessage("");setAuthBusy(true);try{await sendMagicLink(authEmail.trim());setAuthMessage("Check je e-mail voor je veilige toegang.");}catch(error){setAuthMessage(error instanceof Error?error.message:"Aanmelden mislukt.")}finally{setAuthBusy(false)}};
- const submitPasswordAuth=async(createAccount:boolean)=>{setAuthMessage("");setAuthBusy(true);try{if(createAccount){await signUpWithPassword(authEmail.trim(),authPassword);setAuthMessage("Account aangemaakt. Bevestig je e-mail als Supabase e-mailbevestiging actief is.");}else{await signInWithPassword(authEmail.trim(),authPassword);}}catch(error){setAuthMessage(error instanceof Error?error.message:"Aanmelden mislukt.")}finally{setAuthBusy(false)}};
- const handleSignOut=async()=>{setAuthMessage("");try{await signOut()}catch(error){setAuthMessage(error instanceof Error?error.message:"Uitloggen mislukt.")}};
- const requestPasswordReset=async()=>{setAuthMessage("");setAuthBusy(true);try{await resetPassword(authEmail.trim());setAuthMessage("Als dit e-mailadres bekend is, ontvang je een link om je wachtwoord opnieuw in te stellen.");}catch(error){setAuthMessage(error instanceof Error?error.message:"Resetten mislukt.")}finally{setAuthBusy(false)}};
- const saveRecoveredPassword=async()=>{setAuthMessage("");setAuthBusy(true);try{await updatePassword(authPassword);setAuthMessage("Je wachtwoord is bijgewerkt.");setAuthPassword("");setPasswordRecovery(false);}catch(error){setAuthMessage(error instanceof Error?error.message:"Wachtwoord bijwerken mislukt.")}finally{setAuthBusy(false)}};
+ const signInProvider=async(provider:"google"|"apple")=>{setAuthMessage("");setAuthBusy(true);try{await signInWithProvider(provider)}catch(error){setAuthMessage(error instanceof Error?error.message:t("Aanmelden mislukt.","Sign-in failed."))}finally{setAuthBusy(false)}};
+ const requestMagicLink=async()=>{setAuthMessage("");setAuthBusy(true);try{await sendMagicLink(authEmail.trim());setAuthMessage(t("Check je e-mail voor je veilige toegang.","Check your email for your secure sign-in link."));}catch(error){setAuthMessage(error instanceof Error?error.message:t("Aanmelden mislukt.","Sign-in failed."))}finally{setAuthBusy(false)}};
+ const submitPasswordAuth=async(createAccount:boolean)=>{setAuthMessage("");setAuthBusy(true);try{if(createAccount){await signUpWithPassword(authEmail.trim(),authPassword);setAuthMessage(t("Account aangemaakt. Bevestig je e-mail als Supabase e-mailbevestiging actief is.","Account created. Confirm your email if Supabase email confirmation is enabled."));}else{await signInWithPassword(authEmail.trim(),authPassword);}}catch(error){setAuthMessage(error instanceof Error?error.message:t("Aanmelden mislukt.","Sign-in failed."))}finally{setAuthBusy(false)}};
+ const handleSignOut=async()=>{setAuthMessage("");try{await signOut()}catch(error){setAuthMessage(error instanceof Error?error.message:t("Uitloggen mislukt.","Sign-out failed."))}};
+ const requestPasswordReset=async()=>{setAuthMessage("");setAuthBusy(true);try{await resetPassword(authEmail.trim());setAuthMessage(t("Als dit e-mailadres bekend is, ontvang je een link om je wachtwoord opnieuw in te stellen.","If this email address is registered, you will receive a link to reset your password."));}catch(error){setAuthMessage(error instanceof Error?error.message:"Resetten mislukt.")}finally{setAuthBusy(false)}};
+ const saveRecoveredPassword=async()=>{setAuthMessage("");setAuthBusy(true);try{await updatePassword(authPassword);setAuthMessage(t("Je wachtwoord is bijgewerkt.","Your password has been updated."));setAuthPassword("");setPasswordRecovery(false);}catch(error){setAuthMessage(error instanceof Error?error.message:"Wachtwoord bijwerken mislukt.")}finally{setAuthBusy(false)}};
 
- if(!authReady)return <div className="gate"><div className="gate-card"><img className="gate-logo" src="/after-hours-logo.svg" alt="AFTER HOURS" /><h1>Sessie herstellen…</h1><p>Beveiligde toegang wordt gecontroleerd.</p></div></div>;
+ if(!authReady)return <div className="gate"><div className="gate-card"><img className="gate-logo" src="/after-hours-logo.svg" alt="AFTER HOURS" /><h1>{t("Sessie herstellen…","Restoring session…")}</h1><p>{t("Beveiligde toegang wordt gecontroleerd.","Checking secure access.")}</p></div></div>;
  if(!state.ageConfirmed)return <div className="gate"><img className="gate-logo" src="/after-hours-logo.svg" alt="AFTER HOURS" /><span className="eyebrow">PRIVATE EXPERIENCE · 18+</span><h1>AFTER<br/><i>HOURS</i></h1><p>Een premium interactieve ervaring voor volwassenen. Bewust. Afgesproken. Veilig.</p><button onClick={()=>{setState(s=>({...s,ageConfirmed:true,ageConfirmedFor:syncUserId??"local"}));try{if(localStorage.getItem("afterhours.onboarding.completed")!=="1")setScreen("onboarding")}catch{setScreen("onboarding")}}}>Ik ben 18+ <ChevronRight/></button><small>Dit is een zelfverklaring, geen officiële leeftijdsverificatie. Consent wordt afzonderlijk gevraagd.</small></div>;
 
  return <div className={`app ${privacyMode?"privacy-mode":""}`}>
