@@ -74,7 +74,25 @@ const guidePrompts=[
 ];
 
 function App(){
- useEffect(()=>{if("serviceWorker" in navigator){void navigator.serviceWorker.register("/sw.js").catch(()=>{})}},[]);
+ const [appUpdateReady,setAppUpdateReady]=useState(false);
+ useEffect(()=>{
+  if(!("serviceWorker" in navigator))return;
+  let active=true;
+  const announceUpdate=(registration:ServiceWorkerRegistration)=>{if(active&&registration.waiting&&navigator.serviceWorker.controller)setAppUpdateReady(true);};
+  void navigator.serviceWorker.register("/sw.js").then(registration=>{
+   announceUpdate(registration);
+   registration.addEventListener("updatefound",()=>{
+    const installing=registration.installing;
+    if(!installing)return;
+    installing.addEventListener("statechange",()=>{if(installing.state==="installed"&&navigator.serviceWorker.controller)announceUpdate(registration);});
+   });
+   void registration.update().catch(()=>{});
+  }).catch(()=>{});
+  const onControllerChange=()=>{if(active)window.location.reload();};
+  navigator.serviceWorker.addEventListener("controllerchange",onControllerChange);
+  return()=>{active=false;navigator.serviceWorker.removeEventListener("controllerchange",onControllerChange);};
+ },[]);
+ const applyAppUpdate=()=>{setAppUpdateReady(false);navigator.serviceWorker?.getRegistration().then(registration=>registration?.waiting?.postMessage({type:"SKIP_WAITING"}));};
  const [language,setLanguage]=useState<"nl"|"en">(()=>{try{return localStorage.getItem("afterhours.language")==="en"?"en":"nl"}catch{return "nl"}});
  useEffect(()=>{try{localStorage.setItem("afterhours.language",language);document.documentElement.lang=language}catch{}},[language]);
  const t=(nl:string,en:string)=>language==="nl"?nl:en;
@@ -438,5 +456,12 @@ if(teaserPreview){
  void fetch("/maintenance.json",{cache:"no-store"})
   .then(response=>response.ok?response.json():{enabled:false})
   .catch(()=>({enabled:false}))
-  .then(config=>root.render(config?.enabled===true?<UnderConstruction/>:<AppErrorBoundary><App/></AppErrorBoundary>));
+  .then(config=>{
+   const now=Date.now();
+   const startsAt=typeof config?.startsAt==="string"?Date.parse(config.startsAt):NaN;
+   const endsAt=typeof config?.endsAt==="string"?Date.parse(config.endsAt):NaN;
+   const scheduled=Number.isFinite(startsAt)&&Number.isFinite(endsAt)&&endsAt>startsAt&&now>=startsAt&&now<endsAt;
+   const maintenanceActive=config?.enabled===true||scheduled;
+   root.render(maintenanceActive?<UnderConstruction/>:<AppErrorBoundary><App/></AppErrorBoundary>);
+  });
 }
