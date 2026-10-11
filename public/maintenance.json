@@ -1,3 +1,8 @@
 {
-  "enabled": false
+  "enabled": false,
+  "startsAt": null,
+  "endsAt": null,
+  "warningMinutes": 30,
+  "messageNL": "We voeren gepland onderhoud uit. Probeer het straks opnieuw.",
+  "messageEN": "Scheduled maintenance is in progress. Please try again shortly."
 }
