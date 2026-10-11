@@ -2,7 +2,7 @@ import React from "react";
 
 export default function UnderConstruction(){
  return <main className="maintenance-screen">
-  <div className="maintenance-mark" aria-hidden="true">AH</div>
+  <img className="maintenance-logo" src="/after-hours-logo.svg" alt="AFTER HOURS" />
   <span className="maintenance-eyebrow">AFTER HOURS · PRIVATE WORLD</span>
   <h1>UNDER<br/><em>CONSTRUCTION</em></h1>
   <h2>Something worth waiting for.</h2>
