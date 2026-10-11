@@ -1,0 +1,41 @@
+import React, { useMemo, useState } from "react";
+import { ArrowLeft, CheckCircle2, Circle, Clock3, Sparkles, ShieldCheck } from "lucide-react";
+
+type Language = "nl" | "en";
+type MissionKind = "daily" | "weekly" | "special";
+type Mission = { id: string; kind: MissionKind; title: string; description: string; reward: number; action: string };
+const missions: Mission[] = [
+ { id:"daily-intention",kind:"daily",title:"Set the intention",description:"Name one thing you hope to experience today and one thing that is off-limits. No explanation is required for a boundary.",reward:10,action:"Complete today's check-in" },
+ { id:"daily-reflection",kind:"daily",title:"Read the room",description:"Open Kinky Tarot, Oracle or your astrology reflection and take one thought with you.",reward:10,action:"Explore Insights" },
+ { id:"daily-aftercare",kind:"daily",title:"Aftercare matters",description:"Choose one aftercare option that would help you settle after an intense moment.",reward:10,action:"Choose your aftercare" },
+ { id:"weekly-boundaries",kind:"weekly",title:"Boundary ritual",description:"Discuss one boundary, one pause signal and one stop signal. Every answer can be changed or declined.",reward:30,action:"Review your safety plan" },
+ { id:"weekly-discovery",kind:"weekly",title:"Curious mind",description:"Explore three different prompts from The Deck and save one reflection you want to remember.",reward:30,action:"Explore The Deck" },
+ { id:"weekly-care",kind:"weekly",title:"Care in practice",description:"Make space for a no-pressure check-in and agree how to reconnect afterwards.",reward:30,action:"Plan a check-in" },
+ { id:"special-consent",kind:"special",title:"Consent, always",description:"Review your limits and make sure PAUSE, PASS and STOP are understood before any experience.",reward:50,action:"Review safety settings" },
+ { id:"special-explorer",kind:"special",title:"The curious explorer",description:"Visit The Deck, Kinky Tarot and Astrology. Explore at your own pace, without a performance target.",reward:50,action:"Explore AFTER HOURS" },
+];
+const dayKey = () => new Date().toLocaleDateString("sv-SE");
+const weekKey = () => { const d=new Date(); const day=(d.getDay()+6)%7; d.setDate(d.getDate()-day+3); const first=new Date(d.getFullYear(),0,4); const week=1+Math.round(((d.getTime()-first.getTime())/86400000-3+((first.getDay()+6)%7))/7); return d.getFullYear()+"-W"+String(week).padStart(2,"0"); };
+function storageKey(kind: MissionKind) { return "afterhours.missions."+kind+"."+ (kind==="daily"?dayKey():kind==="weekly"?weekKey():"season-1"); }
+function readDone(kind: MissionKind): string[] { try { const value=JSON.parse(localStorage.getItem(storageKey(kind))||"[]"); return Array.isArray(value)?value.filter((v):v is string=>typeof v==="string"):[]; } catch { return []; } }
+
+export default function Missions({language="nl",onBack,onExplore}:{language?:Language;onBack:()=>void;onExplore:(destination:string)=>void}) {
+ const t=(nl:string,en:string)=>language==="nl"?nl:en;
+ const [kind,setKind]=useState<MissionKind>("daily");
+ const [done,setDone]=useState<Record<MissionKind,string[]>>(()=>({daily:readDone("daily"),weekly:readDone("weekly"),special:readDone("special")}));
+ const active=useMemo(()=>missions.filter(m=>m.kind===kind),[kind]);
+ const complete=(mission:Mission)=>{ if(done[kind].includes(mission.id))return; const next=[...done[kind],mission.id]; try{localStorage.setItem(storageKey(kind),JSON.stringify(next));}catch{} setDone(previous=>({...previous,[kind]:next})); };
+ const total=active.reduce((sum,m)=>sum+m.reward,0), earned=active.filter(m=>done[kind].includes(m.id)).reduce((sum,m)=>sum+m.reward,0);
+ const labels:Record<MissionKind,{nl:string;en:string;subNl:string;subEn:string}> = {
+  daily:{nl:"Daily",en:"Daily",subNl:"Kleine intenties voor vandaag",subEn:"Small intentions for today"},
+  weekly:{nl:"Weekly",en:"Weekly",subNl:"Bewust ontdekken, stap voor stap",subEn:"Mindful discovery, one step at a time"},
+  special:{nl:"Special",en:"Special",subNl:"Blijvende mijlpalen, zonder tijdsdruk",subEn:"Long-term milestones, no time pressure"}
+ };
+ return <main className="missions-screen">
+  <header className="missions-hero"><button className="back" onClick={onBack}><ArrowLeft size={16}/> {t("Terug","Back")}</button><span className="eyebrow">AFTER HOURS · MISSIONS</span><h1>{t("Your next chapter.","Jouw volgende hoofdstuk.")}</h1><p>{t("Progress is personal. Grenzen zijn geen opdrachten en niets hoeft afgemaakt te worden.","Progress is personal. Boundaries are never tasks, and nothing has to be completed.")}</p><div className="missions-progress"><div><span>{t("Deze categorie","This category")}</span><strong>{active.filter(m=>done[kind].includes(m.id)).length} / {active.length}</strong></div><div className="missions-progress-track"><i style={{width:(active.length?active.filter(m=>done[kind].includes(m.id)).length/active.length*100:0)+"%"}}/></div><small>{earned} / {total} {t("missiepunten verdiend","mission points earned")}</small></div></header>
+  <div className="mission-tabs" role="tablist" aria-label={t("Missiecategorie","Mission category")}>{(["daily","weekly","special"] as MissionKind[]).map(value=><button key={value} role="tab" aria-selected={kind===value} className={kind===value?"active":""} onClick={()=>setKind(value)}>{labels[value][language==="nl"?"nl":"en"]}<small>{value==="daily"?t("Vernieuwt dagelijks","Resets daily"):value==="weekly"?t("Vernieuwt wekelijks","Resets weekly"):t("Blijvend","Ongoing")}</small></button>)}</div>
+  <p className="mission-category-subtitle">{labels[kind][language==="nl"?"subNl":"subEn"]}</p>
+  <section className="mission-list">{active.map(mission=>{const completed=done[kind].includes(mission.id);return <article className={"mission-card"+(completed?" completed":"")} key={mission.id}><div className="mission-icon">{completed?<CheckCircle2/>:<Sparkles/>}</div><div className="mission-copy"><div className="mission-card-meta"><span>{mission.kind.toUpperCase()} · {t("MISSIE","MISSION")}</span><strong>+{mission.reward} MP</strong></div><h2>{mission.title}</h2><p>{mission.description}</p><div className="mission-card-footer"><span><Clock3 size={14}/>{mission.kind==="daily"?t("Vandaag","Today"):mission.kind==="weekly"?t("Deze week","This week"):t("Op eigen tempo","At your pace")}</span><button disabled={completed} onClick={()=>completed?undefined:onExplore(mission.id.includes("aftercare")?"aftercare":mission.id.includes("boundaries")||mission.id.includes("consent")?"safety":mission.id.includes("reflection")||mission.id.includes("explorer")?"insights":mission.id.includes("discovery")?"prompts":"home")}>{completed?t("Voltooid","Completed"):t("Open onderdeel","Open feature")}</button></div><button className="mission-complete" disabled={completed} onClick={()=>complete(mission)}>{completed?<CheckCircle2 size={16}/>:<Circle size={16}/>} {completed?t("Afgerond","Completed"):t("Markeer als afgerond","Mark as complete")}</button></div></article>})}</section>
+  <aside className="mission-safety-note"><ShieldCheck/><p>{t("Missies zijn uitnodigingen, geen verplichtingen. Je mag overslaan, aanpassen of stoppen. Consent en je eigen grenzen gaan altijd voor beloningen.","Missions are invitations, never obligations. You can skip, adapt or stop. Consent and your own boundaries always come before rewards.")}</p></aside>
+ </main>;
+}
