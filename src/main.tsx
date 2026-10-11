@@ -5,7 +5,7 @@ import PromptLibrary from "./PromptLibrary";
 import BadgeShowcase from "./BadgeShowcase";
 import { recordAchievement } from "./achievements";
 import{createRoot}from"react-dom/client";
-import{Shield,Lock,Play,Pause,RotateCcw,ChevronRight,User,Settings,Home,Timer,CheckCircle2,Square,Activity,LogOut,Sparkles,Radio,Bell,BookOpen,EyeOff,ShoppingBag}from"lucide-react";
+import{Shield,Lock,Play,Pause,RotateCcw,ChevronRight,User,Settings,Home,Timer,CheckCircle2,Square,Activity,LogOut,Sparkles,Radio,Bell,BookOpen,EyeOff,ShoppingBag,MessageCircle}from"lucide-react";
 import"./styles.css";
 import{Insights}from"./Insights";
 import{RadioRoom}from"./RadioRoom";
@@ -76,6 +76,7 @@ function App(){
  const [language,setLanguage]=useState<"nl"|"en">(()=>{try{return localStorage.getItem("afterhours.language")==="en"?"en":"nl"}catch{return "nl"}});
  useEffect(()=>{try{localStorage.setItem("afterhours.language",language);document.documentElement.lang=language}catch{}},[language]);
  const t=(nl:string,en:string)=>language==="nl"?nl:en;
+ const shareWhatsAppInvite=()=>{const invite=new URL(window.location.href);invite.search="";invite.hash="";const text=language==="en"?"Discover AFTER HOURS, a private 18+ interactive experience.":"Ontdek AFTER HOURS, een privé interactieve ervaring voor 18+.";window.open("https://wa.me/?text="+encodeURIComponent(text+" "+invite.origin+invite.pathname),"_blank","noopener,noreferrer");};
  const localizedRoundTasks=language==="en"?roundTasksEnglish:roundTasks;
  const[state,setState]=useState<AfterHoursState>(()=>loadState());
  const[authReady,setAuthReady]=useState(!supabaseConfigured);
@@ -380,6 +381,7 @@ function App(){
    <button className="tile" onClick={()=>setScreen("radio")}><Radio/><span>Radio</span></button>
    <button className="tile" onClick={()=>setScreen("prompts")}><BookOpen/><span>The Deck</span></button>
    <button className="tile" onClick={()=>setScreen("store")}><ShoppingBag/><span>{t("Collecties & prijzen","Collections & pricing")}</span></button>
+   <button className="tile" onClick={shareWhatsAppInvite}><MessageCircle/><span>{t("Deel via WhatsApp","Invite via WhatsApp")}</span></button>
   </section>
   {!consent&&<section id="consent" className="consent-panel"><Shield/><div><strong>{t("Consent is vereist","Consent is required")}</strong><span>{t("Bevestig je vrijwillige toestemming voordat je een ervaring start.","Confirm your voluntary consent before starting an experience.")}</span></div><button onClick={confirmConsent}>{t("Bevestigen","Confirm")}</button></section>}
   {(consent&&(state.session.status==="active"||state.session.status==="paused"))&&<section className="resume-panel"><Activity/><div><strong>{state.session.status==="active"?t("Sessie hervatbaar","Session ready to resume"):t("Sessie gepauzeerd","Session paused")}</strong><span>{state.session.status==="active"?t("De timer loopt verder vanaf de opgeslagen positie.","The timer resumes from its saved position."):t("Je kunt doorgaan vanaf de opgeslagen positie.","You can continue from the saved position.")}</span></div><button onClick={()=>setScreen("game")}>{state.session.status==="active"?t("Ga verder","Continue"):t("Hervatten","Resume")} <ChevronRight/></button></section>}
