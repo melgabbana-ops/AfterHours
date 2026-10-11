@@ -1,3 +1,7 @@
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") self.skipWaiting();
+});
+
 const CACHE_NAME = "after-hours-v3";
 const APP_SHELL = ["/", "/manifest.webmanifest", "/after-hours-logo.svg"];
 
