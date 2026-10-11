@@ -4,6 +4,7 @@ import {
   deletePrivateMedia,
   listPrivateMedia,
   uploadPrivateMedia,
+  validatePrivateMediaFile,
   type PrivateMediaItem,
 } from "./services/media";
 import { supabase, supabaseConfigured } from "./services/supabase";
@@ -123,14 +124,21 @@ export default function MediaVault({ sessionId, language = "nl" }: MediaVaultPro
     if(captureTimeoutRef.current!==undefined){window.clearTimeout(captureTimeoutRef.current);captureTimeoutRef.current=undefined;}
   };
 
-  const uploadSelectedFile=async(file?:File)=>{
+  const stageSelectedFile=(file?:File)=>{
     if(!file)return;
     if(!captureConsent){
       setMessage(t("Bevestig eerst dat de betrokkenen akkoord zijn met deze media en privéopslag.","First confirm that the people involved agree to this media and private storage."));
       return;
     }
-    const saved=await upload(file);
-    if(saved)setCaptureConsent(false);
+    try{
+      validatePrivateMediaFile(file);
+      if(pendingUrl) URL.revokeObjectURL(pendingUrl);
+      setPendingCapture(file);
+      setPendingUrl(URL.createObjectURL(file));
+      setMessage(t("Voorbeeld klaar. Controleer de media en kies daarna zelf voor privé opslaan.","Preview ready. Review the media, then choose whether to save it privately."));
+    }catch(error){
+      setMessage(error instanceof Error ? error.message : t("Dit bestand kan niet worden gebruikt.","This file cannot be used."));
+    }
   };
 
   const startCapture=async()=>{
@@ -163,9 +171,8 @@ export default function MediaVault({ sessionId, language = "nl" }: MediaVaultPro
         const blob=new Blob(chunksRef.current,{type});
         chunksRef.current=[];
         stopCaptureTracks();
-        setCaptureConsent(false);
-        if(blob.size===0){setMessage(t("Er is geen opname gemaakt.","No recording was created."));return;}
-        if(blob.size>20*1024*1024){setMessage(t("De opname is groter dan 20 MB en is niet opgeslagen. Maak een kortere opname.","The recording exceeded 20 MB and was not saved. Make a shorter recording."));return;}
+        if(blob.size===0){setCaptureConsent(false);setMessage(t("Er is geen opname gemaakt.","No recording was created."));return;}
+        if(blob.size>20*1024*1024){setCaptureConsent(false);setMessage(t("De opname is groter dan 20 MB en is niet opgeslagen. Maak een kortere opname.","The recording exceeded 20 MB and was not saved. Make a shorter recording."));return;}
         const extension=type.includes("mp4")?".mp4":type.includes("ogg")?".ogg":".webm";
         const file=new File([blob],`after-hours-${captureKind}-${Date.now()}${extension}`,{type});
         if(pendingUrl)URL.revokeObjectURL(pendingUrl);
@@ -208,7 +215,7 @@ export default function MediaVault({ sessionId, language = "nl" }: MediaVaultPro
     setPendingCapture(null);
     if(pendingUrl){URL.revokeObjectURL(pendingUrl);setPendingUrl("");}
     setCaptureConsent(false);
-    setMessage(t("Opname weggegooid. Er is niets geüpload.","Recording discarded. Nothing was uploaded."));
+    setMessage(t("Media weggegooid. Er is niets geüpload.","Media discarded. Nothing was uploaded."));
   };
 
   const openItem = async (item: PrivateMediaItem) => {
@@ -258,10 +265,10 @@ export default function MediaVault({ sessionId, language = "nl" }: MediaVaultPro
             <input
               type="file"
               accept="image/jpeg,image/png,image/webp,image/gif,image/avif,video/webm,video/mp4,audio/mpeg,audio/mp4,audio/aac,audio/wav,audio/x-wav,audio/ogg,audio/webm,audio/flac"
-              disabled={busy}
+              disabled={busy||isRecording||!!pendingCapture}
               onChange={event => {
                 const file = event.currentTarget.files?.[0];
-                void uploadSelectedFile(file);
+                void stageSelectedFile(file);
                 event.currentTarget.value = "";
               }}
             />
@@ -272,7 +279,7 @@ export default function MediaVault({ sessionId, language = "nl" }: MediaVaultPro
             <p>{t("Opnames zijn optioneel. Geef alleen toestemming wanneer iedereen vrij en duidelijk akkoord is. De opname wordt eerst lokaal getoond en pas na jouw keuze geüpload.","Recordings are optional. Proceed only when everyone freely and clearly agrees. The recording is previewed locally and uploaded only after you choose to save it.")}</p>
             <label className="media-upload media-photo-capture">
               <span>{t("Maak een foto met de camera","Take a photo with the camera")}</span>
-              <input type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/avif" capture="environment" disabled={busy||isRecording||!!pendingCapture} onChange={event=>{const file=event.currentTarget.files?.[0];void uploadSelectedFile(file);event.currentTarget.value="";}}/>
+              <input type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/avif" capture="environment" disabled={busy||isRecording||!!pendingCapture} onChange={event=>{const file=event.currentTarget.files?.[0];void stageSelectedFile(file);event.currentTarget.value="";}}/>
             </label>
             <div className="media-capture-controls">
               <label>{t("Opnametype","Recording type")}<select value={captureKind} disabled={isRecording||busy} onChange={e=>setCaptureKind(e.target.value as "video"|"voice")}><option value="video">{t("Video met camera","Video with camera")}</option><option value="voice">{t("Alleen stem","Voice only")}</option></select></label>
@@ -284,7 +291,7 @@ export default function MediaVault({ sessionId, language = "nl" }: MediaVaultPro
             {liveStream&&<video className="media-live-preview" ref={livePreviewRef} autoPlay muted playsInline aria-label={t("Live cameravoorbeeld","Live camera preview")}/>}
             {pendingCapture&&pendingUrl&&<div className="media-pending-preview">
               <strong>{t("Lokale preview","Local preview")} · {formatSize(pendingCapture.size)}</strong>
-              {pendingCapture.type.startsWith("video/")?<video src={pendingUrl} controls playsInline/>:<audio src={pendingUrl} controls/>}
+              {pendingCapture.type.startsWith("image/")?<img src={pendingUrl} alt={t("Lokale voorbeeldweergave van geselecteerde afbeelding","Local preview of selected image")}/>:pendingCapture.type.startsWith("video/")?<video src={pendingUrl} controls playsInline/>:<audio src={pendingUrl} controls/>}
               <div className="media-item-actions"><button type="button" onClick={()=>void saveCapture()} disabled={busy}>{t("Opslaan in privékluis","Save to private vault")}</button><button type="button" onClick={discardCapture} disabled={busy}>{t("Weggooien","Discard")}</button></div>
             </div>}
           </section>
