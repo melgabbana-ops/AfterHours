@@ -294,7 +294,7 @@ img,svg,video,canvas{max-width:100%}
 
 /* Branded maintenance mode screen */
 .maintenance-screen{position:relative;z-index:1;width:min(100%,520px);min-height:calc(100dvh - 48px);margin:auto;padding:34px 24px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;border:1px solid #30291e;background:radial-gradient(ellipse at 50% 25%,rgba(130,92,35,.19),transparent 45%),linear-gradient(145deg,rgba(20,17,12,.96),rgba(7,7,6,.98));box-shadow:0 25px 100px #0008}
-.maintenance-mark{width:54px;height:54px;margin:0 auto 30px;border:1px solid #735b31;display:grid;place-items:center;color:#c9a45c;font-family:Georgia,serif;font-size:18px}
+.maintenance-logo{display:block;width:min(210px,62vw);height:auto;margin:0 auto 24px;filter:drop-shadow(0 8px 24px rgba(201,164,92,.18))}
 .maintenance-eyebrow{font-size:9px;letter-spacing:.3em;color:#c9a45c;text-transform:uppercase}
 .maintenance-screen h1{font-family:Georgia,'Times New Roman',serif;font-weight:400;font-size:clamp(39px,10vw,60px);line-height:.98;letter-spacing:.04em;margin:22px 0 8px;color:#f4f0e8}
 .maintenance-screen h1 em{color:#c9a45c;font-weight:400}
@@ -587,3 +587,11 @@ img,svg,video,canvas{max-width:100%}
 .onboarding-later,.onboarding-back{min-height:44px;padding:10px 15px;border:1px solid #3b2d40;border-radius:8px;background:#0b0910;color:#b8aabd;font-size:10px;letter-spacing:.06em}.onboarding-back{width:44px;padding:0;display:grid;place-items:center}
 .onboarding-next{min-height:44px;display:flex;align-items:center;justify-content:center;gap:9px;padding:10px 16px;border:1px solid #d5ad5d;border-radius:8px;background:linear-gradient(125deg,#e8ca83,#b78439);color:#171009;font-size:10px;font-weight:800;letter-spacing:.07em}
 @media(max-width:420px){.onboarding-screen{width:calc(100% - 22px)}.onboarding-header{margin-bottom:22px}.onboarding-header img{width:150px}.onboarding-header .eyebrow{font-size:7px}.onboarding-panel{padding:20px 17px}.onboarding-panel h1{font-size:31px}}
+
+/* Official brand lockup for the teaser finale. Reuse the master SVG, never a recreated text mark. */
+.teaser-film-endcard{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(8px,2vw,18px);padding:clamp(18px,5vw,44px);background:radial-gradient(ellipse at 50% 40%,rgba(105,26,105,.28),transparent 58%),#030203;animation:teaser-reveal .9s ease-out both}
+.teaser-film-endcard img{display:block;width:min(54%,260px);max-height:70%;object-fit:contain;filter:drop-shadow(0 0 20px rgba(201,164,92,.24))}
+.teaser-film-endcard p{margin:0;text-align:center;font-family:Georgia,"Times New Roman",serif;font-size:clamp(8px,1.6vw,12px);letter-spacing:.15em;color:#d7b66e}
+.teaser-film-endcard span{font-size:8px;letter-spacing:.2em;color:#9b8a6d}
+@keyframes teaser-reveal{from{opacity:0;transform:scale(.985)}to{opacity:1;transform:scale(1)}}
+@media(prefers-reduced-motion:reduce){.teaser-film-endcard{animation:none}}
