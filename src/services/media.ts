@@ -40,8 +40,12 @@ export function validatePrivateMediaPath(path: string, userId: string): boolean 
     && segments.every((segment) => segment.length > 0 && segment !== "." && segment !== "..");
 }
 
+export function normalizePrivateMediaMimeType(type: string): string {
+  return type.toLowerCase().split(";")[0].trim();
+}
+
 export function validatePrivateMediaFile(file: Pick<File, "type" | "size">): void {
-  if (!ALLOWED_TYPES.has(file.type.toLowerCase())) throw new Error("Kies een afbeelding, audio- of videobestand.");
+  if (!ALLOWED_TYPES.has(normalizePrivateMediaMimeType(file.type))) throw new Error("Kies een afbeelding, audio- of videobestand.");
   if (file.size <= 0 || file.size > MAX_FILE_BYTES) throw new Error("Bestanden moeten kleiner zijn dan 20 MB.");
 }
 
@@ -100,7 +104,7 @@ export async function uploadPrivateMedia(file: File, sessionId: string): Promise
   const path = `${userId}/${safeSessionId}/${crypto.randomUUID()}-${safeFileName(file.name)}`;
   const { error } = await supabase!.storage.from(BUCKET).upload(path, file, {
     cacheControl: "3600",
-    contentType: file.type,
+    contentType: normalizePrivateMediaMimeType(file.type),
     upsert: false,
   });
   if (error) throw error;
