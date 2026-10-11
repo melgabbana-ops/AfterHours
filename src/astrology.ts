@@ -19,9 +19,9 @@ export const dailyReflectionThemes = [
   { title: "Ruimte voor nee", prompt: "Maak vandaag bewust ruimte voor een eerlijk nee en behandel het als waardevolle informatie." },
   { title: "Nieuwsgierigheid", prompt: "Stel één open vraag voordat je een aanname doet over wat de ander wil." },
   { title: "Rust en ritme", prompt: "Kies een tempo waarbij iedereen makkelijk kan pauzeren en van gedachten kan veranderen." },
-  { title: "Vertrouwen", prompt: "Benoem één concrete afspraak die jullie helpt je veilig en gehoord te voelen." },
+  { title: "Vertrouwen", prompt: "Spreek één duidelijke afspraak af die je helpt je veilig en gehoord te voelen." },
   { title: "Speels ontdekken", prompt: "Verken een kleine nieuwe mogelijkheid, maar alleen wanneer die voor iedereen welkom voelt." },
-  { title: "Zorg na afloop", prompt: "Spreek af hoe jullie na een intens moment weer rustig bij elkaar kunnen landen." },
+  { title: "Zorg na afloop", prompt: "Spreek af hoe je na een intens moment rustig kunt landen." },
 ] as const;
 
 const englishDailyReflectionThemes = [
