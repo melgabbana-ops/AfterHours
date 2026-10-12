@@ -14,6 +14,10 @@ The canonical schema is in `supabase/schema.sql`. The ordered migration history 
 7. `20261009090400_private_media_bucket.sql` creates a private media bucket with user-folder scoped read/write/delete policies and server-enforced upload limits.
 8. `20261009090500_session_activation_consent_guard.sql` requires active consent on the database server before a session can be started or resumed.
 9. `20261009090600_completion_revokes_consent.sql` revokes consent atomically when a session completes and repairs completed sessions with stale active consent.
+10. `20261012090000_mission_progress.sql` adds authenticated, idempotent mission progress and server-assigned period/reward rules. Mission points remain separate from rank XP until that integration is explicitly designed and tested.
+11. `20261012100000_private_video_capture.sql` extends the private media storage policy for approved video/audio capture, with limits enforced by the storage/database policy.
+12. `20261012110000_xp_event_ledger.sql` adds the server-write-only XP event ledger and the idempotent, atomic session-completion XP award. Review its 60-minute active-session requirement against the actual product flow before applying it.
+13. `20261012120000_session_mood_history.sql` adds user-owned session mood history with row-level security.
 
 For a new Supabase project, review the SQL and apply migrations in timestamp order using the Supabase CLI or migration workflow before enabling remote persistence. For a project where `schema.sql` was already applied manually, inspect the live schema and migration history before running `db push`; baseline the existing database rather than blindly replaying an untracked schema. Existing databases that recorded the earlier date-only filenames need their migration history checked before applying the timestamped replacements.
 
