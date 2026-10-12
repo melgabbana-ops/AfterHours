@@ -94,6 +94,8 @@ export default function DailyAfterHours({profileId,language="nl",onBack,onOpenMi
     :t("Ritueel en missie zijn op je account bevestigd. Missiepunten zijn geen rank-XP.","Ritual and mission confirmed on your account. Mission points are not rank XP."));
   }else if(historySaved){
    setMessage(t("Ritueel op je account bewaard; missiepunten wachten op de missie-server.","Ritual saved to your account; mission points are waiting for mission-server setup."));
+  }else if(missionSaved){
+   setMessage(t("Missie bevestigd; je ritueelgeschiedenis is lokaal bewaard en nog niet op de server bevestigd.","Mission confirmed; your ritual history is saved locally and is not yet confirmed on the server."));
   }else{
    setMessage(t("Ritueel lokaal bewaard. Accountgeschiedenis en missiebeloning zijn nog niet bevestigd.","Ritual saved locally. Account history and mission reward are not yet confirmed."));
   }
