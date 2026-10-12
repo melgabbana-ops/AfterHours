@@ -77,3 +77,24 @@ Status meanings:
 - Real-device testing on iPhone Safari and Android Chrome.
 
 This matrix is an engineering audit, not a claim that the whole approved product is release-ready.
+
+
+## Follow-up verification pass — 12 October 2026
+
+### Changes now present on `audit/daily-revenue-lovense-camera`
+
+- [x] Lovense is reachable through Profile → Settings → Connected devices rather than a mandatory/home-level entry. It remains optional; the core app works without a toy.
+- [x] Daily After Hours is a first-class destination and now has a PWA shortcut (`/?screen=daily`). The app also accepts direct `daily` and `lovense` screen links.
+- [x] Camera frame choices CLEAN, AFTER HOURS and CINEMATIC are rendered into new in-app video via canvas captureStream, and selected images are composited locally before explicit save.
+- [x] Lovense server-token function validates the signed-in Supabase user and does not forward the user's bearer token to Lovense. Developer credentials remain server-side.
+- [ ] Latest commit's CI must finish successfully; see the repository Actions workflow for the commit that adds the Daily After Hours shortcut.
+
+### Newly confirmed gaps from the final repository pass
+
+- [ ] No repository-level Content-Security-Policy is currently declared in `index.html` or a deployment header file. Before live Lovense, add a carefully tested CSP that allows the official SDK/API, the configured Supabase origin and required media sources without weakening the rest of the policy.
+- [ ] Lovense developer platform approval, `LOVENSE_DEVELOPER_TOKEN`, `LOVENSE_PLATFORM_NAME`, exact allowed origins, Supabase Edge Function deployment and hardware tests are external prerequisites. Do not call the integration live before they pass.
+- [ ] Daily ritual streak remains local-only; the mission completion endpoint can confirm the server mission, but there is no separate account-owned daily-ritual archive/streak table. Keep the UI's copy explicit and implement server persistence if cross-device streaks are desired.
+- [ ] Club price cards are proposals only. Do not collect payment until paid content is delivered, the adult/BDSM product is approved in writing by the processor, and checkout, webhooks, subscription entitlements, cancellation, refunds, disputes and VAT disclosures are tested end to end.
+- [ ] Real iPhone Safari/Android Chrome verification is still required for camera canvas recording, audio/video sync, orientation, capture interruption, storage/upload errors, and PWA shortcut behavior.
+
+This update records repository evidence and blockers; it is not a production-readiness declaration.
