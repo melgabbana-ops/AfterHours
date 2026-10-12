@@ -1,6 +1,7 @@
-import React,{useMemo,useState} from "react";
+import React,{useEffect,useMemo,useRef,useState} from "react";
 import {ArrowLeft,CalendarDays,Check,RefreshCw,Sparkles} from "lucide-react";
 import {completeMissionRemote} from "./services/missions";
+import {completeDailyRitualRemote,loadDailyRitualHistory} from "./services/dailyRituals";
 import {supabaseConfigured} from "./services/supabase";
 
 type Language="nl"|"en";
@@ -23,7 +24,7 @@ const rituals:DailyCard[]=[
  {id:"closing",categoryNL:"AFRONDING",categoryEN:"CLOSING",titleNL:"Sluit bewust af",titleEN:"Close with intention",promptNL:"Hoe weet je dat een moment echt klaar is?",promptEN:"How do you know when a moment is truly over?",practiceNL:"Kies een eenvoudige afsluitzin of een teken dat de rollen afrondt en je weer terugbrengt naar het gewone moment.",practiceEN:"Choose a simple closing phrase or signal that ends the role and brings you back to the everyday moment.",duration:"2 min"}
 ];
 type Progress={doneDates:string[]};
-function todayKey(date=new Date()){return date.getFullYear()+"-"+String(date.getMonth()+1).padStart(2,"0")+"-"+String(date.getDate()).padStart(2,"0")}
+function todayKey(date=new Date()){return date.getUTCFullYear()+"-"+String(date.getUTCMonth()+1).padStart(2,"0")+"-"+String(date.getUTCDate()).padStart(2,"0")}
 export function calculateDailyStreak(doneDates: readonly string[], today: string): number {
  const done = new Set(doneDates);
  const anchor = new Date(today + "T12:00:00");
@@ -43,31 +44,63 @@ function readProgress(profileId:string):Progress {
 }
 export default function DailyAfterHours({profileId,language="nl",onBack,onOpenMissions,onOpenInsights}:{profileId:string;language?:Language;onBack:()=>void;onOpenMissions:()=>void;onOpenInsights:()=>void}){
  const t=(nl:string,en:string)=>language==="nl"?nl:en;
+ const activeProfileRef=useRef(profileId);
+ activeProfileRef.current=profileId;
  const today=todayKey();
  const card=useMemo(()=>{const stamp=Math.floor(new Date(today+"T12:00:00").getTime()/86400000);return rituals[((stamp%rituals.length)+rituals.length)%rituals.length]},[today]);
  const [progress,setProgress]=useState<Progress>(()=>readProgress(profileId));
  const [message,setMessage]=useState("");
+ useEffect(()=>{
+  let active=true;
+  const local=readProgress(profileId);
+  setProgress(local);setMessage("");
+  void loadDailyRitualHistory().then(remote=>{
+   if(!active||!remote)return;
+   const merged={doneDates:Array.from(new Set([...local.doneDates,...remote])).sort().slice(-120)};
+   setProgress(merged);
+   try{localStorage.setItem("afterhours.dailyritual."+profileId,JSON.stringify(merged))}catch{}
+  }).catch(()=>{
+   if(active&&supabaseConfigured)setMessage(t("Je lokale geschiedenis blijft beschikbaar. Synchronisatie met je account is tijdelijk niet gelukt; probeer het later opnieuw.","Your local history remains available. Account sync did not complete this time; please try again later."));
+  });
+  return ()=>{active=false};
+ },[profileId,language]);
  const [busy,setBusy]=useState(false);
  const done=progress.doneDates.includes(today);
  const streak=useMemo(()=>calculateDailyStreak(progress.doneDates,today),[progress,today]);
  const complete=async()=>{
   if(done||busy)return;
+  const requestedProfileId=profileId;
   setBusy(true);setMessage("");
-  let serverSaved=false;
+  let historySaved=false,missionSaved=false;
+  let serverAlreadyDone=false;
+  try{
+   const result=await completeDailyRitualRemote();
+   historySaved=Boolean(result);
+   if(result)serverAlreadyDone=Boolean(result.already_completed);
+  }catch{}
   try{
    const result=await completeMissionRemote("daily-intention");
-   serverSaved=true;
-   setMessage(result.already_completed?t("Deze dagmissie was al op je account geregistreerd.","Today's mission was already registered on your account."):t("Dagmissie op de server bevestigd. De missiepunten zijn niet hetzelfde als XP.","Daily mission confirmed on the server. Mission points are separate from XP."));
-  }catch{
-   setMessage(t("Vandaag lokaal afgevinkt; serverbeloning niet bevestigd.","Marked complete locally; server reward was not confirmed."));
-  }
-  const next={doneDates:Array.from(new Set([...progress.doneDates,today])).sort().slice(-120)};
+   missionSaved=true;
+   serverAlreadyDone=serverAlreadyDone||Boolean(result.already_completed);
+  }catch{}
+  if(activeProfileRef.current!==requestedProfileId){setBusy(false);return;}
+  const current=readProgress(requestedProfileId);
+  const next={doneDates:Array.from(new Set([...current.doneDates,today])).sort().slice(-120)};
   setProgress(next);
-  try{localStorage.setItem("afterhours.dailyritual."+profileId,JSON.stringify(next))}catch{}
-  if(!serverSaved&&!supabaseConfigured)setMessage(t("Dagritueel bewaard op dit apparaat; geen serverbeloning toegekend.","Daily ritual saved on this device; no server reward awarded."));
+  try{localStorage.setItem("afterhours.dailyritual."+requestedProfileId,JSON.stringify(next))}catch{}
+  if(historySaved&&missionSaved){
+   setMessage(serverAlreadyDone
+    ?t("Vandaag is al op je account geregistreerd. Je ritueel is afgerond.","Today was already recorded on your account. Your ritual is complete.")
+    :t("Ritueel en missie zijn op je account bevestigd. Missiepunten zijn geen rank-XP.","Ritual and mission confirmed on your account. Mission points are not rank XP."));
+  }else if(historySaved){
+   setMessage(t("Ritueel op je account bewaard; missiepunten wachten op de missie-server.","Ritual saved to your account; mission points are waiting for mission-server setup."));
+  }else if(missionSaved){
+   setMessage(t("Missie bevestigd; je ritueelgeschiedenis is lokaal bewaard en nog niet op de server bevestigd.","Mission confirmed; your ritual history is saved locally and is not yet confirmed on the server."));
+  }else{
+   setMessage(t("Ritueel lokaal bewaard. Accountgeschiedenis en missiebeloning zijn nog niet bevestigd.","Ritual saved locally. Account history and mission reward are not yet confirmed."));
+  }
   setBusy(false);
- };
- return <main className="daily-screen">
+ }; return <main className="daily-screen">
   <header className="daily-heading"><button className="back" type="button" onClick={onBack}><ArrowLeft size={16}/>{t("Terug","Back")}</button><span className="eyebrow">AFTER HOURS · DAILY RITUAL</span><h1>{t("Jouw moment.","Your moment.")}</h1><p>{t("Elke dag één klein ritueel voor intentie, nieuwsgierigheid en zorg. Geen puntenjacht. Geen druk.","One small daily ritual for intention, curiosity and care. No points chase. No pressure.")}</p></header>
   <section className="daily-streak"><div><CalendarDays size={18}/><span>{t("Jouw ritme","Your rhythm")}</span></div><strong>{streak} <small>{t("dagen","days")}</small></strong><p>{t("Een ritme is geen verplichting. Een gemiste dag is geen mislukking.","A streak is not an obligation. A missed day is not a failure.")}</p></section>
   <article className="daily-ritual-card"><div className="daily-card-top"><span className="eyebrow">{language==="nl"?card.categoryNL:card.categoryEN}</span><span>{card.duration}</span></div><span className="daily-glyph">☾</span><h2>{language==="nl"?card.titleNL:card.titleEN}</h2><p className="daily-prompt">{language==="nl"?card.promptNL:card.promptEN}</p><div className="daily-practice"><span>{t("JOUW RITUEEL","YOUR RITUAL")}</span><p>{language==="nl"?card.practiceNL:card.practiceEN}</p></div>
@@ -75,6 +108,6 @@ export default function DailyAfterHours({profileId,language="nl",onBack,onOpenMi
    {message&&<p className="daily-message" role="status">{message}</p>}
   </article>
   <section className="daily-next-steps"><h3>{t("Ga verder op jouw manier","Continue your way")}</h3><button type="button" onClick={onOpenMissions}><span><strong>{t("Missies van vandaag","Today's missions")}</strong><small>{t("Kleine stappen, op eigen tempo.","Small steps, at your own pace.")}</small></span><span>↗</span></button><button type="button" onClick={onOpenInsights}><span><strong>{t("Inzichten","Insights")}</strong><small>{t("Tarot, Oracle en reflectie.","Tarot, Oracle and reflection.")}</small></span><span>↗</span></button></section>
-  <p className="daily-footnote">{t("Je dagelijkse afvinkritme wordt lokaal op dit apparaat bijgehouden. Serverbevestiging is apart vermeld; veiligheidsfuncties blijven gratis.","Your daily completion streak is tracked locally on this device. Server confirmation is shown separately; safety features always remain free.")}</p>
+  <p className="daily-footnote">{t("Je ritueelgeschiedenis synchroniseert met je account zodra de servermigratie is toegepast; anders blijft de voortgang lokaal. Veiligheidsfuncties blijven gratis.","Your ritual history syncs to your account once the server migration is applied; otherwise progress stays local. Safety features always remain free.")}</p>
  </main>;
 }
