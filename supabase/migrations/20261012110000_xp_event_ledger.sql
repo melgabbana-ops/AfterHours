@@ -39,7 +39,7 @@ as $func$
 declare
   v_session public.sessions%rowtype;
   v_xp integer := 120;
-  v_completed_at timestamptz := now();
+  v_completed_at timestamptz;
   v_consent_status text;
   v_ledger_id uuid;
 begin
@@ -51,6 +51,8 @@ begin
   where id = p_session_id and profile_id = auth.uid()
   for update;
   if not found then raise exception 'Sessie niet gevonden.' using errcode = 'P0002'; end if;
+  -- Timestamp after acquiring the row lock so this completion event follows any prior consent event.
+  v_completed_at := clock_timestamp();
   if v_session.status = 'completed' then
     return jsonb_build_object('xp_earned', 0, 'already_completed', true);
   end if;
@@ -60,7 +62,7 @@ begin
 
   if v_session.status = 'active' and v_session.active_started_at is not null then
     v_session.active_seconds := v_session.active_seconds
-      + greatest(0, floor(extract(epoch from (now() - v_session.active_started_at)))::integer);
+      + greatest(0, floor(extract(epoch from (v_completed_at - v_session.active_started_at)))::integer);
   end if;
   if v_session.active_seconds < 3600 then
     raise exception 'De sessie moet minimaal 60 minuten actieve speeltijd hebben.';
@@ -103,6 +105,10 @@ begin
       active_seconds = v_session.active_seconds,
       updated_at = v_completed_at
   where id = v_session.id;
+
+  -- A completed session must never leave consent active. Keep this in the same transaction.
+  insert into public.consent_records(session_id, status, revoked_at, created_at)
+  values (v_session.id, 'revoked', v_completed_at, v_completed_at);
 
   insert into public.session_history(profile_id, completed_at, xp_earned, rounds)
   values (auth.uid(), v_completed_at, v_xp, p_rounds);
