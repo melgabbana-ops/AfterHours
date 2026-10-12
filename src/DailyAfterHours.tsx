@@ -1,4 +1,4 @@
-import React,{useMemo,useState} from "react";
+import React,{useEffect,useMemo,useState} from "react";
 import {ArrowLeft,CalendarDays,Check,RefreshCw,Sparkles} from "lucide-react";
 import {completeMissionRemote} from "./services/missions";
 import {supabaseConfigured} from "./services/supabase";
@@ -47,6 +47,7 @@ export default function DailyAfterHours({profileId,language="nl",onBack,onOpenMi
  const card=useMemo(()=>{const stamp=Math.floor(new Date(today+"T12:00:00").getTime()/86400000);return rituals[((stamp%rituals.length)+rituals.length)%rituals.length]},[today]);
  const [progress,setProgress]=useState<Progress>(()=>readProgress(profileId));
  const [message,setMessage]=useState("");
+ useEffect(()=>{setProgress(readProgress(profileId));setMessage("");},[profileId]);
  const [busy,setBusy]=useState(false);
  const done=progress.doneDates.includes(today);
  const streak=useMemo(()=>calculateDailyStreak(progress.doneDates,today),[progress,today]);
