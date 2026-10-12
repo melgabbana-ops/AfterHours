@@ -69,6 +69,7 @@ export default function DailyAfterHours({profileId,language="nl",onBack,onOpenMi
  const streak=useMemo(()=>calculateDailyStreak(progress.doneDates,today),[progress,today]);
  const complete=async()=>{
   if(done||busy)return;
+  const requestedProfileId=profileId;
   setBusy(true);setMessage("");
   let historySaved=false,missionSaved=false;
   let serverAlreadyDone=false;
@@ -82,9 +83,11 @@ export default function DailyAfterHours({profileId,language="nl",onBack,onOpenMi
    missionSaved=true;
    serverAlreadyDone=serverAlreadyDone||Boolean(result.already_completed);
   }catch{}
-  const next={doneDates:Array.from(new Set([...progress.doneDates,today])).sort().slice(-120)};
+  if(activeProfileRef.current!==requestedProfileId){setBusy(false);return;}
+  const current=readProgress(requestedProfileId);
+  const next={doneDates:Array.from(new Set([...current.doneDates,today])).sort().slice(-120)};
   setProgress(next);
-  try{localStorage.setItem("afterhours.dailyritual."+profileId,JSON.stringify(next))}catch{}
+  try{localStorage.setItem("afterhours.dailyritual."+requestedProfileId,JSON.stringify(next))}catch{}
   if(historySaved&&missionSaved){
    setMessage(serverAlreadyDone
     ?t("Vandaag is al op je account geregistreerd. Je ritueel is afgerond.","Today was already recorded on your account. Your ritual is complete.")
