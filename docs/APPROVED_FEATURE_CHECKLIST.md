@@ -316,3 +316,21 @@
 - [ ] Verify all master-prompt screens/components against the current source code, including onboarding/trailer, character creation/evolution, game modes/100+ command library, mood history/private notes, private media capture, music/SFX/haptics, socials/templates, admin ranks/products/test mode, legal pages and pricing/credit consistency.
 - [x] Build `docs/FEATURE_IMPLEMENTATION_MATRIX.md`, linking approved requirements to source files and explicitly marking partial, missing, unverified and external-prerequisite work. Keep the matrix updated as implementation changes. Do not infer missing features merely from the old 9 Oct report, which itself noted it had not yet inspected all code.
 - [~] CI has been rerun repeatedly through each implementation change. Final status must be checked against the latest PR commit SHA before reporting completion. Keep changes on the feature branch until explicitly approved for merge/release.
+
+
+## Added scope audit: daily engagement, revenue and camera/Lovense integration (12 Oct 2026)
+
+- [x] Add Daily After Hours as a first-class home destination, with 14 bilingual rotating rituals, a gentle streak display, and shortcuts to Missions and Insights. It is intentionally pressure-free; a missed day is not punished.
+- [x] Reset Daily After Hours' local progress display when the active profile changes, to prevent one account's cached streak being shown after switching accounts.
+- [x] Add optional AFTER HOURS Club monthly/yearly pricing proposals to Collections & Pricing. The buttons store local interest only; no payment or paid access is implied.
+- [x] Add the official Lovense Basic JS SDK connection UI, an authenticated server-side token function, explicit opt-in, a five-second manual test, and an immediate STOP NOW control.
+- [x] Add a connection timeout and stale-attempt guards so a delayed SDK/token response cannot silently resurrect a connection after the user disconnects or a timeout occurs.
+- [x] Add branded CLEAN, AFTER HOURS and CINEMATIC overlays; burn the chosen frame into newly recorded canvas-composited video and locally rendered still images before explicit save.
+- [ ] Register and receive approval for the AFTER HOURS Lovense developer platform; set LOVENSE_DEVELOPER_TOKEN, LOVENSE_PLATFORM_NAME and exact LOVENSE_ALLOWED_ORIGINS as server secrets; deploy the Edge Function; validate CSP and test actual supported devices on iOS and Android.
+- [ ] Apply Supabase migrations only after inspecting the current project's migration history; verify RLS, RPC grants, media bucket policies and server-only write paths against the actual database.
+- [ ] Test camera overlay video/audio sync, codec fallback, device rotation, backgrounding, permission denial, 60-second cutoff, file-size cap, interrupted capture, preview, save, deletion and private signed URLs on real iPhones and Android devices.
+- [ ] Decide and implement cross-device daily streak history with a server-owned table/RPC if desired. The current streak is local-only; do not imply otherwise.
+- [ ] Implement the Club's paid value before charging: daily archive, weekly drops, premium Tarot/Oracle collections, additional story chapters and optional cosmetic frames. A pricing card is not a subscription system.
+- [ ] Choose an adult-content-approved payment provider only after written underwriting of the actual BDSM-related interactive product and Lovense feature. No real checkout, billing or paid entitlement is enabled.
+- [ ] Add server-side subscriptions/entitlements, idempotent provider webhooks, renewals/failures, receipts, refunds, disputes, VAT disclosures and customer-managed cancellation before collecting recurring revenue.
+- [ ] Finish remaining master-scope audit and QA: auth/OAuth config, admin authorization/RLS, XP ledger + combo integration, complete mood/history and aftercare persistence, radio/music rights, Tarot/Oracle/astrology content review, archive/inbox/support/GDPR deletion, notification delivery, legal review, accessibility and mobile/PWA acceptance.
