@@ -60,7 +60,7 @@ export default function DailyAfterHours({profileId,language="nl",onBack,onOpenMi
    setProgress(merged);
    try{localStorage.setItem("afterhours.dailyritual."+profileId,JSON.stringify(merged))}catch{}
   }).catch(()=>{
-   if(active&&supabaseConfigured)setMessage(t("Lokale geschiedenis beschikbaar; synchronisatie met je account wacht op serverconfiguratie.","Local history is available; account sync is waiting for server configuration."));
+   if(active&&supabaseConfigured)setMessage(t("Je lokale geschiedenis blijft beschikbaar. Synchronisatie met je account is tijdelijk niet gelukt; probeer het later opnieuw.","Your local history remains available. Account sync did not complete this time; please try again later."));
   });
   return ()=>{active=false};
  },[profileId,language]);
