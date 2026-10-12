@@ -2,10 +2,10 @@ import React, { useEffect, useState } from "react";
 import { Award, LockKeyhole, Sparkles } from "lucide-react";
 import { achievementEventName, badgeCatalog, listEarnedBadges } from "./achievements";
 
-export default function BadgeShowcase() {
+export default function BadgeShowcase({ profileId }: { profileId?: string | null }) {
   const language = (() => { try { return localStorage.getItem("afterhours.language") === "en" ? "en" : "nl"; } catch { return "nl"; } })();
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
-  const [earned, setEarned] = useState(listEarnedBadges);
+  const [earned, setEarned] = useState(() => listEarnedBadges(profileId));
   const badgeCopy: Record<string, {description: string}> = {
     first_login: {description: "Your first secure sign-in."},
     sky_watcher: {description: "You explored your astrology reflection."},
@@ -18,14 +18,14 @@ export default function BadgeShowcase() {
     first_prompt: {description: "You marked your first prompt as done."}
   };
   useEffect(() => {
-    const refresh = () => setEarned(listEarnedBadges());
+    const refresh = () => setEarned(listEarnedBadges(profileId));
     window.addEventListener(achievementEventName(), refresh);
     window.addEventListener("storage", refresh);
     return () => {
       window.removeEventListener(achievementEventName(), refresh);
       window.removeEventListener("storage", refresh);
     };
-  }, []);
+  }, [profileId]);
 
   const uniqueEarned = new Set(earned.map((badge) => badge.id));
   const dailyVisits = earned.filter((badge) => badge.id === "daily_orbit").length;
@@ -41,6 +41,6 @@ export default function BadgeShowcase() {
         {unlocked && <Sparkles className="badge-earned-mark"/>}
       </article>;
     })}</div>
-    <p className="badge-showcase-footnote">{t("Lokaal opgeslagen op dit apparaat. Daily Orbit ontgrendeld:","Stored locally on this device. Daily Orbit unlocked:")} {dailyVisits} {dailyVisits === 1 ? t("dag","day") : t("dagen","days")}. {t("Badges worden op dit moment niet tussen apparaten gesynchroniseerd.","Badges are not currently synced between devices.")}</p>
+    <p className="badge-showcase-footnote">{t("Lokaal opgeslagen voor dit account op dit apparaat. Daily Orbit ontgrendeld:","Stored locally for this account on this device. Daily Orbit unlocked:")} {dailyVisits} {dailyVisits === 1 ? t("dag","day") : t("dagen","days")}. {t("Badges worden op dit moment niet tussen apparaten gesynchroniseerd.","Badges are not currently synced between devices.")}</p>
   </section>;
 }

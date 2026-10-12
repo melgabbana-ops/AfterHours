@@ -20,10 +20,13 @@ export const badgeCatalog = [
 
 const STORAGE_KEY = "afterhours.achievements.v1";
 const EVENT_NAME = "afterhours:achievement";
+const storageKeyFor = (profileId?: string | null) => profileId
+  ? `${STORAGE_KEY}.${profileId}`
+  : STORAGE_KEY;
 
-function readEarned(): EarnedBadge[] {
+function readEarned(profileId?: string | null): EarnedBadge[] {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(storageKeyFor(profileId));
     if (!raw) return [];
     const parsed: unknown = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
@@ -33,20 +36,20 @@ function readEarned(): EarnedBadge[] {
   } catch { return []; }
 }
 
-function writeEarned(items: EarnedBadge[]) {
+function writeEarned(items: EarnedBadge[], profileId?: string | null) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    localStorage.setItem(storageKeyFor(profileId), JSON.stringify(items));
     window.dispatchEvent(new CustomEvent(EVENT_NAME));
   } catch { /* Storage may be disabled; achievements are non-critical UI. */ }
 }
 
-export function listEarnedBadges(): EarnedBadge[] {
-  return readEarned();
+export function listEarnedBadges(profileId?: string | null): EarnedBadge[] {
+  return readEarned(profileId);
 }
 
-export function recordAchievement(event: AchievementEvent, options: { date?: string; completedSessions?: number } = {}) {
+export function recordAchievement(event: AchievementEvent, options: { date?: string; completedSessions?: number; profileId?: string | null } = {}) {
   const today = options.date ?? new Date().toLocaleDateString("sv-SE");
-  const current = readEarned();
+  const current = readEarned(options.profileId);
   const next: EarnedBadge[] = [...current];
   const add = (id: string, eventKey: string) => {
     if (!next.some((item) => item.id === id)) next.push({ id, earnedAt: new Date().toISOString(), eventKey });
@@ -67,7 +70,7 @@ export function recordAchievement(event: AchievementEvent, options: { date?: str
     if ((options.completedSessions ?? 0) >= 3) add("three_sessions", "session:three");
   }
   if (event === "prompt_complete") add("first_prompt", "prompt:first");
-  writeEarned(next);
+  writeEarned(next, options.profileId);
 }
 
 export function achievementEventName() { return EVENT_NAME; }
