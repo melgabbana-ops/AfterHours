@@ -7,7 +7,7 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id) {
-          const path = id.replace(/\\\\/g, "/");
+          const path = id;
 
           if (
             path.includes("/node_modules/react/") ||
