@@ -1,27 +1,27 @@
 import React,{useEffect,useMemo,useRef,useState}from"react";
 import UnderConstruction from "./UnderConstruction";
 import Teaser from "./Teaser";
-import PromptLibrary from "./PromptLibrary";
+
 import BadgeShowcase from "./BadgeShowcase";
 import { recordAchievement } from "./achievements";
 import{createRoot}from"react-dom/client";
 import{Shield,Lock,Play,Pause,RotateCcw,ChevronRight,User,Settings,Home,Timer,CheckCircle2,Square,Activity,LogOut,Sparkles,Radio,Bell,BookOpen,EyeOff,ShoppingBag,MessageCircle,CalendarDays}from"lucide-react";
 import"./styles.css";
-import{Insights}from"./Insights";
-import{RadioRoom}from"./RadioRoom";
-import MediaVault from"./MediaVault";
-import SafetyPlan from"./SafetyPlan";
-import Monetization from "./Monetization";
-import CharacterStudio from "./CharacterStudio";
-import Onboarding from "./Onboarding";
-import Missions from "./Missions";
-import AdminDashboard from "./AdminDashboard";
-import LegalCenter from "./LegalCenter";
-import SocialStudio from "./SocialStudio";
+
+
+
+
+
+
+
+
+
+
+
 import MoodCheckIn from "./MoodCheckIn";
-import MoodHistory from "./MoodHistory";
-import LovenseControl from "./LovenseControl";
-import DailyAfterHours from "./DailyAfterHours";
+
+
+
 import { recordSessionMoodRemote, type MoodCode, type MoodPhase } from "./services/moods";
 import type{AfterHoursState,AvatarStyle,Screen,Safety,SessionHistoryEntry}from"./types";
 import{loadState,saveState,loadTimer,saveTimer,clearTimer,defaultState}from"./storage";
@@ -33,6 +33,21 @@ import{levelFromXp,rankFromXp,rankIndexFromXp,rankNames,rankThresholds}from"./pr
 import{notificationEvents}from"./services/notifications";
 import{shouldResumeSession}from"./services/sessionSafety";
 import {getMaintenanceStatus,formatMaintenanceDate,type MaintenanceConfig} from "./maintenance";
+const PromptLibrary = React.lazy(() => import("./PromptLibrary"));
+const Insights = React.lazy(async () => ({ default: (await import("./Insights")).Insights }));
+const RadioRoom = React.lazy(async () => ({ default: (await import("./RadioRoom")).RadioRoom }));
+const MediaVault = React.lazy(() => import("./MediaVault"));
+const SafetyPlan = React.lazy(() => import("./SafetyPlan"));
+const Monetization = React.lazy(() => import("./Monetization"));
+const CharacterStudio = React.lazy(() => import("./CharacterStudio"));
+const Onboarding = React.lazy(() => import("./Onboarding"));
+const Missions = React.lazy(() => import("./Missions"));
+const AdminDashboard = React.lazy(() => import("./AdminDashboard"));
+const LegalCenter = React.lazy(() => import("./LegalCenter"));
+const SocialStudio = React.lazy(() => import("./SocialStudio"));
+const MoodHistory = React.lazy(() => import("./MoodHistory"));
+const LovenseControl = React.lazy(() => import("./LovenseControl"));
+const DailyAfterHours = React.lazy(() => import("./DailyAfterHours"));
 
 class AppErrorBoundary extends React.Component<React.PropsWithChildren, {hasError:boolean}>{
  state={hasError:false};
@@ -412,7 +427,7 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
  const saveRecoveredPassword=async()=>{setAuthMessage("");setAuthBusy(true);try{await updatePassword(authPassword);setAuthMessage(t("Je wachtwoord is bijgewerkt.","Your password has been updated."));setAuthPassword("");setPasswordRecovery(false);}catch(error){setAuthMessage(error instanceof Error?error.message:"Wachtwoord bijwerken mislukt.")}finally{setAuthBusy(false)}};
 
  if(maintenanceStatus.active)return <UnderConstruction config={maintenanceConfig} language={language}/>;
- if(screen==="legal")return <LegalCenter language={language} onBack={()=>setScreen("home")}/>;
+ if(screen==="legal")return <React.Suspense fallback={<div className="gate"><div className="gate-card"><p>{t("Scherm laden…","Loading screen…")}</p></div></div>}><LegalCenter language={language} onBack={()=>setScreen("home")}/></React.Suspense>;
  if(!authReady)return <div className="gate"><div className="gate-card"><img className="gate-logo" src="/after-hours-logo.svg" alt="AFTER HOURS" /><h1>{t("Sessie herstellen…","Restoring session…")}</h1><p>{t("Beveiligde toegang wordt gecontroleerd.","Checking secure access.")}</p></div></div>;
  if(!state.ageConfirmed)return <div className="gate"><img className="gate-logo" src="/after-hours-logo.svg" alt="AFTER HOURS" /><span className="eyebrow">PRIVATE EXPERIENCE · 18+</span><h1>AFTER<br/><i>HOURS</i></h1><p>Een premium interactieve ervaring voor volwassenen. Bewust. Afgesproken. Veilig.</p><button onClick={()=>{setState(s=>({...s,ageConfirmed:true,ageConfirmedFor:syncUserId??"local"}));try{if(localStorage.getItem("afterhours.onboarding.completed")!=="1")setScreen("onboarding")}catch{setScreen("onboarding")}}}>Ik ben 18+ <ChevronRight/></button><small>Dit is een zelfverklaring, geen officiële leeftijdsverificatie. Consent wordt afzonderlijk gevraagd.</small><div className="gate-legal-links"><button type="button" onClick={()=>setScreen("legal")}>Juridische informatie / Privacy</button></div></div>;
 
@@ -461,6 +476,7 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
 
  {screen==="aftercare"&&<main className="aftercare-screen"><section className="aftercare-card"><span className="eyebrow">AFTER HOURS · AFTERCARE</span><h2>{t("Rustig landen","Land softly.")}</h2><p>{t("De Experience is voorbij. Kies wat nu het beste past. Niets hoeft meteen.","The Experience is over. Choose what feels right now. Nothing has to happen immediately.")}</p><MoodCheckIn phase="after" language={language} selected={moodAfter} onSelect={mood=>handleMoodChoice("after",mood)}/>{moodMessage&&<p className="mood-save-message" role="status">{moodMessage}</p>}<div className="aftercare-options"><button className={aftercareChoice==="land"?"selected":""} onClick={()=>setAftercareChoice("land")}><strong>{t("Rustig landen","Land softly")}</strong><span>{t("Even zitten, ademen en het tempo laten zakken.","Sit for a moment, breathe, and let the pace settle.")}</span></button><button className={aftercareChoice==="talk"?"selected":""} onClick={()=>setAftercareChoice("talk")}><strong>{t("Kort napraten","Talk it through")}</strong><span>{t("Bespreek samen wat goed voelde en wat je wilt meenemen.","Share what felt good and what you want to carry forward.")}</span></button><button className={aftercareChoice==="space"?"selected":""} onClick={()=>setAftercareChoice("space")}><strong>{t("Ruimte & water","Space & water")}</strong><span>{t("Neem even afstand, drink iets en kom rustig terug.","Take a little space, have some water, and return at your own pace.")}</span></button></div><div className="aftercare-note"><Shield/><span>{t("Aftercare is geen verplichting om iets te delen. Een pauze, grens of stop blijft altijd geldig.","Aftercare never obliges you to share. A pause, boundary, or stop is always valid.")}</span></div><button className="gold aftercare-complete" onClick={()=>void finishSession()} disabled={!aftercareChoice||finishing}>{finishing?t("Veilig afronden…","Finishing safely…"):t("Sessie veilig afronden","Finish session safely")}</button><button className="back" onClick={()=>setScreen("home")}>← {t("Terug","Back")}</button></section></main>}
 
+ <React.Suspense fallback={<main className="feature-loading" role="status"><p>{t("Scherm wordt geladen…","Loading screen…")}</p></main>}>
  {screen==="prompts"&&<PromptLibrary playerId={state.profile.id} language={language} onBack={()=>setScreen("home")} onComplete={()=>recordAchievement("prompt_complete",{profileId:syncUserId})}/>}
  {screen==="missions"&&<Missions language={language} onBack={()=>setScreen("home")} onExplore={(destination)=>setScreen((destination==="aftercare"?"aftercare":destination==="safety"?"safety":destination==="insights"?"insights":destination==="prompts"?"prompts":"home"))}/> }
  {screen==="daily"&&<DailyAfterHours profileId={state.profile.id} language={language} onBack={()=>setScreen("home")} onOpenMissions={()=>setScreen("missions")} onOpenInsights={()=>setScreen("insights")}/>}
@@ -486,6 +502,7 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
   ?<button onClick={requestMagicLink} disabled={authBusy||!authEmail.trim()}>{authBusy?t("Versturen…","Sending…"):t("Magic link sturen","Send magic link")}</button>
   :<div className="password-actions"><div className="auth-actions"><button onClick={()=>void submitPasswordAuth(false)} disabled={authBusy||!authEmail.trim()||authPassword.length<8}>{t("Inloggen","Sign in")}</button><button onClick={()=>void submitPasswordAuth(true)} disabled={authBusy||!authEmail.trim()||authPassword.length<8}>{t("Account maken","Create account")}</button></div><button className="text-button" onClick={()=>void requestPasswordReset()} disabled={authBusy||!authEmail.trim()}>{t("Wachtwoord vergeten?","Forgot password?")}</button></div>
  )}{authMessage&&<small>{authMessage}</small>}</div>}{userEmail&&<div className="auth-panel"><span className="eyebrow">SIGNED IN</span><strong>{userEmail}</strong><button onClick={()=>void handleSignOut()}>{t("Uitloggen","Sign out")}</button></div>}<div className="admin-actions"><button className="secondary" onClick={()=>{reset();setScreen("home")}}>{t("Sessie resetten","Reset session")}</button><button className="danger-action" onClick={revokeConsent}>{t("Consent intrekken","Revoke consent")}</button></div></section><button className="back" onClick={()=>setScreen("home")}>← {t("Terug","Back")}</button></main>}
+ </React.Suspense>
 
  {(state.session.status==="active"||state.session.status==="paused")&&screen!=="game"&&<aside className="stop-controller" aria-label={t("Snelle sessiebediening","Quick session controls")}><div><span>SESSION CONTROL</span><strong>{state.session.status==="active"?t("Sessie loopt","Session active"):t("Sessie gepauzeerd","Session paused")}</strong></div><button className="stop-controller-pause" onClick={()=>state.session.status==="active"?pauseRound():startRound()} aria-label={state.session.status==="active"?t("Sessie pauzeren","Pause session"):t("Sessie hervatten","Resume session")}>{state.session.status==="active"?<Pause/>:<Play/>}{state.session.status==="active"?t("Pauze","Pause"):t("Hervat","Resume")}</button><button className="stop-controller-stop" onClick={()=>handleCheckIn("stop")} aria-label={t("Stop de sessie onmiddellijk","Stop the session now")}><Square/> STOP NU</button></aside>}
 
