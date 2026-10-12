@@ -917,3 +917,26 @@ img,svg,video,canvas{max-width:100%}
 .daily-next-steps>button span:last-child{color:#c89445}
 .daily-footnote{margin-top:20px;font-size:9px;line-height:1.8;color:#85798d}
 @media(max-width:500px){.daily-screen{padding:22px 14px 105px}.daily-ritual-card{padding:16px}.daily-streak{padding:12px}}
+
+
+/* Proposed recurring membership cards: no active billing implied */
+.club-membership{margin:25px 0 20px;padding:18px;border:1px solid rgba(200,148,69,.35);border-radius:13px;background:radial-gradient(ellipse at 100% 0%,rgba(109,22,143,.16),transparent 48%),linear-gradient(145deg,rgba(17,10,21,.94),rgba(7,6,9,.98))}
+.club-membership-heading .eyebrow{display:flex;align-items:center;gap:7px;color:#c89445;font-size:8px;letter-spacing:.15em}
+.club-membership-heading h2{margin:12px 0;font:500 clamp(25px,5vw,34px)/1.15 "Playfair Display",Georgia,serif;color:#efdcb7}
+.club-membership-heading p{font-size:10px;line-height:1.8;color:#a99cad}
+.club-membership-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin-top:18px}
+.club-membership-card{min-width:0;display:flex;flex-direction:column;padding:15px;border:1px solid #3b2b43;border-radius:10px;background:rgba(8,7,11,.87)}
+.club-membership-card.annual{border-color:#8d6935;background:linear-gradient(145deg,rgba(39,25,14,.45),rgba(9,7,11,.95))}
+.club-membership-card>.eyebrow{font-size:8px;letter-spacing:.1em;color:#c9a967}
+.club-membership-card h3{margin:11px 0;font:500 20px/1.2 "Playfair Display",Georgia,serif;color:#ead4a6}
+.club-price{font:500 28px/1.15 "Playfair Display",Georgia,serif;color:#f0dfbe}
+.club-price small{font:10px Arial,sans-serif;color:#a99aaa}
+.club-membership-card>p{font-size:10px;line-height:1.7;color:#aaa0b1}
+.club-membership-card ul{list-style:none;display:grid;gap:10px;padding:0;margin:10px 0 18px}
+.club-membership-card li{display:flex;align-items:flex-start;gap:7px;font-size:10px;line-height:1.6;color:#c6b8cd}
+.club-membership-card li svg{flex:none;color:#c89445;margin-top:2px}
+.club-membership-card .monetization-button{margin-top:auto}
+.club-saving{padding:8px 9px;margin:3px 0 6px;border-left:2px solid #c89445;background:rgba(200,148,69,.08);font-size:9px;line-height:1.55;color:#dfc787}
+.club-membership-disclaimer{display:flex;align-items:flex-start;gap:8px;margin:14px 0 0;padding:12px;border:1px dashed #4a3928;border-radius:7px;color:#a99daa;font-size:9px;line-height:1.75}
+.club-membership-disclaimer svg{flex:none;color:#c89445;margin-top:2px}
+@media(max-width:540px){.club-membership{padding:13px}.club-membership-grid{grid-template-columns:1fr}.club-membership-card{padding:14px}}
