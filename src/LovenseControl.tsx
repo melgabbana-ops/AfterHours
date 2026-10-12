@@ -78,7 +78,7 @@ export default function LovenseControl({language="nl",isAuthenticated,onBack}:{l
     try{const qrData=await sdk.getQrcode();if(qrData?.qrcodeUrl)setQr(qrData.qrcodeUrl)}catch{setMessage(t("De SDK is klaar. Gebruik Open Lovense Connect als de QR-code niet verschijnt.","The SDK is ready. Use Open Lovense Connect if the QR code does not appear."))}
     setConnected(Boolean(sdk.getAppStatus()));refreshToys();
    });
-  }catch(error){setBusy(false);setMessage(error instanceof Error?error.message:t("Lovense kon niet worden gestart.","Lovense could not be started."))}
+  }catch(error){disconnect();setMessage(error instanceof Error?error.message:t("Lovense kon niet worden gestart.","Lovense could not be started."))}
  };
  const testPulse=()=>{
   if(!sdkRef.current||!ready||!connected||!controlsEnabled)return;
@@ -99,11 +99,11 @@ export default function LovenseControl({language="nl",isAuthenticated,onBack}:{l
    <label className="lovense-consent"><input type="checkbox" checked={controlsEnabled} disabled={!connected||!ready} onChange={e=>{if(!e.target.checked)stopAll();setControlsEnabled(e.target.checked)}}/><span>{t("Ik activeer de handmatige bediening voor deze sessie.","I enable manual controls for this session.")}</span></label>
    <label className="lovense-slider">{t("Testintensiteit","Test strength")} <strong>{strength}/5</strong><input aria-label={t("Testintensiteit","Test strength")} type="range" min={1} max={5} step={1} value={strength} onChange={e=>setStrength(Number(e.target.value))}/></label>
    {toys.length>0&&<label className="lovense-toy-select">{t("Apparaat","Toy")}<select value={selectedToy} onChange={e=>setSelectedToy(e.target.value)}><option value="all">{t("Alle verbonden apparaten","All connected devices")}</option>{toys.map((toy,index)=><option key={toy.id??index} value={toy.id??"all"}>{toy.nickname||toy.name||toy.toyType||t("Lovense-apparaat","Lovense device")}{toy.battery!==undefined?" · "+toy.battery+"%":""}</option>)}</select></label>}
-   <div className="lovense-action-row"><button type="button" onClick={testPulse} disabled={!ready||!connected||!controlsEnabled}><Vibrate size={16}/>{t("Test 5 seconden","Test for 5 seconds")}</button><button type="button" className="lovense-stop" onClick={stopAll}><CircleStop size={17}/>{t("STOP NOW","STOP NOW")}</button></div>
+   <div className="lovense-action-row"><button type="button" onClick={testPulse} disabled={!ready||!connected||!controlsEnabled}><Vibrate size={16}/>{t("Test 5 seconden","Test for 5 seconds")}</button><button type="button" className="lovense-stop" onClick={()=>{stopAll();setControlsEnabled(false);setMessage(t("STOP NOW: alle handmatige bediening is uitgeschakeld.","STOP NOW: all manual controls have been disabled."))}}><CircleStop size={17}/>{t("STOP NOW","STOP NOW")}</button></div>
    <button type="button" className="lovense-secondary" onClick={refreshToys} disabled={!ready}><RefreshCw size={14}/>{t("Apparaten vernieuwen","Refresh devices")}</button>
   </section>
   {message&&<p className="lovense-status-message" role="status">{message}</p>}
-  <button type="button" className="lovense-disconnect" onClick={()=>{disconnect();setConsent(false);setMessage(t("Verbonden sessie beëindigd.","Connection ended."))}} disabled={!ready}><Unplug size={16}/>{t("Ontkoppelen en stoppen","Disconnect and stop")}</button>
+  <button type="button" className="lovense-disconnect" onClick={()=>{disconnect();setConsent(false);setMessage(t("Verbonden sessie beëindigd.","Connection ended."))}} disabled={!ready&&!busy}><Unplug size={16}/>{t("Ontkoppelen en stoppen","Disconnect and stop")}</button>
   <p className="lovense-footer">{t("Compatibiliteit en koppeling vereisen een goedgekeurde Lovense Developer-configuratie en de bijbehorende Lovense-app. Dit scherm verstuurt geen opdrachten voordat je ze zelf start.","Compatibility and pairing require an approved Lovense Developer configuration and the Lovense app. This screen sends no commands until you start them yourself.")}</p>
  </main>;
 }
