@@ -60,8 +60,7 @@ Deno.serve(async (req) => {
       body:JSON.stringify({
         token:developerToken,
         uid:userData.user.id,
-        uname:displayName||"AFTER HOURS member",
-        utoken:bearer
+        uname:displayName||"AFTER HOURS member"
       }),
       signal:AbortSignal.timeout(10000)
     });
