@@ -8,6 +8,7 @@ import {
   type PrivateMediaItem,
 } from "./services/media";
 import { supabase, supabaseConfigured } from "./services/supabase";
+import { composeImageWithOverlay, drawCameraFrame, mediaOverlayFrames, type OverlayFrameStyle } from "./mediaOverlay";
 
 interface MediaVaultProps {
   sessionId: string;
@@ -33,12 +34,17 @@ export default function MediaVault({ sessionId, language = "nl" }: MediaVaultPro
   const [signedUrl, setSignedUrl] = useState("");
   const [deletingPath, setDeletingPath] = useState("");
   const [captureKind,setCaptureKind] = useState<"video"|"voice">("video");
+  const [frameStyle,setFrameStyle] = useState<OverlayFrameStyle>("after-hours");
   const [captureConsent,setCaptureConsent] = useState(false);
   const [isRecording,setIsRecording] = useState(false);
   const [liveStream,setLiveStream] = useState<MediaStream|null>(null);
   const [pendingCapture,setPendingCapture] = useState<File|null>(null);
   const [pendingUrl,setPendingUrl] = useState("");
   const livePreviewRef = useRef<HTMLVideoElement|null>(null);
+  const liveCanvasRef = useRef<HTMLCanvasElement|null>(null);
+  const compositionStreamRef = useRef<MediaStream|null>(null);
+  const renderFrameRef = useRef<number|null>(null);
+  const frameStyleRef = useRef<OverlayFrameStyle>("after-hours");
   const recorderRef = useRef<MediaRecorder|null>(null);
   const streamRef = useRef<MediaStream|null>(null);
   const chunksRef = useRef<BlobPart[]>([]);
@@ -48,9 +54,12 @@ export default function MediaVault({ sessionId, language = "nl" }: MediaVaultPro
   useEffect(()=>{
     if(livePreviewRef.current) livePreviewRef.current.srcObject=liveStream;
   },[liveStream]);
+  useEffect(()=>{frameStyleRef.current=frameStyle},[frameStyle]);
   useEffect(()=>()=> {
     if(captureTimeoutRef.current!==undefined) window.clearTimeout(captureTimeoutRef.current);
+    if(renderFrameRef.current!==null) window.cancelAnimationFrame(renderFrameRef.current);
     streamRef.current?.getTracks().forEach(track=>track.stop());
+    compositionStreamRef.current?.getTracks().forEach(track=>track.stop());
   },[]);
   useEffect(()=>{
     const currentUrl=pendingUrl;
@@ -116,29 +125,38 @@ export default function MediaVault({ sessionId, language = "nl" }: MediaVaultPro
   };
 
   const stopCaptureTracks=()=>{
+    if(renderFrameRef.current!==null){window.cancelAnimationFrame(renderFrameRef.current);renderFrameRef.current=null;}
+    compositionStreamRef.current?.getTracks().forEach(track=>track.stop());
+    compositionStreamRef.current=null;
     streamRef.current?.getTracks().forEach(track=>track.stop());
     streamRef.current=null;
     recorderRef.current=null;
+    if(livePreviewRef.current)livePreviewRef.current.srcObject=null;
     setLiveStream(null);
     setIsRecording(false);
     if(captureTimeoutRef.current!==undefined){window.clearTimeout(captureTimeoutRef.current);captureTimeoutRef.current=undefined;}
   };
 
-  const stageSelectedFile=(file?:File)=>{
+  const stageSelectedFile=async(file?:File)=>{
     if(!file)return;
     if(!captureConsent){
       setMessage(t("Bevestig eerst dat de betrokkenen akkoord zijn met deze media en privéopslag.","First confirm that the people involved agree to this media and private storage."));
       return;
     }
+    setBusy(true);
     try{
       validatePrivateMediaFile(file);
+      const previewFile=file.type.startsWith("image/")?await composeImageWithOverlay(file,frameStyleRef.current):file;
+      validatePrivateMediaFile(previewFile);
       if(pendingUrl) URL.revokeObjectURL(pendingUrl);
-      setPendingCapture(file);
-      setPendingUrl(URL.createObjectURL(file));
-      setMessage(t("Voorbeeld klaar. Controleer de media en kies daarna zelf voor privé opslaan.","Preview ready. Review the media, then choose whether to save it privately."));
+      setPendingCapture(previewFile);
+      setPendingUrl(URL.createObjectURL(previewFile));
+      setMessage(file.type.startsWith("image/")
+        ?t("AH-overlay toegepast. Controleer de foto en kies daarna zelf voor privé opslaan.","AH overlay applied. Review the photo, then choose whether to save it privately.")
+        :t("Voorbeeld klaar. Kies daarna zelf voor privé opslaan. Bestaande video's worden niet opnieuw gerenderd.","Preview ready. Choose whether to save privately. Existing videos are not re-rendered."));
     }catch(error){
       setMessage(error instanceof Error ? error.message : t("Dit bestand kan niet worden gebruikt.","This file cannot be used."));
-    }
+    }finally{setBusy(false)}
   };
 
   const startCapture=async()=>{
@@ -158,11 +176,38 @@ export default function MediaVault({ sessionId, language = "nl" }: MediaVaultPro
       streamRef.current=stream;
       setLiveStream(stream);
       chunksRef.current=[];
+      let recorderStream=stream;
+      if(captureKind==="video"){
+        await new Promise<void>(resolve=>window.requestAnimationFrame(()=>window.requestAnimationFrame(()=>resolve())));
+        const video=livePreviewRef.current;
+        const canvas=liveCanvasRef.current;
+        if(!video||!canvas||typeof canvas.captureStream!=="function")throw new Error(t("Deze browser kan de AH-overlay niet in de video opnemen. Gebruik een recente browser of maak een foto.","This browser cannot composite the AH overlay into video. Try a recent browser or take a photo."));
+        video.srcObject=stream;
+        await video.play();
+        if(video.videoWidth===0) await new Promise<void>((resolve,reject)=>{
+          const timeout=window.setTimeout(()=>reject(new Error(t("De camera startte niet op tijd.","The camera did not start in time."))),5000);
+          video.addEventListener("loadedmetadata",()=>{window.clearTimeout(timeout);resolve()},{once:true});
+        });
+        const ratio=video.videoWidth/video.videoHeight;
+        canvas.width=Math.min(1920,video.videoWidth);
+        canvas.height=Math.max(1,Math.round(canvas.width/ratio));
+        const ctx=canvas.getContext("2d");
+        if(!ctx)throw new Error(t("Canvas wordt niet ondersteund door deze browser.","Canvas is not supported in this browser."));
+        const render=()=>{
+          if(video.readyState>=2)drawCameraFrame(ctx,video,canvas.width,canvas.height,frameStyleRef.current);
+          renderFrameRef.current=window.requestAnimationFrame(render);
+        };
+        render();
+        const composited=canvas.captureStream(30);
+        stream.getAudioTracks().forEach(track=>composited.addTrack(track));
+        compositionStreamRef.current=composited;
+        recorderStream=composited;
+      }
       const candidates=captureKind==="video"
         ? ["video/mp4","video/webm;codecs=vp8,opus","video/webm"]
         : ["audio/mp4","audio/webm;codecs=opus","audio/webm","audio/ogg;codecs=opus"];
       const mimeType=candidates.find(type=>MediaRecorder.isTypeSupported(type));
-      const recorder=mimeType?new MediaRecorder(stream,{mimeType}):new MediaRecorder(stream);
+      const recorder=mimeType?new MediaRecorder(recorderStream,{mimeType}):new MediaRecorder(recorderStream);
       recorderRef.current=recorder;
       recorder.ondataavailable=event=>{if(event.data.size>0)chunksRef.current.push(event.data);};
       recorder.onerror=()=>{stopCaptureTracks();setMessage(t("De opname is onderbroken. Controleer de cameratoestemming en probeer opnieuw.","Recording was interrupted. Check camera permissions and try again."));};
@@ -281,6 +326,11 @@ export default function MediaVault({ sessionId, language = "nl" }: MediaVaultPro
               <span>{t("Maak een foto met de camera","Take a photo with the camera")}</span>
               <input type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/avif" capture="environment" disabled={busy||isRecording||!!pendingCapture} onChange={event=>{const file=event.currentTarget.files?.[0];void stageSelectedFile(file);event.currentTarget.value="";}}/>
             </label>
+            <div className="media-frame-picker" role="group" aria-label={t("Stijl van de AFTER HOURS-overlay","AFTER HOURS overlay style")}>
+              <span>{t("Kies je AH-frame","Choose your AH frame")}</span>
+              <div>{mediaOverlayFrames.map(frame=><button key={frame.id} type="button" className={frameStyle===frame.id?"selected":""} aria-pressed={frameStyle===frame.id} onClick={()=>setFrameStyle(frame.id)} disabled={isRecording||busy||!!pendingCapture}><strong>{language==="nl"?frame.titleNL:frame.titleEN}</strong><small>{language==="nl"?frame.descriptionNL:frame.descriptionEN}</small></button>)}</div>
+            </div>
+            <p className="media-overlay-note">{t("Het gekozen frame wordt in de camera-preview, nieuwe video-opnamen en foto's gebrand. Bestaande video's worden niet aangepast.","The selected frame is burned into the camera preview, new video recordings and photos. Existing videos are not modified.")}</p>
             <div className="media-capture-controls">
               <label>{t("Opnametype","Recording type")}<select value={captureKind} disabled={isRecording||busy} onChange={e=>setCaptureKind(e.target.value as "video"|"voice")}><option value="video">{t("Video met camera","Video with camera")}</option><option value="voice">{t("Alleen stem","Voice only")}</option></select></label>
               <label className="media-consent-check"><input type="checkbox" checked={captureConsent} disabled={isRecording||busy||!!pendingCapture} onChange={e=>setCaptureConsent(e.target.checked)}/><span>{t("Ik bevestig dat de betrokkenen akkoord zijn met het maken of uploaden van deze media en privéopslag. Delen vereist aparte toestemming.","I confirm that everyone involved agrees to capture or upload this media and store it privately. Sharing requires separate consent.")}</span></label>
@@ -288,7 +338,7 @@ export default function MediaVault({ sessionId, language = "nl" }: MediaVaultPro
               {isRecording&&<button type="button" className="media-stop-recording" onClick={stopCapture}>{t("Stop opname","Stop recording")}</button>}
             </div>
             {isRecording&&<div className="media-recording-status" role="status"><span/> {t("Opname actief. Je kunt op elk moment stoppen.","Recording is active. You can stop at any time.")}</div>}
-            {liveStream&&<video className="media-live-preview" ref={livePreviewRef} autoPlay muted playsInline aria-label={t("Live cameravoorbeeld","Live camera preview")}/>}
+            {liveStream&&captureKind==="video"&&<div className="media-live-frame"><video className="media-live-source" ref={livePreviewRef} autoPlay muted playsInline aria-hidden="true"/><canvas className="media-live-preview media-live-composite" ref={liveCanvasRef} aria-label={t("Live cameravoorbeeld met AFTER HOURS-overlay","Live camera preview with AFTER HOURS overlay")}/><span className="media-live-watermark">AFTER HOURS <i>◐</i></span></div>}
             {pendingCapture&&pendingUrl&&<div className="media-pending-preview">
               <strong>{t("Lokale preview","Local preview")} · {formatSize(pendingCapture.size)}</strong>
               {pendingCapture.type.startsWith("image/")?<img src={pendingUrl} alt={t("Lokale voorbeeldweergave van geselecteerde afbeelding","Local preview of selected image")}/>:pendingCapture.type.startsWith("video/")?<video src={pendingUrl} controls playsInline/>:<audio src={pendingUrl} controls/>}
