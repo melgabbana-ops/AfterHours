@@ -5,7 +5,7 @@ import PromptLibrary from "./PromptLibrary";
 import BadgeShowcase from "./BadgeShowcase";
 import { recordAchievement } from "./achievements";
 import{createRoot}from"react-dom/client";
-import{Shield,Lock,Play,Pause,RotateCcw,ChevronRight,User,Settings,Home,Timer,CheckCircle2,Square,Activity,LogOut,Sparkles,Radio,Bell,BookOpen,EyeOff,ShoppingBag,MessageCircle}from"lucide-react";
+import{Shield,Lock,Play,Pause,RotateCcw,ChevronRight,User,Settings,Home,Timer,CheckCircle2,Square,Activity,LogOut,Sparkles,Radio,Bell,BookOpen,EyeOff,ShoppingBag,MessageCircle,CalendarDays}from"lucide-react";
 import"./styles.css";
 import{Insights}from"./Insights";
 import{RadioRoom}from"./RadioRoom";
@@ -21,6 +21,7 @@ import SocialStudio from "./SocialStudio";
 import MoodCheckIn from "./MoodCheckIn";
 import MoodHistory from "./MoodHistory";
 import LovenseControl from "./LovenseControl";
+import DailyAfterHours from "./DailyAfterHours";
 import { recordSessionMoodRemote, type MoodCode, type MoodPhase } from "./services/moods";
 import type{AfterHoursState,AvatarStyle,Screen,Safety,SessionHistoryEntry}from"./types";
 import{loadState,saveState,loadTimer,saveTimer,clearTimer,defaultState}from"./storage";
@@ -444,6 +445,7 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
    <button className="tile" onClick={()=>setScreen("radio")}><Radio/><span>Radio</span></button>
    <button className="tile" onClick={()=>setScreen("prompts")}><BookOpen/><span>The Deck</span></button>
    <button className="tile" onClick={()=>setScreen("missions")}><Activity/><span>{t("Missies","Missions")}</span></button>
+   <button className="tile" onClick={()=>setScreen("daily")}><CalendarDays/><span>{t("Daily After Hours","Daily After Hours")}</span></button>
    <button className="tile" onClick={()=>setScreen("store")}><ShoppingBag/><span>{t("Collecties & prijzen","Collections & pricing")}</span></button>
    <button className="tile" onClick={()=>setScreen("social")}><MessageCircle/><span>{t("Social studio","Social studio")}</span></button>
    <button className="tile" onClick={()=>setScreen("lovense")}><Activity/><span>{t("Lovense Connect","Lovense Connect")}</span></button>
@@ -461,6 +463,7 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
 
  {screen==="prompts"&&<PromptLibrary playerId={state.profile.id} language={language} onBack={()=>setScreen("home")} onComplete={()=>recordAchievement("prompt_complete")}/>}
  {screen==="missions"&&<Missions language={language} onBack={()=>setScreen("home")} onExplore={(destination)=>setScreen((destination==="aftercare"?"aftercare":destination==="safety"?"safety":destination==="insights"?"insights":destination==="prompts"?"prompts":"home"))}/> }
+ {screen==="daily"&&<DailyAfterHours profileId={state.profile.id} language={language} onBack={()=>setScreen("home")} onOpenMissions={()=>setScreen("missions")} onOpenInsights={()=>setScreen("insights")}/>}
  {screen==="social"&&<SocialStudio language={language} onBack={()=>setScreen("home")}/>}
  {screen==="lovense"&&<LovenseControl language={language} isAuthenticated={Boolean(supabaseConfigured&&syncUserId)} onBack={()=>setScreen("home")}/>}
 
