@@ -355,3 +355,12 @@
 - [ ] Real iPhone Safari/Android Chrome verification is still required for camera canvas recording, audio/video sync, orientation, capture interruption, storage/upload errors, and PWA shortcut behavior.
 
 This update records repository evidence and blockers; it is not a production-readiness declaration.
+
+
+### Follow-up implementation update — 12 October 2026
+
+- [x] Added the server-owned daily ritual history migration and RPC client; local fallback remains available if the backend is not configured.
+- [x] Added a Daily After Hours PWA shortcut.
+- [x] Moved Lovense to Profile → Settings → Connected devices; optional hardware remains non-required.
+- [ ] Apply `20261012130000_daily_ritual_history.sql` to the correct Supabase project only after migration-history review.
+- [ ] Verify cross-device daily history, Lovense device connection and camera overlay on physical iOS/Android devices.
