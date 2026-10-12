@@ -18,6 +18,7 @@ The canonical schema is in `supabase/schema.sql`. The ordered migration history 
 11. `20261012100000_private_video_capture.sql` extends the private media storage policy for approved video/audio capture, with limits enforced by the storage/database policy.
 12. `20261012110000_xp_event_ledger.sql` adds the server-write-only XP event ledger and the idempotent, atomic session-completion XP award. Review its 60-minute active-session requirement against the actual product flow before applying it.
 13. `20261012120000_session_mood_history.sql` adds user-owned session mood history with row-level security.
+14. `20261012130000_daily_ritual_history.sql` adds account-owned, idempotent daily ritual history. The server assigns the UTC date; ritual completion is separate from mission points and rank XP.
 
 For a new Supabase project, review the SQL and apply migrations in timestamp order using the Supabase CLI or migration workflow before enabling remote persistence. For a project where `schema.sql` was already applied manually, inspect the live schema and migration history before running `db push`; baseline the existing database rather than blindly replaying an untracked schema. Existing databases that recorded the earlier date-only filenames need their migration history checked before applying the timestamped replacements.
 
