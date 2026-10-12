@@ -1,4 +1,4 @@
-import React,{useEffect,useMemo,useState} from "react";
+import React,{useEffect,useMemo,useRef,useState} from "react";
 import {ArrowLeft,CalendarDays,Check,RefreshCw,Sparkles} from "lucide-react";
 import {completeMissionRemote} from "./services/missions";
 import {supabaseConfigured} from "./services/supabase";
@@ -43,6 +43,8 @@ function readProgress(profileId:string):Progress {
 }
 export default function DailyAfterHours({profileId,language="nl",onBack,onOpenMissions,onOpenInsights}:{profileId:string;language?:Language;onBack:()=>void;onOpenMissions:()=>void;onOpenInsights:()=>void}){
  const t=(nl:string,en:string)=>language==="nl"?nl:en;
+ const activeProfileRef=useRef(profileId);
+ activeProfileRef.current=profileId;
  const today=todayKey();
  const card=useMemo(()=>{const stamp=Math.floor(new Date(today+"T12:00:00").getTime()/86400000);return rituals[((stamp%rituals.length)+rituals.length)%rituals.length]},[today]);
  const [progress,setProgress]=useState<Progress>(()=>readProgress(profileId));
@@ -53,18 +55,23 @@ export default function DailyAfterHours({profileId,language="nl",onBack,onOpenMi
  const streak=useMemo(()=>calculateDailyStreak(progress.doneDates,today),[progress,today]);
  const complete=async()=>{
   if(done||busy)return;
+  const requestedProfileId=profileId;
   setBusy(true);setMessage("");
   let serverSaved=false;
   try{
    const result=await completeMissionRemote("daily-intention");
+   if(activeProfileRef.current!==requestedProfileId){setBusy(false);return;}
    serverSaved=true;
    setMessage(result.already_completed?t("Deze dagmissie was al op je account geregistreerd.","Today's mission was already registered on your account."):t("Dagmissie op de server bevestigd. De missiepunten zijn niet hetzelfde als XP.","Daily mission confirmed on the server. Mission points are separate from XP."));
   }catch{
+   if(activeProfileRef.current!==requestedProfileId){setBusy(false);return;}
    setMessage(t("Vandaag lokaal afgevinkt; serverbeloning niet bevestigd.","Marked complete locally; server reward was not confirmed."));
   }
-  const next={doneDates:Array.from(new Set([...progress.doneDates,today])).sort().slice(-120)};
+  if(activeProfileRef.current!==requestedProfileId){setBusy(false);return;}
+  const current=readProgress(requestedProfileId);
+  const next={doneDates:Array.from(new Set([...current.doneDates,today])).sort().slice(-120)};
   setProgress(next);
-  try{localStorage.setItem("afterhours.dailyritual."+profileId,JSON.stringify(next))}catch{}
+  try{localStorage.setItem("afterhours.dailyritual."+requestedProfileId,JSON.stringify(next))}catch{}
   if(!serverSaved&&!supabaseConfigured)setMessage(t("Dagritueel bewaard op dit apparaat; geen serverbeloning toegekend.","Daily ritual saved on this device; no server reward awarded."));
   setBusy(false);
  };
