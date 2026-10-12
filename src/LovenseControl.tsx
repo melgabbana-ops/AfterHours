@@ -57,6 +57,7 @@ export default function LovenseControl({language="nl",isAuthenticated,onBack}:{l
  },[]);
  const disconnect=useCallback(()=>{
   connectionAttemptRef.current+=1;
+  if(connectionTimeoutRef.current!==undefined){window.clearTimeout(connectionTimeoutRef.current);connectionTimeoutRef.current=undefined;}
   stopAll();try{sdkRef.current?.destroy()}catch{}
   sdkRef.current=null;setReady(false);setConnected(false);setControlsEnabled(false);setToys([]);setQr("");setBusy(false);
  },[stopAll]);
