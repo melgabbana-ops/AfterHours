@@ -883,3 +883,37 @@ img,svg,video,canvas{max-width:100%}
 .media-overlay-note{padding:9px 10px;border-left:2px solid #76562b;background:rgba(109,22,143,.08);color:#9f93a4;font-size:9px;line-height:1.65}
 @media(max-width:520px){.media-live-preview,.media-live-frame .media-live-composite{max-height:300px}.media-frame-picker>div{grid-template-columns:1fr}.media-frame-picker button{min-height:0;padding:12px}.media-frame-picker button small{font-size:10px}}
 @media(prefers-reduced-motion:reduce){.media-frame-picker button{transition:none}}
+
+/* Daily AFTER HOURS: a gentle, repeatable daily habit */
+.daily-screen{width:min(760px,100%);margin:0 auto;padding:28px 18px 112px;color:#efe1d0}
+.daily-heading{margin-bottom:18px}
+.daily-heading .back{display:inline-flex;align-items:center;gap:7px;min-height:44px;color:#c7ae75}
+.daily-heading h1{margin:18px 0 10px;font:500 clamp(35px,7vw,55px)/1.08 "Playfair Display",Georgia,serif;color:#eed9aa}
+.daily-heading>p{font-size:12px;color:#a99caf;line-height:1.8}
+.daily-streak{display:grid;grid-template-columns:1fr auto;gap:8px 14px;align-items:center;padding:15px;border:1px solid rgba(200,148,69,.28);border-radius:10px;background:linear-gradient(130deg,rgba(33,19,38,.7),rgba(8,7,10,.92));margin:16px 0}
+.daily-streak>div{display:flex;align-items:center;gap:8px;color:#d8bc7e;font-size:10px;letter-spacing:.05em}
+.daily-streak>strong{font:500 27px/1 Georgia,serif;color:#ecd19a;text-align:right}
+.daily-streak>strong small{font:10px Arial,sans-serif;color:#a597ad}
+.daily-streak>p{grid-column:1/-1;margin:0;font-size:9px;line-height:1.6;color:#92869a}
+.daily-ritual-card{position:relative;overflow:hidden;padding:22px;border:1px solid rgba(200,148,69,.48);border-radius:13px;background:radial-gradient(ellipse at 100% 0%,rgba(109,22,143,.22),transparent 48%),linear-gradient(145deg,#1a1020,#08070b);box-shadow:0 18px 48px rgba(0,0,0,.24)}
+.daily-card-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.daily-card-top .eyebrow{font-size:8px;letter-spacing:.17em;color:#d2ad67}
+.daily-card-top>span:last-child{font-size:9px;color:#a699ad}
+.daily-glyph{display:block;margin-top:25px;font-size:29px;color:#d7b36c}
+.daily-ritual-card h2{margin:10px 0 12px;font:500 clamp(25px,5vw,36px)/1.18 "Playfair Display",Georgia,serif;color:#f0dfbf}
+.daily-prompt{margin:0 0 19px;color:#d0c1d6;font:400 14px/1.8 "Playfair Display",Georgia,serif}
+.daily-practice{padding:14px 15px;border-left:2px solid #c89445;background:rgba(7,5,9,.6)}
+.daily-practice>span{font-size:8px;letter-spacing:.16em;color:#d0ad70}
+.daily-practice p{margin:8px 0 0;color:#b8acbd;font-size:11px;line-height:1.85}
+.daily-complete{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:48px;padding:12px 14px;margin-top:18px;border:1px solid #c89445;border-radius:7px;background:linear-gradient(110deg,#6d4e27,#382114);color:#f1ddb0;font-size:10px;letter-spacing:.06em}
+.daily-complete:disabled{border-color:#77633e;background:#18120d;color:#d8bd80}
+.daily-message{margin:12px 0 0;padding:11px 12px;border-left:2px solid #c89445;background:rgba(109,22,143,.1);font-size:10px;line-height:1.7;color:#ddcbe8}
+.daily-next-steps{margin-top:24px}
+.daily-next-steps h3{font:500 23px/1.2 "Playfair Display",Georgia,serif;color:#ebd8b7;margin:0 0 12px}
+.daily-next-steps>button{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;padding:14px 3px;border:0;border-top:1px solid #302336;background:transparent;color:#e7d7c0;text-align:left}
+.daily-next-steps>button span:first-child{display:grid;gap:5px}
+.daily-next-steps>button strong{font-size:11px;font-weight:500;color:#d7ba7c}
+.daily-next-steps>button small{font-size:10px;color:#9a8fa2}
+.daily-next-steps>button span:last-child{color:#c89445}
+.daily-footnote{margin-top:20px;font-size:9px;line-height:1.8;color:#85798d}
+@media(max-width:500px){.daily-screen{padding:22px 14px 105px}.daily-ritual-card{padding:16px}.daily-streak{padding:12px}}
