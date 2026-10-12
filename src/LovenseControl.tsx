@@ -47,6 +47,7 @@ export default function LovenseControl({language="nl",isAuthenticated,onBack}:{l
  const [qr,setQr]=useState("");
  const [message,setMessage]=useState("");
  const sdkRef=useRef<LovenseSdk|null>(null);
+  const connectionTimeoutRef=useRef<number|undefined>(undefined);
  const connectionAttemptRef=useRef(0);
  const stopAll=useCallback(()=>{try{sdkRef.current?.stopToyAction()}catch{}},[]);
  const t=(nl:string,en:string)=>language==="nl"?nl:en;
@@ -59,7 +60,7 @@ export default function LovenseControl({language="nl",isAuthenticated,onBack}:{l
   stopAll();try{sdkRef.current?.destroy()}catch{}
   sdkRef.current=null;setReady(false);setConnected(false);setControlsEnabled(false);setToys([]);setQr("");setBusy(false);
  },[stopAll]);
- useEffect(()=>()=>{stopAll();try{sdkRef.current?.destroy()}catch{}sdkRef.current=null},[stopAll]);
+ useEffect(()=>()=>{if(connectionTimeoutRef.current!==undefined)window.clearTimeout(connectionTimeoutRef.current);stopAll();try{sdkRef.current?.destroy()}catch{}sdkRef.current=null},[stopAll]);
  const connect=async()=>{
   if(!isAuthenticated){setMessage(t("Log eerst in om Lovense veilig aan je account te koppelen.","Sign in first to securely link Lovense to your account."));return}
   if(!consent){setMessage(t("Bevestig eerst dat je vrijwillig wilt verbinden.","First confirm that you freely choose to connect."));return}
