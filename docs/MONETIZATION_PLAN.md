@@ -25,7 +25,7 @@ Status: OFFER AND PRICING UI IMPLEMENTED; CHECKOUT NOT LIVE.
    - Three selected premium experiences.
    - Three separate games at the bundle price.
    - Three singles cost €29.97; the bundle saves €4.98 (about 16.6%).
-4. No required subscription and no automatic renewal.
+4. Optional AFTER HOURS Club membership is proposed at €8.99/month or €79.99/year. These are draft prices for validation, not active offers. Recurring billing stays disabled until processor underwriting, legal review, server-side entitlements, renewal disclosure and self-serve cancellation work end to end.
 
 ## Initial validation goal
 Aim for the first 25 paying customers before adding recurring plans or complex upsells. This is a validation target, not a forecast.
@@ -39,6 +39,21 @@ These are scenarios only, not guaranteed earnings.
 
 ## Implemented in the app
 - A bilingual Collections & Pricing screen with Free Access, Single Experience and The 3-Game Collection.
+- An optional Club membership proposal: €8.99/month and €79.99/year (draft prices, no active checkout). Interest is stored locally only.
+- Daily After Hours provides one rotating daily ritual and a local completion streak. The daily ritual is free; server-backed mission progress is separate from XP.
+
+## Daily engagement and recurring value plan
+- Free daily ritual + daily/weekly missions; a missed day must never remove privileges or impose a penalty.
+- Club value should be delivered continuously: a 30-day daily ritual archive, weekly themed drops, seasonal story chapters, expanded Tarot/Oracle reflection packs, and additional cosmetic frames. Only market each entitlement after its implementation is live.
+- One-time purchase remains available for users who do not want a subscription: €9.99 single experience or €24.99 three-game bundle.
+- Never paywall consent, limits, PAUSE/PASS/STOP, stopping control, basic aftercare, account deletion or support. No ads in this privacy-sensitive product.
+- Example gross monthly scenarios at €8.99/month: 100 members = €899; 250 = €2,247.50; 500 = €4,495. These are arithmetic scenarios before processor fees, refunds, VAT, chargebacks, marketing and content costs, not forecasts.
+
+## Payment-provider shortlist (not approved / not integrated)
+- Stripe's official policy says it cannot work with businesses that sell or offer adult content/services. Do not build production billing on Stripe for this product without written confirmation that the exact business model is permitted: https://support.stripe.com/questions/prohibited-and-restricted-business-list-faqs
+- Verotel describes adult/high-risk billing and recurring subscription products: https://www.verotel.com/en/index.html and https://www.verotel.com/en/paymentprocessing.html
+- Segpay describes adult, membership and subscription payment services: https://segpay.com/ and https://segpay.com/verticals/subscriptions/
+- Treat Verotel and Segpay as candidates to apply to, not guaranteed approvals. Submit the exact app flows, content taxonomy, Lovense device-controls scope, refund process, countries and business entity for underwriting, then pick the provider only after written approval.
 - Transparent prices and bundle savings.
 - Interest buttons save only a local preference on that device and explicitly state that no payment has started.
 - The screen explains that payment checkout is not live and that safety is not behind a paywall.
