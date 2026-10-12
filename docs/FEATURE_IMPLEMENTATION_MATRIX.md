@@ -14,7 +14,7 @@ Status meanings:
 ## Product scope
 
 | Lovense connection | `src/LovenseControl.tsx`, `supabase/functions/lovense-auth-token/index.ts`, `docs/LOVENSE_INTEGRATION.md` | UI + server token scaffold implemented / not live-verified | Uses the official Lovense Basic JS SDK pattern and server-side developer-token exchange. User must be authenticated, opt in and manually enable controls; first test pulse is capped at 5 seconds and STOP NOW is available. Requires approved Lovense developer platform, correct Supabase secrets/origin allowlist, deployed Edge Function, CSP validation, and real device tests on iOS/Android. No automatic mission/game/camera-triggered commands yet. |
-| Daily engagement / repeat use | `src/DailyAfterHours.tsx`, `src/DailyAfterHours.test.ts`, `src/Missions.tsx`, `src/services/missions.ts` | Daily ritual UI implemented / cross-device persistence partial | Fourteen rotating bilingual micro-rituals, local streak, account-switch state reset, links to missions and insights. Daily completion requests the server-owned `daily-intention` mission; the visible ritual streak remains local-only and must not be represented as cross-device progress. Timezone/day-boundary, archive/calendar, weekly drops, verified content cadence and privacy-respecting analytics remain open. |
+| Daily engagement / repeat use | `src/DailyAfterHours.tsx`, `src/DailyAfterHours.test.ts`, `src/services/dailyRituals.ts`, `src/services/missions.ts`, `supabase/migrations/20261012130000_daily_ritual_history.sql`, `public/manifest.webmanifest` | Daily ritual + account-history code implemented / migration and device QA pending | Fourteen rotating bilingual micro-rituals, UTC day keys, local fallback, server-owned 120-day history RPC, idempotent daily completion, daily mission points kept separate from rank XP, links to missions/insights and a PWA shortcut. Cross-device sync only works after the new migration is applied. Archive/calendar, weekly content drops, analytics, timezone preference and live Supabase migration remain open. |
 | Club membership UI | `src/Monetization.tsx`, `docs/DAILY_RETENTION_AND_MEMBERSHIP.md` | Proposed pricing UI only / no live billing | €8.99/month and €79.99/year are draft proposals; buttons save local interest only. No charge, subscription or paid entitlement is created. Build actual benefits and server entitlements, obtain written adult-product underwriting, then implement checkout, verified/idempotent webhooks, renewal/failure, receipts, VAT disclosures, self-serve cancellation, refunds/disputes and admin reconciliation. Safety, consent, hard limits, PAUSE/PASS/STOP, core aftercare, support and deletion must remain free. |
 
 | Approved feature | Current source evidence | Status | Remaining work / acceptance test |
@@ -98,3 +98,12 @@ This matrix is an engineering audit, not a claim that the whole approved product
 - [ ] Real iPhone Safari/Android Chrome verification is still required for camera canvas recording, audio/video sync, orientation, capture interruption, storage/upload errors, and PWA shortcut behavior.
 
 This update records repository evidence and blockers; it is not a production-readiness declaration.
+
+
+### Follow-up implementation update — 12 October 2026, 21:xx CET
+
+- [x] Added owner-scoped daily ritual history and idempotent completion RPC in `20261012130000_daily_ritual_history.sql`.
+- [x] Daily After Hours now merges server history into its local fallback when the authenticated backend and migration are available. Day keys are UTC to match the server's period boundary.
+- [x] Added a PWA Daily After Hours shortcut and moved Lovense from the home tile to Profile → Settings → Connected devices.
+- [ ] Apply the daily history migration only after checking the configured Supabase project's migration history, then verify cross-device sync with two sessions.
+- [ ] Latest CI for the daily history integration is queued/in progress; do not call this verified until the exact head SHA run is green.
