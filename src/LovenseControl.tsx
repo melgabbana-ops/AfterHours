@@ -63,6 +63,12 @@ export default function LovenseControl({language="nl",isAuthenticated,onBack}:{l
   if(!consent){setMessage(t("Bevestig eerst dat je vrijwillig wilt verbinden.","First confirm that you freely choose to connect."));return}
   if(!supabaseConfigured||!supabase){setMessage(t("Supabase is niet ingesteld. De verbinding is niet gestart.","Supabase is not configured. No connection was started."));return}
   setBusy(true);setMessage("");setQr("");
+  if(connectionTimeoutRef.current!==undefined)window.clearTimeout(connectionTimeoutRef.current);
+  connectionTimeoutRef.current=window.setTimeout(()=>{
+   connectionTimeoutRef.current=undefined;
+   disconnect();
+   setMessage(t("De verbinding duurde te lang. Probeer opnieuw of controleer Lovense Connect.","The connection timed out. Try again or check Lovense Connect."));
+  },20000);
   try{
    await loadLovenseSdk();
    const {data,error}=await supabase.functions.invoke("lovense-auth-token",{body:{displayName:"AFTER HOURS member"}});
@@ -71,14 +77,27 @@ export default function LovenseControl({language="nl",isAuthenticated,onBack}:{l
    if(!auth||typeof auth.authToken!=="string"||typeof auth.uid!=="string"||typeof auth.platform!=="string")throw new Error(t("De server is nog niet ingesteld voor Lovense.","The server is not configured for Lovense yet."));
    const SDK=window.LovenseBasicSdk;if(!SDK)throw new Error("Lovense SDK unavailable.");
    const sdk=SDK({uid:auth.uid,platform:auth.platform,authToken:auth.authToken,appType:"connect",debug:false});sdkRef.current=sdk;
-   sdk.on("sdkError",(info)=>{setMessage(typeof info?.message==="string"?info.message:t("Lovense gaf een verbindingsfout.","Lovense reported a connection error."));setBusy(false)});
-   sdk.on("appStatusChange",(status)=>{const on=status===true||status?.status===true;setConnected(on);if(on){setMessage(t("Lovense is verbonden. Controleer welk apparaat geselecteerd is.","Lovense is connected. Check which device is selected."));refreshToys();setBusy(false)}});
+   sdk.on("sdkError",(info)=>{
+    if(connectionTimeoutRef.current!==undefined){window.clearTimeout(connectionTimeoutRef.current);connectionTimeoutRef.current=undefined;}
+    const errorMessage=typeof info?.message==="string"?info.message:t("Lovense gaf een verbindingsfout.","Lovense reported a connection error.");
+    disconnect();setMessage(errorMessage);
+   });
+   sdk.on("appStatusChange",(status)=>{
+    const on=status===true||status?.status===true;
+    setConnected(on);
+    if(on){setMessage(t("Lovense is verbonden. Controleer welk apparaat geselecteerd is.","Lovense is connected. Check which device is selected."));refreshToys();setBusy(false)}
+    else {stopAll();setControlsEnabled(false);setToys([]);setMessage(t("Lovense is niet verbonden. Handmatige bediening is uitgeschakeld.","Lovense is disconnected. Manual controls have been disabled."));}
+   });
    sdk.on("ready",async()=>{
+    if(connectionTimeoutRef.current!==undefined){window.clearTimeout(connectionTimeoutRef.current);connectionTimeoutRef.current=undefined;}
     setReady(true);setBusy(false);
     try{const qrData=await sdk.getQrcode();if(qrData?.qrcodeUrl)setQr(qrData.qrcodeUrl)}catch{setMessage(t("De SDK is klaar. Gebruik Open Lovense Connect als de QR-code niet verschijnt.","The SDK is ready. Use Open Lovense Connect if the QR code does not appear."))}
     setConnected(Boolean(sdk.getAppStatus()));refreshToys();
    });
-  }catch(error){disconnect();setMessage(error instanceof Error?error.message:t("Lovense kon niet worden gestart.","Lovense could not be started."))}
+  }catch(error){
+   if(connectionTimeoutRef.current!==undefined){window.clearTimeout(connectionTimeoutRef.current);connectionTimeoutRef.current=undefined;}
+   disconnect();setMessage(error instanceof Error?error.message:t("Lovense kon niet worden gestart.","Lovense could not be started."));
+  }
  };
  const testPulse=()=>{
   if(!sdkRef.current||!ready||!connected||!controlsEnabled)return;
