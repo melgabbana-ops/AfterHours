@@ -24,6 +24,20 @@ const rituals:DailyCard[]=[
 ];
 type Progress={doneDates:string[]};
 function todayKey(date=new Date()){return date.getFullYear()+"-"+String(date.getMonth()+1).padStart(2,"0")+"-"+String(date.getDate()).padStart(2,"0")}
+export function calculateDailyStreak(doneDates: readonly string[], today: string): number {
+ const done = new Set(doneDates);
+ const anchor = new Date(today + "T12:00:00");
+ let count = 0;
+ const startOffset = done.has(today) ? 0 : 1;
+ for (let offset = startOffset; offset < 120; offset++) {
+  const date = new Date(anchor);
+  date.setDate(date.getDate() - offset);
+  if (done.has(todayKey(date))) count++;
+  else break;
+ }
+ return count;
+}
+
 function readProgress(profileId:string):Progress {
  try{const value=JSON.parse(localStorage.getItem("afterhours.dailyritual."+profileId)||"{}");return {doneDates:Array.isArray(value.doneDates)?value.doneDates.filter((x:unknown)=>typeof x==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(x)).slice(-120):[]}}catch{return {doneDates:[]}}
 }
@@ -35,7 +49,7 @@ export default function DailyAfterHours({profileId,language="nl",onBack,onOpenMi
  const [message,setMessage]=useState("");
  const [busy,setBusy]=useState(false);
  const done=progress.doneDates.includes(today);
- const streak=useMemo(()=>{const set=new Set(progress.doneDates);let count=0;const date=new Date(today+"T12:00:00");for(let offset=0;offset<120;offset++){const check=new Date(date);check.setDate(check.getDate()-offset);if(set.has(todayKey(check)))count++;else break}return count},[progress,today]);
+ const streak=useMemo(()=>calculateDailyStreak(progress.doneDates,today),[progress,today]);
  const complete=async()=>{
   if(done||busy)return;
   setBusy(true);setMessage("");
