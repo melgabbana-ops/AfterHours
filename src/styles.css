@@ -819,3 +819,47 @@ img,svg,video,canvas{max-width:100%}
 .mood-history li strong{font-size:11px;color:#e2c37f;font-weight:500}
 .mood-history li time{text-align:right;font-size:9px;color:#8d8192}
 @media(max-width:480px){.mood-history{padding:12px}.mood-history li{grid-template-columns:1fr 1.2fr}.mood-history li time{grid-column:1/-1;text-align:left}}
+
+/* AFTER HOURS × Lovense Connect */
+.lovense-screen{width:min(790px,100%);margin:0 auto;padding:28px 18px 110px;color:#eee0cf}
+.lovense-heading{margin-bottom:18px}
+.lovense-heading .back{display:inline-flex;align-items:center;gap:6px;min-height:44px;color:#c7ae75}
+.lovense-heading h1{font:500 clamp(37px,7vw,56px)/1.05 "Playfair Display",Georgia,serif;color:#ecd5a3;margin:20px 0 10px}
+.lovense-heading h1 em{font-style:italic;color:#c89445}
+.lovense-heading>p{font-size:12px;color:#a99bad;line-height:1.8}
+.lovense-private-note{display:flex;align-items:flex-start;gap:12px;padding:14px;border:1px solid #654b29;border-radius:9px;background:linear-gradient(135deg,rgba(48,31,15,.38),rgba(18,10,20,.86));margin:16px 0 18px}
+.lovense-private-note>svg{flex:none;color:#d4ac65}
+.lovense-private-note div{display:grid;gap:5px}
+.lovense-private-note strong{font-size:11px;color:#e8ce92;letter-spacing:.04em}
+.lovense-private-note span{font-size:10px;line-height:1.7;color:#c3b4c9}
+.lovense-connect-card,.lovense-control-card{padding:17px;margin:14px 0;border:1px solid #3b2b43;border-radius:11px;background:radial-gradient(ellipse at 100% 0%,rgba(109,22,143,.13),transparent 52%),linear-gradient(145deg,rgba(19,12,22,.9),rgba(8,7,10,.96))}
+.lovense-connect-card>.eyebrow,.lovense-control-card>.eyebrow{font-size:8px;letter-spacing:.15em;color:#c89445}
+.lovense-connect-card h2,.lovense-control-card h2{display:flex;align-items:center;gap:8px;font:500 23px/1.25 "Playfair Display",Georgia,serif;color:#efddb8;margin:10px 0}
+.lovense-connect-card h2 svg,.lovense-control-card h2 svg{color:#d8b76c}
+.lovense-connect-card>p,.lovense-control-card>p{font-size:11px;line-height:1.8;color:#aa9eb2}
+.lovense-consent{display:flex;align-items:flex-start;gap:10px;margin:14px 0;padding:12px;border:1px solid #4b3926;background:rgba(8,7,10,.62);color:#c8bbce;font-size:10px;line-height:1.75}
+.lovense-consent input{flex:none;width:18px;height:18px;margin:2px 0 0;accent-color:#c89445}
+.lovense-primary,.lovense-action-row button,.lovense-secondary,.lovense-connection-state button,.lovense-disconnect{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:46px;padding:11px 14px;border:1px solid #92703a;border-radius:6px;background:#17100a;color:#e8ce92;font-size:10px;letter-spacing:.04em}
+.lovense-primary{width:100%;background:linear-gradient(100deg,#6b4c25,#392318);border-color:#c89445}
+.lovense-primary:disabled,.lovense-action-row button:disabled{opacity:.38}
+.lovense-connection-state{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:12px;border:1px solid #3e3146;background:#0a080d;border-radius:7px}
+.lovense-connection-state strong{font-size:10px;color:#dfccad;margin-right:auto}
+.connection-dot{width:8px;height:8px;border-radius:50%;background:#897b89}
+.connection-dot.online{background:#7fbf96;box-shadow:0 0 10px #447e58}
+.lovense-qr{display:grid;justify-items:center;gap:8px;margin-top:15px;padding:15px;background:#f8f4ea;border-radius:8px}
+.lovense-qr img{max-width:min(230px,100%);aspect-ratio:1;object-fit:contain}
+.lovense-qr p{text-align:center;color:#392d3b!important;font-size:10px!important}
+.lovense-slider,.lovense-toy-select{display:grid;grid-template-columns:1fr auto;align-items:center;gap:9px;margin:14px 0;color:#c9b8ce;font-size:10px}
+.lovense-slider strong{color:#e5c887}
+.lovense-slider input{grid-column:1/-1;width:100%;accent-color:#c89445}
+.lovense-toy-select{grid-template-columns:1fr;gap:7px}
+.lovense-toy-select select{width:100%;min-height:44px;padding:10px;border:1px solid #3d2d45;border-radius:6px;background:#0b080f;color:#eee0cf}
+.lovense-action-row{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:15px 0}
+.lovense-action-row button{width:100%}
+.lovense-action-row .lovense-stop{border-color:#ac514a;background:#260d11;color:#ffd8d2}
+.lovense-secondary{min-height:40px;background:transparent;border-color:#3d2d45;color:#c5b1ce}
+.lovense-status-message,.lovense-alert{margin:12px 0;padding:12px;border-left:2px solid #c89445;background:rgba(109,22,143,.12);font-size:10px;line-height:1.7;color:#e0d0e9}
+.lovense-disconnect{width:100%;margin-top:10px;border-color:#74403d;background:#1a0b0d;color:#e5b4aa}
+.lovense-footer{margin-top:18px;font-size:9px;line-height:1.8;color:#897e90}
+@media(max-width:500px){.lovense-screen{padding:22px 14px 105px}.lovense-connect-card,.lovense-control-card{padding:13px}.lovense-action-row{grid-template-columns:1fr}.lovense-connection-state{align-items:flex-start;flex-direction:column}.lovense-connection-state strong{margin-right:0}}
+@media(prefers-reduced-motion:reduce){.lovense-primary,.lovense-action-row button{transition:none}}
