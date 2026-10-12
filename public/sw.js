@@ -1,5 +1,9 @@
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") self.skipWaiting();
+});
+
 const CACHE_NAME = "after-hours-v3";
-const APP_SHELL = ["/", "/manifest.webmanifest", "/after-hours-logo.svg"];
+const APP_SHELL = ["/", "/manifest.webmanifest", "/after-hours-logo.svg", "/after-hours-icon-192.png", "/after-hours-icon-512.png"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -7,7 +11,6 @@ self.addEventListener("install", (event) => {
       .then((cache) => Promise.all(APP_SHELL.map(async (asset) => {
         try { await cache.add(asset); } catch { /* Keep install resilient if an optional asset is unavailable. */ }
       })))
-      .then(() => self.skipWaiting())
   );
 });
 
@@ -62,8 +65,8 @@ self.addEventListener("push", (event) => {
 
   event.waitUntil(self.registration.showNotification(title, {
     body,
-    icon: "/after-hours-logo.svg",
-    badge: "/after-hours-logo.svg",
+    icon: "/after-hours-icon-192.png",
+    badge: "/after-hours-icon-192.png",
     tag: typeof payload.tag === "string" ? payload.tag : "after-hours-notification",
     data: { url: target },
     renotify: false

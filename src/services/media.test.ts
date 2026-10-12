@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { safeMediaSessionFolder, validatePrivateMediaFile, validatePrivateMediaPath } from "./media";
+import { normalizePrivateMediaMimeType, safeMediaSessionFolder, validatePrivateMediaFile, validatePrivateMediaPath } from "./media";
 
 describe("private media session folder safety", () => {
   it("uses a general folder for dot path segments", () => {
@@ -18,27 +18,37 @@ describe("private media upload validation", () => {
     expect(() => validatePrivateMediaFile({ type: "image/jpeg", size: 1024 })).not.toThrow();
   });
 
+  it("accepts a non-empty video file under the 20 MB limit", () => {
+    expect(() => validatePrivateMediaFile({ type: "video/webm", size: 1024 })).not.toThrow();
+  });
+
+  it("accepts MediaRecorder MIME values with codec parameters but normalizes storage type", () => {
+    expect(normalizePrivateMediaMimeType("video/webm;codecs=vp8,opus")).toBe("video/webm");
+    expect(() => validatePrivateMediaFile({ type: "video/webm;codecs=vp8,opus", size: 1024 })).not.toThrow();
+    expect(normalizePrivateMediaMimeType("audio/webm;codecs=opus")).toBe("audio/webm");
+  });
+
   it("accepts a non-empty audio file under the 20 MB limit", () => {
     expect(() => validatePrivateMediaFile({ type: "audio/mpeg", size: 1024 })).not.toThrow();
   });
 
   it("rejects unsupported file types", () => {
     expect(() => validatePrivateMediaFile({ type: "application/pdf", size: 1024 }))
-      .toThrow("Kies een afbeelding of audiobestand.");
+      .toThrow("Kies een afbeelding, audio- of videobestand.");
   });
 
   it.each(["image/svg+xml", "image/x-custom", "audio/x-custom", "application/octet-stream"])(
     "rejects non-allowlisted MIME type %s",
     (type) => {
       expect(() => validatePrivateMediaFile({ type, size: 1024 }))
-        .toThrow("Kies een afbeelding of audiobestand.");
+        .toThrow("Kies een afbeelding, audio- of videobestand.");
     },
   );
 
   it("accepts MIME type casing without broadening the allowlist", () => {
     expect(() => validatePrivateMediaFile({ type: "IMAGE/PNG", size: 1024 })).not.toThrow();
     expect(() => validatePrivateMediaFile({ type: "IMAGE/SVG+XML", size: 1024 }))
-      .toThrow("Kies een afbeelding of audiobestand.");
+      .toThrow("Kies een afbeelding, audio- of videobestand.");
   });
 
   it("rejects empty files", () => {

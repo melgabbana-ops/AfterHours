@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">AFTER HOURS app icon</title>
+  <desc id="desc">A gold crescent and monogram in a midnight plum medallion.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1b0b22"/><stop offset=".58" stop-color="#0b0710"/><stop offset="1" stop-color="#030205"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f6d77c"/><stop offset=".45" stop-color="#c89445"/><stop offset="1" stop-color="#88582b"/>
+    </linearGradient>
+    <radialGradient id="glow" cx=".5" cy=".35" r=".7">
+      <stop offset="0" stop-color="#632579" stop-opacity=".48"/><stop offset="1" stop-color="#150b1c" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <rect width="512" height="512" rx="112" fill="url(#glow)"/>
+  <rect x="31" y="31" width="450" height="450" rx="92" fill="none" stroke="url(#gold)" stroke-opacity=".8" stroke-width="2"/>
+  <rect x="44" y="44" width="424" height="424" rx="82" fill="none" stroke="#c89445" stroke-opacity=".23" stroke-width="1"/>
+  <circle cx="256" cy="236" r="157" fill="none" stroke="url(#gold)" stroke-opacity=".7" stroke-width="2"/>
+  <circle cx="256" cy="236" r="146" fill="none" stroke="#c89445" stroke-opacity=".28" stroke-width="1"/>
+  <g fill="url(#gold)">
+    <path d="M256 64l8 18 19 2-14 13 4 19-17-10-17 10 4-19-14-13 19-2z"/>
+    <circle cx="108" cy="236" r="4"/><circle cx="404" cy="236" r="4"/>
+    <circle cx="150" cy="120" r="3"/><circle cx="362" cy="120" r="3"/>
+    <circle cx="150" cy="352" r="3"/><circle cx="362" cy="352" r="3"/>
+    <path d="M240 400h32l-16 17z"/><path d="M240 84h32l-16-17z"/>
+  </g>
+  <path d="M275 109c-49 22-73 77-56 129 18 55 76 85 131 67-19 39-62 66-110 63-69-5-121-65-116-134 4-62 54-114 117-125 12-2 23-2 34 0z" fill="url(#gold)"/>
+  <text x="265" y="285" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="136" font-weight="normal" letter-spacing="-12" fill="#f4e3bd" stroke="#130b17" stroke-width="1.5" paint-order="stroke">AH</text>
+  <path d="M144 326c30 18 66 27 112 27s82-9 112-27" fill="none" stroke="url(#gold)" stroke-width="2" stroke-linecap="round"/>
+  <path d="M220 374h72" fill="none" stroke="#c89445" stroke-width="1.5" stroke-linecap="round"/>
+</svg>
