@@ -39,6 +39,25 @@ export async function loadMissionProgress(): Promise<RemoteMissionProgress[] | n
   });
 }
 
+export async function loadDailyRitualDates(): Promise<string[] | null> {
+  if (!supabaseConfigured || !supabase) return null;
+  const { data: auth, error: authError } = await supabase.auth.getUser();
+  if (authError) throw authError;
+  if (!auth.user) return [];
+  // RLS limits these rows to the signed-in owner. The UTC period key matches
+  // the server's complete_mission() clock, so streaks are consistent across devices.
+  const { data, error } = await supabase
+    .from("mission_progress")
+    .select("period_key")
+    .eq("mission_id", "daily-intention")
+    .order("completed_at", { ascending: false })
+    .limit(120);
+  if (error) throw error;
+  return (data ?? [])
+    .map((row) => row.period_key)
+    .filter((value): value is string => typeof value === "string" && /^\\d{4}-\\d{2}-\\d{2}$/.test(value));
+}
+
 export async function completeMissionRemote(missionId: string): Promise<MissionCompletion> {
   if (!supabaseConfigured || !supabase) throw new Error("Serveropslag voor missies is niet geconfigureerd.");
   const { data: auth, error: authError } = await supabase.auth.getUser();
