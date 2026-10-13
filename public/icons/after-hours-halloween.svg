@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+<title id="title">AFTER HOURS Halloween icon</title><desc id="desc">Seasonal AFTER HOURS monogram with gold crescent in a velvet medallion.</desc>
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#120716"/><stop offset=".62" stop-color="#0b0710"/><stop offset="1" stop-color="#030205"/></linearGradient><linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e7ba6c"/><stop offset=".48" stop-color="#c89445"/><stop offset="1" stop-color="#88582b"/></linearGradient><radialGradient id="glow"><stop offset="0" stop-color="#c45b23" stop-opacity=".42"/><stop offset="1" stop-color="#120716" stop-opacity="0"/></radialGradient></defs>
+<rect width="512" height="512" rx="112" fill="url(#bg)"/><rect width="512" height="512" rx="112" fill="url(#glow)"/>
+<rect x="31" y="31" width="450" height="450" rx="92" fill="none" stroke="url(#gold)" stroke-opacity=".8" stroke-width="2"/><rect x="44" y="44" width="424" height="424" rx="82" fill="none" stroke="#e7ba6c" stroke-opacity=".23"/>
+<circle cx="256" cy="236" r="157" fill="none" stroke="url(#gold)" stroke-opacity=".7" stroke-width="2"/><circle cx="256" cy="236" r="146" fill="none" stroke="#e7ba6c" stroke-opacity=".28"/>
+<path d="M112 120c-13-15-31-9-31 10 0 15 15 26 31 34 16-8 31-19 31-34 0-19-18-25-31-10z" fill="#ef8a3c"/><path d="M400 120c-13-15-31-9-31 10 0 15 15 26 31 34 16-8 31-19 31-34 0-19-18-25-31-10z" fill="#ef8a3c"/><path d="M100 345l12-20 12 20zM388 345l12-20 12 20z" fill="#ef8a3c"/>
+<path d="M256 64l8 18 19 2-14 13 4 19-17-10-17 10 4-19-14-13 19-2z" fill="url(#gold)"/>
+<path d="M275 109c-49 22-73 77-56 129 18 55 76 85 131 67-19 39-62 66-110 63-69-5-121-65-116-134 4-62 54-114 117-125 12-2 23-2 34 0z" fill="url(#gold)"/>
+<text x="265" y="285" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="136" letter-spacing="-12" fill="#f4e3bd" stroke="#130b17" stroke-width="1.5" paint-order="stroke">AH</text>
+<path d="M144 326c30 18 66 27 112 27s82-9 112-27" fill="none" stroke="url(#gold)" stroke-width="2" stroke-linecap="round"/><path d="M220 374h72" stroke="#ef8a3c" stroke-width="2" stroke-linecap="round"/>
+</svg>
