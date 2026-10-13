@@ -1,32 +1,33 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
-<title id="title">AFTER HOURS</title><desc id="desc">Gold circular emblem, crescent moon and AH monogram on black and deep purple velvet.</desc>
+<title id="title">AFTER HOURS</title><desc id="desc">AFTER HOURS monogram in metallic gold, crescent moon and circular gold frame on deep purple velvet.</desc>
 <defs>
- <radialGradient id="night" cx="50%" cy="42%" r="72%"><stop stop-color="#26072c"/><stop offset=".52" stop-color="#100612"/><stop offset="1" stop-color="#020202"/></radialGradient>
- <linearGradient id="gold" x1="0" y1="0" x2="1" y2=".9"><stop stop-color="#fff5bd"/><stop offset=".14" stop-color="#e9a83d"/><stop offset=".28" stop-color="#fff1a2"/><stop offset=".48" stop-color="#a95b16"/><stop offset=".65" stop-color="#ffda70"/><stop offset=".83" stop-color="#fff2b0"/><stop offset="1" stop-color="#a95e1a"/></linearGradient>
- <linearGradient id="goldEdge" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff8ce"/><stop offset=".45" stop-color="#b86a1c"/><stop offset=".7" stop-color="#ffe89a"/><stop offset="1" stop-color="#7b3a0b"/></linearGradient>
- <filter id="shine" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="7" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
- <filter id="shadow"><feGaussianBlur stdDeviation="10"/></filter>
- <linearGradient id="velvet" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#7e1a75"/><stop offset=".3" stop-color="#1c061e"/><stop offset=".56" stop-color="#56104f"/><stop offset=".8" stop-color="#120516"/><stop offset="1" stop-color="#6b155d"/></linearGradient>
+ <radialGradient id="bg" cx="48%" cy="42%" r="70%"><stop stop-color="#250824"/><stop offset=".55" stop-color="#100610"/><stop offset="1" stop-color="#020102"/></radialGradient>
+ <linearGradient id="gold" x1="0" y1="0" x2="1" y2=".85"><stop stop-color="#fff4bd"/><stop offset=".13" stop-color="#f0b449"/><stop offset=".25" stop-color="#fff3ae"/><stop offset=".43" stop-color="#b9681c"/><stop offset=".58" stop-color="#ffe28a"/><stop offset=".78" stop-color="#fff1b3"/><stop offset="1" stop-color="#a85b18"/></linearGradient>
+ <linearGradient id="gold2" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff8d0"/><stop offset=".4" stop-color="#e5a13b"/><stop offset=".7" stop-color="#fff0a4"/><stop offset="1" stop-color="#a45b19"/></linearGradient>
+ <linearGradient id="velvet" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#7b1a70"/><stop offset=".25" stop-color="#210824"/><stop offset=".53" stop-color="#58104f"/><stop offset=".76" stop-color="#120512"/><stop offset="1" stop-color="#721967"/></linearGradient>
+ <filter id="glow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+ <clipPath id="disc"><circle cx="512" cy="490" r="450"/></clipPath>
 </defs>
 <rect width="1024" height="1024" fill="#000"/>
-<circle cx="512" cy="490" r="465" fill="url(#night)"/>
-<g opacity=".78" fill="none" stroke="url(#velvet)" stroke-linecap="round">
- <path d="M95 335Q220 230 360 340T635 315T930 380" stroke-width="84"/>
- <path d="M55 475Q210 390 360 505T670 500T965 455" stroke-width="105"/>
- <path d="M90 670Q235 575 365 700T650 690T940 635" stroke-width="90"/>
- <path d="M250 95Q390 230 520 160T760 150" stroke-width="42"/>
+<circle cx="512" cy="490" r="466" fill="url(#bg)"/>
+<g clip-path="url(#disc)" opacity=".9" fill="none" stroke="url(#velvet)" stroke-linecap="round">
+ <path d="M38 350Q180 220 320 350T610 335T1000 380" stroke-width="90"/>
+ <path d="M15 485Q170 370 350 515T670 485T1020 470" stroke-width="105"/>
+ <path d="M40 665Q220 560 365 690T680 670T1000 650" stroke-width="92"/>
+ <path d="M260 65Q370 230 535 150T820 150" stroke-width="42"/>
+ <path d="M90 805Q260 730 430 815T780 800" stroke-width="56"/>
 </g>
-<circle cx="512" cy="490" r="466" fill="none" stroke="#7a3a10" stroke-width="20"/>
-<circle cx="512" cy="490" r="466" fill="none" stroke="url(#gold)" stroke-width="12"/>
-<circle cx="512" cy="490" r="450" fill="none" stroke="url(#goldEdge)" stroke-width="3"/>
-<path d="M596 116C409 131 264 282 264 463c0 183 151 327 337 337-46 18-96 28-149 28-219 0-397-160-397-357S233 114 452 114c51 0 99 0 144 2Z" fill="url(#gold)" stroke="#8d4a10" stroke-width="3" filter="url(#shine)"/>
-<path d="M590 116C420 150 300 292 300 463c0 157 117 289 275 325" fill="none" stroke="#fff1a0" stroke-width="3" opacity=".8"/>
-<g fill="url(#gold)" stroke="#8d4a10" stroke-width="2.5" stroke-linejoin="round">
- <path d="M300 600 455 244h30l171 356h-58l-43-93H398l-39 93h-59zm119-140h115l-58-135-57 135z"/>
- <path d="M650 350h49v128h134V350h49v250h-49V521H699v79h-49z"/>
+<circle cx="512" cy="490" r="465" fill="none" stroke="#8b4a16" stroke-width="18"/>
+<circle cx="512" cy="490" r="465" fill="none" stroke="url(#gold)" stroke-width="11"/>
+<circle cx="512" cy="490" r="449" fill="none" stroke="url(#gold2)" stroke-width="3"/>
+<path d="M593 112C411 132 266 281 266 462c0 183 150 329 335 338-48 18-99 28-152 28-220 0-398-160-398-359S229 111 449 111c51 0 99 0 144 1Z" fill="url(#gold)" stroke="#9c5818" stroke-width="3" filter="url(#glow)"/>
+<path d="M589 119C420 153 302 293 302 462c0 157 115 289 272 326" fill="none" stroke="#fff2a5" stroke-width="3" opacity=".8"/>
+<g fill="url(#gold)" stroke="#8f4b11" stroke-width="3" stroke-linejoin="round">
+ <path d="M300 598 455 242h30l171 356h-58l-43-92H398l-39 92h-59zm119-140h115l-58-135-57 135z"/>
+ <path d="M650 350h49v128h134V350h49v248h-49V521H699v77h-49z"/>
 </g>
 <text x="512" y="755" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-size="69" letter-spacing="2.5" fill="url(#gold)" stroke="#7d3d0d" stroke-width="1.5">AFTER HOURS</text>
 <path d="M185 796H465M559 796H839" stroke="url(#gold)" stroke-width="4"/>
 <path d="m512 768 24 28-24 28-24-28z" fill="url(#gold)" stroke="#8b4d17" stroke-width="2"/>
-<g fill="#fff0a2" filter="url(#shine)"><path d="M864 133l5 16 16 5-16 5-5 16-5-16-16-5 16-5z"/><path d="M230 242l4 12 12 4-12 4-4 12-4-12-12-4 12-4z"/></g>
+<g fill="#fff0a2" filter="url(#glow)"><path d="M864 133l5 16 16 5-16 5-5 16-5-16-16-5 16-5z"/><path d="M230 242l4 12 12 4-12 4-4 12-4-12-12-4 12-4z"/></g>
 </svg>
