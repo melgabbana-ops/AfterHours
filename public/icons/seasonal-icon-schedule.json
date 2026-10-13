@@ -1,0 +1,17 @@
+{
+  "brand": "AFTER HOURS",
+  "default": "/icons/after-hours-master.svg",
+  "seasonalIcons": [
+    {"id":"spring","label":"Spring","src":"/icons/after-hours-spring.svg","start":"03-01","end":"05-31"},
+    {"id":"summer","label":"Summer","src":"/icons/after-hours-summer.svg","start":"06-01","end":"08-31"},
+    {"id":"autumn","label":"Autumn","src":"/icons/after-hours-autumn.svg","start":"09-01","end":"11-30"},
+    {"id":"winter","label":"Winter","src":"/icons/after-hours-winter.svg","start":"12-01","end":"02-28"}
+  ],
+  "holidayOverrides": [
+    {"id":"valentines","label":"Valentine's Day","src":"/icons/after-hours-valentines.svg","start":"02-07","end":"02-15"},
+    {"id":"halloween","label":"Halloween","src":"/icons/after-hours-halloween.svg","start":"10-20","end":"11-01"},
+    {"id":"christmas","label":"Christmas","src":"/icons/after-hours-christmas.svg","start":"12-10","end":"12-27"},
+    {"id":"new-years-eve","label":"New Year's Eve","src":"/icons/after-hours-new-years-eve.svg","start":"12-28","end":"01-03"}
+  ],
+  "notes": "First-pass asset schedule only. Automatic seasonal switching is not enabled until browser manifest and iOS touch icon behavior are tested on devices."
+}
