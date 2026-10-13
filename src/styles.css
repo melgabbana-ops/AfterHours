@@ -1447,3 +1447,59 @@ input:focus-visible,button:focus-visible{outline-color:var(--ah-gold-light)}
  .media-capture-controls>button{width:100%}
 }
 @media(prefers-reduced-motion:reduce){.media-frame-picker button,.media-capture-controls>button,.media-pending-preview .media-item-actions button{transition:none}}
+
+
+/* AFTER HOURS · trust, legal and creator workspaces */
+.safety-plan,.legal-screen,.social-screen{color:#f4ecdf}
+.safety-plan-heading,.legal-heading,.social-heading{position:relative;margin-bottom:18px}
+.safety-plan-heading h1,.legal-heading h1,.social-heading h1{
+ font:500 clamp(34px,7vw,52px)/1.05 "Playfair Display",Georgia,serif!important;color:#f3e2bc!important;letter-spacing:-.03em
+}
+.safety-plan-intro,.legal-intro,.social-heading>p{color:#b7a8bf!important;line-height:1.8!important}
+.safety-plan section,.safety-plan article,.safety-plan-card{
+ border:1px solid var(--ah-gold-line)!important;border-radius:17px!important;
+ background:radial-gradient(ellipse at 100% 0%,rgba(101,42,116,.16),transparent 48%),linear-gradient(145deg,rgba(28,16,33,.92),rgba(10,8,13,.98))!important;
+ box-shadow:inset 0 1px rgba(255,231,180,.035)
+}
+.safety-plan input,.safety-plan select,.safety-plan textarea,.legal-screen textarea,.social-screen textarea,.social-screen select{
+ background:#0b080e!important;color:#f4ecdf!important;border:1px solid var(--ah-gold-line)!important;border-radius:11px!important
+}
+.safety-plan input:focus-visible,.safety-plan select:focus-visible,.safety-plan textarea:focus-visible,.legal-screen textarea:focus-visible,.social-screen textarea:focus-visible{
+ outline:2px solid var(--ah-gold-light);outline-offset:2px
+}
+.safety-plan-actions button,.legal-doc-tabs button,.social-actions button{
+ border:1px solid var(--ah-gold-line)!important;border-radius:999px!important;
+ background:linear-gradient(145deg,rgba(34,19,39,.92),rgba(11,8,14,.98))!important;color:#d4c3db!important;
+ transition:transform .18s ease,border-color .18s ease,filter .18s ease
+}
+.safety-plan-actions .gold,.social-actions button.primary,.legal-doc-tabs button[aria-selected="true"]{
+ background:linear-gradient(180deg,#f7d88e,#bd8538)!important;color:#1a1009!important;border-color:#b68137!important
+}
+.safety-plan-message,.legal-draft-alert{
+ border:1px solid rgba(222,174,91,.18)!important;border-radius:12px!important;background:rgba(31,18,36,.78)!important;color:#d2c1d8!important;padding:13px!important
+}
+.safety-plan-footnote,.social-note{color:#9f90a8!important;line-height:1.8!important}
+.legal-doc-tabs{display:flex;gap:8px;flex-wrap:wrap}
+.legal-doc-tabs button[aria-pressed="true"],.legal-doc-tabs button.active{border-color:var(--ah-gold)!important;color:var(--ah-gold-light)!important;background:linear-gradient(135deg,rgba(83,42,92,.62),rgba(13,9,16,.98))!important}
+.legal-document{
+ border:1px solid var(--ah-gold-line)!important;border-radius:18px!important;
+ background:linear-gradient(145deg,rgba(28,16,33,.94),rgba(9,7,11,.99))!important;padding:clamp(18px,4vw,30px)!important;
+ box-shadow:0 18px 52px rgba(0,0,0,.22)
+}
+.legal-document h2,.legal-document h3{font-family:"Playfair Display",Georgia,serif;color:#f1dfb8!important}
+.legal-document p,.legal-document li{color:#b9adbf!important;line-height:1.85!important}
+.social-editor,.social-preview{
+ border:1px solid var(--ah-gold-line)!important;border-radius:18px!important;
+ background:radial-gradient(ellipse at 100% 0%,rgba(104,44,119,.16),transparent 50%),linear-gradient(145deg,#1a101e,#0b080e)!important;
+ box-shadow:inset 0 1px rgba(255,231,180,.035)
+}
+.social-editor label{color:var(--ah-gold-light)!important}
+.social-preview{overflow:hidden}
+.social-output{border:1px solid rgba(222,174,91,.18)!important;border-radius:12px!important;background:rgba(7,5,9,.72)!important;color:#e9d9bc!important;line-height:1.8!important}
+.social-actions button:hover,.safety-plan-actions button:hover,.legal-doc-tabs button:hover{border-color:var(--ah-gold-light)!important;transform:translateY(-1px)}
+@media(max-width:520px){
+ .safety-plan,.legal-screen,.social-screen{padding-inline:14px}
+ .legal-doc-tabs button{min-height:44px}
+ .social-actions button,.safety-plan-actions button{width:100%;min-height:44px}
+}
+@media(prefers-reduced-motion:reduce){.social-actions button,.safety-plan-actions button,.legal-doc-tabs button{transition:none}}
