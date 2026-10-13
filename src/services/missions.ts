@@ -23,7 +23,7 @@ export async function loadMissionProgress(): Promise<RemoteMissionProgress[] | n
   if (!supabaseConfigured || !supabase) return null;
   const { data: auth, error: authError } = await supabase.auth.getUser();
   if (authError) throw authError;
-  if (!auth.user) return [];
+  if (!auth.user) return null;
   const { data, error } = await supabase.rpc("get_mission_progress");
   if (error) throw error;
   if (!Array.isArray(data)) throw new Error("Ongeldig antwoord van missieopslag.");
