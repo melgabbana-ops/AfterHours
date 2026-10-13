@@ -1,0 +1,58 @@
+name: AFTER HOURS Deployment Alerts
+
+on:
+  deployment_status:
+
+permissions:
+  contents: read
+  issues: write
+  deployments: read
+
+jobs:
+  report-deployment:
+    if: github.event.deployment_status.state == 'success' || github.event.deployment_status.state == 'failure' || github.event.deployment_status.state == 'error'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create deployment status alert
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const state = context.payload.deployment_status.state;
+            const deployment = context.payload.deployment || {};
+            const environment = deployment.environment || 'unknown environment';
+            const targetUrl = context.payload.deployment_status.target_url || deployment.payload?.web_url || '';
+            const sha = deployment.sha || context.sha;
+            const title = 'AFTER HOURS deployment ' + state + ': ' + environment;
+            const body = [
+              'A deployment status update was received from the connected deployment provider.',
+              '',
+              '- Status: ' + state,
+              '- Environment: ' + environment,
+              '- Commit: ' + sha,
+              targetUrl ? '- Deployment URL: ' + targetUrl : '',
+              '- Event details: ' + context.serverUrl + '/' + context.repo.owner + '/' + context.repo.repo + '/actions',
+              '',
+              'This alert reflects the GitHub deployment_status event; verify the target URL before treating it as the current production version.'
+            ].filter(Boolean).join('\n');
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              per_page: 100
+            });
+            const existing = issues.find(issue => issue.title === title && !issue.pull_request);
+            if (existing) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existing.number,
+                body
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body
+              });
+            }
