@@ -940,3 +940,51 @@ img,svg,video,canvas{max-width:100%}
 .club-membership-disclaimer{display:flex;align-items:flex-start;gap:8px;margin:14px 0 0;padding:12px;border:1px dashed #4a3928;border-radius:7px;color:#a99daa;font-size:9px;line-height:1.75}
 .club-membership-disclaimer svg{flex:none;color:#c89445;margin-top:2px}
 @media(max-width:540px){.club-membership{padding:13px}.club-membership-grid{grid-template-columns:1fr}.club-membership-card{padding:14px}}
+
+
+/* AFTER HOURS visual refinement: velvet, editorial framing, restrained gold */
+.character-studio{
+  border:1px solid rgba(191,145,72,.42);
+  border-radius:22px;
+  overflow:hidden;
+  background:
+    radial-gradient(ellipse at 8% 0%,rgba(91,28,112,.24),transparent 44%),
+    linear-gradient(145deg,#160d19 0%,#0d090f 54%,#09070b 100%);
+  box-shadow:0 22px 65px rgba(0,0,0,.28),inset 0 1px rgba(255,225,164,.035);
+}
+.character-studio-toggle{padding:20px 21px;min-height:78px}
+.character-studio-toggle>span{gap:13px}
+.character-studio-toggle>span>svg{color:#d6ad66;filter:drop-shadow(0 0 8px rgba(214,173,102,.18))}
+.character-studio-toggle strong{font-size:11px;letter-spacing:.19em;color:#d9b977}
+.character-studio-toggle small{margin-top:6px;color:#b2a3b8;font-size:12px;letter-spacing:.01em}
+.character-studio-toggle>svg{color:#c9a45c}
+.character-studio-body{padding:0 20px 22px;gap:23px}
+.character-preview{gap:20px;align-items:center}
+.character-art{width:100%;max-width:260px;border:1px solid rgba(203,160,87,.58);border-radius:13px;background:#0a070d;box-shadow:0 14px 35px rgba(0,0,0,.38),0 0 0 5px rgba(255,255,255,.012)}
+.character-preview-caption{padding:10px 0}
+.character-preview-caption .eyebrow{font-size:8px;letter-spacing:.19em;color:#c4a16a}
+.character-preview-caption strong{display:block;margin-top:13px;font:500 clamp(22px,4vw,31px)/1.15 "Playfair Display",Georgia,serif;color:#f0dfc5}
+.character-preview-caption small{display:block;margin-top:10px;color:#a99bb0;font-size:11px;line-height:1.8}
+.character-options{gap:22px}
+.character-field>.eyebrow{margin-bottom:11px;font-size:8px;letter-spacing:.18em;color:#bda27a}
+.character-segment{gap:8px}
+.character-segment button{min-height:47px;border:1px solid #382b40;border-radius:10px;background:rgba(7,5,9,.54);color:#c5b8cc;transition:background .18s,border-color .18s,color .18s}
+.character-segment button.selected{border-color:#c79a4d;background:linear-gradient(110deg,rgba(125,75,37,.28),rgba(70,23,83,.24));color:#efd39a;box-shadow:inset 0 0 0 1px rgba(199,154,77,.12)}
+.character-swatches{gap:12px}
+.character-swatches button{width:43px;height:43px;border:2px solid rgba(255,255,255,.13);box-shadow:0 3px 10px rgba(0,0,0,.28)}
+.character-swatches button.selected{outline:2px solid #dfbd76;outline-offset:3px;border-color:#f0d89c;box-shadow:0 0 0 5px rgba(199,154,77,.08)}
+.character-mask-toggle{display:flex;align-items:center;gap:11px;padding:14px;border:1px solid #3a2b40;border-radius:10px;background:rgba(7,5,9,.4);color:#d2c1d9;font-size:11px}
+.character-mask-toggle input{accent-color:#c99b50;width:17px;height:17px}
+.character-save-note{margin:0;color:#8f8198;font-size:10px;line-height:1.8}
+@media(max-width:520px){
+ .character-studio{border-radius:18px}
+ .character-studio-toggle{padding:17px 15px}
+ .character-studio-body{padding:0 13px 17px;gap:19px}
+ .character-preview{grid-template-columns:minmax(115px,.82fr) minmax(0,1fr);gap:12px}
+ .character-art{max-height:285px}
+ .character-preview-caption strong{font-size:21px}
+ .character-preview-caption small{font-size:10px}
+ .character-swatches{gap:10px}
+ .character-swatches button{width:37px;height:37px}
+}
+@media(prefers-reduced-motion:reduce){.character-segment button{transition:none}}
