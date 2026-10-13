@@ -13,6 +13,8 @@ import { composeImageWithOverlay, drawCameraFrame, mediaOverlayFrames, type Over
 interface MediaVaultProps {
   sessionId: string;
   language?: "nl" | "en";
+  assignmentTitle?: string;
+  assignmentTask?: string;
 }
 
 function displayName(name: string): string {
@@ -25,7 +27,7 @@ function formatSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-export default function MediaVault({ sessionId, language = "nl" }: MediaVaultProps) {
+export default function MediaVault({ sessionId, language = "nl", assignmentTitle, assignmentTask }: MediaVaultProps) {
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
   const [items, setItems] = useState<PrivateMediaItem[]>([]);
   const [busy, setBusy] = useState(false);
@@ -108,7 +110,7 @@ export default function MediaVault({ sessionId, language = "nl" }: MediaVaultPro
     setMessage("");
     setSignedUrl("");
     try {
-      await uploadPrivateMedia(file, sessionId);
+      await uploadPrivateMedia(file, sessionId, assignmentTitle);
       const refreshed = await refresh();
       setMessage(
         refreshed
@@ -299,7 +301,8 @@ export default function MediaVault({ sessionId, language = "nl" }: MediaVaultPro
   return (
     <section className="media-vault auth-panel" aria-labelledby="media-vault-title">
       <span className="eyebrow">{t("PRIVÉOPSLAG", "PRIVATE STORAGE")}</span>
-      <h3 id="media-vault-title">{t("Mijn privékluis", "My private vault")}</h3>
+      <h3 id="media-vault-title">{assignmentTitle ? t("Opname bij opdracht", "Assignment capture") : t("Mijn privékluis", "My private vault")}</h3>
+      {assignmentTitle&&<div className="assignment-captions"><strong>{assignmentTitle}</strong>{assignmentTask&&<p>{assignmentTask}</p>}<small>{t("Media wordt opgeslagen in de privékluis onder de huidige sessie. De opdracht wordt niet als openbare metadata gepubliceerd.","Media is stored privately under the current session. Assignment details are not published as public metadata.")}</small></div>}
       <p>{t("Afbeeldingen, video en audio blijven privé. Open-links zijn maximaal 60 seconden geldig.", "Images, video and audio stay private. Open links are valid for up to 60 seconds.")}</p>
       {!supabaseConfigured ? (
         <small role="status">{t("Privéopslag verschijnt zodra Supabase is geconfigureerd.", "Private storage will appear once Supabase is configured.")}</small>
