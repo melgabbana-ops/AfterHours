@@ -268,7 +268,7 @@ begin
  if p_status='ready' and v_session.status='completed' then raise exception 'Een afgeronde sessie kan niet worden herstart.'; end if;
  v_active_seconds:=v_session.active_seconds;
  if v_session.status='active' and v_session.active_started_at is not null then
-   v_active_seconds:=v_active_seconds+greatest(0,floor(extract(epoch from(v_completed_at-v_session.active_started_at)))::integer);
+   v_active_seconds:=v_active_seconds+greatest(0,floor(extract(epoch from(now()-v_session.active_started_at)))::integer);
  end if;
  if p_status='active' then
    if p_round<>v_session.round then raise exception 'Ronde moet via de rondeflow worden gewijzigd.'; end if;
