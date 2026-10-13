@@ -35,10 +35,11 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
   const [message, setMessage] = useState("");
   const [signedUrl, setSignedUrl] = useState("");
   const [deletingPath, setDeletingPath] = useState("");
-  const [captureKind,setCaptureKind] = useState<"video"|"voice">("video");
+  const [captureKind,setCaptureKind] = useState<"photo"|"video"|"voice">("video");
   const [frameStyle,setFrameStyle] = useState<OverlayFrameStyle>("after-hours");
   const [captureConsent,setCaptureConsent] = useState(false);
   const [isRecording,setIsRecording] = useState(false);
+  const [isPhotoCameraOpen,setIsPhotoCameraOpen] = useState(false);
   const [liveStream,setLiveStream] = useState<MediaStream|null>(null);
   const [pendingCapture,setPendingCapture] = useState<File|null>(null);
   const [pendingUrl,setPendingUrl] = useState("");
@@ -136,10 +137,11 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
     if(livePreviewRef.current)livePreviewRef.current.srcObject=null;
     setLiveStream(null);
     setIsRecording(false);
+    setIsPhotoCameraOpen(false);
     if(captureTimeoutRef.current!==undefined){window.clearTimeout(captureTimeoutRef.current);captureTimeoutRef.current=undefined;}
   };
 
-  const stageSelectedFile=async(file?:File)=>{
+  const stageSelectedFile=async(file?:File,overlayAlreadyApplied=false)=>{
     if(!file)return;
     if(!captureConsent){
       setMessage(t("Bevestig eerst dat de betrokkenen akkoord zijn met deze media en privéopslag.","First confirm that the people involved agree to this media and private storage."));
@@ -148,7 +150,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
     setBusy(true);
     try{
       validatePrivateMediaFile(file);
-      const previewFile=file.type.startsWith("image/")?await composeImageWithOverlay(file,frameStyleRef.current):file;
+      const previewFile=file.type.startsWith("image/")&&!overlayAlreadyApplied?await composeImageWithOverlay(file,frameStyleRef.current):file;
       validatePrivateMediaFile(previewFile);
       if(pendingUrl) URL.revokeObjectURL(pendingUrl);
       setPendingCapture(previewFile);
@@ -166,18 +168,45 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
       setMessage(t("Bevestig eerst dat iedereen op de opname expliciet akkoord is met opnemen én privé opslaan.","First confirm that everyone recorded explicitly agrees to recording and private storage."));
       return;
     }
-    if(typeof navigator.mediaDevices?.getUserMedia!=="function"||typeof MediaRecorder==="undefined"){
+    if(typeof navigator.mediaDevices?.getUserMedia!=="function"||(captureKind!=="photo"&&typeof MediaRecorder==="undefined")){
       setMessage(t("Opnemen wordt niet ondersteund door deze browser. Probeer een recente browser of gebruik Bestand kiezen.","Recording is not supported by this browser. Try a recent browser or choose a file instead."));
       return;
     }
     setMessage("");
     try{
-      const stream=await navigator.mediaDevices.getUserMedia(captureKind==="video"
-        ? {video:{facingMode:"user",width:{ideal:1280},height:{ideal:720}},audio:true}
-        : {video:false,audio:true});
+      const stream=await navigator.mediaDevices.getUserMedia(captureKind==="photo"
+        ? {video:{facingMode:"environment",width:{ideal:1920},height:{ideal:1080}},audio:false}
+        : captureKind==="video"
+          ? {video:{facingMode:"user",width:{ideal:1280},height:{ideal:720}},audio:true}
+          : {video:false,audio:true});
       streamRef.current=stream;
       setLiveStream(stream);
       chunksRef.current=[];
+      if(captureKind==="photo"){
+        await new Promise<void>(resolve=>window.requestAnimationFrame(()=>window.requestAnimationFrame(()=>resolve())));
+        const video=livePreviewRef.current;
+        const canvas=liveCanvasRef.current;
+        if(!video||!canvas)throw new Error(t("De camera-preview is niet beschikbaar.","Camera preview is not available."));
+        video.srcObject=stream;
+        await video.play();
+        if(video.videoWidth===0) await new Promise<void>((resolve,reject)=>{
+          const timeout=window.setTimeout(()=>reject(new Error(t("De camera startte niet op tijd.","The camera did not start in time."))),5000);
+          video.addEventListener("loadedmetadata",()=>{window.clearTimeout(timeout);resolve()},{once:true});
+        });
+        canvas.width=Math.min(1920,video.videoWidth);
+        canvas.height=Math.max(1,Math.round(canvas.width/(video.videoWidth/video.videoHeight)));
+        const ctx=canvas.getContext("2d");
+        if(!ctx)throw new Error(t("Canvas wordt niet ondersteund door deze browser.","Canvas is not supported in this browser."));
+        const render=()=>{
+          if(video.readyState>=2)drawCameraFrame(ctx,video,canvas.width,canvas.height,frameStyleRef.current);
+          renderFrameRef.current=window.requestAnimationFrame(render);
+        };
+        render();
+        setIsPhotoCameraOpen(true);
+        setPendingCapture(null);
+        if(pendingUrl){URL.revokeObjectURL(pendingUrl);setPendingUrl("");}
+        return;
+      }
       let recorderStream=stream;
       if(captureKind==="video"){
         await new Promise<void>(resolve=>window.requestAnimationFrame(()=>window.requestAnimationFrame(()=>resolve())));
@@ -242,6 +271,18 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
       setCaptureConsent(false);
       setMessage(error instanceof Error?t(error.message,"Recording could not start: "+error.message):t("Geen toegang tot camera of microfoon. Controleer de browsertoestemming.","Camera or microphone access was denied. Check browser permissions."));
     }
+  };
+
+  const takePhoto=async()=>{
+    const canvas=liveCanvasRef.current;
+    if(!canvas||!isPhotoCameraOpen){setMessage(t("De camera is niet actief.","Camera is not active."));return;}
+    try{
+      const blob=await new Promise<Blob>((resolve,reject)=>canvas.toBlob(value=>value?resolve(value):reject(new Error(t("De foto kon niet worden gemaakt.","Could not capture the photo."))),"image/jpeg",.94));
+      if(blob.size>20*1024*1024)throw new Error(t("De foto is te groot om veilig op te slaan.","The photo is too large to store safely."));
+      const file=new File([blob],`after-hours-photo-${Date.now()}.jpg`,{type:"image/jpeg"});
+      stopCaptureTracks();
+      await stageSelectedFile(file,true);
+    }catch(error){setMessage(error instanceof Error?error.message:t("De foto kon niet worden gemaakt.","Could not capture the photo."));}
   };
 
   const stopCapture=()=>{
@@ -335,13 +376,13 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
             </div>
             <p className="media-overlay-note">{t("Het gekozen frame wordt in de camera-preview, nieuwe video-opnamen en foto's gebrand. Bestaande video's worden niet aangepast.","The selected frame is burned into the camera preview, new video recordings and photos. Existing videos are not modified.")}</p>
             <div className="media-capture-controls">
-              <label>{t("Opnametype","Recording type")}<select value={captureKind} disabled={isRecording||busy} onChange={e=>setCaptureKind(e.target.value as "video"|"voice")}><option value="video">{t("Video met camera","Video with camera")}</option><option value="voice">{t("Alleen stem","Voice only")}</option></select></label>
+              <label>{t("Opnametype","Recording type")}<select value={captureKind} disabled={isRecording||busy} onChange={e=>setCaptureKind(e.target.value as "video"|"voice")}><option value="photo">{t("Foto met live overlay","Photo with live overlay")}</option><option value="video">{t("Video met camera","Video with camera")}</option><option value="voice">{t("Alleen stem","Voice only")}</option></select></label>
               <label className="media-consent-check"><input type="checkbox" checked={captureConsent} disabled={isRecording||busy||!!pendingCapture} onChange={e=>setCaptureConsent(e.target.checked)}/><span>{t("Ik bevestig dat de betrokkenen akkoord zijn met het maken of uploaden van deze media en privéopslag. Delen vereist aparte toestemming.","I confirm that everyone involved agrees to capture or upload this media and store it privately. Sharing requires separate consent.")}</span></label>
-              {!isRecording&&!pendingCapture&&<button type="button" onClick={()=>void startCapture()} disabled={busy||!captureConsent}>{t("Start opname · max. 60 sec.","Start recording · max 60 sec")}</button>}
+              {!isRecording&&!isPhotoCameraOpen&&!pendingCapture&&<button type="button" onClick={()=>void startCapture()} disabled={busy||!captureConsent}>{captureKind==="photo"?t("Open camera met live overlay","Open camera with live overlay"):t("Start opname · max. 60 sec.","Start recording · max 60 sec")}</button>}{isPhotoCameraOpen&&<div className="media-capture-controls"><button type="button" className="gold" onClick={()=>void takePhoto()} disabled={busy}>{t("Maak foto","Take photo")}</button><button type="button" onClick={()=>{stopCaptureTracks();setCaptureConsent(false);setMessage(t("Camera gesloten. Er is niets opgeslagen.","Camera closed. Nothing was saved."))}}>{t("Annuleren","Cancel")}</button></div>}
               {isRecording&&<button type="button" className="media-stop-recording" onClick={stopCapture}>{t("Stop opname","Stop recording")}</button>}
             </div>
             {isRecording&&<div className="media-recording-status" role="status"><span/> {t("Opname actief. Je kunt op elk moment stoppen.","Recording is active. You can stop at any time.")}</div>}
-            {liveStream&&captureKind==="video"&&<div className="media-live-frame"><video className="media-live-source" ref={livePreviewRef} autoPlay muted playsInline aria-hidden="true"/><canvas className="media-live-preview media-live-composite" ref={liveCanvasRef} aria-label={t("Live cameravoorbeeld met AFTER HOURS-overlay","Live camera preview with AFTER HOURS overlay")}/><span className="media-live-watermark">AFTER HOURS <i>◐</i></span></div>}
+            {liveStream&&(captureKind==="video"||captureKind==="photo")&&<div className="media-live-frame"><video className="media-live-source" ref={livePreviewRef} autoPlay muted playsInline aria-hidden="true"/><canvas className="media-live-preview media-live-composite" ref={liveCanvasRef} aria-label={t("Live cameravoorbeeld met AFTER HOURS-overlay","Live camera preview with AFTER HOURS overlay")}/><span className="media-live-watermark">AFTER HOURS <i>◐</i></span></div>}
             {pendingCapture&&pendingUrl&&<div className="media-pending-preview">
               <strong>{t("Lokale preview","Local preview")} · {formatSize(pendingCapture.size)}</strong>
               {pendingCapture.type.startsWith("image/")?<img src={pendingUrl} alt={t("Lokale voorbeeldweergave van geselecteerde afbeelding","Local preview of selected image")}/>:pendingCapture.type.startsWith("video/")?<video src={pendingUrl} controls playsInline/>:<audio src={pendingUrl} controls/>}
