@@ -1,7 +1,10 @@
 # AFTER HOURS seasonal icon artwork
 
-The standard iOS/Android/PWA icon remains `public/after-hours-icon-512.png` and `public/after-hours-icon-192.png`. These optional SVG variants preserve the AH crescent-and-medallion mark while adding restrained seasonal accents. Use them for seasonal launch screens, campaign graphics, social posts, or an explicitly chosen seasonal app icon.
+The default browser favicon now uses `after-hours-master.svg`; the browser tab selects a seasonal or holiday SVG by local date. The PWA manifest includes that master SVG while retaining the existing 192×192 and 512×512 PNG files as compatibility fallbacks.
 
+**Important platform distinction:** the date-based switch affects the browser-tab favicon only. iOS home-screen icons and Android installed-app icons remain the existing PNG assets. Seasonal installed icons require separate raster exports, safe-zone review, and device testing before being enabled.
+
+- `after-hours-master.svg`
 - `after-hours-spring.svg`
 - `after-hours-summer.svg`
 - `after-hours-autumn.svg`
@@ -11,4 +14,4 @@ The standard iOS/Android/PWA icon remains `public/after-hours-icon-512.png` and 
 - `after-hours-valentines.svg`
 - `after-hours-new-year.svg`
 
-Note: PWA manifest icons are intentionally unchanged by this asset pack; platform app icons should only be switched after a deliberate release decision.
+The SVGs are first-pass, brand-inspired artwork and are not a pixel-exact replacement for the approved master logo. Review the artwork at small sizes and against the approved source before final release.
