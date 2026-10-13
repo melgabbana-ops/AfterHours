@@ -1193,3 +1193,103 @@ input:focus-visible,button:focus-visible{outline-color:var(--ah-gold-light)}
  .home-wordmark{top:22px;width:min(78vw,270px);max-height:100px}
  .aftercare-card{border-radius:18px;padding:24px 17px}
 }
+
+
+/* AFTER HOURS · cohesive screen system pass */
+:root{
+ --ah-panel:linear-gradient(145deg,rgba(28,16,33,.94),rgba(10,8,13,.98));
+ --ah-panel-soft:rgba(22,13,26,.78);
+ --ah-gold-line:rgba(222,174,91,.24);
+ --ah-lilac:#c4afcf;
+}
+.radio-room,.prompt-library,.monetization-screen,.onboarding-screen,.missions-screen,.legal-center,.social-studio{
+ color:#f4ecdf;
+}
+.radio-hero,.prompt-hero,.monetization-heading{
+ position:relative;
+ padding-top:42px;
+}
+.radio-hero h2,.prompt-hero h2,.monetization-heading h1{
+ color:#f6e6c5;
+ letter-spacing:-.035em;
+ text-shadow:0 8px 34px rgba(0,0,0,.35);
+}
+.radio-player{
+ position:relative;overflow:hidden;margin:0 20px 22px;padding:28px;
+ border:1px solid var(--ah-gold-line);border-radius:22px;
+ background:radial-gradient(ellipse at 50% 0%,rgba(111,48,126,.32),transparent 58%),linear-gradient(145deg,#1c1021,#09070c 78%);
+ box-shadow:0 24px 70px rgba(0,0,0,.34),inset 0 1px rgba(255,235,190,.06);
+}
+.radio-player:before{
+ content:"";position:absolute;inset:10px;border:1px solid rgba(222,174,91,.09);border-radius:15px;pointer-events:none;
+}
+.radio-disc{border-color:rgba(222,174,91,.38)!important;background:radial-gradient(circle at 40% 35%,#3a2044,#0a070d 68%)!important;box-shadow:0 0 55px rgba(115,49,130,.18),inset 0 0 0 5px rgba(222,174,91,.035)}
+.radio-disc svg{color:var(--ah-gold-light)!important}
+.radio-player h3{color:#f4dfb5!important;font-family:"Playfair Display",Georgia,serif!important;letter-spacing:-.02em}
+.radio-vibe{border-top-color:var(--ah-gold-line)}
+.radio-vibe span,.radio-vibe small{color:#9c8ca5}
+.radio-vibe strong{color:var(--ah-gold-light)}
+.radio-controls button,.radio-volume,.moods .mood{
+ border-color:var(--ah-gold-line)!important;background:linear-gradient(145deg,rgba(35,20,40,.9),rgba(10,8,13,.95))!important;color:#d6c8db!important;border-radius:12px!important;
+ transition:border-color .2s ease,transform .2s ease,background .2s ease;
+}
+.radio-controls .radio-play{background:linear-gradient(145deg,#f6d68c,#c58a3b)!important;color:#170e08!important;border:0!important}
+.radio-controls button:hover,.radio-volume:hover,.moods .mood:hover{border-color:rgba(245,204,120,.7)!important;transform:translateY(-1px)}
+.moods .mood.active{border-color:var(--ah-gold)!important;background:linear-gradient(120deg,rgba(84,43,91,.62),rgba(18,12,22,.98))!important;box-shadow:inset 0 0 0 1px rgba(222,174,91,.08)}
+.mood-number{color:var(--ah-gold-light)!important}
+.radio-note{border:1px solid rgba(222,174,91,.16)!important;border-radius:14px!important;background:var(--ah-panel-soft)!important}
+.radio-note>svg{color:var(--ah-gold-light)!important}
+.prompt-card{
+ border-color:var(--ah-gold-line)!important;
+ background:radial-gradient(ellipse at 50% 0%,rgba(94,40,109,.23),transparent 55%),linear-gradient(145deg,#1a101f,#09070b 80%)!important;
+ box-shadow:0 24px 75px rgba(0,0,0,.34),inset 0 1px rgba(255,231,180,.045)!important;
+}
+.prompt-filters button,.prompt-actions button,.prompt-back{
+ border-color:var(--ah-gold-line)!important;border-radius:999px!important;background:rgba(24,14,28,.82)!important;color:#c5b7cd!important;
+}
+.prompt-filters button.active{background:linear-gradient(120deg,rgba(91,46,99,.62),rgba(23,14,27,.95))!important;color:var(--ah-gold-light)!important;border-color:var(--ah-gold)!important}
+.prompt-glyph{background:radial-gradient(circle,#321b3a,#0a070d)!important;border-color:rgba(222,174,91,.42)!important;box-shadow:0 0 36px rgba(112,48,127,.13)}
+.prompt-actions .gold{background:linear-gradient(180deg,#f7d88e,#bd8538)!important;color:#1a1009!important}
+.badge-showcase{border-color:var(--ah-gold-line)!important;border-radius:20px!important;background:var(--ah-panel)!important;box-shadow:inset 0 1px rgba(255,231,180,.035)}
+.badge-tile{border-color:rgba(222,174,91,.16)!important;border-radius:13px!important;background:linear-gradient(145deg,rgba(30,17,35,.8),rgba(10,8,13,.96))!important}
+.badge-tile.is-earned{border-color:rgba(222,174,91,.42)!important;background:linear-gradient(145deg,rgba(59,34,65,.62),rgba(13,9,16,.98))!important}
+.badge-symbol{color:var(--ah-gold-light)!important}
+.monetization-screen{padding-bottom:calc(110px + env(safe-area-inset-bottom))}
+.monetization-free,.monetization-product{
+ position:relative;border:1px solid var(--ah-gold-line)!important;border-radius:20px!important;
+ background:radial-gradient(ellipse at 90% 0%,rgba(102,44,117,.19),transparent 48%),linear-gradient(145deg,#1b1020,#09070b 82%)!important;
+ box-shadow:0 20px 58px rgba(0,0,0,.26),inset 0 1px rgba(255,231,180,.04)!important;
+}
+.monetization-product.featured{border-color:rgba(238,195,111,.58)!important;box-shadow:0 20px 60px rgba(0,0,0,.3),0 0 32px rgba(179,120,47,.07)!important}
+.monetization-price{color:var(--ah-gold-light)!important;font-family:"Playfair Display",Georgia,serif!important}
+.monetization-ribbon{background:linear-gradient(110deg,#f7d88e,#bd8538)!important;color:#1a1009!important}
+.monetization-button{border-radius:999px!important;background:linear-gradient(180deg,#f7d88e,#bd8538)!important;color:#1a1009!important;border:1px solid #9a692c!important}
+.monetization-button.secondary{background:transparent!important;color:var(--ah-gold-light)!important;border-color:var(--ah-gold-line)!important}
+.onboarding-screen{background:radial-gradient(ellipse at 50% 0%,rgba(102,42,119,.3),transparent 48%),#070509!important}
+.onboarding-header img{filter:drop-shadow(0 0 24px rgba(222,174,91,.13))}
+.onboarding-panel{border:1px solid var(--ah-gold-line)!important;border-radius:24px!important;background:linear-gradient(145deg,rgba(28,16,33,.96),rgba(9,7,11,.98))!important;box-shadow:0 26px 80px rgba(0,0,0,.35),inset 0 1px rgba(255,231,180,.045)!important}
+.onboarding-panel h1{font-family:"Playfair Display",Georgia,serif!important;color:#f5e4c5!important;letter-spacing:-.025em}
+.onboarding-stepper span{background:#35223b!important}
+.onboarding-stepper span.current,.onboarding-stepper span.done{background:linear-gradient(90deg,#a87332,#f4d486,#c38a3d)!important;box-shadow:0 0 16px rgba(231,189,104,.16)}
+.onboarding-feature,.onboarding-promise,.onboarding-install-tip{border-color:rgba(222,174,91,.16)!important;background:rgba(28,16,33,.55)!important;border-radius:12px!important}
+.onboarding-feature>span,.onboarding-welcome>svg,.onboarding-promise svg{color:var(--ah-gold-light)!important}
+.onboarding-tabs button{border:1px solid var(--ah-gold-line)!important;border-radius:999px!important;background:rgba(11,8,14,.8)!important;color:#c8b9cf!important}
+.onboarding-tabs button.selected{background:linear-gradient(120deg,rgba(87,43,97,.72),rgba(22,13,25,.98))!important;color:var(--ah-gold-light)!important;border-color:var(--ah-gold)!important}
+.media-vault{border:1px solid var(--ah-gold-line)!important;border-radius:18px!important;background:var(--ah-panel)!important;box-shadow:0 18px 46px rgba(0,0,0,.2)}
+.media-vault input,.media-vault select,.media-vault textarea{background:#0b080e!important;color:#f4ecdf!important;border-color:var(--ah-gold-line)!important;border-radius:10px!important}
+.media-item{border-color:rgba(222,174,91,.16)!important;border-radius:13px!important;background:rgba(23,14,27,.74)!important}
+.media-vault button{border-radius:999px!important}
+.missions-screen article,.mission-card,.mission-item{border-color:var(--ah-gold-line)!important;border-radius:16px!important;background:var(--ah-panel)!important}
+:where(.radio-room,.prompt-library,.monetization-screen,.onboarding-screen,.media-vault,.badge-showcase) button:focus-visible,
+:where(.radio-room,.prompt-library,.monetization-screen,.onboarding-screen,.media-vault,.badge-showcase) a:focus-visible{
+ outline:2px solid var(--ah-gold-light);outline-offset:3px;
+}
+@media(max-width:520px){
+ .radio-player{margin-inline:14px;padding:22px 17px;border-radius:18px}
+ .radio-hero,.prompt-hero,.monetization-heading{padding-top:28px}
+ .monetization-free,.monetization-product{border-radius:17px!important}
+ .onboarding-panel{border-radius:19px!important}
+}
+@media(prefers-reduced-motion:reduce){
+ .radio-controls button,.radio-volume,.moods .mood{transition:none}
+}
