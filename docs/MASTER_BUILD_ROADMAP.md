@@ -287,3 +287,175 @@ A feature is complete only when:
 - [ ] Which features are launch blockers versus later releases; no weakening of safety/privacy gates for speed.
 
 **Operational rule:** This document records approved scope and implementation work. It does not claim every listed feature is already built. Update checkboxes only with evidence from code, tests, migrations, security review and deployed behavior.
+
+
+## 21. EXPANDED GAME TASK LIBRARY — new requirement
+
+**Goal:** Add a large, reusable, searchable and versioned task library to every relevant game mode. The library must support both non-explicit tasks and a separately controlled adult-content category. This is a content-production and implementation requirement, not a claim that the tasks are already live.
+
+### 21.1 Content inventory and targets
+- [ ] Create a launch seed library of at least **300 reviewed task cards**, then grow towards **500+** as editorial capacity permits.
+- [ ] Minimum initial distribution target:
+  - 80 non-explicit discovery, reflection and preference-building tasks.
+  - 60 protocol, service, ritual and routine tasks.
+  - 50 tease/anticipation, puzzle, riddle and branching-story tasks.
+  - 40 roleplay, character and fictional-scenario tasks.
+  - 30 praise, affirmation, confidence and communication tasks.
+  - 20 sensory atmosphere, sound, visual and imagination tasks.
+  - 20 partner/couple discussion and agreement tasks.
+  - 20 safety, preparation, check-in and aftercare tasks.
+  - 20 adult-only explicit-category records, subject to the platform/provider policy review, legal review, age assurance, consent metadata and human approval. Do not generate or publish this category automatically before those gates pass.
+- [ ] Avoid duplicate cards that merely change a few words. Each task needs a distinct purpose, choice, outcome or story beat.
+- [ ] Maintain both Dutch and English versions; translation must preserve meaning, boundaries, tone and safety instructions.
+- [ ] Use short cards for random mode and longer multi-step task chains for story/challenge modes.
+- [ ] Provide beginner, gradual, intermediate and experienced variations without treating experience as proof of consent.
+
+### 21.2 Task-card schema
+Each card must have:
+- [ ] Stable ID, slug, version, title, short preview and complete task text.
+- [ ] Dutch and English content, content category, game/mode compatibility and optional story/chapter links.
+- [ ] KINK DNA tags: Service sub, Tease / anticipation, Nog aan het ontdekken, Switch, Roleplay, Strenge taal, Praise / affirmation, Sensation play, Rope / bondage, Brat, Pet play, Slave / protocol.
+- [ ] Interest tags: Rituelen en protocol, Verhalen en fantasie, Raadsels en quizzen, Duidelijke opdrachten, Speelse uitdagingen, Visuele sfeer, Dagelijkse routines, Koppelscenario's, Persoonlijke reflectie, Stem en audio.
+- [ ] Content classification: non-explicit, adult-themed/non-graphic, or explicit adult category; the last category remains unpublished until policy and legal approval.
+- [ ] Recommended experience level, suggested duration, intensity, solo/partner context, preparation needs and accessibility alternatives.
+- [ ] Required equipment/setting if any, with safe alternatives and a “no equipment” version where possible.
+- [ ] Consent/boundary prerequisites, check-in points, stop/pause behavior, contraindication flags for unsafe combinations and optional aftercare.
+- [ ] Whether the card is fictional/roleplay, a reflection prompt, a communication task or a real-world activity.
+- [ ] Author/reviewer, source/rights if applicable, created/updated dates, moderation notes and publication status.
+- [ ] Optional rewards, XP value and idempotent award event; no reward for ignoring a boundary or continuing after stop.
+- [ ] Duplicate-detection fingerprint, tags for search and recommendation, feedback counters and retirement reason.
+- [ ] Never infer a user's permission from their role, prior session, purchase, relationship status, saved preference or previous completion.
+
+### 21.3 Editorial categories and example non-explicit task prompts
+These are seed examples to be turned into complete cards, reviewed and localized. They are non-explicit, optional and adaptable.
+
+**Discovery and KINK DNA**
+1. Choose one role or interest that feels familiar and one that remains a question mark.
+2. Mark three themes as “curious”, “not now” or “not for me”.
+3. Describe the difference between enjoying a fantasy in a story and wanting it in real life.
+4. Pick a preferred pace: slow reveal, clear steps or alternating formats.
+5. Choose a topic you want the app to leave out of recommendations.
+6. Save one boundary and one thing you would like to explore through fiction only.
+7. Rate today's energy as low, medium or high, then choose a matching experience.
+8. Write one sentence that would make an experience feel respectful and welcoming.
+9. Preview a suggested card and choose accept, edit or replace before it starts.
+10. Revisit one profile answer and decide whether it still fits today.
+
+**Protocol, service and rituals**
+11. Design a two-minute start ritual using only safe, everyday actions.
+12. Choose a personal phrase that signals “ready to begin” and a separate phrase that means “pause”.
+13. Put three steps in an order that feels calm and achievable.
+14. Create a short end-of-session ritual that helps you transition back to ordinary life.
+15. Pick a small everyday habit and define a realistic reminder for it.
+16. Build a fictional protocol card with a title, purpose and opt-out.
+17. Choose which instructions should always be written rather than spoken.
+18. Decide what a respectful correction sounds like for you.
+19. Create a checklist with one preparation step, one check-in and one closing step.
+20. Remove one ritual step that feels unnecessary or uncomfortable.
+
+**Anticipation, riddles and mystery**
+21. Solve a short three-clue riddle to reveal the next story choice.
+22. Choose between a direct reveal and a gradual reveal.
+23. Find a hidden symbol in the scene description and use it to unlock a harmless story branch.
+24. Pick one of three sealed story cards, with a preview of category and intensity shown first.
+25. Build a sequence from clue, choice and reveal.
+26. Choose whether the next clue should be visual, written or audio-based.
+27. Pause the story and predict which of two fictional characters will make the next decision.
+28. Choose a surprise only from categories already approved in your profile.
+29. Solve a word puzzle that reveals a new emblem or piece of lore.
+30. Ask the virtual character one question before continuing the scene.
+
+**Roleplay and fictional worlds**
+31. Choose a character role and a scene setting from the approved story library.
+32. Write one line of dialogue for your character, or choose a suggested line.
+33. Decide which character sets the pace of the fictional scene.
+34. Select a story branch that emphasizes mystery, warmth, discipline or humor.
+35. Create a fictional title and emblem for your alter ego.
+36. Choose whether the scene should be dialogue-led, puzzle-led or atmosphere-led.
+37. Change one detail in the setting and see how the story adapts.
+38. Pick a role reversal in a fictional scene, with a clear exit back to neutral mode.
+39. Choose a fictional challenge that can be completed through a decision rather than a physical action.
+40. End the chapter by selecting what your character learned.
+
+**Praise, affirmation and confidence**
+41. Choose a praise style: gentle, direct, playful or formal.
+42. Write one sentence acknowledging something you handled well today.
+43. Choose an affirmation that feels authentic, then edit any wording that does not.
+44. Select a confidence challenge that can be skipped without explanation.
+45. Choose whether feedback should be private, spoken, displayed as text or omitted.
+46. Save a phrase that feels supportive and remove any phrase that feels patronizing.
+47. Complete the sentence: “I felt respected when…”
+48. Choose one small achievement to record in your private collection.
+49. Ask the virtual character to reflect your chosen strengths without making assumptions.
+50. Finish with a neutral check-in: continue, change direction or stop.
+
+**Sensory atmosphere and imagination**
+51. Choose a visual atmosphere: candlelit library, velvet theatre, moonlit garden or abstract gold-and-purple space.
+52. Pick ambient sound, voice, silent text or no audio.
+53. Choose a breathing-free grounding option such as noticing five visible details in the room.
+54. Select a story texture: elegant, mysterious, playful or minimal.
+55. Choose whether transitions should be subtle or cinematic.
+56. Adjust the pace and brightness before starting.
+57. Build a personal soundscape from licensed/original sounds.
+58. Choose an accessible text description instead of a visual-only clue.
+59. Rate the atmosphere and save or dismiss it.
+60. Turn off effects instantly and continue in a clean, neutral interface.
+
+**Couple communication and agreements**
+61. Each partner privately chooses one topic they are willing to discuss; only share after reviewing the exact item.
+62. Pick a neutral opening question for a boundary conversation.
+63. Mark a proposed activity as “yes to discuss”, “not now” or “no”.
+64. Compare preferred pacing without showing private answers automatically.
+65. Agree on a check-in phrase and a separate stop signal.
+66. Choose what information must never be shared with the other account.
+67. Complete a short post-experience conversation prompt, or skip it.
+68. Review an agreement and explicitly renew, edit or withdraw it.
+69. Practice responding respectfully to “no” in a fictional dialogue.
+70. Unlink partner access and confirm that shared visibility has ended.
+
+**Safety, preparation and aftercare**
+71. Check whether the current setting feels private enough; choose a fictional alternative if not.
+72. Confirm available time and select a shorter version if needed.
+73. Review the card's category, duration and intensity before opting in.
+74. Choose PAUSE, PASS and STOP controls and test where they are on screen.
+75. Pick an aftercare option before the experience, with no obligation to use it.
+76. Set an optional check-in reminder that can be cancelled.
+77. Choose a no-equipment, no-camera and silent alternative.
+78. Review which information will be saved to history before starting.
+79. Finish with “how am I feeling?” and choose a private answer or skip.
+80. Delete the session recap or keep it private in the archive.
+
+### 21.4 Adult-themed and explicit-category handling
+- [ ] Create a separate content classification and publication gate; do not mix explicit-category cards into random/surprise pools unless the user explicitly opted in and the card passes all applicable policy and legal checks.
+- [ ] The app must not equate “explicit” with “unbounded”: every card needs a preview, user-controlled limits, consent prerequisites, PAUSE/PASS/STOP and aftercare where appropriate.
+- [ ] Distinguish non-explicit kink themes, adult-themed but non-graphic writing and explicit sexual content. The OpenAI API policy and any chosen provider policy must be checked for the exact generation and distribution use case before using that provider for adult content. If the policy does not permit a content type, do not generate it with that provider; use approved human-authored content or another lawful, policy-compliant workflow.
+- [ ] Do not generate instructions that encourage non-consensual acts, coercion, incapacitation, injury, dangerous restraint, deprivation of safety controls or disregard of a stop signal.
+- [ ] For rope/bondage/sensation interests, default to non-instructional discussion, preparation, communication and fictional narrative until qualified safety review approves any practical material. Do not offer dangerous physical restraint, breath restriction or injury-risk instructions.
+- [ ] Human review is mandatory before publishing sensitive/adult-category content; keep reviewer decisions, version history and a fast withdrawal mechanism.
+- [ ] Do not use sensitive preference data to target advertising or to infer consent.
+- [ ] Require robust age-access controls appropriate to applicable law and platform/provider requirements; do not represent a checkbox as verified age.
+- [ ] Provide reporting, blocklists, exclusion settings and “never recommend this category” controls.
+
+### 21.5 Content Studio and content generation pipeline
+- [ ] Add bulk import/export (CSV/JSON for editorial workflows), schema validation, preview, tag editor, translation status and duplicate detection.
+- [ ] Workflow: draft → automated schema/safety checks → human review → approved → scheduled/published → monitored → revised/withdrawn.
+- [ ] AI may draft only categories permitted by the configured provider policy. Treat model output as untrusted draft material, never as auto-approved production content.
+- [ ] Add content-generation settings for language, tone, category, tags, length, beginner/experienced variation, mode, diversity and excluded topics.
+- [ ] Use a deterministic template fallback if AI is unavailable. Generation failure must not break gameplay or create unsafe improvised instructions.
+- [ ] Maintain a seeded, human-reviewed library so core games do not require a live model call to function.
+- [ ] Rate-limit generation, set budget caps, redact sensitive profile data from prompts when not needed, and log metadata rather than private user text wherever possible.
+- [ ] Add regression tests for unsafe combinations, consent language, stop-control visibility, age gating, translations and publication permissions.
+- [ ] Track content coverage by role/interest and identify empty combinations without inventing user preferences.
+- [ ] Admin can retire or replace a card without breaking historical session references; completed sessions retain a safe snapshot of the card version shown to the user.
+
+### 21.6 Task Library acceptance criteria
+- [ ] Seed library meets the agreed minimum count with no duplicate filler cards.
+- [ ] Every card has classification, language, tags, experience level, preview, duration and safety metadata.
+- [ ] Random/Surprise never selects excluded or unapproved content.
+- [ ] KINK DNA recommendations explain why a card was suggested and honor “not for me”, “not now” and per-topic boundaries.
+- [ ] User can skip, edit, replace, pause or stop without penalty.
+- [ ] Content is private where appropriate, partner sharing is opt-in, and deletion/export works.
+- [ ] Human approval, rollback and withdrawal are tested.
+- [ ] CI validates schemas, translations, duplicate IDs, missing safety metadata and unauthorized publication.
+- [ ] Explicit-category publication remains disabled until provider policy, legal review, age controls and human review are complete.
+
