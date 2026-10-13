@@ -1,6 +1,6 @@
-import React,{useMemo,useState} from "react";
+import React,{useEffect,useMemo,useState} from "react";
 import {ArrowLeft,CalendarDays,Check,RefreshCw,Sparkles} from "lucide-react";
-import {completeMissionRemote} from "./services/missions";
+import {completeMissionRemote,loadDailyRitualDates} from "./services/missions";
 import {supabaseConfigured} from "./services/supabase";
 
 type Language="nl"|"en";
@@ -23,7 +23,7 @@ const rituals:DailyCard[]=[
  {id:"closing",categoryNL:"AFRONDING",categoryEN:"CLOSING",titleNL:"Sluit bewust af",titleEN:"Close with intention",promptNL:"Hoe weet je dat een moment echt klaar is?",promptEN:"How do you know when a moment is truly over?",practiceNL:"Kies een eenvoudige afsluitzin of een teken dat de rollen afrondt en je weer terugbrengt naar het gewone moment.",practiceEN:"Choose a simple closing phrase or signal that ends the role and brings you back to the everyday moment.",duration:"2 min"}
 ];
 type Progress={doneDates:string[]};
-function todayKey(date=new Date()){return date.getFullYear()+"-"+String(date.getMonth()+1).padStart(2,"0")+"-"+String(date.getDate()).padStart(2,"0")}
+function todayKey(date=new Date()){return date.toISOString().slice(0,10)}
 export function calculateDailyStreak(doneDates: readonly string[], today: string): number {
  const done = new Set(doneDates);
  const anchor = new Date(today + "T12:00:00");
@@ -47,6 +47,22 @@ export default function DailyAfterHours({profileId,language="nl",onBack,onOpenMi
  const card=useMemo(()=>{const stamp=Math.floor(new Date(today+"T12:00:00").getTime()/86400000);return rituals[((stamp%rituals.length)+rituals.length)%rituals.length]},[today]);
  const [progress,setProgress]=useState<Progress>(()=>readProgress(profileId));
  const [message,setMessage]=useState("");
+ const [progressSource,setProgressSource]=useState<"loading"|"server"|"local">("loading");
+ useEffect(()=>{
+  let active=true;
+  const local=readProgress(profileId);
+  setProgress(local);
+  setProgressSource("loading");
+  void loadDailyRitualDates().then(remoteDates=>{
+   if(!active)return;
+   if(remoteDates===null){setProgressSource("local");return;}
+   const merged={doneDates:Array.from(new Set([...local.doneDates,...remoteDates])).sort().slice(-120)};
+   setProgress(merged);
+   try{localStorage.setItem("afterhours.dailyritual."+profileId,JSON.stringify(merged))}catch{}
+   setProgressSource("server");
+  }).catch(()=>{if(active)setProgressSource("local")});
+  return()=>{active=false};
+ },[profileId]);
  const [busy,setBusy]=useState(false);
  const done=progress.doneDates.includes(today);
  const streak=useMemo(()=>calculateDailyStreak(progress.doneDates,today),[progress,today]);
@@ -75,6 +91,6 @@ export default function DailyAfterHours({profileId,language="nl",onBack,onOpenMi
    {message&&<p className="daily-message" role="status">{message}</p>}
   </article>
   <section className="daily-next-steps"><h3>{t("Ga verder op jouw manier","Continue your way")}</h3><button type="button" onClick={onOpenMissions}><span><strong>{t("Missies van vandaag","Today's missions")}</strong><small>{t("Kleine stappen, op eigen tempo.","Small steps, at your own pace.")}</small></span><span>↗</span></button><button type="button" onClick={onOpenInsights}><span><strong>{t("Inzichten","Insights")}</strong><small>{t("Tarot, Oracle en reflectie.","Tarot, Oracle and reflection.")}</small></span><span>↗</span></button></section>
-  <p className="daily-footnote">{t("Je dagelijkse afvinkritme wordt lokaal op dit apparaat bijgehouden. Serverbevestiging is apart vermeld; veiligheidsfuncties blijven gratis.","Your daily completion streak is tracked locally on this device. Server confirmation is shown separately; safety features always remain free.")}</p>
+  <p className="daily-footnote">{progressSource==="server"?t("Je ritme wordt gesynchroniseerd via je account, zodat het op andere apparaten terugkomt.","Your streak syncs through your account and follows you across devices."):progressSource==="loading"?t("Je ritme wordt gecontroleerd…","Checking your streak…"):t("Je ritme wordt lokaal bijgehouden zolang accountsynchronisatie niet beschikbaar is.","Your streak is stored locally while account sync is unavailable.")} {t("Veiligheidsfuncties blijven gratis.","Safety features always remain free.")}</p>
  </main>;
 }
