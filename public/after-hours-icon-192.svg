@@ -1,32 +1,43 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
-  <title id="title">AFTER HOURS app icon</title>
-  <desc id="desc">A gold crescent and monogram in a midnight plum medallion.</desc>
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#1b0b22"/><stop offset=".58" stop-color="#0b0710"/><stop offset="1" stop-color="#030205"/>
-    </linearGradient>
-    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#f6d77c"/><stop offset=".45" stop-color="#c89445"/><stop offset="1" stop-color="#88582b"/>
-    </linearGradient>
-    <radialGradient id="glow" cx=".5" cy=".35" r=".7">
-      <stop offset="0" stop-color="#632579" stop-opacity=".48"/><stop offset="1" stop-color="#150b1c" stop-opacity="0"/>
-    </radialGradient>
-  </defs>
-  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
-  <rect width="512" height="512" rx="112" fill="url(#glow)"/>
-  <rect x="31" y="31" width="450" height="450" rx="92" fill="none" stroke="url(#gold)" stroke-opacity=".8" stroke-width="2"/>
-  <rect x="44" y="44" width="424" height="424" rx="82" fill="none" stroke="#c89445" stroke-opacity=".23" stroke-width="1"/>
-  <circle cx="256" cy="236" r="157" fill="none" stroke="url(#gold)" stroke-opacity=".7" stroke-width="2"/>
-  <circle cx="256" cy="236" r="146" fill="none" stroke="#c89445" stroke-opacity=".28" stroke-width="1"/>
-  <g fill="url(#gold)">
-    <path d="M256 64l8 18 19 2-14 13 4 19-17-10-17 10 4-19-14-13 19-2z"/>
-    <circle cx="108" cy="236" r="4"/><circle cx="404" cy="236" r="4"/>
-    <circle cx="150" cy="120" r="3"/><circle cx="362" cy="120" r="3"/>
-    <circle cx="150" cy="352" r="3"/><circle cx="362" cy="352" r="3"/>
-    <path d="M240 400h32l-16 17z"/><path d="M240 84h32l-16-17z"/>
-  </g>
-  <path d="M275 109c-49 22-73 77-56 129 18 55 76 85 131 67-19 39-62 66-110 63-69-5-121-65-116-134 4-62 54-114 117-125 12-2 23-2 34 0z" fill="url(#gold)"/>
-  <text x="265" y="285" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="136" font-weight="normal" letter-spacing="-12" fill="#f4e3bd" stroke="#130b17" stroke-width="1.5" paint-order="stroke">AH</text>
-  <path d="M144 326c30 18 66 27 112 27s82-9 112-27" fill="none" stroke="url(#gold)" stroke-width="2" stroke-linecap="round"/>
-  <path d="M220 374h72" fill="none" stroke="#c89445" stroke-width="1.5" stroke-linecap="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+<title id="title">AFTER HOURS</title><desc id="desc">AFTER HOURS monogram in metallic gold, crescent moon and circular gold frame on deep purple velvet.</desc>
+<defs>
+ <radialGradient id="bg" cx="48%" cy="42%" r="70%"><stop stop-color="#250824"/><stop offset=".55" stop-color="#100610"/><stop offset="1" stop-color="#020102"/></radialGradient>
+ <linearGradient id="gold" x1="0" y1="0" x2="1" y2=".85"><stop stop-color="#fff4bd"/><stop offset=".13" stop-color="#f0b449"/><stop offset=".25" stop-color="#fff3ae"/><stop offset=".43" stop-color="#b9681c"/><stop offset=".58" stop-color="#ffe28a"/><stop offset=".78" stop-color="#fff1b3"/><stop offset="1" stop-color="#a85b18"/></linearGradient>
+ <linearGradient id="gold2" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff8d0"/><stop offset=".4" stop-color="#e5a13b"/><stop offset=".7" stop-color="#fff0a4"/><stop offset="1" stop-color="#a45b19"/></linearGradient>
+ <linearGradient id="velvet" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#7b1a70"/><stop offset=".25" stop-color="#210824"/><stop offset=".53" stop-color="#58104f"/><stop offset=".76" stop-color="#120512"/><stop offset="1" stop-color="#721967"/></linearGradient>
+ <filter id="glow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+ <clipPath id="disc"><circle cx="512" cy="490" r="450"/></clipPath>
+</defs>
+<rect width="1024" height="1024" fill="#000"/>
+<circle cx="512" cy="490" r="466" fill="url(#bg)"/>
+<g clip-path="url(#disc)" opacity=".9" fill="none" stroke="url(#velvet)" stroke-linecap="round">
+ <path d="M38 350Q180 220 320 350T610 335T1000 380" stroke-width="90"/>
+ <path d="M15 485Q170 370 350 515T670 485T1020 470" stroke-width="105"/>
+ <path d="M40 665Q220 560 365 690T680 670T1000 650" stroke-width="92"/>
+ <path d="M260 65Q370 230 535 150T820 150" stroke-width="42"/>
+ <path d="M90 805Q260 730 430 815T780 800" stroke-width="56"/>
+</g>
+<circle cx="512" cy="490" r="465" fill="none" stroke="#8b4a16" stroke-width="18"/>
+<circle cx="512" cy="490" r="465" fill="none" stroke="url(#gold)" stroke-width="11"/>
+<circle cx="512" cy="490" r="449" fill="none" stroke="url(#gold2)" stroke-width="3"/>
+<path d="M593 112C411 132 266 281 266 462c0 183 150 329 335 338-48 18-99 28-152 28-220 0-398-160-398-359S229 111 449 111c51 0 99 0 144 1Z" fill="url(#gold)" stroke="#9c5818" stroke-width="3" filter="url(#glow)"/>
+<path d="M589 119C420 153 302 293 302 462c0 157 115 289 272 326" fill="none" stroke="#fff2a5" stroke-width="3" opacity=".8"/>
+<g fill="url(#gold)" stroke="#8f4b11" stroke-width="3" stroke-linejoin="round">
+ <path d="M300 598 455 242h30l171 356h-58l-43-92H398l-39 92h-59zm119-140h115l-58-135-57 135z"/>
+ <path d="M650 350h49v128h134V350h49v248h-49V521H699v77h-49z"/>
+</g>
+<!-- Hanging celestial ornament from the approved AH crescent mark -->
+<g fill="none" stroke="url(#gold)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)">
+ <path d="M548 78v22m0 18v16m0 18v14m0 18v14m0 18v14m0 18v15"/>
+ <circle cx="548" cy="107" r="8" fill="#2a0c27" stroke-width="4"/>
+ <path d="m548 129 9 9-9 9-9-9z" fill="#d7a84f"/>
+ <circle cx="548" cy="160" r="5" fill="#2a0c27" stroke-width="3"/>
+ <path d="m548 180 8 8-8 8-8-8z" fill="#d7a84f" stroke-width="3"/>
+ <circle cx="548" cy="210" r="5" fill="#2a0c27" stroke-width="3"/>
+ <path d="M540 226h16l-3 14-5 7-5-7z" fill="#d7a84f" stroke-width="3"/>
+</g>
+<text x="512" y="755" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-size="69" letter-spacing="2.5" fill="url(#gold)" stroke="#7d3d0d" stroke-width="1.5">AFTER HOURS</text>
+<path d="M185 796H465M559 796H839" stroke="url(#gold)" stroke-width="4"/>
+<path d="m512 768 24 28-24 28-24-28z" fill="url(#gold)" stroke="#8b4d17" stroke-width="2"/>
+<g fill="#fff0a2" filter="url(#glow)"><path d="M864 133l5 16 16 5-16 5-5 16-5-16-16-5 16-5z"/><path d="M230 242l4 12 12 4-12 4-4 12-4-12-12-4 12-4z"/></g>
 </svg>
