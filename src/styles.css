@@ -1781,3 +1781,32 @@ h1,h2,h3,h4,.wordmark,.gate h1,.hero h2,.round h2,.profile h2,.admin h2,
 @media(prefers-reduced-motion:reduce){
   .teaser-film-brand,.teaser-film-brand::before{transition:none!important;animation:none!important}
 }
+
+
+/* Match the navigation brand to the approved horizontal logo variant. */
+header .brand-nav{
+  display:flex;align-items:center;justify-content:flex-start;gap:10px;
+  flex:0 1 auto;min-width:0;width:auto;max-width:min(44vw,300px);
+  padding:0;background:transparent;border:0;text-align:left;color:var(--ah-gold-light);
+}
+header .brand-nav-monogram{
+  display:block;flex:0 0 auto;width:clamp(32px,4vw,48px);height:auto;max-height:48px;
+  object-fit:contain;filter:drop-shadow(0 0 10px rgba(243,201,107,.2));
+}
+header .brand-nav-copy{display:flex;flex-direction:column;align-items:flex-start;gap:4px;min-width:0}
+header .brand-nav-copy strong{
+  font-family:"Cinzel",Georgia,serif!important;font-weight:500;font-size:clamp(16px,1.9vw,22px);
+  line-height:1;letter-spacing:.1em;white-space:nowrap;color:var(--ah-gold-light);
+}
+header .brand-nav-copy small{
+  font-family:"DM Sans",Arial,sans-serif!important;font-size:7px;font-weight:500;
+  line-height:1.4;letter-spacing:.11em;color:var(--ah-copy);white-space:nowrap;
+}
+header .brand-nav:focus-visible{outline:2px solid var(--ah-gold-light)!important;outline-offset:4px}
+@media(max-width:520px){
+  header .brand-nav{gap:7px;max-width:min(49vw,210px)}
+  header .brand-nav-monogram{width:30px;max-height:38px}
+  header .brand-nav-copy{gap:3px}
+  header .brand-nav-copy strong{font-size:clamp(13px,3.6vw,17px);letter-spacing:.06em}
+  header .brand-nav-copy small{font-size:5px;letter-spacing:.07em}
+}
