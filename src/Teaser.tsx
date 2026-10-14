@@ -10,19 +10,19 @@ export default function Teaser() {
 
   return <main className="teaser-screen">
     <div className="teaser-noise" aria-hidden="true"/>
-    <div className="teaser-top"><img className="teaser-logo" src="/after-hours-logo.svg" alt="AFTER HOURS" /><div className="teaser-top-actions"><span className="teaser-private">18+ · {t("PRIVÉPREVIEW","PRIVATE PREVIEW")}</span><button className="language-toggle teaser-language-toggle" type="button" aria-label={t("Taal wijzigen","Change language")} onClick={() => setLanguage(language === "nl" ? "en" : "nl")}><span className={language === "nl" ? "language-active" : ""}>NL</span><span className="language-divider">/</span><span className={language === "en" ? "language-active" : ""}>EN</span></button></div></div>
+    <div className="teaser-top"><div className="teaser-brand-lockup teaser-brand-lockup-header" role="img" aria-label="AFTER HOURS. YOUR RULES. YOUR LIMITS. YOUR EXPERIENCE."><img className="teaser-brand-monogram" src="/after-hours-monogram.svg" alt="" /><span className="teaser-brand-copy"><strong>AFTER HOURS</strong><small>YOUR RULES. YOUR LIMITS. YOUR EXPERIENCE.</small></span></div><div className="teaser-top-actions"><span className="teaser-private">18+ · {t("PRIVÉPREVIEW","PRIVATE PREVIEW")}</span><button className="language-toggle teaser-language-toggle" type="button" aria-label={t("Taal wijzigen","Change language")} onClick={() => setLanguage(language === "nl" ? "en" : "nl")}><span className={language === "nl" ? "language-active" : ""}>NL</span><span className="language-divider">/</span><span className={language === "en" ? "language-active" : ""}>EN</span></button></div></div>
     {!introUnavailable && !introEnded && <section className="teaser-film" aria-label={t("AFTER HOURS-intro","AFTER HOURS intro")}>
       <video className="teaser-film-video" autoPlay muted playsInline preload="metadata" poster="https://gcdn.picsart.com/cloud-storage/ea428271-664f-4cd5-a566-5bdebb64f775.jpg"
         onEnded={() => setIntroEnded(true)} onError={() => setIntroUnavailable(true)}>
         <source src="https://gcdn.picsart.com/editing-temp/a18ef45a-9ae8-4ce4-93b4-68e40401defc.mp4" type="video/mp4"/>
       </video>
-      <div className="teaser-film-brand" aria-label="AFTER HOURS">
-        <img src="/after-hours-logo.svg" alt="AFTER HOURS" />
-        <span>YOUR RULES. YOUR LIMITS. YOUR EXPERIENCE.</span>
+      <div className="teaser-film-brand" role="img" aria-label="AFTER HOURS. YOUR RULES. YOUR LIMITS. YOUR EXPERIENCE.">
+        <img className="teaser-brand-monogram" src="/after-hours-monogram.svg" alt="" />
+        <span className="teaser-film-wordmark"><strong>AFTER HOURS</strong><small>YOUR RULES. YOUR LIMITS. YOUR EXPERIENCE.</small></span>
       </div>
       <button className="teaser-film-skip" type="button" onClick={() => setIntroEnded(true)}>{t("INTRO OVERSLAAN","SKIP INTRO")}</button>
     </section>}
-    {(introEnded || introUnavailable) && <section className="teaser-film teaser-film-endcard" aria-label={t("AFTER HOURS-logo","AFTER HOURS logo")}><img src="/after-hours-logo.svg" alt="AFTER HOURS" /><p>YOUR RULES. YOUR LIMITS. YOUR EXPERIENCE.</p><span>18+ · PRIVATE EXPERIENCE</span></section>}
+    {(introEnded || introUnavailable) && <section className="teaser-film teaser-film-endcard" aria-label={t("AFTER HOURS-logo","AFTER HOURS logo")}><div className="teaser-brand-lockup teaser-brand-lockup-endcard" role="img" aria-label="AFTER HOURS. YOUR RULES. YOUR LIMITS. YOUR EXPERIENCE."><img className="teaser-brand-monogram" src="/after-hours-monogram.svg" alt="" /><span className="teaser-brand-copy"><strong>AFTER HOURS</strong><small>YOUR RULES. YOUR LIMITS. YOUR EXPERIENCE.</small></span></div><span>18+ · PRIVATE EXPERIENCE</span></section>}
     <section className="teaser-content">
       <span className="eyebrow"><Sparkles size={13}/> {t("EEN NIEUWE WERELD KRIJGT VORM","A NEW WORLD IS TAKING SHAPE")}</span>
       <h1>{t("IN","UNDER")}<br/><em>{t("AANBOUW","CONSTRUCTION")}</em></h1>
