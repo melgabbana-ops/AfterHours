@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 370" role="img" aria-labelledby="title desc">
+  <title id="title">AFTER HOURS monogram</title>
+  <desc id="desc">Transparent horizontal-brand version of the approved AFTER HOURS AH crescent monogram, derived from the master logo artwork.</desc>
+  <defs>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2=".85">
+      <stop stop-color="#fff4bd"/><stop offset=".13" stop-color="#f0b449"/><stop offset=".25" stop-color="#fff3ae"/><stop offset=".43" stop-color="#b9681c"/><stop offset=".58" stop-color="#ffe28a"/><stop offset=".78" stop-color="#fff1b3"/><stop offset="1" stop-color="#a85b18"/>
+    </linearGradient>
+    <linearGradient id="gold2" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#fff8d0"/><stop offset=".4" stop-color="#e5a13b"/><stop offset=".7" stop-color="#fff0a4"/><stop offset="1" stop-color="#a45b19"/>
+    </linearGradient>
+    <filter id="glow" x="-35%" y="-35%" width="170%" height="170%">
+      <feGaussianBlur stdDeviation="4" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <g transform="translate(-27 -56) scale(.5)">
+    <path d="M593 112C411 132 266 281 266 462c0 183 150 329 335 338-48 18-99 28-152 28-220 0-398-160-398-359S229 111 449 111c51 0 99 0 144 1Z" fill="url(#gold)" stroke="#9c5818" stroke-width="3" filter="url(#glow)"/>
+    <path d="M589 119C420 153 302 293 302 462c0 157 115 289 272 326" fill="none" stroke="#fff2a5" stroke-width="3" opacity=".8"/>
+    <g fill="url(#gold)" stroke="#8f4b11" stroke-width="3" stroke-linejoin="round">
+      <path d="M300 598 455 242h30l171 356h-58l-43-92H398l-39 92h-59zm119-140h115l-58-135-57 135z"/>
+      <path d="M650 350h49v128h134V350h49v248h-49V521H699v77h-49z"/>
+    </g>
+    <path d="M864 133l5 16 16 5-16 5-5 16-5-16-16-5 16-5z" fill="#fff0a2" filter="url(#glow)"/>
+  </g>
+</svg>
