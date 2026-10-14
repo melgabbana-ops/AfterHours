@@ -16,6 +16,10 @@ export default function Teaser() {
         onEnded={() => setIntroEnded(true)} onError={() => setIntroUnavailable(true)}>
         <source src="https://gcdn.picsart.com/editing-temp/a18ef45a-9ae8-4ce4-93b4-68e40401defc.mp4" type="video/mp4"/>
       </video>
+      <div className="teaser-film-brand" aria-hidden="true">
+        <img src="/after-hours-logo.svg" alt="" />
+        <div><strong>AFTER HOURS</strong><span>YOUR RULES. YOUR LIMITS. YOUR EXPERIENCE.</span></div>
+      </div>
       <button className="teaser-film-skip" type="button" onClick={() => setIntroEnded(true)}>{t("INTRO OVERSLAAN","SKIP INTRO")}</button>
     </section>}
     {(introEnded || introUnavailable) && <section className="teaser-film teaser-film-endcard" aria-label={t("AFTER HOURS-logo","AFTER HOURS logo")}><img className="teaser-endcard-logo" src="/after-hours-logo.svg" alt="AFTER HOURS" /><p>YOUR RULES. YOUR LIMITS. YOUR EXPERIENCE.</p><span>18+ · PRIVATE EXPERIENCE</span></section>}
