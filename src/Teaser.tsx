@@ -14,7 +14,7 @@ export default function Teaser() {
     {!introUnavailable && !introEnded && <section className="teaser-film" aria-label={t("AFTER HOURS-intro","AFTER HOURS intro")}>
       <video className="teaser-film-video" autoPlay muted playsInline preload="metadata" poster="https://gcdn.picsart.com/cloud-storage/ea428271-664f-4cd5-a566-5bdebb64f775.jpg"
         onEnded={() => setIntroEnded(true)} onError={() => setIntroUnavailable(true)}>
-        <source src="https://gcdn.picsart.com/editing-temp/8b78d67d-aadf-4728-be19-00c0ad1fead1.mp4" type="video/mp4"/>
+        <source src="https://gcdn.picsart.com/editing-temp/a18ef45a-9ae8-4ce4-93b4-68e40401defc.mp4" type="video/mp4"/>
       </video>
       <div className="teaser-film-brand" aria-label="AFTER HOURS">
         <img src="/after-hours-logo.svg" alt="AFTER HOURS" />
