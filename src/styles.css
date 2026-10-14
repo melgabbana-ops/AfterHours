@@ -1810,3 +1810,44 @@ header .brand-nav:focus-visible{outline:2px solid var(--ah-gold-light)!important
   header .brand-nav-copy strong{font-size:clamp(13px,3.6vw,17px);letter-spacing:.06em}
   header .brand-nav-copy small{font-size:5px;letter-spacing:.07em}
 }
+
+
+/* Approved AFTER HOURS moodboard system: velvet black, electric violet, warm metallic gold. */
+:root{
+  --gold:#d7a84f;
+  --gold-light:#f3c96b;
+  --purple:#6d168f;
+  --purple-deep:#180a20;
+  --ink:#070509;
+  --line:#34203d;
+}
+html,body{background:#070509;color:#f4ebdd}
+.app{background:radial-gradient(ellipse at 50% -18%,rgba(109,22,143,.26),transparent 43%),linear-gradient(180deg,#100712 0%,#070509 46%,#070509 100%)}
+header{background:rgba(7,5,9,.9);border-bottom-color:rgba(200,148,69,.2)}
+.wordmark{width:58px;height:58px;min-width:58px;padding:2px}
+.wordmark img{width:54px;height:54px;object-fit:contain}
+.brand-nav{justify-content:flex-start}
+.hero h2,.round h2,.profile h2,.admin h2,.guide-card h2,.insights-hero h2,.tarot-card h3,.astro-card h3{font-family:"Cinzel",serif;letter-spacing:.025em}
+.tile,.gamecard,.task-card,.consent-panel,.auth-panel,.resume-panel,.support-card,.guide-card,.radio-player,.tarot-card,.astro-card{border-color:rgba(200,148,69,.25);background:linear-gradient(145deg,rgba(41,16,51,.5),rgba(7,5,9,.96))}
+.tile{border-radius:14px;transition:border-color .2s ease,transform .2s ease,background .2s ease}
+.tile:hover{border-color:rgba(243,201,107,.65);background:linear-gradient(145deg,rgba(109,22,143,.18),rgba(7,5,9,.98))}
+.gamecard{border-radius:16px;background:radial-gradient(circle at 100% 0%,rgba(109,22,143,.2),transparent 48%),linear-gradient(145deg,#180a20,#09070b)}
+.gamecard button,.next,.actions button,.guide-actions button,.insight-actions button,.auth-panel button,.consent-panel button,.resume-panel button,.name-editor button{border-radius:10px}
+button.gold,.gold,.teaser-enter{background:linear-gradient(115deg,#c89445,#f3c96b 52%,#c89445);color:#130b13;border-color:#d7a84f}
+button.gold:hover,.gold:hover,.teaser-enter:hover{filter:brightness(1.08)}
+nav{background:rgba(7,5,9,.96);border-top-color:rgba(200,148,69,.2)}
+.status span{background:#b45ce0;box-shadow:0 0 9px rgba(180,92,224,.5)}
+.teaser-top{align-items:center}
+.teaser-logo{display:block;width:clamp(54px,8vw,82px);height:auto;object-fit:contain;filter:drop-shadow(0 0 18px rgba(109,22,143,.28))}
+.teaser-film-brand{display:none!important}
+.teaser-endcard-logo{display:block;width:min(72vw,360px);max-height:70%;object-fit:contain;filter:drop-shadow(0 10px 28px rgba(109,22,143,.3))}
+.teaser-film-endcard{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:clamp(18px,4vw,36px);background:radial-gradient(ellipse at 50% 42%,rgba(109,22,143,.28),transparent 58%),#070509;border:1px solid rgba(200,148,69,.3);border-radius:18px}
+.teaser-film-endcard p{margin:0;color:#f4ebdd;font-family:"DM Sans",sans-serif;font-size:clamp(9px,1.6vw,13px);letter-spacing:.17em;text-align:center}
+.teaser-film-endcard>span{color:#d7a84f;font-size:9px;letter-spacing:.2em}
+@media(max-width:520px){
+  header{padding-left:14px;padding-right:14px}
+  .wordmark{width:50px;height:50px;min-width:50px}
+  .wordmark img{width:48px;height:48px}
+  .teaser-logo{width:58px}
+  .teaser-film-endcard{border-radius:12px}
+}
