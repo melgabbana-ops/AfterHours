@@ -59,6 +59,11 @@ export function safeMediaSessionFolder(value: string): string {
   return segment === "." || segment === ".." ? "general" : segment;
 }
 
+export function safeAssignmentPrefix(value?: string): string {
+  if (!value?.trim()) return "";
+  return `${safeMediaSessionFolder(value).slice(0, 40)}-`;
+}
+
 async function currentUserId(): Promise<string> {
   if (!supabaseConfigured || !supabase) throw new Error("Privéopslag is nog niet geconfigureerd.");
   const { data, error } = await supabase.auth.getUser();
@@ -101,7 +106,7 @@ export async function uploadPrivateMedia(file: File, sessionId: string, assignme
   validatePrivateMediaFile(file);
   const userId = await currentUserId();
   const safeSessionId = safeMediaSessionFolder(sessionId);
-  const safeAssignment = assignmentTitle ? `${safeMediaSessionFolder(assignmentTitle).slice(0, 40)}-` : "";
+  const safeAssignment = safeAssignmentPrefix(assignmentTitle);
   const path = `${userId}/${safeSessionId}/${safeAssignment}${crypto.randomUUID()}-${safeFileName(file.name)}`;
   const { error } = await supabase!.storage.from(BUCKET).upload(path, file, {
     cacheControl: "3600",
