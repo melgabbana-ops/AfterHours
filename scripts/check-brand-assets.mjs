@@ -13,7 +13,7 @@ if (approved !== master) {
 const html = readFileSync("index.html", "utf8");
 const manifest = JSON.parse(readFileSync("public/manifest.webmanifest", "utf8"));
 const referencedIcons = new Set([
-  ...[...html.matchAll(/\/icons\/(after-hours-[a-z0-9-]+\\.svg)/g)].map((match) => `public/icons/${match[1]}`),
+  ...[...html.matchAll(/\/icons\/(after-hours-[a-z0-9-]+\.svg)/g)].map((match) => `public/icons/${match[1]}`),
   ...(manifest.icons ?? []).map((icon) => `public${icon.src}`),
 ]);
 
