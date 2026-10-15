@@ -1975,3 +1975,34 @@ nav{background:rgba(7,5,9,.96);border-top-color:rgba(200,148,69,.2)}
     transition-duration:.01ms!important;
   }
 }
+
+
+/* Character Studio: precise selection feedback and compact-phone layout */
+.character-studio{min-width:0;overflow:hidden}
+.character-studio-toggle{width:100%;min-height:64px;text-align:left;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.character-studio-toggle>span{display:flex;align-items:center;gap:11px;min-width:0}
+.character-studio-toggle>span>span{display:flex;flex-direction:column;gap:4px;min-width:0}
+.character-studio-toggle small{line-height:1.45}
+.character-preview{min-width:0;overflow:hidden}
+.character-preview-caption{min-width:0;overflow-wrap:anywhere}
+.character-art{display:block;width:100%;height:auto;max-width:240px;margin-inline:auto}
+.character-field{min-width:0}
+.character-segment button,.character-swatches button{position:relative;flex:0 0 auto;touch-action:manipulation}
+.character-segment button[aria-pressed="true"],.character-swatches button[aria-pressed="true"]{outline:2px solid var(--ah-gold-light);outline-offset:3px;box-shadow:0 0 0 5px rgba(109,52,121,.2),0 0 18px rgba(231,189,104,.12)}
+.character-swatches button[aria-pressed="true"]:after{content:"";position:absolute;inset:4px;border:1px solid rgba(255,255,255,.72);border-radius:inherit;pointer-events:none}
+.character-mask-toggle{display:flex;align-items:center;gap:11px;min-height:44px;cursor:pointer}
+.character-mask-toggle input{width:18px;height:18px;flex:0 0 auto;accent-color:var(--ah-gold)}
+.character-save-note{color:#b7aabd;font-size:12px}
+@media(max-width:420px){
+ .character-studio-body{padding-inline:10px;gap:16px}
+ .character-preview{grid-template-columns:minmax(0,1fr);gap:12px}
+ .character-art{max-width:200px}
+ .character-preview-caption{text-align:center;padding-bottom:5px}
+ .character-segment{gap:7px}
+ .character-segment button{min-height:44px;padding-inline:12px}
+ .character-swatches{gap:12px}
+ .character-swatches button{width:40px;height:40px}
+}
+@media(forced-colors:active){
+ .character-segment button[aria-pressed="true"],.character-swatches button[aria-pressed="true"]{outline:2px solid Highlight}
+}
