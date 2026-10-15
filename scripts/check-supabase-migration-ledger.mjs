@@ -26,7 +26,7 @@ const actual = readdirSync(directory).filter((name) => name.endsWith(".sql")).so
 const baseline = [...expected].sort();
 const missing = baseline.filter((name) => !actual.includes(name));
 const unexpected = actual.filter((name) => !baseline.includes(name));
-const versions = actual.map((name) => name.match(/^(\\d{14})_/ )?.[1]).filter(Boolean);
+const versions = actual.map((name) => { const separator = name.indexOf("_"); const version = separator < 0 ? "" : name.slice(0, separator); return /^[0-9]{14}$/.test(version) ? version : null; }).filter(Boolean);
 const duplicates = versions.filter((version, index) => versions.indexOf(version) !== index);
 
 if (missing.length || unexpected.length || duplicates.length || versions.length !== actual.length) {
