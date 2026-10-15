@@ -18,6 +18,7 @@ The canonical schema is in `supabase/schema.sql`. The ordered migration history 
 11. `20261012100000_private_video_capture.sql` extends the private media storage policy for approved video/audio capture, with limits enforced by the storage/database policy.
 12. `20261012110000_xp_event_ledger.sql` adds the server-write-only XP event ledger and the idempotent, atomic session-completion XP award. Review its 60-minute active-session requirement against the actual product flow before applying it.
 13. `20261012120000_session_mood_history.sql` adds user-owned session mood history with row-level security.
+14. `20261015100000_restore_atomic_completion_consent.sql` restores consent revocation inside the XP-ledger completion transaction. It also repairs a completed session if its latest consent record is still active. This forward-only migration is needed because the XP-ledger migration replaces the earlier completion function.
 
 For a new Supabase project, review the SQL and apply migrations in timestamp order using the Supabase CLI or migration workflow before enabling remote persistence. For a project where `schema.sql` was already applied manually, inspect the live schema and migration history before running `db push`; baseline the existing database rather than blindly replaying an untracked schema. Existing databases that recorded the earlier date-only filenames need their migration history checked before applying the timestamped replacements.
 
@@ -39,7 +40,7 @@ The Supabase adapter is already wired into the client. Local storage remains ava
 
 ## Consent
 
-Consent is session-scoped and auditable. Revocation stops the active client session immediately. Production code should append a new consent record rather than mutating historical consent evidence.
+Consent is session-scoped and auditable. Revocation stops the active client session immediately. Production code should append a new consent record rather than mutating historical consent evidence. Session completion must also append a revoked consent event in the same database transaction as the completion and XP award.
 
 ## Private media storage
 The bucket `after-hours-private-media` is private. Every object path must start with the authenticated user's UUID, followed by the session ID and filename: `<auth.uid()>/<session-id>/<filename>`. Storage policies scope access to that first folder. The media UI must use authenticated storage operations or short-lived signed URLs; never make this bucket public.
