@@ -316,3 +316,15 @@
 - [ ] Verify all master-prompt screens/components against the current source code, including onboarding/trailer, character creation/evolution, game modes/100+ command library, mood history/private notes, private media capture, music/SFX/haptics, socials/templates, admin ranks/products/test mode, legal pages and pricing/credit consistency.
 - [x] Build `docs/FEATURE_IMPLEMENTATION_MATRIX.md`, linking approved requirements to source files and explicitly marking partial, missing, unverified and external-prerequisite work. Keep the matrix updated as implementation changes. Do not infer missing features merely from the old 9 Oct report, which itself noted it had not yet inspected all code.
 - [~] CI has been rerun repeatedly through each implementation change. Final status must be checked against the latest PR commit SHA before reporting completion. Keep changes on the feature branch until explicitly approved for merge/release.
+
+
+## 13 October 2026 audit additions
+- [x] Daily After Hours page is wired into the home screen. It offers a bilingual rotating daily ritual, local streak and shortcuts to missions/insights; streak sync across devices is not implemented yet.
+- [x] AFTER HOURS camera overlay code is wired into photo processing and new video capture. Presets are CLEAN, AFTER HOURS and CINEMATIC; the current automated test only verifies preset metadata. Physical iOS/Android camera tests remain required.
+- [x] Lovense Connect page and authenticated `lovense-auth-token` Edge Function scaffold are present in current `main`. Official SDK/API docs have been checked. Real connection is still blocked on approved developer account, secret setup, deployment, correct production origin/CSP and real-device verification.
+- [x] AFTER HOURS Club pricing proposal added (€8.99/month / €79.99/year). These are proposals only; buttons store local interest, no charge/subscription is created.
+- [ ] Daily ritual progress must be moved to authenticated server storage if cross-device continuity is desired; current streak is local-only.
+- [ ] Membership: obtain written adult-content processor approval, create checkout/subscription endpoints, signed/idempotent webhooks, entitlements, renewals, retries, receipts, cancellation, refunds/disputes and customer access restoration before any sale.
+- [ ] Lovense: verify exact SDK behavior in supported mobile browsers, add secure session-scoped consent, safe disconnect on pause/stop/overwhelm/session end, and only later consider opt-in command-to-device mapping. Never send device actions without explicit consent and clear limits.
+- [ ] Camera: real-device test recording duration, orientation, video/audio synchronization, memory pressure, interruption and local-preview/save flow. Verify the actual branded overlay is visible in the saved video, not merely the live preview.
+- [ ] Review current `main` against this updated matrix. Do not call the full master spec complete just because CI passes; numerous original scope items remain partial, missing or externally blocked.
