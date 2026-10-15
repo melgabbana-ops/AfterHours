@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+<title id="title">AFTER HOURS</title><desc id="desc">Gold crescent, star and AH monogram on deep aubergine.</desc>
+<defs><radialGradient id="velvet"><stop stop-color="#321036"/><stop offset=".62" stop-color="#160817"/><stop offset="1" stop-color="#070509"/></radialGradient><linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff0ad"/><stop offset=".42" stop-color="#d5a54c"/><stop offset=".7" stop-color="#f9dfa0"/><stop offset="1" stop-color="#986522"/></linearGradient></defs>
+<rect width="512" height="512" rx="88" fill="url(#velvet)"/><circle cx="256" cy="238" r="190" fill="none" stroke="url(#gold)" stroke-width="7"/><circle cx="256" cy="238" r="177" fill="none" stroke="#835a2b" stroke-width="2"/>
+<path d="M249 74a141 141 0 1 0 114 231A119 119 0 0 1 249 74Z" fill="url(#gold)"/><path d="m374 95 13 31 33 13-33 13-13 31-13-31-33-13 33-13z" fill="url(#gold)"/>
+<text x="256" y="356" text-anchor="middle" font-family="Georgia,serif" font-size="110" letter-spacing="-8" fill="url(#gold)">AH</text><path d="M112 390H400" stroke="url(#gold)" stroke-width="2"/><text x="256" y="423" text-anchor="middle" font-family="Georgia,serif" font-size="27" letter-spacing="2" fill="#f5d78f">AFTER HOURS</text></svg>
