@@ -26,16 +26,6 @@
  <path d="M300 598 455 242h30l171 356h-58l-43-92H398l-39 92h-59zm119-140h115l-58-135-57 135z"/>
  <path d="M650 350h49v128h134V350h49v248h-49V521H699v77h-49z"/>
 </g>
-<!-- Hanging celestial ornament from the approved AH crescent mark -->
-<g fill="none" stroke="url(#gold)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)">
- <path d="M548 78v22m0 18v16m0 18v14m0 18v14m0 18v14m0 18v15"/>
- <circle cx="548" cy="107" r="8" fill="#2a0c27" stroke-width="4"/>
- <path d="m548 129 9 9-9 9-9-9z" fill="#d7a84f"/>
- <circle cx="548" cy="160" r="5" fill="#2a0c27" stroke-width="3"/>
- <path d="m548 180 8 8-8 8-8-8z" fill="#d7a84f" stroke-width="3"/>
- <circle cx="548" cy="210" r="5" fill="#2a0c27" stroke-width="3"/>
- <path d="M540 226h16l-3 14-5 7-5-7z" fill="#d7a84f" stroke-width="3"/>
-</g>
 <text x="512" y="755" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-size="69" letter-spacing="2.5" fill="url(#gold)" stroke="#7d3d0d" stroke-width="1.5">AFTER HOURS</text>
 <path d="M185 796H465M559 796H839" stroke="url(#gold)" stroke-width="4"/>
 <path d="m512 768 24 28-24 28-24-28z" fill="url(#gold)" stroke="#8b4d17" stroke-width="2"/>
