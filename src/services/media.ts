@@ -97,11 +97,12 @@ export async function listPrivateMedia(): Promise<PrivateMediaItem[]> {
   return items.sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? "")).slice(0, 100);
 }
 
-export async function uploadPrivateMedia(file: File, sessionId: string): Promise<void> {
+export async function uploadPrivateMedia(file: File, sessionId: string, assignmentTitle?: string): Promise<void> {
   validatePrivateMediaFile(file);
   const userId = await currentUserId();
   const safeSessionId = safeMediaSessionFolder(sessionId);
-  const path = `${userId}/${safeSessionId}/${crypto.randomUUID()}-${safeFileName(file.name)}`;
+  const safeAssignment = assignmentTitle ? `${safeMediaSessionFolder(assignmentTitle).slice(0, 40)}-` : "";
+  const path = `${userId}/${safeSessionId}/${safeAssignment}${crypto.randomUUID()}-${safeFileName(file.name)}`;
   const { error } = await supabase!.storage.from(BUCKET).upload(path, file, {
     cacheControl: "3600",
     contentType: normalizePrivateMediaMimeType(file.type),
