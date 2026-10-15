@@ -15,3 +15,5 @@ The default browser favicon now uses `after-hours-master.svg`; the browser tab s
 - `after-hours-new-year.svg`
 
 The SVGs are first-pass, brand-inspired artwork and are not a pixel-exact replacement for the approved master logo. Review the artwork at small sizes and against the approved source before final release.
+
+**Master artwork rule:** `after-hours-master.svg` is an exact copy of the approved `public/after-hours-logo.svg`. Do not redraw, regenerate, or stylize the master mark. Seasonal browser favicons may use seasonal art, but the canonical master and core app logo must remain the approved artwork.
