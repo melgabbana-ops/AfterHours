@@ -129,7 +129,8 @@ async function syncRemoteStateNow(state:AfterHoursState):Promise<string|null>{
  let sessionId=isUuid(state.session.id)?state.session.id:null;
  let remoteSessionExists=false;
  if(sessionId){
-  const{data:owned}=await supabase.from("sessions").select("id").eq("id",sessionId).eq("profile_id",user.id).maybeSingle();
+  const{data:owned,error:ownershipError}=await supabase.from("sessions").select("id").eq("id",sessionId).eq("profile_id",user.id).maybeSingle();
+  if(ownershipError)return "Sessie-eigenaarschap kon niet worden gecontroleerd. Je sessie is niet gewijzigd. "+ownershipError.message;
   remoteSessionExists=Boolean(owned);
  }
  if(!sessionId){
