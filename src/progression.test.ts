@@ -33,4 +33,12 @@ describe("AFTER HOURS player rank progression", () => {
     expect(rankFromXp(-100)).toBe("THE CURIOUS");
     expect(levelFromXp(-100)).toBe(1);
   });
+  it.each([Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY])(
+    "treats malformed non-finite XP (%s) as zero",
+    (xp) => {
+      expect(rankFromXp(xp)).toBe("THE CURIOUS");
+      expect(rankIndexFromXp(xp)).toBe(0);
+      expect(levelFromXp(xp)).toBe(1);
+    },
+  );
 });
