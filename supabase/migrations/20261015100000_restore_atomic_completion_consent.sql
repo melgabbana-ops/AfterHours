@@ -13,6 +13,8 @@ declare
   v_session public.sessions%rowtype;
   v_xp integer := 120;
   v_completed_at timestamptz;
+  v_processing_time timestamptz;
+  v_latest_consent_created_at timestamptz;
   v_consent_status text;
   v_ledger_id uuid;
 begin
@@ -25,12 +27,14 @@ begin
   for update;
   if not found then raise exception 'Sessie niet gevonden.' using errcode = 'P0002'; end if;
 
-  -- Assign the event timestamp after acquiring the row lock so concurrent
-  -- consent updates and completion are ordered by processing time.
-  v_completed_at := clock_timestamp();
+  -- Capture actual processing time after acquiring the row lock. The audit
+  -- event timestamp is adjusted separately to remain newer than the latest
+  -- consent event, even if that row contains a future timestamp.
+  v_processing_time := clock_timestamp();
 
   if v_session.status = 'completed' then
-    select c.status into v_consent_status
+    select c.status, c.created_at
+      into v_consent_status, v_latest_consent_created_at
     from public.consent_records c
     where c.session_id = v_session.id
     order by c.created_at desc, c.id desc
@@ -38,6 +42,7 @@ begin
 
     -- Repair a legacy completed session whose latest consent record is active.
     if v_consent_status = 'active' then
+      v_completed_at := greatest(v_processing_time, v_latest_consent_created_at + interval '1 microsecond');
       insert into public.consent_records(session_id, status, revoked_at, created_at)
       values (v_session.id, 'revoked', v_completed_at, v_completed_at);
     end if;
@@ -51,13 +56,14 @@ begin
 
   if v_session.status = 'active' and v_session.active_started_at is not null then
     v_session.active_seconds := v_session.active_seconds
-      + greatest(0, floor(extract(epoch from (v_completed_at - v_session.active_started_at)))::integer);
+      + greatest(0, floor(extract(epoch from (v_processing_time - v_session.active_started_at)))::integer);
   end if;
   if v_session.active_seconds < 3600 then
     raise exception 'De sessie moet minimaal 60 minuten actieve speeltijd hebben.';
   end if;
 
-  select c.status into v_consent_status
+  select c.status, c.created_at
+    into v_consent_status, v_latest_consent_created_at
   from public.consent_records c
   where c.session_id = v_session.id
   order by c.created_at desc, c.id desc
@@ -65,6 +71,7 @@ begin
   if v_consent_status is distinct from 'active' then
     raise exception 'Actieve consent ontbreekt.';
   end if;
+  v_completed_at := greatest(v_processing_time, v_latest_consent_created_at + interval '1 microsecond');
 
   -- The unique ledger insert and all following writes share this transaction.
   insert into public.xp_event_ledger(
