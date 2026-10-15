@@ -1857,3 +1857,121 @@ nav{background:rgba(7,5,9,.96);border-top-color:rgba(200,148,69,.2)}
   .teaser-logo{width:58px}
   .teaser-film-endcard{border-radius:12px}
 }
+
+
+/* AFTER HOURS visual quality pass: shared interaction states, responsive rhythm, and accessibility */
+:root{
+  --ah-obsidian:#070609;
+  --ah-plum:#24102f;
+  --ah-plum-soft:#321640;
+  --ah-gold:#d5b16c;
+  --ah-champagne:#f0dcae;
+  --ah-border:rgba(213,177,108,.24);
+  --ah-focus:rgba(240,220,174,.92);
+}
+:where(button,a,input,select,textarea,[tabindex]):focus-visible{
+  outline:2px solid var(--ah-focus);
+  outline-offset:3px;
+}
+:where(button,a){
+  -webkit-tap-highlight-color:transparent;
+}
+:where(button:not(:disabled),a){
+  transition:color .18s ease,border-color .18s ease,background-color .18s ease,box-shadow .18s ease,transform .18s ease;
+}
+:where(button:disabled){
+  cursor:not-allowed;
+  opacity:.48;
+}
+:where(input:not([type="checkbox"]):not([type="radio"]),select,textarea){
+  max-width:100%;
+  border:1px solid var(--ah-border);
+  border-radius:10px;
+  background:rgba(12,9,15,.92);
+  color:#f4eee4;
+  accent-color:var(--ah-gold);
+}
+:where(input,select,textarea)::placeholder{color:#92889a;opacity:1}
+:where(button,.tile,.gamecard,.mission-card,.daily-ritual-card,.prompt-card,.aftercare-card,.character-field){
+  overflow-wrap:anywhere;
+}
+:where(.mission-card,.daily-ritual-card,.prompt-card,.aftercare-card,.character-field,.support-card,.guide-card){
+  border-color:var(--ah-border);
+}
+:where(.mission-card,.daily-ritual-card,.prompt-card,.aftercare-card,.character-field,.support-card,.guide-card,.tile,.gamecard){
+  box-shadow:0 10px 32px rgba(0,0,0,.14);
+}
+:where(.gold,.primary,.button-primary,.aftercare-complete){
+  background:linear-gradient(135deg,#f0d79d 0%,#c59a4d 48%,#9e7435 100%);
+  color:#160f08;
+  border:1px solid rgba(255,235,185,.45);
+}
+:where(.gold,.primary,.button-primary,.aftercare-complete):not(:disabled):hover{
+  box-shadow:0 0 0 1px rgba(240,220,174,.16),0 8px 26px rgba(194,143,57,.17);
+  transform:translateY(-1px);
+}
+:where(.selected,[aria-pressed="true"]){
+  border-color:rgba(240,220,174,.78)!important;
+  box-shadow:inset 0 0 0 1px rgba(240,220,174,.16),0 0 18px rgba(128,69,151,.12);
+}
+:where(.eyebrow,.sectionhead,.section-heading){
+  text-wrap:balance;
+}
+:where(h1,h2,h3,p){text-wrap:pretty}
+:where(.character-studio,.character-editor,.character-panel){
+  min-width:0;
+}
+:where(.character-field,.character-save-note,.character-mask-toggle){
+  line-height:1.55;
+}
+:where(.character-segment,.character-swatches){
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+:where(.character-segment button,.character-swatches button){
+  min-height:40px;
+}
+:where(.media-live-frame,.media-live-preview,.media-live-composite){
+  max-width:100%;
+}
+:where(.media-live-frame video,.media-live-preview video,.media-live-composite video,.media-live-frame canvas,.media-live-preview canvas){
+  max-width:100%;
+}
+:where(.safety,.consent,.consent-panel,.prompt-consent,.aftercare-note,.mission-safety-note){
+  line-height:1.55;
+}
+:where(.safety svg,.consent svg,.consent-panel svg,.prompt-consent svg,.aftercare-note svg){
+  flex-shrink:0;
+}
+@media(max-width:600px){
+  :where(.app,main,section,article,.experience-shell,.aftercare-screen,.insights,.daily-screen,.missions-screen){
+    min-width:0;
+  }
+  :where(.hero h2,.experience-shell .round h2){
+    overflow-wrap:anywhere;
+  }
+  :where(.prompt-actions,.insight-actions,.actions,.aftercare-options){
+    gap:8px;
+  }
+  :where(.prompt-actions button,.insight-actions button,.actions button,.aftercare-options button){
+    min-height:44px;
+  }
+  :where(input,select,textarea){
+    font-size:16px;
+  }
+  :where(.mission-card,.daily-ritual-card,.prompt-card,.aftercare-card){
+    border-radius:14px;
+  }
+  :where(.tile,.gamecard){
+    min-width:0;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    scroll-behavior:auto!important;
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:.01ms!important;
+  }
+}
