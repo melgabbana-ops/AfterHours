@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizePrivateMediaMimeType, safeMediaSessionFolder, validatePrivateMediaFile, validatePrivateMediaPath } from "./media";
+import { normalizePrivateMediaMimeType, safeAssignmentPrefix, safeMediaSessionFolder, validatePrivateMediaFile, validatePrivateMediaPath } from "./media";
 
 describe("private media session folder safety", () => {
   it("uses a general folder for dot path segments", () => {
@@ -85,5 +85,26 @@ describe("private media path validation", () => {
     ["a Windows-style path", "user-123\\session\\file.jpg"],
   ])("rejects %s", (_label, path) => {
     expect(validatePrivateMediaPath(path, owner)).toBe(false);
+  });
+});
+
+
+describe("private assignment media prefix", () => {
+  it("omits a prefix when no assignment title is supplied", () => {
+    expect(safeAssignmentPrefix()).toBe("");
+    expect(safeAssignmentPrefix("   ")).toBe("");
+  });
+
+  it("sanitizes separators and control characters before using assignment titles in object names", () => {
+    const prefix = safeAssignmentPrefix("../Scene\\\u0000: one");
+    expect(prefix).not.toMatch(/[\\/%\u0000-\u001F\u007F]/);
+    expect(prefix.endsWith("-")).toBe(true);
+    expect(prefix.length).toBeLessThanOrEqual(41);
+  });
+
+  it("bounds long assignment titles and normalizes Unicode", () => {
+    const prefix = safeAssignmentPrefix("É".repeat(120));
+    expect(prefix.length).toBeLessThanOrEqual(41);
+    expect(prefix).toMatch(/^[a-zA-Z0-9._-]+$/);
   });
 });
