@@ -2028,3 +2028,7 @@ nav button[aria-current="page"] svg{filter:drop-shadow(0 0 7px rgba(214,169,79,.
 .gate button,.teaser-enter,.actions .gold,.next{border-radius:999px;background:linear-gradient(115deg,#c9953f,#f5d98f 48%,#d5a54c);color:#160d17;border:1px solid rgba(255,231,164,.8);box-shadow:0 8px 24px rgba(177,124,42,.2)}
 .tile,.guide-card,.task-card,.support-card,.auth-panel,.resume-panel,.radio-player,.tarot-card,.astro-card{border-radius:16px}
 @media(max-width:520px){main{padding:28px 16px}header{height:64px;padding-inline:12px}nav{gap:2px}nav button{width:auto;flex:1;padding:8px 2px}nav button svg{width:19px;height:19px}.hero{padding:22px 0 30px}.hero h2,.round h2,.profile h2,.admin h2{font-size:clamp(32px,9vw,40px)}.gate-card{border-radius:18px}}
+
+/* Brand correction pass: give the approved square AH master mark real visual presence on mobile. */
+.home-wordmark{width:min(52vw,200px);height:auto;max-height:none;object-fit:contain;top:18px}
+@media(min-width:700px){.home-wordmark{width:min(30vw,220px);top:24px}}
