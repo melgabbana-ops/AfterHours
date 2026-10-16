@@ -2006,3 +2006,25 @@ nav{background:rgba(7,5,9,.96);border-top-color:rgba(200,148,69,.2)}
 @media(forced-colors:active){
  .character-segment button[aria-pressed="true"],.character-swatches button[aria-pressed="true"]{outline:2px solid Highlight}
 }
+
+
+/* Moodboard cohesion: velvet-black canvas, plum atmosphere, champagne accents */
+:root{--ah-obsidian:#050307;--ah-plum:#260d31;--ah-plum-soft:#351342;--ah-gold:#d6a94f;--ah-champagne:#f6d98e;--ah-border:rgba(214,169,79,.34);--ah-focus:#fff0bd}
+body,.app{background-color:var(--ah-obsidian);background-image:radial-gradient(ellipse at 50% -8%,rgba(93,20,111,.38),transparent 44%),radial-gradient(ellipse at 0% 52%,rgba(70,14,83,.16),transparent 35%),radial-gradient(ellipse at 100% 80%,rgba(110,34,100,.11),transparent 36%)}
+header{border-bottom-color:rgba(214,169,79,.18);background:rgba(5,3,7,.91);box-shadow:0 8px 32px rgba(0,0,0,.25)}
+header .brand-nav{width:clamp(46px,7vw,64px);height:clamp(46px,7vw,64px);min-width:clamp(46px,7vw,64px);padding:0;border:0;background:transparent}
+header .brand-nav img{display:block;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 0 13px rgba(214,169,79,.16))}
+.tile,.gamecard,.task-card,.consent-panel,.auth-panel,.resume-panel,.support-card,.guide-card,.radio-player,.tarot-card,.astro-card{border-color:var(--ah-border)!important;background:linear-gradient(145deg,rgba(48,17,60,.76),rgba(8,5,10,.97))!important;box-shadow:inset 0 1px rgba(255,238,194,.035),0 12px 30px rgba(0,0,0,.18)}
+.gamecard{background:radial-gradient(ellipse at 100% 0%,rgba(125,37,142,.26),transparent 50%),linear-gradient(145deg,#24102f,#08050a)!important;border-radius:18px}
+:where(button,a,input,select,textarea):focus-visible{outline:2px solid var(--ah-focus);outline-offset:3px}
+nav{border-top-color:rgba(214,169,79,.22);background:rgba(5,3,7,.94);box-shadow:0 -12px 36px rgba(0,0,0,.28);padding-bottom:env(safe-area-inset-bottom);height:calc(70px + env(safe-area-inset-bottom))}
+nav button{min-width:0;max-width:120px;font-size:9px;letter-spacing:.04em}
+nav button[aria-current="page"]{color:var(--ah-champagne);text-shadow:0 0 16px rgba(214,169,79,.25)}
+nav button[aria-current="page"] svg{filter:drop-shadow(0 0 7px rgba(214,169,79,.35))}
+.gate{background:radial-gradient(ellipse at 50% 22%,rgba(96,24,117,.34),transparent 43%),radial-gradient(ellipse at 50% 92%,rgba(214,169,79,.08),transparent 36%),#050307!important}
+.gate-card{width:min(100%,480px);padding:clamp(22px,5vw,44px);border:1px solid rgba(214,169,79,.3);border-radius:22px;background:linear-gradient(145deg,rgba(35,13,44,.82),rgba(5,3,7,.98));box-shadow:0 22px 70px rgba(0,0,0,.5),inset 0 1px rgba(255,238,194,.05)}
+.gate-logo{width:min(70vw,300px);max-height:38vh;object-fit:contain;filter:drop-shadow(0 0 24px rgba(107,27,130,.22))}
+.gate h1{font-family:"Cinzel",Georgia,serif;color:var(--ah-champagne);letter-spacing:.04em}
+.gate button,.teaser-enter,.actions .gold,.next{border-radius:999px;background:linear-gradient(115deg,#c9953f,#f5d98f 48%,#d5a54c);color:#160d17;border:1px solid rgba(255,231,164,.8);box-shadow:0 8px 24px rgba(177,124,42,.2)}
+.tile,.guide-card,.task-card,.support-card,.auth-panel,.resume-panel,.radio-player,.tarot-card,.astro-card{border-radius:16px}
+@media(max-width:520px){main{padding:28px 16px}header{height:64px;padding-inline:12px}nav{gap:2px}nav button{width:auto;flex:1;padding:8px 2px}nav button svg{width:19px;height:19px}.hero{padding:22px 0 30px}.hero h2,.round h2,.profile h2,.admin h2{font-size:clamp(32px,9vw,40px)}.gate-card{border-radius:18px}}
