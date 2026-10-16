@@ -11,7 +11,7 @@
   "background_color": "#09050D",
   "theme_color": "#09050D",
   "icons": [
-    {"src": "/icons/after-hours-master.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any"},
+    {"src": "/icons/after-hours-master.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any"}
   ],
   "shortcuts": [
     {"name": "Experience", "short_name": "Experience", "url": "/?screen=game"},
