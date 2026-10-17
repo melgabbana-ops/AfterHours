@@ -2032,3 +2032,46 @@ nav button[aria-current="page"] svg{filter:drop-shadow(0 0 7px rgba(214,169,79,.
 /* Brand correction pass: give the approved square AH master mark real visual presence on mobile. */
 .home-wordmark{width:min(52vw,200px);height:auto;max-height:none;object-fit:contain;top:18px}
 @media(min-width:700px){.home-wordmark{width:min(30vw,220px);top:24px}}
+
+
+/* AFTER HOURS moodboard landing refinement: obsidian, velvet aubergine, champagne gold */
+.moodboard-landing{--mb-gold:#f0cb79;--mb-gold-bright:#ffe8a6;--mb-plum:#1b071d;--mb-magenta:#69204f;position:relative;isolation:isolate;overflow:hidden;background:radial-gradient(ellipse at 50% 8%,rgba(103,22,94,.32),transparent 38%),radial-gradient(ellipse at 8% 48%,rgba(117,37,68,.18),transparent 28%),linear-gradient(160deg,#080509 0%,#100711 46%,#050406 100%);padding-bottom:calc(36px + env(safe-area-inset-bottom))}
+.moodboard-landing:before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.38;background:radial-gradient(ellipse at 80% 18%,rgba(174,91,45,.16),transparent 24%),radial-gradient(ellipse at 18% 76%,rgba(119,25,106,.24),transparent 30%),repeating-linear-gradient(125deg,transparent 0 42px,rgba(239,190,101,.018) 43px,transparent 44px 88px)}
+.moodboard-landing .teaser-top{max-width:980px;margin-inline:auto;border-bottom-color:rgba(231,190,105,.25)}
+.moodboard-landing .teaser-logo{filter:drop-shadow(0 0 18px rgba(216,151,54,.2))}
+.moodboard-landing .teaser-film{max-width:980px;margin:18px auto 0;border:1px solid rgba(231,190,105,.45);border-radius:3px;box-shadow:0 18px 64px rgba(0,0,0,.45),0 0 32px rgba(105,25,92,.18);overflow:hidden}
+.moodboard-landing .teaser-film:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(180deg,rgba(8,3,10,.05),rgba(8,3,10,.12) 48%,rgba(8,3,10,.68))}
+.moodboard-landing .teaser-film-brand{z-index:1}
+.moodboard-landing .teaser-film-skip{z-index:2;border:1px solid rgba(240,203,121,.72);border-radius:999px;background:rgba(9,5,11,.75);color:var(--mb-gold-bright);min-height:44px;padding:10px 18px}
+.moodboard-landing .teaser-content{max-width:820px;margin:clamp(26px,5vw,58px) auto 24px;text-align:center;padding:0 22px}
+.moodboard-landing .teaser-content .eyebrow{color:var(--mb-gold);letter-spacing:.22em}
+.moodboard-landing .teaser-content h1{font-family:"Cinzel",serif;font-size:clamp(48px,9vw,92px);line-height:.9;letter-spacing:.045em;font-weight:500;margin:22px 0 16px;color:#fff3d7;text-shadow:0 2px 24px rgba(226,170,78,.13)}
+.moodboard-landing .teaser-content h1 em{font-style:normal;color:var(--mb-gold);font-weight:400}
+.moodboard-landing .teaser-divider{width:min(420px,78%);margin:18px auto 22px}
+.moodboard-landing .teaser-kicker{color:#f0dcae;font-size:clamp(12px,1.6vw,15px);letter-spacing:.18em;line-height:1.8}
+.moodboard-landing .teaser-copy{max-width:620px;margin:12px auto 24px;color:#d0c0cf;font-size:clamp(15px,2vw,18px);line-height:1.8}
+.moodboard-landing .teaser-enter,.moodboard-landing .moodboard-secondary-cta{display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:56px;padding:15px 26px;border:1px solid #ffe5a0;border-radius:999px;background:linear-gradient(135deg,#ffe4a0 0%,#d8a94f 48%,#f5d68a 100%);color:#1b0c10;font-weight:700;letter-spacing:.1em;font-size:12px;text-decoration:none;box-shadow:0 0 0 3px rgba(224,173,77,.09),0 12px 35px rgba(174,108,35,.2);transition:transform .2s ease,filter .2s ease}
+.moodboard-landing .teaser-enter:hover,.moodboard-landing .moodboard-secondary-cta:hover{filter:brightness(1.06);transform:translateY(-1px)}
+.moodboard-landing .teaser-age-note{max-width:650px;margin:12px auto 0;color:#a99aa9;font-size:11px;line-height:1.6}
+.moodboard-feature-grid{width:min(980px,calc(100% - 32px));margin:28px auto 42px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.moodboard-feature-card{position:relative;min-width:0;min-height:150px;padding:24px 14px 20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;text-decoration:none;color:#f8edda;border:1px solid rgba(226,180,96,.55);border-radius:14px;background:linear-gradient(145deg,rgba(28,10,30,.92),rgba(7,5,9,.96));box-shadow:inset 0 0 26px rgba(111,29,103,.1),0 10px 28px rgba(0,0,0,.18);overflow:hidden}
+.moodboard-feature-card:before{content:"";position:absolute;inset:5px;border:1px solid rgba(226,180,96,.12);border-radius:10px;pointer-events:none}
+.moodboard-feature-card svg{width:34px;height:34px;color:var(--mb-gold);stroke-width:1.45;filter:drop-shadow(0 0 7px rgba(235,180,76,.2))}
+.moodboard-feature-card strong{font-family:"Cinzel",serif;font-size:14px;font-weight:500;letter-spacing:.09em;text-transform:uppercase}
+.moodboard-feature-card small{font-size:11px;color:#bcaabd;line-height:1.5}
+.moodboard-feature-number{position:absolute;top:9px;left:12px;color:rgba(238,196,116,.56);font-size:9px;letter-spacing:.12em}
+.moodboard-missions{width:min(980px,calc(100% - 32px));margin:0 auto 36px;position:relative;text-align:center;padding:30px clamp(16px,3vw,36px) 34px;border:1px solid rgba(229,185,103,.72);background:radial-gradient(ellipse at 50% 0,rgba(102,28,95,.22),transparent 54%),linear-gradient(145deg,rgba(17,7,18,.96),rgba(5,4,7,.98));box-shadow:inset 0 0 0 5px rgba(231,187,100,.035),0 16px 50px rgba(0,0,0,.25)}
+.moodboard-missions:before{content:"";position:absolute;inset:6px;border:1px solid rgba(229,185,103,.18);pointer-events:none}
+.moodboard-ornament{position:relative;margin:-46px auto 12px;width:48px;height:30px;display:grid;place-items:center;background:#0c060e;color:var(--mb-gold);font-size:30px}
+.moodboard-missions .eyebrow{color:var(--mb-gold);letter-spacing:.22em;font-size:10px}
+.moodboard-missions h2{font-family:"Cinzel",serif;color:var(--mb-gold-bright);font-size:clamp(24px,4vw,38px);font-weight:500;letter-spacing:.08em;margin:12px 0}
+.moodboard-missions>p{max-width:640px;margin:0 auto 24px;color:#d2c2d2;font-size:14px;line-height:1.75}
+.moodboard-mission-columns{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.moodboard-mission-columns article{display:flex;flex-direction:column;align-items:center;gap:10px;padding:22px 12px;border:1px solid rgba(224,176,83,.45);border-radius:10px;background:rgba(8,5,10,.8)}
+.moodboard-mission-columns svg{color:var(--mb-gold);width:27px;height:27px;stroke-width:1.5}
+.moodboard-mission-columns strong{font-family:"Cinzel",serif;color:#f4dfb1;font-weight:500;font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+.moodboard-mission-columns span{font-size:12px;color:#bbaabb;line-height:1.6}
+.moodboard-landing .moodboard-secondary-cta{margin-top:24px;min-height:48px;background:transparent;color:var(--mb-gold-bright);box-shadow:none}
+.moodboard-landing .teaser-footer{max-width:980px;margin:0 auto;border-top:1px solid rgba(230,187,100,.26);color:#d6b875;letter-spacing:.22em}
+@media(max-width:620px){.moodboard-landing .teaser-top{padding-inline:16px;height:64px}.moodboard-landing .teaser-logo{max-width:132px;max-height:42px}.moodboard-landing .teaser-private{font-size:9px;letter-spacing:.08em}.moodboard-landing .teaser-film{margin:10px 12px 0}.moodboard-landing .teaser-content{margin-top:28px;padding-inline:18px}.moodboard-landing .teaser-content h1{font-size:clamp(48px,15vw,70px)}.moodboard-landing .teaser-copy{font-size:14px}.moodboard-landing .teaser-enter{width:100%;padding:14px 15px;font-size:10px;letter-spacing:.07em}.moodboard-feature-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;width:calc(100% - 24px);margin:22px auto 34px}.moodboard-feature-card{min-height:136px;padding:23px 10px 16px;gap:8px}.moodboard-feature-card svg{width:30px;height:30px}.moodboard-feature-card strong{font-size:12px}.moodboard-feature-card small{font-size:10px}.moodboard-missions{width:calc(100% - 24px);padding:25px 12px 24px}.moodboard-mission-columns{grid-template-columns:1fr;gap:8px}.moodboard-mission-columns article{display:grid;grid-template-columns:30px 1fr;align-items:center;text-align:left;padding:14px}.moodboard-mission-columns article svg{grid-row:span 2}.moodboard-mission-columns strong{font-size:11px}.moodboard-mission-columns span{font-size:11px}.moodboard-landing .moodboard-secondary-cta{width:100%;font-size:10px;padding:12px}.moodboard-landing .teaser-footer{padding-bottom:env(safe-area-inset-bottom)}}
+@media(prefers-reduced-motion:reduce){.moodboard-landing *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
