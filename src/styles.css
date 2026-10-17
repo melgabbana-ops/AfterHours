@@ -2114,3 +2114,44 @@ h1,h2,h3,.insights h2,.radio-room h2,.missions-screen h2,.aftercare-screen h2{fo
 .app-update-notice,.maintenance-warning{border-color:var(--ah-gold-line)}
 @media(max-width:600px){.app{padding-bottom:calc(86px + env(safe-area-inset-bottom))}.app>header,.app header{backdrop-filter:blur(18px)}.tile{min-height:112px}.home-hero{margin-inline:0}.home-wordmark{font-size:clamp(22px,6vw,32px)}.experience-shell,.aftercare-card,.auth-panel,.onboarding-panel{border-radius:14px}}
 @media(prefers-reduced-motion:reduce){.tile{transition:none}}
+
+
+/* Shared AFTER HOURS moodboard system across the complete in-app experience */
+:root{--ah-obsidian:#070509;--ah-night:#100812;--ah-aubergine:#210d25;--ah-velvet:#40113d;--ah-plum-glow:#76275f;--ah-champagne:#dcb568;--ah-champagne-light:#ffe5a0;--ah-ivory:#f7eedf;--ah-muted:#bcaebe;--ah-hairline:rgba(224,181,103,.36)}
+body{background-color:var(--ah-obsidian)}
+.app{background:radial-gradient(ellipse at 50% -12%,rgba(99,29,91,.35),transparent 34%),radial-gradient(ellipse at 100% 38%,rgba(81,22,63,.13),transparent 30%),linear-gradient(180deg,#0a060b,#080509 72%);color:var(--ah-ivory)}
+.app>header,.app header{border-bottom-color:var(--ah-hairline)}
+.app .brand-nav,.app .wordmark{color:var(--ah-champagne-light);text-shadow:0 0 18px rgba(220,181,104,.14)}
+.app .status{color:#c7b6c7}
+.app main:not(.teaser-screen){position:relative}
+.app .hero,.app .home-hero,.app .consent-panel,.app .resume-panel,.app .experience-shell,.app .task-card,.app .round,.app .tile,.app .auth-panel,.app .safety-plan,.app .legal-document,.app .insights-hero,.app .tarot-card,.app .tarot-spread-card,.app .astro-card,.app .astro-daily,.app .radio-hero,.app .radio-player,.app .missions-hero,.app .mission-card,.app .onboarding-panel,.app .onboarding-feature,.app .character-studio,.app .character-preview,.app .media-item,.app .media-capture,.app .media-upload,.app .media-frame-picker,.app .insight-safety{border-color:var(--ah-hairline)!important;background-color:rgba(15,8,17,.92)}
+.app .hero,.app .home-hero,.app .insights-hero,.app .radio-hero,.app .missions-hero{background-image:radial-gradient(ellipse at 50% 0,rgba(106,31,91,.25),transparent 72%),linear-gradient(145deg,rgba(32,12,35,.96),rgba(8,5,10,.98))}
+.app .tile,.app .task-card,.app .round,.app .consent-panel,.app .resume-panel,.app .mission-card,.app .tarot-card,.app .tarot-spread-card,.app .astro-card,.app .astro-daily,.app .media-item,.app .onboarding-feature{box-shadow:inset 0 0 0 1px rgba(255,228,165,.025),0 12px 32px rgba(0,0,0,.2)}
+.app .tile{transition:border-color .18s ease,transform .18s ease,box-shadow .18s ease}
+.app .tile:hover{border-color:rgba(255,225,157,.72)!important;box-shadow:0 0 22px rgba(153,57,131,.13),0 14px 28px rgba(0,0,0,.25);transform:translateY(-2px)}
+.app h1,.app h2,.app h3,.app .sectionhead,.app .missions-hero h1,.app .insights-hero h1,.app .radio-hero h2{font-family:"Cinzel",Georgia,serif;letter-spacing:.035em}
+.app .eyebrow,.app .sectionhead,.app .astro-label,.app .mission-card-meta{color:var(--ah-champagne);letter-spacing:.13em}
+.app button.gold,.app .gold,.app button.home-start,.app .onboarding-next,.app .teaser-enter{border-color:rgba(255,229,160,.85)}
+.app button.gold,.app .gold,.app button.home-start{background:linear-gradient(135deg,#ffe6a3 0%,#d6a44c 52%,#f3d486 100%);color:#1a0b10;box-shadow:0 6px 22px rgba(192,130,48,.14)}
+.app button:not(.gold):not(.stop):focus-visible,.app a:focus-visible,.app input:focus-visible,.app select:focus-visible,.app textarea:focus-visible{outline:2px solid var(--ah-champagne-light);outline-offset:3px}
+.app .progress,.app .missions-progress-track{background:#28182b;border-color:rgba(220,181,104,.22)}
+.app .progress>span,.app .missions-progress-track>span{background:linear-gradient(90deg,#a46b2c,#ffe6a3,#d3a14a)}
+.app .mood-choice-grid button,.app .moods .mood,.app .insight-tabs button,.app .mission-tabs button,.app .onboarding-tabs button{border-color:rgba(220,181,104,.28);background:linear-gradient(145deg,rgba(37,15,40,.82),rgba(11,7,13,.95))}
+.app .mood-choice-grid button[aria-pressed="true"],.app .moods .mood.active,.app .insight-tabs button[aria-pressed="true"],.app .mission-tabs button[aria-pressed="true"],.app .onboarding-tabs button[aria-pressed="true"]{border-color:var(--ah-champagne-light);box-shadow:0 0 0 1px rgba(255,229,160,.18),0 0 22px rgba(151,45,126,.15)}
+.app .radio-player{background:radial-gradient(circle at 50% 0,rgba(109,33,98,.3),transparent 50%),linear-gradient(160deg,#1c0b20,#080509)}
+.app .radio-disc{box-shadow:0 0 36px rgba(204,147,65,.18);border-color:var(--ah-champagne)}
+.app .radio-play{background:linear-gradient(135deg,#ffe6a3,#d5a34c);color:#190b10}
+.app .missions-screen,.app .insights,.app .radio-room,.app .onboarding-screen,.app .legal-screen,.app .safety-plan{background-image:radial-gradient(ellipse at 50% 0,rgba(107,29,94,.22),transparent 44%)}
+.app .missions-screen .mission-card{border-radius:12px}
+.app .mission-icon,.app .onboarding-feature>span{color:var(--ah-champagne)}
+.app .onboarding-stepper span.current,.app .onboarding-stepper span.done{background:var(--ah-champagne)}
+.app .onboarding-panel{box-shadow:0 18px 50px rgba(0,0,0,.22),inset 0 0 0 1px rgba(255,224,153,.04)}
+.app .media-vault .media-upload,.app .media-vault .media-capture{background:linear-gradient(145deg,rgba(36,13,39,.88),rgba(8,5,10,.96))}
+.app .media-consent-check{border-color:rgba(220,181,104,.35)}
+.app .gate-card{border-color:var(--ah-hairline);background:radial-gradient(ellipse at 50% 0,rgba(103,29,92,.24),transparent 60%),linear-gradient(150deg,#180b1b,#080509)}
+.app .gate-logo{filter:drop-shadow(0 0 18px rgba(225,178,82,.17))}
+.app .gate-legal-links a,.app .legal-screen a{color:var(--ah-champagne-light)}
+.app .back{border-color:var(--ah-hairline);color:var(--ah-champagne-light)}
+.app .stop,.app button.stop{border-color:rgba(229,72,88,.65);background:rgba(80,10,22,.35)}
+@media(max-width:620px){.app{padding-bottom:calc(84px + env(safe-area-inset-bottom))}.app>header,.app header{padding-inline:16px}.app .hero,.app .home-hero,.app .insights-hero,.app .radio-hero,.app .missions-hero{border-radius:14px}.app .tile{min-width:0}.app .home-shortcuts{gap:9px}.app .tile{padding:14px 10px}.app .task-card,.app .mission-card,.app .tarot-card,.app .astro-card,.app .astro-daily,.app .media-item{border-radius:12px}.app button.gold,.app .gold,.app button.home-start{min-height:46px}}
+@media(prefers-reduced-motion:reduce){.app .tile{transition:none}}
