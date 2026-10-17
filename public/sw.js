@@ -3,7 +3,7 @@ self.addEventListener("message", (event) => {
 });
 
 const CACHE_NAME = "after-hours-v3";
-const APP_SHELL = ["/", "/manifest.webmanifest", "/after-hours-logo.svg", "/after-hours-icon-192.png", "/after-hours-icon-512.png"];
+const APP_SHELL = ["/", "/manifest.webmanifest", "/after-hours-logo.svg", "/icons/after-hours-master.svg"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -65,8 +65,8 @@ self.addEventListener("push", (event) => {
 
   event.waitUntil(self.registration.showNotification(title, {
     body,
-    icon: "/after-hours-icon-192.png",
-    badge: "/after-hours-icon-192.png",
+    icon: "/icons/after-hours-master.svg",
+    badge: "/icons/after-hours-master.svg",
     tag: typeof payload.tag === "string" ? payload.tag : "after-hours-notification",
     data: { url: target },
     renotify: false
