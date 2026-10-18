@@ -2784,3 +2784,39 @@ main{max-width:760px;padding:20px 16px 36px}
 .daily-screen button:focus-visible,.social-screen button:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
 @media(min-width:700px){.daily-screen,.social-screen{padding-top:34px}.daily-ritual-card,.social-editor,.social-preview{padding:24px}}
 @media(max-width:390px){.daily-screen,.social-screen{padding-left:14px;padding-right:14px}.daily-ritual-card{padding:17px}.daily-next-steps{grid-template-columns:1fr}.social-editor{padding:14px}.social-actions{display:grid;grid-template-columns:1fr}.social-actions button{width:100%}}
+
+
+/* AFTER HOURS moodboard integration: page-specific visual layer on the real routed screens */
+:root{--ah-ink:#08050B;--ah-surface:#110916;--ah-raised:#1A1022;--ah-plum:#260B31;--ah-purple:#8B19B7;--ah-neon:#E12BFF;--ah-gold:#D9A441;--ah-gold-light:#FFE1A0;--ah-ivory:#F7F0E8;--ah-muted:#B7AAB9;--ah-border:rgba(217,164,65,.38);--ah-display:"Cinzel","Times New Roman",serif;--ah-body:"DM Sans",system-ui,sans-serif}
+.app{background:radial-gradient(ellipse at 50% 0%,rgba(53,16,68,.8),transparent 38%),linear-gradient(180deg,#100815 0%,#08050B 72%)}
+.app h1,.app h2,.app h3,.app h4{font-family:var(--ah-display)}
+.app button{transition:background .18s ease,border-color .18s ease,box-shadow .18s ease,transform .18s ease}
+.app button:focus-visible,.app a:focus-visible,.app input:focus-visible,.app select:focus-visible,.app textarea:focus-visible{outline:2px solid var(--ah-gold-light);outline-offset:3px}
+.gate{min-height:100svh;padding:28px 20px calc(28px + env(safe-area-inset-bottom));display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:radial-gradient(ellipse at 50% 32%,rgba(91,16,112,.35),transparent 38%),radial-gradient(ellipse at 50% 0%,#32113c 0%,#100815 48%,#08050B 80%)}
+.gate-card{width:min(100%,540px);padding:clamp(24px,5vw,46px);border:1px solid var(--ah-border);border-radius:24px;background:linear-gradient(145deg,rgba(28,13,34,.94),rgba(8,5,11,.97));box-shadow:0 28px 90px rgba(0,0,0,.4),0 0 30px rgba(225,43,255,.08);text-align:center}
+.gate-logo{display:block;width:min(68vw,280px);height:auto;max-height:30vh;object-fit:contain;margin:0 auto 18px;filter:drop-shadow(0 0 18px rgba(217,164,65,.13))}
+.gate h1{font-size:clamp(36px,8vw,64px);letter-spacing:.08em;line-height:1.02;color:var(--ah-ivory);margin:16px 0}
+.gate h1 i{color:var(--ah-gold-light);font-style:normal}
+.gate p{color:#d1c3d4;line-height:1.85;font-size:13px}
+.gate>button,.gate-card>button{min-height:50px;padding:12px 20px;border:1px solid var(--ah-border);border-radius:999px;background:linear-gradient(110deg,rgba(217,164,65,.17),rgba(225,43,255,.07));color:var(--ah-gold-light);font-size:10px;letter-spacing:.1em}
+.gate small{display:block;margin-top:12px;color:#9f91a5;font-size:10px;line-height:1.8}
+.gate-legal-links button{border:0;background:none;color:#b7aab9;font-size:10px;text-decoration:underline}
+.app .gamecard,.app .auth-panel,.app .consent-panel,.app .resume-panel,.app .rank-ladder{border-color:var(--ah-border)}
+.app .gamecard{background:linear-gradient(145deg,rgba(35,16,43,.96),rgba(10,7,13,.98));box-shadow:0 14px 40px rgba(0,0,0,.16)}
+.app .tile{border-color:rgba(217,164,65,.25);background:linear-gradient(145deg,rgba(26,16,34,.88),rgba(10,7,13,.84));border-radius:14px}
+.app .tile:hover{border-color:var(--ah-gold);box-shadow:0 0 24px rgba(225,43,255,.12);transform:translateY(-1px)}
+.app .gold,.app button.gold,.app .next{border-color:#a9813d;background:linear-gradient(110deg,#d9a441,#ffe1a0);color:#160d18}
+.app nav{background:rgba(8,5,11,.96);border-color:rgba(217,164,65,.25)}
+.app nav button{min-height:44px}
+.radio-room,.insights,.missions-screen,.prompt-library,.character-studio,.safety-plan,.media-vault,.daily-screen,.social-screen{color:var(--ah-ivory)}
+.radio-hero,.insights-hero,.missions-hero,.prompt-hero,.character-preview,.safety-plan,.media-vault,.daily-ritual-card,.social-editor,.social-preview{border-color:var(--ah-border);background-color:rgba(12,7,16,.82)}
+.radio-disc,.tarot-card,.tarot-spread-card,.mission-card,.prompt-card,.experience-card,.voice-dom-panel,.astro-card,.astro-daily,.character-options,.mission-list .mission-card{border-color:rgba(217,164,65,.3)}
+.radio-play,.insight-actions button,.mission-tabs button,.prompt-filters button,.session-mode-current,.character-studio-toggle,.daily-complete,.social-actions button{min-height:44px}
+.radio-room button:hover,.insights button:hover,.missions-screen button:hover,.prompt-library button:hover,.character-studio button:hover,.daily-screen button:hover,.social-screen button:hover{border-color:var(--ah-gold)}
+.missions-progress-track,.progress,.xp{overflow:hidden}
+.missions-progress-track>span,.progress>span,.xp>span{background:linear-gradient(90deg,#9b6428,var(--ah-gold-light))}
+.insight-tabs button[aria-selected=true],.mission-tabs button[aria-pressed=true],.prompt-filters button[aria-pressed=true],.character-segment button[aria-pressed=true]{border-color:var(--ah-gold);color:var(--ah-gold-light);box-shadow:0 0 18px rgba(217,164,65,.1)}
+.media-vault,.safety-plan{border-radius:18px}
+.daily-ritual-card,.social-editor,.social-preview{border-radius:16px}
+@media(max-width:520px){.gate{padding-left:16px;padding-right:16px}.gate-card{padding:24px 18px;border-radius:20px}.gate-logo{width:min(70vw,235px);max-height:27vh}.app .gamecard{border-radius:16px}.radio-room,.insights,.missions-screen,.prompt-library,.character-studio{padding-left:16px;padding-right:16px}}
+@media(prefers-reduced-motion:reduce){.app button,.app .tile{transition:none!important}.app .tile:hover{transform:none}}
