@@ -2820,3 +2820,33 @@ main{max-width:760px;padding:20px 16px 36px}
 .daily-ritual-card,.social-editor,.social-preview{border-radius:16px}
 @media(max-width:520px){.gate{padding-left:16px;padding-right:16px}.gate-card{padding:24px 18px;border-radius:20px}.gate-logo{width:min(70vw,235px);max-height:27vh}.app .gamecard{border-radius:16px}.radio-room,.insights,.missions-screen,.prompt-library,.character-studio{padding-left:16px;padding-right:16px}}
 @media(prefers-reduced-motion:reduce){.app button,.app .tile{transition:none!important}.app .tile:hover{transform:none}}
+
+
+/* Moodboard pass 2: distinct page composition for Insights, Missions and The Deck */
+.insights,.missions-screen,.prompt-library{position:relative;isolation:isolate}
+.insights:before,.missions-screen:before,.prompt-library:before{content:"";position:absolute;z-index:-1;top:0;left:10%;right:10%;height:230px;pointer-events:none;background:radial-gradient(ellipse at 50% 0%,rgba(123,44,191,.16),transparent 72%)}
+.insights-hero,.missions-hero,.prompt-hero{position:relative;overflow:hidden;border:1px solid rgba(217,164,65,.32);border-radius:18px;padding:24px;background:linear-gradient(145deg,rgba(42,18,51,.94),rgba(12,7,16,.98));box-shadow:0 18px 48px rgba(0,0,0,.22)}
+.insights-hero:after,.missions-hero:after,.prompt-hero:after{content:"";position:absolute;left:0;top:18px;bottom:18px;width:2px;background:linear-gradient(180deg,transparent,#D9A441,#E12BFF,transparent)}
+.insights-hero h1,.insights-hero h2,.missions-hero h1,.missions-hero h2,.prompt-hero h1,.prompt-hero h2{font:500 clamp(30px,7vw,46px)/1.08 "Cinzel",serif;letter-spacing:.015em;color:#F7F0E8}
+.insight-tabs,.mission-tabs,.prompt-filters{display:flex;gap:8px;overflow-x:auto;padding:12px 1px 16px;scrollbar-width:none}
+.insight-tabs::-webkit-scrollbar,.mission-tabs::-webkit-scrollbar,.prompt-filters::-webkit-scrollbar{display:none}
+.insight-tabs button,.mission-tabs button,.prompt-filters button{flex:0 0 auto;min-height:42px;padding:10px 15px;border:1px solid rgba(217,164,65,.22);border-radius:999px;background:rgba(17,9,22,.88);color:#B7AAB9;font-size:10px;letter-spacing:.04em}
+.insight-tabs button[aria-selected=true],.mission-tabs button[aria-pressed=true],.prompt-filters button[aria-pressed=true]{background:rgba(217,164,65,.1);border-color:#D9A441;color:#FFE1A0}
+.tarot-card,.tarot-spread-card,.astro-card,.astro-daily,.mission-card,.prompt-card,.experience-card{position:relative;overflow:hidden;border:1px solid rgba(217,164,65,.25);border-radius:15px;background:linear-gradient(145deg,rgba(31,16,38,.95),rgba(10,7,13,.98));box-shadow:0 10px 30px rgba(0,0,0,.14)}
+.tarot-card{padding:22px;background:radial-gradient(ellipse at 50% 0%,rgba(123,44,191,.2),transparent 55%),linear-gradient(145deg,#21122a,#0b0710)}
+.tarot-symbol{color:#FFE1A0;text-shadow:0 0 24px rgba(225,43,255,.24)}
+.tarot-prompt,.astro-reading{border-left:2px solid #D9A441;background:rgba(8,5,11,.56);padding:14px 16px;color:#D8CBE0;line-height:1.8}
+.missions-progress{padding:16px;border:1px solid rgba(217,164,65,.24);border-radius:14px;background:rgba(17,9,22,.86)}
+.missions-progress-track{height:5px;border-radius:999px;background:#2b1e32;overflow:hidden}
+.missions-progress-track>span{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#8B19B7,#D9A441,#FFE1A0)}
+.mission-list,.experience-grid,.session-mode-grid{gap:12px}
+.mission-card,.prompt-card,.experience-card{padding:17px}
+.mission-icon,.prompt-glyph,.dom-picker-symbol{display:grid;place-items:center;flex:none;border:1px solid rgba(217,164,65,.35);border-radius:12px;background:rgba(123,44,191,.1);color:#FFE1A0}
+.mission-complete{border-radius:999px}
+.prompt-card-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.prompt-intensity{padding:5px 9px;border:1px solid rgba(217,164,65,.3);border-radius:999px;color:#FFE1A0;font-size:9px}
+.prompt-actions button,.insight-actions button,.mission-card button{min-height:44px;border:1px solid rgba(217,164,65,.35);border-radius:999px;padding:10px 14px;color:#FFE1A0}
+.voice-dom-panel{border:1px solid rgba(217,164,65,.3);border-radius:18px;background:radial-gradient(ellipse at 50% 0%,rgba(123,44,191,.2),transparent 56%),#100914;padding:20px}
+.voice-dom-orb{box-shadow:0 0 0 8px rgba(123,44,191,.06),0 0 35px rgba(225,43,255,.14)}
+@media(min-width:700px){.insights-hero,.missions-hero,.prompt-hero{padding:30px}.mission-list,.experience-grid,.session-mode-grid{gap:14px}}
+@media(max-width:390px){.insights-hero,.missions-hero,.prompt-hero{padding:18px 16px}.tarot-card,.mission-card,.prompt-card,.experience-card{padding:14px}}
