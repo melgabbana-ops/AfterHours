@@ -2882,3 +2882,28 @@ main{max-width:760px;padding:20px 16px 36px}
 .safety-plan-actions button.danger,.safety-plan-actions .danger{border-color:#8b3949;background:#210c14;color:#ffb5bd}
 .safety-plan-message{border-radius:10px}
 @media(max-width:390px){.radio-room,.character-studio{padding-left:14px;padding-right:14px}.radio-hero{padding:18px 13px}.radio-disc{width:min(62vw,205px)}.moods{grid-template-columns:1fr}.character-preview{min-height:210px}.character-options,.safety-plan{padding:15px}.safety-plan-actions{grid-template-columns:1fr}}
+
+
+/* Moodboard pass 4: daily ritual, social studio and media vault responsive polish */
+.daily-screen,.social-screen{position:relative;isolation:isolate}
+.daily-screen:before,.social-screen:before{content:"";position:absolute;z-index:-1;top:0;left:12%;right:12%;height:220px;pointer-events:none;background:radial-gradient(ellipse at 50% 0%,rgba(123,44,191,.18),transparent 70%)}
+.daily-heading,.social-heading{padding:20px 0 24px;border-bottom:1px solid rgba(217,164,65,.2)}
+.daily-heading .eyebrow,.social-heading .eyebrow{color:#D9A441;letter-spacing:.18em}
+.daily-streak{border-radius:14px;border-color:rgba(217,164,65,.34);background:linear-gradient(110deg,rgba(38,11,49,.8),rgba(10,7,13,.92))}
+.daily-ritual-card{border-radius:20px;border-color:rgba(217,164,65,.35);background:radial-gradient(ellipse at 90% 0%,rgba(123,44,191,.23),transparent 45%),linear-gradient(145deg,#1b1022,#0a070d);box-shadow:0 18px 50px rgba(0,0,0,.24)}
+.daily-glyph{width:58px;height:58px;background:rgba(123,44,191,.1);box-shadow:0 0 22px rgba(225,43,255,.08)}
+.daily-prompt,.daily-practice{border-radius:0 10px 10px 0}
+.daily-complete{border-radius:999px;background:linear-gradient(110deg,#d9a441,#ffe1a0);color:#160d18;font-weight:700}
+.daily-next-steps button{border-radius:12px;background:linear-gradient(145deg,#1a1022,#0b0710)}
+.social-editor,.social-preview{border-radius:18px;border-color:rgba(217,164,65,.3);box-shadow:0 14px 38px rgba(0,0,0,.15)}
+.social-editor label{letter-spacing:.14em}
+.social-editor input,.social-editor textarea,.social-editor select{border-radius:10px}
+.social-preview{background:radial-gradient(ellipse at 100% 0%,rgba(123,44,191,.2),transparent 48%),linear-gradient(145deg,#180e20,#0d0811)}
+.social-actions button{border-radius:999px}
+.media-vault{border-radius:20px;background:radial-gradient(ellipse at 100% 0%,rgba(123,44,191,.15),transparent 38%),linear-gradient(150deg,#170e1c,#0b0710)}
+.media-upload,.media-capture,.media-item{border-radius:13px}
+.media-live-frame,.media-live-preview.media-live-composite,.media-pending-preview{border-radius:12px;border-color:rgba(217,164,65,.35)}
+.media-vault .media-upload input[type=file]::file-selector-button{min-height:36px;margin-right:10px;padding:8px 12px;border:1px solid rgba(217,164,65,.3);border-radius:999px;background:#211528;color:#FFE1A0}
+.media-vault .media-item-actions button{border-radius:999px}
+@media(min-width:760px){.daily-screen,.social-screen{padding-top:38px}.daily-ritual-card{padding:28px}.social-editor,.social-preview{padding:24px}}
+@media(max-width:520px){.daily-heading h2,.social-heading h2{font-size:clamp(30px,9vw,42px)}.daily-streak{padding:12px}.daily-ritual-card{padding:18px}.media-vault-head{gap:8px}.media-vault-head h3{font-size:20px}}
