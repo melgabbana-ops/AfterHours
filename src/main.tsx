@@ -7,6 +7,7 @@ import { recordAchievement } from "./achievements";
 import{createRoot}from"react-dom/client";
 import{Shield,Lock,Play,Pause,RotateCcw,ChevronRight,User,Settings,Home,Timer,CheckCircle2,Square,Activity,LogOut,Sparkles,Radio,Bell,BookOpen,EyeOff,ShoppingBag,MessageCircle,CalendarDays}from"lucide-react";
 import"./styles.css";
+import"./after-hours-design.css";
 
 
 
