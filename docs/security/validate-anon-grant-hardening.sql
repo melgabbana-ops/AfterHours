@@ -18,7 +18,7 @@ BEGIN
   ] LOOP
     FOREACH p IN ARRAY ARRAY[
       'SELECT', 'INSERT', 'UPDATE', 'DELETE',
-      'TRUNCATE', 'REFERENCES', 'TRIGGER'
+      'TRUNCATE', 'REFERENCES', 'TRIGGER', 'MAINTAIN'
     ] LOOP
       IF has_table_privilege('anon', t, p) THEN
         RAISE EXCEPTION 'Unexpected anon table privilege % on %', p, t;
@@ -40,7 +40,7 @@ BEGIN
   -- Experience rounds are authenticated-only, matching the base migration.
   FOREACH p IN ARRAY ARRAY[
     'SELECT', 'INSERT', 'UPDATE', 'DELETE',
-    'TRUNCATE', 'REFERENCES', 'TRIGGER'
+    'TRUNCATE', 'REFERENCES', 'TRIGGER', 'MAINTAIN'
   ] LOOP
     IF has_table_privilege('anon', 'public.experience_rounds', p) THEN
       RAISE EXCEPTION 'Unexpected anon privilege % on experience_rounds', p;
