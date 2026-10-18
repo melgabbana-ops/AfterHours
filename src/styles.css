@@ -2296,3 +2296,60 @@ nav{
   .home-wordmark{width:190px!important}
   .onboarding-screen{padding-bottom:40px}
 }
+
+
+/* 2026-10-18 screenshot follow-up: final cascade override for the age gate on iPhone. */
+@media(max-width:520px){
+  .gate{
+    min-height:100svh;
+    min-height:100dvh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:0;
+    padding:calc(env(safe-area-inset-top,0px) + 24px) 24px calc(env(safe-area-inset-bottom,0px) + 32px);
+    overflow:visible;
+    background:radial-gradient(ellipse at 50% 16%,rgba(91,22,112,.24),transparent 44%),#09050D;
+  }
+  .gate .gate-logo{
+    width:min(210px,54vw);
+    max-width:210px;
+    max-height:none;
+    height:auto;
+    object-fit:contain;
+    margin:0 auto 22px;
+  }
+  .gate .eyebrow{margin:0 0 14px}
+  .gate h1{
+    font-family:"Cinzel",Georgia,serif;
+    font-size:clamp(40px,11vw,52px);
+    line-height:1.02;
+    letter-spacing:.055em;
+    margin:10px 0 18px;
+  }
+  .gate p{max-width:330px;margin:0 auto 14px;line-height:1.75}
+  .gate>button:not(.gate-legal-links button){
+    width:min(100%,330px);
+    min-height:58px;
+    border:1px solid #f0d58a;
+    border-radius:999px;
+    background:linear-gradient(110deg,#f6d991,#d9a94d);
+    color:#170d1b;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:.08em;
+    margin:22px auto 0;
+    padding:16px 22px;
+  }
+  .gate small{max-width:340px;line-height:1.65;margin:14px auto 0}
+  .gate .gate-legal-links{margin:18px auto 0}
+  .gate .gate-legal-links button{
+    margin:0;
+    width:auto;
+    min-height:44px;
+    border-radius:999px;
+    background:rgba(18,9,22,.78);
+    padding:11px 18px;
+  }
+}
