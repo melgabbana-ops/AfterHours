@@ -4,7 +4,7 @@ import { formatMaintenanceDate, getMaintenanceStatus, type MaintenanceConfig } f
 type Language = "nl" | "en";
 
 export default function UnderConstruction({ config, language: initialLanguage }: { config?: MaintenanceConfig; language?: Language }) {
- const [language,setLanguage]=React.useState<Language>(()=>{if(initialLanguage)return initialLanguage;try{return localStorage.getItem("afterhours.language")==="nl"?"nl":"en"}catch{return "en"}});
+ const [language,setLanguage]=React.useState<Language>(()=>{if(initialLanguage)return initialLanguage;try{return localStorage.getItem("afterhours.language")==="en"?"en":"nl"}catch{return "en"}});
  React.useEffect(()=>{try{localStorage.setItem("afterhours.language",language);document.documentElement.lang=language}catch{/* Optional language preference */}},[language]);
  const t=(nl:string,en:string)=>language==="nl"?nl:en;
  const status=getMaintenanceStatus(config);
