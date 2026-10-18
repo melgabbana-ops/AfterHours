@@ -2551,3 +2551,93 @@ main{max-width:760px;padding:20px 16px 36px}
 .radio-note strong{font-size:11px;margin-bottom:6px}
 .radio-note span{font-size:10px;line-height:1.7;color:var(--muted)}
 @media(max-width:520px){.onboarding-screen{padding-left:16px;padding-right:16px}.onboarding-panel{padding:22px 18px}.onboarding-header img{width:min(66vw,230px)}.onboarding-actions button{padding:0 12px}.radio-player{padding:22px 16px}.radio-vibe{gap:8px;flex-wrap:wrap}.radio-hero{padding-top:10px}}
+
+
+/* Cohesive premium surfaces for insights, missions, the Deck and profile tools */
+.insights,.missions-screen,.prompt-library{position:relative}
+.insights-hero,.missions-hero,.prompt-hero{position:relative;padding:18px 0 26px}
+.insights-hero h2,.missions-hero h2,.prompt-hero h2{font-family:"Cinzel",serif;font-size:clamp(36px,8vw,58px);font-weight:500;line-height:1.04;margin:0 0 14px}
+.insights-hero p,.missions-hero p,.prompt-hero p{max-width:560px;color:var(--muted);font-size:12px;line-height:1.8}
+.insight-tabs,.mission-tabs,.prompt-filters{display:flex;gap:7px;overflow-x:auto;padding:4px 0 12px;scrollbar-width:none}
+.insight-tabs::-webkit-scrollbar,.mission-tabs::-webkit-scrollbar,.prompt-filters::-webkit-scrollbar{display:none}
+.insight-tabs button,.mission-tabs button,.prompt-filters button{flex:0 0 auto;min-height:42px;padding:0 13px;border:1px solid #3b2b43;background:#100914;color:var(--muted);font-size:9px;letter-spacing:.08em;text-transform:uppercase}
+.insight-tabs button[aria-pressed="true"],.mission-tabs button[aria-pressed="true"],.prompt-filters button[aria-pressed="true"],.insight-tabs button.active,.mission-tabs button.active,.prompt-filters button.active{border-color:#9a7940;color:var(--gold);background:linear-gradient(120deg,#24152b,#120c15);box-shadow:inset 0 -2px var(--gold)}
+.tarot-card,.astro-card,.tarot-spread-card{position:relative;overflow:hidden;border:1px solid #5a4264;background:radial-gradient(ellipse at 50% 0%,rgba(117,54,142,.28),transparent 55%),linear-gradient(145deg,#1c1024,#0d0811);box-shadow:0 18px 42px rgba(0,0,0,.24),inset 0 1px rgba(240,213,138,.06)}
+.tarot-card{padding:26px 22px;text-align:center}
+.tarot-symbol{display:grid;place-items:center;width:72px;height:72px;margin:0 auto 18px;border:1px solid #8c6c3c;border-radius:50%;color:var(--gold);font-family:"Cinzel",serif;font-size:28px;box-shadow:0 0 35px rgba(123,44,191,.15),inset 0 0 22px rgba(123,44,191,.12)}
+.tarot-card h3,.tarot-spread-card h3,.astro-card h3{font-family:"Cinzel",serif;font-size:25px;font-weight:500;margin:8px 0 12px}
+.tarot-card p,.tarot-spread-card p,.astro-card p{color:#d1c4d5;font-size:12px;line-height:1.8}
+.tarot-prompt,.astro-reading,.astro-daily{margin-top:16px;padding:16px;border-left:2px solid var(--gold);background:rgba(9,5,13,.62);color:#e9d9a9;font-size:12px;line-height:1.75}
+.tarot-spread,.insight-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:14px}
+.tarot-spread-card{padding:17px 14px;text-align:left}
+.tarot-spread-card .tarot-symbol{width:42px;height:42px;margin:0 0 12px;font-size:18px}
+.insight-actions button,.astro-copy{min-height:44px;border:1px solid #624a6b;padding:11px 14px;color:var(--gold);font-size:10px;letter-spacing:.06em}
+.astro-card{padding:22px}
+.astro-label,.astro-date{color:var(--gold);font-size:9px;letter-spacing:.16em;text-transform:uppercase}
+.astro-date-help{display:block;margin-top:6px;color:var(--muted);font-size:10px;line-height:1.6}
+.insight-safety,.insight-footer{margin-top:16px;padding:14px;border:1px solid #34283A;background:#100914;color:var(--muted);font-size:10px;line-height:1.7}
+.missions-progress{margin:18px 0 22px;padding:17px;border:1px solid #4b3654;background:linear-gradient(120deg,#1c1024,#0f0912)}
+.missions-progress-track{height:4px;margin-top:12px;background:#34283A;overflow:hidden}
+.missions-progress-track span{display:block;height:100%;background:linear-gradient(90deg,#8651a1,var(--gold));box-shadow:0 0 12px rgba(221,184,91,.22)}
+.mission-category-subtitle{color:var(--muted);font-size:10px;line-height:1.6;margin:0 0 12px}
+.mission-sync-message,.mission-safety-note{padding:12px 14px;margin:12px 0;border:1px solid #4b3b2a;background:#120e0a;color:#d8c28d;font-size:10px;line-height:1.65}
+.mission-list{display:grid;gap:10px}
+.mission-list .mission-card{position:relative;border:1px solid #38283f;background:linear-gradient(140deg,#180e20,#0e0812);padding:18px;box-shadow:inset 0 1px rgba(255,255,255,.02)}
+.mission-icon{width:36px;height:36px;display:grid;place-items:center;border:1px solid #72553a;color:var(--gold);background:#130d17}
+.mission-copy{min-width:0}
+.mission-copy h3{font-family:"Cinzel",serif;font-size:18px;font-weight:500;margin:12px 0 8px}
+.mission-copy p{font-size:11px;line-height:1.75;color:var(--muted)}
+.mission-card-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;color:var(--gold);font-size:9px;letter-spacing:.08em}
+.mission-card-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;padding-top:13px;border-top:1px solid #34283A}
+.mission-complete{min-height:44px;padding:0 14px;border:1px solid #765a35;color:var(--gold);font-size:9px;letter-spacing:.07em;text-transform:uppercase}
+.mission-complete:disabled{opacity:.58;border-color:#3b4638;color:#a2b49b}
+.prompt-filters{margin:12px 0 18px}
+.session-mode-current,.dom-picker,.experience-catalog,.session-mode-section,.story-chapters,.experience-intro,.voice-dom-panel{border:1px solid #382840;background:linear-gradient(145deg,rgba(29,15,37,.88),rgba(12,7,16,.95));padding:17px;margin:12px 0}
+.dom-picker{display:flex;gap:10px;overflow-x:auto}
+.dom-picker button,.session-mode-grid button,.story-chapter-grid button{border:1px solid #3b2b43;background:#100914;color:#e8dfea}
+.dom-picker button{flex:0 0 92px;min-height:92px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px}
+.dom-picker button.selected,.session-mode-grid button.selected,.story-chapter-grid button.selected{border-color:#a18247;color:var(--gold);background:#1c1121}
+.dom-picker-symbol{font-family:"Cinzel",serif;font-size:23px;color:var(--gold)}
+.session-mode-section-heading{font-family:"Cinzel",serif;font-size:20px;color:#f1e7f3;margin-bottom:14px}
+.session-mode-grid,.story-chapter-grid,.experience-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.session-mode-grid button,.story-chapter-grid button{position:relative;text-align:left;padding:15px;min-height:110px}
+.session-mode-index,.story-chapter-number{display:block;color:var(--gold);font-family:"Cinzel",serif;font-size:12px;margin-bottom:12px}
+.prompt-card,.prompt-card.experience-card{position:relative;min-width:0;border:1px solid #3b2b43;background:linear-gradient(145deg,#1a0f21,#0e0812);padding:17px;box-shadow:inset 0 1px rgba(255,255,255,.025)}
+.prompt-card h3{font-family:"Cinzel",serif;font-size:19px;font-weight:500;line-height:1.3;margin:10px 0}
+.prompt-card p{font-size:11px;line-height:1.8;color:#c9bdce}
+.prompt-card-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.prompt-intensity{color:var(--gold);font-size:8px;letter-spacing:.12em;text-transform:uppercase}
+.prompt-glyph{color:var(--gold);font-family:"Cinzel",serif;font-size:20px}
+.prompt-consent,.prompt-note{padding:10px;margin-top:12px;background:#100914;border-left:2px solid #6d8a68;color:#b7c5b0;font-size:9px;line-height:1.6}
+.prompt-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.prompt-actions button{border:1px solid #624a6b;color:var(--gold);padding:10px 12px;font-size:9px;letter-spacing:.06em}
+.voice-dom-panel{padding:18px}
+.voice-dom-heading{font-family:"Cinzel",serif;font-size:20px}
+.voice-dom-orb{width:84px;height:84px;margin:18px auto;border-radius:50%;display:grid;place-items:center;border:1px solid #a17c43;background:radial-gradient(circle,#5b2b6d,#160d1d 68%);box-shadow:0 0 34px rgba(123,44,191,.25);color:var(--gold)}
+.voice-dom-controls{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.voice-dom-controls button,.voice-reply button{min-height:44px;border:1px solid #624a6b;padding:10px 13px;color:var(--gold);font-size:10px}
+.voice-status,.voice-privacy,.voice-transcript{font-size:10px;line-height:1.7;color:var(--muted);margin-top:12px}
+.voice-reply,.voice-error{padding:12px;border:1px solid #34283A;background:#0b070e;margin-top:10px}
+.character-studio{margin-top:22px;border:1px solid #3d2a46;background:linear-gradient(145deg,#180e20,#0d0811)}
+.character-studio-toggle{display:flex;width:100%;align-items:center;justify-content:space-between;gap:12px;text-align:left;padding:16px}
+.character-studio-toggle>span{display:flex;align-items:center;gap:11px}
+.character-studio-toggle>span>svg{color:var(--gold)}
+.character-studio-toggle strong,.character-studio-toggle small{display:block}
+.character-studio-toggle strong{font-size:10px;letter-spacing:.14em}
+.character-studio-toggle small{margin-top:4px;color:var(--muted);font-size:10px}
+.character-studio-body{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:18px;padding:16px;border-top:1px solid #34283A}
+.character-preview{min-width:0}
+.character-art{display:block;width:100%;max-height:340px;border:1px solid #5a4264;background:#09070B}
+.character-preview-caption{font-size:9px;color:var(--muted);line-height:1.6;margin-top:8px}
+.character-options{min-width:0}
+.character-field{margin-bottom:17px}
+.character-field>label,.character-field>strong{display:block;font-size:9px;color:var(--gold);letter-spacing:.12em;text-transform:uppercase;margin-bottom:9px}
+.character-segment{display:flex;gap:6px;flex-wrap:wrap}
+.character-segment button{min-height:36px;border:1px solid #3b2b43;padding:0 10px;color:var(--muted);font-size:9px}
+.character-segment button.selected{border-color:#a18247;color:var(--gold);background:#1c1121}
+.character-swatches{display:flex;gap:8px;flex-wrap:wrap}
+.character-swatches button{width:30px;height:30px;min-height:30px;border-radius:50%;border:2px solid #5a4264;box-shadow:inset 0 0 0 2px #0d0811}
+.character-swatches button.selected{outline:2px solid var(--gold);outline-offset:3px}
+.character-mask-toggle{display:flex;align-items:center;gap:10px;color:#ddd0e2;font-size:11px}
+.character-save-note{font-size:9px;color:var(--muted);line-height:1.6;margin-top:12px}
+@media(max-width:520px){.tarot-spread,.insight-actions{grid-template-columns:1fr}.mission-card-footer{align-items:flex-start;flex-direction:column}.mission-complete{width:100%}.session-mode-grid,.story-chapter-grid,.experience-grid{grid-template-columns:1fr}.character-studio-body{grid-template-columns:1fr}.character-art{max-height:300px;width:min(100%,280px);margin:auto}.dom-picker button{flex-basis:84px}.prompt-card{padding:15px}}
