@@ -26,15 +26,16 @@ BEGIN
     END LOOP;
   END LOOP;
 
-  -- No residual column-level grants should remain on user-owned tables.
+  -- No residual column-level grants to anon or PUBLIC should remain on
+  -- user-owned tables; PUBLIC grants would also be inherited by anon.
   IF EXISTS (
     SELECT 1
     FROM information_schema.column_privileges
     WHERE table_schema = 'public'
       AND table_name IN ('consent_records', 'profiles', 'session_history', 'sessions')
-      AND grantee = 'anon'
+      AND grantee IN ('anon', 'PUBLIC')
   ) THEN
-    RAISE EXCEPTION 'Unexpected anon column-level grant remains on a protected table';
+    RAISE EXCEPTION 'Unexpected anon/PUBLIC column-level grant remains on a protected table';
   END IF;
 
   -- Experience rounds are authenticated-only, matching the base migration.
@@ -52,9 +53,9 @@ BEGIN
     FROM information_schema.column_privileges
     WHERE table_schema = 'public'
       AND table_name = 'experience_rounds'
-      AND grantee = 'anon'
+      AND grantee IN ('anon', 'PUBLIC')
   ) THEN
-    RAISE EXCEPTION 'Unexpected anon column-level grant remains on experience_rounds';
+    RAISE EXCEPTION 'Unexpected anon/PUBLIC column-level grant remains on experience_rounds';
   END IF;
 
   -- Anonymous clients must not have a SELECT policy for experience rounds.
