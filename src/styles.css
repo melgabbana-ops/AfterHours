@@ -2215,3 +2215,141 @@ body{background:#070509}
   .moodboard-landing .teaser-content h1{font-size:clamp(48px,14vw,66px)}
   .moodboard-landing .moodboard-feature-card{border-radius:15px}
 }
+
+
+/* 2026-10-18 design fidelity pass: reserve real space for the official logo and fixed mobile navigation. */
+.home-hero{
+  min-height:0!important;
+  padding-top:clamp(224px,58vw,286px)!important;
+  padding-bottom:28px!important;
+  justify-content:flex-end;
+}
+.home-wordmark{
+  position:absolute!important;
+  top:18px!important;
+  left:50%!important;
+  transform:translateX(-50%)!important;
+  display:block;
+  width:clamp(156px,48vw,204px)!important;
+  height:auto!important;
+  max-height:none!important;
+  object-fit:contain;
+  z-index:1;
+}
+.home-hero>.eyebrow,.home-hero h2,.home-hero p,.home-hero .xp,.home-hero .xp-label,.home-hero .home-start{
+  position:relative;
+  z-index:2;
+}
+.home-hero>.eyebrow{margin-top:0}
+.app{
+  padding-bottom:calc(108px + env(safe-area-inset-bottom))!important;
+}
+main{
+  padding-bottom:calc(32px + env(safe-area-inset-bottom));
+}
+nav{
+  height:calc(70px + env(safe-area-inset-bottom))!important;
+  padding-bottom:env(safe-area-inset-bottom);
+  padding-left:max(4px,env(safe-area-inset-left));
+  padding-right:max(4px,env(safe-area-inset-right));
+}
+.onboarding-screen{
+  width:calc(100% - 28px);
+  min-height:100svh;
+  overflow:visible;
+  padding-top:calc(env(safe-area-inset-top,0px) + 18px);
+  padding-bottom:calc(112px + env(safe-area-inset-bottom,0px));
+}
+.onboarding-header{
+  align-items:center;
+  min-height:76px;
+  margin-bottom:22px;
+}
+.onboarding-header img{
+  display:block;
+  flex:0 1 auto;
+  width:clamp(118px,36vw,168px);
+  max-height:100px;
+  object-fit:contain;
+}
+.onboarding-panel{
+  flex:0 0 auto;
+}
+.onboarding-actions{
+  position:relative;
+  z-index:2;
+  padding-top:18px;
+  padding-bottom:10px;
+}
+@media(max-width:420px){
+  .home-hero{padding-top:clamp(212px,57vw,248px)!important;padding-inline:17px!important}
+  .home-wordmark{width:clamp(148px,47vw,184px)!important;top:16px!important}
+  .onboarding-screen{width:calc(100% - 22px);padding-bottom:calc(128px + env(safe-area-inset-bottom,0px))}
+  .onboarding-header{min-height:68px;gap:10px;margin-bottom:18px}
+  .onboarding-header img{width:clamp(108px,34vw,138px);max-height:82px}
+  .onboarding-header .eyebrow{max-width:42%;line-height:1.5}
+  .onboarding-actions{gap:8px}
+  .onboarding-next{padding-inline:12px}
+}
+@media(min-width:700px){
+  .home-hero{padding-top:250px!important}
+  .home-wordmark{width:190px!important}
+  .onboarding-screen{padding-bottom:40px}
+}
+
+
+/* 2026-10-18 screenshot follow-up: final cascade override for the age gate on iPhone. */
+@media(max-width:520px){
+  .gate{
+    min-height:100svh;
+    min-height:100dvh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:0;
+    padding:calc(env(safe-area-inset-top,0px) + 24px) 24px calc(env(safe-area-inset-bottom,0px) + 32px);
+    overflow:visible;
+    background:radial-gradient(ellipse at 50% 16%,rgba(91,22,112,.24),transparent 44%),#09050D;
+  }
+  .gate .gate-logo{
+    width:min(210px,54vw);
+    max-width:210px;
+    max-height:none;
+    height:auto;
+    object-fit:contain;
+    margin:0 auto 22px;
+  }
+  .gate .eyebrow{margin:0 0 14px}
+  .gate h1{
+    font-family:"Cinzel",Georgia,serif;
+    font-size:clamp(40px,11vw,52px);
+    line-height:1.02;
+    letter-spacing:.055em;
+    margin:10px 0 18px;
+  }
+  .gate p{max-width:330px;margin:0 auto 14px;line-height:1.75}
+  .gate>button:not(.gate-legal-links button){
+    width:min(100%,330px);
+    min-height:58px;
+    border:1px solid #f0d58a;
+    border-radius:999px;
+    background:linear-gradient(110deg,#f6d991,#d9a94d);
+    color:#170d1b;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:.08em;
+    margin:22px auto 0;
+    padding:16px 22px;
+  }
+  .gate small{max-width:340px;line-height:1.65;margin:14px auto 0}
+  .gate .gate-legal-links{margin:18px auto 0}
+  .gate .gate-legal-links button{
+    margin:0;
+    width:auto;
+    min-height:44px;
+    border-radius:999px;
+    background:rgba(18,9,22,.78);
+    padding:11px 18px;
+  }
+}
