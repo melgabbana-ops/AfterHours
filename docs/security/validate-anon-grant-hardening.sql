@@ -58,16 +58,20 @@ BEGIN
     RAISE EXCEPTION 'Unexpected anon/PUBLIC column-level grant remains on experience_rounds';
   END IF;
 
-  -- Anonymous clients must not have a SELECT policy for experience rounds.
+  -- Check SELECT and ALL policies for both anon and PUBLIC. PUBLIC policies
+  -- apply to anon even when anon is not named explicitly in the policy roles.
   IF EXISTS (
     SELECT 1
     FROM pg_policies
     WHERE schemaname = 'public'
       AND tablename = 'experience_rounds'
-      AND cmd = 'SELECT'
-      AND 'anon' = ANY (roles::text[])
+      AND cmd IN ('SELECT', 'ALL')
+      AND (
+        'anon' = ANY (roles::text[])
+        OR 'public' = ANY (roles::text[])
+      )
   ) THEN
-    RAISE EXCEPTION 'Unexpected anon SELECT policy exists on experience_rounds';
+    RAISE EXCEPTION 'Unexpected anon/PUBLIC SELECT-capable policy exists on experience_rounds';
   END IF;
 
   -- RLS must remain enabled on all user-owned tables and experience content.
