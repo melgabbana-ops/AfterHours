@@ -2215,3 +2215,35 @@ body{background:#070509}
   .moodboard-landing .teaser-content h1{font-size:clamp(48px,14vw,66px)}
   .moodboard-landing .moodboard-feature-card{border-radius:15px}
 }
+
+
+/* AFTER HOURS Safety Room: in-app readiness and live safety controls */
+.safety-room-panel{margin:24px 0 30px;padding:clamp(16px,3.5vw,22px);border:1px solid #4a3825;border-radius:13px;background:radial-gradient(circle at 0 0,rgba(94,43,113,.22),transparent 52%),linear-gradient(145deg,rgba(22,13,28,.98),rgba(8,5,13,.98));box-shadow:0 18px 45px rgba(0,0,0,.22)}
+.safety-room-status{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.safety-room-status h4{margin:5px 0 0;font-family:"Cinzel",Georgia,serif;font-weight:500;font-size:clamp(19px,4vw,25px);color:#f5eff7}
+.safety-room-pill{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;border:1px solid #51442d;border-radius:999px;padding:7px 10px;color:#d4bf8a;font-size:10px;letter-spacing:.04em}
+.safety-room-pill i{width:6px;height:6px;border-radius:50%;background:#c7aa65}
+.safety-room-pill--active i{background:#e8bd5f;box-shadow:0 0 10px #e8bd5f}
+.safety-room-pill--paused i{background:#d98a61}
+.safety-room-pill--stopped i,.safety-room-pill--completed i{background:#7b9b7b}
+.safety-room-summary,.safety-room-footnote{color:#a49b8d;font-size:11px;line-height:1.65}
+.safety-readiness-meter{margin:18px 0 14px}
+.safety-readiness-meter>div{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:10px;letter-spacing:.1em;color:#b5a8ba}
+.safety-readiness-meter strong{font-size:12px;color:#e5c879;font-variant-numeric:tabular-nums}
+.safety-readiness-track{display:block;height:4px;border-radius:999px;overflow:hidden;background:#2b2031}
+.safety-readiness-track i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#7b2cbf,#e4c16f);transition:width .2s ease}
+.safety-readiness-list{display:grid;gap:8px}
+.safety-plan label.safety-readiness-item{display:grid;grid-template-columns:18px minmax(0,1fr) 20px;align-items:center;gap:10px;margin:0;padding:12px;border:1px solid #34273b;border-radius:9px;background:rgba(9,5,13,.5);cursor:pointer}
+.safety-plan label.safety-readiness-item input{width:17px;height:17px;margin:0;padding:0;accent-color:#c9a454}
+.safety-readiness-item>span{display:grid;gap:4px}
+.safety-readiness-item strong{font-size:12px;line-height:1.4;color:#eee6f0;font-weight:600}
+.safety-plan .safety-readiness-item small{font-size:10px;line-height:1.4;color:#95889a}
+.safety-readiness-item>i{display:grid;place-items:center;width:19px;height:19px;border:1px solid #59465e;border-radius:50%;color:#f0d58a}
+.safety-readiness-item>i svg{width:12px;height:12px}
+.safety-emergency-controls{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:16px}
+.safety-emergency-controls button{display:flex;justify-content:center;align-items:center;gap:8px;min-height:46px;padding:10px;border-radius:9px;font-size:10px;font-weight:700;letter-spacing:.06em}
+.safety-pause-action{border:1px solid #6e5731!important;background:linear-gradient(145deg,#261b10,#130c18)!important;color:#f0d58a}
+.safety-stop-action{border:1px solid #8b303b!important;background:linear-gradient(145deg,#471923,#1c0a12)!important;color:#ffd7dc}
+.safety-emergency-controls button:focus-visible,.safety-readiness-item:focus-within{outline:2px solid #e3c46f;outline-offset:2px}
+.safety-emergency-controls button:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:520px){.safety-room-panel{padding:15px}.safety-room-status{align-items:flex-start}.safety-room-pill{font-size:9px;padding:6px 8px}.safety-emergency-controls{grid-template-columns:1fr}.safety-emergency-controls button{min-height:48px}}
