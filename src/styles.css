@@ -2215,3 +2215,64 @@ body{background:#070509}
   .moodboard-landing .teaser-content h1{font-size:clamp(48px,14vw,66px)}
   .moodboard-landing .moodboard-feature-card{border-radius:15px}
 }
+
+
+/* AFTER HOURS polish: preserve the approved logo artwork's natural proportions. */
+img.maintenance-logo,
+img.teaser-logo,
+.teaser-film-brand img,
+img.teaser-endcard-logo,
+img.gate-logo {
+  display: block;
+  height: auto;
+  max-width: 100%;
+  object-fit: contain;
+}
+img.maintenance-logo {
+  width: min(68vw, 240px);
+  margin-inline: auto;
+  filter: drop-shadow(0 0 22px rgba(200, 148, 69, .16));
+}
+img.teaser-logo {
+  max-height: 76px;
+}
+.teaser-film-brand img,
+img.teaser-endcard-logo,
+img.gate-logo {
+  height: auto;
+  max-height: 120px;
+}
+.maintenance-screen,
+.teaser-screen {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 480px) {
+  img.maintenance-logo {
+    width: min(64vw, 210px);
+  }
+  .teaser-top {
+    gap: 12px;
+  }
+  .teaser-top-actions {
+    min-width: 0;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  img.maintenance-logo,
+  img.teaser-endcard-logo {
+    animation: ah-logo-arrive .9s ease-out both;
+  }
+  @keyframes ah-logo-arrive {
+    from { opacity: 0; transform: translateY(7px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  img.maintenance-logo,
+  img.teaser-endcard-logo {
+    animation: none !important;
+    transition: none !important;
+  }
+}
