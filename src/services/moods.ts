@@ -9,6 +9,7 @@ export const moodCatalog = {
 export type MoodCode = (typeof moodCatalog)[MoodPhase][number];
 export interface MoodEvent { id:string; session_id:string; phase:MoodPhase; mood:MoodCode; created_at:string; }
 export function isMoodCode(phase:MoodPhase,mood:string):mood is MoodCode {
+ if (phase !== "before" && phase !== "during" && phase !== "after") return false;
  return (moodCatalog[phase] as readonly string[]).includes(mood);
 }
 export async function recordSessionMoodRemote(sessionId:string,phase:MoodPhase,mood:MoodCode):Promise<string|null>{
