@@ -1,60 +1,13 @@
 import React, { useState } from "react";
 import { Check, LockKeyhole, Pause, Play, Save, Square, Trash2 } from "lucide-react";
-
-const STORAGE_KEY = "afterhours.safety-plan.v1";
-
-interface ReadinessChecks {
-  consentDiscussed: boolean;
-  signalsDiscussed: boolean;
-  aftercareDiscussed: boolean;
-}
-
-interface SafetyPlanData {
-  safeword: string;
-  amberSignal: string;
-  boundaries: string;
-  readiness: ReadinessChecks;
-}
-
-interface SafetyPlanProps {
-  language?: "nl" | "en";
-  sessionStatus?: "ready" | "active" | "paused" | "completed" | "stopped";
-  onPause?: () => void;
-  onResume?: () => void;
-  onStopNow?: () => void;
-}
-
-const emptyPlan: SafetyPlanData = {
-  safeword: "",
-  amberSignal: "",
-  boundaries: "",
-  readiness: { consentDiscussed: false, signalsDiscussed: false, aftercareDiscussed: false },
-};
-
-function loadPlan(): SafetyPlanData {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return emptyPlan;
-    const value: unknown = JSON.parse(raw);
-    if (!value || typeof value !== "object") return emptyPlan;
-    const plan = value as Partial<SafetyPlanData>;
-    const readiness = plan.readiness && typeof plan.readiness === "object"
-      ? plan.readiness as Partial<ReadinessChecks>
-      : {};
-    return {
-      safeword: typeof plan.safeword === "string" ? plan.safeword.slice(0, 80) : "",
-      amberSignal: typeof plan.amberSignal === "string" ? plan.amberSignal.slice(0, 80) : "",
-      boundaries: typeof plan.boundaries === "string" ? plan.boundaries.slice(0, 1000) : "",
-      readiness: {
-        consentDiscussed: readiness.consentDiscussed === true,
-        signalsDiscussed: readiness.signalsDiscussed === true,
-        aftercareDiscussed: readiness.aftercareDiscussed === true,
-      },
-    };
-  } catch {
-    return emptyPlan;
-  }
-}
+import {
+  clearSafetyPlan,
+  createEmptySafetyPlan,
+  readSafetyPlan,
+  writeSafetyPlan,
+  type ReadinessChecks,
+  type SafetyPlanData,
+} from "./safetyPlanStorage";
 
 export default function SafetyPlan({
   language = "nl",
@@ -63,7 +16,7 @@ export default function SafetyPlan({
   onResume,
   onStopNow,
 }: SafetyPlanProps) {
-  const [plan, setPlan] = useState<SafetyPlanData>(loadPlan);
+  const [plan, setPlan] = useState<SafetyPlanData>(readSafetyPlan);
   const [saved, setSaved] = useState(false);
   const [message, setMessage] = useState("");
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
@@ -93,33 +46,28 @@ export default function SafetyPlan({
   };
 
   const save = () => {
-    try {
-      const nextPlan: SafetyPlanData = {
-        safeword: plan.safeword.trim().slice(0, 80),
-        amberSignal: plan.amberSignal.trim().slice(0, 80),
-        boundaries: plan.boundaries.trim().slice(0, 1000),
-        readiness: { ...plan.readiness },
-      };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(nextPlan));
+    const nextPlan: SafetyPlanData = {
+      safeword: plan.safeword.trim().slice(0, 80),
+      amberSignal: plan.amberSignal.trim().slice(0, 80),
+      boundaries: plan.boundaries.trim().slice(0, 1000),
+      readiness: { ...plan.readiness },
+    };
+    if (writeSafetyPlan(nextPlan)) {
       setPlan(nextPlan);
       setSaved(true);
       setMessage(t("Veiligheidsafspraken opgeslagen op dit apparaat.", "Safety agreements saved on this device."));
-    } catch {
+    } else {
       setSaved(false);
       setMessage(t("Opslaan is niet gelukt. Controleer de opslagruimte van je browser.", "Saving failed. Check your browser storage."));
     }
   };
 
   const clear = () => {
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-      setPlan({
-        ...emptyPlan,
-        readiness: { consentDiscussed: false, signalsDiscussed: false, aftercareDiscussed: false },
-      });
+    if (clearSafetyPlan()) {
+      setPlan(createEmptySafetyPlan());
       setSaved(false);
       setMessage(t("Lokale veiligheidsafspraken verwijderd.", "Local safety agreements deleted."));
-    } catch {
+    } else {
       setMessage(t("Verwijderen is niet gelukt. Probeer het opnieuw via je browserinstellingen.", "Could not delete the plan. Try again through your browser settings."));
     }
   };
