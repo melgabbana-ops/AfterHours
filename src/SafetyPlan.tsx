@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Check, LockKeyhole, Pause, Play, Save, ShieldCheck, Square, Trash2 } from "lucide-react";
+import { Check, LockKeyhole, Pause, Play, Save, Square, Trash2 } from "lucide-react";
 
 const STORAGE_KEY = "afterhours.safety-plan.v1";
 
@@ -134,7 +134,7 @@ export default function SafetyPlan({
           <span className="eyebrow">{t("CONTROL ROOM · VEILIGHEID", "CONTROL ROOM · SAFETY")}</span>
           <h4 id="safety-room-title">{t("Check-in voor je start", "Check in before you start")}</h4>
         </div>
-        <span className={"safety-room-pill safety-room-pill--" + sessionStatus}><i aria-hidden="true"/>{statusLabel}</span>
+        <span className={"safety-room-pill safety-room-pill--" + sessionStatus} role="status" aria-live="polite"><i aria-hidden="true"/>{statusLabel}</span>
       </div>
       <p className="safety-room-summary">{t("Neem samen even de drie punten door. Deze checklist is een herinnering, geen digitale toestemming of vervanging van een gesprek.", "Review these three points together. This checklist is a reminder, not digital consent or a replacement for talking.")}</p>
       <div className="safety-readiness-meter" aria-label={t(readinessCount + " van 3 punten afgevinkt", readinessCount + " of 3 items checked")}>
