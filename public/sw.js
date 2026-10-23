@@ -5,6 +5,22 @@ self.addEventListener("message", (event) => {
 const CACHE_NAME = "after-hours-v3";
 const APP_SHELL = ["/", "/manifest.webmanifest", "/after-hours-logo.svg", "/after-hours-icon-192.png", "/after-hours-icon-512.png"];
 
+// Push payloads may only navigate to a root-relative path on this app's origin.
+// In particular, reject protocol-relative URLs (//host) and backslashes, which
+// browsers can interpret as URL separators.
+function safeNotificationPath(value) {
+  if (typeof value !== "string" || !value.startsWith("/") || value.startsWith("//") || value.includes("\\")) {
+    return "/";
+  }
+  try {
+    const target = new URL(value, self.location.origin);
+    if (target.origin !== self.location.origin) return "/";
+    return `${target.pathname}${target.search}${target.hash}`;
+  } catch {
+    return "/";
+  }
+}
+
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -61,7 +77,7 @@ self.addEventListener("push", (event) => {
 
   const title = typeof payload.title === "string" ? payload.title : "AFTER HOURS";
   const body = typeof payload.body === "string" ? payload.body : "Je hebt een nieuwe melding.";
-  const target = typeof payload.url === "string" && payload.url.startsWith("/") ? payload.url : "/";
+  const target = safeNotificationPath(payload.url);
 
   event.waitUntil(self.registration.showNotification(title, {
     body,
@@ -75,9 +91,7 @@ self.addEventListener("push", (event) => {
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const target = event.notification && event.notification.data && typeof event.notification.data.url === "string"
-    ? event.notification.data.url
-    : "/";
+  const target = safeNotificationPath(event.notification && event.notification.data && event.notification.data.url);
 
   event.waitUntil((async () => {
     const windows = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
