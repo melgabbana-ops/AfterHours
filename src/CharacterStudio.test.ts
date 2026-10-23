@@ -49,10 +49,9 @@ describe("Character Studio saved appearance validation", () => {
     })).toEqual(DEFAULT_LOOK);
   });
 
-  it.each([null, undefined, false, 42, "not an object", [], ["male"]])(
-    "returns defaults for non-object saved data (%s)",
-    (value) => {
+  it("returns defaults for non-object saved data", () => {
+    for (const value of [null, undefined, false, 42, "not an object", [], ["male"]]) {
       expect(normalizeCharacterLook(value)).toEqual(DEFAULT_LOOK);
-    },
-  );
+    }
+  });
 });
