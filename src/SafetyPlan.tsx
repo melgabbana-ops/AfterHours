@@ -1,5 +1,13 @@
 import React, { useState } from "react";
 import { Check, LockKeyhole, Pause, Play, Save, Square, Trash2 } from "lucide-react";
+interface SafetyPlanProps {
+  language?: "nl" | "en";
+  sessionStatus?: "ready" | "active" | "paused" | "completed" | "stopped";
+  onPause?: () => void;
+  onResume?: () => void;
+  onStopNow?: () => void;
+}
+
 import {
   clearSafetyPlan,
   createEmptySafetyPlan,
