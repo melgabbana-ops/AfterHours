@@ -37,13 +37,33 @@ const HAIR_STYLES = [
 ];
 const KEY = "afterhours.character-look.v1";
 
+function pickAllowed(value: unknown, choices: readonly string[], fallback: string): string {
+  return typeof value === "string" && choices.includes(value) ? value : fallback;
+}
+
+export function normalizeCharacterLook(value: unknown): CharacterLook {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return DEFAULT_LOOK;
+  const parsed = value as Partial<CharacterLook>;
+  return {
+    gender: parsed.gender === "male" ? "male" : "female",
+    skin: pickAllowed(parsed.skin, SKINS.map((item) => item.color), DEFAULT_LOOK.skin),
+    hair: pickAllowed(parsed.hair, HAIRS.map((item) => item.color), DEFAULT_LOOK.hair),
+    hairStyle: pickAllowed(parsed.hairStyle, HAIR_STYLES.map((item) => item.id), DEFAULT_LOOK.hairStyle),
+    outfit: pickAllowed(parsed.outfit, OUTFITS.map((item) => item.color), DEFAULT_LOOK.outfit),
+    mask: typeof parsed.mask === "boolean" ? parsed.mask : DEFAULT_LOOK.mask,
+    neckDetail: pickAllowed(parsed.neckDetail, ["collar", "chain", "none"], DEFAULT_LOOK.neckDetail),
+    accessory: pickAllowed(parsed.accessory, ["crescent", "earring", "sigil"], DEFAULT_LOOK.accessory),
+  };
+}
+
 function loadLook(profileId: string): CharacterLook {
   try {
     const raw = localStorage.getItem(KEY + ":" + profileId);
     if (!raw) return DEFAULT_LOOK;
-    const parsed = JSON.parse(raw) as Partial<CharacterLook>;
-    return { ...DEFAULT_LOOK, ...parsed, gender: parsed.gender === "male" ? "male" : "female" };
-  } catch { return DEFAULT_LOOK; }
+    return normalizeCharacterLook(JSON.parse(raw) as unknown);
+  } catch {
+    return DEFAULT_LOOK;
+  }
 }
 function AvatarArt({ look }: { look: CharacterLook }) {
   const longHair = look.hairStyle === "waves" || look.hairStyle === "curls";
