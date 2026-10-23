@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { isMoodCode, moodCatalog } from "./moods";
+import type { MoodPhase } from "./moods";
 
 describe("session mood safety contract", () => {
   it("keeps pause, overwhelm, and STOP choices available during a session", () => {
@@ -14,9 +15,10 @@ describe("session mood safety contract", () => {
     expect(isMoodCode("after", "STOP")).toBe(false);
   });
 
-  it("rejects unknown and cross-phase values when validating mood history", () => {
+  it("rejects unknown moods, cross-phase values, and invalid runtime phases", () => {
     expect(isMoodCode("during", "NOT_A_MOOD")).toBe(false);
     expect(isMoodCode("after", "NEED A PAUSE")).toBe(false);
     expect(isMoodCode("before", "OVERWHELMED")).toBe(false);
+    expect(isMoodCode("unknown" as MoodPhase, "STOP")).toBe(false);
   });
 });
