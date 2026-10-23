@@ -3,10 +3,14 @@
 -- ledger and repository baseline are reconciled through the approved workflow.
 -- Validate in an authorized disposable/non-production database first.
 --
--- Scope: remove anonymous and inherited PUBLIC privileges on user-owned records
--- and experience content. Preserve authenticated grants and existing RLS policies
--- unchanged. The base migration grants experience_rounds SELECT to authenticated
--- only; do not introduce anonymous/public access as part of this hardening change.
+-- Scope:
+--   1. Remove anonymous and inherited PUBLIC privileges on user-owned records
+--      and experience content.
+--   2. Preserve authenticated SELECT/INSERT/UPDATE/DELETE grants and all
+--      existing RLS policies, while removing structural privileges that app
+--      clients do not need (TRUNCATE, REFERENCES, TRIGGER, MAINTAIN).
+--   3. Remove column-level REFERENCES grants too; table-level REVOKE does not
+--      remove those independent column grants.
 
 REVOKE ALL PRIVILEGES ON TABLE
   public.consent_records,
@@ -41,3 +45,41 @@ REVOKE ALL PRIVILEGES (
   id, slug, title, body, title_nl, body_nl, title_en, body_en,
   duration_seconds, sort_order, active, created_at
 ) ON TABLE public.experience_rounds FROM anon, PUBLIC;
+
+-- Runtime clients do not need table-structure privileges. Keep authenticated
+-- row-level operations unchanged, but remove these structural capabilities.
+REVOKE TRUNCATE, REFERENCES, TRIGGER, MAINTAIN ON TABLE
+  public.consent_records,
+  public.profiles,
+  public.session_history,
+  public.sessions,
+  public.experience_rounds
+FROM anon, authenticated, PUBLIC;
+
+-- REFERENCES may be granted per-column, independently of table privileges.
+-- Remove such grants on every current column in scope without changing SELECT,
+-- INSERT, UPDATE, or DELETE column grants for authenticated.
+DO $revoke_column_references$
+DECLARE
+  col record;
+BEGIN
+  FOR col IN
+    SELECT table_name, column_name
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name IN (
+        'consent_records',
+        'profiles',
+        'session_history',
+        'sessions',
+        'experience_rounds'
+      )
+  LOOP
+    EXECUTE format(
+      'REVOKE REFERENCES (%I) ON TABLE public.%I FROM anon, authenticated, PUBLIC',
+      col.column_name,
+      col.table_name
+    );
+  END LOOP;
+END;
+$revoke_column_references$;
