@@ -72,6 +72,47 @@ describe("local persistence", () => {
     expect(state.session.status).toBe("ready");
   });
 
+  it("drops malformed nested records without resetting session or consent", () => {
+    const state = defaultState();
+    state.session.status = "paused";
+    state.consent = {
+      status: "active",
+      confirmedAt: "2026-10-24T00:00:00.000Z",
+      revokedAt: null,
+    };
+    state.history = [{ id: "history-1", completedAt: "2026-10-24T00:00:00.000Z", xpEarned: 20, rounds: 1 }];
+    state.notifications = [{
+      id: "notice-1",
+      kind: "safety",
+      title: "Safety reminder",
+      body: "Take a pause whenever you need one.",
+      createdAt: "2026-10-24T00:00:00.000Z",
+      read: false,
+    }];
+
+    saveState(state);
+
+    const raw = JSON.parse(values.get("afterhours.state.v1") ?? "{}") as Record<string, unknown>;
+    raw.history = [
+      state.history[0],
+      null,
+      { id: 12, completedAt: "not-a-record", xpEarned: "20", rounds: -1 },
+    ];
+    raw.notifications = [
+      state.notifications[0],
+      null,
+      { id: "notice-2", kind: "unknown", title: "Bad kind", body: "", createdAt: "", read: false },
+    ];
+    values.set("afterhours.state.v1", JSON.stringify(raw));
+
+    const restored = loadState();
+
+    expect(restored.session.status).toBe("paused");
+    expect(restored.consent).toEqual(state.consent);
+    expect(restored.history).toEqual(state.history);
+    expect(restored.notifications).toEqual(state.notifications);
+  });
+
   it("subtracts elapsed wall-clock time from a running timer", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-10-09T12:00:00.000Z"));
