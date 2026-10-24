@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { dailyReflectionFor, zodiacSignForBirthDate } from "./astrology";
+import { dailyReflectionFor, isSameLocalCalendarDay, zodiacSignForBirthDate } from "./astrology";
 
 describe("AFTER HOURS astrology helpers", () => {
   it.each([
@@ -34,4 +34,15 @@ describe("AFTER HOURS astrology helpers", () => {
     const date = new Date(2026, 9, 9);
     expect(dailyReflectionFor("Ram", date)).not.toEqual(dailyReflectionFor("Stier", date));
   });
+  it("treats different times on the same local date as the same day", () => {
+    expect(isSameLocalCalendarDay(new Date(2026, 9, 24, 0, 5), new Date(2026, 9, 24, 23, 55))).toBe(true);
+  });
+
+  it.each([
+    [new Date(2026, 9, 24, 23, 59), new Date(2026, 9, 25, 0, 1)],
+    [new Date(2026, 11, 31, 23, 59), new Date(2027, 0, 1, 0, 1)],
+  ])("detects a local calendar-day change", (previous, next) => {
+    expect(isSameLocalCalendarDay(previous, next)).toBe(false);
+  });
+
 });
