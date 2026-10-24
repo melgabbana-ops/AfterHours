@@ -97,11 +97,15 @@ describe("local persistence", () => {
       state.history[0],
       null,
       { id: 12, completedAt: "not-a-record", xpEarned: "20", rounds: -1 },
+      { id: "", completedAt: "2026-10-24T00:00:00.000Z", xpEarned: 5, rounds: 1 },
+      { id: "history-2", completedAt: "not-a-date", xpEarned: 5, rounds: 1 },
     ];
     raw.notifications = [
       state.notifications[0],
       null,
       { id: "notice-2", kind: "unknown", title: "Bad kind", body: "", createdAt: "", read: false },
+      { id: "", kind: "message", title: "Empty ID", body: "Body", createdAt: "2026-10-24T00:00:00.000Z", read: false },
+      { id: "notice-3", kind: "message", title: "Invalid timestamp", body: "Body", createdAt: "not-a-date", read: false },
     ];
     values.set("afterhours.state.v1", JSON.stringify(raw));
 
