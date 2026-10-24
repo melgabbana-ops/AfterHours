@@ -20,9 +20,21 @@ export const badgeCatalog = [
 
 const STORAGE_KEY = "afterhours.achievements.v1";
 const EVENT_NAME = "afterhours:achievement";
+const knownBadgeIds = new Set<string>(badgeCatalog.map((badge) => badge.id));
 const storageKeyFor = (profileId?: string | null) => profileId
   ? `${STORAGE_KEY}.${profileId}`
   : STORAGE_KEY;
+
+function isEarnedBadge(value: unknown): value is EarnedBadge {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const item = value as Partial<EarnedBadge>;
+  return typeof item.id === "string"
+    && knownBadgeIds.has(item.id)
+    && typeof item.earnedAt === "string"
+    && Number.isFinite(Date.parse(item.earnedAt))
+    && typeof item.eventKey === "string"
+    && item.eventKey.trim().length > 0;
+}
 
 function readEarned(profileId?: string | null): EarnedBadge[] {
   try {
@@ -30,9 +42,7 @@ function readEarned(profileId?: string | null): EarnedBadge[] {
     if (!raw) return [];
     const parsed: unknown = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter((item): item is EarnedBadge =>
-      !!item && typeof item.id === "string" && typeof item.earnedAt === "string" && typeof item.eventKey === "string"
-    );
+    return parsed.filter(isEarnedBadge);
   } catch { return []; }
 }
 
