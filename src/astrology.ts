@@ -55,3 +55,10 @@ export function dailyReflectionFor(sign: string, date = new Date(), language: "n
   const index = ((dayKey + Math.max(0, signIndex)) % dailyReflectionThemes.length);
   return language === "en" ? englishDailyReflectionThemes[index] : dailyReflectionThemes[index];
 }
+
+/** Compare local calendar dates without relying on locale-formatted strings. */
+export function isSameLocalCalendarDay(first: Date, second: Date): boolean {
+  return first.getFullYear() === second.getFullYear()
+    && first.getMonth() === second.getMonth()
+    && first.getDate() === second.getDate();
+}
