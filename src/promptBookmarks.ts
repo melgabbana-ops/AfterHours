@@ -25,14 +25,19 @@ export function loadSavedPromptIds(playerId: string): string[] {
   }
 }
 
-/** Save prompt bookmarks locally; storage failures must not block the experience. */
-export function saveSavedPromptIds(playerId: string, ids: readonly string[]): void {
+/**
+ * Save prompt bookmarks locally.
+ * Returns false when the profile is invalid or browser storage cannot persist them.
+ */
+export function saveSavedPromptIds(playerId: string, ids: readonly string[]): boolean {
   const key = storageKeyFor(playerId);
-  if (!key) return;
+  if (!key) return false;
 
   try {
     localStorage.setItem(key, JSON.stringify(normalizePromptIds(ids)));
+    return true;
   } catch {
     // Bookmarks are optional when browser storage is unavailable.
+    return false;
   }
 }
