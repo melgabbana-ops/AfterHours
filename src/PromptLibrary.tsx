@@ -448,7 +448,7 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
   };
   const toggleSaved = () => {
     const next = saved.includes(current.id) ? saved.filter((id) => id !== current.id) : [...saved, current.id];
-    saveSavedPromptIds(playerId, next);
+    if (!saveSavedPromptIds(playerId, next)) return;
     setSavedState({ playerId, ids: next });
   };
   const copy = async () => {
