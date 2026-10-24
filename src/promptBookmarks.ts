@@ -1,6 +1,7 @@
 const STORAGE_KEY = "afterhours.saved-prompts.v1";
 
-const storageKeyFor = (playerId: string) => `${STORAGE_KEY}:${playerId}`;
+const storageKeyFor = (playerId: string): string | null =>
+  playerId.trim().length > 0 ? `${STORAGE_KEY}:${playerId}` : null;
 
 function normalizePromptIds(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
@@ -13,8 +14,11 @@ function normalizePromptIds(value: unknown): string[] {
 
 /** Load saved prompt IDs from this player's local-only bookmark list. */
 export function loadSavedPromptIds(playerId: string): string[] {
+  const key = storageKeyFor(playerId);
+  if (!key) return [];
+
   try {
-    const raw = localStorage.getItem(storageKeyFor(playerId));
+    const raw = localStorage.getItem(key);
     return raw ? normalizePromptIds(JSON.parse(raw)) : [];
   } catch {
     return [];
@@ -23,8 +27,11 @@ export function loadSavedPromptIds(playerId: string): string[] {
 
 /** Save prompt bookmarks locally; storage failures must not block the experience. */
 export function saveSavedPromptIds(playerId: string, ids: readonly string[]): void {
+  const key = storageKeyFor(playerId);
+  if (!key) return;
+
   try {
-    localStorage.setItem(storageKeyFor(playerId), JSON.stringify(normalizePromptIds(ids)));
+    localStorage.setItem(key, JSON.stringify(normalizePromptIds(ids)));
   } catch {
     // Bookmarks are optional when browser storage is unavailable.
   }
