@@ -1,5 +1,5 @@
 import React,{useEffect,useMemo,useState}from"react";
-import{dailyReflectionFor,zodiacSignForBirthDate}from"./astrology";
+import{dailyReflectionFor,isSameLocalCalendarDay,zodiacSignForBirthDate}from"./astrology";
 import{recordAchievement}from"./achievements";
 import{RefreshCw,Sparkles,Shield,Star,LockKeyhole,Copy,Check}from"lucide-react";
 
@@ -83,7 +83,7 @@ export function Insights({onBack,language="nl",profileId}:{onBack:()=>void;langu
  useEffect(()=>{
   const refreshToday=()=>{
    const now=new Date();
-   if(now.toDateString()!==today.toDateString())setToday(now);
+   if(!isSameLocalCalendarDay(now,today))setToday(now);
   };
   const timer=window.setInterval(refreshToday,60_000);
   document.addEventListener("visibilitychange",refreshToday);
