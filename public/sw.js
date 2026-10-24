@@ -27,7 +27,7 @@ function safeNotificationPath(value) {
 function shouldCacheResponse(response) {
   if (!response || !response.ok) return false;
   const cacheControl = response.headers.get("Cache-Control") || "";
-  if (/(?:^|,)\\s*(?:no-store|private)\\b/i.test(cacheControl)) return false;
+  if (/(?:^|,)\s*(?:no-store|private)\b/i.test(cacheControl)) return false;
   if ((response.headers.get("Vary") || "").trim() === "*") return false;
   return true;
 }
