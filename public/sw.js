@@ -21,6 +21,17 @@ function safeNotificationPath(value) {
   }
 }
 
+// Cache API storage does not automatically enforce HTTP Cache-Control directives.
+// Do not persist private/no-store responses or responses varying on an unspecified
+// request dimension; remove any older cached copy so it cannot be served offline.
+function shouldCacheResponse(response) {
+  if (!response || !response.ok) return false;
+  const cacheControl = response.headers.get("Cache-Control") || "";
+  if (/(?:^|,)\\s*(?:no-store|private)\\b/i.test(cacheControl)) return false;
+  if ((response.headers.get("Vary") || "").trim() === "*") return false;
+  return true;
+}
+
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -51,7 +62,11 @@ self.addEventListener("fetch", (event) => {
     try {
       const response = await fetch(request);
       if (response && response.ok) {
-        event.waitUntil(cache.put(request, response.clone()));
+        if (shouldCacheResponse(response)) {
+          event.waitUntil(cache.put(request, response.clone()));
+        } else {
+          event.waitUntil(cache.delete(request));
+        }
       }
       return response;
     } catch {
