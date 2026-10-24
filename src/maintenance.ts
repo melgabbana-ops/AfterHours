@@ -61,8 +61,13 @@ export function getMaintenanceStatus(config: MaintenanceConfig | null | undefine
 }
 
 export function formatMaintenanceDate(timestamp: number, language: "nl" | "en" = "nl"): string {
+  const date = new Date(timestamp);
+  if (!Number.isFinite(date.getTime())) {
+    return language === "nl" ? "Onbekend" : "Unknown";
+  }
+
   return new Intl.DateTimeFormat(language === "nl" ? "nl-NL" : "en-GB", {
     dateStyle: "medium",
     timeStyle: "short"
-  }).format(new Date(timestamp));
+  }).format(date);
 }
