@@ -16,8 +16,8 @@ describe("profile-scoped prompt bookmarks", () => {
   it("persists saved prompts independently for each player", () => {
     const values = installStorage();
 
-    saveSavedPromptIds("alice", ["prompt-one", "prompt-two"]);
-    saveSavedPromptIds("bob", ["prompt-three"]);
+    expect(saveSavedPromptIds("alice", ["prompt-one", "prompt-two"])).toBe(true);
+    expect(saveSavedPromptIds("bob", ["prompt-three"])).toBe(true);
 
     expect(loadSavedPromptIds("alice")).toEqual(["prompt-one", "prompt-two"]);
     expect(loadSavedPromptIds("bob")).toEqual(["prompt-three"]);
@@ -27,8 +27,8 @@ describe("profile-scoped prompt bookmarks", () => {
   it("does not read or write bookmarks for blank profile IDs", () => {
     const values = installStorage();
 
-    saveSavedPromptIds("", ["prompt-one"]);
-    saveSavedPromptIds("   ", ["prompt-two"]);
+    expect(saveSavedPromptIds("", ["prompt-one"])).toBe(false);
+    expect(saveSavedPromptIds("   ", ["prompt-two"])).toBe(false);
 
     expect(loadSavedPromptIds("")).toEqual([]);
     expect(loadSavedPromptIds("   ")).toEqual([]);
@@ -49,13 +49,13 @@ describe("profile-scoped prompt bookmarks", () => {
     expect(loadSavedPromptIds("alice")).toEqual([]);
   });
 
-  it("does not throw when browser storage is unavailable", () => {
+  it("reports when browser storage is unavailable without throwing", () => {
     vi.stubGlobal("localStorage", {
       getItem: () => { throw new Error("storage unavailable"); },
       setItem: () => { throw new Error("storage unavailable"); },
     });
 
     expect(loadSavedPromptIds("alice")).toEqual([]);
-    expect(() => saveSavedPromptIds("alice", ["prompt-one"])).not.toThrow();
+    expect(saveSavedPromptIds("alice", ["prompt-one"])).toBe(false);
   });
 });
