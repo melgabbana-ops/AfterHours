@@ -55,13 +55,43 @@ function isState(value:unknown):value is AfterHoursState{
   &&Array.isArray(v.notifications);
 }
 
+function isValidTimestamp(value:unknown):value is string{
+ return typeof value==="string"&&value.trim().length>0&&!Number.isNaN(Date.parse(value));
+}
+
+function isHistoryEntry(value:unknown):value is AfterHoursState["history"][number]{
+ if(!value||typeof value!=="object")return false;
+ const entry=value as Partial<AfterHoursState["history"][number]>;
+ return typeof entry.id==="string"&&entry.id.trim().length>0
+  &&isValidTimestamp(entry.completedAt)
+  &&typeof entry.xpEarned==="number"&&Number.isFinite(entry.xpEarned)
+  &&typeof entry.rounds==="number"&&Number.isInteger(entry.rounds)&&entry.rounds>=0;
+}
+
+function isNotification(value:unknown):value is AfterHoursState["notifications"][number]{
+ if(!value||typeof value!=="object")return false;
+ const notification=value as Partial<AfterHoursState["notifications"][number]>;
+ return typeof notification.id==="string"&&notification.id.trim().length>0
+  &&(notification.kind==="message"||notification.kind==="checkin"||notification.kind==="safety")
+  &&typeof notification.title==="string"
+  &&typeof notification.body==="string"
+  &&isValidTimestamp(notification.createdAt)
+  &&typeof notification.read==="boolean";
+}
+
 export function loadState():AfterHoursState{
  try{
   const raw=localStorage.getItem(KEY);
   if(!raw)return defaultState();
   const parsed:unknown=JSON.parse(raw);
   if(!isState(parsed))return defaultState();
-  return parsed;
+  // Keep the usable profile/session/consent, but never expose malformed
+  // nested records to screens that read their fields directly.
+  return {
+   ...parsed,
+   history:parsed.history.filter(isHistoryEntry),
+   notifications:parsed.notifications.filter(isNotification)
+  };
  }catch{return defaultState()}
 }
 
