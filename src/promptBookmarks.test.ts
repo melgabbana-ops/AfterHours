@@ -24,6 +24,17 @@ describe("profile-scoped prompt bookmarks", () => {
     expect(values.has("afterhours.saved-prompts.v1")).toBe(false);
   });
 
+  it("does not read or write bookmarks for blank profile IDs", () => {
+    const values = installStorage();
+
+    saveSavedPromptIds("", ["prompt-one"]);
+    saveSavedPromptIds("   ", ["prompt-two"]);
+
+    expect(loadSavedPromptIds("")).toEqual([]);
+    expect(loadSavedPromptIds("   ")).toEqual([]);
+    expect(values.size).toBe(0);
+  });
+
   it("ignores malformed entries and duplicate IDs", () => {
     installStorage({
       "afterhours.saved-prompts.v1:alice": JSON.stringify([" prompt-one ", null, "", "prompt-one", 4, "prompt-two"]),
