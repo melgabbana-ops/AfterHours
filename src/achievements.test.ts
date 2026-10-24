@@ -40,6 +40,21 @@ describe("account-scoped achievements", () => {
     expect(listEarnedBadges("signed-in-user")).toEqual([]);
   });
 
+  it("ignores unknown badges and records with invalid fields", () => {
+    const valid = { id: "first_login", earnedAt: "2026-10-12T10:00:00.000Z", eventKey: "login:first" };
+    const stored = [
+      valid,
+      null,
+      { id: "not-in-catalog", earnedAt: valid.earnedAt, eventKey: "unknown:first" },
+      { id: "", earnedAt: valid.earnedAt, eventKey: "login:first" },
+      { id: "first_login", earnedAt: "not-a-date", eventKey: "login:first" },
+      { id: "first_login", earnedAt: valid.earnedAt, eventKey: "   " },
+    ];
+    installStorage({ "afterhours.achievements.v1.alice": JSON.stringify(stored) });
+
+    expect(listEarnedBadges("alice")).toEqual([valid]);
+  });
+
   it("writes achievement events to the selected account bucket", () => {
     const values = installStorage();
     recordAchievement("tarot", { profileId: "alice" });
