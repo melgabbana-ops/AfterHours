@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { copyTextToClipboard } from "./clipboard";
 import { ArrowLeft, Copy, Check, RefreshCw, Download } from "lucide-react";
 
 type Language = "nl" | "en";
@@ -41,14 +42,15 @@ export default function SocialStudio({language="nl",onBack}:{language?:Language;
  const [body,setBody]=useState("");
  const [cta,setCta]=useState("");
  const [copied,setCopied]=useState(false);
+ const [copyError,setCopyError]=useState(false);
  const t=(nl:string,en:string)=>language==="nl"?nl:en;
  const defaults=copyBank[format][language];
  const currentHeadline=headline||defaults.headline;
  const currentBody=body||defaults.body;
  const currentCta=cta||defaults.cta;
  const output=useMemo(()=>renderText(platform,format,language,currentHeadline,currentBody,currentCta),[platform,format,language,currentHeadline,currentBody,currentCta]);
- const reset=()=>{setHeadline("");setBody("");setCta("");setCopied(false)};
- const copy=async()=>{try{await navigator.clipboard.writeText(output);setCopied(true)}catch{setCopied(false)}};
+ const reset=()=>{setHeadline("");setBody("");setCta("");setCopied(false);setCopyError(false)};
+ const copy=async()=>{setCopyError(false);const success=await copyTextToClipboard(output);setCopied(success);setCopyError(!success)};
  const download=()=>{
   const blob=new Blob([output+"\n"],{type:"text/plain;charset=utf-8"});
   const url=URL.createObjectURL(blob);
@@ -63,13 +65,13 @@ export default function SocialStudio({language="nl",onBack}:{language?:Language;
  };
  return <main className="social-screen">
   <header className="social-heading"><button type="button" className="back" onClick={onBack}><ArrowLeft size={16}/>{t("Terug","Back")}</button><span className="eyebrow">AFTER HOURS · CREATOR STUDIO</span><h1>{t("Social studio","Social studio")}</h1><p>{t("Pas de boodschap aan en kopieer tekst voor je platform. Dit maakt tekst, geen kant-en-klare beeld- of videobestanden.","Adapt the message and copy text for your platform. This creates text, not finished image or video files.")}</p></header>
-  <section className="social-editor"><label>{t("Platform","Platform")}<select value={platform} onChange={e=>{setPlatform(e.target.value as Platform);setCopied(false)}}>{platforms.map(item=><option key={item}>{item}</option>)}</select></label>
+  <section className="social-editor"><label>{t("Platform","Platform")}<select value={platform} onChange={e=>{setPlatform(e.target.value as Platform);setCopied(false);setCopyError(false)}}>{platforms.map(item=><option key={item}>{item}</option>)}</select></label>
    <label>{t("Templateformaat","Template format")}<select value={format} onChange={e=>{setFormat(e.target.value as Format);reset()}}>{formats.map(item=><option key={item}>{item}</option>)}</select></label>
-   <label>{t("Kopregel","Headline")}<input value={currentHeadline} onChange={e=>{setHeadline(e.target.value);setCopied(false)}} maxLength={140}/></label>
-   <label>{t("Berichttekst","Post copy")}<textarea value={currentBody} onChange={e=>{setBody(e.target.value);setCopied(false)}} rows={5} maxLength={2000}/></label>
-   <label>{t("Call to action","Call to action")}<input value={currentCta} onChange={e=>{setCta(e.target.value);setCopied(false)}} maxLength={180}/></label>
+   <label>{t("Kopregel","Headline")}<input value={currentHeadline} onChange={e=>{setHeadline(e.target.value);setCopied(false);setCopyError(false)}} maxLength={140}/></label>
+   <label>{t("Berichttekst","Post copy")}<textarea value={currentBody} onChange={e=>{setBody(e.target.value);setCopied(false);setCopyError(false)}} rows={5} maxLength={2000}/></label>
+   <label>{t("Call to action","Call to action")}<input value={currentCta} onChange={e=>{setCta(e.target.value);setCopied(false);setCopyError(false)}} maxLength={180}/></label>
   </section>
-  <section className="social-preview"><span className="eyebrow">{platform.toUpperCase()} · {format}</span><h2>{currentHeadline}</h2><p>{currentBody}</p><strong>{currentCta}</strong><div className="social-output"><pre>{output}</pre><small>{output.length} {t("tekens","characters")}</small></div><div className="social-actions"><button type="button" onClick={copy}>{copied?<Check size={15}/>:<Copy size={15}/>} {copied?t("Gekopieerd","Copied"):t("Kopieer tekst","Copy text")}</button><button type="button" onClick={download}><Download size={15}/>{t("Download .txt","Download .txt")}</button><button type="button" onClick={reset}><RefreshCw size={15}/>{t("Template herstellen","Reset template")}</button></div>{copied&&<small role="status">{t("Tekst staat op je klembord.","Copy is on your clipboard.")}</small>}</section>
+  <section className="social-preview"><span className="eyebrow">{platform.toUpperCase()} · {format}</span><h2>{currentHeadline}</h2><p>{currentBody}</p><strong>{currentCta}</strong><div className="social-output"><pre>{output}</pre><small>{output.length} {t("tekens","characters")}</small></div><div className="social-actions"><button type="button" onClick={copy}>{copied?<Check size={15}/>:<Copy size={15}/>} {copied?t("Gekopieerd","Copied"):t("Kopieer tekst","Copy text")}</button><button type="button" onClick={download}><Download size={15}/>{t("Download .txt","Download .txt")}</button><button type="button" onClick={reset}><RefreshCw size={15}/>{t("Template herstellen","Reset template")}</button></div>{copied&&<small role="status">{t("Tekst staat op je klembord.","Copy is on your clipboard.")}</small>}{copyError&&<small role="status">{t("Kopiëren is niet gelukt. Gebruik ‘Download .txt’ om de tekst te bewaren.","Copying failed. Use “Download .txt” to save the text.")}</small>}</section>
   <p className="social-note">{t("Controleer platformregels, auteursrechten en eventuele advertentiebeperkingen voordat je publiceert. Gebruik geen niet-consensuele beelden of herkenbare media zonder aparte toestemming.","Check platform rules, copyright and advertising restrictions before publishing. Never use non-consensual or identifiable media without separate permission.")}</p>
  </main>
 }
