@@ -24,4 +24,15 @@ describe("session resume safety", () => {
   ] as const)("never resumes session=%s with consent=%s", (sessionStatus, consentStatus) => {
     expect(shouldResumeSession(sessionStatus, consentStatus)).toBe(false);
   });
+
+  it.each([
+    ["unknown", "active"],
+    ["active", "unknown"],
+    [null, "active"],
+    ["active", null],
+    [{ status: "active" }, "active"],
+    ["active", { status: "active" }],
+  ])("fails closed for malformed runtime values", (sessionStatus, consentStatus) => {
+    expect(shouldResumeSession(sessionStatus, consentStatus)).toBe(false);
+  });
 });
