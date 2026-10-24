@@ -1,4 +1,4 @@
-import React,{useMemo,useState}from"react";
+import React,{useEffect,useMemo,useState}from"react";
 import{dailyReflectionFor,zodiacSignForBirthDate}from"./astrology";
 import{recordAchievement}from"./achievements";
 import{RefreshCw,Sparkles,Shield,Star,LockKeyhole,Copy,Check}from"lucide-react";
@@ -79,6 +79,19 @@ export function Insights({onBack,language="nl",profileId}:{onBack:()=>void;langu
  const[spread,setSpread]=useState<number[]>([]);
  const[sign,setSign]=useState("Weegschaal");
  const[birthDate,setBirthDate]=useState("");
+ const[today,setToday]=useState(()=>new Date());
+ useEffect(()=>{
+  const refreshToday=()=>{
+   const now=new Date();
+   if(now.toDateString()!==today.toDateString())setToday(now);
+  };
+  const timer=window.setInterval(refreshToday,60_000);
+  document.addEventListener("visibilitychange",refreshToday);
+  return()=>{
+   window.clearInterval(timer);
+   document.removeEventListener("visibilitychange",refreshToday);
+  };
+ },[today]);
  const[copied,setCopied]=useState(false);
  const localizedTarot = language === "en" ? tarot.map(item=>({...item,...englishTarot[item.name]})) : tarot;
  const localizedOracle = language === "en" ? oracle.map(item=>({...item,...englishOracle[item.name]})) : oracle;
@@ -86,7 +99,7 @@ export function Insights({onBack,language="nl",profileId}:{onBack:()=>void;langu
  const card=localizedTarot[cardIndex];
  const activeSign=useMemo(()=>birthDate?zodiacSignForBirthDate(birthDate)??sign:sign,[birthDate,sign]);
  const signText=useMemo(()=>language==="en"?(englishSigns[activeSign]?.text??""):signs.find(([name])=>name===activeSign)?.[1]??"",[activeSign,language]);
- const dailyReflection=useMemo(()=>dailyReflectionFor(activeSign,new Date(),language),[activeSign,language]);
+ const dailyReflection=useMemo(()=>dailyReflectionFor(activeSign,today,language),[activeSign,today,language]);
  const drawRandomIndex=(length:number,exclude:number)=>{let next=Math.floor(Math.random()*length);if(length>1&&next===exclude)next=(next+1+Math.floor(Math.random()*(length-1)))%length;return next};
  const drawSpread=()=>{const pool=localizedTarot.map((_,index)=>index);for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]]}setSpread(pool.slice(0,3));setCopied(false)};
  const copyReflection=async()=>{const textToCopy=tab==="tarot"?(spread.length?spread.map((index,position)=>`${spreadLabels[position]}\n${localizedTarot[index].name}\n${localizedTarot[index].meaning}\n${language==="en"?"Reflection":"Reflectie"}: ${localizedTarot[index].prompt}`).join("\n\n"):`${card.name}\n${card.meaning}\n${language==="en"?"Reflection":"Reflectie"}: ${card.prompt}`):tab==="oracle"?`${localizedOracle[oracleIndex].name}\n${localizedOracle[oracleIndex].meaning}\n${language==="en"?"Reflection":"Reflectie"}: ${localizedOracle[oracleIndex].prompt}`:`${activeSign} · ${language==="en"?"AFTER-HOURS ENERGY":"AFTER-HOURS ENERGIE"}\n${signText}\n\n${language==="en"?"Today":"Vandaag"}: ${dailyReflection.title}\n${dailyReflection.prompt}`;try{await navigator.clipboard.writeText(`AFTER HOURS · ${tab.toUpperCase()}\n\n${textToCopy}\n\nConsent first.`);setCopied(true)}catch{setCopied(false)}};
