@@ -9,8 +9,11 @@ const context=():AudioContext|null=>{
 };
 function tone(f:number,d:number,s:number,type:OscillatorType="sine",g=0.035){
  const c=context();if(!c)return;
- const o=c.createOscillator(),a=c.createGain(),t=c.currentTime+s;
- o.type=type;o.frequency.setValueAtTime(f,t);a.gain.setValueAtTime(0,t);a.gain.linearRampToValueAtTime(g,t+0.012);a.gain.exponentialRampToValueAtTime(0.001,t+d);o.connect(a).connect(c.destination);o.start(t);o.stop(t+d+0.02);
+ // Audio is optional. A browser/audio-device failure must never interrupt session controls.
+ try{
+  const o=c.createOscillator(),a=c.createGain(),t=c.currentTime+s;
+  o.type=type;o.frequency.setValueAtTime(f,t);a.gain.setValueAtTime(0,t);a.gain.linearRampToValueAtTime(g,t+0.012);a.gain.exponentialRampToValueAtTime(0.001,t+d);o.connect(a).connect(c.destination);o.start(t);o.stop(t+d+0.02);
+ }catch{return;}
 }
 export async function playNotificationSound(kind:"message"|"checkin"|"safety"="message"){
  const c=context();if(!c)return;
