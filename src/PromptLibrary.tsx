@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { loadSavedPromptIds, saveSavedPromptIds } from "./promptBookmarks";
 import { englishPromptCopy } from "./promptTranslations";
 import { pickRandomId, sessionModes, storyChapters, type SessionModeId } from "./sessionModes";
 import { ArrowRight, Check, Copy, Heart, Shuffle, ShieldCheck } from "lucide-react";
@@ -281,7 +282,8 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
   const [seenPromptIds, setSeenPromptIds] = useState<string[]>(() => { try { return JSON.parse(localStorage.getItem(historyKey) || "[]").filter((id: unknown) => typeof id === "string"); } catch { return []; } });
   const [seenGameVariants, setSeenGameVariants] = useState<string[]>(() => { try { return JSON.parse(localStorage.getItem(gameHistoryKey) || "[]").filter((id: unknown) => typeof id === "string"); } catch { return []; } });
   const [activeVariant, setActiveVariant] = useState<{ key: string; text: string } | null>(null);
-  const [saved, setSaved] = useState<string[]>([]);
+  const [savedState, setSavedState] = useState<{ playerId: string; ids: string[] }>(() => ({ playerId, ids: loadSavedPromptIds(playerId) }));
+  const saved = savedState.playerId === playerId ? savedState.ids : loadSavedPromptIds(playerId);
   const [copied, setCopied] = useState(false);
   const [completed, setCompleted] = useState<string[]>([]);
   const [voiceListening, setVoiceListening] = useState(false);
@@ -444,7 +446,11 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
     setActiveVariant(chosen);
     setSeenGameVariants((previous) => [...previous, chosen.key].slice(-1000));
   };
-  const toggleSaved = () => setSaved((items) => items.includes(current.id) ? items.filter((id) => id !== current.id) : [...items, current.id]);
+  const toggleSaved = () => {
+    const next = saved.includes(current.id) ? saved.filter((id) => id !== current.id) : [...saved, current.id];
+    if (!saveSavedPromptIds(playerId, next)) return;
+    setSavedState({ playerId, ids: next });
+  };
   const copy = async () => {
     try { await navigator.clipboard.writeText(`AFTER HOURS · ${displayKind(current.kind).toUpperCase()}\n${displayCurrent.title}\n\n${displayCurrent.text}\n\nAlleen met vrije, expliciete en herroepbare toestemming.`); setCopied(true); }
     catch { setCopied(false); }
