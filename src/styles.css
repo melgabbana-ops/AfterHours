@@ -3802,3 +3802,65 @@ main:has(>.home-hero){max-width:480px!important;padding:22px 18px 110px!importan
 @media(min-width:760px){
  main:has(>.home-hero),.experience-shell,.aftercare-screen,.completion-screen,.insights,.radio-room,.profile,.game-select-screen{max-width:480px!important}
 }
+
+
+/* FINAL DETAIL PASS · align the first viewport and give every game its own art */
+main:has(>.home-hero){
+ display:flex!important;
+ flex-direction:column!important;
+}
+main:has(>.home-hero)>.home-hero{order:1!important}
+main:has(>.home-hero)>.home-shortcuts{order:2!important}
+main:has(>.home-hero)>.mood-checkin-before{order:3!important;margin-top:16px!important}
+main:has(>.home-hero)>.notification-bar{order:4!important}
+main:has(>.home-hero)>.consent-panel{order:5!important}
+main:has(>.home-hero)>.resume-panel{order:6!important}
+.home-hero{background-image:linear-gradient(180deg,rgba(5,5,5,.02) 0%,rgba(5,5,5,.1) 28%,rgba(5,5,5,.58) 58%,#050505 100%),url("/visuals/ah-cinematic-hero.svg")!important}
+.mood-checkin-before{padding:15px!important;border:1px solid rgba(205,174,119,.24)!important;border-radius:4px!important;background:linear-gradient(145deg,#17120d,#080807)!important}
+.mood-checkin-before h3{font-family:"Cinzel",serif!important;color:#f0dfb4!important;font-size:17px!important}
+.mood-checkin-before>p{font-size:10px!important;line-height:1.55!important;color:#b9af9f!important}
+.mood-checkin-before .mood-choice-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important}
+.mood-checkin-before .mood-choice-grid button{min-height:38px!important;padding:6px!important;border:1px solid rgba(205,174,119,.24)!important;border-radius:3px!important;background:#090807!important;font-size:9px!important}
+.mood-checkin-before .mood-choice-grid button.selected{border-color:#d5b77d!important;background:rgba(198,165,107,.16)!important;color:#f0dfb4!important}
+
+/* Distinct visual thumbnails for the four experience choices */
+.game-select-grid .experience-choice{overflow:hidden!important;isolation:isolate!important}
+.game-select-grid .experience-choice:before{
+ content:"";position:absolute;z-index:-1;right:0;top:0;bottom:0;width:42%;
+ background-position:center!important;background-size:cover!important;opacity:.5;
+ mask-image:linear-gradient(90deg,transparent 0%,#000 45%);
+}
+.game-select-grid .experience-choice:nth-child(1):before{background-image:url("/visuals/ah-cinematic-hero.svg")}
+.game-select-grid .experience-choice:nth-child(2):before{background-image:url("/visuals/ah-tarot-frame.svg")}
+.game-select-grid .experience-choice:nth-child(3):before{background-image:url("/visuals/ah-profile-sigil.svg")}
+.game-select-grid .experience-choice:nth-child(4):before{background-image:url("/visuals/ah-radio-vinyl.svg")}
+.game-select-grid .experience-choice.featured:before{opacity:.28;width:55%}
+.game-select-grid .experience-choice>*{position:relative;z-index:1}
+
+/* Repeated screen chrome and controls */
+.insight-footer button,.radio-room .back,.aftercare-card .back{min-height:42px!important;padding:10px 14px!important;border:1px solid var(--ah-border)!important;border-radius:3px!important;color:#d5b77d!important}
+.insight-safety{display:flex!important;align-items:flex-start!important;gap:9px!important;padding:12px!important;border:1px solid rgba(205,174,119,.2)!important;border-radius:3px!important;background:rgba(5,5,5,.56)!important}
+.insight-safety svg{flex:none!important;color:#d5b77d!important}
+.tarot-spread{display:grid!important;grid-template-columns:1fr!important;gap:9px!important}
+.tarot-spread-card{padding:14px!important;border:1px solid var(--ah-border)!important;border-radius:3px!important;background:linear-gradient(145deg,#17120d,#080807)!important}
+.tarot-spread-card>span{color:#d5b77d!important;font-size:8px!important;letter-spacing:.15em!important}
+.tarot-spread-card h4{font-family:"Cinzel",serif!important;color:#f0dfb4!important;font-size:16px!important}
+.tarot-spread-card p,.tarot-spread-card strong{font-size:10px!important;line-height:1.6!important;color:#c4b9a7!important}
+.profile .rank-ladder span:not(.eyebrow){border-color:rgba(205,174,119,.18)!important;border-radius:3px!important}
+.profile .rank-ladder span.current{background:rgba(198,165,107,.13)!important;border-color:#c6a56b!important;color:#f0dfb4!important}
+.profile .history-row{border-bottom:1px solid rgba(205,174,119,.14)!important;padding:10px 0!important}
+.profile .history-row:last-child{border-bottom:0!important}
+nav{gap:0!important;border-top:1px solid rgba(205,174,119,.25)!important}
+nav button{position:relative!important;max-width:100px!important;min-width:0!important;flex:1!important;color:#898174!important;font-size:8px!important;letter-spacing:.02em!important}
+nav button.active{color:#e1c78f!important}
+nav button.active:after{content:"";position:absolute;top:0;left:26%;right:26%;height:2px;background:linear-gradient(90deg,#a77d42,#f0d69c)!important}
+nav button.active svg{color:#e1c78f!important}
+@media(max-width:360px){
+ .home-shortcuts .tile{min-height:74px!important}
+ .home-shortcuts .tile span{font-size:9px!important}
+ .mood-checkin-before .mood-choice-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .insight-tabs button{font-size:8px!important}
+}
+@media(prefers-reduced-motion:reduce){
+ .home-hero,.experience-choice,.mood-checkin-before{scroll-behavior:auto!important}
+}
