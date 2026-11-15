@@ -131,7 +131,8 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
  useEffect(()=>{let active=true;const refreshRounds=async()=>{if(!supabaseConfigured){setRounds(language==="en"?fallbackRoundsEnglish:fallbackRounds);return;}try{const remote=await loadRemoteRounds(language);if(!active)return;setRounds(remote.length===3?remote.map(item=>({title:item.title,text:item.body,time:item.durationSeconds})):(language==="en"?fallbackRoundsEnglish:fallbackRounds));}catch{if(active)setRounds(language==="en"?fallbackRoundsEnglish:fallbackRounds);}};void refreshRounds();return()=>{active=false}},[language]);
  const initialScreen=initialScreenFromSearch(window.location.search);
  const[screen,setScreen]=useState<Screen>(initialScreen);
- const[completionSummary,setCompletionSummary]=useState<{earned:number;level:number;rounds:number}|null>(null);\n const[insightsInitialTab,setInsightsInitialTab]=useState<"tarot"|"oracle"|"astro">("tarot");
+ const[completionSummary,setCompletionSummary]=useState<{earned:number;level:number;rounds:number}|null>(null);
+ const[insightsInitialTab,setInsightsInitialTab]=useState<"tarot"|"oracle"|"astro">("tarot");
  const [captureAssignment,setCaptureAssignment]=useState<{title:string;task:string}|null>(null);
  const[privacyMode,setPrivacyMode]=useState(false);
  useEffect(()=>{if(new URLSearchParams(window.location.search).has("screen"))window.history.replaceState({},document.title,window.location.pathname+window.location.hash)},[]);
