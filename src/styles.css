@@ -3177,3 +3177,158 @@ nav[aria-label="Hoofdnavigatie"] button.active:before{content:"";position:absolu
 .completion-primary{background:linear-gradient(100deg,#f1d99f,#c99d50)!important;color:#17110a!important;border:1px solid #edcf8d!important}
 .completion-secondary{border-color:rgba(190,153,91,.55)!important;color:#e8cf94!important;background:#080706!important}
 @media(max-width:480px){.game-select-grid{grid-template-columns:1fr}.experience-choice{min-height:108px!important}.game-select-head h2{font-size:23px!important}}
+
+
+/* ==========================================================
+   AFTER HOURS / COMPLETE REFERENCE REDESIGN
+   Source of truth: supplied 10-screen mobile moodboard.
+   Black lacquer · warm bronze · champagne gold · editorial serif
+   ========================================================== */
+:root{
+ --ah-obsidian:#050505!important;--ah-black:#090807!important;
+ --ah-aubergine:#120e0a!important;--ah-velvet:#21180f!important;
+ --ah-violet:#4b3422!important;--ah-amethyst:#79542f!important;
+ --ah-champagne:#c99d59!important;--ah-gold:#d9b56f!important;
+ --ah-gold-light:#f2d99d!important;--ah-ivory:#f2e8d6!important;
+ --ah-muted:#bdb2a2!important;--ah-border:rgba(207,171,111,.34)!important;
+ --gold:#d9b56f!important;--gold-light:#f2d99d!important;
+ --muted:#bdb2a2!important;--line:rgba(207,171,111,.25)!important;
+ --plum:#090807!important;--plum-raised:#17110b!important;
+ --purple-glow:#77542f!important;--magenta:#9a7043!important;
+}
+html,body,#root{background:#050505!important;color:#f2e8d6!important}
+body{background:radial-gradient(ellipse at 50% -20%,#21180f 0%,#090807 42%,#050505 76%)!important}
+.app{background:radial-gradient(ellipse at 50% -15%,rgba(117,82,47,.2),transparent 40%),#070605!important;color:#f2e8d6!important}
+header,.brand-nav{
+ background:rgba(7,6,5,.96)!important;border-color:rgba(207,171,111,.24)!important;
+ backdrop-filter:blur(18px);box-shadow:0 8px 24px rgba(0,0,0,.3)
+}
+.wordmark,.brand-nav .wordmark{font-family:"Cinzel",Georgia,serif!important;color:#ead6ac!important;letter-spacing:.2em!important}
+.wordmark i,h1 i{color:#e2c181!important}
+.status,.eyebrow{color:#c5a56f!important}
+button{ -webkit-tap-highlight-color:transparent }
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
+ outline:2px solid #e0bd7d!important;outline-offset:3px
+}
+.gold,.home-start,.completion-primary,.aftercare-complete,.onboarding-next,.teaser-enter{
+ background:linear-gradient(105deg,#f0d69b 0%,#d5ad68 48%,#b98a4c 100%)!important;
+ color:#17110a!important;border:1px solid #f1d9a3!important;
+ box-shadow:0 8px 26px rgba(190,145,76,.2),inset 0 1px rgba(255,255,255,.4)!important;
+ font-weight:700!important
+}
+main{color:#f2e8d6}
+main:not(.teaser-screen):not(.experience-shell):not(.game-select-screen):not(.completion-screen){
+ background:radial-gradient(ellipse at 50% 0%,rgba(121,84,47,.12),transparent 40%),transparent!important
+}
+.gate,.gate-card,.auth-panel,.profile,.admin,.safety-screen,.round,.task-card,
+.insights-hero,.tarot-card,.astro-card,.radio-hero,.radio-player,.aftercare-card,
+.onboarding-panel,.character-studio,.consent-panel,.resume-panel,.completion-card{
+ background:linear-gradient(155deg,rgba(35,26,17,.96),rgba(8,7,6,.99) 72%)!important;
+ border:1px solid rgba(207,171,111,.4)!important;
+ box-shadow:0 18px 46px rgba(0,0,0,.48),inset 0 1px rgba(255,235,196,.06)!important;
+ border-radius:14px!important
+}
+.profile,.aftercare-card,.completion-card{border-radius:17px!important}
+input,textarea,select,.auth-panel input,.name-editor input,.astro-date{
+ background:#0b0907!important;color:#f2e8d6!important;
+ border:1px solid rgba(207,171,111,.4)!important;border-radius:9px!important
+}
+.tile,.experience-choice,.aftercare-options button,.moods .mood,
+.rank-ladder>div>span,.stats>div,.history,.history-row,
+.adminrow,.safety-controls,.onboarding-feature,.radio-vibe{
+ background:linear-gradient(145deg,#1a140d,#090807 82%)!important;
+ border:1px solid rgba(207,171,111,.3)!important;border-radius:11px!important;
+ color:#eee1c9!important
+}
+.tile svg,.character-studio-toggle svg,.aftercare-options svg,
+.insight-safety svg,.radio-note svg{color:#e1bd78!important}
+h1,h2,h3,h4,.profile h2,.round h2,.game-select-head h2,
+.completion-card h2,.aftercare-card h2,.insights h2,.radio-room h2{
+ font-family:"Cinzel",Georgia,serif!important;font-weight:400!important;
+ color:#ead4a3!important;letter-spacing:.025em
+}
+p,.tile small,.experience-choice small,.aftercare-card p{color:#c7bdaf}
+.home-hero{
+ min-height:440px!important;max-width:620px!important;
+ background:
+ linear-gradient(0deg,rgba(4,4,4,.98),rgba(5,5,5,.48) 56%,rgba(5,5,5,.12)),
+ radial-gradient(ellipse at 50% 25%,rgba(165,118,61,.22),transparent 46%),
+ linear-gradient(135deg,#281d12,#080706 70%)!important;
+ border:1px solid rgba(207,171,111,.48)!important;border-radius:13px!important;
+ box-shadow:0 22px 55px rgba(0,0,0,.55)!important
+}
+.home-hero:before{background:radial-gradient(ellipse at 50% 70%,rgba(169,120,61,.16),transparent 55%)!important}
+.home-level{background:rgba(5,5,5,.78)!important;border-color:rgba(207,171,111,.36)!important}
+.home-level>span{border-color:#d6b779!important;color:#edcf8e!important}
+.home-level strong,.home-shortcuts .tile span{color:#e9d6ae!important}
+.home-xp i,.profile .xp>span{background:linear-gradient(90deg,#9b713c,#d9b56f,#f2d99d)!important}
+.home-shortcuts .tile:nth-child(-n+3){background:linear-gradient(145deg,#21180f,#090807)!important}
+.home-shortcuts .tile{border-color:rgba(207,171,111,.34)!important}
+.experience-shell,.game-select-screen,.completion-screen,.aftercare-screen,.insights,.radio-room,.onboarding-screen{
+ background:radial-gradient(ellipse at 50% 0%,rgba(127,91,50,.15),transparent 42%),#070605!important;
+}
+.experience-shell>.round,.game-select-screen .experience-choice,.completion-card,
+.aftercare-card,.tarot-card,.astro-card,.radio-player{
+ background:linear-gradient(155deg,#21180f,#090807 76%)!important;
+ border-color:rgba(207,171,111,.48)!important
+}
+.round-steps span{background:#0a0907!important;border-color:rgba(207,171,111,.28)!important;color:#b8aa96!important}
+.round-steps span.current,.round-steps span.done{background:linear-gradient(105deg,#f0d69b,#c99d59)!important;color:#1a1209!important;border-color:#eed39a!important}
+.task-card,.timer,.tarot-prompt,.astro-reading,.astro-daily{
+ background:linear-gradient(145deg,#19130d,#080706)!important;border-color:rgba(207,171,111,.35)!important
+}
+.timer strong,.completion-xp strong,.completion-stats strong,.profile .stats b{color:#f0d69b!important}
+.aftercare-options button.selected,.moods .mood.active,.experience-choice.featured{
+ background:linear-gradient(110deg,rgba(125,88,46,.38),#090807 85%)!important;
+ border-color:#d9b56f!important
+}
+.profile .identity-avatar,.profile .avatar-picker,.profile .name-editor{
+ background:linear-gradient(145deg,#281c11,#080706)!important;border-color:rgba(207,171,111,.48)!important
+}
+.profile .profile-rank,.profile .rank-ladder{
+ background:linear-gradient(145deg,#21180f,#090807)!important;border-color:rgba(207,171,111,.36)!important
+}
+.profile .rank-ladder>div>span.current{background:linear-gradient(105deg,#f0d69b,#c99d59)!important;color:#181109!important}
+.insight-tabs button,.character-segment button{
+ background:#0b0907!important;border-color:rgba(207,171,111,.32)!important;color:#d7c8ae!important
+}
+.insight-tabs button.active,.character-segment button.selected{
+ background:linear-gradient(105deg,#f0d69b,#c99d59)!important;color:#1b1309!important;border-color:#f0d69b!important
+}
+.radio-disc{background:repeating-radial-gradient(circle,rgba(217,181,111,.08) 0 1px,transparent 2px 9px),radial-gradient(circle,#241a10,#070605 72%)!important;border-color:#d9b56f!important}
+.radio-disc span,.radio-player h3,.radio-vibe strong{color:#efd59b!important}
+.radio-controls button.radio-play{background:linear-gradient(105deg,#f0d69b,#c99d59)!important;color:#1a1209!important}
+.teaser-screen.moodboard-landing{
+ background:#050505!important;color:#f2e8d6!important
+}
+.teaser-noise{opacity:.12!important}
+.teaser-film,.teaser-film-motion,.teaser-atmosphere{
+ filter:sepia(.58) saturate(.7) hue-rotate(345deg)!important
+}
+.teaser-film-brand,.teaser-film-caption{color:#ead4a3!important}
+.teaser-divider,.moodboard-ornament{border-color:rgba(207,171,111,.48)!important;color:#d9b56f!important}
+.teaser-content h1,.teaser-copy h1{font-family:"Cinzel",Georgia,serif!important;color:#ead4a3!important}
+.moodboard-feature-card,.moodboard-missions{
+ background:linear-gradient(145deg,#21180f,#080706)!important;border:1px solid rgba(207,171,111,.34)!important
+}
+.onboarding-stepper>*,.onboarding-tabs>*{border-color:rgba(207,171,111,.32)!important}
+.onboarding-safety-note,.insight-safety,.radio-note,.aftercare-note{
+ background:rgba(30,22,13,.72)!important;border-color:rgba(207,171,111,.32)!important;color:#d3c4ad!important
+}
+header .safety-shortcut,header .privacy-shortcut,.language-toggle{
+ color:#d9bd83!important;border-color:rgba(207,171,111,.35)!important
+}
+nav,.bottom-nav,.app-nav,.mobile-nav{
+ background:rgba(6,5,4,.97)!important;border-color:rgba(207,171,111,.28)!important;
+ backdrop-filter:blur(18px)
+}
+nav button.active,.bottom-nav button.active,.app-nav button.active,.mobile-nav button.active{color:#f0d69b!important}
+@media(max-width:600px){
+ .app{padding-bottom:calc(82px + env(safe-area-inset-bottom))!important}
+ header{height:58px!important;padding:0 14px!important}
+ main{padding:20px 14px!important}
+ .home-hero{min-height:410px!important;padding:20px!important}
+ .game-select-screen,.completion-screen,.aftercare-screen{padding:18px 14px calc(100px + env(safe-area-inset-bottom))!important}
+ .profile,.round,.aftercare-card,.completion-card{padding:18px!important}
+}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
