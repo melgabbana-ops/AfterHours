@@ -24,15 +24,15 @@ if (missing.length) {
   process.exit(1);
 }
 
-for (const iconPath of ["/after-hours-icon-192.png"]) {
+for (const iconPath of ["/after-hours-icon-192.png", "/after-hours-brand-logo.svg"]) {
   if (!serviceWorker.includes(iconPath)) {
     console.error("Service worker does not reference the current app icon:", iconPath);
     process.exit(1);
   }
 }
 
-if (serviceWorker.includes("/after-hours-icon-192.png")) {
-  console.error("Service worker still references the retired 192px PNG icon.");
+if (serviceWorker.includes("/after-hours-icon-192.svg")) {
+  console.error("Service worker still references the retired 192px SVG icon.");
   process.exit(1);
 }
 

@@ -4097,9 +4097,3 @@ body{background:radial-gradient(ellipse at 50% -12%,rgba(126,82,38,.22),transpar
  to{opacity:1;transform:translateY(0) rotateY(0) scale(1);filter:blur(0)}
 }
 @media(prefers-reduced-motion:reduce){.app .tarot-spread-card{animation:none!important}}
-
-
-/* Approved AFTER HOURS cinematic logo: use the exact black, amber and gold artwork throughout the app. */
-.app .brand-nav img{display:block;width:44px!important;height:44px!important;object-fit:contain!important}
-.app .home-wordmark{display:block;width:min(38vw,150px)!important;height:auto!important;max-height:none!important;object-fit:contain!important;object-position:center!important;align-self:center!important}
-.app .gate-logo{width:min(76vw,300px)!important;height:auto!important;max-height:38vh;object-fit:contain!important}
