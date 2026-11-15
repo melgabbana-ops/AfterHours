@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" fill="none">
+<defs>
+ <radialGradient id="g" cx="50%" cy="36%" r="68%"><stop stop-color="#6c5431" stop-opacity=".46"/><stop offset=".42" stop-color="#211a10" stop-opacity=".52"/><stop offset="1" stop-color="#050505"/></radialGradient>
+ <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f0dfb4" stop-opacity=".72"/><stop offset=".48" stop-color="#b28b4e" stop-opacity=".2"/><stop offset="1" stop-color="#e5c98e" stop-opacity=".65"/></linearGradient>
+ <linearGradient id="shade" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#050505" stop-opacity=".12"/><stop offset=".7" stop-color="#050505" stop-opacity=".2"/><stop offset="1" stop-color="#050505"/></linearGradient>
+ <filter id="blur"><feGaussianBlur stdDeviation="38"/></filter>
+</defs>
+<rect width="1200" height="900" fill="#050505"/><rect width="1200" height="900" fill="url(#g)"/>
+<ellipse cx="610" cy="360" rx="370" ry="250" fill="#a77d3f" opacity=".1" filter="url(#blur)"/>
+<path d="M160 900V390Q160 120 600 80Q1040 120 1040 390V900" stroke="url(#gold)" stroke-opacity=".42" stroke-width="2"/>
+<path d="M210 900V405Q210 165 600 130Q990 165 990 405V900" stroke="url(#gold)" stroke-opacity=".18"/>
+<path d="M270 900V425Q270 220 600 190Q930 220 930 425V900" stroke="url(#gold)" stroke-opacity=".12"/>
+<path d="M600 130V900M160 560H1040" stroke="url(#gold)" stroke-opacity=".08"/>
+<path d="M160 390L600 80L1040 390" stroke="url(#gold)" stroke-opacity=".22"/>
+<circle cx="600" cy="350" r="160" stroke="url(#gold)" stroke-opacity=".12"/>
+<circle cx="600" cy="350" r="132" stroke="url(#gold)" stroke-opacity=".1"/>
+<path d="M600 160l9 25 25 9-25 9-9 25-9-25-25-9 25-9z" fill="#d8bc83" fill-opacity=".48"/>
+<g fill="#e7d2a5" opacity=".45"><circle cx="295" cy="270" r="2"/><circle cx="900" cy="300" r="2"/><circle cx="370" cy="480" r="1.5"/><circle cx="835" cy="520" r="1.5"/><circle cx="480" cy="190" r="1.2"/><circle cx="760" cy="210" r="1.2"/></g>
+<rect width="1200" height="900" fill="url(#shade)"/>
+</svg>

@@ -3457,3 +3457,17 @@ nav button.active,nav button.active svg{color:#e1c78f!important}
  .character-preview{gap:12px}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
+
+
+/* Dedicated authored visual assets for the reference-inspired experience. */
+.teaser-film,.home-hero{
+ background-image:linear-gradient(180deg,rgba(5,5,5,.08) 0%,rgba(5,5,5,.18) 40%,#050505 100%),url("/visuals/ah-cinematic-hero.svg")!important;
+ background-size:cover!important;background-position:center 42%!important;
+}
+.home-hero{isolation:isolate}
+.home-hero:after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(180deg,rgba(5,5,5,.05),rgba(5,5,5,.1) 40%,rgba(5,5,5,.86))}
+.teaser-film{background-size:cover!important;background-position:center!important}
+.experience-choice{background-image:linear-gradient(180deg,rgba(9,8,6,.28),rgba(5,5,5,.96)),url("/visuals/ah-cinematic-hero.svg")!important;background-size:cover!important;background-position:center!important}
+.tarot-card{background-image:linear-gradient(180deg,rgba(7,7,6,.68),rgba(7,7,6,.9)),url("/visuals/ah-tarot-frame.svg")!important;background-size:cover!important;background-position:center!important}
+.tarot-symbol{border-color:rgba(213,183,125,.55)!important;background:radial-gradient(circle,rgba(198,165,107,.1),transparent 70%)}
+@media(max-width:520px){.home-hero{background-position:center 35%!important}.experience-choice{background-position:center!important}}
