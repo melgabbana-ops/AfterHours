@@ -4129,3 +4129,41 @@ body{background:radial-gradient(ellipse at 50% -12%,rgba(126,82,38,.22),transpar
  .app .experience-choice{min-height:220px}
 }
 @media(prefers-reduced-motion:reduce){.app *, .app *::before, .app *::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+/* Final mobile polish: compact rhythm, safe-area spacing and no dead zones. */
+.app main{max-width:620px;padding:22px 16px calc(104px + env(safe-area-inset-bottom,0px))}
+.app .hero{padding-bottom:24px}
+.app .home-hero{margin-top:0;padding-top:190px!important}
+.app .home-shortcuts{gap:9px!important;margin-top:14px}
+.app .home-shortcuts .tile{min-height:88px;padding:14px 12px}
+.app .home-shortcuts .tile svg{margin-bottom:10px}
+.app .insights-hero{padding:24px 16px 14px}
+.app .tarot-card,.app .astro-card{margin:0 16px}
+.app .tarot-card{padding:18px 14px}
+.app .insight-footer{padding:14px 16px 22px}
+.app .radio-hero{padding:24px 16px 16px}
+.app .radio-player{margin:0 16px;padding:24px 18px;border-radius:18px}
+.app .radio-room{padding-bottom:calc(105px + env(safe-area-inset-bottom,0px))}
+.app .profile{padding:20px 0 34px}
+.app .profile>p{margin-bottom:12px}
+.app .character-studio-body{grid-template-columns:minmax(0,1fr);gap:16px}
+.app .character-preview{position:static;display:grid;grid-template-columns:minmax(125px,.9fr) minmax(0,1.1fr);align-items:center;gap:14px}
+.app .character-portrait{min-height:230px}
+.app .character-preview-caption{padding:8px}
+.app .character-options{gap:13px}
+.app .game-select-head{padding:10px 0 18px}
+.app .game-select-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.app .experience-choice{min-height:210px;padding:16px}
+.app .completion-card{padding:26px 18px}
+.app nav{padding-bottom:env(safe-area-inset-bottom,0px);height:calc(70px + env(safe-area-inset-bottom,0px))}
+.app header{padding-left:14px;padding-right:14px}
+.app .wordmark img{width:min(170px,42vw);height:48px}
+@media(max-width:390px){
+ .app main{padding-left:13px;padding-right:13px}
+ .app .game-select-grid{gap:8px}
+ .app .experience-choice{min-height:195px;padding:13px}
+ .app .character-preview{grid-template-columns:minmax(108px,.82fr) minmax(0,1.18fr);gap:10px}
+ .app .character-portrait{min-height:205px}
+ .app .insight-tabs button{font-size:9px;padding:11px 6px}
+}
+@media(min-width:760px){.app main{padding-top:30px}.app .home-hero{min-height:560px}}
