@@ -3471,3 +3471,15 @@ nav button.active,nav button.active svg{color:#e1c78f!important}
 .tarot-card{background-image:linear-gradient(180deg,rgba(7,7,6,.68),rgba(7,7,6,.9)),url("/visuals/ah-tarot-frame.svg")!important;background-size:cover!important;background-position:center!important}
 .tarot-symbol{border-color:rgba(213,183,125,.55)!important;background:radial-gradient(circle,rgba(198,165,107,.1),transparent 70%)}
 @media(max-width:520px){.home-hero{background-position:center 35%!important}.experience-choice{background-position:center!important}}
+
+
+/* Secondary screens: matching authored artwork and quieter editorial surfaces. */
+.radio-player{position:relative;isolation:isolate;overflow:hidden;background-image:linear-gradient(180deg,rgba(5,5,5,.48),rgba(5,5,5,.88)),url("/visuals/ah-radio-vinyl.svg")!important;background-size:cover!important;background-position:center!important}
+.radio-disc{background:radial-gradient(circle,#17130d 0 27%,#090807 28% 58%,#17130d 59% 62%,#080807 63%)!important;box-shadow:0 0 55px rgba(198,165,107,.16),inset 0 0 25px #000!important}
+.profile{position:relative;isolation:isolate;overflow:hidden}
+.profile:before{content:"";position:absolute;z-index:-1;pointer-events:none;inset:0 0 auto;height:260px;background:linear-gradient(180deg,rgba(5,5,5,.2),#0b0a08 96%),url("/visuals/ah-profile-sigil.svg") center 24%/min(100%,380px) auto no-repeat;opacity:.38}
+.profile .identity-avatar{border-color:rgba(213,183,125,.72)!important;box-shadow:0 0 0 5px rgba(213,183,125,.06),0 12px 38px rgba(0,0,0,.5)}
+.aftercare-screen{background-image:radial-gradient(ellipse at 50% 8%,rgba(183,151,92,.16),transparent 42%),linear-gradient(180deg,#0b0a08,#050505)!important}
+.aftercare-card{background-image:linear-gradient(145deg,rgba(24,21,16,.92),rgba(8,8,7,.97)),url("/visuals/ah-cinematic-hero.svg")!important;background-size:cover!important;background-position:center!important}
+.insights-hero{background:radial-gradient(ellipse at 50% 0%,rgba(198,165,107,.12),transparent 68%)}
+@media(max-width:520px){.radio-player{margin:0 14px}.profile:before{height:220px;background-size:280px auto}}
