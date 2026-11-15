@@ -79,7 +79,7 @@ function AvatarArt({ look }: { look: CharacterLook }) {
     <path d="M18 300 C22 242 47 218 83 204 L104 188 L136 188 L157 204 C193 218 218 242 222 300Z" fill="url(#ahPortraitCloth)"/>
     <path d="M78 218 L103 194 L120 219 L137 194 L162 218 L151 300 L89 300Z" fill="#090806" stroke="url(#ahPortraitGold)" strokeOpacity=".5" strokeWidth="1"/>
     <path d={hairShape} fill={look.hair}/>
-    {longHair && <path d={look.hairStyle==="curls"?"M62 80 C49 101 69 118 57 143 C48 165 64 185 60 211 M178 78 C193 99 173 119 185 145 C195 168 177 190 181 211":"M65 78 C52 107 70 129 61 160 C57 180 69 196 67 211 M175 78 C188 106 170 129 179 160 C183 180 171 196 173 211"} fill="none" stroke={look.hair} strokeWidth={look.hairStyle==="curls"?13:10} strokeLinecap="round"/>
+    {longHair && <path d={look.hairStyle==="curls"?"M62 80 C49 101 69 118 57 143 C48 165 64 185 60 211 M178 78 C193 99 173 119 185 145 C195 168 177 190 181 211":"M65 78 C52 107 70 129 61 160 C57 180 69 196 67 211 M175 78 C188 106 170 129 179 160 C183 180 171 196 173 211"} fill="none" stroke={look.hair} strokeWidth={look.hairStyle==="curls"?13:10} strokeLinecap="round"/>}
     <path d={masculine?"M82 76 C93 56 147 56 158 76 L157 140 C155 168 139 187 120 190 C101 187 85 168 83 140Z":"M82 77 C94 56 146 56 158 77 L158 141 C155 170 139 189 120 192 C101 189 85 170 82 141Z"} fill="url(#ahPortraitSkin)"/>
     <path d="M81 82 C91 56 146 53 159 82 C153 68 140 63 120 65 C102 65 91 72 81 93Z" fill={look.hair}/>
     <path d="M91 124 C101 119 110 119 115 123 M125 123 C132 119 141 119 149 124" fill="none" stroke="#21120f" strokeOpacity=".72" strokeWidth="2" strokeLinecap="round"/>
