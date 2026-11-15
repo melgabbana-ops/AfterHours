@@ -82,7 +82,7 @@ export default function SafetyPlan({
 
   return <section className="safety-plan" aria-labelledby="safety-plan-title">
     <div className="safety-plan-heading"><LockKeyhole/><div><span className="eyebrow">{t("PRIVÉ · OP DIT APPARAAT", "PRIVATE · ON THIS DEVICE")}</span><h3 id="safety-plan-title">{t("Jouw veiligheidsplan", "Your safety plan")}</h3></div></div>
-    <p className="safety-plan-intro">{t("Leg vooraf vast welke signalen je wilt gebruiken. Deze notities blijven lokaal in deze browser en worden niet naar AFTER HOURS-servers gesynchroniseerd.", "Set out the signals you want to use before you begin. These notes stay in this browser and are not synced to AFTER HOURS servers.")}</p>
+    <p className="safety-plan-intro">{t("Leg vooraf vast welke signalen je wilt gebruiken. Deze notities blijven lokaal in deze browser en worden niet naar AFTER HOURS-servers gesynchroniseerd. Iedereen met toegang tot dit browserprofiel kan ze mogelijk bekijken. Gebruik dit daarom niet op een gedeeld apparaat en noteer geen namen of andere gevoelige details.", "Set out the signals you want to use before you begin. These notes stay in this browser and are not synced to AFTER HOURS servers. Anyone with access to this browser profile may be able to view them. Do not use this on a shared device or include names or other sensitive details.")}</p>
 
     <section className="safety-room-panel" aria-labelledby="safety-room-title">
       <div className="safety-room-status">
