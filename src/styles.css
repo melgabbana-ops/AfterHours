@@ -4194,3 +4194,92 @@ button:focus-visible,input:focus-visible{outline:2px solid #e6c487;outline-offse
  nav button{min-width:0;flex:1;font-size:7px}
 }
 @media(prefers-reduced-motion:reduce){.tile{transition:none}}
+
+
+/* Cinematic screen family: experience, radio and aftercare */
+.aftercare-screen{
+ min-height:100svh;
+ padding:calc(env(safe-area-inset-top,0px) + 28px) 18px calc(env(safe-area-inset-bottom,0px) + 34px);
+ background:
+  linear-gradient(180deg,rgba(4,4,4,.08),rgba(4,4,4,.48) 32%,#050505 82%),
+  url("/visuals/ah-cinematic-hero.jpg") center 34%/cover fixed,
+  #050505;
+}
+.aftercare-card{
+ position:relative;overflow:hidden;
+ border:1px solid rgba(218,183,122,.38);
+ border-radius:14px;
+ background:linear-gradient(145deg,rgba(27,20,13,.96),rgba(7,7,6,.98));
+ box-shadow:0 25px 80px rgba(0,0,0,.55),inset 0 1px rgba(255,238,203,.06);
+}
+.aftercare-card h2{
+ font-family:"Cinzel",Georgia,serif;
+ font-weight:500;letter-spacing:0;color:#f0dfc0;
+}
+.aftercare-card>p{color:#c2b6a4}
+.aftercare-options{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.aftercare-options button{
+ min-height:112px;padding:16px;
+ border:1px solid rgba(210,173,112,.27);
+ border-radius:10px;
+ background:linear-gradient(145deg,rgba(36,27,17,.82),rgba(8,8,7,.94));
+ color:#eee0ca;
+}
+.aftercare-options button.selected{
+ border-color:#d5ae70;
+ background:linear-gradient(145deg,rgba(111,77,37,.35),rgba(14,11,8,.94));
+ box-shadow:inset 0 0 0 1px rgba(224,190,132,.13),0 0 24px rgba(173,125,62,.1);
+}
+.aftercare-options span{color:#bcb09d}
+.aftercare-note{
+ border:1px solid rgba(210,173,112,.18);
+ border-radius:9px;
+ background:rgba(10,9,7,.72);
+ color:#bdb19e;
+}
+.radio-hero h2,.radio-player h3{font-family:"Cinzel",Georgia,serif;color:#f0dfc0;font-weight:500}
+.radio-hero p{color:#c0b5a4}
+.radio-player{
+ border-color:rgba(210,173,112,.4);
+ border-radius:13px;
+ background:
+  linear-gradient(180deg,rgba(5,5,5,.34),rgba(5,5,5,.95)),
+  url("/visuals/ah-radio-photo.jpg") center/cover,
+  #080706;
+ box-shadow:0 24px 70px rgba(0,0,0,.48),inset 0 1px rgba(255,239,205,.06);
+}
+.radio-disc{border-color:#bd9558;box-shadow:0 0 35px rgba(202,157,88,.13)}
+.spotify-open{
+ border:1px solid rgba(220,184,119,.65);
+ border-radius:9px;
+ background:linear-gradient(145deg,#b78a4e,#6f4c28);
+ color:#100c07;
+}
+.experience-card{
+ padding:18px;
+ border:1px solid rgba(210,173,112,.3);
+ border-radius:12px;
+ background:linear-gradient(150deg,rgba(29,22,14,.94),rgba(7,7,6,.98));
+ box-shadow:0 15px 40px rgba(0,0,0,.22);
+}
+.experience-card h3,.experience-play h3{color:#f0dfc0}
+.experience-card p,.experience-play p{color:#bdb19f}
+.experience-card>button,.experience-play .prompt-actions button{
+ border-color:rgba(210,173,112,.55);
+ border-radius:8px;
+ background:linear-gradient(145deg,rgba(103,72,36,.3),rgba(10,9,7,.9));
+ color:#e8c98f;
+}
+.experience-play .prompt-actions button.gold{
+ background:linear-gradient(145deg,#c49a5c,#76512c);
+ color:#100c07;
+ border-color:#e2c18a;
+}
+@media(max-width:520px){
+ .aftercare-screen{background-attachment:scroll}
+ .aftercare-card{padding:25px 17px}
+ .aftercare-options{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .aftercare-options button{min-height:100px;padding:13px}
+ .radio-player{margin:0 14px;padding:24px 17px}
+ .experience-card{padding:16px}
+}
