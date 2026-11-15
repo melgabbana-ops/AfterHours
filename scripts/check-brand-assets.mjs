@@ -28,7 +28,7 @@ if (missing.length) {
 }
 
 if (!html.includes('rel="apple-touch-icon"') || !html.includes("/after-hours-icon-180.png")) {
-  console.error("The iOS home-screen touch icon must reference the current 512px PNG asset.");
+  console.error("The iOS home-screen touch icon must reference the native 180px PNG asset.");
   process.exit(1);
 }
 
