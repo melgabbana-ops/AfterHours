@@ -446,3 +446,181 @@ hr{border:0;border-top:1px solid var(--ah-line)}
 .mood-save-message,.profile-message{display:block;padding:9px 11px;border:1px solid var(--ah-line);border-radius:4px;background:#171109;color:#e2c18c;font-size:9px}
 .privacy-shortcut,.safety-shortcut,.notification-button{transition:all .18s ease}
 @media(max-width:380px){.avatar-options{grid-template-columns:repeat(3,minmax(0,1fr))}.notification-head-actions{margin-left:0}}
+
+
+/* Screen-specific finish: character identity, tarot, radio, deck, vault and safety. */
+.character-studio{
+ margin:18px 0!important;border:1px solid var(--ah-line)!important;border-radius:6px!important;
+ background:linear-gradient(145deg,#17110b,#090807)!important;overflow:hidden
+}
+.character-studio-toggle{
+ width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;
+ padding:16px!important;background:transparent!important;border:0!important;color:#e9d8bd!important;text-align:left
+}
+.character-studio-toggle>span{display:flex;align-items:center;gap:12px}
+.character-studio-toggle strong{display:block;font-family:"Cinzel",Georgia,serif;font-size:11px;letter-spacing:.12em}
+.character-studio-toggle small{display:block;color:#aa9b85;font-size:9px;margin-top:4px}
+.character-studio-toggle>svg{color:#c9a16a;transition:transform .2s ease}
+.character-studio-toggle>svg.rotated{transform:rotate(180deg)}
+.character-studio-body{display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);gap:16px;padding:0 16px 18px}
+.character-preview{min-width:0;display:flex;flex-direction:column;gap:10px}
+.character-art{display:block;width:100%;max-width:220px;margin:0 auto;border-radius:6px;box-shadow:0 12px 32px rgba(0,0,0,.4)}
+.character-preview-caption{display:flex;flex-direction:column;gap:4px;text-align:center}
+.character-preview-caption .eyebrow{margin:0;font-size:7px}
+.character-preview-caption strong{font-family:"Cinzel",Georgia,serif;font-size:13px;color:#f0dfc5;letter-spacing:.06em}
+.character-preview-caption small{font-size:8px;color:#a99c89;line-height:1.45}
+.character-options{display:flex;flex-direction:column;gap:15px;min-width:0}
+.character-field{display:flex;flex-direction:column;gap:8px}
+.character-field>.eyebrow{margin:0;font-size:7px}
+.character-segment{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.character-segment button{
+ display:flex;align-items:center;justify-content:center;gap:5px;min-height:38px;padding:8px 5px;
+ border:1px solid var(--ah-line)!important;border-radius:4px!important;background:#0b0907!important;
+ color:#bcae98!important;font-size:9px!important
+}
+.character-segment button.selected{border-color:#d0a76c!important;background:#21180f!important;color:#f0d8ad!important}
+.character-swatches{display:flex;flex-wrap:wrap;gap:8px}
+.character-swatches button{
+ width:27px;height:27px;min-width:27px;padding:0;border-radius:50%!important;
+ border:1px solid rgba(230,208,170,.38)!important;box-shadow:inset 0 0 0 2px rgba(0,0,0,.24)
+}
+.character-swatches button.selected{outline:1px solid #e1bf85!important;outline-offset:3px}
+.character-swatches button svg{filter:drop-shadow(0 1px 2px #000);color:#fff}
+.character-save-note{font-size:8px;color:#b7a78f;line-height:1.5}
+.character-studio-toggle:focus-visible,.character-segment button:focus-visible,.character-swatches button:focus-visible{outline:1px solid #e4c58f;outline-offset:3px}
+.insights{padding-top:24px!important}
+.insights-hero,.prompt-hero,.radio-hero{
+ position:relative;padding:20px 0 22px!important;border-bottom:1px solid var(--ah-line)!important;margin-bottom:18px!important
+}
+.insights-hero h2,.prompt-hero h2,.radio-hero h2{font-size:clamp(28px,7vw,39px)!important;line-height:1.12!important;color:#f0dfc5!important;margin:8px 0 12px!important}
+.insights-hero p,.prompt-hero p,.radio-hero p{max-width:40rem;color:#b9ad9a;font-size:11px;line-height:1.7}
+.insight-tabs,.prompt-filters{display:flex;flex-wrap:wrap;gap:7px!important;margin-top:18px}
+.insight-tabs button,.prompt-filters button{
+ flex:1;min-width:0;min-height:39px;padding:8px 10px!important;border:1px solid var(--ah-line)!important;
+ border-radius:4px!important;background:#0c0907!important;color:#b8a990!important;
+ font-size:9px!important;letter-spacing:.04em
+}
+.insight-tabs button.active,.prompt-filters button.active{
+ border-color:#cba36b!important;background:linear-gradient(145deg,#2a1e12,#120d08)!important;color:#f0d7ac!important
+}
+.insight-tabs button svg{width:14px;height:14px;vertical-align:middle;margin-right:4px}
+.tarot-card,.astro-card{
+ border:1px solid var(--ah-line)!important;border-radius:6px!important;
+ background:radial-gradient(ellipse at 50% 0%,rgba(139,94,43,.13),transparent 48%),#0d0a07!important;
+ padding:16px!important
+}
+.ah-tarot-card{
+ max-width:240px;min-height:340px;margin:18px auto;padding:18px 15px!important;
+ display:flex;flex-direction:column;align-items:center;justify-content:space-between;
+ border:1px solid #b88c53!important;border-radius:7px!important;
+ background:radial-gradient(ellipse at 50% 40%,rgba(160,111,53,.24),transparent 56%),linear-gradient(155deg,#21170e,#090705 72%)!important;
+ box-shadow:0 16px 42px rgba(0,0,0,.48),inset 0 0 0 5px rgba(201,161,106,.08),inset 0 0 0 6px rgba(201,161,106,.18);
+ color:#e9d4ae!important
+}
+.ah-tarot-card__top,.ah-tarot-card__bottom{font-family:"Cinzel",Georgia,serif;font-size:8px;letter-spacing:.16em;color:#d4b17a}
+.ah-tarot-card__sigil{width:116px;height:154px;display:grid;place-items:center;border:1px solid rgba(201,161,106,.55);outline:1px solid rgba(201,161,106,.2);outline-offset:5px;color:#e7c58b;font-family:"Cinzel",serif;font-size:58px}
+.ah-tarot-card__name{font-family:"Cinzel",Georgia,serif;font-size:17px;letter-spacing:.08em;text-align:center;color:#f1dfc5}
+.tarot-spread{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:16px 0}
+.tarot-spread-card{
+ min-width:0;padding:10px 8px!important;border:1px solid var(--ah-line)!important;border-radius:5px!important;
+ background:linear-gradient(160deg,#21170e,#0b0806)!important
+}
+.tarot-spread-card>span{display:block;font-size:7px;letter-spacing:.08em;color:#c6a16c;text-transform:uppercase}
+.ah-tarot-mini{height:104px;margin:10px 0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;border:1px solid rgba(201,161,106,.45);background:radial-gradient(ellipse,rgba(146,101,47,.24),transparent 70%),#0b0806}
+.ah-tarot-mini i{font-style:normal;font-family:"Cinzel";font-size:32px;color:#e4c58f}
+.ah-tarot-mini small{font-size:6px;letter-spacing:.13em;color:#c6a16c}
+.tarot-spread-card h4{font-family:"Cinzel";font-size:10px;color:#f0dfc5;margin:8px 0}
+.tarot-spread-card p,.tarot-spread-card strong{font-size:8px;line-height:1.5;color:#b9ad9a}
+.tarot-spread-card strong{display:block;margin-top:8px;color:#e0c18c}
+.tarot-prompt,.insight-consent-note,.insight-safety,.insight-footer{
+ margin:14px 0;padding:13px;border:1px solid var(--ah-line);border-radius:4px;background:#100c08;color:#c8b99f;font-size:10px;line-height:1.6
+}
+.tarot-prompt span{display:block;font-size:7px;letter-spacing:.14em;color:#c9a16a;margin-bottom:6px}
+.tarot-prompt strong{color:#eadbc2;font-family:"Cinzel";font-size:11px}
+.insight-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.insight-actions button{min-height:40px;padding:9px 13px;border:1px solid var(--ah-line)!important;border-radius:4px!important;background:#100c08!important;color:#dfc79e!important;font-size:9px}
+.astro-daily,.astro-reading{margin:12px 0;padding:14px;border:1px solid var(--ah-line);border-radius:5px;background:#100c08}
+.radio-room{padding-top:24px!important}
+.radio-hero{padding:25px 0 26px!important}
+.radio-player{
+ position:relative;overflow:hidden;margin:0 0 15px!important;padding:24px 18px!important;
+ border:1px solid #a9804c!important;border-radius:7px!important;
+ background:linear-gradient(180deg,rgba(5,4,3,.28),rgba(5,4,3,.96)),url("/visuals/ah-radio-photo.jpg") center/cover!important
+}
+.radio-disc{
+ width:132px;height:132px;margin:0 auto 22px;border:1px solid rgba(219,185,126,.7)!important;border-radius:50%;
+ display:flex;align-items:center;justify-content:center;position:relative;
+ background:repeating-radial-gradient(circle,#17110b 0 3px,#080706 4px 7px)!important;
+ box-shadow:0 0 0 7px rgba(201,161,106,.07),0 15px 36px rgba(0,0,0,.45)
+}
+.radio-disc svg{width:24px;height:24px;color:#e3c48e}
+.radio-disc>span{position:absolute;bottom:12px;font-family:"Cinzel";font-size:8px;letter-spacing:.15em;color:#d5b47f}
+.radio-player h3{font-family:"Cinzel";font-size:15px;letter-spacing:.09em;color:#f0dfc5;margin:9px 0}
+.radio-player p{font-size:9px;color:#b9ad9a}
+.radio-vibe{display:flex;flex-direction:column;gap:4px;margin:18px 0;padding:12px 0;border-top:1px solid var(--ah-line);border-bottom:1px solid var(--ah-line)}
+.radio-vibe>span{font-size:8px;color:#c6a16c}.radio-vibe strong{font-family:"Cinzel";font-size:12px;letter-spacing:.09em;color:#eadbc2}.radio-vibe small{font-size:8px;color:#a99b86}
+.spotify-open{display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid #c6a16c;border-radius:4px;color:#eddbbb!important;background:rgba(8,6,4,.82);text-decoration:none}
+.spotify-open span{font-size:8px;opacity:.7}.spotify-open strong{margin-right:auto;font-family:"Cinzel";font-size:10px;letter-spacing:.06em}
+.radio-note{display:flex;gap:12px;align-items:flex-start;padding:14px;border:1px solid var(--ah-line)!important;border-radius:5px!important;background:#100c08!important}
+.radio-note svg{flex:none;color:#d6b77e}.radio-note strong,.radio-note span{display:block}.radio-note strong{font-family:"Cinzel";font-size:10px;color:#eadbc2}.radio-note span{font-size:9px;color:#b9ad9a;line-height:1.55;margin-top:5px}
+.prompt-library{padding-top:24px!important}
+.prompt-filters{margin-bottom:14px}
+.dom-picker{display:grid;gap:8px;margin:18px 0;padding:14px;border:1px solid var(--ah-line);border-radius:5px;background:#100c08}
+.dom-picker>div:first-child{grid-column:1/-1}
+.dom-picker>button{display:flex;align-items:center;gap:10px;min-height:55px;padding:10px;border:1px solid var(--ah-line)!important;border-radius:4px!important;background:#0b0907!important;color:#e6d6bd!important;text-align:left}
+.dom-picker>button.selected{border-color:#cba36b!important;background:#21180f!important}
+.dom-picker-symbol{width:30px;height:30px;display:grid;place-items:center;border:1px solid #9c794b;border-radius:50%;color:#e1c18b}
+.dom-picker>button strong,.dom-picker>button small{display:block}.dom-picker>button strong{font-family:"Cinzel";font-size:10px}.dom-picker>button small{font-size:8px;color:#b4a58e;margin-top:3px}
+.dom-picker-check{margin-left:auto;color:#e2c18c}
+.prompt-card,.experience-card{border:1px solid var(--ah-line)!important;border-radius:5px!important;background:linear-gradient(150deg,#20170e,#0a0806)!important;padding:16px!important}
+.prompt-card-top,.prompt-card .eyebrow{color:#c6a16c;font-size:8px;letter-spacing:.13em}
+.prompt-card h3,.experience-card h3{font-family:"Cinzel";font-size:16px;color:#f0dfc5}
+.prompt-card p,.experience-card p{font-size:10px;color:#b9ad9a;line-height:1.6}
+.prompt-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.prompt-actions button,.experience-play,.read-assignment{
+ min-height:40px;padding:9px 13px;border:1px solid var(--ah-line)!important;border-radius:4px!important;background:#100c08!important;color:#e2c18c!important;font-size:9px
+}
+.media-vault{padding:17px!important;border:1px solid var(--ah-line)!important;border-radius:6px!important;background:#100c08!important}
+.media-vault-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:18px 0 10px}
+.media-vault-head strong{font-family:"Cinzel";font-size:11px;color:#eadbc2}
+.media-vault-head button,.media-item-actions button,.media-upload,.media-stop-recording{
+ min-height:38px;padding:8px 11px;border:1px solid var(--ah-line)!important;border-radius:4px!important;background:#0b0907!important;color:#dfc18f!important;font-size:9px
+}
+.media-list{display:grid;gap:8px}
+.media-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px;border:1px solid var(--ah-line)!important;border-radius:4px;background:#0b0907}
+.media-item-copy{min-width:0}.media-item-copy strong{display:block;overflow-wrap:anywhere;font-size:10px;color:#eadbc2}.media-item-copy small{display:block;margin-top:4px;font-size:8px;color:#a99b86}
+.media-item-actions{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
+.media-item-actions button{min-height:32px;padding:6px 9px}
+.media-live-preview,.media-pending-preview{margin:12px 0;padding:10px;border:1px solid var(--ah-line);border-radius:5px;background:#080706}
+.media-live-preview video,.media-pending-preview img,.media-pending-preview video{display:block;width:100%;max-height:360px;object-fit:contain;border-radius:3px}
+.media-live-watermark{color:#e4c58f;font-family:"Cinzel";font-size:9px;letter-spacing:.14em}
+.media-upload{display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.media-overlay-note{padding:11px;border-left:2px solid #b88c53;background:#120d08;color:#b9ad9a;font-size:9px;line-height:1.6}
+.safety-plan{padding:17px!important;border:1px solid var(--ah-line)!important;border-radius:6px!important;background:linear-gradient(145deg,#17110b,#090807)!important}
+.safety-plan-heading{display:flex;align-items:center;gap:12px;margin-bottom:12px;color:#dfbd83}
+.safety-plan-heading h3{font-family:"Cinzel";font-size:16px;color:#f0dfc5;margin:4px 0}
+.safety-plan-intro,.safety-room-summary,.safety-plan-footnote,.safety-room-footnote{font-size:9px;line-height:1.65;color:#b9ad9a}
+.safety-room-panel{margin:16px 0;padding:14px;border:1px solid var(--ah-line)!important;border-radius:5px!important;background:#0d0a07!important}
+.safety-room-status{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.safety-room-status h4{font-family:"Cinzel";font-size:12px;color:#eadbc2;margin:6px 0}
+.safety-room-pill{white-space:nowrap;padding:6px 8px;border:1px solid var(--ah-line);border-radius:20px;font-size:7px;color:#d9c49f}
+.safety-readiness-meter{margin:14px 0}
+.safety-readiness-meter>div{display:flex;justify-content:space-between;color:#c6a16c;font-size:8px;letter-spacing:.1em}
+.safety-readiness-track{display:block;height:3px;margin-top:8px;background:#30261a}
+.safety-readiness-track i{display:block;height:100%;background:linear-gradient(90deg,#9a7040,#f0d8ad)}
+.safety-readiness-list{display:grid;gap:8px}
+.safety-readiness-item{display:flex;align-items:flex-start;gap:10px;padding:11px;border:1px solid rgba(201,161,106,.17);border-radius:4px;background:#100c08}
+.safety-readiness-item input{margin-top:2px;accent-color:#c9a16a}
+.safety-readiness-item strong,.safety-readiness-item small{display:block}.safety-readiness-item strong{font-size:9px;color:#eadbc2}.safety-readiness-item small{margin-top:4px;font-size:8px;color:#a99b86}
+.safety-plan-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.safety-plan-actions button{min-height:40px;padding:9px 13px;border:1px solid var(--ah-line)!important;border-radius:4px!important;background:#100c08!important;color:#dfc18f!important;font-size:9px}
+@media(max-width:560px){
+ .character-studio-body{grid-template-columns:1fr;gap:14px}
+ .character-art{max-width:190px}
+ .character-preview{max-width:260px;width:100%;margin:0 auto}
+ .tarot-spread{gap:6px}.tarot-spread-card{padding:8px 6px!important}
+ .ah-tarot-mini{height:88px}
+ .media-item{align-items:flex-start;flex-direction:column}
+ .media-item-actions{justify-content:flex-start}
+ .safety-room-status{align-items:flex-start;flex-direction:column}
+}
