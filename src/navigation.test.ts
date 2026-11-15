@@ -19,6 +19,17 @@ describe("initialScreenFromSearch", () => {
     expect(initialScreenFromSearch("?screen=capture")).toBe("home");
   });
 
+
+  it("keeps every installed-app shortcut mapped to a supported screen", async () => {
+    const { readFile } = await import("node:fs/promises");
+    const manifestText = await readFile(new URL("../public/manifest.webmanifest", import.meta.url), "utf8");
+    const manifest = JSON.parse(manifestText) as { shortcuts: Array<{ url: string }> };
+    for (const shortcut of manifest.shortcuts) {
+      const url = new URL(shortcut.url, "https://after-hours.example");
+      expect(initialScreenFromSearch(url.search)).not.toBe("home");
+    }
+  });
+
   it("does not confuse unrelated query parameters with a screen", () => {
     expect(initialScreenFromSearch("?campaign=radio&ref=home")).toBe("home");
     expect(initialScreenFromSearch("?ref=home&screen=daily")).toBe("daily");
