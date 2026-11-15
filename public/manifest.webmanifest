@@ -6,18 +6,55 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "display_override": ["standalone"],
+  "display_override": [
+    "standalone"
+  ],
   "orientation": "any",
   "background_color": "#080807",
   "theme_color": "#080807",
   "icons": [
-    {"src": "/icons/after-hours-master.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any"}
+    {
+      "src": "/icons/after-hours-master.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
   ],
   "shortcuts": [
-    {"name": "Experience", "short_name": "Experience", "url": "/?screen=game"},
-    {"name": "Profiel", "short_name": "Profiel", "url": "/?screen=profile"},
-    {"name": "Session control", "short_name": "Session control", "url": "/?screen=admin"},
-    {"name": "The Deck", "short_name": "The Deck", "url": "/?screen=prompts"},
-    {"name": "Radio", "short_name": "Radio", "url": "/?screen=radio"}
+    {
+      "name": "Experience",
+      "short_name": "Experience",
+      "url": "/?screen=game"
+    },
+    {
+      "name": "Profiel",
+      "short_name": "Profiel",
+      "url": "/?screen=profile"
+    },
+    {
+      "name": "Veiligheidsplan",
+      "short_name": "Veiligheid",
+      "url": "/?screen=safety"
+    },
+    {
+      "name": "The Deck",
+      "short_name": "The Deck",
+      "url": "/?screen=prompts"
+    },
+    {
+      "name": "Radio",
+      "short_name": "Radio",
+      "url": "/?screen=radio"
+    },
+    {
+      "name": "Daily After Hours",
+      "short_name": "Daily",
+      "url": "/?screen=daily"
+    },
+    {
+      "name": "Insights",
+      "short_name": "Insights",
+      "url": "/?screen=insights"
+    }
   ]
 }
