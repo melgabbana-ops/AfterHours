@@ -152,3 +152,85 @@ nav button.active:before{content:"";position:absolute;top:0;left:30%;right:30%;h
  .home-shortcuts .tile{padding:12px 10px!important}
 }
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+
+/* Final consistency pass: every secondary tool uses the same AFTER HOURS material language. */
+:root{
+ --ah-danger:#c87970;
+ --ah-surface:rgba(18,13,9,.96);
+ --ah-surface-raised:linear-gradient(145deg,#1c150e,#0a0806);
+ --ah-line:rgba(201,161,106,.24);
+}
+button,input,select,textarea{font-family:"DM Sans",sans-serif}
+button{transition:background-color .18s ease,border-color .18s ease,color .18s ease,transform .18s ease}
+button:active{transform:translateY(1px)}
+input,select,textarea{
+ color:var(--ah-ivory)!important;background:#0b0907!important;
+ border:1px solid var(--ah-line)!important;border-radius:4px!important;
+ accent-color:var(--ah-champagne)
+}
+input::placeholder,textarea::placeholder{color:#857968!important}
+input:focus,select:focus,textarea:focus{outline:1px solid var(--ah-champagne)!important;outline-offset:2px}
+a{color:var(--ah-gold)}
+hr{border:0;border-top:1px solid var(--ah-line)}
+:where(.support-card,.guide-card,.insights,.tarot-card,.astro-card,.radio-player,.radio-note,.moods,.media-vault,.admin,.history,.rank-ladder,.auth-panel,.consent,.safety,.safety-plan,.legal-center,.character-studio,.social-studio,.missions,.monetization,.daily-after-hours,.mood-history,.prompt-library,.notification-panel,.task-card,.resume-panel,.consent-panel){
+ color:var(--ah-ivory)
+}
+:where(.support-card,.guide-card,.tarot-card,.astro-card,.radio-player,.radio-note,.media-vault,.auth-panel,.history,.rank-ladder,.task-card,.notification-panel,.resume-panel,.consent-panel){
+ border:1px solid var(--ah-line)!important;border-radius:5px!important;
+ background:var(--ah-surface-raised)!important;box-shadow:0 14px 38px rgba(0,0,0,.22)
+}
+:where(.support-card,.guide-card,.tarot-card,.astro-card,.radio-player,.media-vault,.auth-panel,.history,.rank-ladder){padding:18px!important}
+:where(.support-card,.guide-card,.tarot-card,.astro-card,.radio-player,.media-vault,.auth-panel,.history,.rank-ladder) h1,
+:where(.support-card,.guide-card,.tarot-card,.astro-card,.radio-player,.media-vault,.auth-panel,.history,.rank-ladder) h2,
+:where(.support-card,.guide-card,.tarot-card,.astro-card,.radio-player,.media-vault,.auth-panel,.history,.rank-ladder) h3{
+ color:#efdfc5!important;font-family:"Cinzel",Georgia,serif!important;font-weight:400!important;letter-spacing:.04em
+}
+:where(.support-card,.guide-card,.tarot-card,.astro-card,.radio-player,.media-vault,.auth-panel,.history,.rank-ladder) p,
+:where(.support-card,.guide-card,.tarot-card,.astro-card,.radio-player,.media-vault,.auth-panel,.history,.rank-ladder) small{color:var(--ah-muted)}
+:where(.support-list>div,.history-row,.media-item,.adminrow,.radio-note,.aftercare-note){border-color:var(--ah-line)!important}
+:where(.guide-actions button,.insight-tabs button,.insight-actions button,.media-vault button,.media-item-actions button,.media-vault-head button,.avatar-options button,.checkin button,.safety-controls button,.name-editor button,.astro-copy,.mood,.notification-item,.adminrow button){
+ border-radius:4px!important
+}
+:where(.guide-actions button,.insight-tabs button,.insight-actions button,.media-vault button,.media-item-actions button,.media-vault-head button,.avatar-options button,.checkin button,.safety-controls button,.name-editor button,.astro-copy){
+ border:1px solid var(--ah-line)!important;background:#0d0a07!important;color:#d9c39e!important
+}
+:where(.guide-actions button:hover,.insight-tabs button:hover,.insight-actions button:hover,.media-vault button:hover,.avatar-options button:hover,.checkin button:hover,.safety-controls button:hover,.name-editor button:hover){
+ border-color:var(--ah-champagne)!important;background:#21180f!important
+}
+:where(.insight-tabs button.active,.avatar-options button.selected,.checkin button.selected,.safety-controls button.selected){
+ border-color:var(--ah-gold)!important;background:#241a10!important;color:#f0d8ad!important
+}
+:where(.support-card,.guide-card,.insights,.radio-room,.media-vault,.character-studio,.social-studio,.mood-history,.prompt-library,.safety-screen,.admin,.profile,.aftercare-screen,.completion-screen){
+ max-width:100%;overflow-wrap:anywhere
+}
+:where(.insights-hero,.radio-hero){padding-left:0!important;padding-right:0!important}
+:where(.insight-tabs,.insight-actions,.aftercare-options){gap:8px!important}
+:where(.tarot-spread-card,.experience-choice,.gamecard,.tile,.rank-ladder,.avatar-options button,.aftercare-options button){
+ border-radius:5px!important;border-color:var(--ah-line)!important
+}
+:where(.tarot-spread-card,.experience-choice,.gamecard,.tile,.rank-ladder,.avatar-options button){
+ background-color:#0c0907!important
+}
+:where(.tarot-spread-card h4,.mood strong,.media-item-copy strong,.history-row strong,.adminrow b){color:#eadbc2!important}
+:where(.tarot-spread-card p,.mood small,.media-item-copy small,.history-row small,.adminrow span){color:#a99d8c!important}
+:where(.radio-controls .radio-play){background:linear-gradient(180deg,#e4c58f,#b98a50)!important;color:#140e08!important}
+:where(.aftercare-note,.radio-note,.safety,.consent){background:rgba(17,13,9,.82)!important;border:1px solid var(--ah-line)!important}
+:where(.danger-action,.stop-controller-stop,.actions .stop,.stop-controller-stop){border-color:#75443d!important;background:rgba(65,25,21,.48)!important;color:#efb5a9!important}
+:where(.profile-message){background:#1b140b!important;border-color:#8b6a3b!important;color:#e6c58f!important}
+:where(.media-upload){border-color:#a17b49!important;color:#e2c28e!important;background:rgba(18,13,8,.65)!important}
+:where(.media-signed-link){border-color:#a17b49!important;color:#e5c58f!important;background:#100b07!important}
+:where(.gate){background:radial-gradient(ellipse at 50% 28%,rgba(116,75,34,.24),transparent 42%),#070605!important}
+:where(.gate button){border-color:#b18a55!important;background:linear-gradient(180deg,#d9b77f,#a87943)!important;color:#160f08!important;border-radius:4px!important}
+:where(.gate p,.gate small){color:#b9ad9a!important}
+:where(.stop-controller){border-radius:5px!important}
+:where(.stop-controller button){border-radius:4px!important}
+:focus-visible{outline-color:#e4c58f!important}
+@media(max-width:520px){
+ :where(.support-card,.guide-card,.tarot-card,.astro-card,.radio-player,.media-vault,.auth-panel,.history,.rank-ladder){padding:15px!important}
+ :where(.insights-hero,.radio-hero){padding-top:22px!important}
+ :where(.insight-tabs button){font-size:8px!important;letter-spacing:.03em;padding:11px 5px!important}
+ :where(.media-vault-head){align-items:flex-start;flex-wrap:wrap}
+ :where(.stop-controller){bottom:calc(76px + env(safe-area-inset-bottom))!important}
+}
+@media(prefers-reduced-motion:reduce){button{transition:none!important}}
