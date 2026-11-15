@@ -12,6 +12,7 @@ if (approved !== master) {
 
 const html = readFileSync("index.html", "utf8");
 const manifest = JSON.parse(readFileSync("public/manifest.webmanifest", "utf8"));
+const serviceWorker = readFileSync("public/sw.js", "utf8");
 const referencedIcons = new Set([
   ...[...html.matchAll(/\/icons\/(after-hours-[a-z0-9-]+\.svg)/g)].map((match) => `public/icons/${match[1]}`),
   ...(manifest.icons ?? []).map((icon) => `public${icon.src}`),
@@ -20,6 +21,18 @@ const referencedIcons = new Set([
 const missing = [...referencedIcons].filter((path) => !existsSync(path));
 if (missing.length) {
   console.error("Missing referenced brand assets:", missing.join(", "));
+  process.exit(1);
+}
+
+for (const iconPath of ["/after-hours-icon-192.svg", "/after-hours-icon-512.png"]) {
+  if (!serviceWorker.includes(iconPath)) {
+    console.error("Service worker does not reference the current app icon:", iconPath);
+    process.exit(1);
+  }
+}
+
+if (serviceWorker.includes("/after-hours-icon-192.png")) {
+  console.error("Service worker still references the retired 192px PNG icon.");
   process.exit(1);
 }
 
