@@ -28,7 +28,7 @@ export default function CharacterStudio({ profileId, language = "nl" }: { profil
     setLook(next);
     try { localStorage.setItem(KEY + ":" + profileId, JSON.stringify(next)); } catch { /* Local-only fallback */ }
   };
-  const roleName = look.role === "dominant" ? t("Dominant", "Dominant") : look.role === "submissive" ? t("Volgend", "Submissive") : t("Switch", "Switch");
+  const roleName = look.role === "dominant" ? t("Dominant", "Dominant") : look.role === "submissive" ? t("Submissief", "Submissive") : t("Switch", "Switch");
   return <section className="character-studio">
     <button className="character-studio-toggle" onClick={() => setExpanded(value => !value)} aria-expanded={expanded}>
       <span><Sparkles size={16}/><span><strong>{t("CHARACTER ATELIER", "CHARACTER ATELIER")}</strong><small>{t("Jouw rol. Jouw signatuur. Jouw stijl.", "Your role. Your signature. Your style.")}</small></span></span>
@@ -37,7 +37,7 @@ export default function CharacterStudio({ profileId, language = "nl" }: { profil
     {expanded && <div className="character-studio-body">
       <div className="character-preview">
         <div className="character-portrait">
-          <img src="/visuals/ah-profile-photo.jpg" alt={t("Cinematische AFTER HOURS character-portret", "Cinematic AFTER HOURS character portrait")} loading="lazy"/>
+          <img src="/visuals/ah-profile-photo.jpg" alt={t("Cinematisch portret voor AFTER HOURS", "Cinematic AFTER HOURS character portrait")} loading="lazy"/>
           <span className="character-portrait-mark">{look.accessory === "crescent" ? "☾" : look.accessory === "earring" ? "◉" : "✦"}</span>
           {look.mask && <span className="character-mask-overlay" aria-hidden="true"/>}
           {look.neckDetail !== "none" && <span className={"character-neck-overlay " + look.neckDetail} aria-hidden="true"/>}
@@ -49,18 +49,18 @@ export default function CharacterStudio({ profileId, language = "nl" }: { profil
         <div className="character-field"><span className="eyebrow">{t("KIES JE ROL", "CHOOSE YOUR ROLE")}</span><div className="character-segment wrap">
           {(["dominant", "submissive", "switch"] as Role[]).map(role => <button key={role} className={look.role === role ? "selected" : ""} aria-pressed={look.role === role} onClick={() => update({ role })}>{role === "dominant" ? t("Dominant", "Dominant") : role === "submissive" ? t("Volgend", "Submissive") : "Switch"}{look.role === role && <Check size={14}/>}</button>)}
         </div></div>
-        <div className="character-field"><span className="eyebrow">{t("NEKDETAIL", "NECK DETAIL")}</span><div className="character-segment wrap">
+        <div className="character-field"><span className="eyebrow">{t("HALSDETAIL", "NECK DETAIL")}</span><div className="character-segment wrap">
           <button className={look.neckDetail === "collar" ? "selected" : ""} aria-pressed={look.neckDetail === "collar"} onClick={() => update({ neckDetail: "collar" })}>{t("Collar", "Collar")}</button>
           <button className={look.neckDetail === "chain" ? "selected" : ""} aria-pressed={look.neckDetail === "chain"} onClick={() => update({ neckDetail: "chain" })}>{t("Ketting", "Chain")}</button>
           <button className={look.neckDetail === "none" ? "selected" : ""} aria-pressed={look.neckDetail === "none"} onClick={() => update({ neckDetail: "none" })}>{t("Geen", "None")}</button>
         </div></div>
-        <div className="character-field"><span className="eyebrow">{t("SIGNATUURDETAIL", "SIGNATURE DETAIL")}</span><div className="character-segment wrap">
+        <div className="character-field"><span className="eyebrow">{t("KENMERKEND DETAIL", "SIGNATURE DETAIL")}</span><div className="character-segment wrap">
           <button className={look.accessory === "sigil" ? "selected" : ""} aria-pressed={look.accessory === "sigil"} onClick={() => update({ accessory: "sigil" })}>Sigil</button>
           <button className={look.accessory === "crescent" ? "selected" : ""} aria-pressed={look.accessory === "crescent"} onClick={() => update({ accessory: "crescent" })}>{t("Halvemaan", "Crescent")}</button>
           <button className={look.accessory === "earring" ? "selected" : ""} aria-pressed={look.accessory === "earring"} onClick={() => update({ accessory: "earring" })}>{t("Oorbel", "Earring")}</button>
         </div></div>
         <label className="character-mask-toggle"><input type="checkbox" checked={look.mask} onChange={event => update({ mask: event.target.checked })}/><span>{t("Voeg een elegant masker toe aan je signatuur", "Add an elegant mask to your signature")}</span></label>
-        <p className="character-save-note">{t("Je character-keuzes worden op dit apparaat bewaard. Je sessievoortgang en XP blijven behouden.", "Your character choices are saved on this device. Your session progress and XP remain unchanged.")}</p>
+        <p className="character-save-note">{t("Je karakterkeuzes worden op dit apparaat bewaard. Je sessievoortgang en XP blijven behouden.", "Your character choices are saved on this device. Your session progress and XP remain unchanged.")}</p>
       </div>
     </div>}
   </section>;
