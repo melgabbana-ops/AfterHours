@@ -3461,26 +3461,26 @@ nav button.active,nav button.active svg{color:#e1c78f!important}
 
 /* Dedicated authored visual assets for the reference-inspired experience. */
 .teaser-film,.home-hero{
- background-image:linear-gradient(180deg,rgba(5,5,5,.08) 0%,rgba(5,5,5,.18) 40%,#050505 100%),url("/visuals/ah-cinematic-hero.svg")!important;
+ background-image:linear-gradient(180deg,rgba(5,5,5,.08) 0%,rgba(5,5,5,.18) 40%,#050505 100%),url("/visuals/ah-cinematic-hero.jpg")!important;
  background-size:cover!important;background-position:center 42%!important;
 }
 .home-hero{isolation:isolate}
 .home-hero:after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(180deg,rgba(5,5,5,.05),rgba(5,5,5,.1) 40%,rgba(5,5,5,.86))}
 .teaser-film{background-size:cover!important;background-position:center!important}
-.experience-choice{background-image:linear-gradient(180deg,rgba(9,8,6,.28),rgba(5,5,5,.96)),url("/visuals/ah-cinematic-hero.svg")!important;background-size:cover!important;background-position:center!important}
-.tarot-card{background-image:linear-gradient(180deg,rgba(7,7,6,.68),rgba(7,7,6,.9)),url("/visuals/ah-tarot-frame.svg")!important;background-size:cover!important;background-position:center!important}
+.experience-choice{background-image:linear-gradient(180deg,rgba(9,8,6,.28),rgba(5,5,5,.96)),url("/visuals/ah-cinematic-hero.jpg")!important;background-size:cover!important;background-position:center!important}
+.tarot-card{background-image:linear-gradient(180deg,rgba(7,7,6,.68),rgba(7,7,6,.9)),url("/visuals/ah-tarot-photo.jpg")!important;background-size:cover!important;background-position:center!important}
 .tarot-symbol{border-color:rgba(213,183,125,.55)!important;background:radial-gradient(circle,rgba(198,165,107,.1),transparent 70%)}
 @media(max-width:520px){.home-hero{background-position:center 35%!important}.experience-choice{background-position:center!important}}
 
 
 /* Secondary screens: matching authored artwork and quieter editorial surfaces. */
-.radio-player{position:relative;isolation:isolate;overflow:hidden;background-image:linear-gradient(180deg,rgba(5,5,5,.48),rgba(5,5,5,.88)),url("/visuals/ah-radio-vinyl.svg")!important;background-size:cover!important;background-position:center!important}
+.radio-player{position:relative;isolation:isolate;overflow:hidden;background-image:linear-gradient(180deg,rgba(5,5,5,.48),rgba(5,5,5,.88)),url("/visuals/ah-radio-photo.jpg")!important;background-size:cover!important;background-position:center!important}
 .radio-disc{background:radial-gradient(circle,#17130d 0 27%,#090807 28% 58%,#17130d 59% 62%,#080807 63%)!important;box-shadow:0 0 55px rgba(198,165,107,.16),inset 0 0 25px #000!important}
 .profile{position:relative;isolation:isolate;overflow:hidden}
-.profile:before{content:"";position:absolute;z-index:-1;pointer-events:none;inset:0 0 auto;height:260px;background:linear-gradient(180deg,rgba(5,5,5,.2),#0b0a08 96%),url("/visuals/ah-profile-sigil.svg") center 24%/min(100%,380px) auto no-repeat;opacity:.38}
+.profile:before{content:"";position:absolute;z-index:-1;pointer-events:none;inset:0 0 auto;height:260px;background:linear-gradient(180deg,rgba(5,5,5,.2),#0b0a08 96%),url("/visuals/ah-profile-photo.jpg") center 24%/min(100%,380px) auto no-repeat;opacity:.38}
 .profile .identity-avatar{border-color:rgba(213,183,125,.72)!important;box-shadow:0 0 0 5px rgba(213,183,125,.06),0 12px 38px rgba(0,0,0,.5)}
 .aftercare-screen{background-image:radial-gradient(ellipse at 50% 8%,rgba(183,151,92,.16),transparent 42%),linear-gradient(180deg,#0b0a08,#050505)!important}
-.aftercare-card{background-image:linear-gradient(145deg,rgba(24,21,16,.92),rgba(8,8,7,.97)),url("/visuals/ah-cinematic-hero.svg")!important;background-size:cover!important;background-position:center!important}
+.aftercare-card{background-image:linear-gradient(145deg,rgba(24,21,16,.92),rgba(8,8,7,.97)),url("/visuals/ah-cinematic-hero.jpg")!important;background-size:cover!important;background-position:center!important}
 .insights-hero{background:radial-gradient(ellipse at 50% 0%,rgba(198,165,107,.12),transparent 68%)}
 @media(max-width:520px){.radio-player{margin:0 14px}.profile:before{height:220px;background-size:280px auto}}
 
@@ -3629,7 +3629,7 @@ main:has(>.home-hero){max-width:480px!important;padding:22px 18px 110px!importan
  min-height:570px!important;padding:28px 18px 22px!important;
  display:flex!important;flex-direction:column!important;justify-content:flex-end!important;align-items:stretch!important;
  border:1px solid rgba(205,174,119,.25)!important;border-radius:3px!important;
- background-image:linear-gradient(180deg,rgba(5,5,5,.04) 0%,rgba(5,5,5,.12) 27%,rgba(5,5,5,.52) 55%,#050505 100%),url("/visuals/ah-cinematic-hero.svg")!important;
+ background-image:linear-gradient(180deg,rgba(5,5,5,.04) 0%,rgba(5,5,5,.12) 27%,rgba(5,5,5,.52) 55%,#050505 100%),url("/visuals/ah-cinematic-hero.jpg")!important;
  background-position:center 35%!important;background-size:cover!important;
  box-shadow:0 22px 58px rgba(0,0,0,.42)!important;
 }
@@ -3720,7 +3720,7 @@ main:has(>.home-hero){max-width:480px!important;padding:22px 18px 110px!importan
 .insight-tabs{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important;margin-top:18px!important}
 .insight-tabs button{min-height:42px!important;padding:7px 5px!important;border:1px solid rgba(205,174,119,.24)!important;border-radius:3px!important;background:#0b0907!important;color:#b9af9f!important;font-size:9px!important}
 .insight-tabs button.active{border-color:#d5b77d!important;background:linear-gradient(120deg,rgba(75,54,25,.8),rgba(18,14,9,.95))!important;color:#f0dfb4!important}
-.tarot-card,.astro-card{padding:18px 14px!important;border:1px solid rgba(205,174,119,.35)!important;border-radius:4px!important;background-color:#090807!important;background-image:linear-gradient(180deg,rgba(7,7,6,.58),rgba(7,7,6,.96)),url("/visuals/ah-tarot-frame.svg")!important;background-size:cover!important;background-position:center!important}
+.tarot-card,.astro-card{padding:18px 14px!important;border:1px solid rgba(205,174,119,.35)!important;border-radius:4px!important;background-color:#090807!important;background-image:linear-gradient(180deg,rgba(7,7,6,.58),rgba(7,7,6,.96)),url("/visuals/ah-tarot-photo.jpg")!important;background-size:cover!important;background-position:center!important}
 .tarot-symbol{width:122px!important;height:176px!important;margin:18px auto!important;border:1px solid #c6a56b!important;border-radius:4px!important;background:radial-gradient(ellipse at center,rgba(198,165,107,.14),transparent 65%),#090807!important;display:grid!important;place-items:center!important;font-size:40px!important;color:#e1c78f!important;box-shadow:0 12px 34px rgba(0,0,0,.5)!important}
 .tarot-card h3,.astro-card h3{font-family:"Cinzel",serif!important;font-size:24px!important;color:#f0dfb4!important;text-align:center!important}
 .tarot-card>p{max-width:330px!important;margin:10px auto 18px!important;text-align:center!important;font-size:11px!important;line-height:1.7!important;color:#c4b9a7!important}
@@ -3744,7 +3744,7 @@ main:has(>.home-hero){max-width:480px!important;padding:22px 18px 110px!importan
 .radio-hero{padding:0 0 16px!important;border-bottom:1px solid var(--ah-border)!important}
 .radio-hero h2{font-family:"Cinzel",serif!important;font-size:32px!important;color:#f0dfb4!important}
 .radio-hero p{font-size:11px!important;line-height:1.65!important;color:#b9af9f!important}
-.radio-player{min-height:360px!important;margin:18px 0!important;padding:22px 16px!important;border:1px solid rgba(205,174,119,.38)!important;border-radius:4px!important;background-image:linear-gradient(180deg,rgba(5,5,5,.28),rgba(5,5,5,.94)),url("/visuals/ah-radio-vinyl.svg")!important;background-size:cover!important;background-position:center!important;text-align:center!important}
+.radio-player{min-height:360px!important;margin:18px 0!important;padding:22px 16px!important;border:1px solid rgba(205,174,119,.38)!important;border-radius:4px!important;background-image:linear-gradient(180deg,rgba(5,5,5,.28),rgba(5,5,5,.94)),url("/visuals/ah-radio-photo.jpg")!important;background-size:cover!important;background-position:center!important;text-align:center!important}
 .radio-disc{width:112px!important;height:112px!important;margin:0 auto 16px!important;border:1px solid #c6a56b!important;border-radius:50%!important;color:#e1c78f!important}
 .radio-player h3{font-family:"Cinzel",serif!important;font-size:22px!important;color:#f0dfb4!important}
 .radio-player>p{font-size:10px!important;color:#c4b9a7!important}
@@ -3787,7 +3787,7 @@ main:has(>.home-hero){max-width:480px!important;padding:22px 18px 110px!importan
 .game-select-head p{font-size:11px!important;line-height:1.65!important;color:#b9af9f!important}
 .game-select-grid{display:grid!important;grid-template-columns:1fr!important;gap:10px!important}
 .experience-choice{position:relative!important;display:grid!important;grid-template-columns:48px 1fr 18px!important;grid-template-rows:auto auto auto!important;align-items:center!important;gap:4px 10px!important;min-height:120px!important;padding:14px!important;text-align:left!important;border:1px solid rgba(205,174,119,.42)!important;border-radius:4px!important;background:linear-gradient(145deg,rgba(25,19,12,.96),rgba(7,7,6,.98))!important}
-.experience-choice.featured{min-height:145px!important;background-image:linear-gradient(90deg,rgba(5,5,5,.9),rgba(5,5,5,.52)),url("/visuals/ah-cinematic-hero.svg")!important;background-size:cover!important;background-position:center 35%!important}
+.experience-choice.featured{min-height:145px!important;background-image:linear-gradient(90deg,rgba(5,5,5,.9),rgba(5,5,5,.52)),url("/visuals/ah-cinematic-hero.jpg")!important;background-size:cover!important;background-position:center 35%!important}
 .choice-symbol{grid-column:1;grid-row:1/4;width:44px;height:54px;display:grid;place-items:center;border:1px solid rgba(205,174,119,.5)!important;color:#e1c78f!important;font-size:25px!important}
 .experience-choice>.eyebrow{grid-column:2;grid-row:1;margin:0!important;font-size:8px!important}
 .experience-choice>strong{grid-column:2;grid-row:2;font-family:"Cinzel",serif!important;font-size:14px!important;letter-spacing:.04em!important;color:#f0dfb4!important}
@@ -3815,7 +3815,7 @@ main:has(>.home-hero)>.mood-checkin-before{order:3!important;margin-top:16px!imp
 main:has(>.home-hero)>.notification-bar{order:4!important}
 main:has(>.home-hero)>.consent-panel{order:5!important}
 main:has(>.home-hero)>.resume-panel{order:6!important}
-.home-hero{background-image:linear-gradient(180deg,rgba(5,5,5,.02) 0%,rgba(5,5,5,.1) 28%,rgba(5,5,5,.58) 58%,#050505 100%),url("/visuals/ah-cinematic-hero.svg")!important}
+.home-hero{background-image:linear-gradient(180deg,rgba(5,5,5,.02) 0%,rgba(5,5,5,.1) 28%,rgba(5,5,5,.58) 58%,#050505 100%),url("/visuals/ah-cinematic-hero.jpg")!important}
 .mood-checkin-before{padding:15px!important;border:1px solid rgba(205,174,119,.24)!important;border-radius:4px!important;background:linear-gradient(145deg,#17120d,#080807)!important}
 .mood-checkin-before h3{font-family:"Cinzel",serif!important;color:#f0dfb4!important;font-size:17px!important}
 .mood-checkin-before>p{font-size:10px!important;line-height:1.55!important;color:#b9af9f!important}
@@ -3830,10 +3830,10 @@ main:has(>.home-hero)>.resume-panel{order:6!important}
  background-position:center!important;background-size:cover!important;opacity:.5;
  mask-image:linear-gradient(90deg,transparent 0%,#000 45%);
 }
-.game-select-grid .experience-choice:nth-child(1):before{background-image:url("/visuals/ah-cinematic-hero.svg")}
-.game-select-grid .experience-choice:nth-child(2):before{background-image:url("/visuals/ah-tarot-frame.svg")}
-.game-select-grid .experience-choice:nth-child(3):before{background-image:url("/visuals/ah-profile-sigil.svg")}
-.game-select-grid .experience-choice:nth-child(4):before{background-image:url("/visuals/ah-radio-vinyl.svg")}
+.game-select-grid .experience-choice:nth-child(1):before{background-image:url("/visuals/ah-cinematic-hero.jpg")}
+.game-select-grid .experience-choice:nth-child(2):before{background-image:url("/visuals/ah-tarot-photo.jpg")}
+.game-select-grid .experience-choice:nth-child(3):before{background-image:url("/visuals/ah-profile-photo.jpg")}
+.game-select-grid .experience-choice:nth-child(4):before{background-image:url("/visuals/ah-radio-photo.jpg")}
 .game-select-grid .experience-choice.featured:before{opacity:.28;width:55%}
 .game-select-grid .experience-choice>*{position:relative;z-index:1}
 
@@ -3863,4 +3863,15 @@ nav button.active svg{color:#e1c78f!important}
 }
 @media(prefers-reduced-motion:reduce){
  .home-hero,.experience-choice,.mood-checkin-before{scroll-behavior:auto!important}
+}
+
+
+/* Photographic assets are first-class local app assets, not remote placeholders. */
+.home-hero{background-image:linear-gradient(180deg,rgba(5,5,5,.03),rgba(5,5,5,.18) 34%,rgba(5,5,5,.65) 66%,#050505 100%),url("/visuals/ah-cinematic-hero.jpg")!important}
+.experience-choice.featured{background-image:linear-gradient(90deg,rgba(5,5,5,.88),rgba(5,5,5,.4)),url("/visuals/ah-cinematic-hero.jpg")!important}
+.tarot-card{background-image:linear-gradient(180deg,rgba(7,7,6,.34),rgba(7,7,6,.96)),url("/visuals/ah-tarot-photo.jpg")!important}
+.radio-player{background-image:linear-gradient(180deg,rgba(5,5,5,.2),rgba(5,5,5,.93)),url("/visuals/ah-radio-photo.jpg")!important}
+.profile .identity-avatar{
+ background-image:linear-gradient(180deg,rgba(5,5,5,.08),rgba(5,5,5,.28)),url("/visuals/ah-profile-photo.jpg")!important;
+ background-position:center 30%!important;background-size:cover!important;
 }
