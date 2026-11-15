@@ -77,7 +77,8 @@ export function Insights({onBack,language="nl",profileId}:{onBack:()=>void;langu
  const[tab,setTab]=useState<"tarot"|"oracle"|"astro">("tarot");
  const[cardIndex,setCardIndex]=useState(()=>Math.floor(Math.random()*tarot.length));
  const[oracleIndex,setOracleIndex]=useState(()=>Math.floor(Math.random()*oracle.length));
- const[spread,setSpread]=useState<number[]>([]);\n  const[spreadDrawId,setSpreadDrawId]=useState(0);
+ const[spread,setSpread]=useState<number[]>([]);
+  const[spreadDrawId,setSpreadDrawId]=useState(0);
  const[sign,setSign]=useState("Weegschaal");
  const[birthDate,setBirthDate]=useState("");
  const[copied,setCopied]=useState(false);
