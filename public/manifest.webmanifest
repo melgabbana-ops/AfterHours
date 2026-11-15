@@ -10,15 +10,16 @@
     "standalone"
   ],
   "orientation": "any",
-  "background_color": "#080807",
-  "theme_color": "#080807",
+  "background_color": "#050505",
+  "theme_color": "#050505",
   "icons": [
     {
-      "src": "/icons/after-hours-master.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "/after-hours-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
       "purpose": "any"
-    }
+    },
+    { "src": "/after-hours-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
   ],
   "shortcuts": [
     {
