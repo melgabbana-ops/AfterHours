@@ -4097,3 +4097,100 @@ body{background:radial-gradient(ellipse at 50% -12%,rgba(126,82,38,.22),transpar
  to{opacity:1;transform:translateY(0) rotateY(0) scale(1);filter:blur(0)}
 }
 @media(prefers-reduced-motion:reduce){.app .tarot-spread-card{animation:none!important}}
+
+
+/* Approved AFTER HOURS art direction: obsidian, bronze and champagne editorial luxury */
+:root{
+ --ah-obsidian:#050505;
+ --ah-black:#0b0907;
+ --ah-aubergine:#100d09;
+ --ah-velvet:#24190e;
+ --ah-violet:#8b642d;
+ --ah-amethyst:#b58a4c;
+ --ah-champagne:#d2ad70;
+ --ah-gold:#dfbd7d;
+ --ah-gold-light:#f5dfad;
+ --ah-ivory:#f4ecdf;
+ --ah-muted:#b8ad9c;
+ --ah-border:rgba(210,173,112,.28);
+}
+body{background:#030303}
+.app{
+ background:
+  radial-gradient(ellipse at 50% -12%,rgba(128,86,39,.2),transparent 43%),
+  radial-gradient(ellipse at 100% 42%,rgba(80,48,23,.09),transparent 35%),
+  linear-gradient(180deg,#090806 0%,#050505 72%);
+}
+.app>header,header:not(.onboarding-header){
+ background:rgba(5,5,5,.91);
+ border-bottom-color:rgba(210,173,112,.2);
+}
+.wordmark{font-family:"Cinzel",Georgia,serif;letter-spacing:.19em;color:#f0dfc0}
+.hero h2,.round h2,.profile h2,.admin h2,.gate h1{
+ font-family:"Cinzel",Georgia,serif;
+ color:#f1dfbd;
+ text-shadow:0 3px 24px rgba(205,157,83,.12);
+}
+.hero h2{font-style:normal;letter-spacing:.015em}
+.hero p,.round>p{color:#c1b6a5}
+.gamecard{
+ position:relative;overflow:hidden;
+ border:1px solid rgba(210,173,112,.42);
+ border-radius:13px;
+ background:
+  radial-gradient(ellipse at 90% 0%,rgba(169,119,57,.2),transparent 52%),
+  linear-gradient(135deg,rgba(31,23,15,.98),rgba(7,7,6,.98));
+ box-shadow:inset 0 1px rgba(255,239,205,.06),0 18px 44px rgba(0,0,0,.26);
+}
+.gamecard h3{color:#f0dfc0}
+.gamecard button,.next{
+ border-color:#a17a43;color:#f1d49a;border-radius:9px;
+ background:linear-gradient(145deg,rgba(111,77,37,.3),rgba(14,11,8,.8));
+}
+.tile{
+ border:1px solid rgba(210,173,112,.27);
+ border-radius:11px;
+ background:linear-gradient(145deg,rgba(28,21,14,.88),rgba(8,8,7,.94));
+ box-shadow:inset 0 1px rgba(255,239,205,.035);
+ transition:border-color .2s ease,transform .2s ease,background .2s ease;
+}
+.tile:hover{border-color:rgba(231,194,129,.62);background:linear-gradient(145deg,#261b10,#0b0907)}
+.tile svg{color:#e1bd7c}
+.tile span{color:#eee2cf}
+.gate{
+ background:
+  radial-gradient(ellipse at 50% 34%,rgba(133,87,37,.24),transparent 44%),
+  radial-gradient(ellipse at 50% 100%,rgba(76,47,24,.18),transparent 45%),
+  #040404;
+}
+.gate h1{letter-spacing:.035em}
+.mark{border-color:#9c7844;color:#f0d49c;box-shadow:0 0 28px rgba(195,144,69,.13)}
+.safety,.consent-panel,.resume-panel,.auth-panel,.rank-ladder,.mood-history{
+ border-color:rgba(210,173,112,.3);
+ background:linear-gradient(145deg,rgba(29,22,14,.9),rgba(8,8,7,.96));
+ border-radius:11px;
+}
+.profile .avatar{border-color:#b28a50;box-shadow:0 0 0 5px rgba(180,137,76,.08),0 12px 35px rgba(0,0,0,.4)}
+.xp{height:4px;border-radius:20px;background:#292117;overflow:hidden}
+.xp span{background:linear-gradient(90deg,#9a6d35,#f3d99e);box-shadow:0 0 12px rgba(226,189,114,.22)}
+.adminrow{border-color:rgba(210,173,112,.2)}
+.adminrow svg{color:#e0bd7d}
+nav{
+ background:rgba(5,5,5,.96);
+ border-top-color:rgba(210,173,112,.25);
+ box-shadow:0 -12px 35px rgba(0,0,0,.28);
+}
+nav button{font-family:"DM Sans",sans-serif;letter-spacing:.025em}
+nav button:hover,nav button:focus-visible{color:#f1d49a}
+button:focus-visible,input:focus-visible{outline:2px solid #e6c487;outline-offset:3px}
+.actions button{border-radius:8px}
+.actions .gold{background:linear-gradient(145deg,#b58a4c,#6e4c27);color:#100c07;border-color:#d8b77b;font-weight:700}
+.actions .stop{border-color:#8f3934;color:#ffb1a8;background:rgba(100,24,21,.25)}
+@media(max-width:520px){
+ .hero{padding-top:24px}
+ .gamecard{min-height:174px;padding:21px}
+ .tile{padding:17px 14px}
+ nav{gap:2px}
+ nav button{min-width:0;flex:1;font-size:7px}
+}
+@media(prefers-reduced-motion:reduce){.tile{transition:none}}
