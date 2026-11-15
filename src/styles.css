@@ -4086,3 +4086,14 @@ body{background:radial-gradient(ellipse at 50% -12%,rgba(126,82,38,.22),transpar
 .gate p{color:#e3d5c0;text-shadow:0 2px 12px #000}
 .app main{animation:ah-page-enter .42s cubic-bezier(.2,.7,.2,1) both}
 @keyframes ah-page-enter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+
+/* Three-card Kinky Tarot spread: each branded card enters in sequence. */
+.app .tarot-spread-card{animation:ah-spread-reveal .58s cubic-bezier(.2,.75,.25,1) both}
+.app .tarot-spread-card:nth-child(2){animation-delay:.11s}
+.app .tarot-spread-card:nth-child(3){animation-delay:.22s}
+@keyframes ah-spread-reveal{
+ from{opacity:0;transform:translateY(18px) rotateY(-8deg) scale(.96);filter:blur(3px)}
+ to{opacity:1;transform:translateY(0) rotateY(0) scale(1);filter:blur(0)}
+}
+@media(prefers-reduced-motion:reduce){.app .tarot-spread-card{animation:none!important}}
