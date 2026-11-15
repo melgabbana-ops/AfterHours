@@ -13,6 +13,8 @@ if (approved !== master) {
 const html = readFileSync("index.html", "utf8");
 const manifest = JSON.parse(readFileSync("public/manifest.webmanifest", "utf8"));
 const serviceWorker = readFileSync("public/sw.js", "utf8");
+const appSource = readFileSync("src/main.tsx", "utf8");
+const appStyles = readFileSync("src/styles.css", "utf8");
 const referencedIcons = new Set([
   ...[...html.matchAll(/\/icons\/(after-hours-[a-z0-9-]+\.svg)/g)].map((match) => `public/icons/${match[1]}`),
   ...(manifest.icons ?? []).map((icon) => `public${icon.src}`),
@@ -22,6 +24,18 @@ const missing = [...referencedIcons].filter((path) => !existsSync(path));
 if (missing.length) {
   console.error("Missing referenced brand assets:", missing.join(", "));
   process.exit(1);
+}
+
+if ((appSource.match(/\/after-hours-brand-logo\\.svg/g) ?? []).length < 4 || appSource.includes("/after-hours-wordmark.svg")) {
+  console.error("The approved logo must be used in the app header, home screen and access/recovery gates.");
+  process.exit(1);
+}
+
+for (const selector of [".home-wordmark", ".brand-nav", ".gate-logo"]) {
+  if (!appStyles.includes(selector)) {
+    console.error("Missing responsive logo styling for:", selector);
+    process.exit(1);
+  }
 }
 
 for (const iconPath of ["/after-hours-icon-192.png", "/after-hours-brand-logo.svg"]) {
@@ -43,4 +57,4 @@ for (const required of ["public/after-hours-icon-192.png", "public/after-hours-b
   }
 }
 
-console.log(`Brand asset guard passed: canonical logo matches master icon; ${referencedIcons.size} referenced SVG/manifest assets exist.`);
+console.log(`Brand asset guard passed: canonical logo matches master icon; app placements, responsive styles, PWA icons and ${referencedIcons.size} referenced assets verified.`);
