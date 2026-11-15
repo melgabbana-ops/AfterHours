@@ -9,11 +9,11 @@
 ## Changes in this branch
 - Applied a final black/champagne design layer across core screens, cards, controls, focus states and responsive layouts.
 - Updated the AFTER HOURS wordmark, crown emblem and matching PNG iOS/PWA icon artwork using the supplied 512 × 512 source image.
-- Refined Character Studio with a more mature editorial portrait illustration. All original customization controls remain: presentation, skin tone, hair colour/style, outfit, mask, collar/chain detail and accessories. Character appearance is saved locally per profile on the device.
+- Refined Character Studio with a more mature editorial portrait illustration. All original customization controls remain: presentation, skin tone, hair colour/style, outfit, mask, collar/chain detail and accessories. Palette labels now match the black/bronze direction. Character appearance is saved locally per profile on the device.
 - Added the supplied Spotify playlist as a branded external action. The app itself does not render Spotify profile metadata or the account avatar.
 - Added an original four-note locally synthesized AFTER HOURS notification signature with separate message, check-in and safety variants.
 - Updated Kinky Tarot and Oracle card reveals, branded card faces, corrected localization in three-card spreads and added a staggered reveal animation for the three-card layout.
-- Tightened mobile layouts and safe-area spacing; added cinematic image treatments using the committed AFTER HOURS visual assets.
+- Tightened mobile layouts and safe-area spacing; added cinematic image treatments using the committed AFTER HOURS visual assets.\n- Localized Dutch navigation, mission categories, mission descriptions, Lovense emergency-stop label and PWA home-screen shortcut labels.\n- Made the three-card Tarot spread remount each draw so the staggered reveal animation replays reliably.
 - Refined Dutch navigation labels and mission copy for more natural wording.
 
 ## Existing features reviewed in source
@@ -26,7 +26,7 @@
 ## Verification status
 - GitHub Actions **AFTER HOURS build** passed on commit `fddc10a0d245cc1b2a5da8f1e5c7505e44d3c046`, including dependency audit, reproducible dependency install, Supabase migration ledger check, canonical brand asset check, unit tests and production build.
 - GitHub Actions **AFTER HOURS Build Watch** also passed on that commit.
-- The subsequent commit `6a94ee892446727d6344196faee6d1adfba0548e` contains Dutch mission-copy changes only. Its own workflow result has not yet been confirmed.
+- The subsequent commits after `e18851f705ed7053bb8bc9a27107d599e11cc943` contain mission and navigation copy, PWA shortcut labels, Character Studio palette labels, a Tarot reveal replay fix and a Lovense stop-label correction. Their own workflow result has not yet been confirmed.
 - Vercel reports a build-rate-limit / upgrade prompt. GitHub Actions is the independent build and test route; no paid Vercel upgrade, deployment action or production release was initiated.
 - No physical iPhone visual test has been performed. A successful browser build does not prove every screen has been visually verified on-device.
 - PR #97 remains a draft on the review branch. Do not merge or publish without explicit approval.
