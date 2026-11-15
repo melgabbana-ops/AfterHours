@@ -14,12 +14,11 @@
   "theme_color": "#050505",
   "icons": [
     {
-      "src": "/after-hours-icon-192.png",
-      "sizes": "192x192",
+      "src": "/after-hours-icon-512.png",
+      "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any"
-    },
-    { "src": "/after-hours-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+      "purpose": "any maskable"
+    }
   ],
   "shortcuts": [
     {
