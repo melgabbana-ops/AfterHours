@@ -8,8 +8,8 @@
 
 ## Changes in this branch
 - Applied a final black/champagne design layer across core screens, cards, controls, focus states and responsive layouts.
-- Updated the AFTER HOURS wordmark, crown emblem and matching PNG iOS/PWA icon artwork using the supplied 512 × 512 source image.
-- Refined Character Studio with a more mature editorial portrait illustration. All original customization controls remain: presentation, skin tone, hair colour/style, outfit, mask, collar/chain detail and accessories. Palette labels now match the black/bronze direction. Character appearance is saved locally per profile on the device.
+- Updated the AFTER HOURS wordmark, crown emblem and matching PNG iOS/PWA icon artwork using the supplied 512 × 512 source image. The PWA manifest uses a scalable SVG icon declared at 192 × 192 plus the 512 × 512 PNG maskable icon; the mislabeled duplicate PNG was removed.
+- Refined Character Studio with a more mature editorial portrait illustration. Feminine and masculine presentation now have distinct facial contours and details. All original customization controls remain: presentation, skin tone, hair colour/style, outfit, mask, collar/chain detail and accessories. Stored appearance values are normalized against approved options to avoid invalid or malformed local settings. Character appearance is saved locally per profile on the device.
 - Added the supplied Spotify playlist as a branded external action. The app itself does not render Spotify profile metadata or the account avatar.
 - Added an original four-note locally synthesized AFTER HOURS notification signature with separate message, check-in and safety variants.
 - Updated Kinky Tarot and Oracle card reveals, branded card faces, corrected localization in three-card spreads and added a staggered reveal animation for the three-card layout.
@@ -26,7 +26,7 @@
 
 ## Verification status
 - GitHub Actions **AFTER HOURS build** and **AFTER HOURS Build Watch** both passed on the latest verified code commit `8d5dd9bf18d874e4cc2d700602932c4ecf99283b`.
-- The successful run included a clean dependency audit (0 reported vulnerabilities), reproducible dependency install, Supabase migration ledger check, canonical brand asset check, all 151 unit tests and the production build.
+- The successful run included a clean dependency audit (0 reported vulnerabilities), reproducible dependency install, Supabase migration ledger check, canonical brand asset check, all 151 unit tests and the production build.\n- Follow-up Character Studio appearance validation tests were added for valid options, malformed stored values and rejected CSS-like values. The latest CI for this addition and the updated PWA icon guard is being run.
 - An intermediate build exposed a literal escaped newline in the Tarot spread state declaration. The issue was fixed in `8d5dd9b`; the latest build and test workflows completed successfully.
 - Vercel reports a build-rate-limit / upgrade prompt. GitHub Actions is the independent build and test route; no paid Vercel upgrade, deployment action or production release was initiated.
 - No physical iPhone visual test has been performed. A successful browser build does not prove every screen has been visually verified on-device.
