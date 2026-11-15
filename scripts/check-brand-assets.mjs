@@ -15,6 +15,7 @@ const manifest = JSON.parse(readFileSync("public/manifest.webmanifest", "utf8"))
 const serviceWorker = readFileSync("public/sw.js", "utf8");
 const appSource = readFileSync("src/main.tsx", "utf8");
 const appStyles = readFileSync("src/styles.css", "utf8");
+const maintenanceSource = readFileSync("src/UnderConstruction.tsx", "utf8");
 const referencedIcons = new Set([
   ...[...html.matchAll(/(?:href|src)="\/(icons\/after-hours-[a-z0-9-]+\.(?:svg|png)|after-hours-[a-z0-9-]+\.(?:svg|png))"/g)].map((match) => `public/${match[1]}`),
   ...(manifest.icons ?? []).map((icon) => `public${icon.src}`),
@@ -24,6 +25,11 @@ const referencedIcons = new Set([
 const missing = [...referencedIcons].filter((path) => !existsSync(path));
 if (missing.length) {
   console.error("Missing referenced brand assets:", missing.join(", "));
+  process.exit(1);
+}
+
+if (!maintenanceSource.includes('src="/after-hours-brand-logo.svg"')) {
+  console.error("The maintenance screen must use the approved full brand lockup, not the monogram app icon.");
   process.exit(1);
 }
 
