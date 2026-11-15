@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { initialScreenFromSearch } from "./navigation";
+import manifestText from "../public/manifest.webmanifest?raw";
 
 describe("initialScreenFromSearch", () => {
   it("opens every supported direct-link screen", () => {
@@ -21,8 +22,6 @@ describe("initialScreenFromSearch", () => {
 
 
   it("keeps every installed-app shortcut mapped to a supported screen", async () => {
-    const { readFile } = await import("node:fs/promises");
-    const manifestText = await readFile(new URL("../public/manifest.webmanifest", import.meta.url), "utf8");
     const manifest = JSON.parse(manifestText) as { shortcuts: Array<{ url: string }> };
     for (const shortcut of manifest.shortcuts) {
       const url = new URL(shortcut.url, "https://after-hours.example");
