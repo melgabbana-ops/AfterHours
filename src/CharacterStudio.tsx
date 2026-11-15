@@ -25,10 +25,10 @@ const SKINS = [
 const HAIRS = [
   { label: "Midnight", color: "#21151B" }, { label: "Espresso", color: "#4A2B22" },
   { label: "Auburn", color: "#793B2B" }, { label: "Platinum", color: "#C6B5A1" },
-  { label: "Violet", color: "#8D744C" },
+  { label: "Bronze", color: "#8D744C" },
 ];
 const OUTFITS = [
-  { label: "Obsidian", color: "#171019" }, { label: "Violet", color: "#211C13" },
+  { label: "Obsidian", color: "#171019" }, { label: "Midnight", color: "#211C13" },
   { label: "Burgundy", color: "#451B2A" }, { label: "Gold accent", color: "#332711" },
 ];
 const HAIR_STYLES = [
