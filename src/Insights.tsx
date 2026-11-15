@@ -1,4 +1,4 @@
-import React,{useMemo,useState}from"react";
+import React,{useEffect,useMemo,useState}from"react";
 import{dailyReflectionFor,zodiacSignForBirthDate}from"./astrology";
 import{recordAchievement}from"./achievements";
 import{RefreshCw,Sparkles,Shield,Star,LockKeyhole,Copy,Check}from"lucide-react";
@@ -72,9 +72,9 @@ const signs=[
 ["Boogschutter","Nieuwsgierigheid mag de deur openen. Houd de grenzen zichtbaar terwijl je samen iets nieuws verkent."],["Steenbok","Structuur kan overgave juist veiliger maken. Spreek de kaders af en laat binnen die kaders ruimte ontstaan."],["Waterman","Breek met routine, niet met grenzen. Een onverwachte keuze werkt alleen wanneer iedereen bewust meedoet."],["Vissen","Intuïtie is mooi, maar gedachten lezen bestaat niet. Vraag na, luister en laat nazorg de cirkel sluiten."]
 ];
 
-export function Insights({onBack,language="nl",profileId}:{onBack:()=>void;language?:"nl"|"en";profileId?:string|null}){
+export function Insights({onBack,language="nl",profileId,initialTab="tarot"}:{onBack:()=>void;language?:"nl"|"en";profileId?:string|null;initialTab?:"tarot"|"oracle"|"astro"}){
  const t=(nl:string,en:string)=>language==="nl"?nl:en;
- const[tab,setTab]=useState<"tarot"|"oracle"|"astro">("tarot");
+ const[tab,setTab]=useState<"tarot"|"oracle"|"astro">(initialTab);\n useEffect(()=>setTab(initialTab),[initialTab]);
  const[cardIndex,setCardIndex]=useState(()=>Math.floor(Math.random()*tarot.length));
  const[oracleIndex,setOracleIndex]=useState(()=>Math.floor(Math.random()*oracle.length));
  const[spread,setSpread]=useState<number[]>([]);
