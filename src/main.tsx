@@ -464,7 +464,7 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
    <button className="tile" onClick={()=>setScreen("radio")}><Radio/><span>{t("Radio","Radio")}</span></button>
    <button className="tile" onClick={()=>setScreen("prompts")}><BookOpen/><span>{t("Het Deck","The Deck")}</span></button>
    <button className="tile" onClick={()=>setScreen("missions")}><Activity/><span>{t("Missies","Missions")}</span></button>
-   <button className="tile" onClick={()=>setScreen("daily")}><CalendarDays/><span>{t("Dagelijks After Hours","Daily After Hours")}</span></button>
+   <button className="tile" onClick={()=>setScreen("daily")}><CalendarDays/><span>{t("Dagelijks ritueel","Daily After Hours")}</span></button>
    <button className="tile" onClick={()=>setScreen("store")}><ShoppingBag/><span>{t("Collecties & prijzen","Collections & pricing")}</span></button>
    <button className="tile" onClick={()=>setScreen("social")}><MessageCircle/><span>{t("Social studio","Social studio")}</span></button>
    <button className="tile" onClick={()=>setScreen("lovense")}><Activity/><span>{t("Lovense Connect","Lovense Connect")}</span></button>
