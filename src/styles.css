@@ -3495,3 +3495,53 @@ nav button.active,nav button.active svg{color:#e1c78f!important}
 .onboarding-video-wrap{overflow:hidden;border:1px solid rgba(205,174,119,.34);border-radius:12px;background:#050505;box-shadow:0 18px 48px rgba(0,0,0,.38)}
 .onboarding-video-wrap video{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background:#050505}
 .onboarding-later,.onboarding-back{border-color:var(--ah-border)!important;background:#100e0b!important;color:var(--ah-muted)!important}
+
+
+/* Utility, safety and admin routes: finish the shared editorial surface system. */
+.missions-screen,.legal-screen,.safety-plan,.admin-console,.media-vault{
+ color:var(--ah-ivory)!important;
+ background:radial-gradient(ellipse at 50% 0%,rgba(198,165,107,.09),transparent 48%),#050505!important;
+}
+.missions-hero,.legal-heading,.safety-plan-heading,.admin-intro,.media-vault-head{
+ border-bottom:1px solid var(--ah-border)!important;
+ padding-bottom:18px!important;
+}
+.missions-progress,.missions-progress-track,.safety-readiness-meter,.safety-readiness-track{
+ background:#211d16!important;border-color:var(--ah-border)!important;
+}
+.missions-progress-track>span,.safety-readiness-track>span{
+ background:linear-gradient(90deg,#98713b,#e3c98e)!important;
+}
+.mission-tabs,.legal-doc-tabs{
+ display:flex;flex-wrap:wrap;gap:8px!important;
+}
+.mission-tabs button,.legal-doc-tabs button{
+ border:1px solid var(--ah-border)!important;background:#100e0b!important;color:var(--ah-muted)!important;
+}
+.mission-tabs button.active,.legal-doc-tabs button.active{
+ border-color:rgba(213,183,125,.72)!important;color:var(--ah-gold-light)!important;
+ background:linear-gradient(145deg,rgba(45,35,20,.8),rgba(12,11,9,.98))!important;
+}
+.mission-list>*,.mission-card,.legal-document,.safety-room-panel,.admin-metric-card,.admin-round-card,.admin-audit-row,.media-item,.media-upload,.media-capture,.media-frame-picker,.media-live-preview,.media-pending-preview{
+ border:1px solid var(--ah-border)!important;
+ background:linear-gradient(145deg,rgba(24,21,16,.96),rgba(8,8,7,.98))!important;
+ box-shadow:inset 0 1px rgba(255,255,255,.025),0 16px 42px rgba(0,0,0,.2)!important;
+}
+.mission-icon,.mission-complete,.safety-room-status,.admin-state{
+ border-color:var(--ah-border)!important;color:var(--ah-gold-light)!important;
+}
+.mission-safety-note,.safety-room-footnote,.safety-plan-footnote,.admin-footnote,.legal-draft-alert{
+ color:var(--ah-muted)!important;border-color:var(--ah-border)!important;
+}
+.safety-pause-action{border-color:rgba(213,183,125,.6)!important;background:rgba(198,165,107,.09)!important;color:var(--ah-gold-light)!important}
+.safety-stop-action{border-color:rgba(173,91,73,.65)!important;background:rgba(92,34,25,.2)!important;color:#e6b3a6!important}
+.media-live-watermark{color:rgba(240,223,180,.75)!important}
+.admin-metric-card strong,.admin-round-top strong,.mission-copy strong,.media-item-copy strong{color:var(--ah-ivory)!important}
+.admin-round-editor input,.admin-round-editor textarea,.admin-round-editor select,.media-vault input,.media-vault textarea{
+ background:#090807!important;color:var(--ah-ivory)!important;border-color:var(--ah-border)!important;
+}
+@media(max-width:520px){
+ .missions-screen,.legal-screen,.safety-plan,.admin-console,.media-vault{padding-left:14px!important;padding-right:14px!important}
+ .admin-metric-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .mission-tabs button,.legal-doc-tabs button{min-height:40px}
+}
