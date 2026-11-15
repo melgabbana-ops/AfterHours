@@ -2849,3 +2849,78 @@ nav[aria-label="Hoofdnavigatie"] button.active:before{content:"";position:absolu
 .experience-shell>.next{display:flex;align-items:center;justify-content:center;gap:9px;width:min(760px,100%);margin:16px auto 0!important}
 @media(max-width:520px){.experience-shell{padding:13px!important;padding-bottom:calc(96px + env(safe-area-inset-bottom))!important}.round-steps{gap:5px!important}.round-steps span{padding:9px 4px!important;font-size:8px!important}.task-card{padding:14px!important}.task-card>div{grid-template-columns:1fr;gap:7px}.task-card>div button{min-height:44px;text-align:left;padding-left:14px!important}.experience-shell .actions{display:grid;grid-template-columns:1fr 1fr}.experience-shell .actions button.gold{grid-column:1/-1}.timer{margin:20px auto 15px!important}}
 @media(prefers-reduced-motion:reduce){.experience-shell *{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+
+
+/* AFTER HOURS / DESIGN PASS 05: Identity, rank ladder and profile progression */
+.profile{
+ position:relative;isolation:isolate;overflow:hidden;
+ padding:clamp(18px,4vw,30px)!important;
+ border:1px solid rgba(212,175,55,.25)!important;border-radius:22px!important;
+ background:
+  radial-gradient(ellipse at 50% 0%,rgba(107,31,107,.22),transparent 35%),
+  linear-gradient(155deg,rgba(25,12,28,.96),rgba(8,6,8,.98) 68%)!important;
+ box-shadow:0 22px 55px rgba(0,0,0,.38),inset 0 1px rgba(240,213,143,.06);
+}
+.profile>.identity-avatar{
+ width:108px!important;height:108px!important;margin:0 auto 15px!important;
+ border:1px solid rgba(232,199,123,.75)!important;
+ box-shadow:0 0 0 5px rgba(107,31,107,.18),0 0 34px rgba(212,175,55,.16);
+ background:radial-gradient(circle at 35% 25%,#6b1f6b,#160d19 70%)!important;
+}
+.profile>.identity-avatar .avatar-sigil{color:#f0d58f!important;text-shadow:0 0 15px rgba(212,175,55,.4)}
+.profile>.eyebrow{text-align:center;display:block;color:#d4af73!important;font-size:9px!important;letter-spacing:.2em}
+.profile>h2{text-align:center;font-family:"Cinzel",Georgia,serif!important;color:#f0dcae!important;font-size:clamp(25px,6vw,34px)!important;letter-spacing:.05em}
+.profile>p{text-align:center;color:#bdaebe!important;font-size:11px!important;letter-spacing:.06em}
+.profile .profile-rank{
+ display:table;margin:14px auto 9px;padding:7px 17px;
+ border:1px solid rgba(212,175,55,.45);border-radius:999px;
+ background:linear-gradient(110deg,rgba(107,31,107,.35),rgba(42,14,47,.5));
+ color:#f0d58f!important;font-family:"Cinzel",Georgia,serif;font-size:11px;letter-spacing:.14em;
+}
+.profile .xp{height:7px!important;max-width:520px;margin:0 auto!important;border-radius:9px;background:rgba(255,255,255,.09)!important;overflow:hidden}
+.profile .xp>span{display:block;height:100%;border-radius:9px;background:linear-gradient(90deg,#6b1f6b,#b88963,#f0d58f)!important;box-shadow:0 0 13px rgba(212,175,55,.35)}
+.profile .xp-label{display:block;text-align:center;margin:8px 0 20px;color:#aa99ab!important;font-size:10px}
+.profile .rank-ladder{
+ margin:18px 0!important;padding:18px!important;
+ border:1px solid rgba(212,175,55,.25)!important;border-radius:17px!important;
+ background:linear-gradient(145deg,rgba(42,14,47,.46),rgba(10,7,12,.88))!important;
+}
+.profile .rank-ladder>.eyebrow{display:block;margin-bottom:13px;color:#d4af73!important;font-size:9px!important;letter-spacing:.2em}
+.profile .rank-ladder>div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.profile .rank-ladder>div>span{
+ display:flex;align-items:center;min-height:40px;padding:9px 10px;
+ border:1px solid rgba(184,137,99,.2);border-radius:10px;
+ background:rgba(8,6,8,.55);color:#8f8292;font-size:10px;line-height:1.4;
+}
+.profile .rank-ladder>div>span.passed{color:#c5a96e;border-color:rgba(212,175,55,.22)}
+.profile .rank-ladder>div>span.current{
+ color:#1a1010;font-weight:700;border-color:#e8c77b;
+ background:linear-gradient(110deg,#f4dc9b,#d4a842 70%,#b88948);
+ box-shadow:0 0 18px rgba(212,175,55,.15);
+}
+.profile .stats{
+ display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px!important;margin:16px 0!important;
+}
+.profile .stats>div{
+ display:grid;justify-items:center;gap:5px;padding:15px 6px;
+ border:1px solid rgba(184,137,99,.24);border-radius:13px;
+ background:linear-gradient(145deg,rgba(42,14,47,.5),rgba(10,7,12,.88));
+}
+.profile .stats>div>b{font-family:"Cinzel",Georgia,serif;color:#f0d58f;font-size:22px;font-weight:500;font-variant-numeric:tabular-nums}
+.profile .stats>div>small{color:#aa99ab;font-size:8px;letter-spacing:.16em}
+.profile .history{
+ margin:17px 0!important;padding:17px!important;border:1px solid rgba(184,137,99,.22)!important;border-radius:16px!important;background:rgba(12,8,14,.66)!important;
+}
+.profile .history>.eyebrow{display:block;margin-bottom:11px;color:#d4af73!important;font-size:9px!important;letter-spacing:.18em}
+.profile .history-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid rgba(184,137,99,.15)}
+.profile .history-row strong{font-family:"Cinzel",Georgia,serif;color:#e8d9c0;font-size:11px}
+.profile .history-row small{display:block;margin-top:4px;color:#9f90a1;font-size:9px}
+.profile .history-row>b{white-space:nowrap;color:#e8c77b;font-size:11px}
+.profile .avatar-picker,.profile .name-editor{
+ margin:15px 0!important;padding:16px!important;border:1px solid rgba(212,175,55,.2)!important;border-radius:15px!important;background:rgba(24,12,27,.62)!important;
+}
+.profile .avatar-picker>.eyebrow,.profile .name-editor>label{color:#d4af73!important;font-size:9px!important;letter-spacing:.16em}
+.profile .avatar-options{display:flex;flex-wrap:wrap;gap:9px;margin-top:12px}
+.profile .avatar-options button{border:1px solid rgba(184,137,99,.25)!important;border-radius:12px!important;background:rgba(8,6,8,.6)!important;color:#d9cbd9!important}
+.profile .avatar-options button.selected{border-color:#d4af37!important;background:rgba(107,31,107,.3)!important;color:#f0d58f!important}
+@media(max-width:430px){.profile .rank-ladder>div{grid-template-columns:1fr}.profile .stats>div{padding:13px 4px}.profile .stats>div>b{font-size:19px}.profile>.identity-avatar{width:92px!important;height:92px!important}}
