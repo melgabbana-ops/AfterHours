@@ -1,5 +1,5 @@
 name: AFTER HOURS build
-# CI trigger: keep main build verification explicit
+# Reproducible installs and dependency audit
 
 on:
   workflow_dispatch:
@@ -7,6 +7,9 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -18,12 +21,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 24
+      - name: Generate reproducible lockfile
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
       - name: Dependency security report
         run: |
           npm audit --json > npm-audit.json || true
           node --input-type=commonjs -e "const a=require('./npm-audit.json'); console.log(JSON.stringify({metadata:a.metadata?.vulnerabilities, packages:Object.entries(a.vulnerabilities||{}).map(([name,v])=>({name,severity:v.severity,via:v.via.map(x=>typeof x==='string'?x:x.title),fixAvailable:v.fixAvailable}))},null,2))"
-      - name: Install
-        run: npm install --no-package-lock --no-audit --no-fund
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
       - name: Check Supabase migration ledger
         run: npm run check:migrations
       - name: Check canonical brand assets
@@ -32,3 +37,15 @@ jobs:
         run: npm test
       - name: Build
         run: npm run build
+      - name: Commit generated lockfile on main
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          if git diff --quiet -- package-lock.json; then
+            echo "Lockfile is already current."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json
+          git commit -m "build: add reproducible npm lockfile"
+          git push
