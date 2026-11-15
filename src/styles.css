@@ -4428,3 +4428,16 @@ button:focus-visible,input:focus-visible{outline:2px solid #e6c487;outline-offse
  .character-preview{grid-template-columns:minmax(112px,.82fr) minmax(0,1fr)}
  .character-art{max-height:230px}
 }
+
+
+/* Tarot and oracle consent note: visible, calm, and consistent with the brand. */
+.insight-consent-note{
+ display:flex;align-items:flex-start;gap:10px;margin:18px 0 14px;padding:13px 14px;
+ border:1px solid rgba(200,148,69,.24);border-radius:10px;
+ background:linear-gradient(145deg,rgba(30,23,14,.82),rgba(8,8,7,.92));
+ color:#c8bca9;font-size:10px;line-height:1.65;
+}
+.insight-consent-note svg{width:16px;height:16px;flex:0 0 auto;color:#d7a84f;margin-top:1px}
+.ah-tarot-card[aria-live="polite"]{animation:ah-card-reveal .48s cubic-bezier(.2,.75,.25,1) both}
+@keyframes ah-card-reveal{from{opacity:.55;transform:translateY(8px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(prefers-reduced-motion:reduce){.ah-tarot-card[aria-live="polite"]{animation:none}}
