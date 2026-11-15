@@ -22,8 +22,8 @@
   ],
   "shortcuts": [
     {
-      "name": "Experience",
-      "short_name": "Experience",
+      "name": "Ervaring",
+      "short_name": "Spelen",
       "url": "/?screen=game"
     },
     {
@@ -37,8 +37,8 @@
       "url": "/?screen=safety"
     },
     {
-      "name": "The Deck",
-      "short_name": "The Deck",
+      "name": "Het Deck",
+      "short_name": "Deck",
       "url": "/?screen=prompts"
     },
     {
@@ -47,13 +47,13 @@
       "url": "/?screen=radio"
     },
     {
-      "name": "Daily After Hours",
-      "short_name": "Daily",
+      "name": "Dagelijks ritueel",
+      "short_name": "Ritueel",
       "url": "/?screen=daily"
     },
     {
-      "name": "Insights",
-      "short_name": "Insights",
+      "name": "Inzichten",
+      "short_name": "Inzichten",
       "url": "/?screen=insights"
     }
   ]
