@@ -18,7 +18,9 @@
 - Made the three-card Tarot spread remount each draw so the staggered reveal animation replays reliably.
 - Connected horoscope shortcuts to open the astrology tab directly, and Tarot shortcuts to open Tarot directly rather than dropping users into whichever tab was last selected.
 - Replaced the misleading FREE PLAY tile, which previously opened the same guided three-round flow, with a distinct AFTER HOURS Oracle entry that opens the Oracle tab directly. The Insights tab selector now exposes selected state to assistive technology.
-- Updated the service worker to cache the current scalable 192px SVG and 512px PNG icons, use the current notification icon, and invalidate the previous app-shell cache. The brand-asset guard now checks service-worker icon references as well.
+- Integrated the approved black, amber and champagne-gold logo across the app header, home hero, age gate, session-restoration gate and error-recovery gate. Replaced the prior horizontal wordmark reference with the approved master artwork.
+- Added a dedicated 192px PNG PWA icon and updated the manifest, Apple touch icon, service-worker app shell and notification icon. The service-worker cache was bumped to invalidate previously cached branding.
+- Expanded the brand-asset guard to verify app logo placements, responsive logo styles, manifest/service-worker icon references and the presence of all referenced assets.
 
 ## Existing features reviewed in source
 - Kinky Tarot: 12 BDSM/consent-oriented reflection cards, single-card draw and three-card spread.
@@ -41,3 +43,8 @@
 - Spotify opens externally rather than embedding the playlist. AFTER HOURS itself does not render profile metadata, but Spotify may still show the playlist owner. Full separation requires a separate AFTER HOURS Spotify account and a playlist owned by that account.
 - The app uses the committed AFTER HOURS photo assets in its interface. The uploaded icon artwork is used for app branding, not as a replacement for every in-app photograph.
 - iOS may cache an earlier home-screen icon; reinstalling the PWA may be needed to refresh it.
+
+## Latest logo integration follow-up
+- The approved logo integration is committed on `work/after-hours-experience-polish` at `c0db979b427335adeb952cc9db05f8d03cc1c210`.
+- On that commit, GitHub Actions `AFTER HOURS build` and `AFTER HOURS Build Watch` both completed successfully. The build included the canonical brand asset guard, unit tests and production build.
+- PR #97 remains open as a draft. No merge or production deployment was performed.
