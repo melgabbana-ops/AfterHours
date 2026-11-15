@@ -65,11 +65,17 @@ export default function AdminDashboard({language,onBack}:{language:Locale;onBack
   if(!supabaseConfigured||!supabase){setMessage(t("Supabase is niet ingesteld.","Supabase is not configured."));return;}
   setSavingSlug(round.slug);setMessage("");
   try{
-   const{error}=await supabase.from("experience_rounds").update({
+   const duration=Number(round.duration_seconds);
+   if(!Number.isInteger(duration)||duration<60||duration>7200){
+    setMessage(t("De duur moet een heel aantal seconden tussen 60 en 7200 zijn.","Duration must be a whole number of seconds between 60 and 7200."));
+    return;
+   }
+   const{data:updatedRound,error}=await supabase.from("experience_rounds").update({
     title:round.title_nl,body:round.body_nl,title_nl:round.title_nl,body_nl:round.body_nl,
-    title_en:round.title_en,body_en:round.body_en,duration_seconds:Number(round.duration_seconds),active:round.active
-   }).eq("slug",round.slug);
+    title_en:round.title_en,body_en:round.body_en,duration_seconds:duration,active:round.active
+   }).eq("slug",round.slug).select("slug").maybeSingle();
    if(error)throw error;
+   if(!updatedRound)throw new Error("Geen ronde bijgewerkt. Controleer de beheerdersrechten en ronde-identificatie.");
    const[metricResult,auditResult]=await Promise.all([
     supabase.rpc("admin_dashboard_metrics"),
     supabase.from("admin_audit_log").select("id,action,metadata,created_at").order("created_at",{ascending:false}).limit(12)
