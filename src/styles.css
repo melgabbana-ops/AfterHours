@@ -3594,3 +3594,211 @@ body:has(nav[aria-label="Hoofdnavigatie"]) main{padding-bottom:calc(92px + env(s
  nav[aria-label="Hoofdnavigatie"]{min-height:64px!important}
  nav[aria-label="Hoofdnavigatie"] button{font-size:9px!important}
 }
+
+
+/* =========================================================
+   TEN-SCREEN MOODBOARD LOCK · responsive composition pass
+   Reference: approved 10-screen AFTER HOURS board.
+   Keep the existing application state and safety actions intact.
+   ========================================================= */
+:root{
+ --ah-obsidian:#050505;
+ --ah-black:#0b0907;
+ --ah-aubergine:#100e0b;
+ --ah-velvet:#17120d;
+ --ah-champagne:#c6a56b;
+ --ah-gold:#d5b77d;
+ --ah-gold-light:#f0dfb4;
+ --ah-ivory:#f2ede3;
+ --ah-muted:#aaa295;
+ --ah-border:rgba(205,174,119,.28);
+ --ah-danger:#b94b3f;
+}
+html,body,#root{background:#050505!important}
+body{background:radial-gradient(ellipse at 50% -8%,#21180e 0%,#0b0907 34%,#050505 76%)!important}
+.app{background:radial-gradient(ellipse at 50% -12%,#1a140d 0%,#0b0907 34%,#050505 75%)!important}
+header{border-bottom:1px solid rgba(205,174,119,.18)!important;background:rgba(5,5,5,.94)!important}
+.eyebrow{font-family:"DM Sans",sans-serif!important;font-size:9px!important;letter-spacing:.2em!important;color:#d5b77d!important}
+button{ -webkit-appearance:none}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #e1c78f!important;outline-offset:3px!important}
+
+/* 1 · HOME: tall editorial hero, rank bar, one gold CTA, compact feature tiles */
+main:has(>.home-hero){max-width:480px!important;padding:22px 18px 110px!important}
+.home-hero{
+ position:relative!important;isolation:isolate;overflow:hidden!important;
+ min-height:570px!important;padding:28px 18px 22px!important;
+ display:flex!important;flex-direction:column!important;justify-content:flex-end!important;align-items:stretch!important;
+ border:1px solid rgba(205,174,119,.25)!important;border-radius:3px!important;
+ background-image:linear-gradient(180deg,rgba(5,5,5,.04) 0%,rgba(5,5,5,.12) 27%,rgba(5,5,5,.52) 55%,#050505 100%),url("/visuals/ah-cinematic-hero.svg")!important;
+ background-position:center 35%!important;background-size:cover!important;
+ box-shadow:0 22px 58px rgba(0,0,0,.42)!important;
+}
+.home-hero:before{content:"";position:absolute;z-index:-1;inset:0;background:linear-gradient(180deg,rgba(5,5,5,.1),transparent 32%,rgba(5,5,5,.82) 100%)}
+.home-wordmark{width:min(82%,300px)!important;height:auto!important;max-height:54px!important;object-fit:contain!important;align-self:center!important;margin:0 auto auto!important;filter:drop-shadow(0 4px 14px rgba(0,0,0,.7))}
+.home-hero>.eyebrow{margin:0 0 7px!important;text-align:left!important}
+.home-hero h2{font-family:"Cinzel",serif!important;font-size:clamp(38px,11vw,52px)!important;line-height:1!important;letter-spacing:.01em!important;font-style:normal!important;margin:0 0 17px!important;text-shadow:0 4px 22px #000!important}
+.home-level{display:flex!important;align-items:center!important;gap:12px!important;padding:12px 13px!important;margin:0 0 17px!important;border:1px solid rgba(205,174,119,.36)!important;border-radius:3px!important;background:rgba(5,5,5,.66)!important;backdrop-filter:blur(10px)}
+.home-level>span{width:34px;height:34px;display:grid;place-items:center;border:1px solid #b99a65;border-radius:50%;color:#e1c78f;font-size:17px}
+.home-level>div{flex:1;display:grid;grid-template-columns:1fr auto;gap:5px 10px;align-items:center}
+.home-level strong{font-family:"Cinzel",serif!important;color:#f0dfb4!important;font-size:13px!important}
+.home-level small{font-size:9px!important;color:#d5c9b2!important}
+.home-xp{grid-column:1/-1;height:5px!important;border-radius:8px!important;background:rgba(255,255,255,.13)!important;overflow:hidden}
+.home-xp i{display:block;height:100%;border-radius:8px;background:linear-gradient(90deg,#b18a4c,#f0d69c)!important}
+.home-start{min-height:52px!important;width:100%!important;justify-content:center!important;border-radius:4px!important;font-weight:700!important;letter-spacing:.08em!important;font-size:12px!important}
+.home-shortcuts{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important;margin:12px 0 0!important}
+.home-shortcuts .tile{min-height:88px!important;padding:12px 7px!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:7px!important;text-align:center!important;border:1px solid rgba(205,174,119,.36)!important;border-radius:4px!important;background:linear-gradient(155deg,#17120d,#080807)!important}
+.home-shortcuts .tile svg{width:20px!important;height:20px!important;margin:0!important;color:#d5b77d!important}
+.home-shortcuts .tile span{font-size:10px!important;color:#eee6d7!important;line-height:1.25!important}
+.home-shortcuts .tile:nth-child(n+4){min-height:60px!important}
+
+/* 2 · CONSENT: quiet gold panel, clear hierarchy and readable controls */
+.consent-panel{border:1px solid var(--ah-border)!important;border-radius:4px!important;background:linear-gradient(145deg,rgba(25,20,14,.97),rgba(7,7,6,.98))!important;padding:18px!important;box-shadow:inset 0 1px rgba(255,255,255,.025)!important}
+.consent-panel>svg{color:#d5b77d!important;width:23px!important;height:23px!important}
+.consent-panel strong{font-family:"Cinzel",serif!important;font-size:14px!important;letter-spacing:.04em!important;color:#f0dfb4!important}
+.consent-panel span{font-size:11px!important;line-height:1.65!important;color:#c8bdab!important}
+.consent-panel button{border:1px solid #d5b77d!important;background:linear-gradient(110deg,#b18a4c,#e1c78f)!important;color:#100d08!important;border-radius:3px!important;font-weight:700!important}
+
+/* 3 · EXPERIENCE: cinematic round header, timer ring, task surface, separate STOP */
+.experience-shell{max-width:480px!important;padding:20px 18px 120px!important}
+.game-top{padding:7px 0 14px!important;border-bottom:1px solid var(--ah-border)!important;color:#e1c78f!important}
+.game-top>span{font-family:"Cinzel",serif!important;font-size:12px!important;letter-spacing:.16em!important}
+.round-steps{display:flex!important;gap:7px!important;overflow-x:auto!important;padding:14px 0 8px!important;scrollbar-width:none}
+.round-steps span{flex:1;min-width:78px!important;padding:7px 5px!important;text-align:center!important;border-bottom:1px solid rgba(205,174,119,.18)!important;color:#81796d!important;font-size:8px!important;letter-spacing:.08em!important}
+.round-steps span.current,.round-steps span.done{color:#e1c78f!important;border-color:#c6a56b!important}
+.experience-shell>.progress{height:2px!important;margin:8px 0 26px!important;background:#272016!important}
+.experience-shell>.progress span{background:linear-gradient(90deg,#9e753d,#f0d69c)!important}
+.experience-shell .round{padding:18px 15px 20px!important;border:1px solid var(--ah-border)!important;border-radius:4px!important;background:linear-gradient(180deg,rgba(21,16,11,.93),rgba(6,6,5,.98))!important}
+.experience-shell .round h2{font-size:clamp(26px,7vw,34px)!important;color:#f0dfb4!important}
+.experience-shell .round>p{font-size:12px!important;line-height:1.65!important;color:#c2b8a8!important}
+.experience-shell .timer{width:148px;height:148px;justify-content:center!important;margin:24px auto!important;border:1px solid #c6a56b!important;border-radius:50%!important;box-shadow:0 0 0 7px rgba(198,165,107,.06),inset 0 0 28px rgba(198,165,107,.08)!important;background:radial-gradient(circle,#17120d,#070707 72%)!important}
+.experience-shell .timer strong{font-size:40px!important;color:#f0dfb4!important}
+.task-card{padding:15px!important;border:1px solid rgba(205,174,119,.34)!important;border-radius:4px!important;background:rgba(5,5,5,.72)!important;text-align:left!important}
+.task-card>strong{font-family:"Cinzel",serif!important;font-size:14px!important;line-height:1.5!important;color:#f2ede3!important}
+.task-card button{border:1px solid rgba(205,174,119,.24)!important;border-radius:3px!important;background:#100e0b!important}
+.task-card button.selected{border-color:#d5b77d!important;background:rgba(198,165,107,.12)!important}
+.experience-shell .actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important}
+.experience-shell .actions button{min-height:46px!important;justify-content:center!important;border-radius:3px!important}
+.experience-shell .actions .gold{grid-column:1/-1!important;background:linear-gradient(110deg,#b18a4c,#e1c78f)!important;color:#100d08!important}
+.experience-shell .actions .stop,.stop-controller-stop{border-color:rgba(185,75,63,.8)!important;background:rgba(72,23,18,.25)!important;color:#e5a69b!important}
+.stop-controller{border-color:rgba(205,174,119,.38)!important;background:rgba(8,7,6,.97)!important}
+
+/* 4 · AFTERCARE: warmer, quieter cards with unmistakable selection */
+.aftercare-screen{max-width:480px!important;padding:24px 18px 115px!important;background:radial-gradient(ellipse at 50% 8%,rgba(198,165,107,.15),transparent 44%)!important}
+.aftercare-card{padding:22px 16px!important;border:1px solid var(--ah-border)!important;border-radius:4px!important;background:linear-gradient(180deg,rgba(23,18,12,.97),rgba(7,7,6,.98))!important}
+.aftercare-card h2{font-family:"Cinzel",serif!important;font-size:32px!important;color:#f0dfb4!important}
+.aftercare-card>p{font-size:12px!important;line-height:1.7!important;color:#c8bdab!important}
+.aftercare-options{display:grid!important;gap:9px!important;margin:20px 0!important}
+.aftercare-options button{display:flex!important;flex-direction:column!important;align-items:flex-start!important;gap:5px!important;padding:15px!important;text-align:left!important;border:1px solid rgba(205,174,119,.28)!important;border-radius:4px!important;background:linear-gradient(145deg,#17120d,#090807)!important}
+.aftercare-options button strong{font-family:"Cinzel",serif!important;font-size:13px!important;color:#f0dfb4!important}
+.aftercare-options button span{font-size:10px!important;line-height:1.55!important;color:#b9af9f!important}
+.aftercare-options button.selected{border-color:#e1c78f!important;background:linear-gradient(145deg,rgba(65,47,23,.7),#0c0a08)!important;box-shadow:inset 0 0 0 1px rgba(213,183,125,.18)!important}
+.aftercare-note{border-top:1px solid var(--ah-border)!important;border-bottom:1px solid var(--ah-border)!important;padding:13px 0!important;color:#b9af9f!important}
+.aftercare-complete{width:100%!important;min-height:50px!important;border-radius:3px!important}
+
+/* 5 · COMPLETION: centered seal, XP block, three compact stat cards */
+.completion-screen{max-width:480px!important;min-height:calc(100dvh - 140px)!important;padding:25px 18px 110px!important;display:grid!important;align-items:center!important}
+.completion-card{width:100%!important;padding:26px 18px!important;text-align:center!important;border:1px solid var(--ah-border)!important;border-radius:4px!important;background:radial-gradient(ellipse at 50% 0%,rgba(198,165,107,.12),transparent 46%),linear-gradient(180deg,#17120d,#070707)!important;box-shadow:0 18px 55px rgba(0,0,0,.42)!important}
+.completion-seal{width:58px!important;height:58px!important;margin:0 auto 20px!important;border:1px solid #c6a56b!important;border-radius:50%!important;display:grid!important;place-items:center!important;color:#f0dfb4!important}
+.completion-seal svg{width:26px!important;height:26px!important}
+.completion-card h2{font-family:"Cinzel",serif!important;font-size:clamp(27px,7vw,35px)!important;line-height:1.15!important;color:#f0dfb4!important}
+.completion-card>p{font-size:11px!important;line-height:1.7!important;color:#c4b9a7!important}
+.completion-xp{margin:22px 0!important;padding:15px!important;border:1px solid rgba(205,174,119,.35)!important;border-radius:4px!important;background:rgba(5,5,5,.6)!important}
+.completion-xp strong{font-family:"Cinzel",serif!important;font-size:24px!important;color:#e1c78f!important}
+.completion-stats{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important;margin:16px 0 20px!important}
+.completion-stats>div{padding:12px 5px!important;border:1px solid rgba(205,174,119,.28)!important;border-radius:4px!important;background:rgba(5,5,5,.55)!important}
+.completion-stats strong{font-family:"Cinzel",serif!important;font-size:18px!important;color:#f0dfb4!important}
+.completion-stats small{font-size:8px!important;letter-spacing:.08em!important;color:#b9af9f!important}
+.completion-primary,.completion-secondary{width:100%!important;min-height:46px!important;margin-top:8px!important;border:1px solid #c6a56b!important;border-radius:3px!important}
+.completion-primary{background:linear-gradient(110deg,#b18a4c,#e1c78f)!important;color:#100d08!important}
+.completion-secondary{color:#e1c78f!important;background:#0b0907!important}
+
+/* 6/7 · INSIGHTS & HOROSCOPE: card deck, compact tabs, readable editorial reading */
+.insights{max-width:480px!important;padding:24px 18px 110px!important}
+.insights-hero{padding:0 0 16px!important;margin-bottom:18px!important;border-bottom:1px solid var(--ah-border)!important}
+.insights-hero h2{font-family:"Cinzel",serif!important;font-size:32px!important;color:#f0dfb4!important}
+.insights-hero>p{font-size:11px!important;line-height:1.6!important;color:#b9af9f!important}
+.insight-tabs{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important;margin-top:18px!important}
+.insight-tabs button{min-height:42px!important;padding:7px 5px!important;border:1px solid rgba(205,174,119,.24)!important;border-radius:3px!important;background:#0b0907!important;color:#b9af9f!important;font-size:9px!important}
+.insight-tabs button.active{border-color:#d5b77d!important;background:linear-gradient(120deg,rgba(75,54,25,.8),rgba(18,14,9,.95))!important;color:#f0dfb4!important}
+.tarot-card,.astro-card{padding:18px 14px!important;border:1px solid rgba(205,174,119,.35)!important;border-radius:4px!important;background-color:#090807!important;background-image:linear-gradient(180deg,rgba(7,7,6,.58),rgba(7,7,6,.96)),url("/visuals/ah-tarot-frame.svg")!important;background-size:cover!important;background-position:center!important}
+.tarot-symbol{width:122px!important;height:176px!important;margin:18px auto!important;border:1px solid #c6a56b!important;border-radius:4px!important;background:radial-gradient(ellipse at center,rgba(198,165,107,.14),transparent 65%),#090807!important;display:grid!important;place-items:center!important;font-size:40px!important;color:#e1c78f!important;box-shadow:0 12px 34px rgba(0,0,0,.5)!important}
+.tarot-card h3,.astro-card h3{font-family:"Cinzel",serif!important;font-size:24px!important;color:#f0dfb4!important;text-align:center!important}
+.tarot-card>p{max-width:330px!important;margin:10px auto 18px!important;text-align:center!important;font-size:11px!important;line-height:1.7!important;color:#c4b9a7!important}
+.tarot-prompt,.astro-reading,.astro-daily{padding:14px!important;border:1px solid rgba(205,174,119,.24)!important;border-radius:3px!important;background:rgba(5,5,5,.72)!important}
+.tarot-prompt span,.astro-reading>strong{color:#d5b77d!important;font-size:9px!important;letter-spacing:.14em!important}
+.tarot-prompt strong{display:block;margin-top:7px!important;font-family:"Cinzel",serif!important;font-size:13px!important;line-height:1.5!important;color:#f2ede3!important}
+.insight-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:7px!important;margin-top:15px!important}
+.insight-actions button{min-height:42px!important;border:1px solid var(--ah-border)!important;border-radius:3px!important;font-size:9px!important}
+.insight-actions .gold{grid-column:1/-1!important;background:linear-gradient(110deg,#b18a4c,#e1c78f)!important;color:#100d08!important}
+.astro-card .astro-label{display:block;margin:14px 0 6px!important;color:#d5b77d!important;font-size:10px!important}
+.astro-date,.astro-card select{width:100%!important;min-height:43px!important;padding:10px!important;border:1px solid var(--ah-border)!important;border-radius:3px!important;background:#090807!important;color:#f2ede3!important}
+.astro-reading{margin-top:16px!important}
+.astro-reading>svg{color:#d5b77d!important}
+.astro-reading>p,.astro-date-help{font-size:11px!important;line-height:1.65!important;color:#c4b9a7!important}
+.astro-daily{margin-top:14px!important}
+.insight-safety{margin-top:14px!important;color:#b9af9f!important;font-size:10px!important;line-height:1.6!important}
+.insight-footer{display:flex!important;justify-content:space-between!important;align-items:center!important;padding-top:18px!important;color:#948a7b!important;font-size:8px!important;letter-spacing:.12em!important}
+
+/* 8 · RADIO: editorial player, one clear external Spotify action, mood selector */
+.radio-room{max-width:480px!important;padding:24px 18px 110px!important}
+.radio-hero{padding:0 0 16px!important;border-bottom:1px solid var(--ah-border)!important}
+.radio-hero h2{font-family:"Cinzel",serif!important;font-size:32px!important;color:#f0dfb4!important}
+.radio-hero p{font-size:11px!important;line-height:1.65!important;color:#b9af9f!important}
+.radio-player{min-height:360px!important;margin:18px 0!important;padding:22px 16px!important;border:1px solid rgba(205,174,119,.38)!important;border-radius:4px!important;background-image:linear-gradient(180deg,rgba(5,5,5,.28),rgba(5,5,5,.94)),url("/visuals/ah-radio-vinyl.svg")!important;background-size:cover!important;background-position:center!important;text-align:center!important}
+.radio-disc{width:112px!important;height:112px!important;margin:0 auto 16px!important;border:1px solid #c6a56b!important;border-radius:50%!important;color:#e1c78f!important}
+.radio-player h3{font-family:"Cinzel",serif!important;font-size:22px!important;color:#f0dfb4!important}
+.radio-player>p{font-size:10px!important;color:#c4b9a7!important}
+.radio-vibe{margin:16px auto!important;padding:9px!important;border-top:1px solid var(--ah-border)!important;border-bottom:1px solid var(--ah-border)!important;display:flex!important;justify-content:space-between!important;align-items:center!important}
+.radio-vibe strong{font-family:"Cinzel",serif!important;color:#e1c78f!important}
+.radio-controls{display:flex!important;justify-content:center!important;align-items:center!important;gap:18px!important}
+.radio-controls button{width:42px!important;height:42px!important;border:1px solid var(--ah-border)!important;border-radius:50%!important;color:#e1c78f!important}
+.radio-controls .radio-play{width:52px!important;height:52px!important;background:linear-gradient(110deg,#b18a4c,#e1c78f)!important;color:#100d08!important}
+.radio-volume{width:100%!important;min-height:44px!important;margin-top:15px!important;border:1px solid var(--ah-border)!important;border-radius:3px!important;color:#e1c78f!important}
+.moods{margin-top:20px!important}
+.moods .sectionhead{color:#d5b77d!important}
+.moods .mood{display:flex!important;align-items:center!important;gap:12px!important;width:100%!important;min-height:60px!important;padding:10px 12px!important;margin:7px 0!important;text-align:left!important;border:1px solid rgba(205,174,119,.22)!important;border-radius:3px!important;background:linear-gradient(145deg,#17120d,#080807)!important}
+.moods .mood.active{border-color:#d5b77d!important;background:linear-gradient(120deg,rgba(75,54,25,.7),#090807)!important}
+.mood-number{color:#d5b77d!important;font-family:"Cinzel",serif!important}
+.moods .mood div{flex:1}
+.moods .mood strong{font-family:"Cinzel",serif!important;color:#f0dfb4!important}
+.moods .mood small{display:block;margin-top:3px!important;color:#b9af9f!important;font-size:9px!important}
+.radio-note{padding:14px!important;border:1px solid var(--ah-border)!important;border-radius:3px!important;background:#0c0a08!important}
+
+/* 9 · PROFILE: identity portrait/sigil, XP, stats, settings surfaces */
+.profile{max-width:480px!important;margin:0 auto!important;padding:28px 16px 110px!important;text-align:center!important}
+.profile>.eyebrow{margin-top:14px!important}
+.profile h2{font-family:"Cinzel",serif!important;font-size:32px!important;color:#f0dfb4!important}
+.profile>p{font-size:10px!important;color:#b9af9f!important}
+.profile .identity-avatar{width:100px!important;height:100px!important;border:1px solid #c6a56b!important}
+.profile .stats{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important;margin:22px 0!important}
+.profile .stats>div{padding:13px 4px!important;border:1px solid var(--ah-border)!important;border-radius:3px!important;background:linear-gradient(145deg,#17120d,#080807)!important}
+.profile .stats b{font-family:"Cinzel",serif!important;color:#f0dfb4!important;font-size:22px!important}
+.profile .stats small{font-size:8px!important;color:#b9af9f!important}
+.profile .name-editor,.profile .avatar-picker,.profile .history,.profile .rank-ladder,.profile .character-studio,.profile .media-vault{margin-top:12px!important;padding:14px!important;border:1px solid var(--ah-border)!important;border-radius:3px!important;background:linear-gradient(145deg,#17120d,#080807)!important;text-align:left!important}
+.profile .avatar-options button,.profile .name-editor button{border:1px solid var(--ah-border)!important;border-radius:3px!important}
+.profile input{background:#080807!important;border:1px solid var(--ah-border)!important;color:#f2ede3!important}
+.profile .xp{height:5px!important;border-radius:8px!important;background:#282116!important}
+.profile .xp span{background:linear-gradient(90deg,#9e753d,#f0d69c)!important}
+
+/* 10 · GAME SELECTION: four stacked outlined cards, cinematic first card */
+.game-select-screen{max-width:480px!important;padding:24px 18px 110px!important}
+.game-select-head{padding:0 0 17px!important;border-bottom:1px solid var(--ah-border)!important;margin-bottom:16px!important}
+.game-select-head h2{font-family:"Cinzel",serif!important;font-size:30px!important;line-height:1.2!important;color:#f0dfb4!important}
+.game-select-head p{font-size:11px!important;line-height:1.65!important;color:#b9af9f!important}
+.game-select-grid{display:grid!important;grid-template-columns:1fr!important;gap:10px!important}
+.experience-choice{position:relative!important;display:grid!important;grid-template-columns:48px 1fr 18px!important;grid-template-rows:auto auto auto!important;align-items:center!important;gap:4px 10px!important;min-height:120px!important;padding:14px!important;text-align:left!important;border:1px solid rgba(205,174,119,.42)!important;border-radius:4px!important;background:linear-gradient(145deg,rgba(25,19,12,.96),rgba(7,7,6,.98))!important}
+.experience-choice.featured{min-height:145px!important;background-image:linear-gradient(90deg,rgba(5,5,5,.9),rgba(5,5,5,.52)),url("/visuals/ah-cinematic-hero.svg")!important;background-size:cover!important;background-position:center 35%!important}
+.choice-symbol{grid-column:1;grid-row:1/4;width:44px;height:54px;display:grid;place-items:center;border:1px solid rgba(205,174,119,.5)!important;color:#e1c78f!important;font-size:25px!important}
+.experience-choice>.eyebrow{grid-column:2;grid-row:1;margin:0!important;font-size:8px!important}
+.experience-choice>strong{grid-column:2;grid-row:2;font-family:"Cinzel",serif!important;font-size:14px!important;letter-spacing:.04em!important;color:#f0dfb4!important}
+.experience-choice>small{grid-column:2;grid-row:3;font-size:9px!important;line-height:1.5!important;color:#c4b9a7!important}
+.choice-action{grid-column:3;grid-row:1/4;display:grid!important;place-items:center!important;color:#e1c78f!important;font-size:0!important}
+.choice-action svg{width:17px!important;height:17px!important}
+@media(max-width:520px){
+ main:has(>.home-hero),.experience-shell,.aftercare-screen,.completion-screen,.insights,.radio-room,.profile,.game-select-screen{padding-left:14px!important;padding-right:14px!important}
+ .home-hero{min-height:540px!important}
+ .home-shortcuts .tile{min-height:82px!important}
+}
+@media(min-width:760px){
+ main:has(>.home-hero),.experience-shell,.aftercare-screen,.completion-screen,.insights,.radio-room,.profile,.game-select-screen{max-width:480px!important}
+}
