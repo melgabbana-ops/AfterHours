@@ -5,8 +5,6 @@ export default function Teaser() {
   const [language, setLanguage] = React.useState<"nl"|"en">(() => { try { return localStorage.getItem("afterhours.language") === "en" ? "en" : "nl"; } catch { return "nl"; } });
   React.useEffect(() => { try { localStorage.setItem("afterhours.language", language); document.documentElement.lang = language; } catch { /* Language preference is optional. */ } }, [language]);
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
-  const [introUnavailable, setIntroUnavailable] = React.useState(false);
-  const [introEnded, setIntroEnded] = React.useState(false);
   const features = [
     { icon: Gamepad2, title: t("Kinky games", "Kinky games"), copy: t("Interactieve ervaringen", "Interactive experiences") },
     { icon: Layers3, title: t("Kinky tarot", "Kinky tarot"), copy: t("Kaarten en reflectie", "Cards and reflection") },
@@ -18,14 +16,14 @@ export default function Teaser() {
   return <main className="teaser-screen moodboard-landing">
     <div className="teaser-noise" aria-hidden="true"/>
     <div className="teaser-top"><img className="teaser-logo" src="/after-hours-logo.svg" alt="AFTER HOURS" /><div className="teaser-top-actions"><span className="teaser-private">18+ · {t("PRIVÉWERELD","PRIVATE EXPERIENCE")}</span><button className="language-toggle teaser-language-toggle" type="button" aria-label={t("Taal wijzigen","Change language")} onClick={() => setLanguage(language === "nl" ? "en" : "nl")}><span className={language === "nl" ? "language-active" : ""}>NL</span><span className="language-divider">/</span><span className={language === "en" ? "language-active" : ""}>EN</span></button></div></div>
-    {!introUnavailable && !introEnded && <section className="teaser-film" aria-label={t("AFTER HOURS-intro","AFTER HOURS intro")}>
-      <video className="teaser-film-video" autoPlay muted playsInline preload="metadata" poster="https://gcdn.picsart.com/cloud-storage/ea428271-664f-4cd5-a566-5bdebb64f775.jpg" onEnded={() => setIntroEnded(true)} onError={() => setIntroUnavailable(true)}>
-        <source src="https://gcdn.picsart.com/editing-temp/a18ef45a-9ae8-4ce4-93b4-68e40401defc.mp4" type="video/mp4"/>
-      </video>
-      <div className="teaser-film-brand" aria-hidden="true"><img src="/after-hours-logo.svg" alt="" /><div><strong>AFTER HOURS</strong><span>YOUR RULES. YOUR LIMITS. YOUR EXPERIENCE.</span></div></div>
-      <button className="teaser-film-skip" type="button" onClick={() => setIntroEnded(true)}>{t("INTRO OVERSLAAN","SKIP INTRO")}</button>
-    </section>}
-    {(introEnded || introUnavailable) && <section className="teaser-film teaser-film-endcard" aria-label="AFTER HOURS"><img className="teaser-endcard-logo" src="/after-hours-logo.svg" alt="AFTER HOURS" /><p>YOUR RULES. YOUR LIMITS. YOUR EXPERIENCE.</p><span>18+ · PRIVATE EXPERIENCE</span></section>}
+    <section className="teaser-film teaser-film-motion" aria-label={t("AFTER HOURS-intro","AFTER HOURS intro")}>
+      <div className="teaser-atmosphere" aria-hidden="true"><span/><span/><span/><i/><i/></div>
+      <div className="teaser-film-brand">
+        <img src="/after-hours-logo.svg" alt="AFTER HOURS"/>
+        <div><strong>AFTER HOURS</strong><span>YOUR RULES. YOUR LIMITS. YOUR EXPERIENCE.</span></div>
+      </div>
+      <span className="teaser-film-caption">{t("EEN WERELD BUITEN DE GEWONE REGELS","A WORLD BEYOND THE ORDINARY")}</span>
+    </section>
     <section className="teaser-content">
       <span className="eyebrow"><Sparkles size={13}/> {t("KINKY · PLAY · CONNECT","KINKY · PLAY · CONNECT")}</span>
       <h1>AFTER<br/><em>HOURS</em></h1>
