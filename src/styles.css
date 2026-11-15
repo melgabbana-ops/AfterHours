@@ -3332,3 +3332,62 @@ nav button.active,.bottom-nav button.active,.app-nav button.active,.mobile-nav b
  .profile,.round,.aftercare-card,.completion-card{padding:18px!important}
 }
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+
+/* Reference layout pass: screen proportions, spacing and hierarchy */
+.hero.home-hero{
+ width:min(100%,520px)!important;min-height:500px!important;margin:16px auto 18px!important;
+ padding:24px 21px 22px!important;justify-content:flex-end!important;
+ border-radius:12px!important;position:relative!important;overflow:hidden!important;
+}
+.hero.home-hero:after{
+ content:"";position:absolute;inset:0;pointer-events:none;z-index:0;
+ background:linear-gradient(180deg,transparent 20%,rgba(4,4,4,.18) 43%,rgba(4,4,4,.93) 78%,#050505 100%);
+}
+.hero.home-hero>*{position:relative;z-index:1}
+.hero.home-hero .home-wordmark{margin-bottom:auto!important;width:190px!important;align-self:flex-start}
+.hero.home-hero h2{font-size:30px!important;letter-spacing:.03em!important;margin:4px 0 14px!important}
+.hero.home-hero .home-level{width:100%;max-width:none;margin:0 0 13px!important}
+.hero.home-hero .home-start{width:100%!important;max-width:none!important}
+.home-shortcuts{max-width:520px!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important}
+.home-shortcuts .tile{min-height:92px!important;display:grid!important;grid-template-columns:32px 1fr;align-content:center;align-items:center;gap:10px!important;padding:13px!important}
+.home-shortcuts .tile svg{width:22px!important;height:22px!important}
+.home-shortcuts .tile span{font-size:10px!important;text-transform:uppercase;letter-spacing:.08em}
+.game-select-screen{max-width:560px!important;margin:0 auto!important}
+.game-select-head{text-align:left!important;margin:4px 0 21px!important}
+.game-select-head h2{max-width:350px;font-size:27px!important}
+.game-select-grid{gap:9px!important}
+.experience-choice{min-height:112px!important;grid-template-columns:58px minmax(0,1fr) 16px!important;padding:13px!important}
+.experience-choice .eyebrow{font-size:7px!important}
+.experience-choice>strong{font-size:12px!important;letter-spacing:.09em}
+.choice-symbol{width:50px!important;height:50px!important;border-radius:7px!important}
+.profile{max-width:560px!important;margin:14px auto!important;padding:23px!important}
+.profile>.identity-avatar{width:118px!important;height:118px!important;margin-bottom:19px!important}
+.profile>.eyebrow{font-size:8px!important;letter-spacing:.2em}
+.profile>h2{font-size:25px!important;margin:8px 0!important}
+.profile>.profile-rank{margin:15px auto!important}
+.profile .stats{gap:7px!important}
+.profile .stats>div{min-height:82px;align-content:center}
+.profile .history-row{border-top:1px solid rgba(207,171,111,.17)}
+.experience-shell{max-width:600px!important;margin:0 auto!important}
+.experience-shell>.round{padding:24px!important}
+.experience-shell>.round h2{font-size:26px!important}
+.experience-shell .timer{width:190px!important;min-height:150px!important}
+.aftercare-screen{display:grid;align-content:center}
+.aftercare-card{max-width:520px!important;width:100%!important}
+.insights,.radio-room{max-width:600px!important;margin:0 auto!important}
+.insights-hero,.radio-hero{padding:19px!important}
+.tarot-card,.astro-card{max-width:520px!important}
+.onboarding-screen{max-width:560px!important;margin:0 auto!important}
+.onboarding-panel{padding:23px!important}
+.teaser-screen.moodboard-landing{min-height:100dvh!important}
+.teaser-content{max-width:520px!important;margin:0 auto!important}
+@media(max-width:430px){
+ .hero.home-hero{min-height:470px!important;padding:20px 17px!important}
+ .hero.home-hero h2{font-size:27px!important}
+ .home-shortcuts{gap:7px!important}
+ .home-shortcuts .tile{min-height:84px!important;padding:10px!important}
+ .profile>.identity-avatar{width:102px!important;height:102px!important}
+ .experience-shell>.round{padding:18px!important}
+ .aftercare-card{padding:19px!important}
+}
