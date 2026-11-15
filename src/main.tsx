@@ -24,6 +24,7 @@ import MoodCheckIn from "./MoodCheckIn";
 
 import { recordSessionMoodRemote, type MoodCode, type MoodPhase } from "./services/moods";
 import type{AfterHoursState,AvatarStyle,Screen,Safety,SessionHistoryEntry}from"./types";
+import {initialScreenFromSearch} from "./navigation";
 import{loadState,saveState,loadTimer,saveTimer,clearTimer,defaultState}from"./storage";
 import{loadRemoteState,loadRemoteRounds,syncRemoteState,updateRemoteUsername,completeRemoteSession,revokeRemoteConsent}from"./services/backend";
 import{supabase,supabaseConfigured}from"./services/supabase";
@@ -128,7 +129,7 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
  const[authReady,setAuthReady]=useState(!supabaseConfigured);
  const[rounds,setRounds]=useState(fallbackRounds);
  useEffect(()=>{let active=true;const refreshRounds=async()=>{if(!supabaseConfigured){setRounds(language==="en"?fallbackRoundsEnglish:fallbackRounds);return;}try{const remote=await loadRemoteRounds(language);if(!active)return;setRounds(remote.length===3?remote.map(item=>({title:item.title,text:item.body,time:item.durationSeconds})):(language==="en"?fallbackRoundsEnglish:fallbackRounds));}catch{if(active)setRounds(language==="en"?fallbackRoundsEnglish:fallbackRounds);}};void refreshRounds();return()=>{active=false}},[language]);
- const initialScreen=(()=>{const value=new URLSearchParams(window.location.search).get("screen");if(value==="game"||value==="gameSelect"||value==="complete"||value==="profile"||value==="admin"||value==="insights"||value==="radio"||value==="aftercare"||value==="prompts"||value==="safety"||value==="store"||value==="onboarding"||value==="controlroom"||value==="missions"||value==="legal"||value==="social"||value==="lovense"||value==="daily")return value;return "home" as Screen})();
+ const initialScreen=initialScreenFromSearch(window.location.search);
  const[screen,setScreen]=useState<Screen>(initialScreen);
  const[completionSummary,setCompletionSummary]=useState<{earned:number;level:number;rounds:number}|null>(null);
  const [captureAssignment,setCaptureAssignment]=useState<{title:string;task:string}|null>(null);
