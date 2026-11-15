@@ -119,7 +119,7 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
   return()=>{active=false;navigator.serviceWorker.removeEventListener("controllerchange",onControllerChange);};
  },[]);
  const applyAppUpdate=()=>{setAppUpdateReady(false);navigator.serviceWorker?.getRegistration().then(registration=>registration?.waiting?.postMessage({type:"SKIP_WAITING"}));};
- const [language,setLanguage]=useState<"nl"|"en">(()=>{try{const saved=localStorage.getItem("afterhours.language");return saved==="nl"?"nl":"en"}catch{return "en"}});
+ const [language,setLanguage]=useState<"nl"|"en">(()=>{try{const saved=localStorage.getItem("afterhours.language");return saved==="en"?"en":"nl"}catch{return "nl"}});
  useEffect(()=>{try{localStorage.setItem("afterhours.language",language);document.documentElement.lang=language}catch{}},[language]);
  const t=(nl:string,en:string)=>language==="nl"?nl:en;
  const shareWhatsAppInvite=()=>{const invite=new URL(window.location.href);invite.search="";invite.hash="";const text=language==="en"?"Discover AFTER HOURS, a private 18+ interactive experience.":"Ontdek AFTER HOURS, een privé interactieve ervaring voor 18+.";window.open("https://wa.me/?text="+encodeURIComponent(text+" "+invite.origin+invite.pathname),"_blank","noopener,noreferrer");};
