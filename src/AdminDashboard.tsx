@@ -21,6 +21,7 @@ export default function AdminDashboard({language,onBack}:{language:Locale;onBack
  const[rounds,setRounds]=useState<Round[]>([]);
  const[audit,setAudit]=useState<AuditEntry[]>([]);
  const[message,setMessage]=useState("");
+ const[auditError,setAuditError]=useState(false);
  const[savingSlug,setSavingSlug]=useState<string|null>(null);
 
  useEffect(()=>{
@@ -46,6 +47,7 @@ export default function AdminDashboard({language,onBack}:{language:Locale;onBack
     setMetrics((metricResult.data??{}) as unknown as Metrics);
     setRounds((roundResult.data??[]) as unknown as Round[]);
     setAudit((auditResult.data??[]) as unknown as AuditEntry[]);
+    setAuditError(Boolean(auditResult.error));
     setStatus("ready");
    }catch{
     if(active)setStatus("setup");
@@ -73,8 +75,14 @@ export default function AdminDashboard({language,onBack}:{language:Locale;onBack
     supabase.from("admin_audit_log").select("id,action,metadata,created_at").order("created_at",{ascending:false}).limit(12)
    ]);
    if(metricResult.data)setMetrics(metricResult.data as unknown as Metrics);
-   if(auditResult.data)setAudit(auditResult.data as unknown as AuditEntry[]);
-   setMessage(t("Wijzigingen opgeslagen en in het auditlog vastgelegd.","Changes saved and recorded in the audit log."));
+   if(auditResult.error){
+    setAuditError(true);
+    setMessage(t("Wijzigingen opgeslagen. De server heeft de wijziging gelogd, maar de lijst kon niet worden vernieuwd.","Changes saved. The server logged the update, but the audit list could not be refreshed."));
+   }else{
+    setAudit(auditResult.data as unknown as AuditEntry[]);
+    setAuditError(false);
+    setMessage(t("Wijzigingen opgeslagen en in het auditlog vastgelegd.","Changes saved and recorded in the audit log."));
+   }
   }catch(error){
    setMessage(t("Opslaan is mislukt. Controleer de migratie en je beheerdersrechten.","Save failed. Check the migration and your admin permissions."));
   }finally{setSavingSlug(null)}
@@ -119,7 +127,7 @@ export default function AdminDashboard({language,onBack}:{language:Locale;onBack
    </section>
 
    <section className="admin-audit"><span className="eyebrow">{t("BEHEERLOG","AUDIT LOG")}</span><h2>{t("Recente wijzigingen","Recent changes")}</h2>
-    {audit.length===0?<p>{t("Nog geen beheeracties geregistreerd.","No admin actions recorded yet.")}</p>:audit.map(item=><div className="admin-audit-row" key={item.id}><div><strong>{item.action}</strong><small>{String(item.metadata?.slug??"")}</small></div><time>{new Date(item.created_at).toLocaleString(language==="nl"?"nl-NL":"en-GB")}</time></div>)}
+    {auditError?<p role="status">{t("De beheerlog kon niet worden geladen. Probeer het paneel later opnieuw te openen.","The audit log could not be loaded. Try reopening the dashboard later.")}</p>:audit.length===0?<p>{t("Nog geen beheeracties geregistreerd.","No admin actions recorded yet.")}</p>:audit.map(item=><div className="admin-audit-row" key={item.id}><div><strong>{item.action}</strong><small>{String(item.metadata?.slug??"")}</small></div><time>{new Date(item.created_at).toLocaleString(language==="nl"?"nl-NL":"en-GB")}</time></div>)}
    </section>
   </>}
  </main>;
