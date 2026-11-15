@@ -4393,3 +4393,38 @@ button:focus-visible,input:focus-visible{outline:2px solid #e6c487;outline-offse
  .app .experience-choice{min-height:205px}
  .app .completion-card{padding:24px 18px!important}
 }
+
+
+/* Final polish for the approved brand lockup and character studio */
+.onboarding-header img{
+ width:min(220px,52vw);
+ max-height:78px;
+ object-position:left center;
+ filter:drop-shadow(0 0 16px rgba(207,166,99,.16));
+}
+.character-studio{
+ border-color:rgba(210,173,112,.38);
+ background:
+  radial-gradient(ellipse at 12% 0%,rgba(143,99,42,.17),transparent 52%),
+  linear-gradient(145deg,rgba(25,19,12,.97),rgba(5,5,5,.99));
+ box-shadow:0 22px 55px rgba(0,0,0,.34),inset 0 1px rgba(255,239,205,.05);
+}
+.character-art{
+ border:1px solid rgba(210,173,112,.34);
+ border-radius:12px;
+ background:
+  radial-gradient(ellipse at 50% 22%,rgba(162,112,51,.18),transparent 58%),
+  linear-gradient(180deg,#100d09,#030303);
+ box-shadow:0 18px 45px rgba(0,0,0,.42),inset 0 1px rgba(255,239,205,.05);
+}
+.character-preview-caption strong{color:#f0dfc0}
+.character-preview-caption small{color:#b8ad9c}
+.character-field>.eyebrow{color:#d0b17c}
+.character-segment button{border-color:rgba(210,173,112,.28);background:#090807;color:#d5c9b8}
+.character-segment button.selected{border-color:#d6b476;background:linear-gradient(135deg,rgba(150,103,47,.26),rgba(12,10,8,.96));color:#f2d8a5}
+.character-mask-toggle{border-color:rgba(210,173,112,.27);background:rgba(9,8,7,.85);color:#e5d7c2}
+.character-save-note{color:#b6aa98}
+@media(max-width:560px){
+ .character-preview{grid-template-columns:minmax(112px,.82fr) minmax(0,1fr)}
+ .character-art{max-height:230px}
+}
