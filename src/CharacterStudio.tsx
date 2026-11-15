@@ -48,22 +48,37 @@ function loadLook(profileId: string): CharacterLook {
 function AvatarArt({ look }: { look: CharacterLook }) {
   const longHair = look.hairStyle === "waves" || look.hairStyle === "curls";
   const shortHair = look.hairStyle === "short" || (look.gender === "male" && look.hairStyle === "sleek");
+  const curlPath = "M67 112 Q43 35 91 28 Q124 5 158 31 Q197 45 174 119 L179 169 Q169 198 151 153 L88 157 Q75 199 61 176Z";
+  const wavePath = "M68 106 Q47 28 95 25 Q133 5 160 35 Q194 48 174 119 L171 181 Q157 196 150 150 L85 155 Q77 194 66 176Z";
   return <svg className="character-art" viewBox="0 0 240 300" role="img" aria-label="AFTER HOURS custom character portrait">
     <defs>
-      <linearGradient id="ahPortraitGlow" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#9a713e" stopOpacity=".38"/><stop offset="1" stopColor="#050505" stopOpacity="0"/></linearGradient>
+      <linearGradient id="ahPortraitGlow" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#9a713e" stopOpacity=".42"/><stop offset="1" stopColor="#050505" stopOpacity="0"/></linearGradient>
       <linearGradient id="ahGoldLine" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#f3d49a"/><stop offset="1" stopColor="#8e642d"/></linearGradient>
       <linearGradient id="ahVelvet" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor={look.outfit}/><stop offset="1" stopColor="#050505"/></linearGradient>
+      <linearGradient id="ahSkinShade" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#fff" stopOpacity=".16"/><stop offset=".52" stopColor={look.skin}/><stop offset="1" stopColor="#21120e" stopOpacity=".46"/></linearGradient>
+      <radialGradient id="ahFaceLight" cx="38%" cy="28%" r="78%"><stop offset="0" stopColor="#fff" stopOpacity=".18"/><stop offset="1" stopColor="#120b08" stopOpacity=".18"/></radialGradient>
     </defs>
     <rect width="240" height="300" rx="14" fill="#080706"/>
     <ellipse cx="120" cy="132" rx="104" ry="132" fill="url(#ahPortraitGlow)"/>
     <path d="M18 284 Q22 226 70 208 L97 192 L143 192 L170 208 Q218 228 222 284Z" fill="url(#ahVelvet)" stroke="#98713c" strokeOpacity=".68" strokeWidth="1.2"/>
     <path d="M77 211 L99 193 L120 224 L143 193 L164 211 L151 257 L89 257Z" fill="#090807" stroke="url(#ahGoldLine)" strokeOpacity=".8" strokeWidth="1.2"/>
-    <path d="M96 190 L120 223 L144 190 L136 175 L104 175Z" fill={look.skin}/>
-    {longHair && <path d={look.hairStyle === "curls" ? "M67 104 Q43 35 91 28 Q124 5 158 31 Q197 45 174 119 L174 183 Q158 202 147 151 L91 160 Q79 203 64 179Z" : "M68 104 Q47 28 95 25 Q133 5 160 35 Q194 48 174 119 L171 181 Q157 196 150 150 L85 155 Q77 194 66 176Z"} fill={look.hair}/>}
-    <path d="M84 70 Q120 42 156 70 L161 133 Q155 172 120 184 Q85 172 79 133Z" fill={look.skin} stroke="#8b5b47" strokeOpacity=".55" strokeWidth=".8"/>
-    {shortHair && <path d="M78 92 Q69 38 111 31 Q153 28 162 75 L155 102 Q136 76 120 67 Q101 82 81 99Z" fill={look.hair}/>}
+    <path d="M96 187 L120 223 L144 187 L137 169 L103 169Z" fill={look.skin}/>
+    {longHair && <path d={look.hairStyle === "curls" ? curlPath : wavePath} fill={look.hair}/>}
+    <path d="M84 70 Q120 42 156 70 L161 133 Q155 172 120 184 Q85 172 79 133Z" fill="url(#ahSkinShade)" stroke="#8b5b47" strokeOpacity=".55" strokeWidth=".8"/>
+    <path d="M84 74 Q120 49 156 74 L160 132 Q151 166 120 178 Q89 166 80 132Z" fill="url(#ahFaceLight)"/>
+    <path d="M78 111 Q69 83 79 60 M162 111 Q171 83 161 60" fill="none" stroke={look.skin} strokeWidth="9" strokeLinecap="round" opacity=".85"/>
+    <path d="M91 112 Q103 105 112 111 M128 111 Q138 105 149 112" fill="none" stroke="#2a1715" strokeWidth="2.8" strokeLinecap="round"/>
+    <path d="M91 120 Q102 115 112 120 M128 120 Q138 115 149 120" fill="none" stroke="#17100e" strokeWidth="1.8" strokeLinecap="round"/>
+    <ellipse cx="102" cy="120" rx="3.5" ry="2.2" fill="#17100e"/><ellipse cx="138" cy="120" rx="3.5" ry="2.2" fill="#17100e"/>
+    <circle cx="103" cy="119.5" r=".8" fill="#e8d9c5"/><circle cx="139" cy="119.5" r=".8" fill="#e8d9c5"/>
+    <path d="M120 122 Q116 139 113 145 Q120 149 126 145" fill="none" stroke="#7b5141" strokeOpacity=".68" strokeWidth="1.3" strokeLinecap="round"/>
+    <path d="M107 157 Q120 151 133 157 Q120 166 107 157Z" fill="#542d2b" opacity=".9"/>
+    <path d="M109 157 Q120 160 131 157" fill="none" stroke="#e2b9a4" strokeOpacity=".72" strokeWidth="1"/>
+    <path d="M86 145 Q95 151 103 149 M137 149 Q145 151 154 145" fill="none" stroke="#d99a7e" strokeOpacity=".28" strokeWidth="5" strokeLinecap="round"/>
+    {shortHair && <path d="M78 100 Q69 38 111 31 Q153 28 162 75 L155 103 Q139 78 120 67 Q101 82 81 101Z" fill={look.hair}/>}
     {!shortHair && <path d="M79 96 Q70 50 96 31 Q123 15 151 37 Q170 54 160 98 Q140 74 120 66 Q102 81 79 96Z" fill={look.hair}/>}
-    <path d="M90 119 Q120 128 150 119" fill="none" stroke="#9b7452" strokeOpacity=".24" strokeWidth="1"/>
+    {look.hairStyle === "waves" && <path d="M72 73 Q89 52 85 110 Q81 137 70 150 M167 70 Q151 54 157 110 Q162 138 173 151" fill="none" stroke="#fff" strokeOpacity=".12" strokeWidth="3"/>}
+    {look.hairStyle === "curls" && <g fill="none" stroke="#fff" strokeOpacity=".14" strokeWidth="2"><path d="M77 57q-9 9 0 18t0 18 M91 34q-9 9 0 18t0 18 M151 36q-9 9 0 18t0 18 M166 61q-9 9 0 18t0 18"/></g>}
     {look.mask && <path d="M81 104 Q120 89 159 104 L151 137 Q120 148 89 137Z" fill="#100d09" stroke="url(#ahGoldLine)" strokeWidth="1.6"/>}
     {look.neckDetail === "collar" && <><path d="M92 183 Q120 198 148 183 L153 197 Q120 214 87 197Z" fill="#080706" stroke="url(#ahGoldLine)" strokeWidth="2"/><circle cx="120" cy="204" r="4" fill="#d7a84f"/></>}
     {look.neckDetail === "chain" && <><path d="M94 183 Q120 215 146 183" stroke="url(#ahGoldLine)" strokeWidth="2" fill="none"/><circle cx="120" cy="207" r="4" fill="#d7a84f"/></>}
@@ -91,7 +106,7 @@ export default function CharacterStudio({ profileId, language = "nl" }: { profil
       <ChevronDown className={expanded ? "rotated" : ""} size={17}/>
     </button>
     {expanded && <div className="character-studio-body">
-      <div className="character-preview"><AvatarArt look={look}/><div className="character-preview-caption"><span className="eyebrow">AFTER HOURS IDENTITY</span><strong>{look.gender === "female" ? t("The Femme", "The Femme") : t("The Masque", "The Masque")}</strong><small>{t("Cosmetische identiteit · altijd aanpasbaar", "Cosmetic identity · always customizable")}</small></div></div>
+      <div className="character-preview"><AvatarArt look={look}/><div className="character-preview-caption"><span className="eyebrow">AFTER HOURS IDENTITY</span><strong>{look.gender === "female" ? t("The Femme", "The Femme") : t("The Sovereign", "The Sovereign")}</strong><small>{t("Cosmetische identiteit · altijd aanpasbaar", "Cosmetic identity · always customizable")}</small></div></div>
       <div className="character-options">
         <div className="character-field"><span className="eyebrow">{t("KIES JE CHARACTER", "CHOOSE YOUR CHARACTER")}</span><div className="character-segment">
           <button className={look.gender === "female" ? "selected" : ""} aria-pressed={look.gender === "female"} onClick={() => update({ gender: "female" })}>{t("Vrouwelijk", "Feminine")}{look.gender === "female" && <Check size={14}/>}</button>
