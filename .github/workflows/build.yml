@@ -27,6 +27,8 @@ jobs:
         run: |
           npm audit --json > npm-audit.json || true
           node --input-type=commonjs -e "const a=require('./npm-audit.json'); console.log(JSON.stringify({metadata:a.metadata?.vulnerabilities, packages:Object.entries(a.vulnerabilities||{}).map(([name,v])=>({name,severity:v.severity,via:v.via.map(x=>typeof x==='string'?x:x.title),fixAvailable:v.fixAvailable}))},null,2))"
+      - name: Enforce clean dependency audit
+        run: npm audit --audit-level=low
       - name: Install locked dependencies
         run: npm ci --no-audit --no-fund
       - name: Check Supabase migration ledger
