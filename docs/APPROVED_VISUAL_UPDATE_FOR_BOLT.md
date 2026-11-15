@@ -1,3 +1,5 @@
+> **Design direction superseded (15 November 2026):** The latest approved reference screens and user instruction replace the purple/aubergine palette in this historical brief. Use deep black, warm bronze and champagne gold only. No purple UI, violet glow or plum panels. Preserve the functional and safety requirements below unless the user explicitly changes them.
+
 # AFTER HOURS — APPROVED VISUAL UPDATE
 ## Direct implementation brief for Bolt
 
