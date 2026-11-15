@@ -46,6 +46,7 @@ function loadLook(profileId: string): CharacterLook {
   } catch { return DEFAULT_LOOK; }
 }
 function AvatarArt({ look }: { look: CharacterLook }) {
+  const masculine = look.gender === "male";
   const longHair = look.hairStyle === "waves" || look.hairStyle === "curls";
   const shortHair = look.hairStyle === "short" || (look.gender === "male" && look.hairStyle === "sleek");
   const curlPath = "M67 112 Q43 35 91 28 Q124 5 158 31 Q197 45 174 119 L179 169 Q169 198 151 153 L88 157 Q75 199 61 176Z";
@@ -64,11 +65,11 @@ function AvatarArt({ look }: { look: CharacterLook }) {
     <path d="M77 211 L99 193 L120 224 L143 193 L164 211 L151 257 L89 257Z" fill="#090807" stroke="url(#ahGoldLine)" strokeOpacity=".8" strokeWidth="1.2"/>
     <path d="M96 187 L120 223 L144 187 L137 169 L103 169Z" fill={look.skin}/>
     {longHair && <path d={look.hairStyle === "curls" ? curlPath : wavePath} fill={look.hair}/>}
-    <path d="M84 70 Q120 42 156 70 L161 133 Q155 172 120 184 Q85 172 79 133Z" fill="url(#ahSkinShade)" stroke="#8b5b47" strokeOpacity=".55" strokeWidth=".8"/>
-    <path d="M84 74 Q120 49 156 74 L160 132 Q151 166 120 178 Q89 166 80 132Z" fill="url(#ahFaceLight)"/>
+    <path d={masculine ? "M84 70 Q120 42 156 70 L160 126 Q157 158 142 173 L120 181 L98 173 Q83 158 80 126Z" : "M84 70 Q120 42 156 70 L161 133 Q155 172 120 184 Q85 172 79 133Z"} fill="url(#ahSkinShade)" stroke="#8b5b47" strokeOpacity=".55" strokeWidth=".8"/>
+    <path d={masculine ? "M84 74 Q120 49 156 74 L159 126 Q150 158 120 175 Q90 158 81 126Z" : "M84 74 Q120 49 156 74 L160 132 Q151 166 120 178 Q89 166 80 132Z"} fill="url(#ahFaceLight)"/>
     <path d="M78 111 Q69 83 79 60 M162 111 Q171 83 161 60" fill="none" stroke={look.skin} strokeWidth="9" strokeLinecap="round" opacity=".85"/>
-    <path d="M91 112 Q103 105 112 111 M128 111 Q138 105 149 112" fill="none" stroke="#2a1715" strokeWidth="2.8" strokeLinecap="round"/>
-    <path d="M91 120 Q102 115 112 120 M128 120 Q138 115 149 120" fill="none" stroke="#17100e" strokeWidth="1.8" strokeLinecap="round"/>
+    <path d={masculine ? "M90 109 Q102 104 113 108 M127 108 Q138 104 150 109" : "M91 112 Q103 105 112 111 M128 111 Q138 105 149 112"} fill="none" stroke="#2a1715" strokeWidth={masculine ? 3.8 : 2.8} strokeLinecap="round"/>
+    <path d={masculine ? "M91 119 Q102 116 112 119 M128 119 Q138 116 149 119" : "M91 120 Q102 115 112 120 M128 120 Q138 115 149 120"} fill="none" stroke="#17100e" strokeWidth="1.8" strokeLinecap="round"/>
     <ellipse cx="102" cy="120" rx="3.5" ry="2.2" fill="#17100e"/><ellipse cx="138" cy="120" rx="3.5" ry="2.2" fill="#17100e"/>
     <circle cx="103" cy="119.5" r=".8" fill="#e8d9c5"/><circle cx="139" cy="119.5" r=".8" fill="#e8d9c5"/>
     <path d="M120 122 Q116 139 113 145 Q120 149 126 145" fill="none" stroke="#7b5141" strokeOpacity=".68" strokeWidth="1.3" strokeLinecap="round"/>
