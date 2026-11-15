@@ -18,6 +18,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 24
+      - name: Dependency security report
+        run: |
+          npm audit --json > npm-audit.json || true
+          node --input-type=commonjs -e "const a=require('./npm-audit.json'); console.log(JSON.stringify({metadata:a.metadata?.vulnerabilities, packages:Object.entries(a.vulnerabilities||{}).map(([name,v])=>({name,severity:v.severity,via:v.via.map(x=>typeof x==='string'?x:x.title),fixAvailable:v.fixAvailable}))},null,2))"
       - name: Install
         run: npm install --no-package-lock --no-audit --no-fund
       - name: Check Supabase migration ledger
