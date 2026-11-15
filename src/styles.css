@@ -4167,3 +4167,18 @@ body{background:radial-gradient(ellipse at 50% -12%,rgba(126,82,38,.22),transpar
  .app .insight-tabs button{font-size:9px;padding:11px 6px}
 }
 @media(min-width:760px){.app main{padding-top:30px}.app .home-hero{min-height:560px}}
+
+.app .spotify-open{
+ display:flex;align-items:center;justify-content:space-between;gap:12px;
+ width:100%;min-height:52px;margin-top:24px;padding:0 18px;
+ border:1px solid rgba(243,212,154,.72);border-radius:999px;
+ background:linear-gradient(135deg,#f3d49a,#c89445);color:#140e07;
+ text-decoration:none;font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+ box-shadow:0 8px 24px rgba(0,0,0,.28),inset 0 1px rgba(255,255,255,.4);
+}
+.app .spotify-open span{font-weight:700;letter-spacing:.04em;text-transform:none;font-size:13px}
+.app .spotify-open strong{margin-left:auto;font-weight:700}
+.app .spotify-open:focus-visible{outline:2px solid #fff!important;outline-offset:4px}
+.app .radio-note{margin:18px 16px 24px}
+.app .radio-note>svg{color:var(--ah-gold-light)}
+.app .radio-note span{line-height:1.65}
