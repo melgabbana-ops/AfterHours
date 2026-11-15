@@ -16,9 +16,9 @@ const serviceWorker = readFileSync("public/sw.js", "utf8");
 const appSource = readFileSync("src/main.tsx", "utf8");
 const appStyles = readFileSync("src/styles.css", "utf8");
 const referencedIcons = new Set([
-  ...[...html.matchAll(/(?:href|src)="\\/(icons\\/after-hours-[a-z0-9-]+\\.(?:svg|png)|after-hours-[a-z0-9-]+\\.(?:svg|png))"/g)].map((match) => `public/${match[1]}`),
+  ...[...html.matchAll(/(?:href|src)="\/(icons\/after-hours-[a-z0-9-]+\\.(?:svg|png)|after-hours-[a-z0-9-]+\\.(?:svg|png))"/g)].map((match) => `public/${match[1]}`),
   ...(manifest.icons ?? []).map((icon) => `public${icon.src}`),
-  ...[...serviceWorker.matchAll(/"\\/(after-hours-[a-z0-9-]+\\.(?:svg|png))"/g)].map((match) => `public/${match[1]}`),
+  ...[...serviceWorker.matchAll(/"\/(after-hours-[a-z0-9-]+\\.(?:svg|png))"/g)].map((match) => `public/${match[1]}`),
 ]);
 
 const missing = [...referencedIcons].filter((path) => !existsSync(path));
