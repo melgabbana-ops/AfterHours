@@ -84,7 +84,7 @@ self.addEventListener("notificationclick", (event) => {
     for (const client of windows) {
       if ("focus" in client) {
         await client.focus();
-        if ("navigate" in client && target !== "/") await client.navigate(target);
+        if ("navigate" in client) await client.navigate(target);
         return;
       }
     }
