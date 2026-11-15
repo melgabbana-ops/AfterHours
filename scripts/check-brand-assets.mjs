@@ -24,6 +24,22 @@ const referencedIcons = new Set([
   ...[...serviceWorker.matchAll(/"\/(after-hours-[a-z0-9-]+\.(?:svg|png))"/g)].map((match) => `public/${match[1]}`),
 ]);
 
+if ((manifest.icons ?? []).some((icon) => !icon.src.endsWith(".png"))) {
+  console.error("PWA install manifest must use the validated PNG icon set for broad platform compatibility.");
+  process.exit(1);
+}
+
+if (!manifest.icons?.some((icon) => icon.sizes === "192x192" && icon.src === "/after-hours-icon-192.png")
+  || !manifest.icons?.some((icon) => icon.sizes === "512x512" && icon.src === "/after-hours-icon-512.png" && icon.purpose.includes("maskable"))) {
+  console.error("PWA manifest must include the 192px icon and maskable 512px icon.");
+  process.exit(1);
+}
+
+if (!serviceWorker.includes('const CACHE_NAME = "after-hours-v9"')) {
+  console.error("Service worker cache must be bumped when the app shell or install manifest changes.");
+  process.exit(1);
+}
+
 const missing = [...referencedIcons].filter((path) => !existsSync(path));
 if (missing.length) {
   console.error("Missing referenced brand assets:", missing.join(", "));
