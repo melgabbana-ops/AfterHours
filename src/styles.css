@@ -4441,3 +4441,9 @@ button:focus-visible,input:focus-visible{outline:2px solid #e6c487;outline-offse
 .ah-tarot-card[aria-live="polite"]{animation:ah-card-reveal .48s cubic-bezier(.2,.75,.25,1) both}
 @keyframes ah-card-reveal{from{opacity:.55;transform:translateY(8px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
 @media(prefers-reduced-motion:reduce){.ah-tarot-card[aria-live="polite"]{animation:none}}
+
+/* Compact controls for the notification drawer on narrow phone screens. */
+.notification-head-actions{display:flex;align-items:center;justify-content:flex-end;gap:10px;min-width:0}
+.notification-head-actions button{white-space:nowrap;padding:6px 2px;min-height:30px}
+.notification-head-actions button:first-child{color:var(--ah-gold-light)}
+@media(max-width:360px){.notification-head{align-items:flex-start;gap:8px}.notification-head-actions{flex-direction:column;align-items:flex-end;gap:2px}.notification-head-actions button{min-height:24px}}
