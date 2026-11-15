@@ -16,7 +16,8 @@
 - Tightened mobile layouts and safe-area spacing; added cinematic image treatments using the committed AFTER HOURS visual assets.
 - Localized Dutch navigation, mission categories, mission descriptions, Lovense emergency-stop label and PWA home-screen shortcut labels.
 - Made the three-card Tarot spread remount each draw so the staggered reveal animation replays reliably.
-- Connected horoscope shortcuts to open the astrology tab directly, and Tarot shortcuts to open Tarot directly rather than dropping users into whichever tab was last selected. The Insights tab selector now exposes selected state to assistive technology.\n- Updated the service worker to cache the current scalable 192px SVG and 512px PNG icons, use the current notification icon, and invalidate the previous app-shell cache. The brand-asset guard now checks service-worker icon references as well.
+- Connected horoscope shortcuts to open the astrology tab directly, and Tarot shortcuts to open Tarot directly rather than dropping users into whichever tab was last selected. The Insights tab selector now exposes selected state to assistive technology.
+- Updated the service worker to cache the current scalable 192px SVG and 512px PNG icons, use the current notification icon, and invalidate the previous app-shell cache. The brand-asset guard now checks service-worker icon references as well.
 
 ## Existing features reviewed in source
 - Kinky Tarot: 12 BDSM/consent-oriented reflection cards, single-card draw and three-card spread.
