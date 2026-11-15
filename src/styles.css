@@ -3875,3 +3875,26 @@ nav button.active svg{color:#e1c78f!important}
  background-image:linear-gradient(180deg,rgba(5,5,5,.08),rgba(5,5,5,.28)),url("/visuals/ah-profile-photo.jpg")!important;
  background-position:center 30%!important;background-size:cover!important;
 }
+
+
+/* Screen-specific photography for the remaining editorial moments */
+.experience-shell .round{
+ background-image:linear-gradient(180deg,rgba(5,5,5,.58),rgba(5,5,5,.94) 44%,#070706 100%),url("/visuals/ah-experience-photo.jpg")!important;
+ background-position:center top!important;background-size:100% auto!important;background-repeat:no-repeat!important;
+}
+.aftercare-card{
+ background-image:linear-gradient(180deg,rgba(7,7,6,.55),rgba(7,7,6,.94) 42%,#070706 100%),url("/visuals/ah-aftercare-photo.jpg")!important;
+ background-position:center top!important;background-size:100% auto!important;background-repeat:no-repeat!important;
+}
+.completion-card{
+ background-image:linear-gradient(180deg,rgba(7,7,6,.28),rgba(7,7,6,.9) 44%,#070706 100%),url("/visuals/ah-completion-photo.jpg")!important;
+ background-position:center top!important;background-size:100% auto!important;background-repeat:no-repeat!important;
+}
+.astro-card{
+ background-image:linear-gradient(180deg,rgba(7,7,6,.42),rgba(7,7,6,.95) 48%,#070706 100%),url("/visuals/ah-horoscope-photo.jpg")!important;
+ background-position:center top!important;background-size:100% auto!important;background-repeat:no-repeat!important;
+}
+.consent-panel{
+ background-image:linear-gradient(120deg,rgba(20,16,11,.94),rgba(7,7,6,.98)),url("/visuals/ah-experience-photo.jpg")!important;
+ background-position:center!important;background-size:cover!important;
+}
