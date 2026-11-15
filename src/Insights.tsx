@@ -74,7 +74,8 @@ const signs=[
 
 export function Insights({onBack,language="nl",profileId,initialTab="tarot"}:{onBack:()=>void;language?:"nl"|"en";profileId?:string|null;initialTab?:"tarot"|"oracle"|"astro"}){
  const t=(nl:string,en:string)=>language==="nl"?nl:en;
- const[tab,setTab]=useState<"tarot"|"oracle"|"astro">(initialTab);\n useEffect(()=>setTab(initialTab),[initialTab]);
+ const[tab,setTab]=useState<"tarot"|"oracle"|"astro">(initialTab);
+ useEffect(()=>setTab(initialTab),[initialTab]);
  const[cardIndex,setCardIndex]=useState(()=>Math.floor(Math.random()*tarot.length));
  const[oracleIndex,setOracleIndex]=useState(()=>Math.floor(Math.random()*oracle.length));
  const[spread,setSpread]=useState<number[]>([]);
