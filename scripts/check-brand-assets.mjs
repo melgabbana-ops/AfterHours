@@ -27,7 +27,7 @@ if (missing.length) {
   process.exit(1);
 }
 
-if (!html.includes('rel="apple-touch-icon"') || !html.includes("/after-hours-icon-512.png")) {
+if (!html.includes('rel="apple-touch-icon"') || !html.includes("/after-hours-icon-180.png")) {
   console.error("The iOS home-screen touch icon must reference the current 512px PNG asset.");
   process.exit(1);
 }
@@ -56,7 +56,7 @@ if (serviceWorker.includes("/after-hours-icon-192.svg")) {
   process.exit(1);
 }
 
-for (const required of ["public/after-hours-icon-192.png", "public/after-hours-brand-logo.svg"]) {
+for (const required of ["public/after-hours-icon-192.png", "public/after-hours-icon-180.png", "public/after-hours-icon-512.png", "public/after-hours-brand-logo.svg"]) {
   if (!existsSync(required)) {
     console.error("Missing PWA fallback icon:", required);
     process.exit(1);
