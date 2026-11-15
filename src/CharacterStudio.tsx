@@ -51,7 +51,7 @@ function AvatarArt({ look }: { look: CharacterLook }) {
   const shortHair = look.hairStyle === "short" || (look.gender === "male" && look.hairStyle === "sleek");
   const curlPath = "M67 112 Q43 35 91 28 Q124 5 158 31 Q197 45 174 119 L179 169 Q169 198 151 153 L88 157 Q75 199 61 176Z";
   const wavePath = "M68 106 Q47 28 95 25 Q133 5 160 35 Q194 48 174 119 L171 181 Q157 196 150 150 L85 155 Q77 194 66 176Z";
-  return <svg className="character-art" viewBox="0 0 240 300" role="img" aria-label="AFTER HOURS custom character portrait">
+  return <svg className="character-art" viewBox="0 0 240 300" role="img" aria-label={look.gender === "female" ? "AFTER HOURS feminine character portrait" : "AFTER HOURS masculine character portrait"}>
     <defs>
       <linearGradient id="ahPortraitGlow" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#9a713e" stopOpacity=".42"/><stop offset="1" stopColor="#050505" stopOpacity="0"/></linearGradient>
       <linearGradient id="ahGoldLine" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#f3d49a"/><stop offset="1" stopColor="#8e642d"/></linearGradient>
@@ -73,8 +73,9 @@ function AvatarArt({ look }: { look: CharacterLook }) {
     <ellipse cx="102" cy="120" rx="3.5" ry="2.2" fill="#17100e"/><ellipse cx="138" cy="120" rx="3.5" ry="2.2" fill="#17100e"/>
     <circle cx="103" cy="119.5" r=".8" fill="#e8d9c5"/><circle cx="139" cy="119.5" r=".8" fill="#e8d9c5"/>
     <path d="M120 122 Q116 139 113 145 Q120 149 126 145" fill="none" stroke="#7b5141" strokeOpacity=".68" strokeWidth="1.3" strokeLinecap="round"/>
-    <path d="M107 157 Q120 151 133 157 Q120 166 107 157Z" fill="#542d2b" opacity=".9"/>
-    <path d="M109 157 Q120 160 131 157" fill="none" stroke="#e2b9a4" strokeOpacity=".72" strokeWidth="1"/>
+    <path d={masculine ? "M109 158 Q120 155 131 158" : "M107 157 Q120 151 133 157 Q120 166 107 157Z"} fill="none" stroke="#542d2b" strokeWidth={masculine ? 2.2 : 1.4} strokeLinecap="round" opacity=".9"/>
+    {!masculine && <path d="M109 157 Q120 160 131 157" fill="none" stroke="#e2b9a4" strokeOpacity=".72" strokeWidth="1"/>}
+    {masculine && <path d="M91 145 Q99 170 120 174 Q141 170 149 145" fill="none" stroke="#34211c" strokeOpacity=".16" strokeWidth="5" strokeLinecap="round"/>}
     <path d="M86 145 Q95 151 103 149 M137 149 Q145 151 154 145" fill="none" stroke="#d99a7e" strokeOpacity=".28" strokeWidth="5" strokeLinecap="round"/>
     {shortHair && <path d="M78 100 Q69 38 111 31 Q153 28 162 75 L155 103 Q139 78 120 67 Q101 82 81 101Z" fill={look.hair}/>}
     {!shortHair && <path d="M79 96 Q70 50 96 31 Q123 15 151 37 Q170 54 160 98 Q140 74 120 66 Q102 81 79 96Z" fill={look.hair}/>}
