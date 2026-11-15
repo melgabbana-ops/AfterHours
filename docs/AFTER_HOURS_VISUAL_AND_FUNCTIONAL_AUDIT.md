@@ -25,9 +25,9 @@
 - Radio: opens the supplied playlist externally without rendering Spotify account identity inside AFTER HOURS.
 
 ## Verification status
-- GitHub Actions **AFTER HOURS build** passed on commit `fddc10a0d245cc1b2a5da8f1e5c7505e44d3c046`, including dependency audit, reproducible dependency install, Supabase migration ledger check, canonical brand asset check, unit tests and production build.
-- GitHub Actions **AFTER HOURS Build Watch** also passed on that commit.
-- The subsequent commits after `e18851f705ed7053bb8bc9a27107d599e11cc943` contain mission and navigation copy, PWA shortcut labels, Character Studio palette labels, a Tarot reveal replay fix and a Lovense stop-label correction. Their own workflow result has not yet been confirmed.
+- GitHub Actions **AFTER HOURS build** and **AFTER HOURS Build Watch** both passed on the latest verified code commit `8d5dd9bf18d874e4cc2d700602932c4ecf99283b`.
+- The successful run included a clean dependency audit (0 reported vulnerabilities), reproducible dependency install, Supabase migration ledger check, canonical brand asset check, all 151 unit tests and the production build.
+- An intermediate build exposed a literal escaped newline in the Tarot spread state declaration. The issue was fixed in `8d5dd9b`; the latest build and test workflows completed successfully.
 - Vercel reports a build-rate-limit / upgrade prompt. GitHub Actions is the independent build and test route; no paid Vercel upgrade, deployment action or production release was initiated.
 - No physical iPhone visual test has been performed. A successful browser build does not prove every screen has been visually verified on-device.
 - PR #97 remains a draft on the review branch. Do not merge or publish without explicit approval.
