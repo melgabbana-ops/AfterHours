@@ -2,8 +2,8 @@ self.addEventListener("message", (event) => {
   if (event.data && event.data.type === "SKIP_WAITING") self.skipWaiting();
 });
 
-const CACHE_NAME = "after-hours-v4";
-const APP_SHELL = ["/", "/manifest.webmanifest", "/after-hours-logo.svg", "/after-hours-icon-192.svg", "/after-hours-icon-512.png"];
+const CACHE_NAME = "after-hours-v5";
+const APP_SHELL = ["/", "/manifest.webmanifest", "/after-hours-brand-logo.svg", "/after-hours-icon-192.png", "/after-hours-icon-512.png"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -65,8 +65,8 @@ self.addEventListener("push", (event) => {
 
   event.waitUntil(self.registration.showNotification(title, {
     body,
-    icon: "/after-hours-icon-512.png",
-    badge: "/after-hours-icon-512.png",
+    icon: "/after-hours-icon-192.png",
+    badge: "/after-hours-icon-192.png",
     tag: typeof payload.tag === "string" ? payload.tag : "after-hours-notification",
     data: { url: target },
     renotify: false

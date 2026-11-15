@@ -24,7 +24,7 @@ if (missing.length) {
   process.exit(1);
 }
 
-for (const iconPath of ["/after-hours-icon-192.svg", "/after-hours-icon-512.png"]) {
+for (const iconPath of ["/after-hours-icon-192.png"]) {
   if (!serviceWorker.includes(iconPath)) {
     console.error("Service worker does not reference the current app icon:", iconPath);
     process.exit(1);
@@ -36,7 +36,7 @@ if (serviceWorker.includes("/after-hours-icon-192.png")) {
   process.exit(1);
 }
 
-for (const required of ["public/after-hours-icon-192.svg", "public/after-hours-icon-512.png"]) {
+for (const required of ["public/after-hours-icon-192.png", "public/after-hours-brand-logo.svg"]) {
   if (!existsSync(required)) {
     console.error("Missing PWA fallback icon:", required);
     process.exit(1);
