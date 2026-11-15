@@ -3,7 +3,7 @@ self.addEventListener("message", (event) => {
 });
 
 const CACHE_NAME = "after-hours-v5";
-const APP_SHELL = ["/", "/manifest.webmanifest", "/after-hours-brand-logo.svg", "/after-hours-icon-192.png"];
+const APP_SHELL = ["/", "/manifest.webmanifest", "/after-hours-brand-logo.svg", "/after-hours-icon-192.png", "/after-hours-icon-180.png", "/after-hours-icon-512.png"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
