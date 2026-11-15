@@ -12,7 +12,7 @@
 - Refined the Character Studio portrait and retained its customization controls: character presentation, skin tone, hair colour and style, outfit, mask, collar/chain detail and accessories. Character appearance is saved locally per profile on the device.
 - Added the supplied Spotify playlist as a branded external action. The app itself does not render Spotify profile metadata or the account avatar.
 - Replaced the earlier notification motif with an original four-note locally synthesized AFTER HOURS signature and separate message, check-in and safety variants.
-- Updated Kinky Tarot and Oracle card reveals, branded card faces and corrected localization in three-card spreads.
+- Updated Kinky Tarot and Oracle card reveals, branded card faces, corrected localization in three-card spreads and added a staggered reveal animation for the three-card layout.
 - Tightened mobile layouts and safe-area spacing; added cinematic image treatments using the committed AFTER HOURS visual assets.
 
 ## Existing features reviewed
