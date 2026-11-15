@@ -26,7 +26,7 @@ if (missing.length) {
   process.exit(1);
 }
 
-if ((appSource.match(/\/after-hours-brand-logo\\.svg/g) ?? []).length < 4 || appSource.includes("/after-hours-wordmark.svg")) {
+if ((appSource.split('"/after-hours-brand-logo.svg"').length - 1) < 4 || appSource.includes("/after-hours-wordmark.svg")) {
   console.error("The approved logo must be used in the app header, home screen and access/recovery gates.");
   process.exit(1);
 }
