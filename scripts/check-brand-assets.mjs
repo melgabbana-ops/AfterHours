@@ -23,7 +23,7 @@ if (missing.length) {
   process.exit(1);
 }
 
-for (const required of ["public/after-hours-icon-192.png", "public/after-hours-icon-512.png"]) {
+for (const required of ["public/after-hours-icon-192.svg", "public/after-hours-icon-512.png"]) {
   if (!existsSync(required)) {
     console.error("Missing PWA fallback icon:", required);
     process.exit(1);
