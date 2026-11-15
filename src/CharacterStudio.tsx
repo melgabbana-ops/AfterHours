@@ -38,7 +38,9 @@ export default function CharacterStudio({ profileId, language = "nl" }: { profil
       <div className="character-preview">
         <div className="character-portrait">
           <img src="/visuals/ah-profile-photo.jpg" alt={t("Cinematische AFTER HOURS character-portret", "Cinematic AFTER HOURS character portrait")} loading="lazy"/>
-          <span className="character-portrait-mark">♛</span>
+          <span className="character-portrait-mark">{look.accessory === "crescent" ? "☾" : look.accessory === "earring" ? "◉" : "✦"}</span>
+          {look.mask && <span className="character-mask-overlay" aria-hidden="true"/>}
+          {look.neckDetail !== "none" && <span className={"character-neck-overlay " + look.neckDetail} aria-hidden="true"/>}
           <span className="character-portrait-caption">{roleName.toUpperCase()}</span>
         </div>
         <div className="character-preview-caption"><span className="eyebrow">AFTER HOURS IDENTITY</span><strong>{roleName}</strong><small>{t("Een volwassen, stijlvolle identiteit. Je voorkeuren blijven altijd aanpasbaar.", "A mature, elegant identity. Your preferences remain yours to change.")}</small></div>
