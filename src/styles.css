@@ -3391,3 +3391,69 @@ nav button.active,.bottom-nav button.active,.app-nav button.active,.mobile-nav b
  .experience-shell>.round{padding:18px!important}
  .aftercare-card{padding:19px!important}
 }
+
+
+/* Reference fidelity pass: cinematic black lacquer and champagne, across every route. */
+:root{
+ --ah-obsidian:#050505;--ah-black:#0b0a08;--ah-aubergine:#100e0b;--ah-velvet:#17130d;
+ --ah-violet:#8d744c;--ah-amethyst:#b99a65;--ah-champagne:#c6a56b;--ah-gold:#d5b77d;
+ --ah-gold-light:#f0dfb4;--ah-ivory:#f2ede3;--ah-muted:#aaa295;
+ --ah-border:rgba(205,174,119,.25);--gold:var(--ah-gold);--gold-light:var(--ah-gold-light);
+ --muted:var(--ah-muted);--line:rgba(205,174,119,.22);--plum:#0b0a08;--plum-raised:#13110d;
+ --purple-glow:#8d744c;--magenta:#b99a65;
+}
+html,body{background:#050505!important;color:#f2ede3}
+body{background:radial-gradient(ellipse at 50% -15%,#211b11 0%,#0b0a08 34%,#050505 72%)!important}
+.app{background:radial-gradient(ellipse at 50% -10%,#1b160e 0%,#0b0a08 36%,#050505 76%)!important}
+header{background:rgba(5,5,5,.92)!important;border-bottom-color:rgba(205,174,119,.18)!important}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid #d5b77d!important;outline-offset:3px}
+.hero,.home-hero,.teaser-content,.onboarding-panel,.profile,.aftercare-card,.round,.insights-hero,.radio-hero{
+ color:#f2ede3;
+}
+.home-hero,.game-select-card,.gamecard,.tile,.consent-panel,.aftercare-card,.tarot-card,.astro-card,
+.radio-player,.radio-note,.character-studio,.onboarding-panel,.onboarding-feature,.profile .stats>div,
+.rank-ladder,.history,.auth-panel,.admin,.safety,.task-card{
+ background:linear-gradient(145deg,rgba(24,21,16,.96),rgba(8,8,7,.98))!important;
+ border:1px solid rgba(205,174,119,.25)!important;
+ box-shadow:inset 0 1px rgba(255,255,255,.035),0 18px 55px rgba(0,0,0,.24);
+}
+.hero h2,.round h2,.profile h2,.admin h2,.teaser-content h1,.onboarding-panel h1,
+.insights h2,.radio-room h2,.aftercare-card h2,.game-select-screen h1{
+ color:#f4eee3!important;text-shadow:0 8px 32px rgba(0,0,0,.4)
+}
+.eyebrow,.number,.moodboard-feature-number,.sectionhead em{color:#d5b77d!important}
+.gold,.teaser-enter,.onboarding-next,.moodboard-secondary-cta{
+ background:linear-gradient(115deg,#b18a4c,#e1c78f 48%,#a27a3d)!important;
+ color:#100d08!important;border:1px solid #e4cd9c!important;
+ box-shadow:0 8px 28px rgba(175,137,72,.18)
+}
+.gamecard button,.next,.actions .gold{border-color:#b79a65!important;color:#e4cd9c!important}
+.grid,.home-shortcuts,.moodboard-feature-grid{gap:10px}
+.tile,.moodboard-feature-card{border-color:rgba(205,174,119,.23)!important}
+.teaser-screen.moodboard-landing{background:#050505!important}
+.teaser-film{background:radial-gradient(ellipse at 50% 40%,#302719 0%,#17130d 32%,#050505 72%)!important;border-color:rgba(205,174,119,.35)!important}
+.teaser-atmosphere span,.teaser-atmosphere i{background:radial-gradient(ellipse,rgba(198,165,107,.28),transparent 70%)!important}
+.teaser-film-brand img,.teaser-logo{filter:sepia(.35) saturate(.72)}
+.teaser-divider span{background:linear-gradient(90deg,transparent,#d5b77d,transparent)!important}
+.moodboard-feature-card{background:linear-gradient(150deg,#17140f,#080807)!important}
+.moodboard-missions{background:linear-gradient(180deg,#0d0c09,#050505)!important;border-top:1px solid rgba(205,174,119,.2)}
+.tarot-card,.tarot-spread-card{border-color:rgba(205,174,119,.3)!important}
+.radio-disc{background:radial-gradient(circle,#302719,#090807 68%)!important;border-color:#b99a65!important;box-shadow:0 0 50px rgba(198,165,107,.14)!important}
+.radio-player:before,.radio-player:after{border-color:rgba(205,174,119,.2)!important}
+.character-preview{background:linear-gradient(145deg,#1b1710,#080807)!important;border:1px solid rgba(205,174,119,.25)!important}
+.character-preview-caption strong{color:#f0dfb4!important}
+.character-options button.selected,.avatar-options button.selected,.mood.active{border-color:#d5b77d!important;background:rgba(198,165,107,.1)!important}
+nav{background:rgba(5,5,5,.96)!important;border-top:1px solid rgba(205,174,119,.2)!important;backdrop-filter:blur(18px)}
+nav button.active,nav button.active svg{color:#e1c78f!important}
+.stop-controller{background:rgba(10,9,7,.96)!important;border:1px solid rgba(205,174,119,.35)!important}
+@media(max-width:430px){
+ main{padding-left:17px!important;padding-right:17px!important}
+ .teaser-screen.moodboard-landing{padding-left:17px!important;padding-right:17px!important}
+ .teaser-film{min-height:250px!important}
+ .teaser-content h1{font-size:clamp(48px,15vw,72px)!important}
+ .moodboard-feature-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .moodboard-feature-card{min-height:132px!important;padding:17px!important}
+ .radio-player{padding:22px 17px!important}
+ .character-preview{gap:12px}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}

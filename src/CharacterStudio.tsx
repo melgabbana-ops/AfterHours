@@ -25,10 +25,10 @@ const SKINS = [
 const HAIRS = [
   { label: "Midnight", color: "#21151B" }, { label: "Espresso", color: "#4A2B22" },
   { label: "Auburn", color: "#793B2B" }, { label: "Platinum", color: "#C6B5A1" },
-  { label: "Violet", color: "#5D3470" },
+  { label: "Violet", color: "#8D744C" },
 ];
 const OUTFITS = [
-  { label: "Obsidian", color: "#171019" }, { label: "Violet", color: "#32163D" },
+  { label: "Obsidian", color: "#171019" }, { label: "Violet", color: "#211C13" },
   { label: "Burgundy", color: "#451B2A" }, { label: "Gold accent", color: "#332711" },
 ];
 const HAIR_STYLES = [
@@ -50,10 +50,10 @@ function AvatarArt({ look }: { look: CharacterLook }) {
   const shortHair = look.hairStyle === "short" || (look.gender === "male" && look.hairStyle === "sleek");
   return <svg className="character-art" viewBox="0 0 240 300" role="img" aria-label="AFTER HOURS custom character portrait">
     <defs>
-      <linearGradient id="ahPortraitGlow" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#7E2C9A" stopOpacity=".55"/><stop offset="1" stopColor="#0A080D" stopOpacity="0"/></linearGradient>
+      <linearGradient id="ahPortraitGlow" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#8B744C" stopOpacity=".55"/><stop offset="1" stopColor="#050505" stopOpacity="0"/></linearGradient>
       <linearGradient id="ahGoldLine" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#F4D991"/><stop offset="1" stopColor="#8E642D"/></linearGradient>
     </defs>
-    <rect width="240" height="300" rx="14" fill="#09070B"/>
+    <rect width="240" height="300" rx="14" fill="#080807"/>
     <ellipse cx="123" cy="122" rx="94" ry="118" fill="url(#ahPortraitGlow)"/>
     <path d="M18 281 Q22 218 75 203 L96 195 L143 195 L165 203 Q220 222 222 281 Z" fill={look.outfit} stroke="#6F532A" strokeWidth="1.4"/>
     <path d="M77 211 L98 193 L120 225 L143 193 L164 211 L151 252 L91 252 Z" fill="#08070A" stroke="#C39A4C" strokeWidth="1.4"/>
@@ -66,7 +66,7 @@ function AvatarArt({ look }: { look: CharacterLook }) {
     <path d="M121 114 L117 129 L124 130" stroke="#885B49" strokeWidth="1.4" strokeLinecap="round" fill="none"/>
     <path d="M111 145 Q121 151 132 144" stroke="#633A36" strokeWidth="1.6" strokeLinecap="round" fill="none"/>
     {look.mask && <path d="M84 105 Q120 91 156 105 L150 132 Q121 145 90 132 Z" fill="#100C14" stroke="url(#ahGoldLine)" strokeWidth="1.6"/>}
-    {look.neckDetail === "collar" && <><path d="M94 185 Q120 198 147 185 L151 197 Q120 212 90 197 Z" fill="#09070B" stroke="url(#ahGoldLine)" strokeWidth="2"/><circle cx="120" cy="203" r="4" fill="#D7AE5D"/></>}
+    {look.neckDetail === "collar" && <><path d="M94 185 Q120 198 147 185 L151 197 Q120 212 90 197 Z" fill="#080807" stroke="url(#ahGoldLine)" strokeWidth="2"/><circle cx="120" cy="203" r="4" fill="#D7AE5D"/></>}
     {look.neckDetail === "chain" && <><path d="M95 185 Q120 214 145 185" stroke="url(#ahGoldLine)" strokeWidth="2" fill="none"/><circle cx="120" cy="207" r="4" fill="#D7AE5D"/></>}
     {look.neckDetail === "none" && null}
     {look.accessory === "crescent" && <path d="M154 75 A11 11 0 1 0 167 90 A9 9 0 0 1 154 75 Z" fill="#E1C17B" stroke="#6F532A" strokeWidth=".8"/>}
