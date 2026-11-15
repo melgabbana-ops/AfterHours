@@ -15,7 +15,7 @@ type CharacterLook = {
 };
 const DEFAULT_LOOK: CharacterLook = {
   gender: "female", skin: "#B97855", hair: "#21151B", hairStyle: "waves",
-  outfit: "#171019", mask: false, neckDetail: "collar", accessory: "crescent",
+  outfit: "#100e0a", mask: false, neckDetail: "collar", accessory: "crescent",
 };
 const SKINS = [
   { label: "Porcelain", color: "#F1D4C2" }, { label: "Warm", color: "#DCA889" },
@@ -28,8 +28,8 @@ const HAIRS = [
   { label: "Bronze", color: "#8D744C" },
 ];
 const OUTFITS = [
-  { label: "Obsidian", color: "#171019" }, { label: "Midnight", color: "#211C13" },
-  { label: "Burgundy", color: "#451B2A" }, { label: "Gold accent", color: "#332711" },
+  { label: "Obsidian", color: "#100e0a" }, { label: "Espresso", color: "#241b11" },
+  { label: "Warm umber", color: "#3b2a1b" }, { label: "Gold accent", color: "#332711" },
 ];
 const HAIR_STYLES = [
   { id: "waves", nl: "Golvend", en: "Waves" }, { id: "sleek", nl: "Strak", en: "Sleek" },
