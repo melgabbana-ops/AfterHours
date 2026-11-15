@@ -3898,3 +3898,17 @@ nav button.active svg{color:#e1c78f!important}
  background-image:linear-gradient(120deg,rgba(20, 16, 11,.94),rgba(7, 7, 6,.98)),url("/visuals/ah-experience-photo.jpg")!important;
  background-position:center!important;background-size:cover!important;
 }
+
+/* AFTER HOURS signature tarot artwork */
+.ah-tarot-card{position:relative;isolation:isolate;display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:1rem;width:min(100%,310px);min-height:420px;margin:1.5rem auto;padding:1.35rem 1.1rem;border:1px solid rgba(205,173,119,.8);border-radius:16px;background:radial-gradient(ellipse at 50% 42%,rgba(170,128,70,.16),transparent 58%),linear-gradient(145deg,#171512 0%,#090908 55%,#211b12 100%);box-shadow:0 22px 55px rgba(0,0,0,.42),inset 0 0 0 5px rgba(205,173,119,.08),inset 0 0 0 7px rgba(205,173,119,.12);color:#e8d4ad;text-align:center;overflow:hidden}
+.ah-tarot-card:before,.ah-tarot-card:after{content:"";position:absolute;inset:13px;border:1px solid rgba(205,173,119,.25);border-radius:9px;pointer-events:none}
+.ah-tarot-card:after{inset:22px;border-color:rgba(205,173,119,.1)}
+.ah-tarot-card__top,.ah-tarot-card__bottom{position:relative;z-index:1;font-size:.62rem;letter-spacing:.22em;color:#c8aa78}
+.ah-tarot-card__top{width:100%;display:flex;justify-content:space-between}
+.ah-tarot-card__top i{font-style:normal}
+.ah-tarot-card__sigil{position:relative;z-index:1;display:grid;place-items:center;width:180px;height:210px;border:1px solid rgba(205,173,119,.45);border-radius:50% 50% 44% 44% / 35% 35% 55% 55%;font-family:Georgia,serif;font-size:6rem;color:#e1c28e;text-shadow:0 0 28px rgba(205,173,119,.34);background:radial-gradient(ellipse,rgba(205,173,119,.1),transparent 68%)}
+.ah-tarot-card__name{position:relative;z-index:1;font-family:Georgia,'Times New Roman',serif;font-size:1.35rem;letter-spacing:.11em;text-transform:uppercase;color:#f0dfbf}
+.ah-tarot-mini{display:grid;place-items:center;gap:.35rem;min-height:105px;margin:.8rem auto;color:#d5b783}
+.ah-tarot-mini i{display:grid;place-items:center;width:74px;height:88px;border:1px solid rgba(205,173,119,.65);border-radius:8px;background:linear-gradient(145deg,#211c14,#080807);font:2.2rem Georgia,serif;font-style:normal;box-shadow:inset 0 0 0 4px rgba(205,173,119,.1)}
+.ah-tarot-mini small{font-size:.52rem;letter-spacing:.2em}
+.tarot-spread-card{border-color:rgba(205,173,119,.38)!important;background:linear-gradient(150deg,rgba(34,29,21,.98),rgba(9,9,8,.98))!important}
