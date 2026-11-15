@@ -2553,3 +2553,23 @@ body{background-color:var(--ah-obsidian)}
   .teaser-film:before{animation:none}
   :where(.app button,.admin button,.profile button){transition:none}
 }
+
+.teaser-film-motion{min-height:clamp(220px,42vw,440px);display:grid;place-items:center}
+.teaser-atmosphere{position:absolute;inset:0;overflow:hidden;isolation:isolate;background:linear-gradient(135deg,#070509,#100712 48%,#180a20)}
+.teaser-atmosphere span,.teaser-atmosphere i{position:absolute;display:block;pointer-events:none;border-radius:50%;filter:blur(28px);mix-blend-mode:screen}
+.teaser-atmosphere span{width:65%;height:85%;background:radial-gradient(ellipse,rgba(109,22,143,.30),rgba(109,22,143,0) 68%);animation:ah-cloud-one 13s ease-in-out infinite alternate}
+.teaser-atmosphere span:nth-child(1){left:-22%;top:10%}
+.teaser-atmosphere span:nth-child(2){right:-25%;top:-18%;background:radial-gradient(ellipse,rgba(142,36,183,.25),transparent 68%);animation:ah-cloud-two 17s ease-in-out infinite alternate}
+.teaser-atmosphere span:nth-child(3){left:28%;bottom:-48%;background:radial-gradient(ellipse,rgba(200,148,69,.14),transparent 68%);animation:ah-cloud-one 20s ease-in-out infinite alternate-reverse}
+.teaser-atmosphere i{width:3px;height:3px;background:#f3c96b;box-shadow:0 0 12px 3px rgba(243,201,107,.3);opacity:.65;animation:ah-dust 7s ease-in-out infinite}
+.teaser-atmosphere i:nth-of-type(1){left:22%;top:28%}
+.teaser-atmosphere i:nth-of-type(2){right:23%;bottom:25%;animation-delay:-3s}
+.teaser-film-motion .teaser-film-brand{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:28px}
+.teaser-film-motion .teaser-film-brand img{width:min(58%,250px);height:auto;object-fit:contain;filter:drop-shadow(0 0 22px rgba(215,168,79,.22))}
+.teaser-film-motion .teaser-film-brand strong{font-family:"Cinzel",serif;font-size:clamp(18px,3vw,27px);letter-spacing:.28em;color:var(--ah-gold-light)}
+.teaser-film-motion .teaser-film-brand span{font-size:9px;letter-spacing:.18em;color:#c8b8ca}
+.teaser-film-caption{position:absolute;z-index:2;bottom:22px;left:12px;right:12px;text-align:center;color:rgba(244,235,221,.58);font-size:8px;letter-spacing:.24em}
+@keyframes ah-cloud-one{from{transform:translate3d(-4%,2%,0) scale(.9)}to{transform:translate3d(8%,-5%,0) scale(1.18)}}
+@keyframes ah-cloud-two{from{transform:translate3d(5%,-4%,0) scale(1.1)}to{transform:translate3d(-8%,6%,0) scale(.88)}}
+@keyframes ah-dust{0%,100%{transform:translate3d(0,12px,0);opacity:.2}50%{transform:translate3d(12px,-16px,0);opacity:.9}}
+@media(prefers-reduced-motion:reduce){.teaser-atmosphere span,.teaser-atmosphere i{animation:none}}
