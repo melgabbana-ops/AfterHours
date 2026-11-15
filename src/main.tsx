@@ -449,7 +449,7 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
     {unreadNotifications>0&&<span>{unreadNotifications>9?"9+":unreadNotifications}</span>}
    </button>
    {notificationsOpen&&<div className="notification-panel" role="dialog" aria-label={t("Meldingen","Notifications")}>
-    <div className="notification-head"><strong>{t("MELDINGEN","NOTIFICATIONS")}</strong><div className="notification-head-actions"><button type="button" onClick={()=>void playNotificationSound("message")}>{t("Test eigen geluid","Test signature sound")}</button><button onClick={markAllNotificationsRead} disabled={!unreadNotifications}>{t("Alles gelezen","Mark all read")}</button></div></div>
+    <div className="notification-head"><strong>{t("MELDINGEN","NOTIFICATIONS")}</strong><div className="notification-head-actions"><button type="button" onClick={()=>void playNotificationSound("message")}>{t("Test eigen geluid","Test signature sound")}</button><button onClick={markAllNotificationsRead} disabled={!unreadNotifications}>{t("Alles gelezen","Mark all read")}</button></div><small className="notification-sound-note">{t("Het AFTER HOURS-geluid werkt wanneer de app actief is. iOS bepaalt het geluid van systeem- en pushmeldingen.","The AFTER HOURS sound plays while the app is active. iOS controls system and push notification sounds.")}</small></div>
     {state.notifications.length?state.notifications.slice(0,8).map(item=><button key={item.id} className={"notification-item "+(item.read?"":"unread")} onClick={()=>markNotificationRead(item.id)}><b>{item.title}</b><span>{item.body}</span></button>):<small>{t("Geen nieuwe meldingen.","No new notifications.")}</small>}
    </div>}
   </div>
