@@ -16,13 +16,19 @@ const serviceWorker = readFileSync("public/sw.js", "utf8");
 const appSource = readFileSync("src/main.tsx", "utf8");
 const appStyles = readFileSync("src/styles.css", "utf8");
 const referencedIcons = new Set([
-  ...[...html.matchAll(/\/icons\/(after-hours-[a-z0-9-]+\.svg)/g)].map((match) => `public/icons/${match[1]}`),
+  ...[...html.matchAll(/(?:href|src)="\\/(icons\\/after-hours-[a-z0-9-]+\\.(?:svg|png)|after-hours-[a-z0-9-]+\\.(?:svg|png))"/g)].map((match) => `public/${match[1]}`),
   ...(manifest.icons ?? []).map((icon) => `public${icon.src}`),
+  ...[...serviceWorker.matchAll(/"\\/(after-hours-[a-z0-9-]+\\.(?:svg|png))"/g)].map((match) => `public/${match[1]}`),
 ]);
 
 const missing = [...referencedIcons].filter((path) => !existsSync(path));
 if (missing.length) {
   console.error("Missing referenced brand assets:", missing.join(", "));
+  process.exit(1);
+}
+
+if (!html.includes('rel="apple-touch-icon"') || !html.includes("/after-hours-icon-512.png")) {
+  console.error("The iOS home-screen touch icon must reference the current 512px PNG asset.");
   process.exit(1);
 }
 
