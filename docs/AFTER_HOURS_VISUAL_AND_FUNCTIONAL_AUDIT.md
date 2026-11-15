@@ -13,8 +13,9 @@
 - Added the supplied Spotify playlist as a branded external action. The app itself does not render Spotify profile metadata or the account avatar.
 - Added an original four-note locally synthesized AFTER HOURS notification signature with separate message, check-in and safety variants.
 - Updated Kinky Tarot and Oracle card reveals, branded card faces, corrected localization in three-card spreads and added a staggered reveal animation for the three-card layout.
-- Tightened mobile layouts and safe-area spacing; added cinematic image treatments using the committed AFTER HOURS visual assets.\n- Localized Dutch navigation, mission categories, mission descriptions, Lovense emergency-stop label and PWA home-screen shortcut labels.\n- Made the three-card Tarot spread remount each draw so the staggered reveal animation replays reliably.
-- Refined Dutch navigation labels and mission copy for more natural wording.
+- Tightened mobile layouts and safe-area spacing; added cinematic image treatments using the committed AFTER HOURS visual assets.
+- Localized Dutch navigation, mission categories, mission descriptions, Lovense emergency-stop label and PWA home-screen shortcut labels.
+- Made the three-card Tarot spread remount each draw so the staggered reveal animation replays reliably.
 
 ## Existing features reviewed in source
 - Kinky Tarot: 12 BDSM/consent-oriented reflection cards, single-card draw and three-card spread.
