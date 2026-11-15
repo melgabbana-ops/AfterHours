@@ -10,20 +10,26 @@
     "standalone"
   ],
   "orientation": "any",
-  "background_color": "#080807",
-  "theme_color": "#080807",
+  "background_color": "#050505",
+  "theme_color": "#050505",
   "icons": [
     {
-      "src": "/icons/after-hours-master.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "/after-hours-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
       "purpose": "any"
+    },
+    {
+      "src": "/after-hours-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ],
   "shortcuts": [
     {
-      "name": "Experience",
-      "short_name": "Experience",
+      "name": "Ervaring",
+      "short_name": "Spelen",
       "url": "/?screen=game"
     },
     {
@@ -37,8 +43,8 @@
       "url": "/?screen=safety"
     },
     {
-      "name": "The Deck",
-      "short_name": "The Deck",
+      "name": "Het Deck",
+      "short_name": "Deck",
       "url": "/?screen=prompts"
     },
     {
@@ -47,13 +53,13 @@
       "url": "/?screen=radio"
     },
     {
-      "name": "Daily After Hours",
-      "short_name": "Daily",
+      "name": "Dagelijks ritueel",
+      "short_name": "Ritueel",
       "url": "/?screen=daily"
     },
     {
-      "name": "Insights",
-      "short_name": "Insights",
+      "name": "Inzichten",
+      "short_name": "Inzichten",
       "url": "/?screen=insights"
     }
   ]

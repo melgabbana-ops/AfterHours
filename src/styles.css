@@ -3914,116 +3914,536 @@ nav button.active svg{color:#e1c78f!important}
 .tarot-spread-card{border-color:rgba(205,173,119,.38)!important;background:linear-gradient(150deg,rgba(34,29,21,.98),rgba(9,9,8,.98))!important}
 
 
-/* AFTER HOURS — approved aubergine/violet/gold palette lock.
-   Final shared presentation layer: keeps existing component behavior intact. */
+/* AFTER HOURS — CINEMATIC BLACK & CHAMPAGNE DESIGN LOCK.
+   This final layer follows the approved reference screens: no purple UI. */
 :root{
-  --ah-obsidian:#070509;
-  --ah-black:#100712;
-  --ah-night:#100712;
-  --ah-aubergine:#180A20;
-  --ah-plum:#180A20;
-  --ah-plum-raised:#291033;
-  --ah-velvet:#291033;
-  --ah-violet:#6D168F;
-  --ah-violet-bright:#8E24B7;
-  --ah-amethyst:#8E24B7;
-  --ah-champagne:#C89445;
-  --ah-gold:#D7A84F;
-  --ah-gold-light:#F3C96B;
-  --ah-champagne-light:#F3C96B;
-  --ah-ivory:#F4EBDD;
-  --ah-copy:#D9CFD9;
-  --ah-muted:#B8AEBB;
-  --ah-border:rgba(200,148,69,.24);
-  --ah-gold-line:rgba(200,148,69,.32);
-  --ah-hairline:rgba(200,148,69,.24);
-  --ah-danger:#E45B66;
-  --gold:var(--ah-gold);
-  --gold-light:var(--ah-gold-light);
-  --muted:var(--ah-muted);
-  --line:var(--ah-border);
-  --plum:var(--ah-black);
-  --plum-raised:var(--ah-aubergine);
-  --purple-glow:var(--ah-violet);
-  --magenta:var(--ah-amethyst);
-  --stop:var(--ah-danger);
+ --ah-obsidian:#050505;--ah-black:#090807;--ah-night:#090807;
+ --ah-aubergine:#100d0a;--ah-plum:#100d0a;--ah-plum-raised:#17120c;
+ --ah-velvet:#20170e;--ah-violet:#8f6738;--ah-violet-bright:#bd9258;
+ --ah-amethyst:#bd9258;--ah-champagne:#c89445;--ah-gold:#d7a84f;
+ --ah-gold-light:#f3d49a;--ah-champagne-light:#f3d49a;
+ --ah-ivory:#f4ebdd;--ah-copy:#e5d8c4;--ah-muted:#b9ad9d;
+ --ah-border:rgba(200,148,69,.28);--ah-gold-line:rgba(200,148,69,.32);
+ --ah-hairline:rgba(200,148,69,.24);--ah-danger:#b84b50;
+ --gold:var(--ah-gold);--gold-light:var(--ah-gold-light);--muted:var(--ah-muted);
+ --line:var(--ah-border);--plum:var(--ah-black);--plum-raised:var(--ah-aubergine);
+ --purple-glow:#8f6738;--magenta:#bd9258;--stop:var(--ah-danger);
 }
-html,body{background:var(--ah-obsidian)!important;color:var(--ah-ivory)}
-body{background-image:radial-gradient(ellipse at 50% -12%,rgba(109,22,143,.26),transparent 42%),linear-gradient(180deg,#100712 0%,#070509 68%)!important}
-.app{
- background:radial-gradient(ellipse at 50% -14%,rgba(109,22,143,.28),transparent 43%),radial-gradient(ellipse at 100% 42%,rgba(142,36,183,.08),transparent 32%),linear-gradient(180deg,#100712 0%,#070509 68%)!important;
- color:var(--ah-ivory)!important;
-}
-.app>header,.app header,.app nav{
- background:rgba(7,5,9,.94)!important;
- border-color:rgba(200,148,69,.2)!important;
-}
-.app .hero h2,.app .round h2,.app .profile h2,.app .admin h2,
-.app .insights-hero h2,.app .tarot-card h3,.app .astro-card h3,
-.app .guide-card h2,.app .completion-card h2{
- color:var(--ah-ivory);
-}
-.app .eyebrow,.app .number,.app .sectionhead em{color:var(--ah-gold)!important}
-.app .tile,.app .gamecard,.app .task-card,.app .consent-panel,
-.app .auth-panel,.app .resume-panel,.app .support-card,.app .guide-card,
-.app .radio-player,.app .tarot-card,.app .tarot-spread-card,
-.app .astro-card,.app .astro-daily,.app .mission-card,.app .media-item,
-.app .media-capture,.app .media-upload,.app .character-preview,
-.app .profile-card,.app .aftercare-card,.app .onboarding-panel,
-.app .onboarding-feature,.app .safety-plan,.app .legal-document,
-.app .completion-card,.app .experience-choice,.app .game-select-card{
+html,body{background:#050505!important;color:var(--ah-ivory)}
+body{background:radial-gradient(ellipse at 50% -12%,rgba(126,82,38,.22),transparent 44%),#050505!important}
+.app{background:radial-gradient(ellipse at 50% -14%,rgba(126,82,38,.2),transparent 43%),linear-gradient(180deg,#100d0a 0%,#050505 68%)!important;color:var(--ah-ivory)!important}
+.app header,.app>header,.app nav{background:rgba(5,5,5,.94)!important;border-color:rgba(200,148,69,.24)!important}
+.app .hero h2,.app .round h2,.app .profile h2,.app .admin h2,.app .insights-hero h2,
+.app .tarot-card h3,.app .astro-card h3,.app .guide-card h2,.app .completion-card h2{color:#f4ebdd}
+.app .eyebrow,.app .number,.app .sectionhead em{color:var(--ah-gold-light)!important}
+.app .tile,.app .gamecard,.app .task-card,.app .consent-panel,.app .auth-panel,
+.app .resume-panel,.app .support-card,.app .guide-card,.app .radio-player,
+.app .tarot-card,.app .tarot-spread-card,.app .astro-card,.app .astro-daily,
+.app .mission-card,.app .media-item,.app .media-capture,.app .media-upload,
+.app .character-preview,.app .profile-card,.app .aftercare-card,.app .onboarding-panel,
+.app .onboarding-feature,.app .safety-plan,.app .legal-document,.app .completion-card,
+.app .experience-choice,.app .game-select-card{
  border-color:var(--ah-border)!important;
- background:linear-gradient(145deg,rgba(41,16,51,.88),rgba(16,7,18,.97))!important;
+ background:linear-gradient(145deg,rgba(31,23,14,.94),rgba(8,7,6,.98))!important;
  color:var(--ah-ivory)!important;
- box-shadow:inset 0 1px rgba(243,201,107,.035),0 14px 38px rgba(0,0,0,.28)!important;
+ box-shadow:inset 0 1px rgba(243,212,154,.04),0 16px 42px rgba(0,0,0,.34)!important;
 }
-.app .tile small,.app .gamecard p,.app .hero p,.app .round>p,
-.app .tarot-card>p,.app .astro-card p,.app .guide-card p,
-.app .experience-choice small{color:var(--ah-muted)!important}
-.app .insight-tabs button,.app .insight-actions button,
-.app .mission-tabs button,.app .onboarding-tabs button,
-.app .astro-card select,.app .astro-date,.app .task-card button{
- border-color:rgba(200,148,69,.28)!important;
- background:rgba(16,7,18,.92)!important;
- color:var(--ah-copy)!important;
+.app .tile small,.app .gamecard p,.app .hero p,.app .round>p,.app .tarot-card>p,
+.app .astro-card p,.app .guide-card p,.app .experience-choice small{color:var(--ah-muted)!important}
+.app .insight-tabs button,.app .insight-actions button,.app .mission-tabs button,
+.app .onboarding-tabs button,.app .astro-card select,.app .astro-date,.app .task-card button{
+ border-color:rgba(200,148,69,.3)!important;background:rgba(8,7,6,.94)!important;color:var(--ah-copy)!important;
 }
 .app .insight-tabs button.active,.app .insight-tabs button[aria-selected=true],
-.app .mission-tabs button.active,.app .onboarding-tabs button.active,
-.app .task-card button.selected{
+.app .mission-tabs button.active,.app .onboarding-tabs button.active,.app .task-card button.selected{
  border-color:var(--ah-gold)!important;
- background:linear-gradient(135deg,rgba(109,22,143,.42),rgba(41,16,51,.96))!important;
+ background:linear-gradient(135deg,rgba(120,83,40,.38),rgba(20,15,10,.98))!important;
  color:var(--ah-gold-light)!important;
 }
 .app button.gold,.app .gold,.app button.home-start,.app .completion-primary{
- background:linear-gradient(135deg,#F3C96B,#C89445)!important;
- border-color:#F3C96B!important;
- color:#180A20!important;
+ background:linear-gradient(135deg,#f3d49a,#c89445)!important;border-color:#f3d49a!important;color:#160f08!important;
 }
-.app button.stop,.app .danger-action,.app button[aria-label*="Stop"]{
- border-color:rgba(228,91,102,.58)!important;
- color:#F08A91!important;
+.app button.stop,.app .danger-action,.app button[aria-label*="Stop"]{border-color:rgba(184,75,80,.65)!important;color:#ef9b9b!important}
+.app input,.app textarea,.app select{background:#090807!important;border-color:rgba(200,148,69,.3)!important;color:var(--ah-ivory)!important}
+.app :focus-visible{outline:2px solid var(--ah-gold-light)!important;outline-offset:3px!important}
+.app .home-hero{
+ position:relative;isolation:isolate;overflow:hidden;
+ background-image:linear-gradient(180deg,rgba(5,5,5,.06) 0%,rgba(5,5,5,.2) 34%,#050505 96%),url("/visuals/ah-cinematic-hero.jpg")!important;
+ background-size:cover!important;background-position:center 27%!important;
+ border-bottom-color:rgba(225,179,98,.28)!important;
 }
-.app input,.app textarea,.app select{
- background:#100712!important;
- border-color:rgba(200,148,69,.3)!important;
- color:var(--ah-ivory)!important;
+.app .home-hero:before{background:linear-gradient(90deg,rgba(5,5,5,.68),rgba(5,5,5,.06) 72%),linear-gradient(0deg,#050505 0%,transparent 60%)!important}
+.app .home-wordmark{filter:drop-shadow(0 2px 22px rgba(0,0,0,.8)) drop-shadow(0 0 14px rgba(215,168,79,.2))}
+.app .game-select-grid{gap:12px}
+.app .experience-choice{min-height:250px;border-radius:16px;display:flex;flex-direction:column;justify-content:flex-end;gap:12px}
+.app .experience-choice .choice-symbol{font-size:2rem;color:var(--ah-gold-light)}
+.app .character-studio{border:1px solid var(--ah-border)!important;border-radius:18px!important;background:linear-gradient(145deg,#17120c,#070605)!important}
+.app .character-preview{background:rgba(5,5,5,.65)!important}
+.app .character-portrait{position:relative;overflow:hidden;min-height:310px;border:1px solid rgba(215,168,79,.56);border-radius:14px;background:#050505}
+.app .character-portrait img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 25%;filter:saturate(.78) contrast(1.06)}
+.app .character-portrait:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.72));pointer-events:none}
+.app .character-portrait-mark{position:absolute;z-index:1;top:14px;left:0;right:0;text-align:center;color:var(--ah-gold-light);font:1.2rem Georgia,serif;text-shadow:0 2px 12px #000}
+.app .character-portrait-caption{position:absolute;z-index:1;bottom:16px;left:14px;right:14px;text-align:center;color:#f4ebdd;font:500 1.1rem Cinzel,Georgia,serif;letter-spacing:.12em}
+.app .character-field>.eyebrow{color:var(--ah-gold-light)!important}
+.app .character-segment button{border-radius:999px!important;background:#090807!important;border-color:var(--ah-border)!important}
+.app .character-segment button.selected{background:linear-gradient(135deg,#604321,#21170c)!important;color:#f3d49a!important}
+.app .ah-tarot-card{
+ background:radial-gradient(ellipse at 50% 43%,rgba(190,145,82,.16),transparent 58%),linear-gradient(145deg,#21170e 0%,#090807 58%,#050505 100%)!important;
+ border-color:rgba(215,168,79,.78)!important;color:var(--ah-ivory)!important;
+ box-shadow:0 24px 60px rgba(0,0,0,.56),inset 0 0 0 5px rgba(215,168,79,.08),inset 0 0 0 7px rgba(215,168,79,.16)!important;
+ animation:ah-card-reveal .55s cubic-bezier(.2,.75,.25,1) both;
 }
-.app :focus-visible{
- outline:2px solid var(--ah-gold-light)!important;
- outline-offset:3px!important;
+.app .ah-tarot-card__top,.app .ah-tarot-card__bottom,.app .ah-tarot-card__name,.app .ah-tarot-card__sigil{color:var(--ah-gold-light)!important}
+.app .ah-tarot-card__sigil{border-color:rgba(215,168,79,.58)!important;text-shadow:0 0 32px rgba(215,168,79,.45)!important}
+.app .tarot-spread-card{border-radius:14px!important;min-width:0}
+.app .ah-tarot-mini i{background:radial-gradient(circle,rgba(185,137,72,.22),transparent 65%),linear-gradient(145deg,#24190e,#070605)!important;border-color:rgba(215,168,79,.68)!important}
+.app .tarot-symbol{border-color:rgba(215,168,79,.7)!important;background:radial-gradient(circle,rgba(185,137,72,.2),transparent 68%)!important;color:var(--ah-gold-light)!important}
+.app .radio-player{background-image:linear-gradient(180deg,rgba(5,5,5,.28),rgba(5,5,5,.94)),url("/visuals/ah-radio-photo.jpg")!important;background-size:cover!important;background-position:center!important}
+.app .profile-portrait{width:100%;height:100%;object-fit:cover;border-radius:50%;filter:saturate(.75)}
+.app .profile .identity-avatar{overflow:hidden}
+.app .profile .avatar-initials,.app .profile .avatar-sigil{display:none}
+.app .completion-card,.app .aftercare-card{background-image:linear-gradient(180deg,rgba(8,7,6,.52),rgba(8,7,6,.96)),url("/visuals/ah-aftercare-photo.jpg")!important;background-size:cover!important;background-position:center!important}
+.app .wordmark img{width:min(180px,44vw);height:52px;object-fit:contain}
+.app .brand-nav{padding:0;border:0;background:transparent}
+.app .home-hero{min-height:480px}
+.app .home-hero .home-start{max-width:100%;min-height:52px}
+@keyframes ah-card-reveal{from{opacity:0;transform:translateY(12px) rotateY(-9deg) scale(.97);filter:blur(3px)}to{opacity:1;transform:translateY(0) rotateY(0) scale(1);filter:blur(0)}}
+@media(max-width:560px){
+ .app .home-hero{min-height:470px;padding-top:175px!important;background-position:center 22%!important}
+ .app .character-portrait{min-height:290px}
+ .app .experience-choice{min-height:220px}
 }
+@media(prefers-reduced-motion:reduce){.app *, .app *::before, .app *::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+/* Final mobile polish: compact rhythm, safe-area spacing and no dead zones. */
+.app main{max-width:620px;padding:22px 16px calc(104px + env(safe-area-inset-bottom,0px))}
+.app .hero{padding-bottom:24px}
+.app .home-hero{margin-top:0;padding-top:190px!important}
+.app .home-shortcuts{gap:9px!important;margin-top:14px}
+.app .home-shortcuts .tile{min-height:88px;padding:14px 12px}
+.app .home-shortcuts .tile svg{margin-bottom:10px}
+.app .insights-hero{padding:24px 16px 14px}
+.app .tarot-card,.app .astro-card{margin:0 16px}
+.app .tarot-card{padding:18px 14px}
+.app .insight-footer{padding:14px 16px 22px}
+.app .radio-hero{padding:24px 16px 16px}
+.app .radio-player{margin:0 16px;padding:24px 18px;border-radius:18px}
+.app .radio-room{padding-bottom:calc(105px + env(safe-area-inset-bottom,0px))}
+.app .profile{padding:20px 0 34px}
+.app .profile>p{margin-bottom:12px}
+.app .character-studio-body{grid-template-columns:minmax(0,1fr);gap:16px}
+.app .character-preview{position:static;display:grid;grid-template-columns:minmax(125px,.9fr) minmax(0,1.1fr);align-items:center;gap:14px}
+.app .character-portrait{min-height:230px}
+.app .character-preview-caption{padding:8px}
+.app .character-options{gap:13px}
+.app .game-select-head{padding:10px 0 18px}
+.app .game-select-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.app .experience-choice{min-height:210px;padding:16px}
+.app .completion-card{padding:26px 18px}
+.app nav{padding-bottom:env(safe-area-inset-bottom,0px);height:calc(70px + env(safe-area-inset-bottom,0px))}
+.app header{padding-left:14px;padding-right:14px}
+.app .wordmark img{width:min(170px,42vw);height:48px}
+@media(max-width:390px){
+ .app main{padding-left:13px;padding-right:13px}
+ .app .game-select-grid{gap:8px}
+ .app .experience-choice{min-height:195px;padding:13px}
+ .app .character-preview{grid-template-columns:minmax(108px,.82fr) minmax(0,1.18fr);gap:10px}
+ .app .character-portrait{min-height:205px}
+ .app .insight-tabs button{font-size:9px;padding:11px 6px}
+}
+@media(min-width:760px){.app main{padding-top:30px}.app .home-hero{min-height:560px}}
+
+.app .spotify-open{
+ display:flex;align-items:center;justify-content:space-between;gap:12px;
+ width:100%;min-height:52px;margin-top:24px;padding:0 18px;
+ border:1px solid rgba(243,212,154,.72);border-radius:999px;
+ background:linear-gradient(135deg,#f3d49a,#c89445);color:#140e07;
+ text-decoration:none;font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+ box-shadow:0 8px 24px rgba(0,0,0,.28),inset 0 1px rgba(255,255,255,.4);
+}
+.app .spotify-open span{font-weight:700;letter-spacing:.04em;text-transform:none;font-size:13px}
+.app .spotify-open strong{margin-left:auto;font-weight:700}
+.app .spotify-open:focus-visible{outline:2px solid #fff!important;outline-offset:4px}
+.app .radio-note{margin:18px 16px 24px}
+.app .radio-note>svg{color:var(--ah-gold-light)}
+.app .radio-note span{line-height:1.65}
+
+.app .radio-player{background-blend-mode:normal,luminosity!important}
+.app .astro-card{background-image:linear-gradient(180deg,rgba(8,7,6,.52),rgba(8,7,6,.96)),url("/visuals/ah-horoscope-photo.jpg")!important;background-size:cover!important;background-position:center!important}
+.app .tarot-spread-card{background-image:linear-gradient(160deg,rgba(25,18,10,.76),rgba(5,5,5,.96)),url("/visuals/ah-tarot-photo.jpg")!important;background-size:cover!important;background-position:center!important}
+.app .experience-choice{background-image:linear-gradient(180deg,rgba(8,7,6,.24),rgba(8,7,6,.96)),url("/visuals/ah-experience-photo.jpg")!important;background-size:cover!important;background-position:center!important}
+
+.app .character-mask-overlay{position:absolute;z-index:1;top:39%;left:21%;width:58%;height:9%;border:1px solid rgba(243,212,154,.92);border-radius:45% 45% 30% 30%;background:linear-gradient(180deg,rgba(10,8,6,.9),rgba(10,8,6,.72));clip-path:polygon(0 12%,100% 12%,86% 100%,14% 100%);box-shadow:0 2px 14px rgba(0,0,0,.7)}
+.app .character-neck-overlay{position:absolute;z-index:1;top:69%;left:27%;width:46%;height:11%;border:2px solid rgba(215,168,79,.9);border-top:0;border-radius:0 0 50% 50%;filter:drop-shadow(0 1px 4px rgba(0,0,0,.8))}
+.app .character-neck-overlay.chain{top:67%;left:31%;width:38%;height:10%;border-color:rgba(243,212,154,.95);border-width:1px}
+.app .character-portrait-mark{font-size:1.45rem}
+
+/* Cinematic threshold: the age gate is the entrance to the AFTER HOURS world. */
+.gate{position:relative;isolation:isolate;overflow:hidden;background-image:linear-gradient(180deg,rgba(5,5,5,.34),rgba(5,5,5,.72) 45%,#050505 100%),url("/visuals/ah-cinematic-hero.jpg")!important;background-size:cover!important;background-position:center 24%!important}
+.gate:before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(ellipse at 50% 38%,rgba(174,119,54,.2),transparent 54%),linear-gradient(90deg,rgba(0,0,0,.32),transparent 50%,rgba(0,0,0,.32));pointer-events:none}
+.gate .gate-logo{width:min(76vw,330px);height:auto;filter:drop-shadow(0 4px 28px rgba(0,0,0,.85)) drop-shadow(0 0 18px rgba(215,168,79,.18))}
+.gate h1{font-family:"Cinzel",Georgia,serif;color:#f3d49a;text-shadow:0 5px 28px #000}
+.gate p{color:#e3d5c0;text-shadow:0 2px 12px #000}
+.app main{animation:ah-page-enter .42s cubic-bezier(.2,.7,.2,1) both}
+@keyframes ah-page-enter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+
+/* Three-card Kinky Tarot spread: each branded card enters in sequence. */
+.app .tarot-spread-card{animation:ah-spread-reveal .58s cubic-bezier(.2,.75,.25,1) both}
+.app .tarot-spread-card:nth-child(2){animation-delay:.11s}
+.app .tarot-spread-card:nth-child(3){animation-delay:.22s}
+@keyframes ah-spread-reveal{
+ from{opacity:0;transform:translateY(18px) rotateY(-8deg) scale(.96);filter:blur(3px)}
+ to{opacity:1;transform:translateY(0) rotateY(0) scale(1);filter:blur(0)}
+}
+@media(prefers-reduced-motion:reduce){.app .tarot-spread-card{animation:none!important}}
+
+
+/* Approved AFTER HOURS art direction: obsidian, bronze and champagne editorial luxury */
+:root{
+ --ah-obsidian:#050505;
+ --ah-black:#0b0907;
+ --ah-aubergine:#100d09;
+ --ah-velvet:#24190e;
+ --ah-violet:#8b642d;
+ --ah-amethyst:#b58a4c;
+ --ah-champagne:#d2ad70;
+ --ah-gold:#dfbd7d;
+ --ah-gold-light:#f5dfad;
+ --ah-ivory:#f4ecdf;
+ --ah-muted:#b8ad9c;
+ --ah-border:rgba(210,173,112,.28);
+}
+body{background:#030303}
+.app{
+ background:
+  radial-gradient(ellipse at 50% -12%,rgba(128,86,39,.2),transparent 43%),
+  radial-gradient(ellipse at 100% 42%,rgba(80,48,23,.09),transparent 35%),
+  linear-gradient(180deg,#090806 0%,#050505 72%);
+}
+.app>header,header:not(.onboarding-header){
+ background:rgba(5,5,5,.91);
+ border-bottom-color:rgba(210,173,112,.2);
+}
+.wordmark{font-family:"Cinzel",Georgia,serif;letter-spacing:.19em;color:#f0dfc0}
+.hero h2,.round h2,.profile h2,.admin h2,.gate h1{
+ font-family:"Cinzel",Georgia,serif;
+ color:#f1dfbd;
+ text-shadow:0 3px 24px rgba(205,157,83,.12);
+}
+.hero h2{font-style:normal;letter-spacing:.015em}
+.hero p,.round>p{color:#c1b6a5}
+.gamecard{
+ position:relative;overflow:hidden;
+ border:1px solid rgba(210,173,112,.42);
+ border-radius:13px;
+ background:
+  radial-gradient(ellipse at 90% 0%,rgba(169,119,57,.2),transparent 52%),
+  linear-gradient(135deg,rgba(31,23,15,.98),rgba(7,7,6,.98));
+ box-shadow:inset 0 1px rgba(255,239,205,.06),0 18px 44px rgba(0,0,0,.26);
+}
+.gamecard h3{color:#f0dfc0}
+.gamecard button,.next{
+ border-color:#a17a43;color:#f1d49a;border-radius:9px;
+ background:linear-gradient(145deg,rgba(111,77,37,.3),rgba(14,11,8,.8));
+}
+.tile{
+ border:1px solid rgba(210,173,112,.27);
+ border-radius:11px;
+ background:linear-gradient(145deg,rgba(28,21,14,.88),rgba(8,8,7,.94));
+ box-shadow:inset 0 1px rgba(255,239,205,.035);
+ transition:border-color .2s ease,transform .2s ease,background .2s ease;
+}
+.tile:hover{border-color:rgba(231,194,129,.62);background:linear-gradient(145deg,#261b10,#0b0907)}
+.tile svg{color:#e1bd7c}
+.tile span{color:#eee2cf}
+.gate{
+ background:
+  radial-gradient(ellipse at 50% 34%,rgba(133,87,37,.24),transparent 44%),
+  radial-gradient(ellipse at 50% 100%,rgba(76,47,24,.18),transparent 45%),
+  #040404;
+}
+.gate h1{letter-spacing:.035em}
+.mark{border-color:#9c7844;color:#f0d49c;box-shadow:0 0 28px rgba(195,144,69,.13)}
+.safety,.consent-panel,.resume-panel,.auth-panel,.rank-ladder,.mood-history{
+ border-color:rgba(210,173,112,.3);
+ background:linear-gradient(145deg,rgba(29,22,14,.9),rgba(8,8,7,.96));
+ border-radius:11px;
+}
+.profile .avatar{border-color:#b28a50;box-shadow:0 0 0 5px rgba(180,137,76,.08),0 12px 35px rgba(0,0,0,.4)}
+.xp{height:4px;border-radius:20px;background:#292117;overflow:hidden}
+.xp span{background:linear-gradient(90deg,#9a6d35,#f3d99e);box-shadow:0 0 12px rgba(226,189,114,.22)}
+.adminrow{border-color:rgba(210,173,112,.2)}
+.adminrow svg{color:#e0bd7d}
+nav{
+ background:rgba(5,5,5,.96);
+ border-top-color:rgba(210,173,112,.25);
+ box-shadow:0 -12px 35px rgba(0,0,0,.28);
+}
+nav button{font-family:"DM Sans",sans-serif;letter-spacing:.025em}
+nav button:hover,nav button:focus-visible{color:#f1d49a}
+button:focus-visible,input:focus-visible{outline:2px solid #e6c487;outline-offset:3px}
+.actions button{border-radius:8px}
+.actions .gold{background:linear-gradient(145deg,#b58a4c,#6e4c27);color:#100c07;border-color:#d8b77b;font-weight:700}
+.actions .stop{border-color:#8f3934;color:#ffb1a8;background:rgba(100,24,21,.25)}
+@media(max-width:520px){
+ .hero{padding-top:24px}
+ .gamecard{min-height:174px;padding:21px}
+ .tile{padding:17px 14px}
+ nav{gap:2px}
+ nav button{min-width:0;flex:1;font-size:7px}
+}
+@media(prefers-reduced-motion:reduce){.tile{transition:none}}
+
+
+/* Cinematic screen family: experience, radio and aftercare */
+.aftercare-screen{
+ min-height:100svh;
+ padding:calc(env(safe-area-inset-top,0px) + 28px) 18px calc(env(safe-area-inset-bottom,0px) + 34px);
+ background:
+  linear-gradient(180deg,rgba(4,4,4,.08),rgba(4,4,4,.48) 32%,#050505 82%),
+  url("/visuals/ah-cinematic-hero.jpg") center 34%/cover fixed,
+  #050505;
+}
+.aftercare-card{
+ position:relative;overflow:hidden;
+ border:1px solid rgba(218,183,122,.38);
+ border-radius:14px;
+ background:linear-gradient(145deg,rgba(27,20,13,.96),rgba(7,7,6,.98));
+ box-shadow:0 25px 80px rgba(0,0,0,.55),inset 0 1px rgba(255,238,203,.06);
+}
+.aftercare-card h2{
+ font-family:"Cinzel",Georgia,serif;
+ font-weight:500;letter-spacing:0;color:#f0dfc0;
+}
+.aftercare-card>p{color:#c2b6a4}
+.aftercare-options{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.aftercare-options button{
+ min-height:112px;padding:16px;
+ border:1px solid rgba(210,173,112,.27);
+ border-radius:10px;
+ background:linear-gradient(145deg,rgba(36,27,17,.82),rgba(8,8,7,.94));
+ color:#eee0ca;
+}
+.aftercare-options button.selected{
+ border-color:#d5ae70;
+ background:linear-gradient(145deg,rgba(111,77,37,.35),rgba(14,11,8,.94));
+ box-shadow:inset 0 0 0 1px rgba(224,190,132,.13),0 0 24px rgba(173,125,62,.1);
+}
+.aftercare-options span{color:#bcb09d}
+.aftercare-note{
+ border:1px solid rgba(210,173,112,.18);
+ border-radius:9px;
+ background:rgba(10,9,7,.72);
+ color:#bdb19e;
+}
+.radio-hero h2,.radio-player h3{font-family:"Cinzel",Georgia,serif;color:#f0dfc0;font-weight:500}
+.radio-hero p{color:#c0b5a4}
+.radio-player{
+ border-color:rgba(210,173,112,.4);
+ border-radius:13px;
+ background:
+  linear-gradient(180deg,rgba(5,5,5,.34),rgba(5,5,5,.95)),
+  url("/visuals/ah-radio-photo.jpg") center/cover,
+  #080706;
+ box-shadow:0 24px 70px rgba(0,0,0,.48),inset 0 1px rgba(255,239,205,.06);
+}
+.radio-disc{border-color:#bd9558;box-shadow:0 0 35px rgba(202,157,88,.13)}
+.spotify-open{
+ border:1px solid rgba(220,184,119,.65);
+ border-radius:9px;
+ background:linear-gradient(145deg,#b78a4e,#6f4c28);
+ color:#100c07;
+}
+.experience-card{
+ padding:18px;
+ border:1px solid rgba(210,173,112,.3);
+ border-radius:12px;
+ background:linear-gradient(150deg,rgba(29,22,14,.94),rgba(7,7,6,.98));
+ box-shadow:0 15px 40px rgba(0,0,0,.22);
+}
+.experience-card h3,.experience-play h3{color:#f0dfc0}
+.experience-card p,.experience-play p{color:#bdb19f}
+.experience-card>button,.experience-play .prompt-actions button{
+ border-color:rgba(210,173,112,.55);
+ border-radius:8px;
+ background:linear-gradient(145deg,rgba(103,72,36,.3),rgba(10,9,7,.9));
+ color:#e8c98f;
+}
+.experience-play .prompt-actions button.gold{
+ background:linear-gradient(145deg,#c49a5c,#76512c);
+ color:#100c07;
+ border-color:#e2c18a;
+}
+@media(max-width:520px){
+ .aftercare-screen{background-attachment:scroll}
+ .aftercare-card{padding:25px 17px}
+ .aftercare-options{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .aftercare-options button{min-height:100px;padding:13px}
+ .radio-player{margin:0 14px;padding:24px 17px}
+ .experience-card{padding:16px}
+}
+
+
+/* Tarot, horoscope, game selection and completion: cinematic editorial finish */
 .app .tarot-card{
- background-image:linear-gradient(180deg,rgba(16,7,18,.62),rgba(7,5,9,.94)),url("/visuals/ah-tarot-photo.jpg")!important;
+ position:relative;isolation:isolate;overflow:hidden;
+ min-height:360px;
+ border:1px solid rgba(221,184,119,.46);
+ border-radius:13px;
+ background:
+  linear-gradient(180deg,rgba(5,5,5,.28),rgba(5,5,5,.9) 62%,#050505),
+  url("/visuals/ah-tarot-photo.jpg") center 38%/cover,
+  #080706;
+ box-shadow:0 24px 65px rgba(0,0,0,.42),inset 0 1px rgba(255,239,205,.08);
+}
+.app .tarot-card h3,.app .astro-card h3{
+ font-family:"Cinzel",Georgia,serif;
+ color:#f0dfc0;
+ font-weight:500;
+ text-shadow:0 2px 20px rgba(0,0,0,.6);
+}
+.app .tarot-card>p,.app .astro-card p{color:#d0c3ae}
+.app .tarot-symbol{
+ width:88px;height:88px;
+ border:1px solid rgba(230,194,132,.72);
+ border-radius:50%;
+ color:#f1d59d;
+ background:radial-gradient(circle,rgba(185,137,72,.2),rgba(5,5,5,.22) 68%);
+ box-shadow:0 0 38px rgba(201,154,87,.13),inset 0 0 22px rgba(220,185,123,.1);
+}
+.app .tarot-prompt{
+ border:1px solid rgba(210,173,112,.24);
+ border-left:2px solid #d7b478;
+ border-radius:0 9px 9px 0;
+ background:rgba(7,7,6,.78);
+ backdrop-filter:blur(8px);
+}
+.app .tarot-prompt span{color:#d1b27a}
+.app .tarot-prompt strong{color:#eee0ca}
+.app .astro-card{
+ border:1px solid rgba(210,173,112,.38);
+ border-radius:13px;
+ background:
+  linear-gradient(180deg,rgba(5,5,5,.22),rgba(5,5,5,.91)),
+  url("/visuals/ah-horoscope-photo.jpg") center/cover,
+  #080706;
+ box-shadow:0 22px 60px rgba(0,0,0,.4);
+}
+.app .astro-card select{
+ border:1px solid rgba(210,173,112,.44);
+ border-radius:8px;
+ background:rgba(6,6,5,.88);
+ color:#f0dfc0;
+}
+.app .astro-reading{
+ border:1px solid rgba(210,173,112,.32);
+ border-radius:10px;
+ background:rgba(7,7,6,.78);
+}
+.app .astro-reading strong{color:#f0d49a}
+.app .insight-tabs button{
+ border:1px solid rgba(210,173,112,.24);
+ border-radius:8px;
+ background:rgba(15,12,8,.9);
+ color:#bdb19e;
+}
+.app .insight-tabs button.active{
+ border-color:#d5ae70;
+ background:linear-gradient(145deg,rgba(110,77,39,.38),rgba(9,8,7,.96));
+ color:#f0d49a;
+}
+.app .insight-safety{
+ border-color:rgba(210,173,112,.25);
+ border-radius:9px;
+ background:rgba(18,14,9,.86);
+ color:#bdb19e;
+}
+.app .game-select-head h2,.app .completion-card h2{
+ font-family:"Cinzel",Georgia,serif;
+ color:#f0dfc0!important;
+ font-weight:500;
+}
+.app .experience-choice{
+ border-color:rgba(210,173,112,.38)!important;
+ border-radius:12px!important;
+ background-image:
+  linear-gradient(180deg,rgba(5,5,5,.15),rgba(5,5,5,.88)),
+  url("/visuals/ah-experience-photo.jpg")!important;
  background-size:cover!important;
  background-position:center!important;
+ box-shadow:0 18px 42px rgba(0,0,0,.35),inset 0 1px rgba(255,239,205,.06);
 }
-.app .ah-tarot-card{
- background:radial-gradient(ellipse at 50% 42%,rgba(142,36,183,.2),transparent 58%),linear-gradient(145deg,#291033 0%,#100712 58%,#070509 100%)!important;
- border-color:rgba(215,168,79,.72)!important;
- color:var(--ah-ivory)!important;
+.app .experience-choice:before{background:linear-gradient(145deg,rgba(8,7,6,.12),rgba(5,5,5,.45))}
+.app .experience-choice>strong{color:#f1dfbd}
+.app .experience-choice>small{color:#d0c3ae}
+.app .choice-symbol{border-color:rgba(229,192,127,.62);color:#f1d59d;background:rgba(7,7,6,.48)}
+.app .completion-card{
+ border-color:rgba(220,183,119,.48)!important;
+ border-radius:14px!important;
+ background:
+  linear-gradient(180deg,rgba(5,5,5,.34),rgba(5,5,5,.94)),
+  url("/visuals/ah-completion-photo.jpg") center/cover!important;
+ box-shadow:0 26px 75px rgba(0,0,0,.48),inset 0 1px rgba(255,239,205,.07);
 }
-.app .ah-tarot-card__top,.app .ah-tarot-card__bottom,
-.app .ah-tarot-card__name,.app .ah-tarot-card__sigil{color:var(--ah-gold-light)!important}
-@media(prefers-reduced-motion:reduce){
- .app *, .app *::before, .app *::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}
+.app .completion-seal{border-color:#d5ae70;color:#f0d49a;box-shadow:0 0 32px rgba(203,158,88,.14)}
+@media(max-width:520px){
+ .app .tarot-card{min-height:340px;padding:22px 16px}
+ .app .astro-card{padding:22px 16px}
+ .app .experience-choice{min-height:205px}
+ .app .completion-card{padding:24px 18px!important}
 }
+
+
+/* Final polish for the approved brand lockup and character studio */
+.onboarding-header img{
+ width:min(220px,52vw);
+ max-height:78px;
+ object-position:left center;
+ filter:drop-shadow(0 0 16px rgba(207,166,99,.16));
+}
+.character-studio{
+ border-color:rgba(210,173,112,.38);
+ background:
+  radial-gradient(ellipse at 12% 0%,rgba(143,99,42,.17),transparent 52%),
+  linear-gradient(145deg,rgba(25,19,12,.97),rgba(5,5,5,.99));
+ box-shadow:0 22px 55px rgba(0,0,0,.34),inset 0 1px rgba(255,239,205,.05);
+}
+.character-art{
+ border:1px solid rgba(210,173,112,.34);
+ border-radius:12px;
+ background:
+  radial-gradient(ellipse at 50% 22%,rgba(162,112,51,.18),transparent 58%),
+  linear-gradient(180deg,#100d09,#030303);
+ box-shadow:0 18px 45px rgba(0,0,0,.42),inset 0 1px rgba(255,239,205,.05);
+}
+.character-preview-caption strong{color:#f0dfc0}
+.character-preview-caption small{color:#b8ad9c}
+.character-field>.eyebrow{color:#d0b17c}
+.character-segment button{border-color:rgba(210,173,112,.28);background:#090807;color:#d5c9b8}
+.character-segment button.selected{border-color:#d6b476;background:linear-gradient(135deg,rgba(150,103,47,.26),rgba(12,10,8,.96));color:#f2d8a5}
+.character-mask-toggle{border-color:rgba(210,173,112,.27);background:rgba(9,8,7,.85);color:#e5d7c2}
+.character-save-note{color:#b6aa98}
+@media(max-width:560px){
+ .character-preview{grid-template-columns:minmax(112px,.82fr) minmax(0,1fr)}
+ .character-art{max-height:230px}
+}
+
+
+/* Tarot and oracle consent note: visible, calm, and consistent with the brand. */
+.insight-consent-note{
+ display:flex;align-items:flex-start;gap:10px;margin:18px 0 14px;padding:13px 14px;
+ border:1px solid rgba(200,148,69,.24);border-radius:10px;
+ background:linear-gradient(145deg,rgba(30,23,14,.82),rgba(8,8,7,.92));
+ color:#c8bca9;font-size:10px;line-height:1.65;
+}
+.insight-consent-note svg{width:16px;height:16px;flex:0 0 auto;color:#d7a84f;margin-top:1px}
+.ah-tarot-card[aria-live="polite"]{animation:ah-card-reveal .48s cubic-bezier(.2,.75,.25,1) both}
+@keyframes ah-card-reveal{from{opacity:.55;transform:translateY(8px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(prefers-reduced-motion:reduce){.ah-tarot-card[aria-live="polite"]{animation:none}}
+
+/* Compact controls for the notification drawer on narrow phone screens. */
+.notification-head-actions{display:flex;align-items:center;justify-content:flex-end;gap:10px;min-width:0}
+.notification-head-actions button{white-space:nowrap;padding:6px 2px;min-height:30px}
+.notification-head-actions button:first-child{color:var(--ah-gold-light)}
+@media(max-width:360px){.notification-head{align-items:flex-start;gap:8px}.notification-head-actions{flex-direction:column;align-items:flex-end;gap:2px}.notification-head-actions button{min-height:24px}}

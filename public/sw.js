@@ -2,8 +2,8 @@ self.addEventListener("message", (event) => {
   if (event.data && event.data.type === "SKIP_WAITING") self.skipWaiting();
 });
 
-const CACHE_NAME = "after-hours-v3";
-const APP_SHELL = ["/", "/manifest.webmanifest", "/after-hours-logo.svg", "/after-hours-icon-192.png", "/after-hours-icon-512.png"];
+const CACHE_NAME = "after-hours-v10";
+const APP_SHELL = ["/", "/manifest.webmanifest", "/after-hours-brand-logo.svg", "/after-hours-icon-192.png", "/after-hours-icon-180.png", "/after-hours-icon-512.png", "/after-hours-icon-512.svg", "/icons/after-hours-master.svg"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -84,7 +84,7 @@ self.addEventListener("notificationclick", (event) => {
     for (const client of windows) {
       if ("focus" in client) {
         await client.focus();
-        if ("navigate" in client && target !== "/") await client.navigate(target);
+        if ("navigate" in client) await client.navigate(target);
         return;
       }
     }

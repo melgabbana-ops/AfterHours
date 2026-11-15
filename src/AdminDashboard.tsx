@@ -21,6 +21,7 @@ export default function AdminDashboard({language,onBack}:{language:Locale;onBack
  const[rounds,setRounds]=useState<Round[]>([]);
  const[audit,setAudit]=useState<AuditEntry[]>([]);
  const[message,setMessage]=useState("");
+ const[auditError,setAuditError]=useState(false);
  const[savingSlug,setSavingSlug]=useState<string|null>(null);
 
  useEffect(()=>{
@@ -46,6 +47,7 @@ export default function AdminDashboard({language,onBack}:{language:Locale;onBack
     setMetrics((metricResult.data??{}) as unknown as Metrics);
     setRounds((roundResult.data??[]) as unknown as Round[]);
     setAudit((auditResult.data??[]) as unknown as AuditEntry[]);
+    setAuditError(Boolean(auditResult.error));
     setStatus("ready");
    }catch{
     if(active)setStatus("setup");
@@ -63,18 +65,30 @@ export default function AdminDashboard({language,onBack}:{language:Locale;onBack
   if(!supabaseConfigured||!supabase){setMessage(t("Supabase is niet ingesteld.","Supabase is not configured."));return;}
   setSavingSlug(round.slug);setMessage("");
   try{
-   const{error}=await supabase.from("experience_rounds").update({
+   const duration=Number(round.duration_seconds);
+   if(!Number.isInteger(duration)||duration<60||duration>7200){
+    setMessage(t("De duur moet een heel aantal seconden tussen 60 en 7200 zijn.","Duration must be a whole number of seconds between 60 and 7200."));
+    return;
+   }
+   const{data:updatedRound,error}=await supabase.from("experience_rounds").update({
     title:round.title_nl,body:round.body_nl,title_nl:round.title_nl,body_nl:round.body_nl,
-    title_en:round.title_en,body_en:round.body_en,duration_seconds:Number(round.duration_seconds),active:round.active
-   }).eq("slug",round.slug);
+    title_en:round.title_en,body_en:round.body_en,duration_seconds:duration,active:round.active
+   }).eq("slug",round.slug).select("slug").maybeSingle();
    if(error)throw error;
+   if(!updatedRound)throw new Error("Geen ronde bijgewerkt. Controleer de beheerdersrechten en ronde-identificatie.");
    const[metricResult,auditResult]=await Promise.all([
     supabase.rpc("admin_dashboard_metrics"),
     supabase.from("admin_audit_log").select("id,action,metadata,created_at").order("created_at",{ascending:false}).limit(12)
    ]);
    if(metricResult.data)setMetrics(metricResult.data as unknown as Metrics);
-   if(auditResult.data)setAudit(auditResult.data as unknown as AuditEntry[]);
-   setMessage(t("Wijzigingen opgeslagen en in het auditlog vastgelegd.","Changes saved and recorded in the audit log."));
+   if(auditResult.error){
+    setAuditError(true);
+    setMessage(t("Wijzigingen opgeslagen. De server heeft de wijziging gelogd, maar de lijst kon niet worden vernieuwd.","Changes saved. The server logged the update, but the audit list could not be refreshed."));
+   }else{
+    setAudit(auditResult.data as unknown as AuditEntry[]);
+    setAuditError(false);
+    setMessage(t("Wijzigingen opgeslagen en in het auditlog vastgelegd.","Changes saved and recorded in the audit log."));
+   }
   }catch(error){
    setMessage(t("Opslaan is mislukt. Controleer de migratie en je beheerdersrechten.","Save failed. Check the migration and your admin permissions."));
   }finally{setSavingSlug(null)}
@@ -119,7 +133,7 @@ export default function AdminDashboard({language,onBack}:{language:Locale;onBack
    </section>
 
    <section className="admin-audit"><span className="eyebrow">{t("BEHEERLOG","AUDIT LOG")}</span><h2>{t("Recente wijzigingen","Recent changes")}</h2>
-    {audit.length===0?<p>{t("Nog geen beheeracties geregistreerd.","No admin actions recorded yet.")}</p>:audit.map(item=><div className="admin-audit-row" key={item.id}><div><strong>{item.action}</strong><small>{String(item.metadata?.slug??"")}</small></div><time>{new Date(item.created_at).toLocaleString(language==="nl"?"nl-NL":"en-GB")}</time></div>)}
+    {auditError?<p role="status">{t("De beheerlog kon niet worden geladen. Probeer het paneel later opnieuw te openen.","The audit log could not be loaded. Try reopening the dashboard later.")}</p>:audit.length===0?<p>{t("Nog geen beheeracties geregistreerd.","No admin actions recorded yet.")}</p>:audit.map(item=><div className="admin-audit-row" key={item.id}><div><strong>{item.action}</strong><small>{String(item.metadata?.slug??"")}</small></div><time>{new Date(item.created_at).toLocaleString(language==="nl"?"nl-NL":"en-GB")}</time></div>)}
    </section>
   </>}
  </main>;
