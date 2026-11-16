@@ -15,7 +15,7 @@ export default function UnderConstruction({ config, language: initialLanguage }:
  );
  const endTime=status.endsAtMs!==null&&status.endsAtMs>Date.now()?formatMaintenanceDate(status.endsAtMs,language):null;
  return <main className="maintenance-screen">
-  <img className="maintenance-logo" src="/after-hours-brand-logo.svg" alt="AFTER HOURS" />
+  <img className="maintenance-logo" src={`${import.meta.env.BASE_URL}after-hours-brand-logo.svg`} alt="AFTER HOURS" />
   <div className="teaser-top-actions"><span className="maintenance-eyebrow">AFTER HOURS · PRIVATE WORLD</span><button className="language-toggle" type="button" aria-label={t("Taal wijzigen","Change language")} onClick={()=>setLanguage(language==="nl"?"en":"nl")}><span className={language==="nl"?"language-active":""}>NL</span><span className="language-divider">/</span><span className={language==="en"?"language-active":""}>EN</span></button></div>
   <h1>{scheduled?t("IN","UNDER"):t("IN","UNDER")}<br/><em>{scheduled?t("ONDERHOUD","MAINTENANCE"):t("AANBOUW","CONSTRUCTION")}</em></h1>
   <h2>{scheduled?t("We zijn even bezig achter de schermen.","We're making a few things better.") : t("Iets bijzonders is onderweg.","Something worth waiting for.")}</h2>
