@@ -648,3 +648,43 @@ hr{border:0;border-top:1px solid var(--ah-line)}
 }
 .oracle-reveal h3{font-family:"Cinzel",Georgia,serif;color:#f0dfc5;letter-spacing:.08em}
 .oracle-reveal p{font-size:11px;line-height:1.7;color:#c5b69e}
+
+
+/* Final shared components and less-travelled app states. */
+.maintenance-warning{
+ width:min(100%,520px);margin:0 auto;padding:11px 18px;
+ border-bottom:1px solid rgba(201,161,106,.28);
+ background:linear-gradient(100deg,#21170e,#0d0a07);
+ color:#e8d6b7
+}
+.maintenance-warning strong,.maintenance-warning span,.maintenance-warning small{display:block}
+.maintenance-warning strong{font-family:"Cinzel",Georgia,serif;font-size:10px;letter-spacing:.07em;color:#f0d8ad}
+.maintenance-warning span{margin-top:4px;font-size:9px;line-height:1.5;color:#c7b89f}
+.maintenance-warning small{margin-top:5px;font-size:8px;color:#9e8e77}
+.game-select-screen{padding-top:25px!important}
+.game-select-screen .back{margin-top:18px}
+.completion-secondary{
+ display:flex;align-items:center;justify-content:center;width:100%;min-height:43px;margin-top:9px;
+ padding:10px 16px;border:1px solid var(--ah-border)!important;border-radius:4px!important;
+ background:#100c08!important;color:#dfc18f!important;font-family:"Cinzel",Georgia,serif!important;
+ font-size:9px!important;letter-spacing:.1em
+}
+.next{
+ display:flex;align-items:center;justify-content:center;gap:9px;width:100%;min-height:46px;margin-top:14px;
+ border:1px solid #d6b27a!important;border-radius:4px!important;
+ background:linear-gradient(180deg,#d9b77f,#a87943)!important;color:#160f08!important;
+ font-family:"Cinzel",Georgia,serif!important;font-size:10px!important;letter-spacing:.1em
+}
+.feature-loading{min-height:40vh;display:grid;place-items:center;color:#c8b99f}
+.feature-loading p{font-family:"Cinzel",Georgia,serif;font-size:11px;letter-spacing:.12em}
+.password-actions{display:grid;gap:10px;width:100%}
+.password-actions .auth-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.password-actions button{
+ min-height:42px;padding:9px 12px;border:1px solid var(--ah-border)!important;border-radius:4px!important;
+ background:#100c08!important;color:#e2c18c!important;font-size:9px!important
+}
+.password-actions .text-button{justify-self:start;min-height:30px;padding:4px 0;border:0!important;background:transparent!important;color:#bba987!important;text-decoration:underline;text-underline-offset:3px}
+@media(max-width:420px){
+ .password-actions .auth-actions{grid-template-columns:1fr}
+ .maintenance-warning{padding-left:14px;padding-right:14px}
+}
