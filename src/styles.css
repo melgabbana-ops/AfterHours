@@ -4452,3 +4452,43 @@ button:focus-visible,input:focus-visible{outline:2px solid #e6c487;outline-offse
 .notification-head-actions{flex:0 1 auto}
 .notification-sound-note{display:block;flex:1 0 100%;width:100%;color:#928879;font-size:10px;line-height:1.45;letter-spacing:0}
 @media(max-width:360px){.notification-head{flex-direction:row;flex-wrap:wrap}.notification-head>strong{align-self:center}.notification-sound-note{font-size:9px}}
+
+
+/* ANDROID + MOBILE WEBVIEW HARDENING
+   Keep touch targets, dynamic viewport, keyboard and safe-area behavior consistent. */
+html{
+ min-height:100%;
+ min-height:100dvh;
+ -webkit-text-size-adjust:100%;
+ text-size-adjust:100%;
+}
+body,#root{min-height:100%;min-height:100dvh}
+button,a,[role="button"],input,select,textarea{-webkit-tap-highlight-color:transparent}
+button,[role="button"],nav a{touch-action:manipulation}
+@supports(height:100dvh){
+ .app,.gate,.teaser-screen{min-height:100dvh}
+}
+@media(hover:none) and (pointer:coarse){
+ button,.header-tools button,nav[aria-label="Hoofdnavigatie"] button{
+  -webkit-user-select:none;user-select:none;
+ }
+ .header-tools button{min-width:44px;min-height:44px}
+ nav[aria-label="Hoofdnavigatie"] button{min-height:48px}
+ input,select,textarea{font-size:16px!important}
+}
+@media(max-width:520px){
+ html,body,#root{width:100%;overflow-x:clip}
+ .app{width:100%;min-width:0}
+ main{min-width:0}
+ .stop-controller{max-width:calc(100vw - 20px)}
+ .notification-panel{max-width:calc(100vw - 20px);max-height:min(70dvh,520px);overflow-y:auto;overscroll-behavior:contain}
+}
+@media(max-height:520px) and (orientation:landscape){
+ header{position:relative!important}
+ nav[aria-label="Hoofdnavigatie"]{backdrop-filter:blur(12px)!important}
+ .app{padding-bottom:calc(72px + env(safe-area-inset-bottom))!important}
+ .stop-controller{bottom:calc(72px + env(safe-area-inset-bottom))!important}
+}
+@media(prefers-reduced-motion:reduce){
+ *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
