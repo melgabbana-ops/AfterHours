@@ -11,7 +11,7 @@ async function collect(directory) {
   for (const entry of await readdir(directory, { withFileTypes: true })) {
     const fullPath = path.join(directory, entry.name);
     if (entry.isDirectory()) await collect(fullPath);
-    else if (entry.isFile() && /\\.tsx?$/.test(entry.name)) sourceFiles.push(fullPath);
+    else if (entry.isFile() && /\.tsx?$/.test(entry.name)) sourceFiles.push(fullPath);
   }
 }
 
@@ -21,9 +21,9 @@ const classPattern = /className=["']([^"']+)["']/g;
 for (const file of sourceFiles) {
   const source = await readFile(file, "utf8");
   for (const match of source.matchAll(classPattern)) {
-    for (const className of match[1].split(/\\s+/).filter(Boolean)) {
-      const escaped = className.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&");
-      const selector = new RegExp("\\\\." + escaped + "(?![\\\\w-])");
+    for (const className of match[1].split(/\s+/).filter(Boolean)) {
+      const escaped = className.replace(/[.*+?^\${}()|[\]\\]/g, "\\$&");
+      const selector = new RegExp("\\." + escaped + "(?![\\w-])");
       if (!selector.test(styles)) {
         const relative = path.relative(root, file);
         if (!missing.has(relative)) missing.set(relative, new Set());
