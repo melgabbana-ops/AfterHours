@@ -40,16 +40,16 @@ describe("notification sound resilience", () => {
           type: "sine",
           frequency,
           detune: audioParam(),
-          connect: () => ({ connect: () => ({}) }),
+          connect: vi.fn(function (this: { connect: ReturnType<typeof vi.fn> }) { return this; }),
           start: vi.fn(() => started.push(1)),
           stop: vi.fn(),
         };
       }
       createBiquadFilter() {
-        return { type: "lowpass", frequency: audioParam(), connect: () => ({ connect: () => ({}) }) };
+        return { type: "lowpass", frequency: audioParam(), connect: vi.fn(function (this: { connect: ReturnType<typeof vi.fn> }) { return this; }) };
       }
       createGain() {
-        return { gain: audioParam(), connect: () => ({}) };
+        return { gain: audioParam(), connect: vi.fn(function (this: { connect: ReturnType<typeof vi.fn> }) { return this; }) };
       }
     }
 
