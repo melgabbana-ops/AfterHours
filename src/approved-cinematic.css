@@ -629,3 +629,22 @@ hr{border:0;border-top:1px solid var(--ah-line)}
 .character-art{aspect-ratio:4/5;height:auto;object-fit:contain;overflow:visible}
 .character-preview{align-self:start}
 .character-options{align-self:start}
+
+
+/* Last three component hooks: photo capture, midnight player surface and oracle reveal. */
+.media-photo-capture{
+ margin:14px 0;padding:14px;border:1px solid var(--ah-line)!important;border-radius:5px!important;
+ background:linear-gradient(145deg,#17110b,#090807)!important
+}
+.media-photo-capture>button,.media-photo-capture button{
+ border:1px solid var(--ah-line)!important;border-radius:4px!important;background:#0b0907!important;color:#dfc18f!important
+}
+.mood-midnight{background-color:#080706!important}
+.oracle-reveal{
+ margin:16px auto;padding:24px 18px;max-width:420px;border:1px solid #b88c53!important;border-radius:6px!important;
+ background:radial-gradient(ellipse at 50% 0%,rgba(161,112,55,.2),transparent 55%),linear-gradient(155deg,#21170e,#090705)!important;
+ box-shadow:0 15px 42px rgba(0,0,0,.4),inset 0 0 0 4px rgba(201,161,106,.06);
+ color:#eadbc2;text-align:center
+}
+.oracle-reveal h3{font-family:"Cinzel",Georgia,serif;color:#f0dfc5;letter-spacing:.08em}
+.oracle-reveal p{font-size:11px;line-height:1.7;color:#c5b69e}
