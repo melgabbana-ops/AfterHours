@@ -20,7 +20,7 @@ const teaserSource = readFileSync("src/Teaser.tsx", "utf8");
 const onboardingSource = readFileSync("src/Onboarding.tsx", "utf8");
 const referencedIcons = new Set([
   ...[...html.matchAll(/(?:href|src)="\/(icons\/after-hours-[a-z0-9-]+\.(?:svg|png)|after-hours-[a-z0-9-]+\.(?:svg|png))"/g)].map((match) => `public/${match[1]}`),
-  ...(manifest.icons ?? []).map((icon) => `public${icon.src}`),
+  ...(manifest.icons ?? []).map((icon) => `public/${icon.src.replace(/^\.\//, "")}`),
   ...[...serviceWorker.matchAll(/"\/(after-hours-[a-z0-9-]+\.(?:svg|png))"/g)].map((match) => `public/${match[1]}`),
 ]);
 
@@ -29,13 +29,13 @@ if ((manifest.icons ?? []).some((icon) => !icon.src.endsWith(".png"))) {
   process.exit(1);
 }
 
-if (!manifest.icons?.some((icon) => icon.sizes === "192x192" && icon.src === "/after-hours-icon-192.png")
-  || !manifest.icons?.some((icon) => icon.sizes === "512x512" && icon.src === "/after-hours-icon-512.png" && icon.purpose.includes("maskable"))) {
+if (!manifest.icons?.some((icon) => icon.sizes === "192x192" && icon.src.endsWith("after-hours-icon-192.png"))
+  || !manifest.icons?.some((icon) => icon.sizes === "512x512" && icon.src.endsWith("after-hours-icon-512.png") && icon.purpose.includes("maskable"))) {
   console.error("PWA manifest must include the 192px icon and maskable 512px icon.");
   process.exit(1);
 }
 
-if (!serviceWorker.includes('const CACHE_NAME = "after-hours-v10"')) {
+if (!serviceWorker.includes('const CACHE_NAME = "after-hours-v11"')) {
   console.error("Service worker cache must be bumped when the app shell or install manifest changes.");
   process.exit(1);
 }
@@ -46,7 +46,7 @@ if (missing.length) {
   process.exit(1);
 }
 
-if (!teaserSource.includes('src="/after-hours-brand-logo.svg"') || teaserSource.includes('src="/after-hours-logo.svg"')) {
+if (!teaserSource.includes('after-hours-brand-logo.svg') || teaserSource.includes('src="/after-hours-logo.svg"')) {
   console.error("Teaser screens must use the approved full brand lockup, not the monogram app icon.");
   process.exit(1);
 }
@@ -61,12 +61,12 @@ if (!maintenanceSource.includes('src="/after-hours-brand-logo.svg"')) {
   process.exit(1);
 }
 
-if (!html.includes('rel="apple-touch-icon"') || !html.includes("/after-hours-icon-180.png")) {
+if (!html.includes('rel="apple-touch-icon"') || !html.includes("after-hours-icon-180.png")) {
   console.error("The iOS home-screen touch icon must reference the native 180px PNG asset.");
   process.exit(1);
 }
 
-if ((appSource.split('"/after-hours-brand-logo.svg"').length - 1) < 4 || appSource.includes("/after-hours-wordmark.svg")) {
+if ((appSource.split("after-hours-brand-logo.svg").length - 1) < 4 || appSource.includes("/after-hours-wordmark.svg")) {
   console.error("The approved logo must be used in the app header, home screen and access/recovery gates.");
   process.exit(1);
 }
@@ -78,7 +78,7 @@ for (const selector of [".home-wordmark", ".brand-nav", ".gate-logo"]) {
   }
 }
 
-for (const iconPath of ["/after-hours-icon-192.png", "/after-hours-brand-logo.svg"]) {
+for (const iconPath of ["after-hours-icon-192.png", "after-hours-brand-logo.svg"]) {
   if (!serviceWorker.includes(iconPath)) {
     console.error("Service worker does not reference the current app icon:", iconPath);
     process.exit(1);
