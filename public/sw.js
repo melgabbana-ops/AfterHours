@@ -65,7 +65,7 @@ self.addEventListener("push", (event) => {
   let target = asset("");
   if (requested) {
     try {
-      const candidate = new URL(requested.startsWith(BASE_PATH) ? requested : asset(requested.replace(/^\\/+/, "")), self.location.origin);
+      const candidate = new URL(requested.startsWith(BASE_PATH) ? requested : asset(requested.substring(1)), self.location.origin);
       if (candidate.origin === self.location.origin && candidate.pathname.startsWith(BASE_PATH)) target = candidate.href;
     } catch {
       // Invalid notification destinations safely fall back to the app home.
