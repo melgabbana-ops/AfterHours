@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "check:migrations": "node scripts/check-supabase-migration-ledger.mjs",
-    "check:brand": "node scripts/check-brand-assets.mjs"
+    "check:brand": "node scripts/check-brand-assets.mjs",
+    "check:cinematic": "node scripts/check-cinematic-coverage.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
