@@ -5,6 +5,30 @@ const isUuid=(value:string)=>/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0
 
 export interface RemoteRound{slug:string;title:string;body:string;durationSeconds:number}
 
+const STORY_CHAPTER_IDS = ["arrival", "test", "control", "challenge", "boundary", "night", "after-hours"] as const;
+export type StoryChapterId = (typeof STORY_CHAPTER_IDS)[number];
+
+/** Load account-owned Story Mode progress. The RPC derives the user from auth.uid(). */
+export async function loadRemoteStoryProgress(): Promise<StoryChapterId[]> {
+ if (!supabaseConfigured || !supabase) return [];
+ const { data: { user }, error: userError } = await supabase.auth.getUser();
+ if (userError || !user) return [];
+ const { data, error } = await supabase.rpc("get_story_chapter_progress");
+ if (error || !Array.isArray(data)) return [];
+ return [...new Set(data.map((row: { chapter_id?: unknown }) => row.chapter_id)
+  .filter((id: unknown): id is StoryChapterId => typeof id === "string" && (STORY_CHAPTER_IDS as readonly string[]).includes(id)))];
+}
+
+/** Idempotently sync a completed chapter to the signed-in account. */
+export async function completeRemoteStoryChapter(chapterId: string): Promise<string | null> {
+ if (!supabaseConfigured || !supabase) return "Account-sync is niet beschikbaar.";
+ if (!(STORY_CHAPTER_IDS as readonly string[]).includes(chapterId)) return "Ongeldig Story Mode-hoofdstuk.";
+ const { data: { user }, error: userError } = await supabase.auth.getUser();
+ if (userError || !user) return userError?.message ?? "Geen actieve gebruiker voor Story Mode-sync.";
+ const { error } = await supabase.rpc("complete_story_chapter", { p_chapter_id: chapterId });
+ return error?.message ?? null;
+}
+
 export async function loadRemoteRounds(language:"nl"|"en"="nl"):Promise<RemoteRound[]>{
  if(!supabaseConfigured||!supabase)return [];
  const{data,error}=await supabase.from("experience_rounds").select("slug,title_nl,body_nl,title_en,body_en,duration_seconds").eq("active",true).order("sort_order",{ascending:true});
