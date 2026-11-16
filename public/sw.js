@@ -62,7 +62,7 @@ self.addEventListener("push", (event) => {
   const title = typeof payload.title === "string" ? payload.title : "AFTER HOURS";
   const body = typeof payload.body === "string" ? payload.body : "Je hebt een nieuwe melding.";
   const requested = typeof payload.url === "string" && payload.url.startsWith("/") ? payload.url : "";
-  const target = requested.startsWith(BASE_PATH) ? requested : (requested ? asset(requested.replace(/^\\/+/, "")) : asset(""));
+  const target = requested.startsWith(BASE_PATH) ? requested : (requested ? asset(requested.replace(/^\/+/, "")) : asset(""));
   event.waitUntil(self.registration.showNotification(title, {
     body,
     icon: asset("after-hours-icon-192.png"),
