@@ -18,4 +18,44 @@ describe("notification sound resilience", () => {
 
     await expect(playNotificationSound("safety")).resolves.toBeUndefined();
   });
+
+  it.each([
+    ["message", 8],
+    ["checkin", 8],
+    ["safety", 6],
+  ] as const)("schedules the original %s signature with paired tones", async (kind, expectedOscillators) => {
+    const started: number[] = [];
+    const audioParam = () => ({
+      setValueAtTime: vi.fn(),
+      linearRampToValueAtTime: vi.fn(),
+      exponentialRampToValueAtTime: vi.fn(),
+    });
+    class TestAudioContext {
+      state = "running";
+      currentTime = 0;
+      destination = {};
+      createOscillator() {
+        const frequency = audioParam();
+        return {
+          type: "sine",
+          frequency,
+          detune: audioParam(),
+          connect: () => ({ connect: () => ({}) }),
+          start: vi.fn(() => started.push(1)),
+          stop: vi.fn(),
+        };
+      }
+      createBiquadFilter() {
+        return { type: "lowpass", frequency: audioParam(), connect: () => ({ connect: () => ({}) }) };
+      }
+      createGain() {
+        return { gain: audioParam(), connect: () => ({}) };
+      }
+    }
+
+    vi.stubGlobal("window", { AudioContext: TestAudioContext });
+
+    await expect(playNotificationSound(kind)).resolves.toBeUndefined();
+    expect(started).toHaveLength(expectedOscillators);
+  });
 });
