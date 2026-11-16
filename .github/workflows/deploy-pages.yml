@@ -29,6 +29,14 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Validate service worker syntax
         run: node --check public/sw.js
+      - name: Validate brand and public visual assets
+        run: npm run check:brand
+      - name: Validate cinematic screen styling
+        run: npm run check:cinematic
+      - name: Validate database migration ledger
+        run: npm run check:migrations
+      - name: Run application tests
+        run: npm test
       - name: Build production app
         run: npm run build
       - name: Configure GitHub Pages
