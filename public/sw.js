@@ -2,14 +2,25 @@ self.addEventListener("message", (event) => {
   if (event.data && event.data.type === "SKIP_WAITING") self.skipWaiting();
 });
 
-const CACHE_NAME = "after-hours-v10";
-const APP_SHELL = ["/", "/manifest.webmanifest", "/after-hours-brand-logo.svg", "/after-hours-icon-192.png", "/after-hours-icon-180.png", "/after-hours-icon-512.png", "/after-hours-icon-512.svg", "/icons/after-hours-master.svg"];
+const CACHE_NAME = "after-hours-v11";
+const BASE_PATH = new URL(".", self.location.href).pathname;
+const asset = (path) => `${BASE_PATH}${path}`;
+const APP_SHELL = [
+  asset(""),
+  asset("manifest.webmanifest"),
+  asset("after-hours-brand-logo.svg"),
+  asset("after-hours-icon-192.png"),
+  asset("after-hours-icon-180.png"),
+  asset("after-hours-icon-512.png"),
+  asset("after-hours-icon-512.svg"),
+  asset("icons/after-hours-master.svg")
+];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => Promise.all(APP_SHELL.map(async (asset) => {
-        try { await cache.add(asset); } catch { /* Keep install resilient if an optional asset is unavailable. */ }
+      .then((cache) => Promise.all(APP_SHELL.map(async (file) => {
+        try { await cache.add(file); } catch { /* Optional shell assets must not block installation. */ }
       })))
   );
 });
@@ -25,48 +36,37 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   const request = event.request;
   if (request.method !== "GET") return;
-
   const url = new URL(request.url);
-  if (url.origin !== self.location.origin) return;
+  if (url.origin !== self.location.origin || !url.pathname.startsWith(BASE_PATH)) return;
 
-  // Network-first keeps app updates fresh, with a cached shell as an offline fallback.
   event.respondWith((async () => {
     const cache = await caches.open(CACHE_NAME);
     try {
       const response = await fetch(request);
-      if (response && response.ok) {
-        event.waitUntil(cache.put(request, response.clone()));
-      }
+      if (response && response.ok) event.waitUntil(cache.put(request, response.clone()));
       return response;
     } catch {
       const cached = await cache.match(request);
       if (cached) return cached;
-
-      // Deep links should still open the cached single-page app when offline.
-      if (request.mode === "navigate") {
-        return (await cache.match("/")) || Response.error();
-      }
+      if (request.mode === "navigate") return (await cache.match(asset(""))) || Response.error();
       return Response.error();
     }
   })());
 });
 
-// Push is displayed only when a server sends a push event. A push provider and
-// user permission are still required; this handler does not create subscriptions.
 self.addEventListener("push", (event) => {
   let payload = {};
   try { payload = event.data ? event.data.json() : {}; } catch {
     payload = { body: event.data ? event.data.text() : "" };
   }
-
   const title = typeof payload.title === "string" ? payload.title : "AFTER HOURS";
   const body = typeof payload.body === "string" ? payload.body : "Je hebt een nieuwe melding.";
-  const target = typeof payload.url === "string" && payload.url.startsWith("/") ? payload.url : "/";
-
+  const requested = typeof payload.url === "string" && payload.url.startsWith("/") ? payload.url : "";
+  const target = requested.startsWith(BASE_PATH) ? requested : (requested ? asset(requested.replace(/^\\/+/, "")) : asset(""));
   event.waitUntil(self.registration.showNotification(title, {
     body,
-    icon: "/after-hours-icon-192.png",
-    badge: "/after-hours-icon-192.png",
+    icon: asset("after-hours-icon-192.png"),
+    badge: asset("after-hours-icon-192.png"),
     tag: typeof payload.tag === "string" ? payload.tag : "after-hours-notification",
     data: { url: target },
     renotify: false
@@ -77,8 +77,7 @@ self.addEventListener("notificationclick", (event) => {
   event.notification.close();
   const target = event.notification && event.notification.data && typeof event.notification.data.url === "string"
     ? event.notification.data.url
-    : "/";
-
+    : asset("");
   event.waitUntil((async () => {
     const windows = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
     for (const client of windows) {
