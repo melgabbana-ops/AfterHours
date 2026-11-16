@@ -69,4 +69,10 @@ describe("formatMaintenanceDate", () => {
     expect(formatMaintenanceDate(starts, "nl")).toContain("2026");
     expect(formatMaintenanceDate(starts, "en")).toContain("2026");
   });
+
+  it("returns a localized fallback for invalid and out-of-range timestamps", () => {
+    expect(formatMaintenanceDate(Number.NaN, "nl")).toBe("Onbekend");
+    expect(formatMaintenanceDate(Number.POSITIVE_INFINITY, "en")).toBe("Unknown");
+    expect(formatMaintenanceDate(Number.MAX_VALUE, "nl")).toBe("Onbekend");
+  });
 });
