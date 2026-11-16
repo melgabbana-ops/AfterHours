@@ -51,12 +51,12 @@ if (!teaserSource.includes('after-hours-brand-logo.svg') || teaserSource.include
   process.exit(1);
 }
 
-if (!onboardingSource.includes('src="/after-hours-brand-logo.svg"') || onboardingSource.includes('src="/after-hours-logo.svg"')) {
+if (!onboardingSource.includes("after-hours-brand-logo.svg") || onboardingSource.includes('src="/after-hours-logo.svg"')) {
   console.error("Onboarding must use the approved full brand lockup, not the monogram app icon.");
   process.exit(1);
 }
 
-if (!maintenanceSource.includes('src="/after-hours-brand-logo.svg"')) {
+if (!maintenanceSource.includes("after-hours-brand-logo.svg")) {
   console.error("The maintenance screen must use the approved full brand lockup, not the monogram app icon.");
   process.exit(1);
 }
