@@ -21,7 +21,7 @@ export default function Onboarding({ language = "nl", onComplete }: { language?:
   return <main className="onboarding-screen">
     <div className="onboarding-orbit" aria-hidden="true"><span/><i/><b/></div>
     <header className="onboarding-header">
-      <img src="/after-hours-brand-logo.svg" alt="AFTER HOURS"/>
+      <img src={`${import.meta.env.BASE_URL}after-hours-brand-logo.svg`} alt="AFTER HOURS"/>
       <span className="eyebrow">PRIVATE EXPERIENCE · 18+</span>
     </header>
     <div className="onboarding-stepper" aria-label={t("Stap","Step") + " " + (step + 1) + " / 4"}>
