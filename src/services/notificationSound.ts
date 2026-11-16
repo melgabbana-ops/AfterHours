@@ -73,7 +73,8 @@ export async function playNotificationSound(kind: "message" | "checkin" | "safet
   if (!context) return;
   try { if (context.state === "suspended") await context.resume(); } catch { return; }
   if (context.state !== "running") return;
-  playSignature(kind);
+  // Audio is optional: a browser/device scheduling failure must never interrupt app controls.
+  try { playSignature(kind); } catch { return; }
 }
 export function notificationAudioAvailable() {
   return typeof window !== "undefined" && ("AudioContext" in window || "webkitAudioContext" in (window as AudioWindow));
