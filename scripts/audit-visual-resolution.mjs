@@ -2,7 +2,7 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 
 const directory = "public/visuals";
-const files = readdirSync(directory).filter((name) => /\\.(jpe?g|png|webp)$/i.test(name)).sort();
+const files = readdirSync(directory).filter((name) => /\.(jpe?g|png|webp)$/i.test(name)).sort();
 
 function jpegDimensions(buffer) {
   let offset = 2;
