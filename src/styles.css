@@ -4492,3 +4492,26 @@ button,[role="button"],nav a{touch-action:manipulation}
 @media(prefers-reduced-motion:reduce){
  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
+
+
+/* Notification drawer: escape header/overflow clipping and remain reachable on short phones. */
+.notification-panel{
+ position:fixed!important;
+ top:calc(env(safe-area-inset-top,0px) + 78px)!important;
+ right:max(12px,env(safe-area-inset-right,0px))!important;
+ left:auto!important;
+ width:min(380px,calc(100vw - 24px))!important;
+ max-width:calc(100vw - 24px)!important;
+ max-height:min(70dvh,520px)!important;
+ overflow-x:hidden!important;
+ overflow-y:auto!important;
+ overscroll-behavior:contain;
+ -webkit-overflow-scrolling:touch;
+ z-index:30!important;
+}
+@media(max-width:360px){
+ .notification-panel{right:8px!important;width:calc(100vw - 16px)!important;max-width:calc(100vw - 16px)!important;padding:12px!important}
+}
+@media(max-height:520px) and (orientation:landscape){
+ .notification-panel{top:calc(env(safe-area-inset-top,0px) + 10px)!important;max-height:calc(100dvh - 20px)!important}
+}
