@@ -3,6 +3,7 @@ import { join } from "node:path";
 
 const directory = "public/visuals";
 const files = readdirSync(directory).filter((name) => /\.(jpe?g|png|webp)$/i.test(name)).sort();
+const vectorFiles = readdirSync(directory).filter((name) => /\.svg$/i.test(name)).sort();
 
 function jpegDimensions(buffer) {
   let offset = 2;
@@ -49,4 +50,11 @@ for (const name of files) {
   if (!is4k) below4k += 1;
   console.log(`${is4k ? "4K" : "BELOW_4K"} ${name}: ${size.width}x${size.height} (${(statSync(path).size / 1024).toFixed(1)} KB)`);
 }
-console.log(`Visual resolution audit: ${files.length} raster assets checked; ${below4k} below UHD 4K. SVG assets are vector-based and scale independently of pixel resolution.`);
+const expectedVectorAssets = ["ah-aftercare-photo.svg", "ah-cinematic-hero.svg", "ah-completion-photo.svg", "ah-experience-photo.svg", "ah-horoscope-photo.svg", "ah-profile-photo.svg", "ah-radio-photo.svg", "ah-tarot-photo.svg"];
+const missingVectorAssets = expectedVectorAssets.filter((name) => !vectorFiles.includes(name));
+const invalidVectorAssets = vectorFiles.filter((name) => !/<svg[^>]*width="3840"[^>]*height="2160"[^>]*viewBox="0 0 3840 2160"/.test(readFileSync(join(directory, name), "utf8")));
+if (missingVectorAssets.length || invalidVectorAssets.length) {
+  console.error("Vector artwork check failed. Missing: " + (missingVectorAssets.join(", ") || "none") + "; invalid 4K canvas: " + (invalidVectorAssets.join(", ") || "none"));
+  process.exitCode = 1;
+}
+console.log("Visual resolution audit: " + files.length + " raster assets checked; " + below4k + " below UHD 4K; " + vectorFiles.length + " vector assets checked (" + expectedVectorAssets.length + " required 4K-canvas artworks).");
