@@ -49,11 +49,12 @@ set search_path = public
 as $function$
 declare
   v_completed_at timestamptz;
+  v_already_completed boolean := false;
 begin
   if auth.uid() is null then
     raise exception 'Authentication required.' using errcode = '42501';
   end if;
-  if p_chapter_id not in ('arrival','test','control','challenge','boundary','night','after-hours') then
+  if p_chapter_id is null or p_chapter_id not in ('arrival','test','control','challenge','boundary','night','after-hours') then
     raise exception 'Unknown Story Mode chapter.' using errcode = '22023';
   end if;
 
