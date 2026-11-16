@@ -62,47 +62,36 @@ function loadLook(profileId: string): CharacterLook {
 function AvatarArt({ look }: { look: CharacterLook }) {
   const masculine = look.gender === "male";
   const longHair = look.hairStyle === "waves" || look.hairStyle === "curls";
-  const shortHair = look.hairStyle === "short" || (look.gender === "male" && look.hairStyle === "sleek");
-  const curlPath = "M67 112 Q43 35 91 28 Q124 5 158 31 Q197 45 174 119 L179 169 Q169 198 151 153 L88 157 Q75 199 61 176Z";
-  const wavePath = "M68 106 Q47 28 95 25 Q133 5 160 35 Q194 48 174 119 L171 181 Q157 196 150 150 L85 155 Q77 194 66 176Z";
-  return <svg className="character-art" viewBox="0 0 240 300" role="img" aria-label={look.gender === "female" ? "AFTER HOURS feminine character portrait" : "AFTER HOURS masculine character portrait"}>
+  const shortHair = look.hairStyle === "short" || (masculine && look.hairStyle === "sleek");
+  const hairShape = shortHair
+    ? "M62 125 C55 65 80 29 119 25 C163 21 187 60 178 125 L163 105 C151 82 133 72 119 70 C103 75 83 91 76 119Z"
+    : "M59 142 C48 72 72 23 119 20 C171 17 194 66 181 144 L176 217 C169 230 158 211 157 182 L153 123 C145 91 132 77 119 72 C101 81 86 101 82 129 L78 207 C68 222 59 202 59 142Z";
+  return <svg className="character-art" viewBox="0 0 240 300" role="img" aria-label={masculine ? "AFTER HOURS masculine character portrait" : "AFTER HOURS feminine character portrait"}>
     <defs>
-      <linearGradient id="ahPortraitGlow" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#9a713e" stopOpacity=".42"/><stop offset="1" stopColor="#050505" stopOpacity="0"/></linearGradient>
-      <linearGradient id="ahGoldLine" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#f3d49a"/><stop offset="1" stopColor="#8e642d"/></linearGradient>
-      <linearGradient id="ahVelvet" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor={look.outfit}/><stop offset="1" stopColor="#050505"/></linearGradient>
-      <linearGradient id="ahSkinShade" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#fff" stopOpacity=".16"/><stop offset=".52" stopColor={look.skin}/><stop offset="1" stopColor="#21120e" stopOpacity=".46"/></linearGradient>
-      <radialGradient id="ahFaceLight" cx="38%" cy="28%" r="78%"><stop offset="0" stopColor="#fff" stopOpacity=".18"/><stop offset="1" stopColor="#120b08" stopOpacity=".18"/></radialGradient>
+      <linearGradient id="ahPortraitBg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#302113"/><stop offset=".48" stopColor="#100c08"/><stop offset="1" stopColor="#050403"/></linearGradient>
+      <linearGradient id="ahPortraitGold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor="#f1d9ad"/><stop offset=".5" stopColor="#b58a50"/><stop offset="1" stopColor="#6f4a26"/></linearGradient>
+      <linearGradient id="ahPortraitSkin" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stopColor={look.skin}/><stop offset=".48" stopColor={look.skin}/><stop offset="1" stopColor="#20120e"/></linearGradient>
+      <linearGradient id="ahPortraitCloth" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor={look.outfit}/><stop offset="1" stopColor="#030303"/></linearGradient>
+      <radialGradient id="ahPortraitLight" cx="50%" cy="35%" r="65%"><stop offset="0" stopColor="#d5a969" stopOpacity=".22"/><stop offset="1" stopColor="#080604" stopOpacity="0"/></radialGradient>
     </defs>
-    <rect width="240" height="300" rx="14" fill="#080706"/>
-    <ellipse cx="120" cy="132" rx="104" ry="132" fill="url(#ahPortraitGlow)"/>
-    <path d="M18 284 Q22 226 70 208 L97 192 L143 192 L170 208 Q218 228 222 284Z" fill="url(#ahVelvet)" stroke="#98713c" strokeOpacity=".68" strokeWidth="1.2"/>
-    <path d="M77 211 L99 193 L120 224 L143 193 L164 211 L151 257 L89 257Z" fill="#090807" stroke="url(#ahGoldLine)" strokeOpacity=".8" strokeWidth="1.2"/>
-    <path d="M96 187 L120 223 L144 187 L137 169 L103 169Z" fill={look.skin}/>
-    {longHair && <path d={look.hairStyle === "curls" ? curlPath : wavePath} fill={look.hair}/>}
-    <path d={masculine ? "M84 70 Q120 42 156 70 L160 126 Q157 158 142 173 L120 181 L98 173 Q83 158 80 126Z" : "M84 70 Q120 42 156 70 L161 133 Q155 172 120 184 Q85 172 79 133Z"} fill="url(#ahSkinShade)" stroke="#8b5b47" strokeOpacity=".55" strokeWidth=".8"/>
-    <path d={masculine ? "M84 74 Q120 49 156 74 L159 126 Q150 158 120 175 Q90 158 81 126Z" : "M84 74 Q120 49 156 74 L160 132 Q151 166 120 178 Q89 166 80 132Z"} fill="url(#ahFaceLight)"/>
-    <path d="M78 111 Q69 83 79 60 M162 111 Q171 83 161 60" fill="none" stroke={look.skin} strokeWidth="9" strokeLinecap="round" opacity=".85"/>
-    <path d={masculine ? "M90 109 Q102 104 113 108 M127 108 Q138 104 150 109" : "M91 112 Q103 105 112 111 M128 111 Q138 105 149 112"} fill="none" stroke="#2a1715" strokeWidth={masculine ? 3.8 : 2.8} strokeLinecap="round"/>
-    <path d={masculine ? "M91 119 Q102 116 112 119 M128 119 Q138 116 149 119" : "M91 120 Q102 115 112 120 M128 120 Q138 115 149 120"} fill="none" stroke="#17100e" strokeWidth="1.8" strokeLinecap="round"/>
-    <ellipse cx="102" cy="120" rx="3.5" ry="2.2" fill="#17100e"/><ellipse cx="138" cy="120" rx="3.5" ry="2.2" fill="#17100e"/>
-    <circle cx="103" cy="119.5" r=".8" fill="#e8d9c5"/><circle cx="139" cy="119.5" r=".8" fill="#e8d9c5"/>
-    <path d="M120 122 Q116 139 113 145 Q120 149 126 145" fill="none" stroke="#7b5141" strokeOpacity=".68" strokeWidth="1.3" strokeLinecap="round"/>
-    <path d={masculine ? "M109 158 Q120 155 131 158" : "M107 157 Q120 151 133 157 Q120 166 107 157Z"} fill="none" stroke="#542d2b" strokeWidth={masculine ? 2.2 : 1.4} strokeLinecap="round" opacity=".9"/>
-    {!masculine && <path d="M109 157 Q120 160 131 157" fill="none" stroke="#e2b9a4" strokeOpacity=".72" strokeWidth="1"/>}
-    {masculine && <path d="M91 145 Q99 170 120 174 Q141 170 149 145" fill="none" stroke="#34211c" strokeOpacity=".16" strokeWidth="5" strokeLinecap="round"/>}
-    <path d="M86 145 Q95 151 103 149 M137 149 Q145 151 154 145" fill="none" stroke="#d99a7e" strokeOpacity=".28" strokeWidth="5" strokeLinecap="round"/>
-    {shortHair && <path d="M78 100 Q69 38 111 31 Q153 28 162 75 L155 103 Q139 78 120 67 Q101 82 81 101Z" fill={look.hair}/>}
-    {!shortHair && <path d="M79 96 Q70 50 96 31 Q123 15 151 37 Q170 54 160 98 Q140 74 120 66 Q102 81 79 96Z" fill={look.hair}/>}
-    {look.hairStyle === "waves" && <path d="M72 73 Q89 52 85 110 Q81 137 70 150 M167 70 Q151 54 157 110 Q162 138 173 151" fill="none" stroke="#fff" strokeOpacity=".12" strokeWidth="3"/>}
-    {look.hairStyle === "curls" && <g fill="none" stroke="#fff" strokeOpacity=".14" strokeWidth="2"><path d="M77 57q-9 9 0 18t0 18 M91 34q-9 9 0 18t0 18 M151 36q-9 9 0 18t0 18 M166 61q-9 9 0 18t0 18"/></g>}
-    {look.mask && <path d="M81 104 Q120 89 159 104 L151 137 Q120 148 89 137Z" fill="#100d09" stroke="url(#ahGoldLine)" strokeWidth="1.6"/>}
-    {look.neckDetail === "collar" && <><path d="M92 183 Q120 198 148 183 L153 197 Q120 214 87 197Z" fill="#080706" stroke="url(#ahGoldLine)" strokeWidth="2"/><circle cx="120" cy="204" r="4" fill="#d7a84f"/></>}
-    {look.neckDetail === "chain" && <><path d="M94 183 Q120 215 146 183" stroke="url(#ahGoldLine)" strokeWidth="2" fill="none"/><circle cx="120" cy="207" r="4" fill="#d7a84f"/></>}
-    {look.accessory === "crescent" && <path d="M154 74 A11 11 0 1 0 168 91 A9 9 0 0 1 154 74Z" fill="#e1c17b" stroke="#6f532a" strokeWidth=".8"/>}
-    {look.accessory === "earring" && <><circle cx="82" cy="137" r="3" fill="#d7a84f"/><path d="M82 140v8l5 5" stroke="#d7a84f" strokeWidth="1.5" fill="none"/></>}
-    {look.accessory === "sigil" && <><path d="M120 235l7 8-7 8-7-8Z" fill="none" stroke="#d7a84f" strokeWidth="1.5"/><circle cx="120" cy="243" r="15" fill="none" stroke="#8e642d" strokeWidth=".8"/></>}
-    <rect x="8" y="8" width="224" height="284" rx="10" fill="none" stroke="url(#ahGoldLine)" strokeOpacity=".62" strokeWidth="1.2"/>
-    <path d="M17 46V17h29M194 17h29v29M17 254v29h29M194 283h29v-29" fill="none" stroke="#d7a84f" strokeWidth="1.6"/>
+    <rect width="240" height="300" rx="8" fill="url(#ahPortraitBg)"/>
+    <rect width="240" height="300" rx="8" fill="url(#ahPortraitLight)"/>
+    <path d="M18 300 C22 242 47 218 83 204 L104 188 L136 188 L157 204 C193 218 218 242 222 300Z" fill="url(#ahPortraitCloth)"/>
+    <path d="M78 218 L103 194 L120 219 L137 194 L162 218 L151 300 L89 300Z" fill="#090806" stroke="url(#ahPortraitGold)" strokeOpacity=".5" strokeWidth="1"/>
+    <path d={hairShape} fill={look.hair}/>
+    {longHair && <path d={look.hairStyle==="curls"?"M62 80 C49 101 69 118 57 143 C48 165 64 185 60 211 M178 78 C193 99 173 119 185 145 C195 168 177 190 181 211":"M65 78 C52 107 70 129 61 160 C57 180 69 196 67 211 M175 78 C188 106 170 129 179 160 C183 180 171 196 173 211"} fill="none" stroke={look.hair} strokeWidth={look.hairStyle==="curls"?13:10} strokeLinecap="round"/>}
+    <path d={masculine?"M82 76 C93 56 147 56 158 76 L157 140 C155 168 139 187 120 190 C101 187 85 168 83 140Z":"M82 77 C94 56 146 56 158 77 L158 141 C155 170 139 189 120 192 C101 189 85 170 82 141Z"} fill="url(#ahPortraitSkin)"/>
+    <path d="M81 82 C91 56 146 53 159 82 C153 68 140 63 120 65 C102 65 91 72 81 93Z" fill={look.hair}/>
+    <path d="M91 124 C101 119 110 119 115 123 M125 123 C132 119 141 119 149 124" fill="none" stroke="#21120f" strokeOpacity=".72" strokeWidth="2" strokeLinecap="round"/>
+    {look.mask && <path d="M83 113 C105 105 135 105 157 113 L151 143 C132 150 108 150 89 143Z" fill="#0b0907" stroke="url(#ahPortraitGold)" strokeWidth="1.2"/>}
+    <path d="M101 188 L120 216 L139 188" fill="none" stroke="url(#ahPortraitGold)" strokeOpacity=".55" strokeWidth="1"/>
+    {look.neckDetail==="collar"&&<><path d="M88 184 C105 201 135 201 152 184 L157 201 C137 219 103 219 83 201Z" fill="#090806" stroke="url(#ahPortraitGold)" strokeWidth="1.5"/><circle cx="120" cy="211" r="3" fill="#d8b477"/></>}
+    {look.neckDetail==="chain"&&<><path d="M91 185 C108 220 132 220 149 185" fill="none" stroke="url(#ahPortraitGold)" strokeWidth="1.5"/><path d="M120 208 l4 5 -4 5 -4 -5Z" fill="#d8b477"/></>}
+    {look.accessory==="crescent"&&<path d="M159 83 A10 10 0 1 0 171 99 A8 8 0 0 1 159 83Z" fill="#dfbd83"/>}
+    {look.accessory==="earring"&&<><circle cx="82" cy="147" r="2.5" fill="#dfbd83"/><path d="M82 150v10l5 4" fill="none" stroke="#dfbd83" strokeWidth="1.2"/></>}
+    {look.accessory==="sigil"&&<><path d="M120 238l8 9-8 9-8-9Z" fill="none" stroke="url(#ahPortraitGold)" strokeWidth="1.3"/><circle cx="120" cy="247" r="15" fill="none" stroke="#9b7445" strokeWidth=".7"/></>}
+    <path d="M17 50V17H50 M190 17h33v33 M17 250v33h33 M190 283h33v-33" fill="none" stroke="url(#ahPortraitGold)" strokeOpacity=".9" strokeWidth="1.3"/>
+    <rect x="8" y="8" width="224" height="284" rx="6" fill="none" stroke="url(#ahPortraitGold)" strokeOpacity=".55" strokeWidth=".8"/>
   </svg>;
 }
 

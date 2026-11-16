@@ -59,6 +59,8 @@ jobs:
         run: npm run check:migrations
       - name: Check canonical brand assets
         run: npm run check:brand
+      - name: Check cinematic style coverage
+        run: npm run check:cinematic
       - name: Unit tests
         run: npm test
       - name: Build
