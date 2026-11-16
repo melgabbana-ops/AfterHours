@@ -63,6 +63,7 @@ begin
   returning completed_at into v_completed_at;
 
   if v_completed_at is null then
+    v_already_completed := true;
     select p.completed_at into v_completed_at
     from public.story_chapter_progress p
     where p.user_id = auth.uid() and p.chapter_id = p_chapter_id;
@@ -71,7 +72,7 @@ begin
   return jsonb_build_object(
     'chapter_id', p_chapter_id,
     'completed_at', v_completed_at,
-    'already_completed', not found
+    'already_completed', v_already_completed
   );
 end;
 $function$;
