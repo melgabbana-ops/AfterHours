@@ -164,6 +164,7 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
  useEffect(()=>{setDisplayNameDraft(state.profile.displayName);setUsernameDraft(state.profile.username)},[state.profile.displayName,state.profile.username]);
  const[selectedTask,setSelectedTask]=useState<string|null>(null);
  const[notificationsOpen,setNotificationsOpen]=useState(false);
+ useEffect(()=>{if(!notificationsOpen)return;const closeOnEscape=(event:KeyboardEvent)=>{if(event.key==="Escape")setNotificationsOpen(false)};window.addEventListener("keydown",closeOnEscape);return()=>window.removeEventListener("keydown",closeOnEscape)},[notificationsOpen]);
  const[guideIndex,setGuideIndex]=useState(()=>Math.floor(Math.random()*guidePrompts.length));
  const hydrateGeneration=useRef(0);
  useEffect(()=>{let active=true;
@@ -445,11 +446,11 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
  {screen==="home"&&<main>  {authReady&&(!supabaseConfigured||!syncUserId)&&<section className="consent-panel" role="status"><Lock/><div><strong>{supabaseConfigured?t("Niet ingelogd","Not signed in"):t("Lokale demo-modus","Local demo mode")}</strong><span>{supabaseConfigured?t("Je kunt de experience bekijken, maar log in voordat je begint om sessievoortgang en XP aan je account te koppelen.","You can preview the experience, but sign in before starting to link session progress and XP to your account."):t("De Supabase-backend is niet ingesteld. Voortgang blijft lokaal op dit apparaat; sessies kunnen niet server-side worden afgerond en leveren geen opgeslagen XP op.","The Supabase backend is not configured. Progress stays on this device; sessions cannot be completed server-side and XP will not be saved.")}</span></div>{supabaseConfigured&&!syncUserId&&<button onClick={()=>setScreen("admin")}>{t("Inloggen","Sign in")}</button>}</section>}
   <MoodCheckIn phase="before" language={language} selected={moodBefore} onSelect={mood=>handleMoodChoice("before",mood)}/>
   <div className="notification-bar">
-   <button className="notification-button" aria-label={unreadNotifications?unreadNotifications+" "+t("ongelezen meldingen","unread notifications"):t("Meldingen","Notifications")} aria-expanded={notificationsOpen} onClick={()=>setNotificationsOpen(open=>!open)}>
+   <button className="notification-button" aria-label={unreadNotifications?unreadNotifications+" "+t("ongelezen meldingen","unread notifications"):t("Meldingen","Notifications")} aria-expanded={notificationsOpen} aria-controls="after-hours-notifications" onClick={()=>setNotificationsOpen(open=>!open)}>
     <Bell size={16}/>
     {unreadNotifications>0&&<span>{unreadNotifications>9?"9+":unreadNotifications}</span>}
    </button>
-   {notificationsOpen&&<div className="notification-panel" role="dialog" aria-label={t("Meldingen","Notifications")}>
+   {notificationsOpen&&<div id="after-hours-notifications" className="notification-panel" role="dialog" aria-label={t("Meldingen","Notifications")}>
     <div className="notification-head"><strong>{t("MELDINGEN","NOTIFICATIONS")}</strong><div className="notification-head-actions"><button type="button" onClick={()=>void playNotificationSound("message")}>{t("Test eigen geluid","Test signature sound")}</button><button onClick={markAllNotificationsRead} disabled={!unreadNotifications}>{t("Alles gelezen","Mark all read")}</button></div><small className="notification-sound-note">{t("Het AFTER HOURS-geluid werkt wanneer de app actief is. iOS bepaalt het geluid van systeem- en pushmeldingen.","The AFTER HOURS sound plays while the app is active. iOS controls system and push notification sounds.")}</small></div>
     {state.notifications.length?state.notifications.slice(0,8).map(item=><button key={item.id} className={"notification-item "+(item.read?"":"unread")} onClick={()=>markNotificationRead(item.id)}><b>{item.title}</b><span>{item.body}</span></button>):<small>{t("Geen nieuwe meldingen.","No new notifications.")}</small>}
    </div>}
