@@ -97,4 +97,13 @@ for (const required of ["public/after-hours-icon-192.png", "public/after-hours-i
   }
 }
 
+
+const visualReferences = [...appStyles.matchAll(/url\(["']?(\/visuals\/[^"')]+)["']?\)/g)].map((match) => match[1]);
+const missingVisuals = [...new Set(visualReferences)]
+  .filter((asset) => !existsSync(`public${asset}`));
+if (missingVisuals.length) {
+  console.error("Missing referenced cinematic visual assets:", missingVisuals.join(", "));
+  process.exit(1);
+}
+
 console.log(`Brand asset guard passed: canonical logo matches master icon; app placements, responsive styles, PWA icons and ${referencedIcons.size} referenced assets verified.`);
