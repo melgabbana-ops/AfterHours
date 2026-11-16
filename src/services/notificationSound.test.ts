@@ -13,7 +13,7 @@ describe("notification sound resilience", () => {
       }
     }
 
-    vi.stubGlobal("window", { AudioContext: BrokenAudioContext });
+    vi.stubGlobal("window", { AudioContext: BrokenAudioContext, addEventListener: vi.fn(), removeEventListener: vi.fn() });
 
     const { playNotificationSound } = await import("./notificationSound");
     await expect(playNotificationSound("safety")).resolves.toBeUndefined();
@@ -53,7 +53,7 @@ describe("notification sound resilience", () => {
       }
     }
 
-    vi.stubGlobal("window", { AudioContext: TestAudioContext });
+    vi.stubGlobal("window", { AudioContext: TestAudioContext, addEventListener: vi.fn(), removeEventListener: vi.fn() });
 
     const { playNotificationSound } = await import("./notificationSound");
     await expect(playNotificationSound(kind)).resolves.toBeUndefined();
