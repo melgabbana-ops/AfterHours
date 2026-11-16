@@ -31,7 +31,7 @@ p{line-height:1.65}
  margin:0 -18px 22px;padding:35px 25px 28px!important;
  display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;
  border:0!important;border-bottom:1px solid var(--ah-border)!important;
- background:linear-gradient(180deg,rgba(4,4,3,.04) 0%,rgba(4,4,3,.15) 28%,rgba(4,4,3,.76) 68%,#070605 100%),url("../visuals/ah-cinematic-hero.jpg") center 34%/cover no-repeat!important;
+ background:linear-gradient(180deg,rgba(4,4,3,.04) 0%,rgba(4,4,3,.15) 28%,rgba(4,4,3,.76) 68%,#070605 100%),url("../visuals/ah-cinematic-hero.svg") center 34%/cover no-repeat!important;
 }
 .home-hero:after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(0,0,0,.24),transparent 75%);pointer-events:none}
 .home-wordmark{width:min(210px,62vw);max-height:70px;object-fit:contain;object-position:left center;margin:0 0 auto;filter:drop-shadow(0 4px 16px #000)}
