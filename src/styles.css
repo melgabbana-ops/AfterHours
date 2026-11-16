@@ -4447,3 +4447,8 @@ button:focus-visible,input:focus-visible{outline:2px solid #e6c487;outline-offse
 .notification-head-actions button{white-space:nowrap;padding:6px 2px;min-height:30px}
 .notification-head-actions button:first-child{color:var(--ah-gold-light)}
 @media(max-width:360px){.notification-head{align-items:flex-start;gap:8px}.notification-head-actions{flex-direction:column;align-items:flex-end;gap:2px}.notification-head-actions button{min-height:24px}}
+/* Keep the signature-sound guidance readable inside the mobile notification drawer. */
+.notification-head{flex-wrap:wrap;row-gap:8px}
+.notification-head-actions{flex:0 1 auto}
+.notification-sound-note{display:block;flex:1 0 100%;width:100%;color:#928879;font-size:10px;line-height:1.45;letter-spacing:0}
+@media(max-width:360px){.notification-head{flex-direction:row;flex-wrap:wrap}.notification-head>strong{align-self:center}.notification-sound-note{font-size:9px}}
