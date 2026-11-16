@@ -46,6 +46,18 @@ describe("account-scoped achievements", () => {
     expect(listEarnedBadges("alice")).toEqual([valid]);
   });
 
+  it("awards each completed Story Mode chapter once per account", () => {
+    const values = installStorage();
+    recordAchievement("story_chapter_complete", { profileId: "alice", chapterId: "arrival" });
+    recordAchievement("story_chapter_complete", { profileId: "alice", chapterId: "arrival" });
+    recordAchievement("story_chapter_complete", { profileId: "alice", chapterId: "boundary" });
+    recordAchievement("story_chapter_complete", { profileId: "alice", chapterId: "not-a-chapter" });
+
+    expect(JSON.parse(values.get("afterhours.achievements.v1.alice") ?? "[]"))
+      .toEqual([expect.objectContaining({ id: "story_arrival", eventKey: "story:arrival" }), expect.objectContaining({ id: "story_boundary", eventKey: "story:boundary" })]);
+    expect(listEarnedBadges("bob")).toEqual([]);
+  });
+
   it("writes achievement events to the selected account bucket", () => {
     const values = installStorage();
     recordAchievement("tarot", { profileId: "alice" });
