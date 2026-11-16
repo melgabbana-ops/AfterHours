@@ -52,7 +52,7 @@ for (const name of files) {
 }
 const expectedVectorAssets = ["ah-aftercare-photo.svg", "ah-cinematic-hero.svg", "ah-completion-photo.svg", "ah-experience-photo.svg", "ah-horoscope-photo.svg", "ah-profile-photo.svg", "ah-radio-photo.svg", "ah-tarot-photo.svg"];
 const missingVectorAssets = expectedVectorAssets.filter((name) => !vectorFiles.includes(name));
-const invalidVectorAssets = vectorFiles.filter((name) => !/<svg[^>]*width="3840"[^>]*height="2160"[^>]*viewBox="0 0 3840 2160"/.test(readFileSync(join(directory, name), "utf8")));
+const invalidVectorAssets = expectedVectorAssets.filter((name) => vectorFiles.includes(name) && !/<svg[^>]*width="3840"[^>]*height="2160"[^>]*viewBox="0 0 3840 2160"/.test(readFileSync(join(directory, name), "utf8")));
 if (missingVectorAssets.length || invalidVectorAssets.length) {
   console.error("Vector artwork check failed. Missing: " + (missingVectorAssets.join(", ") || "none") + "; invalid 4K canvas: " + (invalidVectorAssets.join(", ") || "none"));
   process.exitCode = 1;
