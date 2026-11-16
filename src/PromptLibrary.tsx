@@ -302,7 +302,7 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
         saveCompletedStoryChapters(playerId, merged);
         setStoryProgressState({ playerId, ids: merged });
       }
-      const pending = localIds.filter((id) => !remoteIds.includes(id));
+      const pending = localIds.filter((id) => !remoteIds.some((remoteId) => remoteId === id));
       for (const chapterId of pending) {
         if (!active) return;
         await completeRemoteStoryChapter(chapterId);
