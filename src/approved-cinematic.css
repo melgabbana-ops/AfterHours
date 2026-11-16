@@ -624,3 +624,8 @@ hr{border:0;border-top:1px solid var(--ah-line)}
  .media-item-actions{justify-content:flex-start}
  .safety-room-status{align-items:flex-start;flex-direction:column}
 }
+
+/* Portrait refinement: keep the illustrated identity crisp at every device width. */
+.character-art{aspect-ratio:4/5;height:auto;object-fit:contain;overflow:visible}
+.character-preview{align-self:start}
+.character-options{align-self:start}
