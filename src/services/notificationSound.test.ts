@@ -1,8 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { playNotificationSound } from "./notificationSound";
 
 describe("notification sound resilience", () => {
-  afterEach(() => vi.unstubAllGlobals());
+  afterEach(() => { vi.unstubAllGlobals(); vi.resetModules(); });
 
   it("does not throw when browser audio scheduling fails", async () => {
     class BrokenAudioContext {
@@ -16,6 +15,7 @@ describe("notification sound resilience", () => {
 
     vi.stubGlobal("window", { AudioContext: BrokenAudioContext });
 
+    const { playNotificationSound } = await import("./notificationSound");
     await expect(playNotificationSound("safety")).resolves.toBeUndefined();
   });
 
@@ -55,6 +55,7 @@ describe("notification sound resilience", () => {
 
     vi.stubGlobal("window", { AudioContext: TestAudioContext });
 
+    const { playNotificationSound } = await import("./notificationSound");
     await expect(playNotificationSound(kind)).resolves.toBeUndefined();
     expect(started).toHaveLength(expectedOscillators);
   });
