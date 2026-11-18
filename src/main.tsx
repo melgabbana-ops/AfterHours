@@ -471,9 +471,11 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
    <button className="home-start gold" onClick={()=>{if(consent){setScreen("gameSelect");return}document.getElementById("consent")?.scrollIntoView({behavior:"smooth",block:"center"})}}>{t("START EXPERIENCE","START EXPERIENCE")} <ChevronRight/></button>
   </section>
   <section className="grid home-shortcuts">
+   <button className="tile" onClick={()=>setScreen("gameSelect")}><Play/><span>{t("Games & taken","Games & tasks")}</span></button>
    <button className="tile" onClick={()=>{setInsightsInitialTab("tarot");setScreen("insights")}}><Sparkles/><span>{t("Kinky Tarot","Kinky Tarot")}</span></button>
-   <button className="tile" onClick={()=>{setInsightsInitialTab("astro");setScreen("insights")}}><Activity/><span>{t("Horoscoop","Horoscope")}</span></button>
    <button className="tile" onClick={()=>setScreen("radio")}><Radio/><span>{t("Radio","Radio")}</span></button>
+   <button className="tile" onClick={()=>setScreen("profile")}><User/><span>{t("Profiel","Profile")}</span></button>
+   <button className="tile" onClick={()=>{setInsightsInitialTab("astro");setScreen("insights")}}><Activity/><span>{t("Horoscoop","Horoscope")}</span></button>
    <button className="tile" onClick={()=>setScreen("prompts")}><BookOpen/><span>{t("Het Deck","The Deck")}</span></button>
    <button className="tile" onClick={()=>setScreen("missions")}><Activity/><span>{t("Missies","Missions")}</span></button>
    <button className="tile" onClick={()=>setScreen("daily")}><CalendarDays/><span>{t("Dagelijks ritueel","Daily After Hours")}</span></button>
