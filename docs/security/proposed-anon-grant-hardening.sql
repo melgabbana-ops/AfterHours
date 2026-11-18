@@ -1,26 +1,27 @@
 -- PROPOSAL ONLY: NOT an applied production migration.
--- Keep this SQL outside supabase/migrations until the live Supabase migration
--- ledger and repository baseline are reconciled through the approved workflow.
 -- Validate in an authorized disposable/non-production database first.
+-- Keep this file outside supabase/migrations until the grant tests below pass
+-- and the target migration workflow / ledger are reconciled.
 --
--- Scope:
---   1. Remove anonymous and inherited PUBLIC privileges on user-owned records
---      and experience content.
---   2. Preserve authenticated SELECT/INSERT/UPDATE/DELETE grants and all
---      existing RLS policies, while removing structural privileges that app
---      clients do not need (TRUNCATE, REFERENCES, TRIGGER, MAINTAIN).
---   3. Remove column-level REFERENCES grants too; table-level REVOKE does not
---      remove those independent column grants.
+-- Security intent:
+--   * Remove direct and inherited PUBLIC privileges from anon on the five
+--     reviewed app tables.
+--   * Keep authenticated grants, including existing structural grants,
+--     exactly as they are. This proposal does not alter authenticated ACLs.
+--   * Keep all current RLS policies and authenticated flows unchanged.
+--   * Prevent postgres-created public tables in the future from inheriting
+--     broad anon privileges. This does not change existing table privileges.
 
 REVOKE ALL PRIVILEGES ON TABLE
   public.consent_records,
   public.profiles,
   public.session_history,
-  public.sessions
+  public.sessions,
+  public.experience_rounds
 FROM anon, PUBLIC;
 
 -- Table-level REVOKE does not remove separately granted column privileges.
--- Clear PUBLIC column grants too because anon inherits privileges granted to PUBLIC.
+-- Remove direct / inherited column privileges from anon only.
 REVOKE ALL PRIVILEGES (
   id, session_id, status, confirmed_at, revoked_at, created_at
 ) ON TABLE public.consent_records FROM anon, PUBLIC;
@@ -37,49 +38,17 @@ REVOKE ALL PRIVILEGES (
   id, profile_id, status, round, started_at, updated_at, active_seconds, active_started_at
 ) ON TABLE public.sessions FROM anon, PUBLIC;
 
--- Experience rounds remain available to authenticated users under the existing
--- RLS policy (active rounds or app admins). Anonymous clients get no access.
-REVOKE ALL PRIVILEGES ON TABLE public.experience_rounds FROM anon, PUBLIC;
-
 REVOKE ALL PRIVILEGES (
   id, slug, title, body, title_nl, body_nl, title_en, body_en,
   duration_seconds, sort_order, active, created_at
 ) ON TABLE public.experience_rounds FROM anon, PUBLIC;
 
--- Runtime clients do not need table-structure privileges. Keep authenticated
--- row-level operations unchanged, but remove these structural capabilities.
-REVOKE TRUNCATE, REFERENCES, TRIGGER, MAINTAIN ON TABLE
-  public.consent_records,
-  public.profiles,
-  public.session_history,
-  public.sessions,
-  public.experience_rounds
-FROM anon, authenticated, PUBLIC;
+-- Future-proofing: postgres is the role used to create the current production
+-- application tables. Newly created public tables must opt into anonymous
+-- access explicitly instead of inheriting it by default. Authenticated and
+-- service_role defaults are intentionally not changed here.
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA public
+  REVOKE ALL PRIVILEGES ON TABLES FROM anon, PUBLIC;
 
--- REFERENCES may be granted per-column, independently of table privileges.
--- Remove such grants on every current column in scope without changing SELECT,
--- INSERT, UPDATE, or DELETE column grants for authenticated.
-DO $revoke_column_references$
-DECLARE
-  col record;
-BEGIN
-  FOR col IN
-    SELECT table_name, column_name
-    FROM information_schema.columns
-    WHERE table_schema = 'public'
-      AND table_name IN (
-        'consent_records',
-        'profiles',
-        'session_history',
-        'sessions',
-        'experience_rounds'
-      )
-  LOOP
-    EXECUTE format(
-      'REVOKE REFERENCES (%I) ON TABLE public.%I FROM anon, authenticated, PUBLIC',
-      col.column_name,
-      col.table_name
-    );
-  END LOOP;
-END;
-$revoke_column_references$;
+-- No functions are changed by this proposal. Existing SECURITY DEFINER app
+-- RPCs are intentionally reviewed separately and must not be mass-revoked.
