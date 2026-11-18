@@ -2,13 +2,14 @@ self.addEventListener("message", (event) => {
   if (event.data && event.data.type === "SKIP_WAITING") self.skipWaiting();
 });
 
-const CACHE_NAME = "after-hours-v13";
+const CACHE_NAME = "after-hours-v14";
 const BASE_PATH = new URL(".", self.location.href).pathname;
 const asset = (path) => `${BASE_PATH}${path}`;
 const APP_SHELL = [
   asset(""),
   asset("manifest.webmanifest"),
   asset("after-hours-brand-logo.svg"),
+  asset("after-hours-wordmark.svg"),
   asset("after-hours-icon-192.png"),
   asset("after-hours-icon-180.png"),
   asset("after-hours-icon-512.png"),
