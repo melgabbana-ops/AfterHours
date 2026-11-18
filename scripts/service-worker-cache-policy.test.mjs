@@ -111,3 +111,54 @@ describe("AFTER HOURS service-worker cache privacy", () => {
     expect(worker.cache.delete).toHaveBeenCalledWith(worker.request);
   });
 });
+
+
+function startPushWorker(payload) {
+  const handlers = new Map();
+  const showNotification = vi.fn(async () => undefined);
+  const self = {
+    location: {
+      href: "https://app.example/AfterHours/sw.js",
+      origin: "https://app.example",
+    },
+    addEventListener: (type, handler) => handlers.set(type, handler),
+    registration: { showNotification },
+    clients: { claim: vi.fn(), matchAll: vi.fn(async () => []), openWindow: vi.fn() },
+    skipWaiting: vi.fn(),
+  };
+  runInNewContext(workerSource, { self, URL });
+  let completion;
+  handlers.get("push")({
+    data: { json: () => payload },
+    waitUntil: (promise) => { completion = promise; },
+  });
+  return { showNotification, complete: () => completion };
+}
+
+describe("AFTER HOURS push notification haptics", () => {
+  it.each([
+    ["message", [70, 40, 70]],
+    ["checkin", [70, 45, 110]],
+    ["safety", [120, 70, 240, 70, 360]],
+  ])("uses the distinct %s vibration pattern", async (kind, expectedPattern) => {
+    const worker = startPushWorker({ kind, title: "AFTER HOURS", body: "Test" });
+
+    await worker.complete();
+
+    expect(worker.showNotification).toHaveBeenCalledWith(
+      "AFTER HOURS",
+      expect.objectContaining({ vibrate: expectedPattern }),
+    );
+  });
+
+  it("keeps a safe default vibration for older push payloads", async () => {
+    const worker = startPushWorker({ title: "AFTER HOURS", body: "Test" });
+
+    await worker.complete();
+
+    expect(worker.showNotification).toHaveBeenCalledWith(
+      "AFTER HOURS",
+      expect.objectContaining({ vibrate: [70, 40, 70] }),
+    );
+  });
+});

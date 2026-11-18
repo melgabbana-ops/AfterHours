@@ -79,6 +79,13 @@ self.addEventListener("push", (event) => {
   }
   const title = typeof payload.title === "string" ? payload.title : "AFTER HOURS";
   const body = typeof payload.body === "string" ? payload.body : "Je hebt een nieuwe melding.";
+  // Haptic patterns are progressive enhancement: supported Android browsers
+  // can distinguish safety and check-in alerts; unsupported devices ignore them.
+  const vibrate = payload.kind === "safety"
+    ? [120, 70, 240, 70, 360]
+    : payload.kind === "checkin"
+      ? [70, 45, 110]
+      : [70, 40, 70];
   const requested = typeof payload.url === "string" && payload.url.startsWith("/") ? payload.url : "";
   let target = asset("");
   if (requested) {
@@ -95,7 +102,8 @@ self.addEventListener("push", (event) => {
     badge: asset("after-hours-icon-192.png"),
     tag: typeof payload.tag === "string" ? payload.tag : "after-hours-notification",
     data: { url: target },
-    renotify: false
+    renotify: false,
+    vibrate
   }));
 });
 
