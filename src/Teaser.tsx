@@ -5,6 +5,7 @@ export default function Teaser() {
   const [language, setLanguage] = React.useState<"nl"|"en">(() => { try { return localStorage.getItem("afterhours.language") === "en" ? "en" : "nl"; } catch { return "nl"; } });
   React.useEffect(() => { try { localStorage.setItem("afterhours.language", language); document.documentElement.lang = language; } catch { /* Language preference is optional. */ } }, [language]);
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
+  const introVideo = "https://gcdn.picsart.com/editing-temp/a18ef45a-9ae8-4ce4-93b4-68e40401defc.mp4";
   const features = [
     { icon: Gamepad2, title: t("Kinky games", "Kinky games"), copy: t("Interactieve ervaringen", "Interactive experiences") },
     { icon: Layers3, title: t("Kinky tarot", "Kinky tarot"), copy: t("Kaarten en reflectie", "Cards and reflection") },
@@ -17,7 +18,7 @@ export default function Teaser() {
     <div className="teaser-noise" aria-hidden="true"/>
     <div className="teaser-top"><img className="teaser-logo" src={`${import.meta.env.BASE_URL}after-hours-brand-logo.svg`} alt="AFTER HOURS" /><div className="teaser-top-actions"><span className="teaser-private">18+ · {t("PRIVÉWERELD","PRIVATE EXPERIENCE")}</span><button className="language-toggle teaser-language-toggle" type="button" aria-label={t("Taal wijzigen","Change language")} onClick={() => setLanguage(language === "nl" ? "en" : "nl")}><span className={language === "nl" ? "language-active" : ""}>NL</span><span className="language-divider">/</span><span className={language === "en" ? "language-active" : ""}>EN</span></button></div></div>
     <section className="teaser-film teaser-film-motion" aria-label={t("AFTER HOURS-intro","AFTER HOURS intro")}>
-      <div className="teaser-atmosphere" aria-hidden="true"><span/><span/><span/><i/><i/></div>
+      <video className="teaser-film-video teaser-film-background" src={introVideo} poster={`${import.meta.env.BASE_URL}visuals/ah-cinematic-hero.svg`} muted autoPlay loop playsInline preload="metadata" aria-label={t("Cinematische AFTER HOURS-intro","Cinematic AFTER HOURS intro")}/><div className="teaser-atmosphere" aria-hidden="true"><span/><span/><span/><i/><i/></div>
       <div className="teaser-film-brand">
         <img src={`${import.meta.env.BASE_URL}after-hours-brand-logo.svg`} alt="AFTER HOURS"/>
         <div><strong>AFTER HOURS</strong><span>YOUR RULES. YOUR LIMITS. YOUR EXPERIENCE.</span></div>
