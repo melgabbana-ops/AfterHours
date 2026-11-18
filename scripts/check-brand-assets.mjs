@@ -44,7 +44,7 @@ if (!manifest.icons?.some((icon) => icon.sizes === "192x192" && icon.src.endsWit
   process.exit(1);
 }
 
-if (!serviceWorker.includes('const CACHE_NAME = "after-hours-v13"')) {
+if (!serviceWorker.includes('const CACHE_NAME = "after-hours-v14"')) {
   console.error("Service worker cache must be bumped when the app shell or install manifest changes.");
   process.exit(1);
 }
@@ -75,8 +75,8 @@ if (!html.includes('rel="apple-touch-icon"') || !html.includes("after-hours-icon
   process.exit(1);
 }
 
-if ((appSource.split("after-hours-brand-logo.svg").length - 1) < 4 || appSource.includes("/after-hours-wordmark.svg")) {
-  console.error("The approved logo must be used in the app header, home screen and access/recovery gates.");
+if ((appSource.split("after-hours-brand-logo.svg").length - 1) < 3 || (appSource.split("after-hours-wordmark.svg").length - 1) !== 2) {
+  console.error("The full emblem must remain on access/recovery gates, while the horizontal wordmark is used in the header and home hero.");
   process.exit(1);
 }
 
@@ -87,7 +87,7 @@ for (const selector of [".home-wordmark", ".brand-nav", ".gate-logo"]) {
   }
 }
 
-for (const iconPath of ["after-hours-icon-192.png", "after-hours-brand-logo.svg"]) {
+for (const iconPath of ["after-hours-icon-192.png", "after-hours-brand-logo.svg", "after-hours-wordmark.svg"]) {
   if (!serviceWorker.includes(iconPath)) {
     console.error("Service worker does not reference the current app icon:", iconPath);
     process.exit(1);
@@ -99,7 +99,7 @@ if (serviceWorker.includes("/after-hours-icon-192.svg")) {
   process.exit(1);
 }
 
-for (const required of ["public/after-hours-icon-192.png", "public/after-hours-icon-180.png", "public/after-hours-icon-512.png", "public/after-hours-brand-logo.svg"]) {
+for (const required of ["public/after-hours-icon-192.png", "public/after-hours-icon-180.png", "public/after-hours-icon-512.png", "public/after-hours-brand-logo.svg", "public/after-hours-wordmark.svg"]) {
   if (!existsSync(required)) {
     console.error("Missing PWA fallback icon:", required);
     process.exit(1);
