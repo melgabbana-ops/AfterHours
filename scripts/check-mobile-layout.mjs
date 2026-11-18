@@ -15,7 +15,7 @@ const checks = [
   ["44px minimum touch target", /button\s*\{[^}]*min-height\s*:\s*44px/i.test(styles)],
   ["horizontal overflow protection", /(?:body|html,body,#root)\s*\{[^}]*overflow-x\s*:\s*(?:hidden|clip)/i.test(styles)],
   ["border-box sizing", /\*\s*\{\s*box-sizing\s*:\s*border-box/i.test(styles)],
-  ["short-landscape layout breakpoint", /@media\s*\([^)]*orientation\s*:\s*landscape[^)]*max-height/i.test(styles)],
+  ["short-landscape layout breakpoint", /@media[^{}]*orientation\s*:\s*landscape[^{}]*max-height/i.test(styles)],
 ];
 
 const failed = checks.filter(([, passed]) => !passed);
