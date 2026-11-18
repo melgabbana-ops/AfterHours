@@ -62,7 +62,8 @@ describe("media capture cleanup", () => {
     } as unknown as MediaRecorder;
     const track = { stop: vi.fn() };
 
-    discardMediaCapture(recorder, [{ getTracks: () => [track] }]);
+    const stream = { getTracks: () => [track] } as unknown as MediaStream;
+    discardMediaCapture(recorder, [stream]);
 
     expect(stop).not.toHaveBeenCalled();
     expect(recorder.ondataavailable).toBeNull();
