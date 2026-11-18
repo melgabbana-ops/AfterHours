@@ -3,8 +3,11 @@ type CaptureRecorder = Pick<MediaRecorder, "state" | "stop" | "ondataavailable" 
 
 /** Stop every camera/microphone track, even if one browser track has already ended. */
 export function stopMediaStreams(streams: readonly (CaptureStream | null | undefined)[]): void {
+  const stoppedTracks = new Set<MediaStreamTrack>();
   for (const stream of streams) {
     for (const track of stream?.getTracks() ?? []) {
+      if (stoppedTracks.has(track)) continue;
+      stoppedTracks.add(track);
       try {
         track.stop();
       } catch {
