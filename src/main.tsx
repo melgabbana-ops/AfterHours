@@ -531,7 +531,7 @@ if(teaserPreview){
 }else if(maintenancePreview){
  root.render(<UnderConstruction/>);
 }else{
- void fetch("/maintenance.json",{cache:"no-store"})
+ void fetch(`${import.meta.env.BASE_URL}maintenance.json`,{cache:"no-store"})
   .then(response=>response.ok?response.json():{enabled:false})
   .catch(()=>({enabled:false}))
   .then(rawConfig=>{
