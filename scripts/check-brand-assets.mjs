@@ -12,7 +12,7 @@ if (approved !== master) {
 }
 
 const html = readFileSync("index.html", "utf8");
-if (!fullBrand.includes("AFTER HOURS") || !fullBrand.includes("crescent") && !fullBrand.includes("512 682") || !fullBrand.includes("M394 278") && !fullBrand.includes("M394 278")) {
+if (!fullBrand.includes("AFTER HOURS") || !fullBrand.includes("L512 150") || !fullBrand.includes("C430 748")) {
   console.error("Primary brand emblem must contain the full AFTER HOURS name, crown and crescent moon.");
   process.exit(1);
 }
