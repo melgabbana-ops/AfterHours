@@ -38,12 +38,14 @@ function dimensions(buffer, extension) {
 }
 
 let below4k = 0;
+let unread = 0;
 for (const name of files) {
   const path = join(directory, name);
   const buffer = readFileSync(path);
   const size = dimensions(buffer, name.slice(name.lastIndexOf(".")).toLowerCase());
   if (!size) {
-    console.log(`UNREAD ${name}: dimensions could not be read automatically`);
+    unread += 1;
+    console.error(`UNREAD ${name}: dimensions could not be read automatically`);
     continue;
   }
   const is4k = Math.max(size.width, size.height) >= 3840 && Math.min(size.width, size.height) >= 2160;
@@ -57,4 +59,8 @@ if (missingVectorAssets.length || invalidVectorAssets.length) {
   console.error("Vector artwork check failed. Missing: " + (missingVectorAssets.join(", ") || "none") + "; invalid 4K canvas: " + (invalidVectorAssets.join(", ") || "none"));
   process.exitCode = 1;
 }
-console.log("Visual resolution audit: " + files.length + " raster assets checked; " + below4k + " below UHD 4K; " + vectorFiles.length + " vector assets checked (" + expectedVectorAssets.length + " required 4K-canvas artworks).");
+console.log("Visual resolution audit: " + files.length + " raster assets checked; " + below4k + " below UHD 4K; " + unread + " unreadable raster assets; " + vectorFiles.length + " vector assets checked (" + expectedVectorAssets.length + " required 4K-canvas artworks).");
+if (below4k || unread) {
+  console.error("Visual quality gate failed: every raster visual must be readable and at least 3840x2160 (or portrait-equivalent).");
+  process.exitCode = 1;
+}
