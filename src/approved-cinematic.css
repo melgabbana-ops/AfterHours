@@ -702,3 +702,9 @@ hr{border:0;border-top:1px solid var(--ah-line)}
     font-size: max(16px, 1em) !important;
   }
 }
+
+
+/* Mission sync feedback: visible retry path and touch-safe action. */
+.mission-sync-message{margin:12px 14px;padding:12px 14px;border:1px solid var(--ah-line);border-radius:5px;background:rgba(25,18,10,.72);color:#d8c9b2;font-size:11px;line-height:1.55}
+.mission-sync-retry{display:block;min-height:44px;margin:8px 14px 14px;padding:10px 16px;border:1px solid var(--ah-gold);border-radius:5px;background:#171109;color:var(--ah-gold-light);font-size:11px;touch-action:manipulation}
+.mission-sync-retry:focus-visible{outline:2px solid var(--ah-gold-light);outline-offset:3px}
