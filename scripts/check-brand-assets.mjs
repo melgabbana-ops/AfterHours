@@ -75,8 +75,8 @@ if (!html.includes('rel="apple-touch-icon"') || !html.includes("after-hours-icon
   process.exit(1);
 }
 
-if ((appSource.split("after-hours-brand-logo.svg").length - 1) < 4 || appSource.includes("/after-hours-wordmark.svg")) {
-  console.error("The approved logo must be used in the app header, home screen and access/recovery gates.");
+if ((appSource.split("after-hours-brand-logo.svg").length - 1) < 3 || (appSource.split("after-hours-wordmark.svg").length - 1) !== 2) {
+  console.error("The full emblem must remain on access/recovery gates, while the horizontal wordmark is used in the header and home hero.");
   process.exit(1);
 }
 
