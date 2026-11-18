@@ -157,6 +157,31 @@ describe("local persistence", () => {
     expect(loadTimer("profile-a", 0, 60)).toBe(60);
   });
 
+  it("rejects corrupt timer values instead of restoring an invalid countdown", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-10-09T12:00:00.000Z"));
+    const key = "afterhours.timer.v1:profile-a";
+    const invalidSnapshots = [
+      { profileId: "profile-a", round: 0, seconds: -1, savedAt: Date.now(), running: true },
+      { profileId: "profile-a", round: 0, seconds: 12.5, savedAt: Date.now(), running: true },
+      { profileId: "profile-a", round: 0, seconds: 61, savedAt: Date.now(), running: true },
+      { profileId: "profile-a", round: 0, seconds: 30, savedAt: Date.now() + 60_000, running: true },
+      { profileId: "profile-a", round: 0, seconds: 30, savedAt: Date.now(), running: "yes" },
+    ];
+
+    for (const snapshot of invalidSnapshots) {
+      localStorageMock.setItem(key, JSON.stringify(snapshot));
+      expect(loadTimer("profile-a", 0, 60)).toBe(60);
+    }
+  });
+
+  it("does not restore a timer belonging to another profile or round", () => {
+    saveTimer("profile-a", 1, 30, false);
+
+    expect(loadTimer("profile-b", 1, 60)).toBe(60);
+    expect(loadTimer("profile-a", 0, 60)).toBe(60);
+  });
+
   it("clears a saved timer", () => {
     saveTimer("profile-a", 0, 45, false);
 
