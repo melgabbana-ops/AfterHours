@@ -47,11 +47,11 @@ export default function Onboarding({ language = "nl", onComplete }: { language?:
       {step === 2 && <div className="onboarding-install">
         <p>{t("Je kunt AFTER HOURS op je beginscherm zetten, zodat het meer als een app aanvoelt.", "Add AFTER HOURS to your home screen for a more app-like experience.")}</p>
         <div className="onboarding-tabs"><button className={platform === "iphone" ? "selected" : ""} onClick={() => setPlatform("iphone")}>iPhone</button><button className={platform === "android" ? "selected" : ""} onClick={() => setPlatform("android")}>Android</button></div>
-        {platform === "iphone" ? <ol><li>{t("Open AFTER HOURS in Safari.", "Open AFTER HOURS in Safari.")}</li><li>{t("Tik op de Deel-knop.", "Tap the Share button.")}</li><li>{t("Kies ‘Zet op beginscherm’.", "Choose ‘Add to Home Screen’.")}</li><li>{t("Tik op ‘Voeg toe’.", "Tap ‘Add’.")}</li></ol> : <ol><li>{t("Open AFTER HOURS in Chrome.", "Open AFTER HOURS in Chrome.")}</li><li>{t("Open het menu ⋮.", "Open the ⋮ menu.")}</li><li>{t("Kies ‘App installeren’ of ‘Toevoegen aan startscherm’.", "Choose ‘Install app’ or ‘Add to Home Screen’.")}</li><li>{t("Bevestig met ‘Installeren’.", "Confirm with ‘Install’.")}</li></ol>}
+        {platform === "iphone" ? <ol><li>{t("Open AFTER HOURS in Safari.", "Open AFTER HOURS in Safari.")}</li><li>{t("Tik op de Deel-knop.", "Tap the Share button.")}</li><li>{t("Kies ‘Zet op beginscherm’.", "Choose ‘Add to Home Screen’.")}</li><li>{t("Tik op ‘Voeg toe’.", "Tap ‘Add’." )}</li></ol> : <ol><li>{t("Open AFTER HOURS in Chrome.", "Open AFTER HOURS in Chrome.")}</li><li>{t("Open het menu ⋮.", "Open the ⋮ menu.")}</li><li>{t("Kies ‘App installeren’ of ‘Toevoegen aan startscherm’.", "Choose ‘Install app’ or ‘Add to Home Screen’.")}</li><li>{t("Bevestig met ‘Installeren’.", "Confirm with ‘Install’.")}</li></ol>}
         <div className="onboarding-install-tip"><Download size={16}/>{t("Je kunt dit ook later doen via het browsermenu.", "You can also do this later from your browser menu.")}</div>
       </div>}
       {step === 3 && <div className="onboarding-trailer">
-        <div className="onboarding-video-wrap"><video src={VIDEO} controls playsInline preload="metadata" poster="/visuals/ah-cinematic-hero.svg"/></div>
+        <div className="onboarding-video-wrap"><video src={VIDEO} controls playsInline preload="metadata" poster={`${import.meta.env.BASE_URL}visuals/ah-cinematic-hero.svg`}/></div>
         <p>{t("Een korte blik op de sfeer. De ervaring zelf begint pas wanneer jij dat wilt.", "A short look at the atmosphere. The experience itself begins only when you choose.")}</p>
       </div>}
     </section>
