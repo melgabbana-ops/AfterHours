@@ -20,27 +20,6 @@ jobs:
         with:
           ref: ${{ github.head_ref || github.ref_name }}
           fetch-depth: 0
-      - name: Sync approved PWA icon PNGs
-        if: github.event_name == 'pull_request'
-        shell: bash
-        run: |
-          set -euo pipefail
-          curl --fail --location --retry 3 "https://4c1f428b-8529-4e0b-b153-d6037b887d6e.sandbox.floot.app/_cdn/static/e24b3798-6bf4-4fc8-82fe-c13a6247d539-after-hours-icon-180.png" -o public/after-hours-icon-180.png
-          curl --fail --location --retry 3 "https://4c1f428b-8529-4e0b-b153-d6037b887d6e.sandbox.floot.app/_cdn/static/56a9a061-71b6-41a5-a178-38294b18e407-after-hours-icon-192.png" -o public/after-hours-icon-192.png
-          curl --fail --location --retry 3 "https://4c1f428b-8529-4e0b-b153-d6037b887d6e.sandbox.floot.app/_cdn/static/a646ee87-0631-45e2-a9e2-7d6e9fc59aaa-after-hours-icon-512.png" -o public/after-hours-icon-512.png
-          test "$(stat -c%s public/after-hours-icon-180.png)" -eq 53976
-          test "$(stat -c%s public/after-hours-icon-192.png)" -eq 60392
-          test "$(stat -c%s public/after-hours-icon-512.png)" -eq 349602
-          file public/after-hours-icon-180.png public/after-hours-icon-192.png public/after-hours-icon-512.png
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add public/after-hours-icon-180.png public/after-hours-icon-192.png public/after-hours-icon-512.png
-          if git diff --cached --quiet; then
-            echo "Uploaded icon assets already match the repository."
-          else
-            git commit -m "Replace AFTER HOURS PWA icon PNG assets"
-            git push origin "HEAD:${{ github.head_ref }}"
-          fi
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
