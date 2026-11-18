@@ -40,6 +40,8 @@ jobs:
         run: npm run check:brand
       - name: Check cinematic style coverage
         run: npm run check:cinematic
+      - name: Check mobile layout foundations
+        run: npm run check:mobile
       - name: Audit 4K visual assets
         run: npm run audit:visuals
       - name: Unit tests
