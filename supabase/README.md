@@ -4,7 +4,7 @@ AFTER HOURS uses Supabase/PostgreSQL for account-scoped progress, session safety
 
 ## Migration history
 
-The version prefix in each file under `supabase/migrations/` must match the version recorded in the connected production project's Supabase migration ledger. The current production ledger has 17 entries. The file names below have been aligned to that ledger without changing SQL contents or applying any database change.
+The version prefix in each file under `supabase/migrations/` must match the version recorded in the connected production project's Supabase migration ledger. The current production ledger has 18 entries. The file names below have been aligned to that ledger without changing SQL contents or applying any database change.
 
 | Production ledger version | Migration file |
 |---|---|
@@ -25,14 +25,15 @@ The version prefix in each file under `supabase/migrations/` must match the vers
 | `20261013110933` | `20261013110933_rls_policy_performance.sql` |
 | `20261013110946` | `20261013110946_merge_experience_rounds_read_policies.sql` |
 | `20261015114512` | `20261015114512_restore_atomic_completion_consent.sql` |
+| `20261118205045` | `20261118205045_story_chapter_account_sync.sql` |
 
 Run `npm run check:migrations` to verify that the checked-in file list still matches this deployed baseline. When adding a migration, use the version that was actually recorded by the reviewed migration workflow, then update the guard and this table in the same change. Never rename or replay an already-applied production migration casually.
 
 For a new Supabase project, review and apply migrations in version order before enabling remote persistence. If a database was originally created by manually applying SQL, inspect its live schema and migration registry and reconcile/baseline history deliberately before using `supabase db push`. Do not blindly replay a base schema against an existing database.
 
-## Pending database change
+## Story Mode account sync
 
-`pending/story_chapter_account_sync.sql` contains the reviewed SQL for account-synced Story Mode chapter progress. It is intentionally outside `migrations/` and has **not** been applied: the connected AFTER HOURS Supabase project is currently inactive and its migration ledger could not be queried. Do not move this file into the migration ledger or release account-sync as active until the project is restored, the live migration history is verified, and the SQL is applied through the reviewed migration workflow. Local Story Mode progress remains available in the meantime. The client sync adapter is fail-safe and keeps this local record intact if the remote RPC is not yet installed.
+`20261118205045_story_chapter_account_sync.sql` is recorded in the connected production migration ledger and has been applied successfully. Chapter completion is account-owned, authenticated through `auth.uid()`, limited to the seven approved chapter IDs, and idempotent. Local progress remains available when no account is signed in.
 
 ## Security model
 
