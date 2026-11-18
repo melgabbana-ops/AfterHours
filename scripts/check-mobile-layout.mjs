@@ -10,6 +10,7 @@ const styles = baseStyles + "\n" + cinematicStyles;
 const checks = [
   ["viewport-fit for modern mobile safe areas", /name=["']viewport["'][^>]*viewport-fit=cover/i.test(html)],
   ["responsive mobile breakpoint", /@media\s*\(\s*max-width\s*:\s*520px\s*\)/i.test(styles)],
+  ["mobile form controls avoid automatic zoom", /@media\s*\(\s*max-width\s*:\s*767px\s*\)[\s\S]*?:where\(\s*input\s*,\s*select\s*,\s*textarea\s*\)\s*\{[^}]*font-size\s*:\s*max\(\s*16px\s*,\s*1em\s*\)\s*!important/i.test(styles)],
   ["safe-area top inset", /env\(\s*safe-area-inset-top/i.test(styles)],
   ["safe-area bottom inset", /env\(\s*safe-area-inset-bottom/i.test(styles)],
   ["44px minimum touch target", /button\s*\{[^}]*min-height\s*:\s*44px/i.test(styles)],

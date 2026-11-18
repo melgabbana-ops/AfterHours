@@ -694,3 +694,11 @@ hr{border:0;border-top:1px solid var(--ah-line)}
 .story-sync-status{display:flex;align-items:center;flex-wrap:wrap;gap:9px;margin-top:10px;padding:10px 12px;border:1px solid var(--ah-line);border-radius:4px;background:#100c08;color:#c9b99f;font-size:9px;line-height:1.55}
 .story-sync-status button{min-height:34px;padding:7px 11px;border:1px solid var(--ah-line)!important;border-radius:4px!important;background:#0b0907!important;color:#dfc18f!important;font-size:9px}
 .story-sync-status button:hover{border-color:#c9a16a!important;color:#f0dfc5!important}
+
+
+/* Mobile form fields stay readable and avoid Safari's automatic input zoom. */
+@media (max-width: 767px) {
+  :where(input, select, textarea) {
+    font-size: max(16px, 1em) !important;
+  }
+}
