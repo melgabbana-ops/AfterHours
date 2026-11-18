@@ -3,6 +3,7 @@ import { englishPromptCopy } from "./promptTranslations";
 import { loadSavedPromptIds, saveSavedPromptIds } from "./promptBookmarks";
 import { pickRandomId, sessionModes, storyChapters, type SessionModeId } from "./sessionModes";
 import { loadCompletedStoryChapters, saveCompletedStoryChapters } from "./storyProgress";
+import { completeRemoteStoryChapter, loadRemoteStoryProgress } from "./services/backend";
 import { ArrowRight, Check, Copy, Heart, Shuffle, ShieldCheck } from "lucide-react";
 
 type PromptKind = "Kinky opdrachten" | "Kinky vragen" | "Vanille & verbinding" | "Aftercare";
@@ -266,7 +267,7 @@ const localizeGame = (game: ExperienceGame, language: "nl" | "en"): ExperienceGa
   return copy ? { ...game, description: copy.description, rounds: copy.rounds } : game;
 };
 
-export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment, playerId = "local-profile", language = "nl" }: { onBack: () => void; onComplete: (chapterId?: string) => void; onCaptureAssignment?: (assignment: { title: string; task: string }) => void; playerId?: string; language?: "nl" | "en" }) {
+export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment, playerId = "local-profile", remoteProfileId = null, language = "nl" }: { onBack: () => void; onComplete: (chapterId?: string) => void; onCaptureAssignment?: (assignment: { title: string; task: string }) => void; playerId?: string; remoteProfileId?: string | null; language?: "nl" | "en" }) {
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
   const speechLocale = language === "nl" ? "nl-NL" : "en-US";
   const historyKey = `afterhours.prompt-history.v2:${playerId}`;
@@ -289,11 +290,33 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
   const [completed, setCompleted] = useState<string[]>([]);
   const [storyProgressState, setStoryProgressState] = useState<{ playerId: string; ids: string[] }>(() => ({ playerId, ids: loadCompletedStoryChapters(playerId) }));
   const completedStoryChapters = storyProgressState.playerId === playerId ? storyProgressState.ids : loadCompletedStoryChapters(playerId);
+  React.useEffect(() => {
+    if (!remoteProfileId) return;
+    let active = true;
+    const syncStoryProgress = async () => {
+      const localIds = loadCompletedStoryChapters(playerId);
+      const remoteIds = await loadRemoteStoryProgress();
+      if (!active) return;
+      const merged = [...new Set([...remoteIds, ...localIds])];
+      if (merged.length !== localIds.length || merged.some((id, index) => id !== localIds[index])) {
+        saveCompletedStoryChapters(playerId, merged);
+        setStoryProgressState({ playerId, ids: merged });
+      }
+      const pending = localIds.filter((id) => !remoteIds.some((remoteId) => remoteId === id));
+      for (const chapterId of pending) {
+        if (!active) return;
+        await completeRemoteStoryChapter(chapterId);
+      }
+    };
+    void syncStoryProgress();
+    return () => { active = false; };
+  }, [playerId, remoteProfileId]);
   const completeActiveStoryChapter = () => {
     const chapterId = activeStoryChapter === null ? null : storyChapters[activeStoryChapter]?.id;
     if (chapterId) {
       const next = [...new Set([...completedStoryChapters, chapterId])];
       if (saveCompletedStoryChapters(playerId, next)) setStoryProgressState({ playerId, ids: next });
+      if (remoteProfileId) void completeRemoteStoryChapter(chapterId);
     }
     setActiveStoryChapter(null);
     return chapterId;

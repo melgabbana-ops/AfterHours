@@ -30,6 +30,10 @@ Run `npm run check:migrations` to verify that the checked-in file list still mat
 
 For a new Supabase project, review and apply migrations in version order before enabling remote persistence. If a database was originally created by manually applying SQL, inspect its live schema and migration registry and reconcile/baseline history deliberately before using `supabase db push`. Do not blindly replay a base schema against an existing database.
 
+## Pending database change
+
+`pending/story_chapter_account_sync.sql` contains the reviewed SQL for account-synced Story Mode chapter progress. It is intentionally outside `migrations/` and has **not** been applied: the connected AFTER HOURS Supabase project is currently inactive and its migration ledger could not be queried. Do not move this file into the migration ledger or release account-sync as active until the project is restored, the live migration history is verified, and the SQL is applied through the reviewed migration workflow. Local Story Mode progress remains available in the meantime. The client sync adapter is fail-safe and keeps this local record intact if the remote RPC is not yet installed.
+
 ## Security model
 
 - The browser may use the public Supabase client key, but must never receive a service-role or secret key.
