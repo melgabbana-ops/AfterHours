@@ -7,6 +7,7 @@ const VIDEO = "https://gcdn.picsart.com/editing-temp/a18ef45a-9ae8-4ce4-93b4-68e
 export default function Onboarding({ language = "nl", onComplete }: { language?: Language; onComplete: () => void }) {
   const [step, setStep] = useState(0);
   const [platform, setPlatform] = useState<"iphone" | "android">("iphone");
+  const [trailerUnavailable, setTrailerUnavailable] = useState(false);
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
   const finish = () => {
     try { localStorage.setItem("afterhours.onboarding.completed", "1"); } catch { /* Optional preference */ }
@@ -51,7 +52,7 @@ export default function Onboarding({ language = "nl", onComplete }: { language?:
         <div className="onboarding-install-tip"><Download size={16}/>{t("Je kunt dit ook later doen via het browsermenu.", "You can also do this later from your browser menu.")}</div>
       </div>}
       {step === 3 && <div className="onboarding-trailer">
-        <div className="onboarding-video-wrap"><video src={VIDEO} controls playsInline preload="metadata" poster={`${import.meta.env.BASE_URL}visuals/ah-cinematic-background.svg`}/></div>
+        {trailerUnavailable ? <div className="onboarding-video-fallback" role="status"><img src={`${import.meta.env.BASE_URL}visuals/ah-cinematic-background.svg`} alt="" /><p>{t("De trailer kon niet worden geladen. De introductie en alle appfuncties blijven gewoon beschikbaar.", "The trailer could not be loaded. The introduction and all app features remain available.")}</p></div> : <div className="onboarding-video-wrap"><video src={VIDEO} controls playsInline preload="metadata" poster={`${import.meta.env.BASE_URL}visuals/ah-cinematic-background.svg`} onError={() => setTrailerUnavailable(true)} /></div>}
         <p>{t("Een korte blik op de sfeer. De ervaring zelf begint pas wanneer jij dat wilt.", "A short look at the atmosphere. The experience itself begins only when you choose.")}</p>
       </div>}
     </section>
