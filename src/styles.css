@@ -996,8 +996,8 @@ img,svg,video,canvas{max-width:100%}
   --ah-obsidian:#050505;
   --ah-panel:#17130d;
   --ah-panel-2:#1b160d;
-  --ah-violet:#473517;
-  --ah-violet-bright:#796034;
+  --ah-gold-shadow:#473517;
+  --ah-gold-shadow-bright:#796034;
   --ah-gold:#e7bd68;
   --ah-gold-light:#ffe4a0;
   --ah-gold-deep:#8f6227;
@@ -1514,8 +1514,8 @@ input:focus-visible,button:focus-visible{outline-color:var(--ah-gold-light)}
   --ah-night:#17130d;
   --ah-panel:#17130d;
   --ah-panel-raised:#332610;
-  --ah-violet:#bf892c;
-  --ah-violet-bright:#b78124;
+  --ah-gold-shadow:#bf892c;
+  --ah-gold-shadow-bright:#b78124;
   --ah-gold:#ddb85b;
   --ah-gold-deep:#f0d58a;
   --ah-gold-light:#f0d58a;
@@ -2117,7 +2117,7 @@ h1,h2,h3,.insights h2,.radio-room h2,.missions-screen h2,.aftercare-screen h2{fo
 
 
 /* Shared AFTER HOURS moodboard system across the complete in-app experience */
-:root{--ah-obsidian:#090805;--ah-night:#120e08;--ah-aubergine:#251c0d;--ah-velvet:#402f11;--ah-plum-glow:#765927;--ah-champagne:#dcb568;--ah-champagne-light:#ffe5a0;--ah-ivory:#f7eedf;--ah-muted:#beb8ae;--ah-hairline:rgba(224, 181, 103,.36)}
+:root{--ah-obsidian:#090805;--ah-night:#120e08;--ah-black-raised:#251c0d;--ah-velvet:#402f11;--ah-plum-glow:#765927;--ah-champagne:#dcb568;--ah-champagne-light:#ffe5a0;--ah-ivory:#f7eedf;--ah-muted:#beb8ae;--ah-hairline:rgba(224, 181, 103,.36)}
 body{background-color:var(--ah-obsidian)}
 .app{background:radial-gradient(ellipse at 50% -12%,rgba(99, 73, 29,.35),transparent 34%),radial-gradient(ellipse at 100% 38%,rgba(81, 59, 22,.13),transparent 30%),linear-gradient(180deg,#0b0906,#090805 72%);color:var(--ah-ivory)}
 .app>header,.app header{border-bottom-color:var(--ah-hairline)}
@@ -2579,9 +2579,9 @@ body{background-color:var(--ah-obsidian)}
    Character Studio, profile surfaces and mobile-first editorial finish. */
 :root{
   --ah-obsidian:#080706;
-  --ah-aubergine:#2f230e;
+  --ah-black-raised:#2f230e;
   --ah-plum:#6c5431;
-  --ah-violet:#c89a4b;
+  --ah-gold-shadow:#c89a4b;
   --ah-gold:#d4af37;
   --ah-champagne:#e8c77b;
   --ah-gold-soft:#b88963;
@@ -2709,7 +2709,7 @@ body{
 
 /* AFTER HOURS / DESIGN PASS 03: Home, shortcuts and bottom navigation */
 :root{
- --ah-ink:#080706;--ah-plum:#2f230e;--ah-violet:#6c5431;
+ --ah-ink:#080706;--ah-plum:#2f230e;--ah-gold-shadow:#6c5431;
  --ah-gold:#d4af37;--ah-champagne:#f0d58f;--ah-bronze:#b88963;
 }
 body{
@@ -3186,15 +3186,15 @@ nav[aria-label="Hoofdnavigatie"] button.active:before{content:"";position:absolu
    ========================================================== */
 :root{
  --ah-obsidian:#050505!important;--ah-black:#090807!important;
- --ah-aubergine:#120e0a!important;--ah-velvet:#21180f!important;
- --ah-violet:#4b3422!important;--ah-amethyst:#79542f!important;
+ --ah-black-raised:#120e0a!important;--ah-velvet:#21180f!important;
+ --ah-gold-shadow:#4b3422!important;--ah-gold-deep:#79542f!important;
  --ah-champagne:#c99d59!important;--ah-gold:#d9b56f!important;
  --ah-gold-light:#f2d99d!important;--ah-ivory:#f2e8d6!important;
  --ah-muted:#bdb2a2!important;--ah-border:rgba(207, 171, 111,.34)!important;
  --gold:#d9b56f!important;--gold-light:#f2d99d!important;
  --muted:#bdb2a2!important;--line:rgba(207, 171, 111,.25)!important;
- --plum:#090807!important;--plum-raised:#17110b!important;
- --purple-glow:#77542f!important;--magenta:#9a7043!important;
+ --ah-surface:#090807!important;--ah-surface-raised:#17110b!important;
+ --ah-gold-glow:#77542f!important;--ah-gold-accent:#9a7043!important;
 }
 html,body,#root{background:#050505!important;color:#f2e8d6!important}
 body{background:radial-gradient(ellipse at 50% -20%,#21180f 0%,#090807 42%,#050505 76%)!important}
@@ -3396,11 +3396,11 @@ nav button.active,.bottom-nav button.active,.app-nav button.active,.mobile-nav b
 /* Reference fidelity pass: cinematic black lacquer and champagne, across every route. */
 :root{
  --ah-obsidian:#050505;--ah-black:#0b0a08;--ah-black-raised:#100e0b;--ah-velvet:#17130d;
- --ah-violet:#8d744c;--ah-amethyst:#b99a65;--ah-champagne:#c6a56b;--ah-gold:#d5b77d;
+ --ah-gold-shadow:#8d744c;--ah-gold-deep:#b99a65;--ah-champagne:#c6a56b;--ah-gold:#d5b77d;
  --ah-gold-light:#f0dfb4;--ah-ivory:#f2ede3;--ah-muted:#aaa295;
  --ah-border:rgba(205, 174, 119,.25);--gold:var(--ah-gold);--gold-light:var(--ah-gold-light);
- --muted:var(--ah-muted);--line:rgba(205, 174, 119,.22);--plum:#0b0a08;--plum-raised:#13110d;
- --purple-glow:#8d744c;--magenta:#b99a65;
+ --muted:var(--ah-muted);--line:rgba(205, 174, 119,.22);--ah-surface:#0b0a08;--ah-surface-raised:#13110d;
+ --ah-gold-glow:#8d744c;--ah-gold-accent:#b99a65;
 }
 html,body{background:#050505!important;color:#f2ede3}
 body{background:radial-gradient(ellipse at 50% -15%,#211b11 0%,#0b0a08 34%,#050505 72%)!important}
@@ -3918,9 +3918,9 @@ nav button.active svg{color:#e1c78f!important}
    This final layer follows the approved reference screens: no purple UI. */
 :root{
  --ah-obsidian:#050505;--ah-black:#090807;--ah-night:#090807;
- --ah-aubergine:#100d0a;--ah-plum:#100d0a;--ah-plum-raised:#17120c;
- --ah-velvet:#20170e;--ah-violet:#8f6738;--ah-violet-bright:#bd9258;
- --ah-amethyst:#bd9258;--ah-champagne:#c89445;--ah-gold:#d7a84f;
+ --ah-black-raised:#100d0a;--ah-plum:#100d0a;--ah-plum-raised:#17120c;
+ --ah-velvet:#20170e;--ah-gold-shadow:#8f6738;--ah-gold-shadow-bright:#bd9258;
+ --ah-gold-deep:#bd9258;--ah-champagne:#c89445;--ah-gold:#d7a84f;
  --ah-gold-light:#f3d49a;--ah-champagne-light:#f3d49a;
  --ah-ivory:#f4ebdd;--ah-copy:#e5d8c4;--ah-muted:#b9ad9d;
  --ah-border:rgba(200,148,69,.28);--ah-gold-line:rgba(200,148,69,.32);
@@ -4103,10 +4103,10 @@ body{background:radial-gradient(ellipse at 50% -12%,rgba(126,82,38,.22),transpar
 :root{
  --ah-obsidian:#050505;
  --ah-black:#0b0907;
- --ah-aubergine:#100d09;
+ --ah-black-raised:#100d09;
  --ah-velvet:#24190e;
- --ah-violet:#8b642d;
- --ah-amethyst:#b58a4c;
+ --ah-gold-shadow:#8b642d;
+ --ah-gold-deep:#b58a4c;
  --ah-champagne:#d2ad70;
  --ah-gold:#dfbd7d;
  --ah-gold-light:#f5dfad;
