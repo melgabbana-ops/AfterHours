@@ -4,6 +4,7 @@ const approvedPath = "public/after-hours-logo.svg";
 const masterPath = "public/icons/after-hours-master.svg";
 const approved = readFileSync(approvedPath, "utf8");
 const master = readFileSync(masterPath, "utf8");
+const fullBrand = readFileSync("public/after-hours-brand-logo.svg", "utf8");
 
 if (approved !== master) {
   console.error("Canonical master icon must be an exact copy of the approved AFTER HOURS logo.");
@@ -11,6 +12,14 @@ if (approved !== master) {
 }
 
 const html = readFileSync("index.html", "utf8");
+if (!fullBrand.includes("AFTER HOURS") || !fullBrand.includes("crescent") && !fullBrand.includes("512 682") || !fullBrand.includes("M394 278") && !fullBrand.includes("M394 278")) {
+  console.error("Primary brand emblem must contain the full AFTER HOURS name, crown and crescent moon.");
+  process.exit(1);
+}
+if (!html.includes("og:image") || !html.includes("twitter:image") || !html.includes("after-hours-brand-logo.svg")) {
+  console.error("Social previews must reference the full primary AFTER HOURS emblem.");
+  process.exit(1);
+}
 const manifest = JSON.parse(readFileSync("public/manifest.webmanifest", "utf8"));
 const serviceWorker = readFileSync("public/sw.js", "utf8");
 const appSource = readFileSync("src/main.tsx", "utf8");
@@ -35,7 +44,7 @@ if (!manifest.icons?.some((icon) => icon.sizes === "192x192" && icon.src.endsWit
   process.exit(1);
 }
 
-if (!serviceWorker.includes('const CACHE_NAME = "after-hours-v12"')) {
+if (!serviceWorker.includes('const CACHE_NAME = "after-hours-v13"')) {
   console.error("Service worker cache must be bumped when the app shell or install manifest changes.");
   process.exit(1);
 }
