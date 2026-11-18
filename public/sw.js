@@ -57,7 +57,9 @@ self.addEventListener("activate", (event) => {
       const response = await fetch(request);
       if (shouldCacheResponse(response)) {
         event.waitUntil(cache.put(request, response.clone()));
-      } else if (response && response.ok) {
+      } else {
+        // A denied, private, no-store or otherwise non-cacheable response must
+        // invalidate any older copy, including when the new response is 401/403.
         event.waitUntil(cache.delete(request));
       }
       return response;
