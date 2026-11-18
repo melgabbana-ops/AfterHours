@@ -1,0 +1,29 @@
+import { readFile } from "node:fs/promises";
+
+const [html, baseStyles, cinematicStyles] = await Promise.all([
+  readFile("index.html", "utf8"),
+  readFile("src/styles.css", "utf8"),
+  readFile("src/approved-cinematic.css", "utf8"),
+]);
+const styles = baseStyles + "\n" + cinematicStyles;
+
+const checks = [
+  ["viewport-fit for modern mobile safe areas", /name=["']viewport["'][^>]*viewport-fit=cover/i.test(html)],
+  ["responsive mobile breakpoint", /@media\s*\(\s*max-width\s*:\s*520px\s*\)/i.test(styles)],
+  ["safe-area top inset", /env\(\s*safe-area-inset-top/i.test(styles)],
+  ["safe-area bottom inset", /env\(\s*safe-area-inset-bottom/i.test(styles)],
+  ["44px minimum touch target", /button\s*\{[^}]*min-height\s*:\s*44px/i.test(styles)],
+  ["horizontal overflow protection", /(?:body|html,body,#root)\s*\{[^}]*overflow-x\s*:\s*(?:hidden|clip)/i.test(styles)],
+  ["border-box sizing", /\*\s*\{\s*box-sizing\s*:\s*border-box/i.test(styles)],
+  ["short-landscape layout breakpoint", /@media\s*\([^)]*orientation\s*:\s*landscape[^)]*max-height/i.test(styles)],
+];
+
+const failed = checks.filter(([, passed]) => !passed);
+for (const [label, passed] of checks) {
+  console.log((passed ? "PASS " : "FAIL ") + label);
+}
+if (failed.length) {
+  console.error(`Mobile layout guard failed: ${failed.length} of ${checks.length} checks.`);
+  process.exit(1);
+}
+console.log(`Mobile layout guard passed: all ${checks.length} responsive foundations are present.`);
