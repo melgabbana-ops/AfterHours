@@ -88,7 +88,7 @@ if (!(onboardingSource.includes("after-hours-brand-logo.svg") || onboardingSourc
   process.exit(1);
 }
 
-if (!maintenanceSource.includes("after-hours-brand-logo.svg")) {
+if (!(maintenanceSource.includes("after-hours-brand-logo.svg") || maintenanceSource.includes("after-hours-brand-logo-transparent.svg"))) {
   console.error("The maintenance screen must use the approved full brand lockup, not the monogram app icon.");
   process.exit(1);
 }
