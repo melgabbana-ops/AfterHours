@@ -4566,3 +4566,19 @@ button,[role="button"],nav a{touch-action:manipulation}
  .media-consent-check{align-items:flex-start}
  .media-consent-check input{flex:0 0 18px;margin-top:2px}
 }
+
+
+/* Cinematic intro treatment, built around the approved 16:9 hero artwork. */
+.teaser-film-motion{position:relative;isolation:isolate;aspect-ratio:16/9;min-height:220px;background:#050403 url("../visuals/ah-cinematic-hero.svg") center/cover no-repeat!important}
+.teaser-film-motion>.teaser-film-background{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;opacity:.86}
+.teaser-film-motion>.teaser-atmosphere{z-index:1;pointer-events:none}
+.teaser-film-motion>.teaser-film-brand{position:absolute;z-index:2;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:20px;text-align:center}
+.teaser-film-motion>.teaser-film-brand img{display:block;width:clamp(112px,24vw,190px);height:auto;max-height:65%;object-fit:contain;background:transparent;filter:drop-shadow(0 4px 24px rgba(0,0,0,.9))}
+.teaser-film-motion>.teaser-film-brand>div{display:flex;flex-direction:column;gap:7px}
+.teaser-film-motion>.teaser-film-brand strong{font:500 clamp(13px,2.5vw,20px)/1.1 "Cinzel",Georgia,serif;letter-spacing:.2em;color:#f4dfb8;text-shadow:0 2px 12px #000}
+.teaser-film-motion>.teaser-film-brand span{font-size:8px;letter-spacing:.2em;color:#e2c28c;text-shadow:0 2px 10px #000}
+.teaser-film-motion>.teaser-film-caption{position:absolute;z-index:3;left:12px;right:12px;bottom:12px;text-align:center;font-size:8px;letter-spacing:.18em;color:#f1dfc2;text-shadow:0 2px 12px #000}
+.teaser-logo,.onboarding-header img,.gate-logo{background:transparent!important;mix-blend-mode:normal}
+.onboarding-video-wrap video{background:#050403 url("../visuals/ah-cinematic-hero.svg") center/cover no-repeat}
+@media(max-width:420px){.teaser-film-motion{min-height:190px}.teaser-film-motion>.teaser-film-brand img{width:116px}}
+@media(prefers-reduced-motion:reduce){.teaser-film-background{display:none!important}}
