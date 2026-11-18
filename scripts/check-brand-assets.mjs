@@ -98,7 +98,8 @@ if (!html.includes('rel="apple-touch-icon"') || !html.includes("after-hours-icon
   process.exit(1);
 }
 
-const fullLogoPlacements = (appSource.split("after-hours-brand-logo.svg").length - 1) + (appSource.split("after-hours-brand-logo-transparent.svg").length - 1);\nconst wordmarkPlacements = (appSource.split("after-hours-wordmark.svg").length - 1) + (appSource.split("after-hours-wordmark-transparent.svg").length - 1);\nif (fullLogoPlacements < 3 || wordmarkPlacements !== 2) {
+const fullLogoPlacements = (appSource.split("after-hours-brand-logo.svg").length - 1) + (appSource.split("after-hours-brand-logo-transparent.svg").length - 1);
+const wordmarkPlacements = (appSource.split("after-hours-wordmark.svg").length - 1) + (appSource.split("after-hours-wordmark-transparent.svg").length - 1);\nif (fullLogoPlacements < 3 || wordmarkPlacements !== 2) {
   console.error("The full emblem must remain on access/recovery gates, while the horizontal wordmark is used in the header and home hero.");
   process.exit(1);
 }
