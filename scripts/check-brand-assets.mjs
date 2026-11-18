@@ -78,12 +78,12 @@ if (missing.length) {
   process.exit(1);
 }
 
-if (!teaserSource.includes('after-hours-brand-logo.svg') || teaserSource.includes('src="/after-hours-logo.svg"')) {
+if (!(teaserSource.includes("after-hours-brand-logo.svg") || teaserSource.includes("after-hours-brand-logo-transparent.svg")) || teaserSource.includes('src="/after-hours-logo.svg"')) {
   console.error("Teaser screens must use the approved full brand lockup, not the monogram app icon.");
   process.exit(1);
 }
 
-if (!onboardingSource.includes("after-hours-brand-logo.svg") || onboardingSource.includes('src="/after-hours-logo.svg"')) {
+if (!(onboardingSource.includes("after-hours-brand-logo.svg") || onboardingSource.includes("after-hours-brand-logo-transparent.svg")) || onboardingSource.includes('src="/after-hours-logo.svg"')) {
   console.error("Onboarding must use the approved full brand lockup, not the monogram app icon.");
   process.exit(1);
 }
@@ -98,7 +98,7 @@ if (!html.includes('rel="apple-touch-icon"') || !html.includes("after-hours-icon
   process.exit(1);
 }
 
-if ((appSource.split("after-hours-brand-logo.svg").length - 1) < 3 || (appSource.split("after-hours-wordmark.svg").length - 1) !== 2) {
+const fullLogoPlacements = (appSource.split("after-hours-brand-logo.svg").length - 1) + (appSource.split("after-hours-brand-logo-transparent.svg").length - 1);\nconst wordmarkPlacements = (appSource.split("after-hours-wordmark.svg").length - 1) + (appSource.split("after-hours-wordmark-transparent.svg").length - 1);\nif (fullLogoPlacements < 3 || wordmarkPlacements !== 2) {
   console.error("The full emblem must remain on access/recovery gates, while the horizontal wordmark is used in the header and home hero.");
   process.exit(1);
 }
