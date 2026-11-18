@@ -15,6 +15,7 @@ const checks = [
   ["44px minimum touch target", /button\s*\{[^}]*min-height\s*:\s*44px/i.test(styles)],
   ["horizontal overflow protection", /(?:body|html,body,#root)\s*\{[^}]*overflow-x\s*:\s*(?:hidden|clip)/i.test(styles)],
   ["border-box sizing", /\*\s*\{\s*box-sizing\s*:\s*border-box/i.test(styles)],
+  ["GitHub Pages-safe visual asset paths", !/url\(\s*["']?\/(?:visuals|assets)\//i.test(styles)],
   ["short-landscape layout breakpoint", /@media[^{}]*orientation\s*:\s*landscape[^{}]*max-height/i.test(styles)],
 ];
 
@@ -26,4 +27,4 @@ if (failed.length) {
   console.error(`Mobile layout guard failed: ${failed.length} of ${checks.length} checks.`);
   process.exit(1);
 }
-console.log(`Mobile layout guard passed: all ${checks.length} responsive foundations are present.`);
+console.log(`Mobile layout guard passed: all ${checks.length} responsive and asset-path foundations are present.`);
