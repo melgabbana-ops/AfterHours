@@ -757,3 +757,32 @@ hr{border:0;border-top:1px solid var(--ah-line)}
  position:relative;z-index:1;max-width:34rem;margin:0;color:#f0dfc5;
  font-size:11px;line-height:1.65;text-shadow:0 2px 12px #000;
 }
+
+
+/* HOME / approved mobile dashboard rhythm */
+@media(max-width:600px){
+ .hero.home-hero{
+  min-height:clamp(390px,78svh,470px);
+  padding:26px 20px 24px!important;
+  background-position:center 38%!important;
+ }
+ .home-wordmark{width:min(190px,58vw);max-height:62px}
+ .home-level{width:min(100%,320px)}
+ .grid.home-shortcuts{
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:7px!important;margin:0 0 18px!important;
+ }
+ .home-shortcuts .tile{
+  min-width:0;min-height:88px!important;padding:10px 6px!important;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:9px!important;text-align:center;border-radius:6px!important;
+ }
+ .home-shortcuts .tile svg{width:19px!important;height:19px!important}
+ .home-shortcuts .tile span{font-size:8px!important;line-height:1.35;letter-spacing:.01em;overflow-wrap:anywhere}
+ .home-shortcuts .tile:nth-child(n+5){grid-column:span 2;min-height:68px!important;flex-direction:row;justify-content:flex-start;padding:12px 14px!important;text-align:left}
+ .home-shortcuts .tile:nth-child(n+5) span{font-size:9px!important}
+}
+@media(max-width:360px){
+ .hero.home-hero{min-height:370px}
+ .home-shortcuts .tile{min-height:82px!important}
+}
