@@ -9,6 +9,7 @@ import {
 } from "./services/media";
 import { supabase, supabaseConfigured } from "./services/supabase";
 import { composeImageWithOverlay, drawCameraFrame, mediaOverlayFrames, type OverlayFrameStyle } from "./mediaOverlay";
+import { discardMediaCapture, stopMediaStreams } from "./services/mediaCapture";
 
 interface MediaVaultProps {
   sessionId: string;
@@ -43,6 +44,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
   const [liveStream,setLiveStream] = useState<MediaStream|null>(null);
   const [pendingCapture,setPendingCapture] = useState<File|null>(null);
   const [pendingUrl,setPendingUrl] = useState("");
+  const mountedRef = useRef(false);
   const livePreviewRef = useRef<HTMLVideoElement|null>(null);
   const liveCanvasRef = useRef<HTMLCanvasElement|null>(null);
   const compositionStreamRef = useRef<MediaStream|null>(null);
@@ -58,18 +60,28 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
     if(livePreviewRef.current) livePreviewRef.current.srcObject=liveStream;
   },[liveStream]);
   useEffect(()=>{frameStyleRef.current=frameStyle},[frameStyle]);
-  useEffect(()=>()=> {
-    if(captureTimeoutRef.current!==undefined) window.clearTimeout(captureTimeoutRef.current);
-    if(renderFrameRef.current!==null) window.cancelAnimationFrame(renderFrameRef.current);
-    streamRef.current?.getTracks().forEach(track=>track.stop());
-    compositionStreamRef.current?.getTracks().forEach(track=>track.stop());
+  useEffect(()=>{
+    mountedRef.current=true;
+    return ()=>{
+      mountedRef.current=false;
+      if(captureTimeoutRef.current!==undefined) window.clearTimeout(captureTimeoutRef.current);
+      if(renderFrameRef.current!==null) window.cancelAnimationFrame(renderFrameRef.current);
+      // Leaving the vault discards an unfinished recording instead of creating a preview.
+      // Detach recorder callbacks before stopping tracks so no late event can update an unmounted view.
+      discardMediaCapture(recorderRef.current,[streamRef.current,compositionStreamRef.current]);
+      recorderRef.current=null;
+      streamRef.current=null;
+      compositionStreamRef.current=null;
+      chunksRef.current=[];
+      if(livePreviewRef.current)livePreviewRef.current.srcObject=null;
+    };
   },[]);
   useEffect(()=>{
     const currentUrl=pendingUrl;
     return ()=>{if(currentUrl)URL.revokeObjectURL(currentUrl);};
   },[pendingUrl]);
 
-  const refresh = useCallback(async (isActive: () => boolean = () => true): Promise<boolean> => {
+  const refresh = useCallback(async (isActive: () => boolean = () => mountedRef.current): Promise<boolean> => {
     if (isActive()) {
       setLoading(true);
       setMessage("");
@@ -106,13 +118,15 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
   }, [refresh, language]);
 
   const upload = async (file?: File): Promise<boolean> => {
-    if (!file) return false;
+    if (!file || !mountedRef.current) return false;
     setBusy(true);
     setMessage("");
     setSignedUrl("");
     try {
       await uploadPrivateMedia(file, sessionId, assignmentTitle);
-      const refreshed = await refresh();
+      if(!mountedRef.current)return true;
+      const refreshed = await refresh(() => mountedRef.current);
+      if(!mountedRef.current)return true;
       setMessage(
         refreshed
           ? t("Bestand veilig geüpload naar je privékluis.", "File safely uploaded to your private vault.")
@@ -120,29 +134,30 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
       );
       return true;
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : t("Uploaden is mislukt.", "Upload failed."));
+      if(mountedRef.current)setMessage(error instanceof Error ? error.message : t("Uploaden is mislukt.", "Upload failed."));
       return false;
     } finally {
-      setBusy(false);
+      if(mountedRef.current)setBusy(false);
     }
   };
 
   const stopCaptureTracks=()=>{
     if(renderFrameRef.current!==null){window.cancelAnimationFrame(renderFrameRef.current);renderFrameRef.current=null;}
-    compositionStreamRef.current?.getTracks().forEach(track=>track.stop());
+    stopMediaStreams([compositionStreamRef.current,streamRef.current]);
     compositionStreamRef.current=null;
-    streamRef.current?.getTracks().forEach(track=>track.stop());
     streamRef.current=null;
     recorderRef.current=null;
     if(livePreviewRef.current)livePreviewRef.current.srcObject=null;
-    setLiveStream(null);
-    setIsRecording(false);
-    setIsPhotoCameraOpen(false);
+    if(mountedRef.current){
+      setLiveStream(null);
+      setIsRecording(false);
+      setIsPhotoCameraOpen(false);
+    }
     if(captureTimeoutRef.current!==undefined){window.clearTimeout(captureTimeoutRef.current);captureTimeoutRef.current=undefined;}
   };
 
   const stageSelectedFile=async(file?:File,overlayAlreadyApplied=false)=>{
-    if(!file)return;
+    if(!file||!mountedRef.current)return;
     if(!captureConsent){
       setMessage(t("Bevestig eerst dat de betrokkenen akkoord zijn met deze media en privéopslag.","First confirm that the people involved agree to this media and private storage."));
       return;
@@ -151,6 +166,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
     try{
       validatePrivateMediaFile(file);
       const previewFile=file.type.startsWith("image/")&&!overlayAlreadyApplied?await composeImageWithOverlay(file,frameStyleRef.current):file;
+      if(!mountedRef.current)return;
       validatePrivateMediaFile(previewFile);
       if(pendingUrl) URL.revokeObjectURL(pendingUrl);
       setPendingCapture(previewFile);
@@ -159,8 +175,8 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
         ?t("AH-overlay toegepast. Controleer de foto en kies daarna zelf voor privé opslaan.","AH overlay applied. Review the photo, then choose whether to save it privately.")
         :t("Voorbeeld klaar. Kies daarna zelf voor privé opslaan. Bestaande video's worden niet opnieuw gerenderd.","Preview ready. Choose whether to save privately. Existing videos are not re-rendered."));
     }catch(error){
-      setMessage(error instanceof Error ? error.message : t("Dit bestand kan niet worden gebruikt.","This file cannot be used."));
-    }finally{setBusy(false)}
+      if(mountedRef.current)setMessage(error instanceof Error ? error.message : t("Dit bestand kan niet worden gebruikt.","This file cannot be used."));
+    }finally{if(mountedRef.current)setBusy(false)}
   };
 
   const startCapture=async()=>{
@@ -179,20 +195,24 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
         : captureKind==="video"
           ? {video:{facingMode:"user",width:{ideal:1280},height:{ideal:720}},audio:true}
           : {video:false,audio:true});
+      if(!mountedRef.current){stopMediaStreams([stream]);return;}
       streamRef.current=stream;
       setLiveStream(stream);
       chunksRef.current=[];
       if(captureKind==="photo"){
         await new Promise<void>(resolve=>window.requestAnimationFrame(()=>window.requestAnimationFrame(()=>resolve())));
+        if(!mountedRef.current)return;
         const video=livePreviewRef.current;
         const canvas=liveCanvasRef.current;
         if(!video||!canvas)throw new Error(t("De camera-preview is niet beschikbaar.","Camera preview is not available."));
         video.srcObject=stream;
         await video.play();
+        if(!mountedRef.current)return;
         if(video.videoWidth===0) await new Promise<void>((resolve,reject)=>{
           const timeout=window.setTimeout(()=>reject(new Error(t("De camera startte niet op tijd.","The camera did not start in time."))),5000);
           video.addEventListener("loadedmetadata",()=>{window.clearTimeout(timeout);resolve()},{once:true});
         });
+        if(!mountedRef.current)return;
         canvas.width=Math.min(1920,video.videoWidth);
         canvas.height=Math.max(1,Math.round(canvas.width/(video.videoWidth/video.videoHeight)));
         const ctx=canvas.getContext("2d");
@@ -210,15 +230,18 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
       let recorderStream=stream;
       if(captureKind==="video"){
         await new Promise<void>(resolve=>window.requestAnimationFrame(()=>window.requestAnimationFrame(()=>resolve())));
+        if(!mountedRef.current)return;
         const video=livePreviewRef.current;
         const canvas=liveCanvasRef.current;
         if(!video||!canvas||typeof canvas.captureStream!=="function")throw new Error(t("Deze browser kan de AH-overlay niet in de video opnemen. Gebruik een recente browser of maak een foto.","This browser cannot composite the AH overlay into video. Try a recent browser or take a photo."));
         video.srcObject=stream;
         await video.play();
+        if(!mountedRef.current)return;
         if(video.videoWidth===0) await new Promise<void>((resolve,reject)=>{
           const timeout=window.setTimeout(()=>reject(new Error(t("De camera startte niet op tijd.","The camera did not start in time."))),5000);
           video.addEventListener("loadedmetadata",()=>{window.clearTimeout(timeout);resolve()},{once:true});
         });
+        if(!mountedRef.current)return;
         const ratio=video.videoWidth/video.videoHeight;
         canvas.width=Math.min(1920,video.videoWidth);
         canvas.height=Math.max(1,Math.round(canvas.width/ratio));
@@ -240,9 +263,13 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
       const mimeType=candidates.find(type=>MediaRecorder.isTypeSupported(type));
       const recorder=mimeType?new MediaRecorder(recorderStream,{mimeType}):new MediaRecorder(recorderStream);
       recorderRef.current=recorder;
-      recorder.ondataavailable=event=>{if(event.data.size>0)chunksRef.current.push(event.data);};
-      recorder.onerror=()=>{stopCaptureTracks();setMessage(t("De opname is onderbroken. Controleer de cameratoestemming en probeer opnieuw.","Recording was interrupted. Check camera permissions and try again."));};
+      recorder.ondataavailable=event=>{if(mountedRef.current&&event.data.size>0)chunksRef.current.push(event.data);};
+      recorder.onerror=()=>{
+        stopCaptureTracks();
+        if(mountedRef.current)setMessage(t("De opname is onderbroken. Controleer de cameratoestemming en probeer opnieuw.","Recording was interrupted. Check camera permissions and try again."));
+      };
       recorder.onstop=()=>{
+        if(!mountedRef.current){chunksRef.current=[];return;}
         const type=recorder.mimeType|| (captureKind==="video"?"video/webm":"audio/webm");
         const blob=new Blob(chunksRef.current,{type});
         chunksRef.current=[];
@@ -261,6 +288,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
       setPendingCapture(null);
       if(pendingUrl){URL.revokeObjectURL(pendingUrl);setPendingUrl("");}
       captureTimeoutRef.current=window.setTimeout(()=>{
+        if(!mountedRef.current)return;
         if(recorder.state==="recording"){
           recorder.stop();
           setMessage(t("De opname is automatisch gestopt na 60 seconden.","Recording stopped automatically after 60 seconds."));
@@ -268,6 +296,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
       },60_000);
     }catch(error){
       stopCaptureTracks();
+      if(!mountedRef.current)return;
       setCaptureConsent(false);
       setMessage(error instanceof Error?t(error.message,"Recording could not start: "+error.message):t("Geen toegang tot camera of microfoon. Controleer de browsertoestemming.","Camera or microphone access was denied. Check browser permissions."));
     }
@@ -278,11 +307,12 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
     if(!canvas||!isPhotoCameraOpen){setMessage(t("De camera is niet actief.","Camera is not active."));return;}
     try{
       const blob=await new Promise<Blob>((resolve,reject)=>canvas.toBlob(value=>value?resolve(value):reject(new Error(t("De foto kon niet worden gemaakt.","Could not capture the photo."))),"image/jpeg",.94));
+      if(!mountedRef.current)return;
       if(blob.size>20*1024*1024)throw new Error(t("De foto is te groot om veilig op te slaan.","The photo is too large to store safely."));
       const file=new File([blob],`after-hours-photo-${Date.now()}.jpg`,{type:"image/jpeg"});
       stopCaptureTracks();
       await stageSelectedFile(file,true);
-    }catch(error){setMessage(error instanceof Error?error.message:t("De foto kon niet worden gemaakt.","Could not capture the photo."));}
+    }catch(error){if(mountedRef.current)setMessage(error instanceof Error?error.message:t("De foto kon niet worden gemaakt.","Could not capture the photo."));}
   };
 
   const stopCapture=()=>{
@@ -291,9 +321,9 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
   };
 
   const saveCapture=async()=>{
-    if(!pendingCapture)return;
+    if(!pendingCapture||!mountedRef.current)return;
     const saved=await upload(pendingCapture);
-    if(!saved)return;
+    if(!saved||!mountedRef.current)return;
     setPendingCapture(null);
     if(pendingUrl){URL.revokeObjectURL(pendingUrl);setPendingUrl("");}
     setCaptureConsent(false);
@@ -307,19 +337,22 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
   };
 
   const openItem = async (item: PrivateMediaItem) => {
+    if(!mountedRef.current)return;
     setBusy(true);
     setMessage("");
     setSignedUrl("");
     try {
-      setSignedUrl(await createPrivateMediaUrl(item.path));
+      const url=await createPrivateMediaUrl(item.path);
+      if(mountedRef.current)setSignedUrl(url);
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : t("Het bestand kon niet worden geopend.", "The file could not be opened."));
+      if(mountedRef.current)setMessage(error instanceof Error ? error.message : t("Het bestand kon niet worden geopend.", "The file could not be opened."));
     } finally {
-      setBusy(false);
+      if(mountedRef.current)setBusy(false);
     }
   };
 
   const removeItem = async (path: string) => {
+    if(!mountedRef.current)return;
     if (deletingPath !== path) {
       setDeletingPath(path);
       return;
@@ -328,14 +361,15 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
     setMessage("");
     try {
       await deletePrivateMedia(path);
+      if(!mountedRef.current)return;
       setItems(current => current.filter(item => item.path !== path));
       setDeletingPath("");
       setSignedUrl("");
       setMessage(t("Bestand verwijderd.", "File deleted."));
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : t("Verwijderen is mislukt.", "Could not delete the file."));
+      if(mountedRef.current)setMessage(error instanceof Error ? error.message : t("Verwijderen is mislukt.", "Could not delete the file."));
     } finally {
-      setBusy(false);
+      if(mountedRef.current)setBusy(false);
     }
   };
 
