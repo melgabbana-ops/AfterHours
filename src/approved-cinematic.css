@@ -735,3 +735,10 @@ hr{border:0;border-top:1px solid var(--ah-line)}
 .gate-logo,.onboarding-header img,.teaser-logo,.teaser-film-brand img,.home-wordmark{
  background:transparent!important;mix-blend-mode:screen;
 }
+
+
+/* Notification sound test feedback */
+.notification-sound-feedback{
+ display:block;margin-top:9px;padding:9px 11px;border:1px solid var(--ah-border);
+ border-radius:4px;background:#100c08;color:#e2c18c;font-size:10px;line-height:1.5;
+}

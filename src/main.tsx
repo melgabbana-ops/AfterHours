@@ -30,7 +30,7 @@ import{loadState,saveState,loadTimer,saveTimer,clearTimer,defaultState}from"./st
 import{loadRemoteState,loadRemoteRounds,syncRemoteState,updateRemoteUsername,completeRemoteSession,revokeRemoteConsent}from"./services/backend";
 import{supabase,supabaseConfigured}from"./services/supabase";
 import{getCurrentUser,sendMagicLink,signInWithProvider,signInWithPassword,signUpWithPassword,resetPassword,updatePassword,signOut}from"./services/auth";
-import{playNotificationSound}from"./services/notificationSound";
+import{playNotificationSound,primeNotificationAudio}from"./services/notificationSound";
 import{levelFromXp,rankFromXp,rankIndexFromXp,rankNames,rankThresholds}from"./progression";
 import{notificationEvents}from"./services/notifications";
 import{shouldResumeSession}from"./services/sessionSafety";
@@ -164,6 +164,7 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
  useEffect(()=>{setDisplayNameDraft(state.profile.displayName);setUsernameDraft(state.profile.username)},[state.profile.displayName,state.profile.username]);
  const[selectedTask,setSelectedTask]=useState<string|null>(null);
  const[notificationsOpen,setNotificationsOpen]=useState(false);
+ const[soundTestFeedback,setSoundTestFeedback]=useState("");
  useEffect(()=>{if(!notificationsOpen)return;const closeOnEscape=(event:KeyboardEvent)=>{if(event.key==="Escape")setNotificationsOpen(false)};window.addEventListener("keydown",closeOnEscape);return()=>window.removeEventListener("keydown",closeOnEscape)},[notificationsOpen]);
  const[guideIndex,setGuideIndex]=useState(()=>Math.floor(Math.random()*guidePrompts.length));
  const hydrateGeneration=useRef(0);
@@ -293,6 +294,7 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
  const unreadNotifications=state.notifications.filter(item=>!item.read).length;
  const markNotificationRead=(id:string)=>setState(s=>({...s,notifications:s.notifications.map(item=>item.id===id?{...item,read:true}:item)}));
  const markAllNotificationsRead=()=>setState(s=>({...s,notifications:s.notifications.map(item=>({...item,read:true}))}));
+ const testNotificationSound=async()=>{setSoundTestFeedback("");primeNotificationAudio();const played=await playNotificationSound("message");setSoundTestFeedback(played?t("AFTER HOURS-geluid afgespeeld. Hoor je niets? Controleer het volume en de stille modus van je iPhone.","AFTER HOURS sound scheduled. If you hear nothing, check your phone volume and silent mode."):t("Audio is door je browser geblokkeerd. Tik nogmaals op Test eigen geluid en controleer je browserinstellingen.","Your browser blocked audio. Tap Test signature sound again and check your browser settings."));};
  useEffect(()=>{if(screen==="home"||screen==="legal")return;if(!state.ageConfirmed){setScreen("home");return}if(screen==="game"&&state.consent.status!=="active"){setScreen("home")}},[screen,state.ageConfirmed,state.consent.status]);
  const xp=state.profile.xp;
  const currentLevel=Math.max(1,state.profile.level);
@@ -458,7 +460,7 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
     {unreadNotifications>0&&<span>{unreadNotifications>9?"9+":unreadNotifications}</span>}
    </button>
    {notificationsOpen&&<div id="after-hours-notifications" className="notification-panel" role="dialog" aria-label={t("Meldingen","Notifications")}>
-    <div className="notification-head"><strong>{t("MELDINGEN","NOTIFICATIONS")}</strong><div className="notification-head-actions"><button type="button" onClick={()=>void playNotificationSound("message")}>{t("Test eigen geluid","Test signature sound")}</button><button onClick={markAllNotificationsRead} disabled={!unreadNotifications}>{t("Alles gelezen","Mark all read")}</button></div><small className="notification-sound-note">{t("Het AFTER HOURS-geluid werkt wanneer de app actief is. iOS bepaalt het geluid van systeem- en pushmeldingen.","The AFTER HOURS sound plays while the app is active. iOS controls system and push notification sounds.")}</small></div>
+    <div className="notification-head"><strong>{t("MELDINGEN","NOTIFICATIONS")}</strong><div className="notification-head-actions"><button type="button" onClick={()=>void testNotificationSound()}>{t("Test eigen geluid","Test signature sound")}</button><button onClick={markAllNotificationsRead} disabled={!unreadNotifications}>{t("Alles gelezen","Mark all read")}</button></div><small className="notification-sound-note">{t("Het AFTER HOURS-geluid werkt wanneer de app actief is. iOS bepaalt het geluid van systeem- en pushmeldingen.","The AFTER HOURS sound plays while the app is active. iOS controls system and push notification sounds.")}</small>{soundTestFeedback&&<small className="notification-sound-feedback" role="status" aria-live="polite">{soundTestFeedback}</small>}</div>
     {state.notifications.length?state.notifications.slice(0,8).map(item=><button key={item.id} className={"notification-item "+(item.read?"":"unread")} onClick={()=>markNotificationRead(item.id)}><b>{item.title}</b><span>{item.body}</span></button>):<small>{t("Geen nieuwe meldingen.","No new notifications.")}</small>}
    </div>}
   </div>
