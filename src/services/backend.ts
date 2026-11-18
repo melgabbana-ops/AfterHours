@@ -41,7 +41,8 @@ export async function loadRemoteRounds(language:"nl"|"en"="nl"):Promise<RemoteRo
 export async function loadRemoteState(preferredSessionId?:string):Promise<AfterHoursState|null>{
  if(!supabaseConfigured||!supabase)return null;
  const{data:{user},error:userError}=await supabase.auth.getUser();
- if(userError||!user)return null;
+ if(userError)throw new Error("Accountstatus kon niet worden gecontroleerd: "+userError.message);
+ if(!user)return null;
 
  const{data:profile,error:profileError}=await supabase.from("profiles").select("*").eq("id",user.id).maybeSingle();
  if(profileError)throw new Error("Profiel kon niet worden geladen: "+profileError.message);
