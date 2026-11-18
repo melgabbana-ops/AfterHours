@@ -786,3 +786,12 @@ hr{border:0;border-top:1px solid var(--ah-line)}
  .hero.home-hero{min-height:370px}
  .home-shortcuts .tile{min-height:82px!important}
 }
+
+
+/* Aftercare completion feedback stays visible beside the action that needs attention. */
+.aftercare-status{
+ margin:12px 0;padding:12px 14px;border:1px solid rgba(212,175,55,.42);
+ border-radius:5px;background:rgba(44,28,12,.72);color:#f0d8ad;
+ font-size:11px;line-height:1.6;overflow-wrap:anywhere;
+}
+.aftercare-status[role="alert"]{box-shadow:inset 3px 0 0 #c99a55}
