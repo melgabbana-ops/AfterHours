@@ -111,8 +111,21 @@ const timerKey=(profileId:string)=>`${TIMER_KEY}:${profileId}`;
 export function loadTimer(profileId:string,round:number,initialSeconds:number):number{
  try{
   const parsed=JSON.parse(localStorage.getItem(timerKey(profileId))??"null") as Partial<TimerSnapshot>|null;
-  if(!parsed||parsed.profileId!==profileId||parsed.round!==round||!Number.isFinite(parsed.seconds)||!Number.isFinite(parsed.savedAt)||typeof parsed.running!=="boolean")return initialSeconds;
-  const elapsed=parsed.running?Math.max(0,Math.floor((Date.now()-Number(parsed.savedAt))/1000)):0;
+  if(!parsed
+   ||parsed.profileId!==profileId
+   ||parsed.round!==round
+   ||!Number.isInteger(parsed.round)
+   ||!Number.isInteger(parsed.seconds)
+   ||Number(parsed.seconds)<0
+   ||Number(parsed.seconds)>initialSeconds
+   ||!Number.isFinite(parsed.savedAt)
+   ||Number(parsed.savedAt)<0
+   ||Number(parsed.savedAt)>Date.now()
+   ||typeof parsed.running!=="boolean"
+   ||!Number.isFinite(initialSeconds)
+   ||initialSeconds<0
+  )return initialSeconds;
+  const elapsed=parsed.running?Math.floor((Date.now()-Number(parsed.savedAt))/1000):0;
   return Math.max(0,Math.min(initialSeconds,Number(parsed.seconds)-elapsed));
  }catch{return initialSeconds}
 }
