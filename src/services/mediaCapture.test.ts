@@ -15,7 +15,7 @@ describe("media capture cleanup", () => {
     stopMediaStreams(streams);
 
     expect(cameraVideo.stop).toHaveBeenCalledTimes(1);
-    expect(cameraAudio.stop).toHaveBeenCalledTimes(2);
+    expect(cameraAudio.stop).toHaveBeenCalledOnce();
     expect(compositeVideo.stop).toHaveBeenCalledTimes(1);
   });
 
