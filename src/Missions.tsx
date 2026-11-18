@@ -27,22 +27,57 @@ export default function Missions({language="nl",onBack,onExplore}:{language?:Lan
  const [done,setDone]=useState<Record<MissionKind,string[]>>(()=>({daily:readDone("daily"),weekly:readDone("weekly"),special:readDone("special")}));
  const [remoteProgress,setRemoteProgress]=useState<RemoteMissionProgress[]|null>(null);
  const [syncMessage,setSyncMessage]=useState("");
+ const [syncStatus,setSyncStatus]=useState<"loading"|"ready"|"login-required"|"error"|"offline">(()=>supabaseConfigured?"loading":"offline");
  const [busyMission,setBusyMission]=useState<string|null>(null);
  const active=useMemo(()=>missions.filter(m=>m.kind===kind),[kind]);
- const refreshRemoteProgress=async()=>{const rows=await loadMissionProgress();if(rows===null)return;setRemoteProgress(rows);};
+ const refreshRemoteProgress=async()=>{
+  const rows=await loadMissionProgress();
+  if(rows===null)throw new Error(t("Missieserver is niet beschikbaar.","Mission server is unavailable."));
+  setRemoteProgress(rows);
+  if(rows.length===0){
+   setSyncStatus("login-required");
+   setSyncMessage(t("Log in om missies veilig aan je account te koppelen.","Sign in to securely link missions to your account."));
+  }else setSyncStatus("ready");
+  return rows;
+ };
+ const retrySync=async()=>{
+  setSyncStatus("loading");
+  setSyncMessage("");
+  try{await refreshRemoteProgress()}
+  catch(error){setSyncStatus("error");setSyncMessage(error instanceof Error?error.message:t("Missies konden niet worden gesynchroniseerd.","Missions could not be synchronized."))}
+ };
  useEffect(()=>{
-  if(!supabaseConfigured)return;
+  if(!supabaseConfigured){setSyncStatus("offline");return;}
   let alive=true;
-  void loadMissionProgress().then(rows=>{if(!alive)return;setRemoteProgress(rows);if(rows?.length===0)setSyncMessage(t("Log in om missies veilig aan je account te koppelen.","Sign in to securely link missions to your account."));}).catch(error=>{if(alive){setRemoteProgress([]);setSyncMessage(error instanceof Error?error.message:t("Missies konden niet van de server worden geladen.","Missions could not be loaded from the server."));}});
+  setSyncStatus("loading");
+  void loadMissionProgress().then(rows=>{
+   if(!alive)return;
+   if(rows===null){setSyncStatus("error");setSyncMessage(t("Missieserver is niet beschikbaar.","Mission server is unavailable."));return;}
+   setRemoteProgress(rows);
+   if(rows.length===0){
+    setSyncStatus("login-required");
+    setSyncMessage(t("Log in om missies veilig aan je account te koppelen.","Sign in to securely link missions to your account."));
+   }else{
+    setSyncStatus("ready");
+    setSyncMessage("");
+   }
+  }).catch(error=>{
+   if(alive){
+    setSyncStatus("error");
+    setSyncMessage(error instanceof Error?error.message:t("Missies konden niet van de server worden geladen.","Missions could not be loaded from the server."));
+   }
+  });
   return()=>{alive=false};
  },[]);
- const completedIds=remoteProgress===null?done[kind]:remoteProgress.filter(item=>item.mission_kind===kind&&item.completed).map(item=>item.mission_id);
+ const completedIds=supabaseConfigured
+  ?(remoteProgress??[]).filter(item=>item.mission_kind===kind&&item.completed).map(item=>item.mission_id)
+  :done[kind];
  const complete=async(mission:Mission)=>{
   if(completedIds.includes(mission.id)||busyMission)return;
   if(supabaseConfigured){
    setBusyMission(mission.id);setSyncMessage("");
-   try{const result=await completeMissionRemote(mission.id);await refreshRemoteProgress();setSyncMessage(result.already_completed?t("Deze missie was al veilig geregistreerd.","This mission was already recorded safely."):t("Missie bevestigd op de server. Je missiepunten zijn bijgewerkt.","Mission confirmed on the server. Your mission points are updated."));}
-   catch(error){setSyncMessage(error instanceof Error?error.message:t("De missie kon niet worden opgeslagen.","This mission could not be saved."));}
+   try{const result=await completeMissionRemote(mission.id);const rows=await refreshRemoteProgress();if(rows.length>0)setSyncMessage(result.already_completed?t("Deze missie was al veilig geregistreerd.","This mission was already recorded safely."):t("Missie bevestigd op de server. Je missiepunten zijn bijgewerkt.","Mission confirmed on the server. Your mission points are updated."));}
+   catch(error){setSyncStatus("error");setSyncMessage(error instanceof Error?error.message:t("De missie kon niet worden opgeslagen of bijgewerkt.","The mission could not be saved or refreshed."));}
    finally{setBusyMission(null)}
    return;
   }
@@ -61,8 +96,9 @@ export default function Missions({language="nl",onBack,onExplore}:{language?:Lan
   <div className="mission-tabs" role="tablist" aria-label={t("Missiecategorie","Mission category")}>{(["daily","weekly","special"] as MissionKind[]).map(value=><button key={value} role="tab" aria-selected={kind===value} className={kind===value?"active":""} onClick={()=>setKind(value)}>{labels[value][language==="nl"?"nl":"en"]}<small>{value==="daily"?t("Vernieuwt dagelijks","Resets daily"):value==="weekly"?t("Vernieuwt wekelijks","Resets weekly"):t("Blijvend","Ongoing")}</small></button>)}</div>
   <p className="mission-category-subtitle">{labels[kind][language==="nl"?"subNl":"subEn"]}</p>
   {syncMessage&&<p className="mission-sync-message" role="status">{syncMessage}</p>}
-  {supabaseConfigured&&remoteProgress===null&&<p className="mission-sync-message" role="status">{t("Missies synchroniseren…","Syncing missions…")}</p>}
-  <section className="mission-list">{active.map(mission=>{const completed=completedIds.includes(mission.id);return <article className={"mission-card"+(completed?" completed":"")} key={mission.id}><div className="mission-icon">{completed?<CheckCircle2/>:<Sparkles/>}</div><div className="mission-copy"><div className="mission-card-meta"><span>{labels[mission.kind][language==="nl"?"nl":"en"].toUpperCase()} · {t("MISSIE","MISSION")}</span><strong>+{mission.reward} MP</strong></div><h2>{language==="nl"?mission.titleNL:mission.titleEN}</h2><p>{language==="nl"?mission.descriptionNL:mission.descriptionEN}</p><div className="mission-card-footer"><span><Clock3 size={14}/>{mission.kind==="daily"?t("Vandaag","Today"):mission.kind==="weekly"?t("Deze week","This week"):t("Op eigen tempo","At your pace")}</span><button disabled={completed||busyMission!==null} onClick={()=>completed?undefined:onExplore(mission.id.includes("aftercare")?"aftercare":mission.id.includes("boundaries")||mission.id.includes("consent")?"safety":mission.id.includes("reflection")||mission.id.includes("explorer")?"insights":mission.id.includes("discovery")?"prompts":"home")}>{completed?t("Voltooid","Completed"):t("Open onderdeel","Open feature")}</button></div><button className="mission-complete" disabled={completed||busyMission!==null} onClick={()=>void complete(mission)}>{completed?<CheckCircle2 size={16}/>:<Circle size={16}/>} {busyMission===mission.id?t("Opslaan…","Saving…"):completed?t("Afgerond","Completed"):t("Markeer als afgerond","Mark as complete")}</button></div></article>})}</section>
+  {supabaseConfigured&&syncStatus==="loading"&&<p className="mission-sync-message" role="status">{t("Missies synchroniseren…","Syncing missions…")}</p>}
+  {supabaseConfigured&&syncStatus==="error"&&<button type="button" className="mission-sync-retry" onClick={()=>void retrySync()}>{t("Synchronisatie opnieuw proberen","Retry synchronization")}</button>}
+  <section className="mission-list">{active.map(mission=>{const completed=completedIds.includes(mission.id);return <article className={"mission-card"+(completed?" completed":"")} key={mission.id}><div className="mission-icon">{completed?<CheckCircle2/>:<Sparkles/>}</div><div className="mission-copy"><div className="mission-card-meta"><span>{labels[mission.kind][language==="nl"?"nl":"en"].toUpperCase()} · {t("MISSIE","MISSION")}</span><strong>+{mission.reward} MP</strong></div><h2>{language==="nl"?mission.titleNL:mission.titleEN}</h2><p>{language==="nl"?mission.descriptionNL:mission.descriptionEN}</p><div className="mission-card-footer"><span><Clock3 size={14}/>{mission.kind==="daily"?t("Vandaag","Today"):mission.kind==="weekly"?t("Deze week","This week"):t("Op eigen tempo","At your pace")}</span><button disabled={completed||busyMission!==null} onClick={()=>completed?undefined:onExplore(mission.id.includes("aftercare")?"aftercare":mission.id.includes("boundaries")||mission.id.includes("consent")?"safety":mission.id.includes("reflection")||mission.id.includes("explorer")?"insights":mission.id.includes("discovery")?"prompts":"home")}>{completed?t("Voltooid","Completed"):t("Open onderdeel","Open feature")}</button></div><button className="mission-complete" disabled={completed||busyMission!==null||(supabaseConfigured&&syncStatus!=="ready")} onClick={()=>void complete(mission)}>{completed?<CheckCircle2 size={16}/>:<Circle size={16}/>} {busyMission===mission.id?t("Opslaan…","Saving…"):completed?t("Afgerond","Completed"):t("Markeer als afgerond","Mark as complete")}</button></div></article>})}</section>
   <aside className="mission-safety-note"><ShieldCheck/><p>{t("Missies zijn uitnodigingen, geen verplichtingen. Je mag overslaan, aanpassen of stoppen. Consent en je eigen grenzen gaan altijd voor beloningen.","Missions are invitations, never obligations. You can skip, adapt or stop. Consent and your own boundaries always come before rewards.")}</p></aside>
  </main>;
 }
