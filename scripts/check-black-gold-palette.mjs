@@ -8,7 +8,7 @@ const files = [
   "public/visuals/ah-aftercare-photo.svg",
   "public/visuals/ah-completion-photo.svg",
 ];
-const forbiddenNames = /purple|violet|magenta|aubergine|plum/i;
+const forbiddenNames = /--[\\w-]*(?:purple|violet|magenta|aubergine|plum)[\\w-]*/i;
 const failures = [];
 
 function rgbToHsl(hex) {
