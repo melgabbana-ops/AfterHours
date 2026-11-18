@@ -19,7 +19,7 @@ const checks = [
   ["horizontal overflow protection", /(?:body|html,body,#root)\s*\{[^}]*overflow-x\s*:\s*(?:hidden|clip)/i.test(styles)],
   ["border-box sizing", /\*\s*\{\s*box-sizing\s*:\s*border-box/i.test(styles)],
   ["GitHub Pages-safe visual asset paths", !/url\(\s*["']?\/(?:visuals|assets)\//i.test(styles)],
-  ["onboarding trailer poster uses the configured Pages base path", onboarding.includes('poster={`${import.meta.env.BASE_URL}visuals/ah-cinematic-hero.svg`} ') || onboarding.includes('poster={`${import.meta.env.BASE_URL}visuals/ah-cinematic-hero.svg`}' )],
+  ["onboarding trailer poster uses the configured Pages base path", onboarding.includes('poster={`${import.meta.env.BASE_URL}visuals/ah-cinematic-hero.svg`}')],
   ["onboarding trailer poster points to the committed 4K hero artwork", /<svg\b[^>]*\bwidth="3840"[^>]*\bheight="2160"/s.test(heroPoster)],
   ["short-landscape layout breakpoint", /@media[^{}]*orientation\s*:\s*landscape[^{}]*max-height/i.test(styles)],
 ];
