@@ -11,6 +11,7 @@
     "check:migrations": "node scripts/check-supabase-migration-ledger.mjs",
     "check:brand": "node scripts/check-brand-assets.mjs",
     "check:cinematic": "node scripts/check-cinematic-coverage.mjs",
+    "check:mobile": "node scripts/check-mobile-layout.mjs",
     "audit:visuals": "node scripts/audit-visual-resolution.mjs"
   },
   "dependencies": {

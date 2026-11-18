@@ -35,6 +35,8 @@ jobs:
         run: npm run check:brand
       - name: Validate cinematic screen styling
         run: npm run check:cinematic
+      - name: Validate mobile layout foundations
+        run: npm run check:mobile
       - name: Audit visual asset resolution
         run: npm run audit:visuals
       - name: Validate database migration ledger
