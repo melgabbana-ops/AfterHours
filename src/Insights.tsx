@@ -1,5 +1,5 @@
 import React,{useEffect,useMemo,useState}from"react";
-import{dailyReflectionFor,zodiacSignForBirthDate}from"./astrology";
+import{dailyReflectionFor,isSameLocalCalendarDay,zodiacSignForBirthDate}from"./astrology";
 import{recordAchievement}from"./achievements";
 import{RefreshCw,Sparkles,Shield,Star,LockKeyhole,Copy,Check}from"lucide-react";
 
