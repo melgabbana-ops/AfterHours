@@ -88,6 +88,17 @@ describe("AFTER HOURS service-worker cache privacy", () => {
     expect(worker.cache.delete).toHaveBeenCalledWith(worker.request);
   });
 
+  it.each([401, 403, 500])("removes an older cached copy when the server returns non-cacheable HTTP %i", async (status) => {
+    const response = makeResponse({ "Cache-Control": "private, no-store" }, false);
+    response.status = status;
+    const worker = startWorker(response);
+
+    await worker.complete();
+
+    expect(worker.cache.put).not.toHaveBeenCalled();
+    expect(worker.cache.delete).toHaveBeenCalledWith(worker.request);
+  });
+
   it("does not cache responses with Vary: *", async () => {
     const worker = startWorker(makeResponse({
       "Cache-Control": "public, max-age=3600",
