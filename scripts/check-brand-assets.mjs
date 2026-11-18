@@ -1,5 +1,28 @@
 import { existsSync, readFileSync } from "node:fs";
 
+function assertPngDimensions(path, expectedWidth, expectedHeight) {
+  const png = readFileSync(path);
+  const signature = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
+  if (png.length < 24 || !png.subarray(0, 8).equals(signature)) {
+    console.error(`PWA icon is missing or is not a valid PNG: ${path}`);
+    process.exit(1);
+  }
+  const width = png.readUInt32BE(16);
+  const height = png.readUInt32BE(20);
+  if (width !== expectedWidth || height !== expectedHeight) {
+    console.error(`PWA icon ${path} must be ${expectedWidth}x${expectedHeight}; found ${width}x${height}.`);
+    process.exit(1);
+  }
+}
+
+for (const [path, width, height] of [
+  ["public/after-hours-icon-180.png", 180, 180],
+  ["public/after-hours-icon-192.png", 192, 192],
+  ["public/after-hours-icon-512.png", 512, 512],
+]) {
+  assertPngDimensions(path, width, height);
+}
+
 const approvedPath = "public/after-hours-logo.svg";
 const masterPath = "public/icons/after-hours-master.svg";
 const approved = readFileSync(approvedPath, "utf8");
