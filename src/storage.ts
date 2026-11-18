@@ -1,4 +1,4 @@
-import type{AfterHoursState}from"./types";
+import type{AfterHoursState,AfterHoursNotification,SessionHistoryEntry}from"./types";
 
 const KEY="afterhours.state.v1";
 const TIMER_KEY="afterhours.timer.v1";
@@ -18,6 +18,39 @@ export const defaultState=():AfterHoursState=>{
   notifications:[]
  };
 };
+
+function isTimestamp(value:unknown):value is string{
+ return typeof value==="string"&&value.trim().length>0&&Number.isFinite(Date.parse(value));
+}
+
+function isSessionHistoryEntry(value:unknown):value is SessionHistoryEntry{
+ if(!value||typeof value!=="object")return false;
+ const entry=value as Partial<SessionHistoryEntry>;
+ return typeof entry.id==="string"
+  &&entry.id.trim().length>0
+  &&isTimestamp(entry.completedAt)
+  &&typeof entry.xpEarned==="number"
+  &&Number.isFinite(entry.xpEarned)
+  &&entry.xpEarned>=0
+  &&typeof entry.rounds==="number"
+  &&Number.isInteger(entry.rounds)
+  &&entry.rounds>0
+  &&entry.rounds<=20;
+}
+
+function isAfterHoursNotification(value:unknown):value is AfterHoursNotification{
+ if(!value||typeof value!=="object")return false;
+ const notification=value as Partial<AfterHoursNotification>;
+ return typeof notification.id==="string"
+  &&notification.id.trim().length>0
+  &&(notification.kind==="message"||notification.kind==="checkin"||notification.kind==="safety")
+  &&typeof notification.title==="string"
+  &&notification.title.trim().length>0
+  &&typeof notification.body==="string"
+  &&notification.body.trim().length>0
+  &&isTimestamp(notification.createdAt)
+  &&typeof notification.read==="boolean";
+}
 
 function isState(value:unknown):value is AfterHoursState{
  if(!value||typeof value!=="object")return false;
@@ -61,7 +94,11 @@ export function loadState():AfterHoursState{
   if(!raw)return defaultState();
   const parsed:unknown=JSON.parse(raw);
   if(!isState(parsed))return defaultState();
-  return parsed;
+  return {
+   ...parsed,
+   history:parsed.history.filter(isSessionHistoryEntry).slice(0,12),
+   notifications:parsed.notifications.filter(isAfterHoursNotification).slice(0,20)
+  };
  }catch{return defaultState()}
 }
 
