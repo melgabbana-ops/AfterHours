@@ -35,9 +35,15 @@ export function validatePrivateMediaPath(path: string, userId: string): boolean 
   // separators, traversal, and control characters before signing or deleting objects.
   if (path.includes("%")) return false;
   const segments = path.split("/");
+  const safeSegment = /^[a-zA-Z0-9._-]+$/;
   return segments.length === 3
     && segments[0] === userId
-    && segments.every((segment) => segment.length > 0 && segment !== "." && segment !== "..");
+    && segments.every((segment) =>
+      segment.length > 0
+      && segment !== "."
+      && segment !== ".."
+      && safeSegment.test(segment)
+    );
 }
 
 export function normalizePrivateMediaMimeType(type: string): string {
