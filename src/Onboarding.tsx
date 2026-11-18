@@ -51,7 +51,7 @@ export default function Onboarding({ language = "nl", onComplete }: { language?:
         <div className="onboarding-install-tip"><Download size={16}/>{t("Je kunt dit ook later doen via het browsermenu.", "You can also do this later from your browser menu.")}</div>
       </div>}
       {step === 3 && <div className="onboarding-trailer">
-        <div className="onboarding-video-wrap"><video src={VIDEO} controls playsInline preload="metadata" poster="/visuals/ah-cinematic-hero.svg"/></div>
+        <div className="onboarding-video-wrap"><video src={VIDEO} controls playsInline preload="metadata" poster={`${import.meta.env.BASE_URL}visuals/ah-cinematic-hero.svg`}/></div>
         <p>{t("Een korte blik op de sfeer. De ervaring zelf begint pas wanneer jij dat wilt.", "A short look at the atmosphere. The experience itself begins only when you choose.")}</p>
       </div>}
     </section>
