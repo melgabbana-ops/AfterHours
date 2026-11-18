@@ -72,6 +72,71 @@ describe("local persistence", () => {
     expect(state.session.status).toBe("ready");
   });
 
+  it("filters malformed history and notifications without resetting the profile", () => {
+    const state = defaultState();
+    state.profile.displayName = "Night Test";
+    const validHistory = {
+      id: "history-1",
+      completedAt: "2026-11-18T18:00:00.000Z",
+      xpEarned: 45,
+      rounds: 3,
+    };
+    const validNotification = {
+      id: "notification-1",
+      kind: "message" as const,
+      title: "Sessie voltooid",
+      body: "Je sessie is veilig opgeslagen.",
+      createdAt: "2026-11-18T18:01:00.000Z",
+      read: false,
+    };
+    state.history = [
+      validHistory,
+      { id: "bad-date", completedAt: "not-a-date", xpEarned: 10, rounds: 3 },
+      null,
+      { id: "", completedAt: "2026-11-18T18:00:00.000Z", xpEarned: 5, rounds: 1 },
+    ] as unknown as typeof state.history;
+    state.notifications = [
+      validNotification,
+      { ...validNotification, id: "unknown-kind", kind: "system" },
+      { ...validNotification, id: "invalid-read", read: "false" },
+      { ...validNotification, id: "empty-body", body: "  " },
+      null,
+    ] as unknown as typeof state.notifications;
+
+    saveState(state);
+
+    const restored = loadState();
+
+    expect(restored.profile.displayName).toBe("Night Test");
+    expect(restored.history).toEqual([validHistory]);
+    expect(restored.notifications).toEqual([validNotification]);
+  });
+
+  it("keeps the newest history and notification records within their storage limits", () => {
+    const state = defaultState();
+    state.history = Array.from({ length: 15 }, (_, index) => ({
+      id: `history-${index}`,
+      completedAt: new Date(Date.UTC(2026, 10, 18, 0, index)).toISOString(),
+      xpEarned: 10,
+      rounds: 3,
+    }));
+    state.notifications = Array.from({ length: 25 }, (_, index) => ({
+      id: `notification-${index}`,
+      kind: "message" as const,
+      title: "Update",
+      body: "Nieuwe melding.",
+      createdAt: new Date(Date.UTC(2026, 10, 18, 0, index)).toISOString(),
+      read: false,
+    }));
+
+    saveState(state);
+
+    expect(loadState().history).toHaveLength(12);
+    expect(loadState().notifications).toHaveLength(20);
+    expect(loadState().history[0].id).toBe("history-0");
+    expect(loadState().notifications[0].id).toBe("notification-0");
+  });
+
   it("subtracts elapsed wall-clock time from a running timer", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-10-09T12:00:00.000Z"));
