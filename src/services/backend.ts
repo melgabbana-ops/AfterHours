@@ -12,9 +12,11 @@ export type StoryChapterId = (typeof STORY_CHAPTER_IDS)[number];
 export async function loadRemoteStoryProgress(): Promise<StoryChapterId[]> {
  if (!supabaseConfigured || !supabase) return [];
  const { data: { user }, error: userError } = await supabase.auth.getUser();
- if (userError || !user) return [];
+ if (userError) throw new Error(userError.message);
+ if (!user) throw new Error("Geen actieve gebruiker voor Story Mode-sync.");
  const { data, error } = await supabase.rpc("get_story_chapter_progress");
- if (error || !Array.isArray(data)) return [];
+ if (error) throw new Error(error.message);
+ if (!Array.isArray(data)) throw new Error("Story Mode-voortgang kon niet worden gelezen.");
  return [...new Set(data.map((row: { chapter_id?: unknown }) => row.chapter_id)
   .filter((id: unknown): id is StoryChapterId => typeof id === "string" && (STORY_CHAPTER_IDS as readonly string[]).includes(id)))];
 }
