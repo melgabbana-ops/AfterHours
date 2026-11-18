@@ -463,7 +463,7 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
    </div>}
   </div>
   <section className="hero home-hero" style={{"--ah-cinematic-background": `url("${import.meta.env.BASE_URL}visuals/ah-cinematic-background.svg")`} as React.CSSProperties}>
-   <img className="home-wordmark" src={`${import.meta.env.BASE_URL}after-hours-wordmark.svg`} alt="AFTER HOURS"/>
+   <img className="home-wordmark" src={`${import.meta.env.BASE_URL}after-hours-wordmark-transparent.svg`} alt="AFTER HOURS"/>
    <span className="eyebrow">{t("WELKOM TERUG","WELCOME BACK")}</span><h2>{state.profile.displayName||"Mysti"}</h2>
    <div className="home-level"><span>♙</span><div><strong>Level {state.profile.level}</strong><small>{xp} / {nextLevelFloor} XP</small><div className="home-xp"><i style={{width:levelProgress+"%"}}/></div></div></div>
    <button className="home-start gold" onClick={()=>{if(consent){setScreen("gameSelect");return}document.getElementById("consent")?.scrollIntoView({behavior:"smooth",block:"center"})}}>{t("START EXPERIENCE","START EXPERIENCE")} <ChevronRight/></button>
