@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3840" height="2160" viewBox="0 0 3840 2160" role="img" aria-label="AFTER HOURS dark cinematic chamber with warm gold arches and candlelight">
+<defs>
+ <linearGradient id="bg" x2="0" y2="1"><stop stop-color="#080705"/><stop offset=".55" stop-color="#100c07"/><stop offset="1" stop-color="#050403"/></linearGradient>
+ <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff0c7"/><stop offset=".25" stop-color="#d7a84f"/><stop offset=".55" stop-color="#795027"/><stop offset=".8" stop-color="#f0cf88"/><stop offset="1" stop-color="#8c5b28"/></linearGradient>
+ <radialGradient id="glow"><stop stop-color="#b8792b" stop-opacity=".34"/><stop offset="1" stop-color="#b8792b" stop-opacity="0"/></radialGradient>
+ <linearGradient id="floor" x2="0" y2="1"><stop stop-color="#b17b35" stop-opacity=".12"/><stop offset="1" stop-color="#050403" stop-opacity="0"/></linearGradient>
+ <filter id="soft"><feGaussianBlur stdDeviation="90"/></filter>
+ <filter id="shine"><feGaussianBlur stdDeviation="10" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+ <g id="candle"><rect x="-45" y="0" width="90" height="230" rx="12" fill="#0b0906" stroke="url(#gold)" stroke-width="4"/><path d="M-30 22h60M-30 204h60" stroke="url(#gold)" stroke-width="3" opacity=".55"/><path d="M0 -4 C-28 -45 -4 -77 0 -104 C28 -66 28 -37 0 -4Z" fill="#e5a94d" filter="url(#shine)"/><ellipse cy="-7" rx="26" ry="12" fill="#f5d48a" opacity=".25"/></g>
+ <g id="ornament" fill="none" stroke="url(#gold)" stroke-width="5" opacity=".65"><path d="M0 120 Q90 20 180 120 Q90 220 0 120Z"/><path d="M30 120Q90 60 150 120Q90 180 30 120Z"/><path d="M90 30V210M0 120H180"/></g>
+</defs>
+<rect width="3840" height="2160" fill="url(#bg)"/>
+<ellipse cx="1920" cy="760" rx="1650" ry="1050" fill="url(#glow)" filter="url(#soft)"/>
+<path d="M330 2160V840Q330 100 1920 60Q3510 100 3510 840V2160" fill="none" stroke="url(#gold)" stroke-width="13" opacity=".36"/>
+<path d="M520 2160V880Q520 300 1920 230Q3320 300 3320 880V2160" fill="none" stroke="url(#gold)" stroke-width="7" opacity=".24"/>
+<path d="M730 2160V930Q730 470 1920 390Q3110 470 3110 930V2160" fill="none" stroke="url(#gold)" stroke-width="4" opacity=".16"/>
+<g opacity=".58"><path d="M190 0V2160M3650 0V2160" stroke="url(#gold)" stroke-width="5" opacity=".35"/><path d="M220 0V2160M3620 0V2160" stroke="#d7a84f" stroke-width="1" opacity=".3"/></g>
+<g fill="#0a0806" stroke="url(#gold)" stroke-width="8" opacity=".9">
+ <path d="M110 0H410L450 2160H70Z"/><path d="M3430 0H3730L3770 2160H3390Z"/>
+ <path d="M115 160H405M90 320H430M70 1900H450M3435 160H3725M3410 320H3750M3390 1900H3770" fill="none" stroke-width="5"/>
+</g>
+<g opacity=".7"><use href="#ornament" x="120" y="520"/><use href="#ornament" x="3540" y="520"/></g>
+<g opacity=".8"><use href="#candle" x="210" y="1440"/><use href="#candle" x="410" y="1650"/><use href="#candle" x="610" y="1780"/><use href="#candle" x="3630" y="1440"/><use href="#candle" x="3430" y="1650"/><use href="#candle" x="3230" y="1780"/></g>
+<g fill="none" stroke="url(#gold)" opacity=".35"><path d="M0 1920Q960 1770 1920 1920T3840 1920" stroke-width="6"/><path d="M0 2020Q960 1870 1920 2020T3840 2020" stroke-width="3"/><path d="M0 2110Q960 1960 1920 2110T3840 2110" stroke-width="2"/></g>
+<rect y="1800" width="3840" height="360" fill="url(#floor)"/>
+<g fill="#f3d08a" opacity=".6"><circle cx="520" cy="420" r="5"/><circle cx="3310" cy="510" r="5"/><circle cx="790" cy="1130" r="3"/><circle cx="3040" cy="1220" r="4"/></g>
+<rect width="3840" height="2160" fill="#000" opacity=".22"/>
+</svg>
