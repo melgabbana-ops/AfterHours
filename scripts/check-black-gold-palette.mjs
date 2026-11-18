@@ -37,7 +37,7 @@ function rgbToHsl(hex) {
 for (const file of files) {
   const source = await readFile(file, "utf8");
   if (forbiddenNames.test(source)) failures.push(file + ": legacy purple-family naming found");
-  for (const match of source.matchAll(/#[0-9a-fA-F]{3,8}\\b/g)) {
+  for (const match of source.matchAll(/#[0-9a-fA-F]{3,8}\b/g)) {
     const { hue, saturation, lightness } = rgbToHsl(match[0]);
     if (saturation > 0.28 && lightness > 0.08 && hue >= 250 && hue <= 330) {
       failures.push(file + ": purple-family color " + match[0]);
