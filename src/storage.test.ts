@@ -116,7 +116,7 @@ describe("local persistence", () => {
     const state = defaultState();
     state.history = Array.from({ length: 15 }, (_, index) => ({
       id: `history-${index}`,
-      completedAt: new Date(Date.UTC(2026, 10, 18, 0, index)).toISOString(),
+      completedAt: new Date(Date.UTC(2026, 10, 18, 0, 14 - index)).toISOString(),
       xpEarned: 10,
       rounds: 3,
     }));
@@ -125,7 +125,7 @@ describe("local persistence", () => {
       kind: "message" as const,
       title: "Update",
       body: "Nieuwe melding.",
-      createdAt: new Date(Date.UTC(2026, 10, 18, 0, index)).toISOString(),
+      createdAt: new Date(Date.UTC(2026, 10, 18, 0, 24 - index)).toISOString(),
       read: false,
     }));
 
