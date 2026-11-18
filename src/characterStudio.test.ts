@@ -52,4 +52,23 @@ describe("Character Studio appearance", () => {
       accessory: "crescent",
     });
   });
+  
+  it("ignores unexpected properties in saved appearance data", () => {
+    const normalized = normalizeCharacterLook({
+      gender: "male",
+      skin: "#784833",
+      hair: "#793B2B",
+      hairStyle: "short",
+      outfit: "#3b2a1b",
+      mask: true,
+      neckDetail: "chain",
+      accessory: "sigil",
+      unexpected: "must not be persisted",
+    });
+
+    expect(normalized).not.toHaveProperty("unexpected");
+    expect(Object.keys(normalized).sort()).toEqual([
+      "accessory", "gender", "hair", "hairStyle", "mask", "neckDetail", "outfit", "skin",
+    ]);
+  });
 });
