@@ -213,13 +213,20 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
    const availableRounds=remoteRounds.length===3?remoteRounds.map(r=>({title:r.title,text:r.body,time:r.durationSeconds})):fallbackRounds;
    if(remoteRounds.length===3)setRounds(availableRounds);
    let remote:AfterHoursState|null=null;
+   let remoteLoadFailed=false;
    try{
     remote=await loadRemoteState(localState.session.id);
    }catch{
-    setProfileMessage(t("Online sessiegegevens zijn tijdelijk niet bereikbaar. De app probeert opnieuw en gebruikt intussen beschikbare lokale gegevens.","Online session data is temporarily unavailable. The app will retry and use available local data in the meantime."));
+    remoteLoadFailed=true;
+    setProfileMessage(t("Online sessiegegevens zijn tijdelijk niet bereikbaar. Je volledige lokale profiel en sessie blijven behouden. Controleer je verbinding en probeer opnieuw.","Online session data is temporarily unavailable. Your complete local profile and session are preserved. Check your connection and try again."));
    }
    if(!active||generation!==hydrateGeneration.current)return;
-   if(remote){
+   if(remoteLoadFailed){
+    setState(localState);
+    const restoredRound=Math.min(Math.max(0,localState.session.round),availableRounds.length-1);
+    setRunning(shouldResumeSession(localState.session.status,localState.consent.status));
+    setSeconds(loadTimer(localState.profile.id,restoredRound,availableRounds[restoredRound].time));
+   }else if(remote){
     const sameAccount=localState.profile.id===user.id;
     const remoteIsNewer=!sameAccount||remote.session.id!==localState.session.id||new Date(remote.session.updatedAt).getTime()>=new Date(localState.session.updatedAt).getTime();
     setState(current=>({...remote,ageConfirmed:current.ageConfirmed&&(current.ageConfirmedFor===user.id),ageConfirmedFor:current.ageConfirmedFor===user.id?user.id:null,safety:current.safety,profile:{...remote.profile,username:remote.profile.username||current.profile.username},session:remoteIsNewer?remote.session:current.session,consent:remoteIsNewer?remote.consent:current.consent}));

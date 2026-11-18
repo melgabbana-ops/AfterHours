@@ -41,22 +41,24 @@ export async function loadRemoteRounds(language:"nl"|"en"="nl"):Promise<RemoteRo
 export async function loadRemoteState(preferredSessionId?:string):Promise<AfterHoursState|null>{
  if(!supabaseConfigured||!supabase)return null;
  const{data:{user},error:userError}=await supabase.auth.getUser();
- if(userError||!user)return null;
+ if(userError)throw new Error("Accountstatus kon niet worden gecontroleerd: "+userError.message);
+ if(!user)return null;
 
  const{data:profile,error:profileError}=await supabase.from("profiles").select("*").eq("id",user.id).maybeSingle();
- if(profileError||!profile)return null;
+ if(profileError)throw new Error("Profiel kon niet worden geladen: "+profileError.message);
+ if(!profile)return null;
 
  const legacyLocalSession=!preferredSessionId||preferredSessionId==="local-session";
  let sessionQuery=legacyLocalSession
   ?supabase.from("sessions").select("*").eq("profile_id",user.id).order("updated_at",{ascending:false}).order("id",{ascending:false}).limit(1).maybeSingle()
   :supabase.from("sessions").select("*").eq("profile_id",user.id).eq("id",preferredSessionId).maybeSingle();
  let{data:session,error:sessionError}=await sessionQuery;
- if(sessionError)return null;
+ if(sessionError)throw new Error("Sessie kon niet worden geladen: "+sessionError.message);
  // A device-local session ID may not exist on this account. Recover the latest
  // server-owned session before deciding that no remote session is available.
  if(!session&&!legacyLocalSession){
   const fallback=await supabase.from("sessions").select("*").eq("profile_id",user.id).order("updated_at",{ascending:false}).order("id",{ascending:false}).limit(1).maybeSingle();
-  if(fallback.error)return null;
+  if(fallback.error)throw new Error("Herstel van de laatste sessie is mislukt: "+fallback.error.message);
   session=fallback.data;
  }
  const effectiveSession=session??{
@@ -71,9 +73,9 @@ export async function loadRemoteState(preferredSessionId?:string):Promise<AfterH
  const{data:consent,error:consentError}=session
   ?await supabase.from("consent_records").select("status,confirmed_at,revoked_at").eq("session_id",effectiveSession.id).order("created_at",{ascending:false}).order("id",{ascending:false}).limit(1).maybeSingle()
   :{data:null,error:null};
- if(consentError)return null;
+ if(consentError)throw new Error("Toestemmingsstatus kon niet worden geladen: "+consentError.message);
  const{data:history,error:historyError}=await supabase.from("session_history").select("id,completed_at,xp_earned,rounds").eq("profile_id",user.id).order("completed_at",{ascending:false}).limit(12);
- if(historyError)return null;
+ if(historyError)throw new Error("Sessiegeschiedenis kon niet worden geladen: "+historyError.message);
 
  return{
   ageConfirmed:false,
