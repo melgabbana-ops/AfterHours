@@ -34,7 +34,18 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-self.addEventListener("fetch", (event) => {
+// The Cache API does not automatically enforce HTTP Cache-Control directives.
+ // Never persist private/no-store responses, and remove any older cached copy so
+ // it cannot be served later by the offline fallback.
+ function shouldCacheResponse(response) {
+   if (!response || !response.ok) return false;
+   const cacheControl = response.headers.get("Cache-Control") || "";
+   if (/(?:^|,)\s*(?:no-store|private)\b/i.test(cacheControl)) return false;
+   if ((response.headers.get("Vary") || "").trim() === "*") return false;
+   return true;
+ }
+
+ self.addEventListener("fetch", (event) => {
   const request = event.request;
   if (request.method !== "GET") return;
   const url = new URL(request.url);
@@ -44,7 +55,11 @@ self.addEventListener("fetch", (event) => {
     const cache = await caches.open(CACHE_NAME);
     try {
       const response = await fetch(request);
-      if (response && response.ok) event.waitUntil(cache.put(request, response.clone()));
+      if (shouldCacheResponse(response)) {
+        event.waitUntil(cache.put(request, response.clone()));
+      } else if (response && response.ok) {
+        event.waitUntil(cache.delete(request));
+      }
       return response;
     } catch {
       const cached = await cache.match(request);
