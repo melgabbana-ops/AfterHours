@@ -20,9 +20,9 @@ export default function Teaser() {
     <div className="teaser-top"><img className="teaser-logo" src={`${import.meta.env.BASE_URL}after-hours-brand-logo-transparent.svg`} alt="AFTER HOURS" /><div className="teaser-top-actions"><span className="teaser-private">18+ · {t("PRIVÉWERELD","PRIVATE EXPERIENCE")}</span><button className="language-toggle teaser-language-toggle" type="button" aria-label={t("Taal wijzigen","Change language")} onClick={() => setLanguage(language === "nl" ? "en" : "nl")}><span className={language === "nl" ? "language-active" : ""}>NL</span><span className="language-divider">/</span><span className={language === "en" ? "language-active" : ""}>EN</span></button></div></div>
     <section className="teaser-film teaser-film-motion" aria-label={t("AFTER HOURS-intro","AFTER HOURS intro")}>
       <div className="teaser-atmosphere" aria-hidden="true"><span/><span/><span/><i/><i/></div>
-      <video className="teaser-film-video" src={INTRO_VIDEO} autoPlay muted loop playsInline controls preload="metadata" poster={`${import.meta.env.BASE_URL}visuals/ah-cinematic-hero.svg`} aria-label={t("AFTER HOURS officiële introvideo","AFTER HOURS official intro video")}/>
+      <video className="teaser-film-video" src={INTRO_VIDEO} autoPlay muted loop playsInline controls preload="metadata" poster={`${import.meta.env.BASE_URL}visuals/ah-cinematic-background.svg`} aria-label={t("AFTER HOURS officiële introvideo","AFTER HOURS official intro video")}/>
       <div className="teaser-film-brand">
-        <img src={`${import.meta.env.BASE_URL}after-hours-brand-logo.svg`} alt="AFTER HOURS"/>
+        <img src={`${import.meta.env.BASE_URL}after-hours-brand-logo-transparent.svg`} alt="AFTER HOURS"/>
         <div><strong>AFTER HOURS</strong><span>YOUR RULES. YOUR LIMITS. YOUR EXPERIENCE.</span></div>
       </div>
       <span className="teaser-film-caption">{t("EEN WERELD BUITEN DE GEWONE REGELS","A WORLD BEYOND THE ORDINARY")}</span>
