@@ -18,10 +18,10 @@ export default function Onboarding({ language = "nl", onComplete }: { language?:
     t("NEEM AFTER HOURS MEE", "TAKE AFTER HOURS WITH YOU"),
     t("BEKIJK DE TRAILER", "WATCH THE TRAILER"),
   ];
-  return <main className="onboarding-screen">
+  return <main className="onboarding-screen" style={{"--ah-cinematic-background": `url("${import.meta.env.BASE_URL}visuals/ah-cinematic-background.svg")`} as React.CSSProperties}>
     <div className="onboarding-orbit" aria-hidden="true"><span/><i/><b/></div>
     <header className="onboarding-header">
-      <img src={`${import.meta.env.BASE_URL}after-hours-brand-logo.svg`} alt="AFTER HOURS"/>
+      <img src={`${import.meta.env.BASE_URL}after-hours-brand-logo-transparent.svg`} alt="AFTER HOURS"/>
       <span className="eyebrow">PRIVATE EXPERIENCE · 18+</span>
     </header>
     <div className="onboarding-stepper" aria-label={t("Stap","Step") + " " + (step + 1) + " / 4"}>
@@ -51,7 +51,7 @@ export default function Onboarding({ language = "nl", onComplete }: { language?:
         <div className="onboarding-install-tip"><Download size={16}/>{t("Je kunt dit ook later doen via het browsermenu.", "You can also do this later from your browser menu.")}</div>
       </div>}
       {step === 3 && <div className="onboarding-trailer">
-        <div className="onboarding-video-wrap"><video src={VIDEO} controls playsInline preload="metadata" poster={`${import.meta.env.BASE_URL}visuals/ah-cinematic-hero.svg`}/></div>
+        <div className="onboarding-video-wrap"><video src={VIDEO} controls playsInline preload="metadata" poster={`${import.meta.env.BASE_URL}visuals/ah-cinematic-background.svg`}/></div>
         <p>{t("Een korte blik op de sfeer. De ervaring zelf begint pas wanneer jij dat wilt.", "A short look at the atmosphere. The experience itself begins only when you choose.")}</p>
       </div>}
     </section>
