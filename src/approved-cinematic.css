@@ -39,6 +39,7 @@ p{line-height:1.65}
 .home-hero h2{font-size:clamp(38px,10vw,54px)!important;line-height:1.02;margin:0 0 18px!important;text-shadow:0 3px 20px #000}
 .home-level{display:flex;align-items:center;gap:12px;width:min(100%,300px);margin-bottom:20px;color:#e9d5b4}
 .home-level>span{font-family:"Cinzel";font-size:25px;color:var(--ah-gold)}
+.home-level-copy{min-width:0;flex:1}
 .home-level strong,.home-level small{display:block}.home-level strong{font-size:11px;letter-spacing:.1em;text-transform:uppercase}
 .home-level small{font-size:9px;color:#c6b69d;margin-top:3px}
 .home-xp{height:2px;background:rgba(255,255,255,.2);margin-top:8px;width:220px;max-width:60vw}.home-xp i{display:block;height:100%;background:linear-gradient(90deg,#9a7040,#f0d8ad)}
