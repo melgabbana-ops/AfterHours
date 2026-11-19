@@ -1,4 +1,4 @@
-export type Screen="home"|"game"|"gameSelect"|"complete"|"profile"|"admin"|"insights"|"radio"|"aftercare"|"prompts"|"safety"|"store"|"onboarding"|"controlroom"|"missions"|"legal"|"social"|"lovense"|"daily"|"capture";
+export type Screen="home"|"consent"|"game"|"gameSelect"|"complete"|"profile"|"admin"|"insights"|"radio"|"aftercare"|"prompts"|"safety"|"store"|"onboarding"|"controlroom"|"missions"|"legal"|"social"|"lovense"|"daily"|"capture";
 export type Safety="green"|"amber";
 export type ConsentStatus="pending"|"active"|"revoked";
 export type AvatarStyle="sigil"|"collar"|"key"|"crown";
