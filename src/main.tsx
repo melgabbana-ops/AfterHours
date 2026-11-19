@@ -37,7 +37,7 @@ import{getCurrentUser,sendMagicLink,signInWithProvider,signInWithPassword,signUp
 import{playNotificationSound,primeNotificationAudio}from"./services/notificationSound";
 import{levelFromXp,rankFromXp,rankIndexFromXp,rankNames,rankThresholds}from"./progression";
 import{notificationEvents}from"./services/notifications";
-import{getSessionSafetyAnnouncement,getTaskChoiceFeedback,isTaskPassed,PASS_TASK_SELECTION,shouldResumeSession}from"./services/sessionSafety";
+import{getSessionSafetyAnnouncement,getTaskChoiceFeedback,isTaskPassed,PASS_TASK_SELECTION,shouldResumeSession,shouldResumeSessionBeforeHydration}from"./services/sessionSafety";
 import {getMaintenanceStatus,formatMaintenanceDate,type MaintenanceConfig} from "./maintenance";
 const PromptLibrary = React.lazy(() => import("./PromptLibrary"));
 const Insights = React.lazy(async () => ({ default: (await import("./Insights")).Insights }));
@@ -141,7 +141,7 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
  const [captureAssignment,setCaptureAssignment]=useState<{title:string;task:string}|null>(null);
  const[privacyMode,setPrivacyMode]=useState(false);
  useEffect(()=>{if(new URLSearchParams(window.location.search).has("screen"))window.history.replaceState({},document.title,window.location.pathname+window.location.hash)},[]);
- const[running,setRunning]=useState(()=>shouldResumeSession(state.session.status,state.consent.status));
+ const[running,setRunning]=useState(()=>shouldResumeSessionBeforeHydration(supabaseConfigured,state.session.status,state.consent.status));
  const[seconds,setSeconds]=useState(()=>loadTimer(state.profile.id,state.session.round,rounds[state.session.round]?.time||rounds[0].time));
  const[userEmail,setUserEmail]=useState<string|null>(null);
  const[authEmail,setAuthEmail]=useState("");
