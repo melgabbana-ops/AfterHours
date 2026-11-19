@@ -329,3 +329,26 @@ input,select,textarea{accent-color:#c79b5d!important}
  .ah-session-screen .task-card>div{grid-template-columns:1fr!important}
  .ah-session-screen .game-top>span:last-child{font-size:7px!important}
 }
+
+
+/* Photographic art direction rollout · generated original AFTER HOURS imagery */
+:root{
+ --ah-photo-consent:url("https://gcdn.picsart.com/pipeline-output/ee9b2312-7f4d-4299-b241-d3e16982fa36.png");
+ --ah-photo-aftercare:url("https://gcdn.picsart.com/pipeline-output/e8f4402a-7e90-4143-8149-9bec98ab3241.png");
+ --ah-photo-tarot:url("https://gcdn.picsart.com/pipeline-output/fad8c8e3-1edc-4ec5-96ea-40a5486e4128.png");
+ --ah-photo-radio:url("https://gcdn.picsart.com/pipeline-output/5dbe1964-e376-4d2a-b693-1b06392abd82.png");
+ --ah-photo-profile:url("https://gcdn.picsart.com/pipeline-output/725cbaa5-4f9c-4aae-b16e-7ae8e7f4b340.png");
+}
+.consent-screen:before{background-image:var(--ah-photo-consent)!important;background-position:center 34%!important;opacity:.78!important}
+.consent-visual{background-image:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.3) 36%,#050505 100%),var(--ah-photo-consent)!important;background-position:center 36%!important;background-size:cover!important}
+.aftercare-screen:before,.aftercare-card{background-image:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.72) 70%,#050505 100%),var(--ah-photo-aftercare)!important;background-position:center 35%!important;background-size:cover!important}
+.completion-screen:before,.completion-card{background-image:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.82) 58%,#050505 100%),var(--ah-photo-profile)!important;background-position:center 30%!important;background-size:cover!important}
+.ah-profile-screen:before,.ah-profile-screen .profile{background-image:linear-gradient(180deg,rgba(0,0,0,.04),rgba(0,0,0,.86) 68%,#050505 100%),var(--ah-photo-profile)!important;background-position:center 25%!important;background-size:cover!important}
+.radio-room:before,.radio-hero,.radio-player,.radio-note{background-image:linear-gradient(180deg,rgba(0,0,0,.18),rgba(0,0,0,.86)),var(--ah-photo-radio)!important;background-position:center 40%!important;background-size:cover!important}
+.insights:before,.insights .insights-hero,.insights .tarot-card{background-image:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.86)),var(--ah-photo-tarot)!important;background-position:center 38%!important;background-size:cover!important}
+.insights.insights-astro:before,.insights .astro-card{background-image:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.88)),var(--ah-photo-tarot)!important;background-position:center 38%!important;background-size:cover!important}
+.game-select-screen:before{background-image:var(--ah-photo-consent)!important;opacity:.48!important}
+.experience-choice{background-image:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.88)),var(--ah-photo-consent)!important;background-position:center!important;background-size:cover!important}
+.experience-choice:nth-child(2){background-image:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.88)),var(--ah-photo-tarot)!important}
+.experience-choice:nth-child(3){background-image:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.88)),var(--ah-photo-profile)!important}
+.experience-choice:nth-child(4){background-image:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.88)),var(--ah-photo-radio)!important}
