@@ -27,6 +27,7 @@ describe("Character Studio appearance", () => {
       hairStyle: "short",
       outfit: "#3b2a1b",
       mask: true,
+      tattoos: true,
       neckDetail: "chain",
       accessory: "sigil",
     });
