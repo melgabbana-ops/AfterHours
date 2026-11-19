@@ -3,88 +3,78 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const root = process.cwd();
-const css = readFileSync(resolve(root, "src/approved-cinematic.css"), "utf8");
+const css = [
+  "src/approved-cinematic.css",
+  "src/reference-home.css",
+  "src/reference-pages.css",
+].map((path) => readFileSync(resolve(root, path), "utf8")).join("\n");
 const serviceWorker = readFileSync(resolve(root, "public/sw.js"), "utf8");
 const insightsSource = readFileSync(resolve(root, "src/Insights.tsx"), "utf8");
-const marker = "/* AFTER HOURS page-specific visual art mapping.";
-const markerIndex = css.lastIndexOf(marker);
-const pageArtCss = markerIndex >= 0 ? css.slice(markerIndex + marker.length) : "";
+const mainSource = readFileSync(resolve(root, "src/main.tsx"), "utf8");
+const teaserSource = readFileSync(resolve(root, "src/Teaser.tsx"), "utf8");
+const onboardingSource = readFileSync(resolve(root, "src/Onboarding.tsx"), "utf8");
 
 const mappings = [
-  { selector: ".game-select-screen:before", asset: "ah-experience-photo.svg" },
-  { selector: ".ah-session-screen:before", asset: "ah-experience-photo.svg" },
-  { selector: ".aftercare-screen:before", asset: "ah-aftercare-photo.svg" },
-  { selector: ".completion-screen:before", asset: "ah-completion-photo.svg" },
-  { selector: ".ah-profile-screen:before", asset: "ah-profile-photo.svg" },
-  { selector: ".insights:before", asset: "ah-tarot-photo.svg" },
-  { selector: ".insights.insights-astro:before", asset: "ah-horoscope-photo.svg" },
-  { selector: ".radio-room:before", asset: "ah-radio-photo.svg" },
-  { selector: ".experience-choice:before", asset: "ah-experience-photo.svg" },
-  { selector: ".aftercare-screen .aftercare-card", asset: "ah-aftercare-photo.svg" },
-  { selector: ".completion-screen .completion-card", asset: "ah-completion-photo.svg" },
-  { selector: ".app .insights .tarot-card", asset: "ah-tarot-photo.svg" },
-  { selector: ".app .insights .astro-card", asset: "ah-horoscope-photo.svg" },
-  { selector: ".app .radio-room .radio-player", asset: "ah-radio-photo.svg" },
-  { selector: ".app .ah-tarot-card", asset: "ah-tarot-frame.svg" },
-  { selector: ".app .radio-disc", asset: "ah-radio-vinyl.svg" },
+  { selector: ".game-select-screen:before", asset: "reference-experience.svg" },
+  { selector: ".ah-session-screen:before", asset: "reference-experience.svg" },
+  { selector: ".aftercare-screen:before", asset: "reference-aftercare.svg" },
+  { selector: ".completion-screen:before", asset: "reference-completion.svg" },
+  { selector: ".ah-profile-screen:before", asset: "reference-profile.svg" },
+  { selector: ".consent-screen:before", asset: "reference-consent.svg" },
+  { selector: ".insights:before", asset: "reference-tarot.svg" },
+  { selector: ".insights.insights-astro:before", asset: "reference-horoscope.svg" },
+  { selector: ".radio-room:before", asset: "reference-radio.svg" },
+  { selector: ".aftercare-card", asset: "reference-aftercare.svg" },
+  { selector: ".completion-card", asset: "reference-completion.svg" },
+  { selector: ".insights .tarot-card", asset: "reference-tarot.svg" },
+  { selector: ".insights .astro-card", asset: "reference-horoscope.svg" },
+  { selector: ".radio-player", asset: "reference-radio.svg" },
 ];
 
 const precachedAssets = [
-  "ah-experience-photo.svg",
-  "ah-aftercare-photo.svg",
-  "ah-completion-photo.svg",
-  "ah-horoscope-photo.svg",
-  "ah-profile-photo.svg",
-  "ah-radio-photo.svg",
-  "ah-tarot-photo.svg",
-  "ah-radio-vinyl.svg",
-  "ah-tarot-frame.svg",
+  "reference-home.svg",
+  "reference-consent.svg",
+  "reference-experience.svg",
+  "reference-aftercare.svg",
+  "reference-completion.svg",
+  "reference-tarot.svg",
+  "reference-horoscope.svg",
+  "reference-radio.svg",
+  "reference-profile.svg",
 ];
 
 function ruleFor(selector) {
-  const index = pageArtCss.indexOf(selector);
+  const index = css.indexOf(selector);
   if (index < 0) return "";
-  const start = pageArtCss.lastIndexOf("}", index) + 1;
-  const end = pageArtCss.indexOf("}", index);
-  return pageArtCss.slice(start, end + 1);
+  const start = css.lastIndexOf("}", index) + 1;
+  const end = css.indexOf("}", index);
+  return css.slice(start, end + 1);
 }
 
-describe("AFTER HOURS page-specific visual assets", () => {
+describe("AFTER HOURS screen-specific artwork", () => {
   it.each(mappings)("maps $selector to $asset", ({ selector, asset }) => {
     expect(ruleFor(selector)).toContain(`/AfterHours/visuals/${asset}`);
+  });
+
+  it("uses the black-and-gold home artwork on the home screen, teaser and onboarding", () => {
+    expect(mainSource).toContain("visuals/reference-home.svg");
+    expect(teaserSource).toContain("visuals/reference-home.svg");
+    expect(onboardingSource).toContain("visuals/reference-home.svg");
   });
 
   it("switches the Insights backdrop with the selected tab", () => {
     expect(insightsSource).toContain('className={`insights insights-${tab}`}');
   });
 
-  it("ships every page-specific artwork asset with the service worker shell", () => {
+  it("ships every screen artwork asset with the service worker shell", () => {
     expect(serviceWorker).toContain('const CACHE_NAME = "after-hours-v19";');
     for (const asset of precachedAssets) {
       expect(serviceWorker).toContain(`asset("visuals/${asset}")`);
     }
   });
 
-  it("keeps the wide page artwork on a 4K canvas", () => {
-    const wideAssets = [
-      "ah-experience-photo.svg",
-      "ah-aftercare-photo.svg",
-      "ah-completion-photo.svg",
-      "ah-horoscope-photo.svg",
-      "ah-profile-photo.svg",
-      "ah-radio-photo.svg",
-    "reference-home.svg",
-    "reference-consent.svg",
-    "reference-experience.svg",
-    "reference-aftercare.svg",
-    "reference-completion.svg",
-    "reference-tarot.svg",
-    "reference-horoscope.svg",
-    "reference-radio.svg",
-    "reference-profile.svg",
-      "ah-tarot-photo.svg",
-    ];
-    for (const asset of wideAssets) {
+  it("keeps every dedicated screen artwork on a 4K canvas", () => {
+    for (const asset of precachedAssets) {
       const svg = readFileSync(resolve(root, "public/visuals", asset), "utf8");
       expect(svg).toMatch(/<svg[^>]*width="3840"[^>]*height="2160"[^>]*viewBox="0 0 3840 2160"/);
     }
