@@ -331,31 +331,9 @@ input,select,textarea{accent-color:#c79b5d!important}
 }
 
 
-/* Photographic art direction rollout · generated original AFTER HOURS imagery */
-:root{
- --ah-photo-consent:url("https://gcdn.picsart.com/pipeline-output/ee9b2312-7f4d-4299-b241-d3e16982fa36.png");
- --ah-photo-aftercare:url("https://gcdn.picsart.com/pipeline-output/e8f4402a-7e90-4143-8149-9bec98ab3241.png");
- --ah-photo-tarot:url("https://gcdn.picsart.com/pipeline-output/fad8c8e3-1edc-4ec5-96ea-40a5486e4128.png");
- --ah-photo-radio:url("https://gcdn.picsart.com/pipeline-output/5dbe1964-e376-4d2a-b693-1b06392abd82.png");
- --ah-photo-profile:url("https://gcdn.picsart.com/pipeline-output/725cbaa5-4f9c-4aae-b16e-7ae8e7f4b340.png");
-}
-.consent-screen:before{background-image:var(--ah-photo-consent),url("/AfterHours/visuals/reference-consent.svg")!important;background-position:center 34%!important;opacity:.78!important}
-.consent-visual{background-image:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.3) 36%,#050505 100%),var(--ah-photo-consent)!important;background-position:center 36%!important;background-size:cover!important}
-.aftercare-screen:before,.aftercare-card{background-image:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.72) 70%,#050505 100%),var(--ah-photo-aftercare),url("/AfterHours/visuals/reference-aftercare.svg")!important;background-position:center 35%!important;background-size:cover!important}
-.completion-screen:before,.completion-card{background-image:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.82) 58%,#050505 100%),var(--ah-photo-profile),url("/AfterHours/visuals/reference-completion.svg")!important;background-position:center 30%!important;background-size:cover!important}
-.ah-profile-screen:before,.ah-profile-screen .profile{background-image:linear-gradient(180deg,rgba(0,0,0,.04),rgba(0,0,0,.86) 68%,#050505 100%),var(--ah-photo-profile),url("/AfterHours/visuals/reference-profile.svg")!important;background-position:center 25%!important;background-size:cover!important}
-.radio-room:before,.radio-hero,.radio-player,.radio-note{background-image:linear-gradient(180deg,rgba(0,0,0,.18),rgba(0,0,0,.86)),var(--ah-photo-radio),url("/AfterHours/visuals/reference-radio.svg")!important;background-position:center 40%!important;background-size:cover!important}
-.insights:before,.insights .insights-hero,.insights .tarot-card{background-image:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.86)),var(--ah-photo-tarot),url("/AfterHours/visuals/reference-tarot.svg")!important;background-position:center 38%!important;background-size:cover!important}
-.insights.insights-astro:before,.insights .astro-card{background-image:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.88)),var(--ah-photo-tarot),url("/AfterHours/visuals/reference-horoscope.svg")!important;background-position:center 38%!important;background-size:cover!important}
-.game-select-screen:before,.ah-session-screen:before{background-image:var(--ah-photo-consent),url("/AfterHours/visuals/reference-experience.svg")!important;opacity:.48!important}
-.experience-choice{background-image:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.88)),var(--ah-photo-consent)!important;background-position:center!important;background-size:cover!important}
-.experience-choice:nth-child(2){background-image:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.88)),var(--ah-photo-tarot)!important}
-.experience-choice:nth-child(3){background-image:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.88)),var(--ah-photo-profile)!important}
-.experience-choice:nth-child(4){background-image:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.88)),var(--ah-photo-radio)!important}
 
-
-
-/* Durable hosted editorial photographs, with existing SVG assets retained as offline fallbacks. */
+/* Photographic art direction rollout · generated original AFTER HOURS imagery.
+   Keep the preceding 4K SVG mappings as offline fallbacks for the screen tests and service worker. */
 :root{
  --ah-photo-consent:url("https://gcdn.picsart.com/pipeline-output/ee9b2312-7f4d-4299-b241-d3e16982fa36.png");
  --ah-photo-aftercare:url("https://gcdn.picsart.com/pipeline-output/e8f4402a-7e90-4143-8149-9bec98ab3241.png");
@@ -364,25 +342,20 @@ input,select,textarea{accent-color:#c79b5d!important}
  --ah-photo-home:url("https://gcdn.picsart.com/pipeline-output/5f3d6127-421e-424a-b009-edd9e6e66a8d.png");
  --ah-photo-profile:url("https://gcdn.picsart.com/pipeline-output/725cbaa5-4f9c-4aae-b16a-7ae8e7f4b340.png");
 }
-/* Keep all reference SVG mappings in the source for a reliable fallback; use the photo layer as the visible art. */
-.game-select-screen:before{background-image:url("/AfterHours/visuals/reference-experience.svg");}
-.aftercare-screen:before{background-image:url("/AfterHours/visuals/reference-aftercare.svg");}
-.completion-screen:before{background-image:url("/AfterHours/visuals/reference-completion.svg");}
-.consent-screen:before{background-image:url("/AfterHours/visuals/reference-consent.svg");}
-.ah-profile-screen:before{background-image:url("/AfterHours/visuals/reference-profile.svg");}
-.radio-room:before{background-image:url("/AfterHours/visuals/reference-radio.svg");}
-.insights:before{background-image:url("/AfterHours/visuals/reference-tarot.svg");}
-.insights.insights-astro:before{background-image:url("/AfterHours/visuals/reference-horoscope.svg");}
-/* An additional photographic layer sits above the existing fallback background. */
 .game-select-screen:before,.ah-session-screen:before{background-image:linear-gradient(rgba(0,0,0,.34),rgba(0,0,0,.56)),var(--ah-photo-consent),url("/AfterHours/visuals/reference-experience.svg")!important;background-size:cover!important;background-position:center 24%!important;}
-.aftercare-screen:before,.aftercare-card{background-image:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.72) 70%,#050505 100%),var(--ah-photo-aftercare),url("/AfterHours/visuals/reference-aftercare.svg")!important;background-position:center 35%!important;background-size:cover!important;}
-.completion-screen:before,.completion-card{background-image:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.82) 58%,#050505 100%),var(--ah-photo-home),url("/AfterHours/visuals/reference-completion.svg")!important;background-position:center 30%!important;background-size:cover!important;}
-.consent-screen:before{background-image:linear-gradient(rgba(0,0,0,.18),rgba(0,0,0,.25)),var(--ah-photo-consent),url("/AfterHours/visuals/reference-consent.svg")!important;background-position:center 34%!important;opacity:.9!important;}
+.aftercare-screen:before{background-image:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.72) 70%,#050505 100%),var(--ah-photo-aftercare),url("/AfterHours/visuals/reference-aftercare.svg")!important;background-position:center 35%!important;background-size:cover!important;}
+.aftercare-card{background-image:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.72) 70%,#050505 100%),var(--ah-photo-aftercare),url("/AfterHours/visuals/reference-aftercare.svg")!important;background-position:center 35%!important;background-size:cover!important;}
+.completion-screen:before{background-image:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.82) 58%,#050505 100%),var(--ah-photo-home),url("/AfterHours/visuals/reference-completion.svg")!important;background-position:center 30%!important;background-size:cover!important;}
+.completion-card{background-image:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.82) 58%,#050505 100%),var(--ah-photo-home),url("/AfterHours/visuals/reference-completion.svg")!important;background-position:center 30%!important;background-size:cover!important;}
 .ah-profile-screen:before,.ah-profile-screen .profile{background-image:linear-gradient(180deg,rgba(0,0,0,.04),rgba(0,0,0,.86) 68%,#050505 100%),var(--ah-photo-profile),url("/AfterHours/visuals/reference-profile.svg")!important;background-position:center 25%!important;background-size:cover!important;}
-.radio-room:before,.radio-hero,.radio-player,.radio-note{background-image:linear-gradient(180deg,rgba(0,0,0,.18),rgba(0,0,0,.86)),var(--ah-photo-radio),url("/AfterHours/visuals/reference-radio.svg")!important;background-position:center 40%!important;background-size:cover!important;}
-.insights:before,.insights .insights-hero,.insights .tarot-card{background-image:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.86)),var(--ah-photo-tarot),url("/AfterHours/visuals/reference-tarot.svg")!important;background-position:center 38%!important;background-size:cover!important;}
-.insights.insights-astro:before,.insights .astro-card{background-image:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.88)),var(--ah-photo-tarot),url("/AfterHours/visuals/reference-horoscope.svg")!important;background-position:center 38%!important;background-size:cover!important;}
-.consent-visual{background-image:linear-gradient(180deg,rgba(0,0,0,.03),rgba(0,0,0,.22) 35%,#050505 100%),var(--ah-photo-consent),url("/AfterHours/visuals/reference-experience.svg")!important;background-position:center 28%!important;}
+.consent-screen:before{background-image:linear-gradient(rgba(0,0,0,.18),rgba(0,0,0,.25)),var(--ah-photo-consent),url("/AfterHours/visuals/reference-consent.svg")!important;background-position:center 34%!important;opacity:.9!important;}
+.consent-visual{background-image:linear-gradient(180deg,rgba(0,0,0,.03),rgba(0,0,0,.22) 35%,#050505 100%),var(--ah-photo-consent),url("/AfterHours/visuals/reference-experience.svg")!important;background-position:center 28%!important;background-size:cover!important;}
+.insights:before{background-image:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.86)),var(--ah-photo-tarot),url("/AfterHours/visuals/reference-tarot.svg")!important;background-position:center 38%!important;background-size:cover!important;}
+.insights .tarot-card{background-image:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.86)),var(--ah-photo-tarot),url("/AfterHours/visuals/reference-tarot.svg")!important;background-position:center 38%!important;background-size:cover!important;}
+.insights.insights-astro:before{background-image:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.88)),var(--ah-photo-tarot),url("/AfterHours/visuals/reference-horoscope.svg")!important;background-position:center 38%!important;background-size:cover!important;}
+.insights .astro-card{background-image:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.88)),var(--ah-photo-tarot),url("/AfterHours/visuals/reference-horoscope.svg")!important;background-position:center 38%!important;background-size:cover!important;}
+.radio-room:before{background-image:linear-gradient(180deg,rgba(0,0,0,.18),rgba(0,0,0,.86)),var(--ah-photo-radio),url("/AfterHours/visuals/reference-radio.svg")!important;background-position:center 40%!important;background-size:cover!important;}
+.radio-hero,.radio-player,.radio-note{background-image:linear-gradient(180deg,rgba(0,0,0,.18),rgba(0,0,0,.86)),var(--ah-photo-radio),url("/AfterHours/visuals/reference-radio.svg")!important;background-position:center 40%!important;background-size:cover!important;}
 .experience-choice{background-size:cover!important;background-position:center!important;}
 .experience-choice.featured{background-image:linear-gradient(180deg,rgba(0,0,0,.04),rgba(0,0,0,.86)),var(--ah-photo-consent),url("/AfterHours/visuals/reference-experience.svg")!important;}
 .experience-choice:nth-child(2){background-image:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.86)),var(--ah-photo-tarot),url("/AfterHours/visuals/reference-tarot.svg")!important;}
