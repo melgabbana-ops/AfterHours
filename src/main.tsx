@@ -28,7 +28,7 @@ import MoodCheckIn from "./MoodCheckIn";
 
 import { recordSessionMoodRemote, type MoodCode, type MoodPhase } from "./services/moods";
 import type{AfterHoursState,AvatarStyle,Screen,Safety,SessionHistoryEntry}from"./types";
-import {initialScreenFromSearch} from "./navigation";
+import {initialScreenFromSearch, shouldShowTeaser} from "./navigation";
 import { isNotificationBackdropClick } from "./notificationOverlay";
 import{loadState,saveState,loadTimer,saveTimer,clearTimer,defaultState}from"./storage";
 import{loadRemoteState,loadRemoteRounds,syncRemoteState,updateRemoteUsername,completeRemoteSession,revokeRemoteConsent}from"./services/backend";
@@ -557,9 +557,8 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
 }
 const root=createRoot(document.getElementById("root")!);
 const entryParams=new URLSearchParams(window.location.search);
-const enterApp=entryParams.get("enter")==="1";
 const maintenancePreview=entryParams.get("maintenance")==="1";
-const teaserPreview=entryParams.get("teaser")==="1"||(!enterApp&&!maintenancePreview);
+const teaserPreview=shouldShowTeaser(window.location.search);
 if(teaserPreview){
  root.render(<Teaser/>);
 }else if(maintenancePreview){
