@@ -944,3 +944,68 @@ html,body,#root,.app{background:#050505!important;color:#f4e7d2!important}
  .app .insights .ah-tarot-card{min-height:260px!important}
  .app .insights .astro-zodiac-wheel{width:min(62vw,220px)!important}
 }
+
+
+/* REFERENCE MATCH · Radio turntable / now-playing screen */
+.app .ah-radio-reference{
+ width:100%!important;max-width:520px!important;min-height:calc(100dvh - 70px)!important;
+ padding:8px 18px calc(96px + env(safe-area-inset-bottom,0px))!important;background:#050403!important;
+}
+.app .ah-radio-reference:before{opacity:.9!important;background-size:cover!important;background-position:center top!important}
+.app .ah-radio-reference:after{background:linear-gradient(180deg,rgba(4,3,2,.08),rgba(4,3,2,.25) 34%,rgba(4,3,2,.94) 82%,#050403)!important}
+.app .ah-radio-reference .radio-hero{
+ margin:0!important;padding:8px 0 12px!important;text-align:center!important;background:transparent!important;border:0!important;
+}
+.app .ah-radio-reference .radio-hero>.eyebrow{display:none!important}
+.app .ah-radio-reference .radio-hero h2{
+ margin:4px 0 7px!important;font:clamp(27px,7vw,35px)/1.12 "Cinzel",Georgia,serif!important;
+ color:#f1dfbf!important;
+}
+.app .ah-radio-reference .radio-hero p{margin:0!important;font-size:10px!important;color:#d7c5a8!important}
+.app .ah-radio-reference .radio-player{
+ position:relative!important;isolation:isolate!important;overflow:hidden!important;
+ margin:0!important;padding:22px 18px 18px!important;min-height:0!important;
+ display:flex!important;flex-direction:column!important;align-items:center!important;text-align:center!important;
+ border:1px solid rgba(216,183,126,.46)!important;border-radius:8px!important;
+ background-image:linear-gradient(180deg,rgba(5,4,3,.12),rgba(5,4,3,.55) 45%,rgba(5,4,3,.98) 100%),url("/AfterHours/visuals/ah-radio-photo.svg")!important;
+ background-position:center top!important;background-size:cover!important;
+ box-shadow:0 20px 55px rgba(0,0,0,.55)!important;
+}
+.app .ah-radio-reference .radio-disc{
+ width:min(54vw,220px)!important;height:min(54vw,220px)!important;flex:none!important;
+ margin:2px auto 20px!important;border:1px solid rgba(226,190,126,.72)!important;border-radius:50%!important;
+ background-image:url("/AfterHours/visuals/ah-radio-vinyl.svg")!important;background-size:cover!important;background-position:center!important;
+ box-shadow:0 0 35px rgba(205,158,87,.2),0 14px 34px rgba(0,0,0,.6)!important;
+ animation:ah-vinyl-turn 18s linear infinite!important;
+}
+.app .ah-radio-reference .radio-disc>span{font:13px "Cinzel",Georgia,serif!important;color:#f0d5a0!important}
+@keyframes ah-vinyl-turn{to{transform:rotate(360deg)}}
+.app .ah-radio-reference .radio-player>.eyebrow{font-size:8px!important;letter-spacing:.2em!important;color:#d4b477!important}
+.app .ah-radio-reference .radio-player h3{
+ margin:8px 0 5px!important;font:18px "Cinzel",Georgia,serif!important;color:#f1dfbf!important;
+}
+.app .ah-radio-reference .radio-player>p{margin:0!important;font-size:9px!important;color:#c8b79d!important}
+.app .ah-radio-reference .radio-waveform{
+ width:100%!important;height:42px!important;margin:16px 0 9px!important;
+ display:flex!important;align-items:center!important;justify-content:center!important;gap:3px!important;overflow:hidden!important;
+}
+.app .ah-radio-reference .radio-waveform i{
+ width:2px!important;max-height:36px!important;min-height:5px!important;display:block!important;
+ border-radius:3px!important;background:linear-gradient(180deg,#f2d8a5,#9d713e)!important;
+ box-shadow:0 0 7px rgba(211,166,99,.24)!important;
+}
+.app .ah-radio-reference .spotify-open{
+ width:100%!important;min-height:49px!important;margin:8px 0 0!important;padding:0 15px!important;
+ border:1px solid #f0d29a!important;border-radius:7px!important;
+ background:linear-gradient(180deg,#e8c88f,#bd8c50)!important;color:#171008!important;
+}
+.app .ah-radio-reference .spotify-open strong{font-size:10px!important;letter-spacing:.08em!important}
+.app .ah-radio-reference .radio-note{
+ margin:12px 0 10px!important;padding:10px 11px!important;display:flex!important;gap:9px!important;
+ border:1px solid rgba(216,183,126,.22)!important;border-radius:6px!important;background:rgba(8,6,4,.85)!important;
+}
+.app .ah-radio-reference .radio-note>svg{width:16px!important;height:16px!important;flex:none!important;color:#d8b77e!important}
+.app .ah-radio-reference .radio-note strong{font:10px "Cinzel",Georgia,serif!important;color:#e8d5b6!important}
+.app .ah-radio-reference .radio-note span{font-size:8px!important;line-height:1.4!important;color:#bcae98!important}
+.app .ah-radio-reference>.back{width:100%!important;min-height:40px!important}
+@media(max-width:390px){.app .ah-radio-reference .radio-player{padding:17px 14px 14px!important}.app .ah-radio-reference .radio-disc{margin-bottom:14px!important}}
