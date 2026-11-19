@@ -1019,3 +1019,126 @@ html,body,#root,.app{background:#050505!important;color:#f4e7d2!important}
 /* Exact asset anchors for each reference screen. */
 .insights .tarot-card{background-image:linear-gradient(180deg,rgba(5,5,5,.3),rgba(5,5,5,.92)),url("/AfterHours/visuals/reference-tarot.svg")!important;background-size:cover!important}
 .insights .astro-card{background-image:linear-gradient(180deg,rgba(5,5,5,.3),rgba(5,5,5,.92)),url("/AfterHours/visuals/reference-horoscope.svg")!important;background-size:cover!important}
+
+
+/* REFERENCE MATCH · Profile and Game Selection */
+.app .ah-profile-screen{
+ width:100%!important;max-width:520px!important;margin:0 auto!important;
+ padding:8px 18px calc(100px + env(safe-area-inset-bottom,0px))!important;
+ background:#050403!important;
+}
+.app .ah-profile-screen .profile{
+ position:relative!important;display:flex!important;flex-direction:column!important;align-items:center!important;
+ gap:12px!important;padding:8px 0 20px!important;text-align:center!important;
+}
+.app .ah-profile-screen .profile:before{
+ content:""!important;position:absolute!important;z-index:0!important;top:0!important;left:50%!important;
+ width:100vw!important;height:300px!important;transform:translateX(-50%)!important;pointer-events:none!important;
+ background:linear-gradient(180deg,rgba(4,3,2,.1),rgba(4,3,2,.38) 58%,#050403 100%),url("/AfterHours/visuals/ah-profile-photo.svg") center 22%/cover!important;
+}
+.app .ah-profile-screen .profile>*{position:relative!important;z-index:1!important}
+.app .ah-profile-screen .identity-avatar{
+ width:126px!important;height:126px!important;margin:8px auto 2px!important;
+ border:2px solid #d4ae72!important;border-radius:50%!important;padding:4px!important;
+ background:#080706!important;box-shadow:0 0 0 5px rgba(207,166,99,.1),0 12px 34px rgba(0,0,0,.5)!important;
+}
+.app .ah-profile-screen .profile-portrait{width:100%!important;height:100%!important;object-fit:cover!important;border-radius:50%!important}
+.app .ah-profile-screen .profile>.eyebrow{font-size:8px!important;letter-spacing:.2em!important;color:#d7b77f!important}
+.app .ah-profile-screen .profile>h2{
+ margin:0!important;font:clamp(27px,7vw,34px)/1.12 "Cinzel",Georgia,serif!important;
+ color:#f1dfbf!important;letter-spacing:.02em!important;
+}
+.app .ah-profile-screen .profile>p{margin:0!important;font-size:10px!important;color:#d0c0a7!important}
+.app .ah-profile-screen .character-studio,.app .ah-profile-screen .mood-history,
+.app .ah-profile-screen .avatar-picker,.app .ah-profile-screen .media-vault,
+.app .ah-profile-screen .name-editor,.app .ah-profile-screen .rank-ladder,
+.app .ah-profile-screen .history,.app .ah-profile-screen .badge-showcase{
+ width:100%!important;text-align:left!important;border:1px solid rgba(211,174,112,.32)!important;
+ border-radius:8px!important;background:linear-gradient(145deg,rgba(25,19,12,.93),rgba(6,6,5,.97))!important;
+ box-shadow:0 12px 32px rgba(0,0,0,.24)!important;
+}
+.app .ah-profile-screen .profile-rank{
+ width:100%!important;padding:11px 13px!important;border:1px solid rgba(211,174,112,.4)!important;
+ border-radius:6px!important;background:rgba(10,8,6,.9)!important;
+ color:#f0d49a!important;font:12px "Cinzel",Georgia,serif!important;text-align:center!important;letter-spacing:.12em!important;
+}
+.app .ah-profile-screen .xp{
+ width:100%!important;height:7px!important;overflow:hidden!important;border:1px solid rgba(211,174,112,.28)!important;
+ border-radius:99px!important;background:#17120c!important;
+}
+.app .ah-profile-screen .xp>span{display:block!important;height:100%!important;background:linear-gradient(90deg,#8e6334,#f0d49a)!important;box-shadow:0 0 14px rgba(218,177,110,.32)!important}
+.app .ah-profile-screen .xp-label{align-self:flex-end!important;font-size:8px!important;color:#cbb998!important}
+.app .ah-profile-screen .stats{
+ width:100%!important;display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important;
+}
+.app .ah-profile-screen .stats>div{
+ min-width:0!important;padding:14px 5px!important;border:1px solid rgba(211,174,112,.36)!important;
+ border-radius:7px!important;background:linear-gradient(145deg,#21180e,#080706)!important;
+}
+.app .ah-profile-screen .stats b{display:block!important;font:23px "Cinzel",Georgia,serif!important;color:#f0d49a!important}
+.app .ah-profile-screen .stats small{display:block!important;margin-top:4px!important;font-size:8px!important;letter-spacing:.14em!important;color:#bfb099!important}
+.app .ah-profile-screen .rank-ladder,.app .ah-profile-screen .history{padding:14px!important}
+.app .ah-profile-screen .rank-ladder>div{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;margin-top:10px!important}
+.app .ah-profile-screen .rank-ladder>div>span{padding:8px!important;border:1px solid rgba(211,174,112,.17)!important;border-radius:4px!important;background:#090806!important;font-size:8px!important;color:#a99d89!important}
+.app .ah-profile-screen .rank-ladder>div>span.current{border-color:#d7b77f!important;color:#f0d49a!important;background:rgba(111,77,38,.22)!important}
+.app .ah-profile-screen .rank-ladder>div>span.passed{color:#c6ad82!important}
+.app .ah-profile-screen .history-row{padding:11px 0!important;border-bottom:1px solid rgba(211,174,112,.16)!important}
+.app .ah-profile-screen .history-row strong{font-size:10px!important;color:#ead9bc!important}
+.app .ah-profile-screen .history-row small{font-size:8px!important;color:#aa9c86!important}
+.app .ah-profile-screen .history-row>b{color:#e7c68d!important;font-size:10px!important}
+.app .ah-profile-screen .avatar-picker{padding:14px!important}
+.app .ah-profile-screen .avatar-options{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:6px!important}
+.app .ah-profile-screen .avatar-options button{min-width:0!important;padding:9px 3px!important;border:1px solid rgba(211,174,112,.22)!important;border-radius:5px!important;background:#090806!important;color:#cbb998!important}
+.app .ah-profile-screen .avatar-options button.selected{border-color:#d7b77f!important;background:rgba(111,77,38,.25)!important;color:#f0d49a!important}
+.app .ah-profile-screen .name-editor{padding:12px!important}
+.app .ah-profile-screen .name-editor>label{display:block!important;margin-bottom:8px!important;color:#d8bd8d!important;font-size:8px!important;letter-spacing:.15em!important}
+.app .ah-profile-screen .name-editor>div{display:flex!important;gap:6px!important}
+.app .ah-profile-screen .name-editor input{min-width:0!important;flex:1!important;background:#090806!important;border:1px solid rgba(211,174,112,.3)!important;color:#f0dfc0!important}
+.app .ah-profile-screen .name-editor button{padding:0 12px!important;border:1px solid #c79c60!important;border-radius:5px!important;background:linear-gradient(180deg,#e8c88f,#bd8c50)!important;color:#171008!important;font-size:9px!important}
+.app .game-select-screen{
+ width:100%!important;max-width:520px!important;margin:0 auto!important;
+ padding:8px 18px calc(100px + env(safe-area-inset-bottom,0px))!important;background:#050403!important;
+}
+.app .game-select-head{
+ margin:0!important;padding:9px 0 17px!important;text-align:center!important;border:0!important;background:transparent!important;
+}
+.app .game-select-head>.eyebrow{font-size:8px!important;letter-spacing:.19em!important;color:#d6b77f!important}
+.app .game-select-head h2{
+ margin:7px 0!important;font:clamp(27px,7vw,34px)/1.12 "Cinzel",Georgia,serif!important;color:#f1dfbf!important;
+}
+.app .game-select-head p{max-width:330px!important;margin:0 auto!important;font-size:10px!important;line-height:1.55!important;color:#cbbda7!important}
+.app .game-select-grid{
+ display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;
+}
+.app .game-select-grid .experience-choice{
+ position:relative!important;isolation:isolate!important;overflow:hidden!important;
+ min-height:220px!important;padding:13px!important;display:flex!important;flex-direction:column!important;
+ align-items:flex-start!important;justify-content:flex-end!important;gap:7px!important;text-align:left!important;
+ border:1px solid rgba(218,180,119,.55)!important;border-radius:7px!important;
+ background-image:linear-gradient(180deg,rgba(4,3,2,.06),rgba(4,3,2,.3) 36%,rgba(4,3,2,.96) 100%),url("/AfterHours/visuals/ah-grand-candlelit-chamber.svg")!important;
+ background-size:cover!important;background-position:center!important;
+ box-shadow:0 15px 34px rgba(0,0,0,.38)!important;
+}
+.app .game-select-grid .experience-choice:before{content:""!important;position:absolute!important;inset:0!important;z-index:-1!important;background:linear-gradient(135deg,rgba(8,7,5,.05),rgba(5,4,3,.6))!important}
+.app .game-select-grid .experience-choice.featured{grid-column:span 2!important;min-height:190px!important;background-position:center 38%!important}
+.app .game-select-grid .choice-symbol{
+ position:absolute!important;top:12px!important;left:12px!important;width:34px!important;height:34px!important;
+ display:grid!important;place-items:center!important;border:1px solid rgba(224,190,132,.65)!important;
+ border-radius:50%!important;background:rgba(5,4,3,.58)!important;color:#f0d49a!important;font-size:18px!important;
+}
+.app .game-select-grid .experience-choice>.eyebrow{font-size:7px!important;letter-spacing:.16em!important;color:#d8b77f!important}
+.app .game-select-grid .experience-choice>strong{font:15px "Cinzel",Georgia,serif!important;color:#f3e3c6!important;line-height:1.2!important}
+.app .game-select-grid .experience-choice>small{font-size:8px!important;line-height:1.45!important;color:#d1c2aa!important}
+.app .game-select-grid .choice-action{
+ width:100%!important;margin-top:3px!important;padding-top:8px!important;display:flex!important;
+ align-items:center!important;justify-content:space-between!important;border-top:1px solid rgba(222,185,125,.32)!important;
+ color:#f0d49a!important;font-size:8px!important;letter-spacing:.1em!important;text-transform:uppercase!important;
+}
+.app .game-select-grid .choice-action svg{width:14px!important;height:14px!important}
+@media(max-width:390px){
+ .app .ah-profile-screen,.app .game-select-screen{padding-left:14px!important;padding-right:14px!important}
+ .app .game-select-grid{gap:8px!important}
+ .app .game-select-grid .experience-choice{min-height:200px!important;padding:10px!important}
+ .app .game-select-grid .experience-choice.featured{min-height:175px!important}
+ .app .ah-profile-screen .identity-avatar{width:112px!important;height:112px!important}
+}
