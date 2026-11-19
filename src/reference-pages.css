@@ -352,3 +352,52 @@ input,select,textarea{accent-color:#c79b5d!important}
 .experience-choice:nth-child(2){background-image:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.88)),var(--ah-photo-tarot)!important}
 .experience-choice:nth-child(3){background-image:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.88)),var(--ah-photo-profile)!important}
 .experience-choice:nth-child(4){background-image:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.88)),var(--ah-photo-radio)!important}
+
+
+/* v2 photographic rollout: real, warm editorial imagery replaces geometric stand-ins. */
+.game-select-screen:before,.ah-session-screen:before{background-image:url("https://gcdn.picsart.com/pipeline-output/ee9b2312-7f4d-4299-b241-d3e16982fa36.png")!important;background-position:center 24%!important;}
+.aftercare-screen:before{background-image:url("https://gcdn.picsart.com/pipeline-output/e8f4402a-7e90-4143-8149-9bec98ab3241.png")!important;background-position:center 18%!important;}
+.completion-screen:before{background-image:url("https://gcdn.picsart.com/pipeline-output/5f3d6127-421e-424a-b009-edd9e6e66a8d.png")!important;background-position:center 20%!important;}
+.consent-screen:before{background-image:url("https://gcdn.picsart.com/pipeline-output/ee9b2312-7f4d-4299-b241-d3e16982fa36.png")!important;background-position:center top!important;}
+.ah-profile-screen:before{background-image:url("https://gcdn.picsart.com/pipeline-output/725cbaa5-4f9c-4aae-b16e-7ae8e7f4b340.png")!important;background-position:center 18%!important;}
+.radio-room:before{background-image:url("https://gcdn.picsart.com/pipeline-output/5dbe1964-e376-4d2a-b693-1b06392abd82.png")!important;background-position:center 24%!important;}
+.insights:before{background-image:url("https://gcdn.picsart.com/pipeline-output/fad8c8e3-1edc-4ec5-96ea-40a5486e4128.png")!important;background-position:center 22%!important;}
+.insights.insights-astro:before{background-image:url("https://gcdn.picsart.com/pipeline-output/fad8c8e3-1edc-4ec5-96ea-40a5486e4128.png")!important;background-position:center 18%!important;}
+.consent-visual{
+ background-image:linear-gradient(180deg,rgba(0,0,0,.03),rgba(0,0,0,.22) 35%,#050505 100%),url("https://gcdn.picsart.com/pipeline-output/ee9b2312-7f4d-4299-b241-d3e16982fa36.png")!important;
+ background-position:center 28%!important;
+}
+.aftercare-card{
+ background-image:linear-gradient(180deg,rgba(0,0,0,.04),rgba(0,0,0,.78) 42%,#050505 100%),url("https://gcdn.picsart.com/pipeline-output/e8f4402a-7e90-4143-8149-9bec98ab3241.png")!important;
+ background-position:center 20%!important;
+}
+.completion-card{
+ background-image:linear-gradient(180deg,rgba(0,0,0,.06),rgba(0,0,0,.88) 38%,#050505 100%),url("https://gcdn.picsart.com/pipeline-output/5f3d6127-421e-424a-b009-edd9e6e66a8d.png")!important;
+ background-position:center 22%!important;
+}
+.ah-profile-screen .profile{
+ background-image:linear-gradient(180deg,rgba(0,0,0,.06),rgba(0,0,0,.91) 300px),url("https://gcdn.picsart.com/pipeline-output/725cbaa5-4f9c-4aae-b16e-7ae8e7f4b340.png")!important;
+ background-position:center 15%!important;
+}
+.radio-hero,.radio-player,.radio-note{
+ background-image:linear-gradient(180deg,rgba(0,0,0,.22),rgba(0,0,0,.9)),url("https://gcdn.picsart.com/pipeline-output/5dbe1964-e376-4d2a-b693-1b06392abd82.png")!important;
+ background-position:center 24%!important;
+}
+.insights .insights-hero,.insights .tarot-card{
+ background-image:linear-gradient(180deg,rgba(0,0,0,.15),rgba(0,0,0,.9)),url("https://gcdn.picsart.com/pipeline-output/fad8c8e3-1edc-4ec5-96ea-40a5486e4128.png")!important;
+ background-position:center 18%!important;
+}
+.insights .astro-card{
+ background-image:linear-gradient(180deg,rgba(0,0,0,.18),rgba(0,0,0,.92)),url("https://gcdn.picsart.com/pipeline-output/fad8c8e3-1edc-4ec5-96ea-40a5486e4128.png")!important;
+ background-position:center 20%!important;
+}
+.experience-choice{background-size:cover!important;background-position:center!important;}
+.experience-choice.featured{background-image:linear-gradient(180deg,rgba(0,0,0,.04),rgba(0,0,0,.86)),url("https://gcdn.picsart.com/pipeline-output/ee9b2312-7f4d-4299-b241-d3e16982fa36.png")!important;}
+.experience-choice:nth-child(2){background-image:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.86)),url("https://gcdn.picsart.com/pipeline-output/fad8c8e3-1edc-4ec5-96ea-40a5486e4128.png")!important;}
+.experience-choice:nth-child(3){background-image:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.86)),url("https://gcdn.picsart.com/pipeline-output/fad8c8e3-1edc-4ec5-96ea-40a5486e4128.png")!important;}
+.experience-choice:nth-child(4){background-image:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.86)),url("https://gcdn.picsart.com/pipeline-output/e8f4402a-7e90-4143-8149-9bec98ab3241.png")!important;}
+@media(max-width:390px){
+ .consent-visual{min-height:285px!important;}
+ .aftercare-card{padding-top:22px!important;}
+ .completion-card{padding-top:24px!important;}
+}
