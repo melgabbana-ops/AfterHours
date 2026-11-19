@@ -56,6 +56,18 @@ export function canStartSessionWithVerifiedState(
   return !supabaseConfigured || (authenticated && remoteStateVerified);
 }
 
+/** A locally stopped and revoked session must be replayed to the server before remote hydration. */
+export function getPendingStopTimestamp(
+  sessionStatus: SessionSafetyStatus,
+  consentStatus: ConsentSafetyStatus,
+  revokedAt: string | null,
+  sessionUpdatedAt: string,
+): string | null {
+  if (sessionStatus !== "stopped" || consentStatus !== "revoked") return null;
+  const timestamp = revokedAt ?? sessionUpdatedAt;
+  return timestamp.trim().length > 0 ? timestamp : null;
+}
+
 /** A Supabase-backed session waits for authenticated remote hydration before its local timer can run. */
 export function shouldResumeSessionBeforeHydration(
   supabaseConfigured: boolean,

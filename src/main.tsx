@@ -37,7 +37,7 @@ import{getCurrentUser,sendMagicLink,signInWithProvider,signInWithPassword,signUp
 import{playNotificationSound,primeNotificationAudio}from"./services/notificationSound";
 import{levelFromXp,rankFromXp,rankIndexFromXp,rankNames,rankThresholds}from"./progression";
 import{notificationEvents}from"./services/notifications";
-import{canStartSessionWithVerifiedState,getSessionSafetyAnnouncement,getTaskChoiceFeedback,isTaskPassed,PASS_TASK_SELECTION,shouldResumeSession,shouldResumeSessionBeforeHydration}from"./services/sessionSafety";
+import{canStartSessionWithVerifiedState,getPendingStopTimestamp,getSessionSafetyAnnouncement,getTaskChoiceFeedback,isTaskPassed,PASS_TASK_SELECTION,shouldResumeSession,shouldResumeSessionBeforeHydration}from"./services/sessionSafety";
 import {getMaintenanceStatus,formatMaintenanceDate,type MaintenanceConfig} from "./maintenance";
 const PromptLibrary = React.lazy(() => import("./PromptLibrary"));
 const Insights = React.lazy(async () => ({ default: (await import("./Insights")).Insights }));
@@ -177,8 +177,8 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
  const[guideIndex,setGuideIndex]=useState(()=>Math.floor(Math.random()*guidePrompts.length));
  const hydrateGeneration=useRef(0);
  useEffect(()=>{let active=true;
-  const generation=++hydrateGeneration.current;
   const hydrate=async()=>{
+   const generation=++hydrateGeneration.current;
    const localState=loadState();
    if(supabaseConfigured)setRemoteStateVerified(false);
    if(!supabaseConfigured){
@@ -207,15 +207,38 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
    setUserEmail(user?.email??null);
    setSyncUserId(null);
    if(!user){
+    const pendingStopAt=getPendingStopTimestamp(localState.session.status,localState.consent.status,localState.consent.revokedAt,localState.session.updatedAt);
     setRemoteStateVerified(false);
     clearTimer(localState.profile.id);
     setRunning(false);
     setSeconds(fallbackRounds[0].time);
-    setState(current=>({...defaultState(),ageConfirmed:current.ageConfirmed,ageConfirmedFor:current.ageConfirmedFor,safety:current.safety}));
+    if(pendingStopAt){
+     setState(localState);
+     setCheckIn("stop");
+     setProfileMessage(t("Je STOP blijft lokaal bewaard. Meld je opnieuw aan en maak verbinding om de serverintrekking te bevestigen.","Your STOP remains saved locally. Sign in again and reconnect to confirm server revocation."));
+    }else{
+     setState(current=>({...defaultState(),ageConfirmed:current.ageConfirmed,ageConfirmedFor:current.ageConfirmedFor,safety:current.safety}));
+    }
     setAuthReady(true);
     return;
    }
    setAuthReady(false);
+   const pendingStopAt=getPendingStopTimestamp(localState.session.status,localState.consent.status,localState.consent.revokedAt,localState.session.updatedAt);
+   if(pendingStopAt){
+    const revocationError=await revokeRemoteConsent(localState.session.id,pendingStopAt);
+    if(!active||generation!==hydrateGeneration.current)return;
+    if(revocationError){
+     setRemoteStateVerified(false);
+     setState(localState);
+     setRunning(false);
+     setCheckIn("stop");
+     setSyncUserId(null);
+     setSafetySyncMessage(t("Je STOP is lokaal opgeslagen, maar de server heeft de intrekking nog niet bevestigd. De sessie blijft gestopt. Controleer je verbinding; de intrekking wordt automatisch opnieuw geprobeerd zodra je weer online bent.","Your STOP is saved locally, but the server has not confirmed revocation. The session remains stopped. Check your connection; revocation will be retried automatically when you are back online."));
+     setAuthReady(true);
+     return;
+    }
+    setSafetySyncMessage("");
+   }
    let remoteRounds:Awaited<ReturnType<typeof loadRemoteRounds>>=[];
    try{
     remoteRounds=await loadRemoteRounds(language);
@@ -275,6 +298,8 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
    setSyncUserId(user.id);
    setAuthReady(true);
   };
+  const handleOnline=()=>{if(active)void hydrate()};
+  window.addEventListener("online",handleOnline);
   void hydrate();
   const sub=supabase?.auth.onAuthStateChange((event,session)=>{
    if(!active)return;
@@ -287,6 +312,8 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
     setScreen("admin");
    }
    if(event==="SIGNED_OUT"){
+    const localState=loadState();
+    const pendingStopAt=getPendingStopTimestamp(localState.session.status,localState.consent.status,localState.consent.revokedAt,localState.session.updatedAt);
     setRemoteStateVerified(false);
     clearTimer(state.profile.id);
     clearTimer("local-profile");
@@ -296,14 +323,20 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
     setAuthMessage("");
     setAuthBusy(false);
     setRunning(false);
-    setState(defaultState());
+    if(pendingStopAt){
+     setState(localState);
+     setCheckIn("stop");
+     setProfileMessage(t("Je STOP blijft lokaal bewaard. Meld je opnieuw aan en maak verbinding om de serverintrekking te bevestigen.","Your STOP remains saved locally. Sign in again and reconnect to confirm server revocation."));
+    }else{
+     setState(defaultState());
+    }
     setScreen("home");
    }
    if(session?.user){
-    window.setTimeout(()=>{if(active&&generation===hydrateGeneration.current)void hydrate()},0);
+    window.setTimeout(()=>{if(active)void hydrate()},0);
    }
   });
-  return()=>{active=false;sub?.data.subscription.unsubscribe()};
+  return()=>{active=false;window.removeEventListener("online",handleOnline);sub?.data.subscription.unsubscribe()};
  },[]);
 
  useEffect(()=>{try{saveState(state)}catch{setProfileMessage(t("Lokale opslag is niet beschikbaar. Gebruik een ingelogd account om sessiegegevens server-side op te slaan.","Local storage is unavailable. Sign in to save session data on the server."))}if(!supabaseConfigured||syncUserId){void syncRemoteState(state).then(message=>{if(message){setProfileMessage(message);if(supabaseConfigured&&syncUserId)setRemoteStateVerified(false)}else if(supabaseConfigured&&syncUserId)setRemoteStateVerified(true)}).catch(()=>{if(supabaseConfigured&&syncUserId)setRemoteStateVerified(false);setProfileMessage(t("Synchronisatie is tijdelijk niet beschikbaar. Controleer je verbinding voordat je verdergaat.","Sync is temporarily unavailable. Check your connection before continuing."))})}if(!syncUserId)return;},[state,syncUserId]);
@@ -413,8 +446,19 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
   setState(s=>({...s,consent:{status:"pending",confirmedAt:null,revokedAt:null},session:{...s.session,id:crypto.randomUUID(),round:0,status:"ready",startedAt:null,updatedAt:now}}))
  };
  const revokeConsentRemotely=(sessionId:string,revokedAt:string)=>{setSafetySyncMessage("");void revokeRemoteConsent(sessionId,revokedAt).then(error=>{if(error)setSafetySyncMessage(t("Lokaal gestopt, maar intrekken op de server is niet bevestigd. Blijf gestopt en controleer je verbinding voordat je opnieuw start. ","Stopped locally, but server revocation was not confirmed. Stay stopped and check your connection before starting again. ")+error)}).catch(()=>setSafetySyncMessage(t("Lokaal gestopt, maar intrekken op de server is niet bevestigd. Blijf gestopt en controleer je verbinding voordat je opnieuw start.","Stopped locally, but server revocation was not confirmed. Stay stopped and check your connection before starting again.")))};
- const stop=()=>{setSafetyAnnouncement(getSessionSafetyAnnouncement("stopped",language));void playNotificationSound("safety");const now=new Date().toISOString();revokeConsentRemotely(state.session.id,now);clearTimer(state.profile.id);setRunning(false);setCheckIn("stop");setState(s=>({...s,consent:{status:"revoked",confirmedAt:null,revokedAt:now},notifications:[notificationEvents.safety(t("De sessie is veilig gestopt. Bevestig consent opnieuw voordat je opnieuw start.","The session has been safely stopped. Confirm consent again before restarting.")),...s.notifications].slice(0,20),session:{...s.session,status:"stopped",startedAt:null,updatedAt:now}}));setScreen("home")};
- const revokeConsent=()=>{setSafetyAnnouncement(getSessionSafetyAnnouncement("consent-revoked",language));void playNotificationSound("safety");const now=new Date().toISOString();revokeConsentRemotely(state.session.id,now);clearTimer(state.profile.id);setRunning(false);setState(s=>({...s,consent:{status:"revoked",confirmedAt:null,revokedAt:now},session:{...s.session,status:"stopped",startedAt:null,updatedAt:now}}));setSeconds(rounds[round].time);persistTimer(state.profile.id,round,rounds[round].time,false);setScreen("home")};
+ const persistStoppedState=(now:string,notice?:string)=>{
+  const stoppedState:AfterHoursState={...state,consent:{status:"revoked",confirmedAt:null,revokedAt:now},notifications:notice?[notificationEvents.safety(notice),...state.notifications].slice(0,20):state.notifications,session:{...state.session,status:"stopped",startedAt:null,updatedAt:now}};
+  let localSaveFailed=false;
+  try{saveState(stoppedState)}catch{localSaveFailed=true}
+  clearTimer(state.profile.id);
+  setRunning(false);
+  setCheckIn("stop");
+  setState(stoppedState);
+  revokeConsentRemotely(stoppedState.session.id,now);
+  if(localSaveFailed)setSafetySyncMessage(t("STOP is direct toegepast, maar kon niet lokaal worden opgeslagen. Houd de app open en controleer de opslaginstellingen.","STOP was applied immediately, but could not be saved locally. Keep the app open and check storage settings."));
+ };
+ const stop=()=>{setSafetyAnnouncement(getSessionSafetyAnnouncement("stopped",language));void playNotificationSound("safety");const now=new Date().toISOString();persistStoppedState(now,t("De sessie is veilig gestopt. Bevestig consent opnieuw voordat je opnieuw start.","The session has been safely stopped. Confirm consent again before restarting."));setScreen("home")};
+ const revokeConsent=()=>{setSafetyAnnouncement(getSessionSafetyAnnouncement("consent-revoked",language));void playNotificationSound("safety");const now=new Date().toISOString();persistStoppedState(now);setSeconds(rounds[round].time);persistTimer(state.profile.id,round,rounds[round].time,false);setScreen("home")};
  const confirmConsent=()=>{if(supabaseConfigured&&!syncUserId){setAuthMessage(t("Log in om consent en sessievoortgang veilig aan je account te koppelen.","Sign in to securely link consent and session progress to your account."));setScreen("admin");return;}setSafetyAnnouncement(getSessionSafetyAnnouncement("consent-confirmed",language));setCheckIn("clear");recordAchievement("consent_confirmed",{profileId:syncUserId});void playNotificationSound("checkin");setState(s=>({...s,notifications:[notificationEvents.checkIn(t("Je toestemming is bevestigd. Je kunt de experience veilig starten.","Your consent is confirmed. You can safely start the experience.")),...s.notifications].slice(0,20),consent:{status:"active",confirmedAt:new Date().toISOString(),revokedAt:null}}));};
  const handleCheckIn=(choice:"clear"|"pause"|"stop")=>{setCheckIn(choice);if(choice!=="stop")void playNotificationSound("checkin");if(choice==="pause"){setSafetyAnnouncement(getSessionSafetyAnnouncement("paused",language));setRunning(false);persistTimer(state.profile.id,round,seconds,false);updateSession({status:"paused"})}if(choice==="stop"){stop()}};
  const handleMoodChoice=(phase:MoodPhase,mood:MoodCode)=>{
