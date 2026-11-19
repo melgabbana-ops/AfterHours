@@ -67,8 +67,13 @@ if (!manifest.icons?.some((icon) => icon.sizes === "192x192" && icon.src.endsWit
   process.exit(1);
 }
 
-if (!serviceWorker.includes('const CACHE_NAME = "after-hours-v15"')) {
+if (!serviceWorker.includes('const CACHE_NAME = "after-hours-v16"')) {
   console.error("Service worker cache must be bumped when the app shell or install manifest changes.");
+  process.exit(1);
+}
+
+if (!existsSync("public/visuals/ah-grand-candlelit-chamber.webp")) {
+  console.error("The approved candlelit chamber background is missing.");
   process.exit(1);
 }
 
