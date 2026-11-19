@@ -28,7 +28,7 @@ const mappings = [
   { selector: ".completion-card", asset: "reference-completion.svg" },
   { selector: ".insights .tarot-card", asset: "reference-tarot.svg" },
   { selector: ".insights .astro-card", asset: "reference-horoscope.svg" },
-  { selector: ".radio-player{", asset: "reference-radio.svg" },
+  { selector: ".radio-hero,.radio-player,.radio-note{", asset: "reference-radio.svg" },
 ];
 
 const precachedAssets = [
