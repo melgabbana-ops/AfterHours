@@ -1614,3 +1614,70 @@ hr{border:0;border-top:1px solid var(--ah-line)}
 @keyframes ah-home-aurora{0%{transform:translate3d(-2%,1%,0) scale(.96);opacity:.72}100%{transform:translate3d(3%,-2%,0) scale(1.06);opacity:1}}
 @media(max-width:600px){.hero.home-hero{min-height:clamp(430px,72svh,560px)!important;padding:30px 16px!important;background-position:center 42%!important}.hero.home-hero .home-wordmark{width:min(250px,74vw)!important;max-height:88px!important}.hero.home-hero h2{font-size:clamp(28px,8vw,38px)!important}.hero.home-hero .home-level{width:min(340px,92%)!important}.hero.home-hero .home-start{width:min(330px,92%)!important}.grid.home-shortcuts .tile{min-height:92px!important}.teaser-film-motion{width:calc(100% - 20px)!important;min-height:clamp(250px,76vw,390px)!important;aspect-ratio:4/3!important;margin-top:18px}}
 @media(prefers-reduced-motion:reduce){.hero.home-hero:before{animation:none!important}.hero.home-hero .home-start,.grid.home-shortcuts .tile{transition:none!important}}
+
+
+/* AFTER HOURS · inner-screen visual system / obsidian + antique gold */
+:root{--ah-obsidian:#050403;--ah-gold-soft:#d9b979;--ah-gold-muted:rgba(211,174,111,.34)}
+.game-select-screen,.completion-screen,.aftercare-screen,.safety-screen{
+ background:radial-gradient(ellipse at 50% 0%,rgba(155,112,52,.15),transparent 42%),linear-gradient(180deg,#090806,#040403 72%)!important;
+ color:#f1e5d0!important;
+}
+.game-select-head h2,.completion-card h2,.aftercare-card h2,.experience-intro h3{
+ color:#f0d39a!important;font-family:"Cinzel",Georgia,serif!important;
+ text-shadow:0 5px 24px rgba(0,0,0,.65),0 0 22px rgba(185,139,69,.12);
+}
+.game-select-head .eyebrow,.completion-card .eyebrow,.aftercare-card .eyebrow{
+ color:#d5b77f!important;letter-spacing:.22em!important;
+}
+.experience-choice{
+ border:1px solid rgba(207,166,99,.42)!important;border-radius:4px!important;
+ background:linear-gradient(145deg,rgba(36,27,15,.94),rgba(7,6,5,.98) 72%)!important;
+ box-shadow:inset 0 1px rgba(240,213,143,.05),0 18px 42px rgba(0,0,0,.34)!important;
+}
+.experience-choice:before{background:radial-gradient(ellipse at 88% 12%,rgba(175,126,54,.24),transparent 48%)!important}
+.experience-choice.featured{border-color:rgba(232,194,125,.78)!important;box-shadow:inset 0 0 0 1px rgba(232,194,125,.16),0 18px 42px rgba(0,0,0,.4)!important}
+.experience-choice strong,.experience-choice h3{color:#f0d39a!important;font-family:"Cinzel",Georgia,serif!important}
+.experience-choice p,.experience-choice small{color:#c9bda9!important}
+.completion-card,.aftercare-card{
+ position:relative;overflow:hidden;border:1px solid rgba(213,174,111,.48)!important;
+ border-radius:4px!important;background:linear-gradient(148deg,rgba(31,23,14,.97),rgba(6,5,4,.99))!important;
+ box-shadow:0 24px 75px rgba(0,0,0,.5),inset 0 0 0 5px rgba(221,182,113,.025)!important;
+}
+.completion-card:before,.aftercare-card:before{content:"";position:absolute;inset:8px;pointer-events:none;border:1px solid rgba(213,174,111,.14)}
+.completion-seal{border-color:rgba(222,185,118,.7)!important;background:radial-gradient(circle,rgba(177,129,57,.24),rgba(8,7,5,.92) 70%)!important;color:#f0d39a!important;box-shadow:0 0 36px rgba(188,139,67,.12)!important}
+.aftercare-card>p,.completion-card>p{color:#c8bdad!important}
+.aftercare-options button{
+ border:1px solid rgba(210,171,109,.30)!important;border-radius:3px!important;
+ background:linear-gradient(145deg,rgba(32,24,15,.92),rgba(8,7,5,.98))!important;
+ color:#eee0c8!important;
+}
+.aftercare-options button.selected{border-color:rgba(235,199,135,.78)!important;background:linear-gradient(145deg,rgba(63,44,20,.8),rgba(12,9,6,.98))!important;box-shadow:inset 0 0 0 1px rgba(203,169,103,.14),0 0 22px rgba(203,169,103,.08)!important}
+.aftercare-options span,.aftercare-note{color:#bfb19b!important}
+.aftercare-note{border:1px solid rgba(210,171,109,.18)!important;border-radius:3px!important;background:rgba(20,15,9,.78)!important}
+.profile{max-width:760px;margin:0 auto!important;padding:28px 18px!important}
+.profile .identity-avatar{border:1px solid rgba(223,185,118,.72)!important;box-shadow:inset 0 0 0 5px #050403,0 0 0 5px rgba(211,174,111,.06),0 18px 48px rgba(0,0,0,.55)!important}
+.profile .identity-avatar span{border-color:#9a7845!important;background:#080705!important;color:#f0d39a!important}
+.profile>h2,.profile h2,.profile h3{color:#f0d39a!important;font-family:"Cinzel",Georgia,serif!important}
+.profile .xp{height:5px!important;border-radius:8px!important;background:#292116!important;overflow:hidden}
+.profile .xp span{background:linear-gradient(90deg,#795329,#c99a55,#f0d99b)!important;box-shadow:0 0 14px rgba(220,174,91,.42)}
+.profile .stats{gap:clamp(24px,8vw,70px)!important}
+.profile .stats b{color:#f1dfbf!important}
+.admin{padding:20px!important;border:1px solid rgba(211,174,111,.24)!important;border-radius:4px!important;background:linear-gradient(145deg,rgba(26,20,12,.82),rgba(5,4,3,.96))!important}
+.admin h2{color:#f0d39a!important;font-family:"Cinzel",Georgia,serif!important}
+.adminrow{border-color:rgba(211,174,111,.2)!important}
+.adminrow svg{color:#d9b979!important}
+.adminrow b{color:#e9d7b7!important}
+.adminrow span{color:#b8aa94!important}
+.bottom-nav,.app-nav,.mobile-nav{background:rgba(5,4,3,.97)!important;border-top:1px solid rgba(211,174,111,.32)!important;box-shadow:0 -12px 36px rgba(0,0,0,.36)!important;backdrop-filter:blur(18px)}
+nav button.active,.bottom-nav button.active,.app-nav button.active,.mobile-nav button.active{color:#f0d39a!important;text-shadow:0 0 16px rgba(218,177,105,.28)}
+nav button svg,.bottom-nav button svg,.app-nav button svg,.mobile-nav button svg{color:inherit!important}
+.game-select-screen button:focus-visible,.completion-screen button:focus-visible,.aftercare-screen button:focus-visible,.profile button:focus-visible,.admin button:focus-visible{outline:2px solid #edcf94!important;outline-offset:3px!important}
+@media(max-width:600px){
+ .game-select-grid{gap:9px!important}
+ .experience-choice{min-height:190px!important;padding:14px!important;border-radius:3px!important}
+ .completion-card,.aftercare-card{padding:24px 17px!important}
+ .profile{padding:20px 14px calc(104px + env(safe-area-inset-bottom))!important}
+ .profile .stats{gap:28px!important;flex-wrap:wrap}
+ .admin{padding:15px!important}
+}
+@media(prefers-reduced-motion:reduce){.experience-choice,.aftercare-options button{transition:none!important}}
