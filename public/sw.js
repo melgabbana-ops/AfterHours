@@ -10,7 +10,7 @@ const APP_SHELL = [
   asset("manifest.webmanifest"),
   asset("after-hours-brand-logo.svg"),
   asset("after-hours-brand-logo-transparent.svg"),
-  asset("visuals/ah-grand-candlelit-chamber.webp"),
+  asset("visuals/ah-grand-candlelit-chamber.svg"),
   asset("visuals/ah-cinematic-background.svg"),
   asset("visuals/ah-cinematic-hero.svg"),
   asset("after-hours-wordmark.svg"),
