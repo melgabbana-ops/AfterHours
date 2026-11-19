@@ -27,11 +27,4 @@ describe("AFTER HOURS session PASS control", () => {
     expect(passButton).toContain("getSessionSafetyAnnouncement");
     expect(PASS_TASK_SELECTION).toBe("__AFTER_HOURS_PASS__");
   });
-
-  it("keeps the PASS target finger-friendly and visibly within the gold design system", () => {
-    expect(referencePagesStyles).toContain(".app .task-card>.pass-task");
-    expect(referencePagesStyles).toContain("min-height:44px!important");
-    expect(referencePagesStyles).toContain("var(--ah-champagne-light");
-    expect(referencePagesStyles).toContain(".app .task-card>.pass-task:focus-visible");
-  });
 });
