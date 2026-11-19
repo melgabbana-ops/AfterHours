@@ -335,7 +335,7 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
  const pauseRound=()=>{setSafetyAnnouncement(getSessionSafetyAnnouncement("paused",language));setRunning(false);persistTimer(state.profile.id,round,seconds,false);updateSession({status:"paused"})};
  const startRound=()=>{
   if(!canStartSessionWithVerifiedState(supabaseConfigured,Boolean(syncUserId),remoteStateVerified)){
-   if(supabaseConfigured&&!syncUserId){setAuthMessage(t("Log in voordat je een sessie start, zodat consent en actieve speeltijd veilig worden opgeslagen.","Sign in before starting a session so consent and active play time can be saved securely."));setScreen("admin");return}
+   if(supabaseConfigured&&!syncUserId&&!userEmail){setAuthMessage(t("Log in voordat je een sessie start, zodat consent en actieve speeltijd veilig worden opgeslagen.","Sign in before starting a session so consent and active play time can be saved securely."));setScreen("admin");return}
    setSafetySyncMessage(t("De serverstatus van deze sessie is niet geverifieerd. De sessie blijft gepauzeerd. Controleer je verbinding en laad opnieuw voordat je verdergaat.","The server status of this session has not been verified. The session remains paused. Check your connection and reload before continuing."));
    setRunning(false);
    setScreen("home");
