@@ -217,3 +217,100 @@ describe("AFTER HOURS offline intro shell", () => {
     }
   });
 });
+
+
+function startNotificationClickWorker(url, windows = []) {
+  const handlers = new Map();
+  const notification = {
+    data: { url },
+    close: vi.fn(),
+  };
+  const clients = {
+    matchAll: vi.fn(async () => windows),
+    openWindow: vi.fn(async () => undefined),
+  };
+  const self = {
+    location: {
+      href: "https://app.example/AfterHours/sw.js",
+      origin: "https://app.example",
+    },
+    addEventListener: (type, handler) => handlers.set(type, handler),
+    clients,
+    skipWaiting: vi.fn(),
+  };
+  runInNewContext(workerSource, { self, URL });
+
+  let completion;
+  handlers.get("notificationclick")({
+    notification,
+    waitUntil: (promise) => { completion = promise; },
+  });
+
+  return {
+    notification,
+    clients,
+    complete: () => completion,
+  };
+}
+
+describe("AFTER HOURS notification-click navigation safety", () => {
+  const home = "https://app.example/AfterHours/";
+
+  it("opens a normalized in-app destination when no app window is available", async () => {
+    const worker = startNotificationClickWorker("/?screen=profile");
+
+    await worker.complete();
+
+    expect(worker.notification.close).toHaveBeenCalledTimes(1);
+    expect(worker.clients.openWindow).toHaveBeenCalledWith(
+      "https://app.example/AfterHours/?screen=profile",
+    );
+  });
+
+  it("focuses an existing app window and navigates it only to the scoped app path", async () => {
+    const client = {
+      focus: vi.fn(async () => undefined),
+      navigate: vi.fn(async () => undefined),
+    };
+    const worker = startNotificationClickWorker("/?screen=radio", [client]);
+
+    await worker.complete();
+
+    expect(client.focus).toHaveBeenCalledTimes(1);
+    expect(client.navigate).toHaveBeenCalledWith(
+      "https://app.example/AfterHours/?screen=radio",
+    );
+    expect(worker.clients.openWindow).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["external absolute URL", "https://evil.example/path"],
+    ["protocol-relative URL", "//evil.example/path"],
+    ["root path traversal", "/../../outside"],
+    ["scoped path traversal", "/AfterHours/../../outside"],
+    ["encoded path traversal", "/AfterHours/%2e%2e/%2e%2e/outside"],
+    ["backslash URL separator", "/\\\\evil.example/path"],
+    ["script URL", "javascript:alert(1)"],
+  ])("revalidates an unsafe %s before opening a window", async (_label, url) => {
+    const worker = startNotificationClickWorker(url);
+
+    await worker.complete();
+
+    expect(worker.notification.close).toHaveBeenCalledTimes(1);
+    expect(worker.clients.openWindow).toHaveBeenCalledWith(home);
+  });
+
+  it("revalidates notification data before navigating an already-open app window", async () => {
+    const client = {
+      focus: vi.fn(async () => undefined),
+      navigate: vi.fn(async () => undefined),
+    };
+    const worker = startNotificationClickWorker("//evil.example/steal", [client]);
+
+    await worker.complete();
+
+    expect(client.focus).toHaveBeenCalledTimes(1);
+    expect(client.navigate).toHaveBeenCalledWith(home);
+    expect(worker.clients.openWindow).not.toHaveBeenCalled();
+  });
+});
