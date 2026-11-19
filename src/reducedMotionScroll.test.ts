@@ -23,6 +23,6 @@ describe("reduced-motion aware consent navigation", () => {
 
   it("wires the consent boundary shortcut to the operating-system motion preference", () => {
     expect(consentSource).toContain('window.matchMedia?.("(prefers-reduced-motion: reduce)")');
-    expect(consentSource).toMatch(/scrollIntoViewRespectingMotion\\(note,\\s*prefersReducedMotion\\)/);
+    expect(consentSource).toContain("scrollIntoViewRespectingMotion(note,prefersReducedMotion)");
   });
 });
