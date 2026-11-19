@@ -67,7 +67,7 @@ describe("AFTER HOURS screen-specific artwork", () => {
   });
 
   it("ships every screen artwork asset with the service worker shell", () => {
-    expect(serviceWorker).toContain('const CACHE_NAME = "after-hours-v19";');
+    expect(serviceWorker).toContain('const CACHE_NAME = "after-hours-v20";');
     for (const asset of precachedAssets) {
       expect(serviceWorker).toContain(`asset("visuals/${asset}")`);
     }
