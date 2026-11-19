@@ -8,6 +8,7 @@ import{createRoot}from"react-dom/client";
 import{Shield,Lock,Play,Pause,RotateCcw,ChevronRight,User,Settings,Home,Timer,CheckCircle2,Square,Activity,LogOut,Sparkles,Radio,Bell,BookOpen,EyeOff,ShoppingBag,MessageCircle,CalendarDays}from"lucide-react";
 import"./styles.css";
 import"./approved-cinematic.css";
+import"./reference-home.css";
 
 
 
@@ -455,43 +456,49 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
  {maintenanceStatus.warning&&<aside className="maintenance-warning" role="status" aria-live="polite"><div><strong>{t("Gepland onderhoud komt eraan","Scheduled maintenance is coming up")}</strong><span>{language==="nl"?maintenanceStatus.messageNL:maintenanceStatus.messageEN}</span><small>{t("Start: ","Starts: ")}{maintenanceStatus.startsAtMs===null?"":formatMaintenanceDate(maintenanceStatus.startsAtMs,language)}{maintenanceStatus.endsAtMs!==null?" · "+t("verwacht einde: ","expected finish: ")+formatMaintenanceDate(maintenanceStatus.endsAtMs,language):""}</small></div></aside>}
  <header><button className="wordmark brand-nav" onClick={()=>setScreen("home")} aria-label="AFTER HOURS home"><img src={`${import.meta.env.BASE_URL}after-hours-wordmark-transparent.svg`} alt="AFTER HOURS" /></button><div className="header-tools"><button type="button" className="safety-shortcut" aria-label={t("Veiligheidsplan openen","Open safety plan")} title={t("Veiligheidsplan","Safety plan")} onClick={()=>setScreen("safety")}><Shield size={17}/></button><button type="button" className="privacy-shortcut" aria-label={privacyMode?t("Privémodus uitschakelen","Turn privacy mode off"):t("Privémodus inschakelen","Turn privacy mode on")} title={privacyMode?t("Privémodus uitschakelen","Turn privacy mode off"):t("Privémodus","Privacy mode")} aria-pressed={privacyMode} onClick={()=>setPrivacyMode(value=>!value)}><EyeOff size={16}/></button><button type="button" className="language-toggle" aria-label={t("Taal wijzigen","Change language")} onClick={()=>setLanguage(language==="nl"?"en":"nl")}><span className={language==="nl"?"language-active":""}>NL</span><span className="language-divider">/</span><span className={language==="en"?"language-active":""}>EN</span></button><div className="status"><span></span> {t("privé sessie","private session")}</div></div></header>
 
- {screen==="home"&&<main className="ah-home-screen">  {authReady&&(!supabaseConfigured||!syncUserId)&&<section className="consent-panel" role="status"><Lock/><div><strong>{supabaseConfigured?t("Niet ingelogd","Not signed in"):t("Lokale demo-modus","Local demo mode")}</strong><span>{supabaseConfigured?t("Je kunt de experience bekijken, maar log in voordat je begint om sessievoortgang en XP aan je account te koppelen.","You can preview the experience, but sign in before starting to link session progress and XP to your account."):t("De Supabase-backend is niet ingesteld. Voortgang blijft lokaal op dit apparaat; sessies kunnen niet server-side worden afgerond en leveren geen opgeslagen XP op.","The Supabase backend is not configured. Progress stays on this device; sessions cannot be completed server-side and XP will not be saved.")}</span></div>{supabaseConfigured&&!syncUserId&&<button onClick={()=>setScreen("admin")}>{t("Inloggen","Sign in")}</button>}</section>}
-  {safetySyncMessage&&<section className="safety-sync-alert" role="alert"><Shield/><span>{safetySyncMessage}</span><button onClick={()=>setSafetySyncMessage("")}>{t("Begrepen","Dismiss")}</button></section>}
-  <MoodCheckIn phase="before" language={language} selected={moodBefore} onSelect={mood=>handleMoodChoice("before",mood)}/>
+ {screen==="home"&&<main className="ah-home-screen ah-reference-home">
   <div className="notification-bar">
    <button className="notification-button" aria-label={unreadNotifications?unreadNotifications+" "+t("ongelezen meldingen","unread notifications"):t("Meldingen","Notifications")} aria-expanded={notificationsOpen} aria-controls="after-hours-notifications" onClick={()=>setNotificationsOpen(open=>!open)}>
-    <Bell size={16}/>
-    {unreadNotifications>0&&<span>{unreadNotifications>9?"9+":unreadNotifications}</span>}
+    <Bell size={16}/>{unreadNotifications>0&&<span>{unreadNotifications>9?"9+":unreadNotifications}</span>}
    </button>
    {notificationsOpen&&<div id="after-hours-notifications" className="notification-panel" role="dialog" aria-label={t("Meldingen","Notifications")}>
     <div className="notification-head"><strong>{t("MELDINGEN","NOTIFICATIONS")}</strong><div className="notification-head-actions"><button type="button" onClick={()=>void testNotificationSound()}>{t("Test eigen geluid","Test signature sound")}</button><button onClick={markAllNotificationsRead} disabled={!unreadNotifications}>{t("Alles gelezen","Mark all read")}</button></div><small className="notification-sound-note">{t("Het AFTER HOURS-geluid werkt wanneer de app actief is. iOS bepaalt het geluid van systeem- en pushmeldingen.","The AFTER HOURS sound plays while the app is active. iOS controls system and push notification sounds.")}</small>{soundTestFeedback&&<small className="notification-sound-feedback" role="status" aria-live="polite">{soundTestFeedback}</small>}</div>
     {state.notifications.length?state.notifications.slice(0,8).map(item=><button key={item.id} className={"notification-item "+(item.read?"":"unread")} onClick={()=>markNotificationRead(item.id)}><b>{item.title}</b><span>{item.body}</span></button>):<small>{t("Geen nieuwe meldingen.","No new notifications.")}</small>}
    </div>}
   </div>
-  <section className="hero home-hero" style={{"--ah-cinematic-background": `url("${import.meta.env.BASE_URL}visuals/ah-grand-candlelit-chamber.svg")`} as React.CSSProperties}>
+  <section className="hero home-hero" style={{"--ah-cinematic-background":`url("${import.meta.env.BASE_URL}visuals/ah-grand-candlelit-chamber.svg")`} as React.CSSProperties}>
    <img className="home-wordmark" src={`${import.meta.env.BASE_URL}after-hours-wordmark-transparent.svg`} alt="AFTER HOURS"/>
-   <span className="eyebrow">{t("WELKOM TERUG","WELCOME BACK")}</span><h2>{state.profile.displayName||"Mysti"}</h2>
-   <div className="home-level"><span>♙</span><div><strong>Level {state.profile.level}</strong><small>{xp} / {nextLevelFloor} XP</small><div className="home-xp"><i style={{width:levelProgress+"%"}}/></div></div></div>
-   <button className="home-start gold" onClick={()=>{if(consent){setScreen("gameSelect");return}document.getElementById("consent")?.scrollIntoView({behavior:"smooth",block:"center"})}}>{t("START EXPERIENCE","START EXPERIENCE")} <ChevronRight/></button>
+   <span className="eyebrow">{t("WELCOME BACK","WELCOME BACK")}</span>
+   <h2>{state.profile.displayName||"Mistress"}</h2>
+   <p className="home-intro">{t("Vervolg je reis, ontdek nieuwe ervaringen en verleg je grenzen.","Continue your journey, explore new experiences and push boundaries.")}</p>
+   <button className="home-start gold" onClick={()=>{if(consent){setScreen("gameSelect");return}document.getElementById("consent")?.scrollIntoView({behavior:"smooth",block:"center"})}}><Play size={15}/>{t("START EXPERIENCE","START EXPERIENCE")} <ChevronRight size={16}/></button>
   </section>
-  <section className="grid home-shortcuts">
-   <button className="tile" onClick={()=>setScreen("gameSelect")}><Play/><span>{t("Games & taken","Games & tasks")}</span></button>
-   <button className="tile" onClick={()=>{setInsightsInitialTab("tarot");setScreen("insights")}}><Sparkles/><span>{t("Kinky Tarot","Kinky Tarot")}</span></button>
-   <button className="tile" onClick={()=>setScreen("radio")}><Radio/><span>{t("Radio","Radio")}</span></button>
+  <section className="grid home-shortcuts" aria-label={t("Snel naar","Quick access")}>
+   <button className="tile" onClick={()=>setScreen("gameSelect")}><Play/><span>{t("Games","Games")}</span></button>
+   <button className="tile" onClick={()=>{setInsightsInitialTab("tarot");setScreen("insights")}}><Sparkles/><span>Tarot</span></button>
+   <button className="tile" onClick={()=>setScreen("radio")}><Radio/><span>Radio</span></button>
    <button className="tile" onClick={()=>setScreen("profile")}><User/><span>{t("Profiel","Profile")}</span></button>
-   <button className="tile" onClick={()=>{setInsightsInitialTab("astro");setScreen("insights")}}><Activity/><span>{t("Horoscoop","Horoscope")}</span></button>
-   <button className="tile" onClick={()=>setScreen("prompts")}><BookOpen/><span>{t("Het Deck","The Deck")}</span></button>
-   <button className="tile" onClick={()=>setScreen("missions")}><Activity/><span>{t("Missies","Missions")}</span></button>
-   <button className="tile" onClick={()=>setScreen("daily")}><CalendarDays/><span>{t("Dagelijks ritueel","Daily After Hours")}</span></button>
-   <button className="tile" onClick={()=>setScreen("store")}><ShoppingBag/><span>{t("Collecties & prijzen","Collections & pricing")}</span></button>
-   <button className="tile" onClick={()=>setScreen("social")}><MessageCircle/><span>{t("Social studio","Social studio")}</span></button>
-   <button className="tile" onClick={()=>setScreen("lovense")}><Activity/><span>{t("Lovense Connect","Lovense Connect")}</span></button>
-   <button className="tile" onClick={()=>setScreen("legal")}><BookOpen/><span>{t("Juridische info","Legal information")}</span></button>
-   <button className="tile" onClick={shareWhatsAppInvite}><MessageCircle/><span>{t("Deel via WhatsApp","Invite via WhatsApp")}</span></button>
-   {isBusinessAdmin&&<button className="tile admin-launch-tile" onClick={()=>setScreen("controlroom")}><Shield/><span>{t("Beheerpaneel","Admin dashboard")}</span></button>}
   </section>
+  <details className="home-more">
+   <summary>{t("Meer ontdekken","Explore more")}</summary>
+   <div className="home-more-grid">
+    <button onClick={()=>{setInsightsInitialTab("astro");setScreen("insights")}}>{t("Horoscoop","Horoscope")}</button>
+    <button onClick={()=>setScreen("prompts")}>{t("Het Deck","The Deck")}</button>
+    <button onClick={()=>setScreen("missions")}>{t("Missies","Missions")}</button>
+    <button onClick={()=>setScreen("daily")}>{t("Dagelijks ritueel","Daily ritual")}</button>
+    <button onClick={()=>setScreen("store")}>{t("Collecties & prijzen","Collections & pricing")}</button>
+    <button onClick={()=>setScreen("social")}>{t("Social studio","Social studio")}</button>
+    <button onClick={()=>setScreen("lovense")}>Lovense Connect</button>
+    <button onClick={()=>setScreen("legal")}>{t("Juridische info","Legal information")}</button>
+    <button onClick={shareWhatsAppInvite}>{t("Deel via WhatsApp","Invite via WhatsApp")}</button>
+    {isBusinessAdmin&&<button onClick={()=>setScreen("controlroom")}>{t("Beheerpaneel","Admin dashboard")}</button>}
+   </div>
+  </details>
   {!consent&&<section id="consent" className="consent-panel"><Shield/><div><strong>{t("Consent is vereist","Consent is required")}</strong><span>{t("Bevestig je vrijwillige toestemming voordat je een ervaring start.","Confirm your voluntary consent before starting an experience.")}</span></div><button onClick={confirmConsent}>{t("Bevestigen","Confirm")}</button></section>}
   {(consent&&(state.session.status==="active"||state.session.status==="paused"))&&<section className="resume-panel"><Activity/><div><strong>{state.session.status==="active"?t("Sessie hervatbaar","Session ready to resume"):t("Sessie gepauzeerd","Session paused")}</strong><span>{state.session.status==="active"?t("De timer loopt verder vanaf de opgeslagen positie.","The timer resumes from its saved position."):t("Je kunt doorgaan vanaf de opgeslagen positie.","You can continue from the saved position.")}</span></div><button onClick={()=>setScreen("game")}>{state.session.status==="active"?t("Ga verder","Continue"):t("Hervatten","Resume")} <ChevronRight/></button></section>}
+  <MoodCheckIn phase="before" language={language} selected={moodBefore} onSelect={mood=>handleMoodChoice("before",mood)}/>
+  {authReady&&(!supabaseConfigured||!syncUserId)&&<section className="consent-panel home-auth-panel" role="status"><Lock/><div><strong>{supabaseConfigured?t("Niet ingelogd","Not signed in"):t("Lokale demo-modus","Local demo mode")}</strong><span>{supabaseConfigured?t("Log in om je voortgang en XP aan je account te koppelen.","Sign in to link progress and XP to your account."):t("Voortgang blijft lokaal op dit apparaat; sessies worden niet server-side opgeslagen.","Progress stays on this device; sessions are not saved server-side.")}</span></div>{supabaseConfigured&&!syncUserId&&<button onClick={()=>setScreen("admin")}>{t("Inloggen","Sign in")}</button>}</section>}
+  {safetySyncMessage&&<section className="safety-sync-alert" role="alert"><Shield/><span>{safetySyncMessage}</span><button onClick={()=>setSafetySyncMessage("")}>{t("Begrepen","Dismiss")}</button></section>}
  </main>}
 
  {screen==="gameSelect"&&<main className="game-select-screen ah-editorial-screen"><section className="game-select-head"><span className="eyebrow">AFTER HOURS · EXPERIENCE COLLECTION</span><h2>{t("Kies jouw ervaring","Choose your experience")}</h2><p>{t("Vier manieren om jouw avond vorm te geven. Kies wat vandaag goed voelt.","Four ways to shape your evening. Choose what feels right today.")}</p></section><div className="game-select-grid"><button className="experience-choice featured" onClick={()=>setScreen(consent?"game":"home")}><span className="choice-symbol">⌛</span><span className="eyebrow">01 · SIGNATURE EXPERIENCE</span><strong>THE 60-MINUTE GAME</strong><small>{t("Een complete ervaring in drie rondes, met check-ins en aftercare.","A complete three-round experience with check-ins and aftercare.")}</small><span className="choice-action">{t("Start ervaring","Start experience")} <ChevronRight/></span></button><button className="experience-choice" onClick={()=>{setInsightsInitialTab("tarot");setScreen("insights")}}><span className="choice-symbol">✧</span><span className="eyebrow">02 · DAILY INSIGHT</span><strong>KINKY TAROT</strong><small>{t("Trek een kaart en ontdek een reflectie voor vandaag.","Draw a card and discover a reflection for today.")}</small><span className="choice-action">{t("Open tarot","Open tarot")} <ChevronRight/></span></button><button className="experience-choice" onClick={()=>{setInsightsInitialTab("astro");setScreen("insights")}}><span className="choice-symbol">♓</span><span className="eyebrow">03 · COSMIC PLAY</span><strong>{t("KINKY HOROSCOOP","KINKY ASTROLOGY")}</strong><small>{t("Ontdek de astrologische invalshoek van jouw dag.","Explore the astrological angle of your day.")}</small><span className="choice-action">{t("Ontdek meer","Explore")} <ChevronRight/></span></button><button className="experience-choice" onClick={()=>{setInsightsInitialTab("oracle");setScreen("insights")}}><span className="choice-symbol">◇</span><span className="eyebrow">04 · INNER COMPASS</span><strong>AFTER HOURS ORACLE</strong><small>{t("Ontvang een reflectie en een vraag om samen bij stil te staan.","Receive a reflection and a question to explore together.")}</small><span className="choice-action">{t("Open het orakel","Open the oracle")} <ChevronRight/></span></button></div><button className="back" onClick={()=>setScreen("home")}>← {t("Terug naar home","Back home")}</button></main>}
