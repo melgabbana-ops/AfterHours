@@ -226,14 +226,17 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
     remote=await loadRemoteState(localState.session.id);
    }catch{
     remoteLoadFailed=true;
-    setProfileMessage(t("Online sessiegegevens zijn tijdelijk niet bereikbaar. Je volledige lokale profiel en sessie blijven behouden. Controleer je verbinding en probeer opnieuw.","Online session data is temporarily unavailable. Your complete local profile and session are preserved. Check your connection and try again."));
+    setProfileMessage(t("Online sessiegegevens zijn tijdelijk niet bereikbaar. Je lokale gegevens blijven behouden, maar de sessie wordt uit veiligheid niet hervat. Controleer je verbinding en laad opnieuw voordat je verdergaat.","Online session data is temporarily unavailable. Your local data is preserved, but the session is not resumed for safety. Check your connection and reload before continuing."));
    }
    if(!active||generation!==hydrateGeneration.current)return;
    if(remoteLoadFailed){
     setState(localState);
     const restoredRound=Math.min(Math.max(0,localState.session.round),availableRounds.length-1);
-    setRunning(shouldResumeSession(localState.session.status,localState.consent.status));
+    setRunning(shouldResumeSession(localState.session.status,localState.consent.status,false));
     setSeconds(loadTimer(localState.profile.id,restoredRound,availableRounds[restoredRound].time));
+    // Keep syncUserId unset: do not resume or push unverified local consent/session state to the server.
+    setAuthReady(true);
+    return;
    }else if(remote){
     const sameAccount=localState.profile.id===user.id;
     const remoteIsNewer=!sameAccount||remote.session.id!==localState.session.id||new Date(remote.session.updatedAt).getTime()>=new Date(localState.session.updatedAt).getTime();
