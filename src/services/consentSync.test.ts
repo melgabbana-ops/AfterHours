@@ -106,3 +106,26 @@ describe("consent revocation ordering", () => {
     ]);
   });
 });
+
+
+describe("offline STOP acknowledgement", () => {
+  it("does not report a missing server session as a successful revocation", async () => {
+    mocks.from.mockImplementation(() => ({
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+    }));
+
+    const { revokeRemoteConsent } = await import("./backend");
+    await expect(revokeRemoteConsent(SESSION_ID, "2026-11-19T08:01:00.000Z"))
+      .resolves.toContain("Server-sessie niet gevonden");
+    expect(mocks.rpc).not.toHaveBeenCalled();
+  });
+
+  it("rejects a non-UUID session identifier instead of silently skipping STOP sync", async () => {
+    const { revokeRemoteConsent } = await import("./backend");
+    await expect(revokeRemoteConsent("local-session", "2026-11-19T08:01:00.000Z"))
+      .resolves.toContain("Sessie-ID kan niet veilig worden gecontroleerd");
+    expect(mocks.getUser).not.toHaveBeenCalled();
+  });
+});
