@@ -75,6 +75,24 @@ self.addEventListener("activate", (event) => {
   })());
 });
 
+// Resolve notification destinations only inside this app's GitHub Pages base path.
+function safeNotificationPath(value) {
+  const fallback = asset("");
+  if (typeof value !== "string" || value.startsWith("//") || value.includes("\\")) return fallback;
+  try {
+    const candidate = new URL(
+      value.startsWith("/")
+        ? (value.startsWith(BASE_PATH) ? value : asset(value.substring(1)))
+        : value,
+      self.location.origin
+    );
+    if (candidate.origin !== self.location.origin || !candidate.pathname.startsWith(BASE_PATH)) return fallback;
+    return candidate.href;
+  } catch {
+    return fallback;
+  }
+}
+
 self.addEventListener("push", (event) => {
   let payload = {};
   try { payload = event.data ? event.data.json() : {}; } catch {
@@ -89,16 +107,7 @@ self.addEventListener("push", (event) => {
     : payload.kind === "checkin"
       ? [70, 45, 110]
       : [70, 40, 70];
-  const requested = typeof payload.url === "string" && payload.url.startsWith("/") ? payload.url : "";
-  let target = asset("");
-  if (requested) {
-    try {
-      const candidate = new URL(requested.startsWith(BASE_PATH) ? requested : asset(requested.substring(1)), self.location.origin);
-      if (candidate.origin === self.location.origin && candidate.pathname.startsWith(BASE_PATH)) target = candidate.href;
-    } catch {
-      // Invalid notification destinations safely fall back to the app home.
-    }
-  }
+  const target = safeNotificationPath(payload.url);
   event.waitUntil(self.registration.showNotification(title, {
     body,
     icon: asset("after-hours-icon-192.png"),
@@ -112,9 +121,7 @@ self.addEventListener("push", (event) => {
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const target = event.notification && event.notification.data && typeof event.notification.data.url === "string"
-    ? event.notification.data.url
-    : asset("");
+  const target = safeNotificationPath(event.notification && event.notification.data && event.notification.data.url);
   event.waitUntil((async () => {
     const windows = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
     for (const client of windows) {
