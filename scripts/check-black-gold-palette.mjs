@@ -54,4 +54,4 @@ if (failures.length) {
   for (const failure of failures) console.error(failure);
   process.exit(1);
 }
-console.log("Black-and-gold palette passed: stylesheets and approved 4K visual assets contain no purple-family colors.");
+console.log("Black-and-gold palette passed: stylesheets and all public visual SVGs contain no purple-family colors.");
