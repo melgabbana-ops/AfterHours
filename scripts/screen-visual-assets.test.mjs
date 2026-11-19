@@ -44,7 +44,7 @@ const precachedAssets = [
 ];
 
 function ruleFor(selector) {
-  const index = css.indexOf(selector);
+  const index = css.lastIndexOf(selector);
   if (index < 0) return "";
   const start = css.lastIndexOf("}", index) + 1;
   const end = css.indexOf("}", index);
