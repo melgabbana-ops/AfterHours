@@ -67,8 +67,8 @@ if (!manifest.icons?.some((icon) => icon.sizes === "192x192" && icon.src.endsWit
   process.exit(1);
 }
 
-if (!serviceWorker.includes('const CACHE_NAME = "after-hours-v16"')) {
-  console.error("Service worker cache must be bumped when the app shell or install manifest changes.");
+if (!serviceWorker.includes('const CACHE_NAME = "after-hours-v17"')) {
+  console.error("Service worker cache must match the current v17 app shell.");
   process.exit(1);
 }
 
