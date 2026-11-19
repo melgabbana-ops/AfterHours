@@ -263,3 +263,40 @@ input,select,textarea{accent-color:#c79b5d!important}
 .mood-history li strong{color:#f1e2cc!important;font:12px "Cinzel",Georgia,serif!important}
 .mood-history li time{color:#aa9a83!important;font-size:8px!important}
 @media(max-width:360px){.mood-history li{grid-template-columns:65px minmax(0,1fr)!important}}
+
+
+/* Experience collection: give each destination its own visual identity. */
+.game-select-screen{padding-top:30px!important}
+.game-select-head{position:relative;padding:12px 8px 18px!important}
+.game-select-head:after{
+ content:"";display:block;width:72px;height:1px;margin:18px auto 0;
+ background:linear-gradient(90deg,transparent,#d8b77e,transparent);
+}
+.experience-choice{
+ min-height:248px!important;padding:16px!important;
+ border-color:rgba(216,183,126,.42)!important;
+ transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease;
+}
+.experience-choice:active{transform:scale(.985);border-color:#f0d6a4!important}
+.experience-choice.featured{min-height:300px!important}
+.experience-choice:nth-child(4){
+ background-image:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.84)),url("/AfterHours/visuals/reference-consent.svg")!important;
+}
+.experience-choice .choice-symbol{
+ display:grid!important;place-items:center!important;
+ width:38px!important;height:38px!important;margin-bottom:auto!important;
+ font-size:18px!important;box-shadow:0 4px 18px rgba(0,0,0,.4)!important;
+}
+.experience-choice>strong{font-size:14px!important;line-height:1.25!important}
+.experience-choice.featured>strong{font-size:18px!important}
+.experience-choice .choice-action{
+ display:flex!important;align-items:center!important;gap:6px!important;
+ margin-top:12px!important;padding-top:10px!important;
+ border-top:1px solid rgba(216,183,126,.28)!important;
+}
+@media(max-width:390px){
+ .game-select-grid{gap:8px!important}
+ .experience-choice{min-height:220px!important;padding:12px!important}
+ .experience-choice.featured{min-height:260px!important}
+ .experience-choice>strong{font-size:12px!important}
+}
