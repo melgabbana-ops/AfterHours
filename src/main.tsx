@@ -474,6 +474,14 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
    <span className="eyebrow">{t("WELCOME BACK","WELCOME BACK")}</span>
    <h2>{state.profile.displayName||"Mistress"}</h2>
    <p className="home-intro">{t("Vervolg je reis, ontdek nieuwe ervaringen en verleg je grenzen.","Continue your journey, explore new experiences and push boundaries.")}</p>
+   <div className="home-level" aria-label={t("Voortgang: niveau "+currentLevel+", rang "+rankFromXp(xp)+", "+xp+" XP en "+state.profile.sessions+" sessies","Progress: level "+currentLevel+", rank "+rankFromXp(xp)+", "+xp+" XP and "+state.profile.sessions+" sessions")}>
+    <span>{String(currentLevel).padStart(2,"0")}</span>
+    <div className="home-level-copy">
+     <strong>{rankFromXp(xp)}</strong>
+     <small>{xp} XP · {state.profile.sessions} {t("sessies","sessions")}</small>
+     <div className="home-xp" role="progressbar" aria-label={t("Voortgang naar volgend niveau","Progress to next level")} aria-valuemin={0} aria-valuemax={100} aria-valuenow={levelProgress}><i style={{width:levelProgress+"%"}}/></div>
+    </div>
+   </div>
    <button className="home-start gold" onClick={()=>setScreen(consent?"gameSelect":"consent")}><Play size={15}/>{t("START EXPERIENCE","START EXPERIENCE")} <ChevronRight size={16}/></button>
   </section>
   <section className="grid home-shortcuts" aria-label={t("Snel naar","Quick access")}>
