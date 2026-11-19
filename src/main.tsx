@@ -469,7 +469,7 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
     {state.notifications.length?state.notifications.slice(0,8).map(item=><button key={item.id} className={"notification-item "+(item.read?"":"unread")} onClick={()=>markNotificationRead(item.id)}><b>{item.title}</b><span>{item.body}</span></button>):<small>{t("Geen nieuwe meldingen.","No new notifications.")}</small>}
    </div>}
   </div>
-  <section className="hero home-hero" style={{"--ah-cinematic-background":`url("https://gcdn.picsart.com/pipeline-output/5f3d6127-421e-424a-b009-edd9e6e66a8d.png")`} as React.CSSProperties}>
+  <section className="hero home-hero" style={{"--ah-cinematic-background":`url("https://gcdn.picsart.com/editing-temp/bc8725cb-2e53-4c72-8cc0-e953ea8894ad.png")`} as React.CSSProperties}>
    <img className="home-wordmark" src={`${import.meta.env.BASE_URL}after-hours-wordmark-transparent.svg`} alt="AFTER HOURS"/>
    <span className="eyebrow">{t("WELCOME BACK","WELCOME BACK")}</span>
    <h2>{state.profile.displayName||"Mistress"}</h2>
