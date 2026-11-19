@@ -811,6 +811,14 @@ img,svg,video,canvas{max-width:100%}
 .mood-history-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .mood-history-head .eyebrow{display:flex;align-items:center;gap:7px;color:#ddb85b;font-size:8px;letter-spacing:.13em}
 .mood-history-head button{display:inline-flex;align-items:center;gap:6px;min-height:38px;padding:8px 10px;border:1px solid #493820;background:#100c08;color:#d9bd7f;font-size:9px}
+.mood-history-filters{display:flex;flex-wrap:wrap;gap:7px;margin:13px 0 5px}
+.mood-history-filters button,.mood-history-more{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:9px 13px;border:1px solid rgba(201,157,89,.35);border-radius:999px;background:#0b0907;color:#d8c49f;font-size:10px}
+.mood-history-filters button[aria-pressed="true"]{border-color:#d9b56f;background:linear-gradient(120deg,rgba(111,79,39,.48),rgba(23,17,11,.96));color:#f2d99d;box-shadow:inset 0 0 0 1px rgba(217,181,111,.12)}
+.mood-history-filters button:focus-visible,.mood-history-more:focus-visible{outline:2px solid #f2d99d;outline-offset:3px}
+.mood-history-count{margin:10px 0 0;font-size:9px;color:#a59f94}
+.mood-history-more{margin-top:12px;border-color:#80633d;color:#f0d8a9}
+.mood-history-more:hover{border-color:#d9b56f;background:#17110b}
+
 .mood-history h3{margin:11px 0 7px;font:500 22px/1.25 "Cinzel",Georgia,serif;color:#edd8a7}
 .mood-history-note,.mood-history>p{font-size:10px;line-height:1.7;color:#a59f94}
 .mood-history ol{list-style:none;padding:0;margin:14px 0 0;display:grid;gap:8px}
