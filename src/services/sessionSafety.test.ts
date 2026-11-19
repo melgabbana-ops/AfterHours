@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { canStartSessionWithVerifiedState, getSessionSafetyAnnouncement, getTaskChoiceFeedback, isTaskPassed, PASS_TASK_SELECTION, shouldResumeSession, shouldResumeSessionBeforeHydration } from "./sessionSafety";
+import mainSource from "../main.tsx?raw";
+import { canStartSessionWithVerifiedState, getPendingStopTimestamp, getSessionSafetyAnnouncement, getTaskChoiceFeedback, isTaskPassed, PASS_TASK_SELECTION, shouldResumeSession, shouldResumeSessionBeforeHydration } from "./sessionSafety";
 
 describe("session resume safety", () => {
   it("resumes only when both persisted session and consent are active", () => {
@@ -113,5 +114,35 @@ describe("initial session hydration safety", () => {
   it("does not resume local-only sessions unless both session and consent are active", () => {
     expect(shouldResumeSessionBeforeHydration(false, "paused", "active")).toBe(false);
     expect(shouldResumeSessionBeforeHydration(false, "active", "revoked")).toBe(false);
+  });
+});
+
+
+describe("offline STOP recovery", () => {
+  it("marks only a stopped session with revoked consent for remote replay", () => {
+    expect(getPendingStopTimestamp("stopped", "revoked", "2026-11-19T20:00:00.000Z", "2026-11-19T20:00:01.000Z")).toBe("2026-11-19T20:00:00.000Z");
+    expect(getPendingStopTimestamp("active", "revoked", "2026-11-19T20:00:00.000Z", "2026-11-19T20:00:01.000Z")).toBeNull();
+    expect(getPendingStopTimestamp("stopped", "active", "2026-11-19T20:00:00.000Z", "2026-11-19T20:00:01.000Z")).toBeNull();
+  });
+
+  it("uses the persisted session update time for older stopped records without a revocation timestamp", () => {
+    expect(getPendingStopTimestamp("stopped", "revoked", null, "2026-11-19T20:00:01.000Z")).toBe("2026-11-19T20:00:01.000Z");
+  });
+
+  it("persists the local STOP snapshot before starting remote revocation", () => {
+    const start = mainSource.indexOf("const persistStoppedState=");
+    const end = mainSource.indexOf("const stop=()=>", start);
+    const handler = mainSource.slice(start, end);
+    expect(handler).toContain("saveState(stoppedState)");
+    expect(handler.indexOf("saveState(stoppedState)")).toBeLessThan(handler.indexOf("revokeConsentRemotely(stoppedState.session.id,now)"));
+  });
+
+  it("replays a pending STOP before loading remote state and retries hydration on reconnect", () => {
+    const start = mainSource.indexOf("const hydrate=async()=>");
+    const end = mainSource.indexOf("const handleOnline=", start);
+    const hydrate = mainSource.slice(start, end);
+    expect(hydrate).toContain("getPendingStopTimestamp");
+    expect(hydrate.indexOf("revokeRemoteConsent(localState.session.id,pendingStopAt)")).toBeLessThan(hydrate.indexOf("loadRemoteState(localState.session.id)"));
+    expect(mainSource).toContain('window.addEventListener("online",handleOnline)');
   });
 });
