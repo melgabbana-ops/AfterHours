@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3840" height="2160" viewBox="0 0 3840 2160" role="img"><title>AFTER HOURS active experience timer and gold dial</title><defs>
+ <linearGradient id="bg" x2="0" y2="1"><stop stop-color="#050505"/><stop offset=".55" stop-color="#17100a"/><stop offset="1" stop-color="#020202"/></linearGradient>
+ <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff0c8"/><stop offset=".22" stop-color="#d9b36f"/><stop offset=".5" stop-color="#76502b"/><stop offset=".78" stop-color="#f0d29a"/><stop offset="1" stop-color="#8a5d2e"/></linearGradient>
+ <radialGradient id="amber"><stop stop-color="#c28a42" stop-opacity=".55"/><stop offset=".55" stop-color="#7a4b1d" stop-opacity=".18"/><stop offset="1" stop-color="#050505" stop-opacity="0"/></radialGradient>
+ <linearGradient id="velvet" x2="1" y2="1"><stop stop-color="#21170f"/><stop offset=".45" stop-color="#080706"/><stop offset="1" stop-color="#1c120a"/></linearGradient>
+ <filter id="blur"><feGaussianBlur stdDeviation="70"/></filter>
+ <filter id="glow"><feGaussianBlur stdDeviation="20"/></filter>
+ <filter id="shadow"><feGaussianBlur stdDeviation="38"/></filter>
+</defs>
+<rect width="3840" height="2160" fill="url(#bg)"/>
+<ellipse cx="1900" cy="900" rx="1700" ry="1200" fill="url(#amber)" filter="url(#blur)"/>
+<g opacity=".24" stroke="url(#gold)" fill="none"><path d="M0 120H3840M0 2040H3840" stroke-width="5"/><path d="M180 0V2160M3660 0V2160" stroke-width="3"/></g>
+
+ <ellipse cx="1920" cy="1110" rx="1050" ry="1000" fill="url(#amber)" filter="url(#blur)"/>
+ <circle cx="1920" cy="1020" r="650" fill="#050505" stroke="#5b4025" stroke-width="16"/>
+ <circle cx="1920" cy="1020" r="590" fill="none" stroke="url(#gold)" stroke-width="15" opacity=".9"/>
+ <circle cx="1920" cy="1020" r="510" fill="none" stroke="#8c6338" stroke-width="4"/>
+ <circle cx="1920" cy="1020" r="420" fill="#080706" stroke="url(#gold)" stroke-width="8"/>
+ <circle cx="1920" cy="1020" r="350" fill="none" stroke="#b58a51" stroke-width="3" stroke-dasharray="8 20"/>
+ <path d="M1920 520V690M1920 1350V1520M1420 1020H1590M2250 1020H2420" stroke="url(#gold)" stroke-width="16"/>
+ <path d="M1920 760V1020L2160 1140" stroke="#f1d8a6" stroke-width="20" stroke-linecap="round" fill="none"/>
+ <circle cx="1920" cy="1020" r="36" fill="url(#gold)"/>
+ <g fill="none" stroke="url(#gold)" stroke-width="14"><path d="M1220 1820Q1920 1450 2620 1820"/><path d="M1350 1930Q1920 1640 2490 1930"/></g>
+ <g fill="#d7b277"><circle cx="720" cy="720" r="14"/><circle cx="3100" cy="700" r="16"/><circle cx="810" cy="1530" r="10"/><circle cx="3010" cy="1540" r="12"/></g>
+ <rect x="28" y="28" width="3784" height="2104" rx="28" fill="none" stroke="url(#gold)" stroke-opacity=".22" stroke-width="4"/></svg>
