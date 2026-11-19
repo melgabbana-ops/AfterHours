@@ -4581,3 +4581,21 @@ button,[role="button"],nav a{touch-action:manipulation}
  white-space:nowrap!important;
  border:0!important;
 }
+
+
+/* Optional browser-local aftercare reflection. Keep it within the approved black/gold palette. */
+.aftercare-private-note{margin:22px 0;padding:18px;border:1px solid rgba(203,169,103,.3);border-radius:18px;background:linear-gradient(145deg,rgba(24,20,13,.72),rgba(7,7,6,.88));}
+.aftercare-private-note-heading{display:flex;align-items:flex-start;gap:12px;color:#d8bb82;}
+.aftercare-private-note-heading>svg{flex:0 0 auto;margin-top:3px}
+.aftercare-private-note-heading h3{margin:6px 0 0;color:#f0e4ca;font-size:clamp(1.05rem,4vw,1.35rem);line-height:1.35}
+.aftercare-private-note-privacy{margin:12px 0 18px;color:#b9ad98;font-size:.82rem;line-height:1.55}
+.aftercare-private-note-fields{display:grid;gap:8px}
+.aftercare-private-note-fields label{margin-top:8px;color:#e1d0ae;font-size:.9rem;font-weight:600}
+.aftercare-private-note-fields textarea{width:100%;min-height:88px;resize:vertical;padding:12px;border:1px solid rgba(203,169,103,.28);border-radius:12px;background:#090806;color:#f4ead8;font:inherit;line-height:1.5}
+.aftercare-private-note-fields textarea:focus-visible{outline:2px solid #e2c17e;outline-offset:2px}
+.aftercare-private-note-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.aftercare-private-note-actions button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:10px 14px;border:1px solid rgba(203,169,103,.4);border-radius:12px;background:rgba(255,255,255,.025);color:#f0e4ca}
+.aftercare-private-note-actions button:disabled{opacity:.45;cursor:not-allowed}
+.aftercare-private-note-actions .aftercare-private-note-delete{border-color:rgba(190,105,88,.55);color:#e7b6a9}
+.aftercare-private-note-message{margin:12px 0 0;color:#e4d0a9;font-size:.86rem;line-height:1.5}
+@media(max-width:560px){.aftercare-private-note{padding:15px;border-radius:14px}.aftercare-private-note-actions{display:grid;grid-template-columns:1fr}.aftercare-private-note-actions button{width:100%}}
