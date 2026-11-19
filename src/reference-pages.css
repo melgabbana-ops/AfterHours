@@ -352,3 +352,44 @@ input,select,textarea{accent-color:#c79b5d!important}
 .experience-choice:nth-child(2){background-image:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.88)),var(--ah-photo-tarot)!important}
 .experience-choice:nth-child(3){background-image:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.88)),var(--ah-photo-profile)!important}
 .experience-choice:nth-child(4){background-image:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.88)),var(--ah-photo-radio)!important}
+
+
+/* Screen-specific art mapping correction.
+   Never recycle the consent portrait for unrelated screens; each destination
+   keeps its own visual identity and the approved black/champagne palette. */
+:root{
+ --ah-photo-home:url("https://gcdn.picsart.com/editing-temp/bc8725cb-2e53-4c72-8cc0-e953ea8894ad.png");
+ --ah-photo-profile:url("https://gcdn.picsart.com/editing-temp/f8a86f1b-af63-4831-bdc7-75741d1f1131.png");
+}
+.game-select-screen:before,.ah-session-screen:before{
+ background-image:linear-gradient(180deg,rgba(0,0,0,.22),rgba(0,0,0,.88)),url("/AfterHours/visuals/reference-experience.svg")!important;
+ background-position:center!important;background-size:cover!important;
+}
+.experience-choice.featured{
+ background-image:linear-gradient(180deg,rgba(0,0,0,.06),rgba(0,0,0,.9)),url("/AfterHours/visuals/reference-experience.svg")!important;
+}
+.experience-choice:nth-child(2){
+ background-image:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.88)),var(--ah-photo-tarot),url("/AfterHours/visuals/reference-tarot.svg")!important;
+}
+.experience-choice:nth-child(3){
+ background-image:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.88)),url("/AfterHours/visuals/reference-horoscope.svg")!important;
+}
+.experience-choice:nth-child(4){
+ background-image:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.88)),var(--ah-photo-radio),url("/AfterHours/visuals/reference-radio.svg")!important;
+}
+.completion-screen:before,.completion-screen .completion-card{
+ background-image:linear-gradient(180deg,rgba(0,0,0,.16),rgba(0,0,0,.9)),url("/AfterHours/visuals/reference-completion.svg")!important;
+ background-position:center top!important;background-size:cover!important;
+}
+.consent-screen:before,.consent-screen .consent-visual{
+ background-image:linear-gradient(180deg,rgba(0,0,0,.1),rgba(0,0,0,.88)),var(--ah-photo-consent),url("/AfterHours/visuals/reference-consent.svg")!important;
+ background-position:center 34%!important;background-size:cover!important;
+}
+.ah-profile-screen:before,.ah-profile-screen .profile{
+ background-image:linear-gradient(180deg,rgba(0,0,0,.06),rgba(0,0,0,.9)),var(--ah-photo-profile),url("/AfterHours/visuals/reference-profile.svg")!important;
+ background-position:center 25%!important;background-size:cover!important;
+}
+.insights.insights-astro:before,.insights .astro-card{
+ background-image:linear-gradient(180deg,rgba(0,0,0,.14),rgba(0,0,0,.9)),url("/AfterHours/visuals/reference-horoscope.svg")!important;
+ background-position:center!important;background-size:cover!important;
+}
