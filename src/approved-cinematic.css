@@ -395,6 +395,7 @@ hr{border:0;border-top:1px solid var(--ah-line)}
 .notification-head-actions{display:flex;gap:7px;margin-left:auto}
 .notification-head-actions button{padding:8px 10px;border:1px solid var(--ah-line);border-radius:4px;background:#171109;color:#e2c18c;font-size:8px}
 .notification-head-actions button:disabled{opacity:.4}
+.notification-head-actions .notification-close{width:44px;min-width:44px;min-height:44px;padding:0;display:grid;place-items:center;font-size:20px;line-height:1}
 .notification-sound-note{flex:0 0 100%;font-size:9px;line-height:1.5;color:#a99b86}
 .notification-button{border:1px solid var(--ah-line)!important;border-radius:4px!important;background:#100c08!important;color:#e5d5bd!important}
 .notification-button[aria-expanded="true"]{border-color:#d4ad70!important;color:#f0d8ad!important}

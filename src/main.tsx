@@ -29,6 +29,7 @@ import MoodCheckIn from "./MoodCheckIn";
 import { recordSessionMoodRemote, type MoodCode, type MoodPhase } from "./services/moods";
 import type{AfterHoursState,AvatarStyle,Screen,Safety,SessionHistoryEntry}from"./types";
 import {initialScreenFromSearch} from "./navigation";
+import { isNotificationBackdropClick } from "./notificationOverlay";
 import{loadState,saveState,loadTimer,saveTimer,clearTimer,defaultState}from"./storage";
 import{loadRemoteState,loadRemoteRounds,syncRemoteState,updateRemoteUsername,completeRemoteSession,revokeRemoteConsent}from"./services/backend";
 import{supabase,supabaseConfigured}from"./services/supabase";
@@ -459,7 +460,7 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
  <header><button className="wordmark brand-nav" onClick={()=>setScreen("home")} aria-label="AFTER HOURS home"><img src={`${import.meta.env.BASE_URL}after-hours-wordmark-transparent.svg`} alt="AFTER HOURS" /></button><div className="header-tools"><button type="button" className="safety-shortcut" aria-label={t("Veiligheidsplan openen","Open safety plan")} title={t("Veiligheidsplan","Safety plan")} onClick={()=>setScreen("safety")}><Shield size={17}/></button><button type="button" className="privacy-shortcut" aria-label={privacyMode?t("Privémodus uitschakelen","Turn privacy mode off"):t("Privémodus inschakelen","Turn privacy mode on")} title={privacyMode?t("Privémodus uitschakelen","Turn privacy mode off"):t("Privémodus","Privacy mode")} aria-pressed={privacyMode} onClick={()=>setPrivacyMode(value=>!value)}><EyeOff size={16}/></button><button type="button" className="language-toggle" aria-label={t("Taal wijzigen","Change language")} onClick={()=>setLanguage(language==="nl"?"en":"nl")}><span className={language==="nl"?"language-active":""}>NL</span><span className="language-divider">/</span><span className={language==="en"?"language-active":""}>EN</span></button><div className="status"><span></span> {t("privé sessie","private session")}</div></div></header>
 
  {screen==="home"&&<main className="ah-home-screen ah-reference-home">
-  <div className={`notification-bar ${notificationsOpen?"is-open":""}`} onClick={()=>setNotificationsOpen(false)}>
+  <div className={`notification-bar ${notificationsOpen?"is-open":""}`} onClick={event=>{if(isNotificationBackdropClick(event.target,event.currentTarget))setNotificationsOpen(false)}}>
    <button className="notification-button" aria-label={unreadNotifications?unreadNotifications+" "+t("ongelezen meldingen","unread notifications"):t("Meldingen","Notifications")} aria-expanded={notificationsOpen} aria-controls="after-hours-notifications" onClick={()=>setNotificationsOpen(open=>!open)}>
     <Bell size={16}/>{unreadNotifications>0&&<span>{unreadNotifications>9?"9+":unreadNotifications}</span>}
    </button>
