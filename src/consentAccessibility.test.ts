@@ -1,6 +1,9 @@
 import consentSource from "./ConsentScreen.tsx?raw";
-import referenceCss from "./reference-pages.css?raw";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+
+const referenceCss = readFileSync(resolve(process.cwd(), "src/reference-pages.css"), "utf8");
 
 describe("consent screen accessibility", () => {
   it("groups the required acknowledgements in a labelled fieldset", () => {
