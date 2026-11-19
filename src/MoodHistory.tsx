@@ -64,6 +64,6 @@ export default function MoodHistory({profileId,language}:{profileId:string;langu
     <ol id="mood-history-list">{visibleEvents.map(event=><li key={event.id}><span className="mood-history-phase">{language==="nl"?phaseLabel[event.phase][0]:phaseLabel[event.phase][1]}</span><strong>{label[event.mood][language==="nl"?0:1]}</strong><time dateTime={event.created_at}>{new Intl.DateTimeFormat(language==="nl"?"nl-NL":"en-GB",{dateStyle:"medium",timeStyle:"short"}).format(new Date(event.created_at))}</time></li>)}</ol>
     {visibleEvents.length<filteredEvents.length&&<button className="mood-history-more" type="button" aria-controls="mood-history-list" onClick={()=>setVisibleCount(current=>Math.min(current+10,filteredEvents.length))}>{t("Meer tonen","Show more")} · {filteredEvents.length-visibleEvents.length}</button>}
    </>}
-  </>
+  </>}
  </section>
 }
