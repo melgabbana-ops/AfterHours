@@ -820,7 +820,7 @@ html,body,#root,.app{background:#050505!important;color:#f4e7d2!important}
 .completion-screen .completion-primary,.completion-screen .completion-secondary{width:100%!important;min-height:48px!important;border-radius:6px!important;font-size:10px!important;letter-spacing:.13em!important}
 .completion-screen .completion-primary{border:1px solid #efd29b!important;background:linear-gradient(180deg,#e8c88f,#bd8c50)!important;color:#171008!important}
 .completion-screen .completion-secondary{margin-top:9px!important;border:1px solid rgba(216,183,126,.38)!important;background:transparent!important;color:#e7d3b1!important}
-@media(max-width:390px){.completion-screen{padding:20px 14px 104px!important}.completion-screen .completion-card {padding:28px 16px 19px!important}.completion-screen .completion-seal{width:72px!important;height:72px!important}}
+@media(max-width:390px){.completion-screen{padding:20px 14px 104px!important}.completion-screen .completion-card {padding:28px 16px 19px!important;background-image:linear-gradient(160deg,rgba(27,21,14,.88),rgba(7,7,6,.95) 52%),url("/AfterHours/visuals/reference-completion.svg")!important;background-size:cover!important;background-position:center!important}.completion-screen .completion-seal{width:72px!important;height:72px!important}}
 
 
 /* REFERENCE MATCH · Tarot and Horoscope mobile screens */
@@ -874,6 +874,7 @@ html,body,#root,.app{background:#050505!important;color:#f4e7d2!important}
  font:clamp(23px,6vw,29px)/1.2 "Cinzel",Georgia,serif!important;color:#f0dfc0!important;
 }
 .app .insights .tarot-card>p{
+ background-image:url("/AfterHours/visuals/reference-tarot.svg")!important;background-size:cover!important;
  max-width:310px!important;margin:0 auto 17px!important;text-align:center!important;
  font-size:10px!important;line-height:1.55!important;color:#e0d2bd!important;
 }
@@ -916,6 +917,7 @@ html,body,#root,.app{background:#050505!important;color:#f4e7d2!important}
 .app .insights .astro-date-help{font-size:9px!important;text-align:center!important}
 .app .insights .astro-card .astro-date{display:none!important}
 .app .insights .astro-card select{
+ background-image:linear-gradient(145deg,#21180e,#080706),url("/AfterHours/visuals/reference-horoscope.svg")!important;background-size:cover!important;
  width:100%!important;min-height:45px!important;margin:0 0 12px!important;
  border:1px solid rgba(215,177,115,.55)!important;border-radius:6px!important;
  background:linear-gradient(145deg,#21180e,#080706)!important;color:#f0d9ae!important;text-align:center!important;
