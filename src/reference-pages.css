@@ -1,0 +1,216 @@
+/* AFTER HOURS · Screen-by-screen reference build
+   Visual direction: absolute black, champagne gold, bronze and warm candlelight.
+   No purple hues, filters, glow or gradients are used. */
+:root{
+ --ref-black:#050505;
+ --ref-ink:#0b0907;
+ --ref-panel:#100d0a;
+ --ref-panel-2:#19120c;
+ --ref-gold:#d8b77e;
+ --ref-gold-bright:#f0d6a4;
+ --ref-bronze:#8f673c;
+ --ref-ivory:#f4e7d2;
+ --ref-muted:#c2b29a;
+ --ref-line:rgba(216,183,126,.34);
+}
+.app{background:#050505!important;color:var(--ref-ivory)!important}
+.app>header{background:rgba(5,5,5,.97)!important;border-bottom:1px solid var(--ref-line)!important}
+.app>header .brand-nav img{filter:drop-shadow(0 2px 8px #000)}
+.app>nav{background:rgba(5,5,5,.98)!important;border-top:1px solid var(--ref-line)!important}
+.app>nav button{color:#9d8b72!important}
+.app>nav button.active{color:var(--ref-gold-bright)!important}
+.app>nav button.active:before{background:var(--ref-gold)!important;box-shadow:0 0 9px rgba(216,183,126,.4)!important}
+.ah-editorial-screen,.ah-profile-screen,.radio-room,.insights{
+ position:relative;isolation:isolate;overflow:hidden;
+ width:min(100%,520px)!important;max-width:520px!important;min-height:calc(100dvh - 128px);
+ margin:0 auto!important;padding:24px 18px 110px!important;
+ background:#050505!important;
+}
+.ah-editorial-screen:before,.ah-profile-screen:before,.radio-room:before,.insights:before{
+ content:"";position:absolute;inset:0;z-index:-2;pointer-events:none;
+ background-position:center top;background-size:cover;background-repeat:no-repeat;opacity:.68;
+}
+.ah-editorial-screen:after,.ah-profile-screen:after,.radio-room:after,.insights:after{
+ content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+ background:linear-gradient(180deg,rgba(5,5,5,.2),rgba(5,5,5,.76) 42%,#050505 100%);
+}
+.game-select-screen:before,.ah-session-screen:before{background-image:url("/AfterHours/visuals/ah-experience-photo.svg")}
+.aftercare-screen:before{background-image:url("/AfterHours/visuals/ah-aftercare-photo.svg")}
+.completion-screen:before{background-image:url("/AfterHours/visuals/ah-completion-photo.svg")}
+.consent-screen:before{background-image:url("/AfterHours/visuals/ah-experience-photo.svg")}
+.ah-profile-screen:before{background-image:url("/AfterHours/visuals/ah-profile-photo.svg")}
+.radio-room:before{background-image:url("/AfterHours/visuals/ah-radio-photo.svg")}
+.insights:before{background-image:url("/AfterHours/visuals/ah-tarot-photo.svg")}
+.insights.insights-astro:before{background-image:url("/AfterHours/visuals/ah-horoscope-photo.svg")}
+.eyebrow{color:var(--ref-gold)!important;letter-spacing:.18em!important}
+.ah-editorial-screen h2,.radio-room h2,.insights h2,.ah-profile-screen h2{
+ color:var(--ref-ivory)!important;font-family:"Cinzel",Georgia,serif!important;
+ font-weight:400!important;letter-spacing:.035em!important;text-shadow:0 2px 18px #000;
+}
+.ah-editorial-screen p,.radio-room p,.insights p{color:#d5c7b1!important}
+.gold,.home-start,.completion-primary,.consent-submit,.spotify-open{
+ border:1px solid #efd29b!important;border-radius:6px!important;
+ background:linear-gradient(180deg,#e8c88f 0%,#bd8c50 100%)!important;
+ color:#171008!important;box-shadow:0 7px 24px rgba(0,0,0,.45),inset 0 1px rgba(255,255,255,.35)!important;
+ font-weight:700!important;letter-spacing:.09em!important;
+}
+.back{border:1px solid var(--ref-line)!important;border-radius:5px!important;background:rgba(12,9,6,.88)!important;color:var(--ref-gold-bright)!important}
+.game-select-head{text-align:center!important;margin:10px auto 24px!important;max-width:440px}
+.game-select-head h2{font-size:clamp(30px,8vw,39px)!important;margin:10px 0!important}
+.game-select-head p{font-size:11px!important;line-height:1.6!important}
+.game-select-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}
+.experience-choice{
+ position:relative!important;isolation:isolate!important;overflow:hidden!important;
+ min-height:230px!important;padding:15px!important;display:flex!important;flex-direction:column!important;
+ align-items:flex-start!important;justify-content:flex-end!important;text-align:left!important;
+ border:1px solid var(--ref-line)!important;border-radius:8px!important;
+ background:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.82)),url("/AfterHours/visuals/ah-experience-photo.svg") center/cover!important;
+ box-shadow:0 12px 30px rgba(0,0,0,.38)!important;
+}
+.experience-choice:before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,transparent 25%,rgba(0,0,0,.88))!important}
+.experience-choice.featured{grid-column:1/-1;min-height:270px!important;background-position:center 36%!important}
+.experience-choice:nth-child(2){background-image:linear-gradient(180deg,rgba(0,0,0,.06),rgba(0,0,0,.8)),url("/AfterHours/visuals/ah-tarot-photo.svg")!important}
+.experience-choice:nth-child(3){background-image:linear-gradient(180deg,rgba(0,0,0,.06),rgba(0,0,0,.8)),url("/AfterHours/visuals/ah-horoscope-photo.svg")!important}
+.experience-choice:nth-child(4){background-image:linear-gradient(180deg,rgba(0,0,0,.06),rgba(0,0,0,.8)),url("/AfterHours/visuals/ah-radio-photo.svg")!important}
+.experience-choice .choice-symbol{width:32px!important;height:32px!important;margin:0 0 auto!important;border:1px solid var(--ref-gold)!important;border-radius:50%!important;background:rgba(0,0,0,.5)!important;color:var(--ref-gold-bright)!important}
+.experience-choice .eyebrow{font-size:7px!important;margin:0 0 7px!important}
+.experience-choice>strong{font:13px "Cinzel",Georgia,serif!important;color:#fff0d5!important;letter-spacing:.07em}
+.experience-choice>small{font-size:9px!important;line-height:1.45!important;color:#e1d2bb!important}
+.experience-choice .choice-action{color:var(--ref-gold-bright)!important;font-size:8px!important;letter-spacing:.12em!important}
+.consent-screen{padding-top:0!important}
+.consent-visual{
+ min-height:300px;margin:0 -18px 18px;padding:44px 24px 24px;display:flex;flex-direction:column;justify-content:flex-end;
+ background:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.24) 30%,#050505 100%),url("/AfterHours/visuals/ah-experience-photo.svg") center 28%/cover no-repeat;
+ border-bottom:1px solid var(--ref-line);
+}
+.consent-visual h2{font-size:clamp(31px,8vw,40px)!important;margin:5px 0 8px!important}
+.consent-visual p{max-width:340px;font-size:10px!important;line-height:1.55!important}
+.consent-form{display:flex;flex-direction:column;gap:9px}
+.consent-check{
+ display:flex;align-items:center;gap:12px;min-height:54px;padding:11px 13px;
+ border:1px solid var(--ref-line);border-radius:7px;background:linear-gradient(145deg,#19120c,#080706);
+ color:#f0e3cf;font-size:10px;line-height:1.45;cursor:pointer;
+}
+.consent-check input{position:absolute;opacity:0;width:1px;height:1px}
+.custom-check{width:20px;height:20px;flex:none;display:grid;place-items:center;border:1px solid #9c7547;border-radius:4px;color:transparent;background:#080706}
+.consent-check.checked .custom-check{color:#170f07;background:linear-gradient(180deg,#efd29b,#b98549);border-color:#f1d5a0}
+.consent-check:focus-within{outline:2px solid var(--ref-gold);outline-offset:2px}
+.consent-boundaries{
+ min-height:52px;display:flex;align-items:center;gap:10px;padding:12px;
+ border:1px solid var(--ref-line);border-radius:7px;background:#100c08;color:var(--ref-gold-bright);font-size:9px;text-align:left;
+}
+.consent-boundaries span{flex:1}
+.consent-safety-note{display:flex;gap:10px;padding:12px;border:1px solid rgba(216,183,126,.18);background:rgba(9,7,5,.8);color:#c9b99f;font-size:9px;line-height:1.5}
+.consent-safety-note svg{flex:none;color:var(--ref-gold)}
+.consent-submit{width:100%;min-height:50px!important;margin-top:8px}
+.consent-submit:disabled{opacity:.38;filter:grayscale(.65);box-shadow:none!important}
+.ah-session-screen{padding-top:24px!important}
+.ah-session-screen .game-top{padding:0 0 14px;border-bottom:1px solid var(--ref-line);color:var(--ref-gold-bright)}
+.ah-session-screen .game-top button{border:1px solid var(--ref-line);border-radius:50%;color:var(--ref-gold-bright)}
+.ah-session-screen .round-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin:18px 0}
+.ah-session-screen .round-steps span{border:1px solid rgba(216,183,126,.2)!important;border-radius:4px!important;background:rgba(0,0,0,.5)!important;color:#a89578!important;font-size:7px!important}
+.ah-session-screen .round-steps span.current{background:linear-gradient(180deg,#e4c18a,#a97943)!important;color:#170f08!important;border-color:#f0d6a4!important}
+.ah-session-screen .progress{height:2px!important;background:#302417!important;margin:14px 0 26px!important}
+.ah-session-screen .progress span{background:linear-gradient(90deg,#8f673c,#e7c58d)!important}
+.ah-session-screen .round{text-align:center!important}
+.ah-session-screen .round h2{font-size:30px!important;margin:8px 0 10px!important}
+.ah-session-screen .round>p{font-size:10px!important;max-width:350px!important}
+.ah-session-screen .task-card{margin:20px 0!important;padding:14px!important;border:1px solid var(--ref-line)!important;border-radius:8px!important;background:linear-gradient(145deg,rgba(26,18,11,.95),rgba(5,5,5,.96))!important;text-align:left}
+.ah-session-screen .task-card>strong{color:#f2e4cf!important;font:13px "Cinzel",Georgia,serif!important}
+.ah-session-screen .task-card button{border:1px solid var(--ref-line)!important;border-radius:5px!important;background:#0a0806!important;color:#dfcfb6!important}
+.ah-session-screen .task-card button.selected{background:linear-gradient(180deg,#e2c18b,#a97b48)!important;color:#160f08!important;border-color:#f0d7a5!important}
+.ah-session-screen .timer{
+ width:196px!important;height:196px!important;margin:22px auto!important;border:2px solid #e3c18a!important;border-radius:50%!important;
+ display:flex!important;align-items:center!important;justify-content:center!important;flex-direction:column!important;
+ background:radial-gradient(circle,rgba(31,22,13,.78),rgba(0,0,0,.9) 72%)!important;
+ box-shadow:0 0 0 6px rgba(216,183,126,.07),0 0 28px rgba(216,183,126,.22),inset 0 0 24px rgba(216,183,126,.08)!important;
+}
+.ah-session-screen .timer svg{color:var(--ref-gold)!important}
+.ah-session-screen .timer strong{font:36px "Cinzel",Georgia,serif!important;color:#f7e4c1!important}
+.ah-session-screen .timer small{color:#cbb797!important;font-size:8px!important;letter-spacing:.16em}
+.ah-session-screen .actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important}
+.ah-session-screen .actions button{min-height:46px!important;border:1px solid var(--ref-line)!important;border-radius:6px!important;background:#100c08!important;color:#e9d8bd!important;font-size:9px!important}
+.ah-session-screen .actions .gold{background:linear-gradient(180deg,#e5c48d,#b58249)!important;color:#170f08!important}
+.ah-session-screen .actions .stop{background:linear-gradient(180deg,#8d302b,#4d1715)!important;color:#fff0e9!important;border-color:#c66a5d!important}
+.ah-session-screen .consent{margin-top:16px!important;border-color:var(--ref-line)!important;background:#0d0a07!important}
+.aftercare-card{
+ max-width:470px!important;margin:0 auto!important;padding:28px 17px 22px!important;
+ border:1px solid var(--ref-line)!important;border-radius:9px!important;
+ background:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.84) 36%,#050505 100%),url("/AfterHours/visuals/ah-aftercare-photo.svg") center top/cover no-repeat!important;
+ box-shadow:0 18px 50px rgba(0,0,0,.5)!important;
+}
+.aftercare-card h2,.completion-card h2{font-size:31px!important;text-align:center!important;margin:9px 0!important}
+.aftercare-card>p{text-align:center!important;font-size:10px!important;line-height:1.55!important}
+.aftercare-options{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;margin:20px 0!important}
+.aftercare-options button{
+ min-height:112px!important;padding:12px 9px!important;border:1px solid var(--ref-line)!important;border-radius:7px!important;
+ background:linear-gradient(145deg,rgba(28,19,11,.94),rgba(5,5,5,.96))!important;color:#f0e2cc!important;
+}
+.aftercare-options button:before{content:"♡";display:block;color:var(--ref-gold);font-size:22px;margin-bottom:7px}
+.aftercare-options button strong{display:block;color:#f4dfbd!important;font:12px "Cinzel",Georgia,serif!important}
+.aftercare-options button span{display:block;margin-top:5px;color:#c9b99f!important;font-size:8px!important;line-height:1.45!important}
+.aftercare-options button.selected{border-color:#f0d6a4!important;box-shadow:inset 0 0 0 1px rgba(240,214,164,.2)!important}
+.aftercare-note{display:flex;gap:10px;padding:12px;border:1px solid var(--ref-line);background:rgba(0,0,0,.7);font-size:9px;line-height:1.5;color:#d3c4ad}
+.aftercare-note svg{flex:none;color:var(--ref-gold)}
+.aftercare-complete{width:100%;margin-top:16px}
+.completion-card{
+ max-width:470px!important;margin:0 auto!important;padding:28px 17px!important;text-align:center!important;
+ border:1px solid var(--ref-line)!important;border-radius:9px!important;
+ background:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.85) 36%,#050505 100%),url("/AfterHours/visuals/ah-completion-photo.svg") center top/cover no-repeat!important;
+}
+.completion-seal{width:62px!important;height:62px!important;margin:0 auto 16px!important;border:1px solid var(--ref-gold)!important;border-radius:50%!important;background:rgba(0,0,0,.55)!important;color:var(--ref-gold-bright)!important}
+.completion-xp{margin:20px auto!important;padding:15px!important;border-top:1px solid var(--ref-line)!important;border-bottom:1px solid var(--ref-line)!important}
+.completion-xp strong{font:30px "Cinzel",Georgia,serif!important;color:#f0d6a4!important}
+.completion-stats{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:8px!important;margin:16px 0!important}
+.completion-stats>div{padding:12px 5px;border:1px solid var(--ref-line)!important;border-radius:6px!important;background:rgba(0,0,0,.6)}
+.completion-stats strong{display:block;color:#f0d6a4!important;font:20px "Cinzel",Georgia,serif!important}
+.completion-stats small{font-size:7px!important;color:#cbb99e!important;letter-spacing:.1em}
+.completion-primary{width:100%;min-height:48px!important}
+.completion-secondary{margin-top:12px;color:var(--ref-gold-bright);font-size:9px;letter-spacing:.1em}
+.ah-profile-screen .profile{max-width:470px!important;margin:0 auto!important;padding:25px 16px!important;text-align:center!important;border:1px solid var(--ref-line)!important;border-radius:9px!important;background:linear-gradient(180deg,rgba(0,0,0,.1),rgba(0,0,0,.9) 280px),url("/AfterHours/visuals/ah-profile-photo.svg") center top/cover no-repeat!important}
+.ah-profile-screen .identity-avatar{width:116px!important;height:116px!important;margin:0 auto 14px!important;border:1px solid var(--ref-gold)!important;box-shadow:0 0 0 5px rgba(216,183,126,.08),0 12px 36px #000!important}
+.ah-profile-screen .identity-avatar img{border-radius:50%!important}
+.ah-profile-screen .profile h2{font-size:29px!important}
+.ah-profile-screen .profile>p{color:#e0cfb4!important;font-size:9px!important}
+.ah-profile-screen .profile .xp{height:5px!important;background:#3a2b1b!important}
+.ah-profile-screen .profile .xp span{background:linear-gradient(90deg,#8f673c,#e9c88f)!important}
+.ah-profile-screen .stats{gap:8px!important;margin:18px 0!important}
+.ah-profile-screen .stats>div{flex:1;padding:10px 4px;border:1px solid var(--ref-line);border-radius:6px;background:rgba(0,0,0,.65)}
+.ah-profile-screen .stats b{color:#f0d6a4!important;font:21px "Cinzel",Georgia,serif!important}
+.ah-profile-screen .stats small{color:#c9b99f!important;font-size:7px!important}
+.ah-profile-screen .rank-ladder,.ah-profile-screen .history{background:rgba(9,7,5,.9)!important;border-color:var(--ref-line)!important;border-radius:7px!important}
+.radio-room{padding-top:26px!important}
+.radio-hero,.radio-player,.radio-note{border:1px solid var(--ref-line)!important;border-radius:8px!important;background:linear-gradient(180deg,rgba(0,0,0,.35),rgba(0,0,0,.9)),url("/AfterHours/visuals/ah-radio-photo.svg") center/cover!important;box-shadow:0 14px 40px rgba(0,0,0,.42)!important}
+.radio-hero{text-align:center!important;padding:24px 15px!important}
+.radio-hero h2{font-size:28px!important}
+.radio-player{text-align:center!important;padding:22px 15px!important}
+.radio-disc{width:176px!important;height:176px!important;margin:0 auto 16px!important;border:1px solid var(--ref-gold)!important;border-radius:50%!important;background:repeating-radial-gradient(circle,#15100b 0 4px,#050505 5px 8px)!important;box-shadow:0 0 0 6px rgba(216,183,126,.08),0 0 30px rgba(216,183,126,.16)!important}
+.radio-disc span{color:var(--ref-gold-bright)!important}
+.radio-player h3{color:#f3dfbf!important;font:17px "Cinzel",Georgia,serif!important}
+.radio-player p{font-size:9px!important}
+.radio-vibe{display:flex;flex-direction:column;gap:5px;margin:16px 0;padding:12px;border-top:1px solid var(--ref-line);border-bottom:1px solid var(--ref-line)}
+.radio-vibe span,.radio-vibe small{color:#c4b398!important;font-size:8px!important}
+.radio-vibe strong{color:#f0d6a4!important;font:12px "Cinzel",Georgia,serif!important}
+.spotify-open{display:flex!important;align-items:center;justify-content:space-between;gap:10px;padding:0 14px;min-height:48px;text-decoration:none!important}
+.radio-note{display:flex;gap:10px;padding:13px!important;color:#d4c3a8!important;font-size:9px!important;line-height:1.5}
+.radio-note svg{flex:none;color:var(--ref-gold)!important}
+.insights{padding-top:24px!important}
+.insights .insights-hero{border:1px solid var(--ref-line)!important;border-radius:8px!important;background:linear-gradient(180deg,rgba(0,0,0,.35),rgba(0,0,0,.88)),url("/AfterHours/visuals/ah-tarot-photo.svg") center/cover!important;text-align:center!important;padding:24px 14px!important}
+.insights .insight-tabs{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:6px!important}
+.insights .insight-tabs button{border:1px solid var(--ref-line)!important;border-radius:5px!important;background:#0c0907!important;color:#d8c5a8!important;font-size:9px!important}
+.insights .insight-tabs button.active{background:linear-gradient(180deg,#e5c58e,#b58249)!important;color:#170f08!important}
+.insights .tarot-card,.insights .astro-card{border:1px solid var(--ref-line)!important;border-radius:8px!important;background:linear-gradient(180deg,rgba(0,0,0,.25),rgba(0,0,0,.92)),url("/AfterHours/visuals/ah-tarot-photo.svg") center/cover!important}
+.insights .astro-card{background-image:linear-gradient(180deg,rgba(0,0,0,.25),rgba(0,0,0,.92)),url("/AfterHours/visuals/ah-horoscope-photo.svg")!important}
+.insights button{border-color:var(--ref-line)!important}
+input,select,textarea{accent-color:#c79b5d!important}
+@media(max-width:390px){
+ .game-select-grid{gap:7px!important}.experience-choice{min-height:205px!important;padding:12px!important}
+ .experience-choice.featured{min-height:235px!important}
+ .ah-session-screen .timer{width:178px!important;height:178px!important}
+ .ah-session-screen .timer strong{font-size:32px!important}
+ .aftercare-options button{min-height:104px!important}
+}
+@media(min-width:700px){
+ .ah-editorial-screen,.ah-profile-screen,.radio-room,.insights{max-width:560px!important;padding-left:24px!important;padding-right:24px!important}
+ .consent-visual{margin-left:-24px;margin-right:-24px;padding-left:32px;padding-right:32px}
+}
