@@ -1873,3 +1873,65 @@ body{color:var(--ah-ivory)!important}
  .ah-session-screen .actions button{font-size:9px!important}
 }
 @media(prefers-reduced-motion:reduce){.app *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+
+/* AFTER HOURS page-specific visual art mapping.
+   The approved candlelit chamber remains the shared atmosphere. Each destination
+   now uses its own existing black-and-gold artwork instead of repeating the room. */
+.game-select-screen:before,.ah-session-screen:before{
+ background-image:linear-gradient(180deg,rgba(0,0,0,.28),rgba(0,0,0,.9)),url("/AfterHours/visuals/ah-experience-photo.svg")!important;
+ background-size:cover!important;background-position:center!important;
+}
+.aftercare-screen:before{
+ background-image:linear-gradient(180deg,rgba(0,0,0,.18),rgba(0,0,0,.84)),url("/AfterHours/visuals/ah-aftercare-photo.svg")!important;
+}
+.completion-screen:before{
+ background-image:linear-gradient(180deg,rgba(0,0,0,.22),rgba(0,0,0,.9)),url("/AfterHours/visuals/ah-completion-photo.svg")!important;
+}
+.ah-profile-screen:before{
+ background-image:linear-gradient(180deg,rgba(0,0,0,.18),rgba(0,0,0,.92)),url("/AfterHours/visuals/ah-profile-photo.svg")!important;
+}
+.insights:before{
+ background-image:linear-gradient(180deg,rgba(0,0,0,.18),rgba(0,0,0,.9)),url("/AfterHours/visuals/ah-tarot-photo.svg")!important;
+}
+.insights.insights-astro:before{
+ background-image:linear-gradient(180deg,rgba(0,0,0,.18),rgba(0,0,0,.9)),url("/AfterHours/visuals/ah-horoscope-photo.svg")!important;
+}
+.radio-room:before{
+ background-image:linear-gradient(180deg,rgba(0,0,0,.2),rgba(0,0,0,.92)),url("/AfterHours/visuals/ah-radio-photo.svg")!important;
+}
+.experience-choice:before,
+.experience-choice:nth-child(2):before,
+.experience-choice:nth-child(3):before,
+.experience-choice:nth-child(4):before{
+ background-image:linear-gradient(180deg,rgba(0,0,0,.03),rgba(0,0,0,.24) 38%,rgba(0,0,0,.96)),url("/AfterHours/visuals/ah-experience-photo.svg")!important;
+ background-position:center!important;background-size:cover!important;
+}
+.aftercare-screen .aftercare-card{
+ background-image:linear-gradient(180deg,rgba(7,5,4,.42),rgba(6,4,3,.96)),url("/AfterHours/visuals/ah-aftercare-photo.svg")!important;
+ background-size:cover!important;background-position:center!important;
+}
+.completion-screen .completion-card{
+ background-image:linear-gradient(180deg,rgba(7,5,4,.34),rgba(6,4,3,.96)),url("/AfterHours/visuals/ah-completion-photo.svg")!important;
+ background-size:cover!important;background-position:center!important;
+}
+.app .insights .tarot-card{
+ background-image:linear-gradient(180deg,rgba(7,6,5,.48),rgba(5,4,3,.94)),url("/AfterHours/visuals/ah-tarot-photo.svg")!important;
+ background-size:cover!important;background-position:center!important;
+}
+.app .insights .astro-card{
+ background-image:linear-gradient(180deg,rgba(7,6,5,.44),rgba(5,4,3,.94)),url("/AfterHours/visuals/ah-horoscope-photo.svg")!important;
+ background-size:cover!important;background-position:center!important;
+}
+.app .radio-room .radio-player{
+ background-image:linear-gradient(180deg,rgba(5,5,5,.2),rgba(5,5,5,.88)),url("/AfterHours/visuals/ah-radio-photo.svg")!important;
+ background-size:cover!important;background-position:center!important;
+}
+.app .ah-tarot-card{
+ background-image:linear-gradient(145deg,rgba(8,7,6,.14),rgba(5,5,5,.4)),url("/AfterHours/visuals/ah-tarot-frame.svg")!important;
+ background-size:cover!important;background-position:center!important;
+}
+.app .radio-disc{
+ background-image:url("/AfterHours/visuals/ah-radio-vinyl.svg")!important;
+ background-size:cover!important;background-position:center!important;background-repeat:no-repeat!important;
+}
