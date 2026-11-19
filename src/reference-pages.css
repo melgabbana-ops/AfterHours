@@ -777,7 +777,7 @@ html,body,#root,.app{background:#050505!important;color:#f4e7d2!important}
 }
 .completion-screen:before{
  content:""!important;position:absolute!important;inset:0!important;opacity:.22!important;
- background:radial-gradient(ellipse at 50% 18%,rgba(190,150,88,.16),transparent 48%),linear-gradient(180deg,#080706 0%,#050505 70%)!important;
+ background-image:linear-gradient(180deg,rgba(5,5,5,.42),rgba(5,5,5,.9)),url("/AfterHours/visuals/reference-completion.svg")!important;background-size:cover!important;background-position:center!important;
 }
 .completion-screen .completion-card{
  position:relative!important;z-index:1!important;width:min(100%,430px)!important;
@@ -785,7 +785,7 @@ html,body,#root,.app{background:#050505!important;color:#f4e7d2!important}
  display:flex!important;flex-direction:column!important;align-items:center!important;
  text-align:center!important;gap:0!important;
  border:1px solid rgba(216,183,126,.42)!important;border-radius:9px!important;
- background:linear-gradient(160deg,rgba(27,21,14,.98),rgba(7,7,6,.99) 52%)!important;
+ background-image:linear-gradient(160deg,rgba(27,21,14,.88),rgba(7,7,6,.95) 52%),url("/AfterHours/visuals/reference-completion.svg")!important;background-size:cover!important;background-position:center!important;
  box-shadow:0 22px 70px rgba(0,0,0,.55),inset 0 1px rgba(255,255,255,.05)!important;
 }
 .completion-screen .completion-seal{
@@ -820,4 +820,4 @@ html,body,#root,.app{background:#050505!important;color:#f4e7d2!important}
 .completion-screen .completion-primary,.completion-screen .completion-secondary{width:100%!important;min-height:48px!important;border-radius:6px!important;font-size:10px!important;letter-spacing:.13em!important}
 .completion-screen .completion-primary{border:1px solid #efd29b!important;background:linear-gradient(180deg,#e8c88f,#bd8c50)!important;color:#171008!important}
 .completion-screen .completion-secondary{margin-top:9px!important;border:1px solid rgba(216,183,126,.38)!important;background:transparent!important;color:#e7d3b1!important}
-@media(max-width:390px){.completion-screen{padding:20px 14px 104px!important}.completion-screen .completion-card{padding:28px 16px 19px!important}.completion-screen .completion-seal{width:72px!important;height:72px!important}}
+@media(max-width:390px){.completion-screen{padding:20px 14px 104px!important}.completion-screen .completion-card {padding:28px 16px 19px!important}.completion-screen .completion-seal{width:72px!important;height:72px!important}}
