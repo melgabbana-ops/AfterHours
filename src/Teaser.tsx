@@ -16,7 +16,7 @@ export default function Teaser() {
     const nextMuted = !introMuted;
     if (video) {
       video.muted = nextMuted;
-      if (!nextMuted) void video.play().catch(() => setIntroMuted(true));
+      if (!nextMuted) void video.play().catch(() => { video.muted = true; setIntroMuted(true); });
     }
     setIntroMuted(nextMuted);
   };
