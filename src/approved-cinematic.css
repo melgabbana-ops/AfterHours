@@ -914,3 +914,7 @@ hr{border:0;border-top:1px solid var(--ah-line)}
  .mission-card-footer button{width:100%}
  .mission-list .mission-complete{grid-column:2}
 }
+
+
+/* Intro video fallback: retain the local cinematic artwork if remote media is unavailable. */
+.teaser-film-fallback{position:absolute;inset:0;z-index:0;background:linear-gradient(180deg,rgba(5,4,3,.12),rgba(5,4,3,.36)),var(--ah-cinematic-background, url("../visuals/ah-cinematic-background.svg")) center/cover no-repeat;}
