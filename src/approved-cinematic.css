@@ -924,3 +924,76 @@ hr{border:0;border-top:1px solid var(--ah-line)}
 .teaser-audio-toggle svg{width:16px;height:16px;color:#dfbd83}
 .teaser-audio-toggle:focus-visible{outline:2px solid #f0d8ad;outline-offset:3px}
 @media(max-width:520px){.teaser-audio-toggle{right:10px;bottom:10px;min-height:38px;padding:0 11px;font-size:8px}}
+
+
+/* Cinematic intro polish: full-bleed framing and a living local fallback. */
+.teaser-film-motion{
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  background:#050403;
+}
+.teaser-film-video{
+  position:absolute;
+  inset:0;
+  z-index:1;
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center;
+  background:transparent;
+}
+.teaser-film-fallback{
+  position:absolute;
+  inset:0;
+  z-index:0;
+  overflow:hidden;
+  background:
+    radial-gradient(ellipse at 50% 44%,rgba(198,151,77,.13),transparent 48%),
+    linear-gradient(180deg,rgba(5,4,3,.08),rgba(5,4,3,.44)),
+    var(--ah-cinematic-background, url("../visuals/ah-cinematic-background.svg")) center/cover no-repeat;
+  transform:scale(1.015);
+  animation:ah-intro-drift 26s ease-in-out infinite alternate;
+}
+.teaser-film-fallback::after{
+  content:"";
+  position:absolute;
+  inset:-35%;
+  pointer-events:none;
+  background:linear-gradient(112deg,transparent 34%,rgba(226,184,111,.075) 49%,transparent 63%);
+  transform:translateX(-28%) rotate(-8deg);
+  animation:ah-intro-light-sweep 18s ease-in-out infinite;
+}
+.teaser-film-motion .teaser-atmosphere{
+  z-index:0;
+  opacity:.88;
+}
+.teaser-film-motion .teaser-film-brand{
+  z-index:3;
+  text-shadow:0 3px 20px rgba(0,0,0,.95);
+}
+.teaser-film-caption{
+  z-index:3;
+  text-shadow:0 2px 12px rgba(0,0,0,.95);
+}
+.teaser-audio-toggle{
+  z-index:4;
+}
+@keyframes ah-intro-drift{
+  from{transform:scale(1.015) translate3d(-.5%,0,0)}
+  to{transform:scale(1.10) translate3d(.5%,-1%,0)}
+}
+@keyframes ah-intro-light-sweep{
+  0%,18%{transform:translateX(-35%) rotate(-8deg);opacity:0}
+  35%{opacity:.8}
+  70%,100%{transform:translateX(35%) rotate(-8deg);opacity:0}
+}
+@media(max-width:520px){
+  .teaser-film-motion{min-height:clamp(240px,64vw,360px)}
+  .teaser-film-motion .teaser-film-brand img{width:min(64%,230px)}
+}
+@media(prefers-reduced-motion:reduce){
+  .teaser-film-fallback,.teaser-film-fallback::after{animation:none!important;transform:none}
+  .teaser-atmosphere span,.teaser-atmosphere i{animation:none!important}
+}
