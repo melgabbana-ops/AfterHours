@@ -207,11 +207,18 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
    setUserEmail(user?.email??null);
    setSyncUserId(null);
    if(!user){
+    const pendingStopAt=getPendingStopTimestamp(localState.session.status,localState.consent.status,localState.consent.revokedAt,localState.session.updatedAt);
     setRemoteStateVerified(false);
     clearTimer(localState.profile.id);
     setRunning(false);
     setSeconds(fallbackRounds[0].time);
-    setState(current=>({...defaultState(),ageConfirmed:current.ageConfirmed,ageConfirmedFor:current.ageConfirmedFor,safety:current.safety}));
+    if(pendingStopAt){
+     setState(localState);
+     setCheckIn("stop");
+     setProfileMessage(t("Je STOP blijft lokaal bewaard. Meld je opnieuw aan en maak verbinding om de serverintrekking te bevestigen.","Your STOP remains saved locally. Sign in again and reconnect to confirm server revocation."));
+    }else{
+     setState(current=>({...defaultState(),ageConfirmed:current.ageConfirmed,ageConfirmedFor:current.ageConfirmedFor,safety:current.safety}));
+    }
     setAuthReady(true);
     return;
    }
@@ -305,6 +312,8 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
     setScreen("admin");
    }
    if(event==="SIGNED_OUT"){
+    const localState=loadState();
+    const pendingStopAt=getPendingStopTimestamp(localState.session.status,localState.consent.status,localState.consent.revokedAt,localState.session.updatedAt);
     setRemoteStateVerified(false);
     clearTimer(state.profile.id);
     clearTimer("local-profile");
@@ -314,7 +323,13 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
     setAuthMessage("");
     setAuthBusy(false);
     setRunning(false);
-    setState(defaultState());
+    if(pendingStopAt){
+     setState(localState);
+     setCheckIn("stop");
+     setProfileMessage(t("Je STOP blijft lokaal bewaard. Meld je opnieuw aan en maak verbinding om de serverintrekking te bevestigen.","Your STOP remains saved locally. Sign in again and reconnect to confirm server revocation."));
+    }else{
+     setState(defaultState());
+    }
     setScreen("home");
    }
    if(session?.user){
