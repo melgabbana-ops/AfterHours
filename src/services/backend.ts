@@ -3,6 +3,17 @@ import{supabase,supabaseConfigured}from"./supabase";
 
 const isUuid=(value:string)=>/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 
+// Serialize session-state writes and consent revocation. A STOP must be applied
+// after any already-running sync and must invalidate older queued snapshots.
+let syncQueue: Promise<void> = Promise.resolve();
+let syncGeneration = 0;
+
+function enqueueRemoteMutation<T>(operation: () => Promise<T>): Promise<T> {
+ const job = syncQueue.then(operation);
+ syncQueue = job.then(() => undefined, () => undefined);
+ return job;
+}
+
 export interface RemoteRound{slug:string;title:string;body:string;durationSeconds:number}
 
 const STORY_CHAPTER_IDS = ["arrival", "test", "control", "challenge", "boundary", "night", "after-hours"] as const;
@@ -104,18 +115,23 @@ export async function updateRemoteUsername(username:string):Promise<string|null>
  return null;
 }
 
-export async function revokeRemoteConsent(sessionId:string,revokedAt:string):Promise<string|null>{
- if(!supabaseConfigured||!supabase||!isUuid(sessionId))return null;
- const{data:{user},error:userError}=await supabase.auth.getUser();
- if(userError||!user)return userError?.message??"Geen actieve gebruiker voor consent-sync.";
- const{data:session,error:sessionError}=await supabase.from("sessions").select("id").eq("id",sessionId).eq("profile_id",user.id).maybeSingle();
- if(sessionError)return sessionError.message;
- if(!session)return null;
- // Always ask the server to enforce revocation, even if the latest consent
- // record already says revoked or is inconsistent with the session state.
- // The database RPC is responsible for idempotently stopping active/paused sessions.
- const{error}=await supabase.rpc("set_consent_state",{p_session_id:sessionId,p_status:"revoked",p_confirmed_at:null,p_revoked_at:revokedAt});
- return error?.message??null;
+export function revokeRemoteConsent(sessionId:string,revokedAt:string):Promise<string|null>{
+ if(!supabaseConfigured||!supabase||!isUuid(sessionId))return Promise.resolve(null);
+ // Drop queued state snapshots from before STOP. If a sync is already in
+ // flight, the revocation waits for it and is therefore the final server write.
+ syncGeneration += 1;
+ return enqueueRemoteMutation(async()=>{
+  const{data:{user},error:userError}=await supabase.auth.getUser();
+  if(userError||!user)return userError?.message??"Geen actieve gebruiker voor consent-sync.";
+  const{data:session,error:sessionError}=await supabase.from("sessions").select("id").eq("id",sessionId).eq("profile_id",user.id).maybeSingle();
+  if(sessionError)return sessionError.message;
+  if(!session)return null;
+  // Always ask the server to enforce revocation, even if the latest consent
+  // record already says revoked or is inconsistent with the session state.
+  // The database RPC is responsible for idempotently stopping active/paused sessions.
+  const{error}=await supabase.rpc("set_consent_state",{p_session_id:sessionId,p_status:"revoked",p_confirmed_at:null,p_revoked_at:revokedAt});
+  return error?.message??null;
+ });
 }
 
 export async function completeRemoteSession(sessionId:string,rounds:number):Promise<{error:string|null,xpEarned:number,alreadyCompleted:boolean}>{
@@ -127,17 +143,12 @@ export async function completeRemoteSession(sessionId:string,rounds:number):Prom
  return {error:null,xpEarned:Number(data?.xp_earned??120),alreadyCompleted:Boolean(data?.already_completed)};
 }
 
-let syncQueue=Promise.resolve();
-let syncGeneration=0;
-
-export async function syncRemoteState(state:AfterHoursState):Promise<string|null>{
+export function syncRemoteState(state:AfterHoursState):Promise<string|null>{
  const generation=++syncGeneration;
- const job=syncQueue.then(()=>{
-  if(generation!==syncGeneration)return null;
+ return enqueueRemoteMutation(()=>{
+  if(generation!==syncGeneration)return Promise.resolve(null);
   return syncRemoteStateNow(state);
  });
- syncQueue=job.then(()=>undefined,()=>undefined);
- return job;
 }
 
 async function syncRemoteStateNow(state:AfterHoursState):Promise<string|null>{
