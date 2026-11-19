@@ -59,7 +59,7 @@ describe("AFTER HOURS page-specific visual assets", () => {
   });
 
   it("ships every page-specific artwork asset with the service worker shell", () => {
-    expect(serviceWorker).toContain('const CACHE_NAME = "after-hours-v18";');
+    expect(serviceWorker).toContain('const CACHE_NAME = "after-hours-v19";');
     for (const asset of precachedAssets) {
       expect(serviceWorker).toContain(`asset("visuals/${asset}")`);
     }
@@ -73,6 +73,15 @@ describe("AFTER HOURS page-specific visual assets", () => {
       "ah-horoscope-photo.svg",
       "ah-profile-photo.svg",
       "ah-radio-photo.svg",
+    "reference-home.svg",
+    "reference-consent.svg",
+    "reference-experience.svg",
+    "reference-aftercare.svg",
+    "reference-completion.svg",
+    "reference-tarot.svg",
+    "reference-horoscope.svg",
+    "reference-radio.svg",
+    "reference-profile.svg",
       "ah-tarot-photo.svg",
     ];
     for (const asset of wideAssets) {
