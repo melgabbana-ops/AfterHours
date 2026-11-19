@@ -1210,3 +1210,31 @@ html,body,#root,.app{background:#050505!important;color:#f4e7d2!important}
 .experience-choice:nth-child(4){
  background-image:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.9)),url("https://gcdn.picsart.com/pipeline-output/5dbe1964-e376-4d2a-b693-1b06392abd82.png"),url("/AfterHours/visuals/reference-radio.svg")!important;
 }
+
+
+/* Explicit PASS choice: a neutral, visible alternative to answering the current check-in. */
+.app .task-card>.pass-task{
+  display:flex!important;
+  width:100%!important;
+  min-height:44px!important;
+  margin-top:10px!important;
+  padding:10px 14px!important;
+  align-items:center!important;
+  justify-content:center!important;
+  border:1px solid var(--ah-champagne,#d5b77d)!important;
+  border-radius:10px!important;
+  background:rgba(5,5,5,.72)!important;
+  color:var(--ah-champagne-light,#f0dfb4)!important;
+  font-size:10px!important;
+  font-weight:700!important;
+  letter-spacing:.1em!important;
+  touch-action:manipulation;
+}
+.app .task-card>.pass-task[aria-pressed="true"]{
+  border-color:var(--ah-champagne-light,#f0dfb4)!important;
+  background:rgba(198,165,107,.14)!important;
+}
+.app .task-card>.pass-task:focus-visible{
+  outline:2px solid var(--ah-champagne-light,#f0dfb4)!important;
+  outline-offset:3px!important;
+}

@@ -6,12 +6,36 @@ export type SessionSafetyAnnouncementEvent =
   | "timer-paused"
   | "resumed"
   | "stopped"
+  | "task-passed"
   | "consent-revoked"
   | "consent-confirmed";
 
 export interface SessionSafetyAnnouncement {
   message: string;
   priority: "polite" | "assertive";
+}
+
+
+export const PASS_TASK_SELECTION = "__AFTER_HOURS_PASS__";
+
+export function isTaskPassed(selection: string | null): boolean {
+  return selection === PASS_TASK_SELECTION;
+}
+
+export function getTaskChoiceFeedback(selection: string | null, language: "nl" | "en"): string {
+  if (isTaskPassed(selection)) {
+    return language === "nl"
+      ? "Vraag overgeslagen. Geen straf of uitleg nodig."
+      : "Question skipped. No penalty or explanation is needed.";
+  }
+  if (selection) {
+    return language === "nl"
+      ? "Je keuze is bewaard voor deze ronde. Je kunt altijd van richting veranderen."
+      : "Your choice is saved for this round. You can always change direction.";
+  }
+  return language === "nl"
+    ? "Kies alleen als dit voor jou goed voelt en stem samen af."
+    : "Choose only if it feels right for you, and check in with each other.";
 }
 
 /** A restored timer may run only when both persisted session and consent are active. */
@@ -44,6 +68,10 @@ export function getSessionSafetyAnnouncement(
     stopped: {
       nl: "Sessie onmiddellijk gestopt. Toestemming is ingetrokken. Bevestig opnieuw voordat je start.",
       en: "Session stopped immediately. Consent has been revoked. Confirm again before starting.",
+    },
+    "task-passed": {
+      nl: "PASS geregistreerd. Deze vraag is overgeslagen. Je hoeft niets uit te leggen.",
+      en: "PASS recorded. This question was skipped. No explanation is needed.",
     },
     "consent-revoked": {
       nl: "Toestemming ingetrokken. De sessie is gestopt. Bevestig opnieuw voordat je start.",

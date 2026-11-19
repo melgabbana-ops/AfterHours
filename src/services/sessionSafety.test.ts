@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getSessionSafetyAnnouncement, shouldResumeSession } from "./sessionSafety";
+import { getSessionSafetyAnnouncement, getTaskChoiceFeedback, isTaskPassed, PASS_TASK_SELECTION, shouldResumeSession } from "./sessionSafety";
 
 describe("session resume safety", () => {
   it("resumes only when both persisted session and consent are active", () => {
@@ -30,6 +30,8 @@ describe("session resume safety", () => {
 describe("session safety announcements", () => {
   it.each([
     ["started", "nl", "Sessie gestart.", "polite"],
+    ["task-passed", "nl", "PASS geregistreerd. Deze vraag is overgeslagen. Je hoeft niets uit te leggen.", "polite"],
+    ["task-passed", "en", "PASS recorded. This question was skipped. No explanation is needed.", "polite"],
     ["started", "en", "Session started.", "polite"],
     ["paused", "nl", "Sessie gepauzeerd. Je kunt hervatten wanneer je er klaar voor bent.", "polite"],
     ["paused", "en", "Session paused. You can resume when you are ready.", "polite"],
@@ -49,4 +51,24 @@ describe("session safety announcements", () => {
       expect(getSessionSafetyAnnouncement(event, language)).toEqual({ message, priority });
     },
   );
+});
+
+
+describe("session task PASS", () => {
+  it("uses a dedicated marker without treating a normal answer as PASS", () => {
+    expect(isTaskPassed(PASS_TASK_SELECTION)).toBe(true);
+    expect(isTaskPassed("Tempo")).toBe(false);
+    expect(isTaskPassed(null)).toBe(false);
+  });
+
+  it.each([
+    [PASS_TASK_SELECTION, "nl", "Vraag overgeslagen. Geen straf of uitleg nodig."],
+    [PASS_TASK_SELECTION, "en", "Question skipped. No penalty or explanation is needed."],
+    ["Tempo", "nl", "Je keuze is bewaard voor deze ronde. Je kunt altijd van richting veranderen."],
+    ["Pace", "en", "Your choice is saved for this round. You can always change direction."],
+    [null, "nl", "Kies alleen als dit voor jou goed voelt en stem samen af."],
+    [null, "en", "Choose only if it feels right for you, and check in with each other."],
+  ] as const)("provides safe feedback for selection=%s in %s", (selection, language, expected) => {
+    expect(getTaskChoiceFeedback(selection, language)).toBe(expected);
+  });
 });
