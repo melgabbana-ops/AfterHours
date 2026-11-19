@@ -1,13 +1,14 @@
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 
+const visualDirectory = "public/visuals";
+const visualAssets = (await readdir(visualDirectory))
+  .filter((name) => /\\.svg$/i.test(name))
+  .map((name) => `${visualDirectory}/${name}`);
 const files = [
   "src/styles.css",
   "src/approved-cinematic.css",
-  "public/visuals/ah-cinematic-hero.svg",
-  "public/visuals/ah-experience-photo.svg",
-  "public/visuals/ah-aftercare-photo.svg",
-  "public/visuals/ah-completion-photo.svg",
-];
+  ...visualAssets,
+
 const forbiddenNames = /--[\\w-]*(?:purple|violet|magenta|aubergine|plum)[\\w-]*/i;
 const failures = [];
 
