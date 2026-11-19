@@ -485,11 +485,9 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
    <button className="home-start gold" onClick={()=>setScreen(consent?"gameSelect":"consent")}><Play size={15}/>{t("START EXPERIENCE","START EXPERIENCE")} <ChevronRight size={16}/></button>
   </section>
   <section className="grid home-shortcuts" aria-label={t("Snel naar","Quick access")}>
-   <button className="tile" onClick={()=>setScreen("gameSelect")}><Play/><span>{t("Ervaringen","Experiences")}</span></button>
-   <button className="tile" onClick={()=>setScreen("missions")}><CheckCircle2/><span>{t("Taken","Missions")}</span></button>
-   <button className="tile" onClick={()=>setScreen("profile")}><Timer/><span>{t("Sessies","Sessions")}</span></button>
-   <button className="tile" onClick={()=>setScreen("profile")}><Sparkles/><span>{t("Rangen","Ranks")}</span></button>
-   <button className="tile" onClick={()=>setScreen("profile")}><Activity/><span>{t("Mood","Mood")}</span></button>
+   <button className="tile" onClick={()=>setScreen("gameSelect")}><Play/><span>{t("Games","Games")}</span></button>
+   <button className="tile" onClick={()=>{setInsightsInitialTab("tarot");setScreen("insights")}}><Sparkles/><span>Tarot</span></button>
+   <button className="tile" onClick={()=>setScreen("radio")}><Headphones/><span>Radio</span></button>
    <button className="tile" onClick={()=>setScreen("profile")}><User/><span>{t("Profiel","Profile")}</span></button>
   </section>
   <details className="home-more">
