@@ -1,0 +1,38 @@
+import consentSource from "./ConsentScreen.tsx?raw";
+import referenceCss from "./reference-pages.css?raw";
+import { describe, expect, it } from "vitest";
+
+describe("consent screen accessibility", () => {
+  it("groups the required acknowledgements in a labelled fieldset", () => {
+    expect(consentSource).toMatch(/<fieldset[^>]*className="consent-checks"[^>]*aria-describedby="consent-checks-help"/);
+    expect(consentSource).toMatch(/<fieldset[\\s\\S]*?<legend[^>]*>.*?<\\/legend>/);
+    expect(consentSource).toContain('id="consent-checks-help"');
+  });
+
+  it("keeps each agreement as a native checkbox inside its label", () => {
+    expect(consentSource).toContain('<input type="checkbox" checked={checks[index]}');
+    expect(consentSource).toContain('<label className={"consent-check "+');
+  });
+
+  it("provides Dutch and English group instructions", () => {
+    expect(consentSource).toContain('t("Bevestig alle afspraken","Confirm all agreements")');
+    expect(consentSource).toContain('t("Vink alle vier afspraken aan om verder te gaan.","Check all four agreements to continue.")');
+  });
+
+  it("still requires all four acknowledgements before consent can continue", () => {
+    expect(consentSource).toContain("const ready=checks.every(Boolean);");
+    expect(consentSource).toContain("disabled={!ready}");
+  });
+
+  it("preserves the explicit STOP, PAUZE and consent-withdrawal guidance", () => {
+    expect(consentSource).toContain("STOP betekent direct stoppen.");
+    expect(consentSource).toContain("PAUZE betekent vertragen en opnieuw afstemmen.");
+    expect(consentSource).toContain("Toestemming kan altijd worden ingetrokken.");
+  });
+
+  it("styles the semantic group within the existing black-and-gold reference system", () => {
+    expect(referenceCss).toContain(".consent-checks{");
+    expect(referenceCss).toContain("color:var(--ref-gold-bright)");
+    expect(referenceCss).toContain("background:#050505!important");
+  });
+});
