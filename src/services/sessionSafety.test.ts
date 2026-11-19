@@ -6,6 +6,11 @@ describe("session resume safety", () => {
     expect(shouldResumeSession("active", "active")).toBe(true);
   });
 
+  it("does not resume an active local session when server state could not be verified", () => {
+    expect(shouldResumeSession("active", "active", false)).toBe(false);
+    expect(shouldResumeSession("paused", "active", false)).toBe(false);
+  });
+
   it.each([
     ["ready", "pending"],
     ["ready", "active"],
