@@ -1,28 +1,48 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="3840" height="2160" viewBox="0 0 3840 2160" role="img" aria-label="AFTER HOURS dark cinematic chamber with warm gold arches and candlelight">
+<svg xmlns="http://www.w3.org/2000/svg" width="3840" height="2160" viewBox="0 0 3840 2160" role="img" aria-label="AFTER HOURS ornate candlelit black and gold chamber">
 <defs>
- <linearGradient id="bg" x2="0" y2="1"><stop stop-color="#080705"/><stop offset=".55" stop-color="#100c07"/><stop offset="1" stop-color="#050403"/></linearGradient>
- <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff0c7"/><stop offset=".25" stop-color="#d7a84f"/><stop offset=".55" stop-color="#795027"/><stop offset=".8" stop-color="#f0cf88"/><stop offset="1" stop-color="#8c5b28"/></linearGradient>
- <radialGradient id="glow"><stop stop-color="#b8792b" stop-opacity=".34"/><stop offset="1" stop-color="#b8792b" stop-opacity="0"/></radialGradient>
- <linearGradient id="floor" x2="0" y2="1"><stop stop-color="#b17b35" stop-opacity=".12"/><stop offset="1" stop-color="#050403" stop-opacity="0"/></linearGradient>
- <filter id="soft"><feGaussianBlur stdDeviation="90"/></filter>
- <filter id="shine"><feGaussianBlur stdDeviation="10" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
- <g id="candle"><rect x="-45" y="0" width="90" height="230" rx="12" fill="#0b0906" stroke="url(#gold)" stroke-width="4"/><path d="M-30 22h60M-30 204h60" stroke="url(#gold)" stroke-width="3" opacity=".55"/><path d="M0 -4 C-28 -45 -4 -77 0 -104 C28 -66 28 -37 0 -4Z" fill="#e5a94d" filter="url(#shine)"/><ellipse cy="-7" rx="26" ry="12" fill="#f5d48a" opacity=".25"/></g>
- <g id="ornament" fill="none" stroke="url(#gold)" stroke-width="5" opacity=".65"><path d="M0 120 Q90 20 180 120 Q90 220 0 120Z"/><path d="M30 120Q90 60 150 120Q90 180 30 120Z"/><path d="M90 30V210M0 120H180"/></g>
+ <linearGradient id="wall" x2="0" y2="1"><stop stop-color="#090705"/><stop offset=".56" stop-color="#171008"/><stop offset="1" stop-color="#050403"/></linearGradient>
+ <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff0c8"/><stop offset=".22" stop-color="#d6a64f"/><stop offset=".48" stop-color="#765020"/><stop offset=".72" stop-color="#f2d08b"/><stop offset="1" stop-color="#8b602b"/></linearGradient>
+ <linearGradient id="pillar" x2="1"><stop stop-color="#050403"/><stop offset=".22" stop-color="#302113"/><stop offset=".42" stop-color="#080605"/><stop offset=".72" stop-color="#21170d"/><stop offset="1" stop-color="#030302"/></linearGradient>
+ <linearGradient id="floor" x2="0" y2="1"><stop stop-color="#171008"/><stop offset=".22" stop-color="#090705"/><stop offset="1" stop-color="#020202"/></linearGradient>
+ <radialGradient id="warm"><stop stop-color="#c58b37" stop-opacity=".42"/><stop offset=".48" stop-color="#8a5b24" stop-opacity=".12"/><stop offset="1" stop-color="#6e471d" stop-opacity="0"/></radialGradient>
+ <linearGradient id="flame" x2="0" y2="1"><stop stop-color="#fff6c9"/><stop offset=".35" stop-color="#ffd36a"/><stop offset="1" stop-color="#b45b13" stop-opacity="0"/></linearGradient>
+ <filter id="blur"><feGaussianBlur stdDeviation="75"/></filter>
+ <filter id="glow"><feGaussianBlur stdDeviation="22"/></filter>
+ <pattern id="ornament" width="180" height="180" patternUnits="userSpaceOnUse"><path d="M90 8C20 38 20 142 90 172C160 142 160 38 90 8ZM90 35C52 55 52 125 90 145C128 125 128 55 90 35ZM8 90Q90 8 172 90Q90 172 8 90Z" fill="none" stroke="url(#gold)" stroke-width="3" opacity=".48"/><circle cx="90" cy="90" r="7" fill="#d8b16b" opacity=".4"/></pattern>
 </defs>
-<rect width="3840" height="2160" fill="url(#bg)"/>
-<ellipse cx="1920" cy="760" rx="1650" ry="1050" fill="url(#glow)" filter="url(#soft)"/>
-<path d="M330 2160V840Q330 100 1920 60Q3510 100 3510 840V2160" fill="none" stroke="url(#gold)" stroke-width="13" opacity=".36"/>
-<path d="M520 2160V880Q520 300 1920 230Q3320 300 3320 880V2160" fill="none" stroke="url(#gold)" stroke-width="7" opacity=".24"/>
-<path d="M730 2160V930Q730 470 1920 390Q3110 470 3110 930V2160" fill="none" stroke="url(#gold)" stroke-width="4" opacity=".16"/>
-<g opacity=".58"><path d="M190 0V2160M3650 0V2160" stroke="url(#gold)" stroke-width="5" opacity=".35"/><path d="M220 0V2160M3620 0V2160" stroke="#d7a84f" stroke-width="1" opacity=".3"/></g>
-<g fill="#0a0806" stroke="url(#gold)" stroke-width="8" opacity=".9">
- <path d="M110 0H410L450 2160H70Z"/><path d="M3430 0H3730L3770 2160H3390Z"/>
- <path d="M115 160H405M90 320H430M70 1900H450M3435 160H3725M3410 320H3750M3390 1900H3770" fill="none" stroke-width="5"/>
+<rect width="3840" height="2160" fill="url(#wall)"/>
+<ellipse cx="1920" cy="850" rx="1600" ry="1120" fill="url(#warm)" filter="url(#blur)"/>
+<!-- grand central arch -->
+<path d="M520 2160V980C520 360 1080 70 1920 70S3320 360 3320 980V2160" fill="none" stroke="url(#gold)" stroke-width="22" opacity=".55"/>
+<path d="M650 2160V1010C650 460 1150 210 1920 210S3190 460 3190 1010V2160" fill="none" stroke="url(#gold)" stroke-width="7" opacity=".34"/>
+<path d="M790 2160V1070C790 570 1240 350 1920 350S3050 570 3050 1070V2160" fill="none" stroke="url(#gold)" stroke-width="3" opacity=".2"/>
+<path d="M520 980Q1920 -80 3320 980" fill="none" stroke="url(#gold)" stroke-width="12" opacity=".34"/>
+<path d="M650 1000Q1920 40 3190 1000" fill="none" stroke="url(#gold)" stroke-width="4" opacity=".24"/>
+<!-- carved side columns -->
+<g>
+ <g transform="translate(120 0)"><rect x="0" y="0" width="420" height="2160" fill="url(#pillar)"/><rect x="35" y="0" width="350" height="2160" fill="url(#ornament)" opacity=".42"/><path d="M0 160H420M0 240H420M0 620H420M0 700H420M0 1880H420M0 1960H420" stroke="url(#gold)" stroke-width="15" opacity=".62"/><path d="M70 0V2160M350 0V2160" stroke="url(#gold)" stroke-width="8" opacity=".4"/><path d="M0 180Q210 20 420 180L390 280H30Z" fill="url(#gold)" opacity=".55"/></g>
+ <g transform="translate(3300 0)"><rect x="0" y="0" width="420" height="2160" fill="url(#pillar)"/><rect x="35" y="0" width="350" height="2160" fill="url(#ornament)" opacity=".42"/><path d="M0 160H420M0 240H420M0 620H420M0 700H420M0 1880H420M0 1960H420" stroke="url(#gold)" stroke-width="15" opacity=".62"/><path d="M70 0V2160M350 0V2160" stroke="url(#gold)" stroke-width="8" opacity=".4"/><path d="M0 180Q210 20 420 180L390 280H30Z" fill="url(#gold)" opacity=".55"/></g>
 </g>
-<g opacity=".7"><use href="#ornament" x="120" y="520"/><use href="#ornament" x="3540" y="520"/></g>
-<g opacity=".8"><use href="#candle" x="210" y="1440"/><use href="#candle" x="410" y="1650"/><use href="#candle" x="610" y="1780"/><use href="#candle" x="3630" y="1440"/><use href="#candle" x="3430" y="1650"/><use href="#candle" x="3230" y="1780"/></g>
-<g fill="none" stroke="url(#gold)" opacity=".35"><path d="M0 1920Q960 1770 1920 1920T3840 1920" stroke-width="6"/><path d="M0 2020Q960 1870 1920 2020T3840 2020" stroke-width="3"/><path d="M0 2110Q960 1960 1920 2110T3840 2110" stroke-width="2"/></g>
-<rect y="1800" width="3840" height="360" fill="url(#floor)"/>
-<g fill="#f3d08a" opacity=".6"><circle cx="520" cy="420" r="5"/><circle cx="3310" cy="510" r="5"/><circle cx="790" cy="1130" r="3"/><circle cx="3040" cy="1220" r="4"/></g>
-<rect width="3840" height="2160" fill="#000" opacity=".22"/>
+<!-- central medallion -->
+<circle cx="1920" cy="850" r="510" fill="none" stroke="url(#gold)" stroke-width="9" opacity=".16"/>
+<circle cx="1920" cy="850" r="480" fill="none" stroke="url(#gold)" stroke-width="3" opacity=".22" stroke-dasharray="8 18"/>
+<path d="M1920 290Q1980 430 2110 470Q1980 510 1920 650Q1860 510 1730 470Q1860 430 1920 290Z" fill="url(#gold)" opacity=".08"/>
+<!-- draped velvet curtains -->
+<path d="M0 0Q280 180 460 0Q300 500 520 900Q260 720 0 1100Z" fill="#100a06" stroke="url(#gold)" stroke-width="8" opacity=".78"/>
+<path d="M3840 0Q3560 180 3380 0Q3540 500 3320 900Q3580 720 3840 1100Z" fill="#100a06" stroke="url(#gold)" stroke-width="8" opacity=".78"/>
+<path d="M0 0Q220 250 410 20M3840 0Q3620 250 3430 20" fill="none" stroke="url(#gold)" stroke-width="18" opacity=".4"/>
+<!-- floor -->
+<path d="M0 1480Q1920 1300 3840 1480V2160H0Z" fill="url(#floor)"/>
+<path d="M0 1580Q1920 1390 3840 1580M0 1770Q1920 1590 3840 1770M0 1980Q1920 1830 3840 1980" fill="none" stroke="url(#gold)" stroke-width="5" opacity=".2"/>
+<path d="M1920 1450L0 2160M1920 1450L960 2160M1920 1450L2880 2160M1920 1450L3840 2160" fill="none" stroke="url(#gold)" stroke-width="4" opacity=".13"/>
+<!-- candle stands and flames -->
+<g>
+ <g transform="translate(260 0)"><ellipse cx="160" cy="1900" rx="220" ry="36" fill="#c18a39" opacity=".2" filter="url(#glow)"/><path d="M60 1880H260L230 1930H90Z" fill="url(#gold)"/><rect x="105" y="1690" width="110" height="190" rx="10" fill="#080605" stroke="url(#gold)" stroke-width="7"/><path d="M100 1690H220L205 1650H115Z" fill="url(#gold)"/><rect x="132" y="1510" width="56" height="150" rx="8" fill="#0a0805" stroke="url(#gold)" stroke-width="5"/><path d="M160 1510C110 1440 145 1380 160 1340C185 1390 210 1450 160 1510Z" fill="url(#flame)" filter="url(#glow)"/><path d="M160 1490C142 1450 157 1420 164 1400C180 1445 176 1470 160 1490Z" fill="#fff0b1"/></g>
+ <g transform="translate(3000 0)"><ellipse cx="160" cy="1900" rx="220" ry="36" fill="#c18a39" opacity=".2" filter="url(#glow)"/><path d="M60 1880H260L230 1930H90Z" fill="url(#gold)"/><rect x="105" y="1690" width="110" height="190" rx="10" fill="#080605" stroke="url(#gold)" stroke-width="7"/><path d="M100 1690H220L205 1650H115Z" fill="url(#gold)"/><rect x="132" y="1510" width="56" height="150" rx="8" fill="#0a0805" stroke="url(#gold)" stroke-width="5"/><path d="M160 1510C110 1440 145 1380 160 1340C185 1390 210 1450 160 1510Z" fill="url(#flame)" filter="url(#glow)"/><path d="M160 1490C142 1450 157 1420 164 1400C180 1445 176 1470 160 1490Z" fill="#fff0b1"/></g>
+ <g transform="translate(70 0) scale(.72)"><rect x="100" y="1730" width="90" height="170" rx="8" fill="#080605" stroke="url(#gold)" stroke-width="7"/><path d="M145 1730C100 1670 130 1620 145 1580C168 1630 185 1680 145 1730Z" fill="url(#flame)"/></g>
+ <g transform="translate(3400 0) scale(.72)"><rect x="100" y="1730" width="90" height="170" rx="8" fill="#080605" stroke="url(#gold)" stroke-width="7"/><path d="M145 1730C100 1670 130 1620 145 1580C168 1630 185 1680 145 1730Z" fill="url(#flame)"/></g>
+</g>
+<!-- ambient motes -->
+<g fill="#e7c98f" opacity=".45"><circle cx="760" cy="460" r="5"/><circle cx="920" cy="720" r="3"/><circle cx="2920" cy="510" r="5"/><circle cx="2750" cy="820" r="3"/><circle cx="1080" cy="1260" r="4"/><circle cx="2800" cy="1300" r="4"/><circle cx="1920" cy="1200" r="3"/></g>
+<rect width="3840" height="2160" fill="#000" opacity=".16"/>
 </svg>
