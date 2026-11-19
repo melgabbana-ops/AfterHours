@@ -47,6 +47,15 @@ export function shouldResumeSession(
   return remoteStateVerified && sessionStatus === "active" && consentStatus === "active";
 }
 
+/** A Supabase-backed session waits for authenticated remote hydration before its local timer can run. */
+export function shouldResumeSessionBeforeHydration(
+  supabaseConfigured: boolean,
+  sessionStatus: SessionSafetyStatus,
+  consentStatus: ConsentSafetyStatus,
+): boolean {
+  return !supabaseConfigured && shouldResumeSession(sessionStatus, consentStatus);
+}
+
 /** Localized screen-reader feedback for consent and session safety transitions. */
 export function getSessionSafetyAnnouncement(
   event: SessionSafetyAnnouncementEvent,
