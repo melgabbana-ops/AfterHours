@@ -170,7 +170,7 @@
 
 
 /* Home hero photographic portrait replaces the vector placeholder. */
-.ah-reference-home{--ah-cinematic-background:url("https://gcdn.picsart.com/pipeline-output/5f3d6127-421e-424a-b009-edd9e6e66a8d.png")!important}
+.ah-reference-home{--ah-cinematic-background:url("https://gcdn.picsart.com/editing-temp/bc8725cb-2e53-4c72-8cc0-e953ea8894ad.png")!important}
 .ah-reference-home .hero.home-hero{background-image:linear-gradient(180deg,rgba(5,4,3,.02) 0%,rgba(5,4,3,.05) 28%,rgba(5,4,3,.42) 58%,rgba(5,4,3,.96) 100%),var(--ah-cinematic-background)!important;background-position:center 24%!important;background-size:cover!important}
 
 
