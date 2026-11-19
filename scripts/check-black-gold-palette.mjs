@@ -2,14 +2,15 @@ import { readFile, readdir } from "node:fs/promises";
 
 const visualDirectory = "public/visuals";
 const visualAssets = (await readdir(visualDirectory))
-  .filter((name) => /\\.svg$/i.test(name))
+  .filter((name) => /\.svg$/i.test(name))
   .map((name) => `${visualDirectory}/${name}`);
 const files = [
   "src/styles.css",
   "src/approved-cinematic.css",
   ...visualAssets,
+];
 
-const forbiddenNames = /--[\\w-]*(?:purple|violet|magenta|aubergine|plum)[\\w-]*/i;
+const forbiddenNames = /--[\w-]*(?:purple|violet|magenta|aubergine|plum)[\w-]*/i;
 const failures = [];
 
 function rgbToHsl(hex) {
