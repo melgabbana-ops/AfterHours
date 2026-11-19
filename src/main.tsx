@@ -468,7 +468,7 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
     {state.notifications.length?state.notifications.slice(0,8).map(item=><button key={item.id} className={"notification-item "+(item.read?"":"unread")} onClick={()=>markNotificationRead(item.id)}><b>{item.title}</b><span>{item.body}</span></button>):<small>{t("Geen nieuwe meldingen.","No new notifications.")}</small>}
    </div>}
   </div>
-  <section className="hero home-hero" style={{"--ah-cinematic-background": `url("${import.meta.env.BASE_URL}visuals/ah-cinematic-background.svg")`} as React.CSSProperties}>
+  <section className="hero home-hero" style={{"--ah-cinematic-background": `url("${import.meta.env.BASE_URL}visuals/ah-grand-candlelit-chamber.webp")`} as React.CSSProperties}>
    <img className="home-wordmark" src={`${import.meta.env.BASE_URL}after-hours-wordmark-transparent.svg`} alt="AFTER HOURS"/>
    <span className="eyebrow">{t("WELKOM TERUG","WELCOME BACK")}</span><h2>{state.profile.displayName||"Mysti"}</h2>
    <div className="home-level"><span>♙</span><div><strong>Level {state.profile.level}</strong><small>{xp} / {nextLevelFloor} XP</small><div className="home-xp"><i style={{width:levelProgress+"%"}}/></div></div></div>
