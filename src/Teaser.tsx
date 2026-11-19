@@ -7,6 +7,7 @@ export default function Teaser() {
   const [language, setLanguage] = React.useState<"nl"|"en">(() => { try { return localStorage.getItem("afterhours.language") === "en" ? "en" : "nl"; } catch { return "nl"; } });
   React.useEffect(() => { try { localStorage.setItem("afterhours.language", language); document.documentElement.lang = language; } catch { /* Language preference is optional. */ } }, [language]);
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
+  const [introVideoUnavailable, setIntroVideoUnavailable] = React.useState(false);
   const features = [
     { icon: Gamepad2, title: t("Kinky games", "Kinky games"), copy: t("Interactieve ervaringen", "Interactive experiences") },
     { icon: Layers3, title: t("Kinky tarot", "Kinky tarot"), copy: t("Kaarten en reflectie", "Cards and reflection") },
@@ -20,7 +21,7 @@ export default function Teaser() {
     <div className="teaser-top"><img className="teaser-logo" src={`${import.meta.env.BASE_URL}after-hours-brand-logo-transparent.svg`} alt="AFTER HOURS" /><div className="teaser-top-actions"><span className="teaser-private">18+ · {t("PRIVÉWERELD","PRIVATE EXPERIENCE")}</span><button className="language-toggle teaser-language-toggle" type="button" aria-label={t("Taal wijzigen","Change language")} onClick={() => setLanguage(language === "nl" ? "en" : "nl")}><span className={language === "nl" ? "language-active" : ""}>NL</span><span className="language-divider">/</span><span className={language === "en" ? "language-active" : ""}>EN</span></button></div></div>
     <section className="teaser-film teaser-film-motion" aria-label={t("AFTER HOURS-intro","AFTER HOURS intro")}>
       <div className="teaser-atmosphere" aria-hidden="true"><span/><span/><span/><i/><i/></div>
-      <video className="teaser-film-video" src={INTRO_VIDEO} autoPlay muted loop playsInline controls preload="metadata" poster={`${import.meta.env.BASE_URL}visuals/ah-cinematic-background.svg`} aria-label={t("AFTER HOURS officiële introvideo","AFTER HOURS official intro video")}/>
+      {introVideoUnavailable ? <div className="teaser-film-fallback" role="img" aria-label={t("Cinematische AFTER HOURS-achtergrond","Cinematic AFTER HOURS background")}/> : <video className="teaser-film-video" src={INTRO_VIDEO} autoPlay muted loop playsInline controls preload="metadata" poster={`${import.meta.env.BASE_URL}visuals/ah-cinematic-background.svg`} aria-label={t("AFTER HOURS officiële introvideo","AFTER HOURS official intro video")} onError={() => setIntroVideoUnavailable(true)}/>}
       <div className="teaser-film-brand">
         <img src={`${import.meta.env.BASE_URL}after-hours-brand-logo-transparent.svg`} alt="AFTER HOURS"/>
         <div><strong>AFTER HOURS</strong><span>YOUR RULES. YOUR LIMITS. YOUR EXPERIENCE.</span></div>
