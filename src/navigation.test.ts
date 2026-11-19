@@ -7,7 +7,7 @@ describe("initialScreenFromSearch", () => {
     const screens = [
       "game", "gameSelect", "complete", "profile", "admin", "insights", "radio",
       "aftercare", "prompts", "safety", "store", "onboarding", "controlroom",
-      "missions", "legal", "social", "lovense", "daily",
+      "missions", "legal", "social", "lovense", "daily", "capture",
     ];
     for (const screen of screens) {
       expect(initialScreenFromSearch(`?screen=${screen}`)).toBe(screen);
@@ -17,9 +17,7 @@ describe("initialScreenFromSearch", () => {
   it("falls back safely for missing or unknown screens", () => {
     expect(initialScreenFromSearch("")).toBe("home");
     expect(initialScreenFromSearch("?screen=not-a-screen")).toBe("home");
-    expect(initialScreenFromSearch("?screen=capture")).toBe("home");
   });
-
 
   it("keeps every installed-app shortcut mapped to a supported screen", async () => {
     const manifest = JSON.parse(manifestText) as { shortcuts: Array<{ url: string }> };
