@@ -86,7 +86,7 @@
  box-shadow:0 5px 24px rgba(0,0,0,.42),inset 0 1px rgba(255,255,255,.42)!important;
 }
 .ah-reference-home .grid.home-shortcuts{
- display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;
+ display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;
  gap:7px!important;margin:0 0 14px!important;
 }
 .ah-reference-home .home-shortcuts .tile{
@@ -146,4 +146,24 @@
 }
 @media(min-width:700px){
  .ah-reference-home .hero.home-hero{min-height:650px;width:calc(100% + 48px);margin-left:-24px!important;margin-right:-24px!important;padding-left:42px!important}
+}
+
+
+/* Six destination tiles: balanced 3x2 grid on mobile, never cramped. */
+.ah-reference-home .grid.home-shortcuts{
+ grid-template-columns:repeat(3,minmax(0,1fr))!important;
+ gap:9px!important;margin:0 0 18px!important;
+}
+.ah-reference-home .home-shortcuts .tile{
+ min-height:94px!important;padding:13px 7px!important;
+ background:linear-gradient(150deg,rgba(36,25,15,.96),rgba(7,6,5,.99))!important;
+ border-color:rgba(211,174,112,.43)!important;
+ transition:transform .18s ease,border-color .18s ease,background .18s ease;
+}
+.ah-reference-home .home-shortcuts .tile:active{transform:scale(.97);border-color:#f0d6a4!important}
+.ah-reference-home .home-shortcuts .tile svg{width:21px!important;height:21px!important}
+.ah-reference-home .home-shortcuts .tile span{font-size:9px!important;letter-spacing:.06em!important}
+@media(max-width:390px){
+ .ah-reference-home .grid.home-shortcuts{gap:7px!important}
+ .ah-reference-home .home-shortcuts .tile{min-height:86px!important}
 }
