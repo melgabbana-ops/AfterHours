@@ -6,7 +6,9 @@ const root = process.cwd();
 const css = readFileSync(resolve(root, "src/approved-cinematic.css"), "utf8");
 const serviceWorker = readFileSync(resolve(root, "public/sw.js"), "utf8");
 const insightsSource = readFileSync(resolve(root, "src/Insights.tsx"), "utf8");
-const pageArtCss = css.split("/* AFTER HOURS page-specific visual art mapping. */").at(-1) ?? "";
+const marker = "/* AFTER HOURS page-specific visual art mapping.";
+const markerIndex = css.lastIndexOf(marker);
+const pageArtCss = markerIndex >= 0 ? css.slice(markerIndex + marker.length) : "";
 
 const mappings = [
   { selector: ".game-select-screen:before", asset: "ah-experience-photo.svg" },
