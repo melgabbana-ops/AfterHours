@@ -300,3 +300,32 @@ input,select,textarea{accent-color:#c79b5d!important}
  .experience-choice.featured{min-height:260px!important}
  .experience-choice>strong{font-size:12px!important}
 }
+
+
+/* Session controls: clear state, calm pacing, and reliable touch targets */
+.ah-session-screen .game-top{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important}
+.ah-session-screen .game-top>span:last-child{margin-left:auto!important;font-size:9px!important;letter-spacing:.14em!important}
+.ah-session-screen .session-state{display:inline-flex!important;align-items:center!important;gap:7px!important;margin-left:0!important;padding:7px 10px!important;border:1px solid rgba(216,183,126,.28)!important;border-radius:30px!important;background:rgba(12,9,6,.86)!important;color:#d8c5a6!important;font-size:8px!important;letter-spacing:.1em!important;white-space:nowrap!important}
+.ah-session-screen .session-state:before{content:"";width:6px;height:6px;border-radius:50%;background:#bd9258;box-shadow:0 0 9px rgba(216,183,126,.55)}
+.ah-session-screen .session-state.live:before{background:#9fc18a;box-shadow:0 0 10px rgba(159,193,138,.75)}
+.ah-session-screen .task-card>div{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;margin-top:14px!important}
+.ah-session-screen .task-card button{min-height:48px!important;padding:10px 12px!important;text-align:left!important;font-size:10px!important;line-height:1.4!important}
+.ah-session-screen .task-card button:focus-visible,.ah-session-screen .actions button:focus-visible,.ah-session-screen .next:focus-visible{outline:2px solid #f0d6a4!important;outline-offset:3px!important}
+.ah-session-screen .timer{position:relative!important}
+.ah-session-screen .timer:after{content:"";position:absolute;inset:8px;border:1px solid rgba(216,183,126,.13);border-radius:50%;pointer-events:none}
+.ah-session-screen .timer strong{font-variant-numeric:tabular-nums!important;letter-spacing:.04em!important}
+.ah-session-screen .actions{margin-top:18px!important}
+.ah-session-screen .actions button{font-size:10px!important;letter-spacing:.035em!important}
+.ah-session-screen .actions .stop{grid-column:1/-1!important;min-height:48px!important;letter-spacing:.12em!important}
+.ah-session-screen .next{width:100%!important;min-height:50px!important;margin-top:14px!important;border:1px solid #d6b47b!important;border-radius:6px!important;background:linear-gradient(180deg,#dfbd83,#a97943)!important;color:#170f08!important;font-weight:700!important;letter-spacing:.1em!important}
+.ah-session-screen .consent{display:flex!important;align-items:center!important;gap:11px!important;padding:12px!important;border:1px solid var(--ref-line)!important;border-radius:6px!important}
+.ah-session-screen .consent svg{flex:none!important;color:var(--ref-gold)!important}
+.ah-session-screen .consent span{font-size:9px!important;color:#c9b99f!important}
+@media(max-width:380px){
+ .ah-session-screen .round-steps{gap:3px!important}
+ .ah-session-screen .round-steps span{font-size:6px!important;padding:7px 3px!important}
+ .ah-session-screen .timer{width:174px!important;height:174px!important}
+ .ah-session-screen .timer strong{font-size:32px!important}
+ .ah-session-screen .task-card>div{grid-template-columns:1fr!important}
+ .ah-session-screen .game-top>span:last-child{font-size:7px!important}
+}
