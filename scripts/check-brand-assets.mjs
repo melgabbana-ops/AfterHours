@@ -47,6 +47,7 @@ const manifest = JSON.parse(readFileSync("public/manifest.webmanifest", "utf8"))
 const serviceWorker = readFileSync("public/sw.js", "utf8");
 const appSource = readFileSync("src/main.tsx", "utf8");
 const appStyles = readFileSync("src/styles.css", "utf8");
+const referenceStyles = ["src/reference-home.css", "src/reference-pages.css"].map((path) => readFileSync(path, "utf8")).join("\n");
 const maintenanceSource = readFileSync("src/UnderConstruction.tsx", "utf8");
 const teaserSource = readFileSync("src/Teaser.tsx", "utf8");
 const onboardingSource = readFileSync("src/Onboarding.tsx", "utf8");
@@ -67,8 +68,8 @@ if (!manifest.icons?.some((icon) => icon.sizes === "192x192" && icon.src.endsWit
   process.exit(1);
 }
 
-if (!serviceWorker.includes('const CACHE_NAME = "after-hours-v18"')) {
-  console.error("Service worker cache must match the current v18 app shell.");
+if (!serviceWorker.includes('const CACHE_NAME = "after-hours-v19"')) {
+  console.error("Service worker cache must match the current v19 app shell.");
   process.exit(1);
 }
 
@@ -137,7 +138,7 @@ for (const required of ["public/after-hours-icon-192.png", "public/after-hours-i
 }
 
 
-const visualReferences = [...appStyles.matchAll(/url\(["']?(\/visuals\/[^"')]+)["']?\)/g)].map((match) => match[1]);
+const visualReferences = [...(appStyles + "\n" + referenceStyles).matchAll(/url\(["']?(?:\/AfterHours)?(\/visuals\/[^"')]+)["']?\)/g)].map((match) => match[1]);
 const missingVisuals = [...new Set(visualReferences)]
   .filter((asset) => !existsSync(`public${asset}`));
 if (missingVisuals.length) {
