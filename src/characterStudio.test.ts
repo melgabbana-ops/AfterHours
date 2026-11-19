@@ -55,7 +55,11 @@ describe("Character Studio appearance", () => {
     });
   });
   
-  it("allows tattoos to be disabled without changing other appearance settings", () => {\n    expect(normalizeCharacterLook({ tattoos: false }).tattoos).toBe(false);\n  });\n\n  it("ignores unexpected properties in saved appearance data", () => {
+  it("allows tattoos to be disabled without changing other appearance settings", () => {
+    expect(normalizeCharacterLook({ tattoos: false }).tattoos).toBe(false);
+  });
+
+  it("ignores unexpected properties in saved appearance data", () => {
     const normalized = normalizeCharacterLook({
       gender: "male",
       skin: "#784833",
