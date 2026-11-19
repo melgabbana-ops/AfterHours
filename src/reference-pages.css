@@ -680,3 +680,89 @@ html,body,#root,.app{background:#050505!important;color:#f4e7d2!important}
  .ah-session-screen .task-card>div button{font-size:8px!important}
  .ah-session-screen .actions{gap:6px!important}
 }
+
+/* AFTERCARE · approved candlelit reference composition */
+.aftercare-screen{
+ padding:0 18px 112px!important;
+}
+.aftercare-screen:before{
+ background-image:
+  linear-gradient(180deg,rgba(0,0,0,.04) 0%,rgba(0,0,0,.28) 34%,rgba(5,5,5,.96) 78%,#050505 100%),
+  url("/AfterHours/visuals/ah-aftercare-photo.svg")!important;
+ background-position:center top!important;background-size:100% auto,cover!important;
+ background-repeat:no-repeat!important;
+ opacity:1!important;
+}
+.aftercare-screen .aftercare-card{
+ position:relative!important;isolation:isolate!important;
+ margin:0 -18px!important;padding:clamp(265px,43svh,355px) 18px 24px!important;
+ border:0!important;border-radius:0!important;
+ background:
+  linear-gradient(180deg,rgba(5,5,5,0) 0%,rgba(5,5,5,.12) 17%,rgba(5,5,5,.92) 36%,#050505 58%)!important;
+ box-shadow:none!important;
+}
+.aftercare-screen .aftercare-card>.eyebrow{
+ display:block!important;margin:0 0 8px!important;text-align:center!important;
+}
+.aftercare-screen .aftercare-card>h2{
+ margin:0 0 9px!important;text-align:center!important;
+ font-size:clamp(30px,8vw,39px)!important;
+}
+.aftercare-screen .aftercare-card>p:not(.mood-save-message):not(.aftercare-status){
+ max-width:350px!important;margin:0 auto 18px!important;
+ text-align:center!important;font-size:10px!important;line-height:1.6!important;
+}
+.aftercare-screen .mood-checkin{
+ margin:14px 0!important;
+}
+.aftercare-screen .aftercare-options{
+ display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+ gap:9px!important;margin:18px 0!important;
+}
+.aftercare-screen .aftercare-options button{
+ min-height:112px!important;padding:13px 10px!important;
+ display:flex!important;flex-direction:column!important;align-items:center!important;
+ justify-content:center!important;gap:7px!important;
+ border:1px solid rgba(216,183,126,.38)!important;border-radius:7px!important;
+ background:linear-gradient(145deg,rgba(25,18,11,.96),rgba(7,6,5,.98))!important;
+ color:#ead9bd!important;text-align:center!important;
+ box-shadow:inset 0 1px rgba(255,255,255,.035),0 8px 20px rgba(0,0,0,.25)!important;
+}
+.aftercare-screen .aftercare-options button svg{
+ width:21px!important;height:21px!important;color:#d8b77e!important;
+}
+.aftercare-screen .aftercare-options button strong{
+ color:#f2e3ca!important;font:12px "Cinzel",Georgia,serif!important;
+ letter-spacing:.035em!important;
+}
+.aftercare-screen .aftercare-options button span{
+ color:#bfae94!important;font-size:9px!important;line-height:1.4!important;
+}
+.aftercare-screen .aftercare-options button.selected{
+ border-color:#f0d6a4!important;
+ background:linear-gradient(145deg,rgba(83,59,32,.92),rgba(20,14,8,.98))!important;
+ box-shadow:0 0 0 1px rgba(240,214,164,.18),0 0 22px rgba(216,183,126,.12)!important;
+}
+.aftercare-screen .aftercare-options button.selected svg{color:#f0d6a4!important}
+.aftercare-screen .aftercare-note{
+ display:flex!important;gap:10px!important;align-items:flex-start!important;
+ margin:12px 0 16px!important;padding:13px!important;
+ border:1px solid rgba(216,183,126,.22)!important;border-radius:6px!important;
+ background:rgba(10,8,6,.92)!important;color:#c7b79d!important;
+ font-size:9px!important;line-height:1.55!important;
+}
+.aftercare-screen .aftercare-note svg{flex:none!important;color:#d8b77e!important}
+.aftercare-screen .aftercare-complete{
+ width:100%!important;min-height:50px!important;margin:4px 0 10px!important;
+ border:1px solid #efd29b!important;border-radius:6px!important;
+ background:linear-gradient(180deg,#e8c88f 0%,#bd8c50 100%)!important;
+ color:#171008!important;font-size:10px!important;letter-spacing:.1em!important;
+}
+.aftercare-screen .aftercare-complete:disabled{opacity:.42!important;filter:grayscale(.55)!important}
+.aftercare-screen .back{width:100%!important;min-height:43px!important}
+@media(max-width:390px){
+ .aftercare-screen .aftercare-card{padding-top:clamp(245px,40svh,315px)!important}
+ .aftercare-screen .aftercare-options{gap:7px!important}
+ .aftercare-screen .aftercare-options button{min-height:102px!important;padding:10px 7px!important}
+ .aftercare-screen .aftercare-options button strong{font-size:11px!important}
+}
