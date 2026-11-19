@@ -10,3 +10,7 @@ export function initialScreenFromSearch(search: string): Screen {
   const value = new URLSearchParams(search).get("screen");
   return value && DEEP_LINK_SCREENS.includes(value as Screen) ? value as Screen : "home";
 }
+
+export function shouldShowTeaser(search: string): boolean {
+  return new URLSearchParams(search).get("teaser") === "1";
+}
