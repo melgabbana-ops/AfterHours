@@ -59,7 +59,7 @@ describe("AFTER HOURS page-specific visual assets", () => {
   });
 
   it("ships every page-specific artwork asset with the service worker shell", () => {
-    expect(serviceWorker).toContain('const CACHE_NAME = "after-hours-v17";');
+    expect(serviceWorker).toContain('const CACHE_NAME = "after-hours-v18";');
     for (const asset of precachedAssets) {
       expect(serviceWorker).toContain(`asset("visuals/${asset}")`);
     }
