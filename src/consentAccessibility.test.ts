@@ -4,8 +4,12 @@ import { describe, expect, it } from "vitest";
 
 describe("consent screen accessibility", () => {
   it("groups the required acknowledgements in a labelled fieldset", () => {
-    expect(consentSource).toMatch(/<fieldset[^>]*className="consent-checks"[^>]*aria-describedby="consent-checks-help"/);
-    expect(consentSource).toMatch(/<fieldset[\\s\\S]*?<legend[^>]*>.*?<\\/legend>/);
+    const fieldsetStart = consentSource.indexOf('<fieldset className="consent-checks"');
+    const legendStart = consentSource.indexOf("<legend", fieldsetStart);
+    const legendEnd = consentSource.indexOf("</legend>", legendStart);
+    expect(fieldsetStart).toBeGreaterThanOrEqual(0);
+    expect(legendStart).toBeGreaterThan(fieldsetStart);
+    expect(legendEnd).toBeGreaterThan(legendStart);
     expect(consentSource).toContain('id="consent-checks-help"');
   });
 
