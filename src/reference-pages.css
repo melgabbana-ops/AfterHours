@@ -821,3 +821,126 @@ html,body,#root,.app{background:#050505!important;color:#f4e7d2!important}
 .completion-screen .completion-primary{border:1px solid #efd29b!important;background:linear-gradient(180deg,#e8c88f,#bd8c50)!important;color:#171008!important}
 .completion-screen .completion-secondary{margin-top:9px!important;border:1px solid rgba(216,183,126,.38)!important;background:transparent!important;color:#e7d3b1!important}
 @media(max-width:390px){.completion-screen{padding:20px 14px 104px!important}.completion-screen .completion-card {padding:28px 16px 19px!important}.completion-screen .completion-seal{width:72px!important;height:72px!important}}
+
+
+/* REFERENCE MATCH · Tarot and Horoscope mobile screens */
+.app .insights{
+ width:100%!important;max-width:520px!important;min-height:calc(100dvh - 70px)!important;
+ padding:8px 18px calc(96px + env(safe-area-inset-bottom,0px))!important;
+ background:#050403!important;
+}
+.app .insights:before{
+ opacity:.84!important;background-size:cover!important;background-position:center top!important;
+}
+.app .insights:after{
+ background:linear-gradient(180deg,rgba(4,3,2,.04) 0%,rgba(4,3,2,.12) 26%,rgba(4,3,2,.72) 54%,#050403 100%)!important;
+}
+.app .insights-hero{
+ padding:8px 0 8px!important;margin:0 0 8px!important;text-align:center!important;
+ border:0!important;background:transparent!important;
+}
+.app .insights-hero>.eyebrow{display:none!important}
+.app .insights-hero h2{
+ margin:4px 0 8px!important;font:clamp(28px,7.5vw,36px)/1.12 "Cinzel",Georgia,serif!important;
+ color:#f1dfbf!important;letter-spacing:.015em!important;
+}
+.app .insights-hero>p{display:none!important}
+.app .insight-tabs{display:none!important}
+.app .insights .tarot-card,.app .insights .astro-card{
+ width:100%!important;margin:0!important;padding:10px 0 14px!important;
+ min-height:0!important;border:0!important;border-radius:0!important;
+ background:transparent!important;box-shadow:none!important;
+}
+.app .insights .tarot-card>.eyebrow,.app .insights .astro-card>.eyebrow{display:none!important}
+.app .insights .ah-tarot-card{
+ width:min(62vw,228px)!important;height:min(96vw,330px)!important;
+ min-height:280px!important;margin:8px auto 16px!important;padding:17px 12px!important;
+ display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:space-between!important;
+ border:1px solid #c99d5e!important;border-radius:5px!important;
+ background-image:linear-gradient(180deg,rgba(7,5,3,.1),rgba(7,5,3,.28)),url("/AfterHours/visuals/ah-tarot-frame.svg")!important;
+ background-size:cover!important;background-position:center!important;
+ box-shadow:0 18px 42px rgba(0,0,0,.55),0 0 0 5px rgba(194,148,83,.07)!important;
+}
+.app .insights .ah-tarot-card__top{font-size:8px!important;letter-spacing:.2em!important;color:#e7c78f!important}
+.app .insights .ah-tarot-card__sigil{
+ width:100%!important;flex:1!important;display:grid!important;place-items:center!important;
+ color:#e8c78d!important;font:64px "Cinzel",Georgia,serif!important;
+ text-shadow:0 0 24px rgba(213,171,104,.3)!important;
+}
+.app .insights .ah-tarot-card__name{font:18px "Cinzel",Georgia,serif!important;color:#f1ddb7!important}
+.app .insights .ah-tarot-card__bottom{font-size:8px!important;letter-spacing:.18em!important;color:#c9a66e!important}
+.app .insights .tarot-card>h3{
+ margin:4px 0 7px!important;text-align:center!important;
+ font:clamp(23px,6vw,29px)/1.2 "Cinzel",Georgia,serif!important;color:#f0dfc0!important;
+}
+.app .insights .tarot-card>p{
+ max-width:310px!important;margin:0 auto 17px!important;text-align:center!important;
+ font-size:10px!important;line-height:1.55!important;color:#e0d2bd!important;
+}
+.app .insights .tarot-prompt,.app .insights .insight-consent-note{display:none!important}
+.app .insights .insight-actions{
+ display:flex!important;flex-direction:column!important;gap:8px!important;
+ max-width:100%!important;margin:0!important;
+}
+.app .insights .tarot-draw-button{
+ min-height:49px!important;width:100%!important;display:flex!important;align-items:center!important;
+ justify-content:center!important;gap:14px!important;border:1px solid #f0d29a!important;border-radius:7px!important;
+ background:linear-gradient(180deg,#e8c88f,#bd8c50)!important;color:#171008!important;
+ font:600 11px "Cinzel",Georgia,serif!important;letter-spacing:.1em!important;
+}
+.app .insights .tarot-draw-button span,.app .insights .astro-full-button span{font-size:22px!important;line-height:0!important}
+.app .insights .tarot-extra-action{display:none!important}
+.app .insights .tarot-spread{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important}
+.app .insights .tarot-spread-card{padding:8px 5px!important;border:1px solid rgba(210,173,112,.4)!important;background:rgba(8,6,4,.92)!important}
+.app .insights .astro-card{
+ padding:8px 0 14px!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;
+}
+.app .insights .astro-zodiac-wheel{
+ position:relative!important;width:min(66vw,250px)!important;aspect-ratio:1!important;
+ margin:8px auto 18px!important;border:1px solid #d1a66a!important;border-radius:50%!important;
+ background:radial-gradient(circle,rgba(206,163,98,.2) 0 2%,rgba(8,6,4,.2) 48%,rgba(4,3,2,.86) 70%)!important;
+ box-shadow:0 0 28px rgba(198,151,83,.13),inset 0 0 30px rgba(198,151,83,.1)!important;
+ display:grid!important;grid-template-columns:repeat(4,1fr)!important;grid-template-rows:repeat(3,1fr)!important;
+ place-items:center!important;color:#d9b77f!important;
+}
+.app .insights .astro-zodiac-wheel:before,.app .insights .astro-zodiac-wheel:after{
+ content:""!important;position:absolute!important;border:1px solid rgba(211,171,106,.58)!important;border-radius:50%!important;inset:12%!important;
+}
+.app .insights .astro-zodiac-wheel:after{inset:31%!important;background:radial-gradient(circle,#b98c50 0%,#392719 48%,#080604 78%)!important;box-shadow:0 0 22px rgba(205,157,88,.35)!important}
+.app .insights .astro-zodiac-wheel span{z-index:1!important;font:19px Georgia,serif!important;color:#e5c38b!important}
+.app .insights .astro-zodiac-wheel i{position:absolute!important;z-index:2!important;font:32px Georgia,serif!important;color:#f2d49c!important}
+.app .insights .astro-card>h3{
+ margin:0 0 12px!important;text-align:center!important;font:23px "Cinzel",Georgia,serif!important;color:#f0dfc0!important;
+}
+.app .insights .astro-label{margin:5px 0 4px!important;font-size:9px!important;color:#d9bd8d!important}
+.app .insights .astro-date-help{font-size:9px!important;text-align:center!important}
+.app .insights .astro-card .astro-date{display:none!important}
+.app .insights .astro-card select{
+ width:100%!important;min-height:45px!important;margin:0 0 12px!important;
+ border:1px solid rgba(215,177,115,.55)!important;border-radius:6px!important;
+ background:linear-gradient(145deg,#21180e,#080706)!important;color:#f0d9ae!important;text-align:center!important;
+}
+.app .insights .astro-reading{
+ padding:13px!important;border:1px solid rgba(210,173,112,.5)!important;border-radius:7px!important;
+ background:linear-gradient(145deg,rgba(28,20,12,.96),rgba(5,5,4,.98))!important;text-align:center!important;
+}
+.app .insights .astro-reading>svg{display:none!important}
+.app .insights .astro-reading>strong{font:20px "Cinzel",Georgia,serif!important;color:#f1d7a8!important}
+.app .insights .astro-reading>p{font-size:10px!important;line-height:1.55!important}
+.app .insights .astro-daily{margin-top:8px!important;padding:9px!important;border:0!important;background:transparent!important}
+.app .insights .astro-daily>span{font-size:8px!important;letter-spacing:.14em!important;color:#d2ae73!important}
+.app .insights .astro-daily>p{font-size:10px!important}
+.app .insights .insight-safety{display:none!important}
+.app .insights .astro-full-button{
+ width:100%!important;min-height:48px!important;margin:13px 0 0!important;
+ display:flex!important;align-items:center!important;justify-content:center!important;gap:12px!important;
+ border:1px solid #f0d29a!important;border-radius:7px!important;
+ background:linear-gradient(180deg,#e8c88f,#bd8c50)!important;color:#171008!important;
+ font:600 11px "Cinzel",Georgia,serif!important;letter-spacing:.1em!important;
+}
+.app .insights .insight-footer{display:none!important}
+@media(max-width:390px){
+ .app .insights{padding-left:15px!important;padding-right:15px!important}
+ .app .insights .ah-tarot-card{min-height:260px!important}
+ .app .insights .astro-zodiac-wheel{width:min(62vw,220px)!important}
+}
