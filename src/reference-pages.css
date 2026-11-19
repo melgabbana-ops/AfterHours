@@ -340,7 +340,7 @@ input,select,textarea{accent-color:#c79b5d!important}
  --ah-photo-tarot:url("https://gcdn.picsart.com/pipeline-output/fad8c8e3-1edc-4ec5-96ea-40a5486e4128.png");
  --ah-photo-radio:url("https://gcdn.picsart.com/pipeline-output/5dbe1964-e376-4d2a-b693-1b06392abd82.png");
  --ah-photo-home:url("https://gcdn.picsart.com/pipeline-output/5f3d6127-421e-424a-b009-edd9e6e66a8d.png");
- --ah-photo-profile:url("https://gcdn.picsart.com/pipeline-output/725cbaa5-4f9c-4aae-b16a-7ae8e7f4b340.png");
+ --ah-photo-profile:url("https://gcdn.picsart.com/editing-temp/f8a86f1b-af63-4831-bdc7-75741d1f1131.png");
 }
 .game-select-screen:before,.ah-session-screen:before{background-image:linear-gradient(rgba(0,0,0,.34),rgba(0,0,0,.56)),var(--ah-photo-consent),url("/AfterHours/visuals/reference-experience.svg")!important;background-size:cover!important;background-position:center 24%!important;}
 .aftercare-screen:before{background-image:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.72) 70%,#050505 100%),var(--ah-photo-aftercare),url("/AfterHours/visuals/reference-aftercare.svg")!important;background-position:center 35%!important;background-size:cover!important;}
