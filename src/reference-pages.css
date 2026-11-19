@@ -1145,3 +1145,58 @@ html,body,#root,.app{background:#050505!important;color:#f4e7d2!important}
 
 /* Tarot screen backdrop: keep the approved 4K local artwork as its offline-safe base. */
 .insights:before{background-image:linear-gradient(180deg,rgba(0,0,0,.24),rgba(0,0,0,.88)),url("/AfterHours/visuals/reference-tarot.svg")!important;background-position:center!important;background-size:cover!important}
+
+
+/* Offline-safe photography: keep the editorial image first, but always ship
+   the matching local artwork beneath it so the screen remains complete when
+   the external image host is unavailable or the app is used offline. */
+.ah-reference-home .hero.home-hero{
+ background-image:
+  linear-gradient(180deg,rgba(0,0,0,.04),rgba(0,0,0,.06) 28%,rgba(0,0,0,.42) 58%,rgba(0,0,0,.96) 100%),
+  url("https://gcdn.picsart.com/editing-temp/bc8725cb-2e53-4c72-8cc0-e953ea8894ad.png"),
+  url("/AfterHours/visuals/reference-home.svg")!important;
+ background-position:center,center 24%,center 30%!important;
+ background-size:cover,cover,cover!important;
+ background-repeat:no-repeat,no-repeat,no-repeat!important;
+}
+.consent-screen:before,.consent-screen .consent-visual{
+ background-image:linear-gradient(180deg,rgba(0,0,0,.1),rgba(0,0,0,.88)),url("https://gcdn.picsart.com/pipeline-output/ee9b2312-7f4d-4299-b241-d3e16982fa36.png"),url("/AfterHours/visuals/reference-consent.svg")!important;
+ background-position:center 34%,center 34%,center top!important;background-size:cover!important;background-repeat:no-repeat!important;
+}
+.aftercare-screen:before,.aftercare-card{
+ background-image:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.82) 70%,#050505 100%),url("https://gcdn.picsart.com/pipeline-output/e8f4402a-7e90-4143-8149-9bec98ab3241.png"),url("/AfterHours/visuals/reference-aftercare.svg")!important;
+ background-position:center 35%,center 35%,center top!important;background-size:cover!important;background-repeat:no-repeat!important;
+}
+.completion-screen:before,.completion-card{
+ background-image:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.88) 58%,#050505 100%),url("https://gcdn.picsart.com/editing-temp/f8a86f1b-af63-4831-bdc7-75741d1f1131.png"),url("/AfterHours/visuals/reference-completion.svg")!important;
+ background-position:center 30%,center 30%,center top!important;background-size:cover!important;background-repeat:no-repeat!important;
+}
+.ah-profile-screen:before,.ah-profile-screen .profile{
+ background-image:linear-gradient(180deg,rgba(0,0,0,.04),rgba(0,0,0,.9) 68%,#050505 100%),url("https://gcdn.picsart.com/editing-temp/f8a86f1b-af63-4831-bdc7-75741d1f1131.png"),url("/AfterHours/visuals/reference-profile.svg")!important;
+ background-position:center 25%,center 25%,center top!important;background-size:cover!important;background-repeat:no-repeat!important;
+}
+.radio-room:before,.radio-hero,.radio-player,.radio-note{
+ background-image:linear-gradient(180deg,rgba(0,0,0,.18),rgba(0,0,0,.9)),url("https://gcdn.picsart.com/pipeline-output/5dbe1964-e376-4d2a-b693-1b06392abd82.png"),url("/AfterHours/visuals/reference-radio.svg")!important;
+ background-position:center 40%,center 40%,center top!important;background-size:cover!important;background-repeat:no-repeat!important;
+}
+.insights:before,.insights .insights-hero,.insights .tarot-card{
+ background-image:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.9)),url("https://gcdn.picsart.com/pipeline-output/fad8c8e3-1edc-4ec5-96ea-40a5486e4128.png"),url("/AfterHours/visuals/reference-tarot.svg")!important;
+ background-position:center 38%,center 38%,center top!important;background-size:cover!important;background-repeat:no-repeat!important;
+}
+.insights.insights-astro:before,.insights .astro-card{
+ background-image:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.9)),url("https://gcdn.picsart.com/pipeline-output/fad8c8e3-1edc-4ec5-96ea-40a5486e4128.png"),url("/AfterHours/visuals/reference-horoscope.svg")!important;
+ background-position:center 38%,center 38%,center top!important;background-size:cover!important;background-repeat:no-repeat!important;
+}
+.game-select-screen:before,.ah-session-screen:before,.experience-choice{
+ background-image:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.9)),url("https://gcdn.picsart.com/pipeline-output/ee9b2312-7f4d-4299-b241-d3e16982fa36.png"),url("/AfterHours/visuals/reference-experience.svg")!important;
+ background-position:center,center,center top!important;background-size:cover!important;background-repeat:no-repeat!important;
+}
+.experience-choice:nth-child(2){
+ background-image:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.9)),url("https://gcdn.picsart.com/pipeline-output/fad8c8e3-1edc-4ec5-96ea-40a5486e4128.png"),url("/AfterHours/visuals/reference-tarot.svg")!important;
+}
+.experience-choice:nth-child(3){
+ background-image:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.9)),url("https://gcdn.picsart.com/editing-temp/f8a86f1b-af63-4831-bdc7-75741d1f1131.png"),url("/AfterHours/visuals/reference-profile.svg")!important;
+}
+.experience-choice:nth-child(4){
+ background-image:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.9)),url("https://gcdn.picsart.com/pipeline-output/5dbe1964-e376-4d2a-b693-1b06392abd82.png"),url("/AfterHours/visuals/reference-radio.svg")!important;
+}
