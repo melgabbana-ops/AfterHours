@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getSessionSafetyAnnouncement, getTaskChoiceFeedback, isTaskPassed, PASS_TASK_SELECTION, shouldResumeSession } from "./sessionSafety";
+import { getSessionSafetyAnnouncement, getTaskChoiceFeedback, isTaskPassed, PASS_TASK_SELECTION, shouldResumeSession, shouldResumeSessionBeforeHydration } from "./sessionSafety";
 
 describe("session resume safety", () => {
   it("resumes only when both persisted session and consent are active", () => {
@@ -75,5 +75,21 @@ describe("session task PASS", () => {
     [null, "en", "Choose only if it feels right for you, and check in with each other."],
   ] as const)("provides safe feedback for selection=%s in %s", (selection, language, expected) => {
     expect(getTaskChoiceFeedback(selection, language)).toBe(expected);
+  });
+});
+
+
+describe("initial session hydration safety", () => {
+  it("allows an active local-only session to restore without a remote account", () => {
+    expect(shouldResumeSessionBeforeHydration(false, "active", "active")).toBe(true);
+  });
+
+  it("keeps a Supabase-backed local session paused until remote state is verified", () => {
+    expect(shouldResumeSessionBeforeHydration(true, "active", "active")).toBe(false);
+  });
+
+  it("does not resume local-only sessions unless both session and consent are active", () => {
+    expect(shouldResumeSessionBeforeHydration(false, "paused", "active")).toBe(false);
+    expect(shouldResumeSessionBeforeHydration(false, "active", "revoked")).toBe(false);
   });
 });
