@@ -3,7 +3,7 @@ import path from "node:path";
 
 const root = process.cwd();
 const sourceRoot = path.join(root, "src");
-const stylesheetPaths = ["src/styles.css", "src/approved-cinematic.css"];
+const stylesheetPaths = ["src/styles.css", "src/approved-cinematic.css", "src/reference-home.css", "src/reference-pages.css"];
 const styles = (await Promise.all(stylesheetPaths.map((file) => readFile(path.join(root, file), "utf8")))).join("\n");
 const sourceFiles = [];
 
