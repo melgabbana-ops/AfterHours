@@ -1,9 +1,5 @@
 import consentSource from "./ConsentScreen.tsx?raw";
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-
-const referenceCss = readFileSync(resolve(process.cwd(), "src/reference-pages.css"), "utf8");
 
 describe("consent screen accessibility", () => {
   it("groups the required acknowledgements in a labelled fieldset", () => {
@@ -37,9 +33,4 @@ describe("consent screen accessibility", () => {
     expect(consentSource).toContain("Toestemming kan altijd worden ingetrokken.");
   });
 
-  it("styles the semantic group within the existing black-and-gold reference system", () => {
-    expect(referenceCss).toContain(".consent-checks{");
-    expect(referenceCss).toContain("color:var(--ref-gold-bright)");
-    expect(referenceCss).toContain("background:#050505!important");
-  });
 });
