@@ -6,7 +6,7 @@ const consentSource = readFileSync(new URL("./ConsentScreen.tsx", import.meta.ur
 describe("consent screen accessibility", () => {
   it("groups all required acknowledgements in a labelled fieldset", () => {
     expect(consentSource).toMatch(/<fieldset[^>]*className="consent-checks"[^>]*aria-describedby="consent-checks-help"/);
-    expect(consentSource).toMatch(/<fieldset[\\s\\S]*?<legend[^>]*>.*?<\\/legend>/);
+    expect(consentSource).toMatch(/<fieldset[\s\S]*?<legend[^>]*>.*?<\/legend>/);
     expect(consentSource).toContain('id="consent-checks-help"');
   });
 
