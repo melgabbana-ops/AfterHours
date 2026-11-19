@@ -178,3 +178,16 @@
  background-size:cover,cover,cover!important;
  background-repeat:no-repeat!important;
 }
+
+/* Home shortcut grid follows the approved reference: four equal destinations. */
+.ah-reference-home .grid.home-shortcuts{
+ grid-template-columns:repeat(2,minmax(0,1fr))!important;
+ gap:9px!important;margin:0 0 18px!important;
+}
+.ah-reference-home .home-shortcuts .tile{
+ min-height:68px!important;padding:12px 14px!important;
+ flex-direction:row!important;justify-content:flex-start!important;
+ gap:12px!important;text-align:left!important;
+}
+.ah-reference-home .home-shortcuts .tile svg{width:20px!important;height:20px!important;flex:none!important}
+.ah-reference-home .home-shortcuts .tile span{font-size:10px!important;letter-spacing:.06em!important}
