@@ -77,7 +77,7 @@ self.addEventListener("activate", (event) => {
 
 // Resolve notification destinations only inside this app's GitHub Pages base path.
 function safeNotificationPath(value) {
-  const fallback = asset("");
+  const fallback = new URL(asset(""), self.location.origin).href;
   if (typeof value !== "string" || value.startsWith("//") || value.includes("\\")) return fallback;
   try {
     const candidate = new URL(
