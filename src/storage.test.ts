@@ -165,7 +165,6 @@ describe("local persistence", () => {
       { profileId: "profile-a", round: 0, seconds: -1, savedAt: Date.now(), running: true },
       { profileId: "profile-a", round: 0, seconds: 12.5, savedAt: Date.now(), running: true },
       { profileId: "profile-a", round: 0, seconds: 61, savedAt: Date.now(), running: true },
-      { profileId: "profile-a", round: 0, seconds: 30, savedAt: Date.now() + 60_000, running: true },
       { profileId: "profile-a", round: 0, seconds: 30, savedAt: Date.now(), running: "yes" },
     ];
 
@@ -173,6 +172,36 @@ describe("local persistence", () => {
       localStorageMock.setItem(key, JSON.stringify(snapshot));
       expect(loadTimer("profile-a", 0, 60)).toBe(60);
     }
+  });
+
+  it("fails closed when the device clock moves behind an active timer snapshot", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-10-09T12:00:00.000Z"));
+    saveTimer("profile-a", 0, 30, true);
+
+    vi.setSystemTime(new Date("2026-10-09T11:59:00.000Z"));
+
+    expect(loadTimer("profile-a", 0, 60)).toBe(0);
+  });
+
+  it("does not expire a paused timer when the device clock is behind its snapshot", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-10-09T12:00:00.000Z"));
+    saveTimer("profile-a", 0, 30, false);
+
+    vi.setSystemTime(new Date("2026-10-09T11:59:00.000Z"));
+
+    expect(loadTimer("profile-a", 0, 60)).toBe(30);
+  });
+
+  it("returns zero when an active timer elapsed while the app was in the background", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-10-09T12:00:00.000Z"));
+    saveTimer("profile-a", 0, 10, true);
+
+    vi.setSystemTime(new Date("2026-10-09T12:00:15.000Z"));
+
+    expect(loadTimer("profile-a", 0, 60)).toBe(0);
   });
 
   it("does not restore a timer belonging to another profile or round", () => {

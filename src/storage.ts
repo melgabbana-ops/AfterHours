@@ -120,11 +120,13 @@ export function loadTimer(profileId:string,round:number,initialSeconds:number):n
    ||Number(parsed.seconds)>initialSeconds
    ||!Number.isFinite(parsed.savedAt)
    ||Number(parsed.savedAt)<0
-   ||Number(parsed.savedAt)>Date.now()
    ||typeof parsed.running!=="boolean"
    ||!Number.isFinite(initialSeconds)
    ||initialSeconds<0
   )return initialSeconds;
+  // A device clock rollback must never restore extra active session time.
+  // Fail closed at zero so the app transitions the active round to PAUSE.
+  if(parsed.running && Number(parsed.savedAt)>Date.now())return 0;
   const elapsed=parsed.running?Math.floor((Date.now()-Number(parsed.savedAt))/1000):0;
   return Math.max(0,Math.min(initialSeconds,Number(parsed.seconds)-elapsed));
  }catch{return initialSeconds}
