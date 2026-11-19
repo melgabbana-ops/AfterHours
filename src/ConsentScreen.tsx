@@ -25,10 +25,14 @@ export default function ConsentScreen({language="nl",onConfirm,onBack}:{language
    <p>{t("Een bewuste ervaring begint met duidelijke afspraken. Jij houdt altijd de regie over jouw grenzen.","A mindful experience starts with clear agreements. You always remain in control of your boundaries.")}</p>
   </section>
   <section className="consent-form" aria-label={t("Consentformulier","Consent form")}>
-   {labels.map((label,index)=><label className={"consent-check "+(checks[index]?"checked":"")} key={index}>
-    <input type="checkbox" checked={checks[index]} onChange={e=>setChecks(old=>old.map((v,i)=>i===index?e.target.checked:v))}/>
-    <span className="custom-check" aria-hidden="true">✓</span><span>{label}</span>
-   </label>)}
+   <fieldset className="consent-checks" aria-describedby="consent-checks-help">
+    <legend className="consent-checks-legend">{t("Bevestig alle afspraken","Confirm all agreements")}</legend>
+    <p className="consent-checks-help" id="consent-checks-help">{t("Vink alle vier afspraken aan om verder te gaan.","Check all four agreements to continue.")}</p>
+    {labels.map((label,index)=><label className={"consent-check "+(checks[index]?"checked":"")} key={index}>
+     <input type="checkbox" checked={checks[index]} onChange={e=>setChecks(old=>old.map((v,i)=>i===index?e.target.checked:v))}/>
+     <span className="custom-check" aria-hidden="true">✓</span><span>{label}</span>
+    </label>)}
+   </fieldset>
    <button className="consent-boundaries" type="button" onClick={revealSafetyNote}><Shield/><span>{t("Bekijk grenzen en veiligheidsafspraken","Review boundaries and safety agreements")}</span><ChevronRight/></button>
    <div className="consent-safety-note" id="consent-safety-note"><Lock/><span>{t("STOP betekent direct stoppen. PAUZE betekent vertragen en opnieuw afstemmen. Toestemming kan altijd worden ingetrokken.","STOP means stop immediately. PAUSE means slow down and check in again. Consent can always be withdrawn.")}</span></div>
    <button className="gold consent-submit" type="button" disabled={!ready} onClick={onConfirm}>{t("IK GEEF TOESTEMMING","I CONSENT")} <ChevronRight/></button>
