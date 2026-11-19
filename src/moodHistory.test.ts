@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { filterMoodHistoryEvents } from "./moodHistory";
+import { filterMoodHistoryEvents, removeLocalMoodHistoryEvent } from "./moodHistory";
 import type { MoodEvent } from "./services/moods";
 
 const events: MoodEvent[] = [
@@ -29,5 +29,42 @@ describe("mood history phase filters", () => {
 
   it("returns an empty list when a phase has no events", () => {
     expect(filterMoodHistoryEvents([], "after")).toEqual([]);
+  });
+});
+
+function memoryStorage() {
+  const values = new Map<string, string>();
+  return {
+    getItem: (key: string) => values.get(key) ?? null,
+    setItem: (key: string, value: string) => { values.set(key, value); },
+  };
+}
+
+describe("browser-local mood history deletion", () => {
+  it("deletes only the selected entry for the selected profile", () => {
+    const storage = memoryStorage();
+    storage.setItem("afterhours.moodhistory.profile-a", JSON.stringify(events));
+    storage.setItem("afterhours.moodhistory.profile-b", JSON.stringify([events[0]]));
+
+    expect(removeLocalMoodHistoryEvent("profile-a", "during-1", storage)).toBe(true);
+    expect(JSON.parse(storage.getItem("afterhours.moodhistory.profile-a") ?? "[]").map((event: MoodEvent) => event.id))
+      .toEqual(["after-1", "before-1", "during-2"]);
+    expect(JSON.parse(storage.getItem("afterhours.moodhistory.profile-b") ?? "[]")).toEqual([events[0]]);
+  });
+
+  it("does not change storage when the entry or profile is unknown", () => {
+    const storage = memoryStorage();
+    storage.setItem("afterhours.moodhistory.profile-a", JSON.stringify(events));
+    expect(removeLocalMoodHistoryEvent("profile-a", "missing", storage)).toBe(false);
+    expect(removeLocalMoodHistoryEvent(" ", "during-1", storage)).toBe(false);
+    expect(JSON.parse(storage.getItem("afterhours.moodhistory.profile-a") ?? "[]")).toEqual(events);
+  });
+
+  it("fails safely for malformed data and unavailable storage", () => {
+    const malformed = memoryStorage();
+    malformed.setItem("afterhours.moodhistory.profile-a", "{");
+    expect(removeLocalMoodHistoryEvent("profile-a", "during-1", malformed)).toBe(false);
+    const broken = { getItem: () => { throw new Error("blocked"); }, setItem: () => { throw new Error("blocked"); } };
+    expect(removeLocalMoodHistoryEvent("profile-a", "during-1", broken)).toBe(false);
   });
 });
