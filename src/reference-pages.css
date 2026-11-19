@@ -80,7 +80,7 @@
 .consent-screen{padding-top:0!important}
 .consent-visual{
  min-height:300px;margin:0 -18px 18px;padding:44px 24px 24px;display:flex;flex-direction:column;justify-content:flex-end;
- background:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.24) 30%,#050505 100%),url("/AfterHours/visuals/reference-experience.svg") center 28%/cover no-repeat;
+ background:linear-gradient(180deg,rgba(0,0,0,.12),rgba(0,0,0,.24) 30%,#050505 100%),url("/AfterHours/visuals/reference-consent.svg") center 28%/cover no-repeat;
  border-bottom:1px solid var(--ref-line);
 }
 .consent-visual h2{font-size:clamp(31px,8vw,40px)!important;margin:5px 0 8px!important}
