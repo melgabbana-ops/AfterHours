@@ -164,6 +164,37 @@ describe("AFTER HOURS push notification haptics", () => {
 });
 
 
+
+describe("AFTER HOURS push notification navigation safety", () => {
+  const home = "https://app.example/AfterHours/";
+  const targetFor = async (url) => {
+    const worker = startPushWorker({ url });
+    await worker.complete();
+    return worker.showNotification.mock.calls[0][1].data.url;
+  };
+
+  it.each([
+    ["root-relative screen link", "/?screen=profile", "https://app.example/AfterHours/?screen=profile"],
+    ["already scoped screen link", "/AfterHours/?screen=radio", "https://app.example/AfterHours/?screen=radio"],
+    ["same-origin absolute app link", "https://app.example/AfterHours/?screen=game", "https://app.example/AfterHours/?screen=game"],
+  ])("keeps the %s inside the GitHub Pages app path", async (_label, input, expected) => {
+    await expect(targetFor(input)).resolves.toBe(expected);
+  });
+
+  it.each([
+    ["external absolute URL", "https://evil.example/path"],
+    ["protocol-relative URL", "//evil.example/path"],
+    ["root path traversal", "/../../outside"],
+    ["scoped path traversal", "/AfterHours/../../outside"],
+    ["encoded path traversal", "/AfterHours/%2e%2e/%2e%2e/outside"],
+    ["backslash URL separator", "/\\\\evil.example/path"],
+    ["script URL", "javascript:alert(1)"],
+  ])("falls back to the app home for an unsafe %s", async (_label, input) => {
+    await expect(targetFor(input)).resolves.toBe(home);
+  });
+});
+
+
 describe("AFTER HOURS offline intro shell", () => {
   it("pre-caches the transparent teaser logo and local cinematic backgrounds", () => {
     expect(workerSource).toContain('const CACHE_NAME = "after-hours-v15"');
