@@ -543,3 +543,20 @@ html,body,#root,.app{background:#050505!important;color:#f4e7d2!important}
 @media(prefers-reduced-motion:reduce){
  .experience-choice,.home-shortcuts .tile{transition:none!important}
 }
+
+/* Consent hero resilience: keep the approved local artwork available when the
+   optional photographic layer cannot be reached, including on GitHub Pages. */
+.consent-screen .consent-visual{
+ background-image:
+  linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.22) 42%,#050505 100%),
+  url("https://gcdn.picsart.com/pipeline-output/ee9b2312-7f4d-4299-b241-d3e16982fa36.png"),
+  url("/AfterHours/visuals/reference-consent.svg")!important;
+ background-position:center 34%,center 34%,center!important;
+ background-size:cover,cover,cover!important;
+ background-repeat:no-repeat!important;
+}
+@media(max-width:390px){
+ .consent-screen .consent-visual{min-height:clamp(260px,42svh,310px)!important}
+ .consent-screen .consent-form{gap:8px!important}
+ .consent-screen .consent-check{min-height:54px!important;padding:11px 12px!important}
+}
