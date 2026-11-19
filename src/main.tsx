@@ -11,7 +11,6 @@ import"./approved-cinematic.css";
 import"./reference-home.css";
 import"./reference-pages.css";
 import ConsentScreen from "./ConsentScreen";
-import"./reference-home.css";
 
 
 
@@ -469,7 +468,7 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
     {state.notifications.length?state.notifications.slice(0,8).map(item=><button key={item.id} className={"notification-item "+(item.read?"":"unread")} onClick={()=>markNotificationRead(item.id)}><b>{item.title}</b><span>{item.body}</span></button>):<small>{t("Geen nieuwe meldingen.","No new notifications.")}</small>}
    </div>}
   </div>
-  <section className="hero home-hero" style={{"--ah-cinematic-background":`url("${import.meta.env.BASE_URL}visuals/ah-grand-candlelit-chamber.svg")`} as React.CSSProperties}>
+  <section className="hero home-hero" style={{"--ah-cinematic-background":`url("${import.meta.env.BASE_URL}visuals/reference-home.svg")`} as React.CSSProperties}>
    <img className="home-wordmark" src={`${import.meta.env.BASE_URL}after-hours-wordmark-transparent.svg`} alt="AFTER HOURS"/>
    <span className="eyebrow">{t("WELCOME BACK","WELCOME BACK")}</span>
    <h2>{state.profile.displayName||"Mistress"}</h2>
