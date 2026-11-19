@@ -37,7 +37,7 @@ import{getCurrentUser,sendMagicLink,signInWithProvider,signInWithPassword,signUp
 import{playNotificationSound,primeNotificationAudio}from"./services/notificationSound";
 import{levelFromXp,rankFromXp,rankIndexFromXp,rankNames,rankThresholds}from"./progression";
 import{notificationEvents}from"./services/notifications";
-import{getSessionSafetyAnnouncement,getTaskChoiceFeedback,isTaskPassed,PASS_TASK_SELECTION,shouldResumeSession}from"./services/sessionSafety";
+import{canStartSessionWithVerifiedState,getSessionSafetyAnnouncement,getTaskChoiceFeedback,isTaskPassed,PASS_TASK_SELECTION,shouldResumeSession,shouldResumeSessionBeforeHydration}from"./services/sessionSafety";
 import {getMaintenanceStatus,formatMaintenanceDate,type MaintenanceConfig} from "./maintenance";
 const PromptLibrary = React.lazy(() => import("./PromptLibrary"));
 const Insights = React.lazy(async () => ({ default: (await import("./Insights")).Insights }));
@@ -141,7 +141,7 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
  const [captureAssignment,setCaptureAssignment]=useState<{title:string;task:string}|null>(null);
  const[privacyMode,setPrivacyMode]=useState(false);
  useEffect(()=>{if(new URLSearchParams(window.location.search).has("screen"))window.history.replaceState({},document.title,window.location.pathname+window.location.hash)},[]);
- const[running,setRunning]=useState(()=>shouldResumeSession(state.session.status,state.consent.status));
+ const[running,setRunning]=useState(()=>shouldResumeSessionBeforeHydration(supabaseConfigured,state.session.status,state.consent.status));
  const[seconds,setSeconds]=useState(()=>loadTimer(state.profile.id,state.session.round,rounds[state.session.round]?.time||rounds[0].time));
  const[userEmail,setUserEmail]=useState<string|null>(null);
  const[authEmail,setAuthEmail]=useState("");
@@ -151,6 +151,7 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
  const[authMessage,setAuthMessage]=useState("");
  const[passwordRecovery,setPasswordRecovery]=useState(false);
  const[syncUserId,setSyncUserId]=useState<string|null>(null);
+ const[remoteStateVerified,setRemoteStateVerified]=useState(!supabaseConfigured);
  const[isBusinessAdmin,setIsBusinessAdmin]=useState(false);
  useEffect(()=>{let active=true;const checkAdmin=async()=>{if(!syncUserId||!supabaseConfigured||!supabase){setIsBusinessAdmin(false);return;}try{const{data,error}=await supabase.from("app_admins").select("user_id").eq("user_id",syncUserId).maybeSingle();if(active)setIsBusinessAdmin(!error&&Boolean(data));}catch{if(active)setIsBusinessAdmin(false);}};void checkAdmin();return()=>{active=false}},[syncUserId]);
  useEffect(()=>{if(syncUserId)recordAchievement("login",{profileId:syncUserId})},[syncUserId]);
@@ -179,11 +180,13 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
   const generation=++hydrateGeneration.current;
   const hydrate=async()=>{
    const localState=loadState();
+   if(supabaseConfigured)setRemoteStateVerified(false);
    if(!supabaseConfigured){
     if(!active||generation!==hydrateGeneration.current)return;
     const localRound=Math.min(Math.max(0,localState.session.round),fallbackRounds.length-1);
     setUserEmail(null);
     setSyncUserId(null);
+    setRemoteStateVerified(true);
     setState(localState);
     setRunning(shouldResumeSession(localState.session.status,localState.consent.status));
     setSeconds(loadTimer(localState.profile.id,localRound,fallbackRounds[localRound].time));
@@ -195,6 +198,7 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
     user=await getCurrentUser();
    }catch{
     if(!active||generation!==hydrateGeneration.current)return;
+    setRemoteStateVerified(false);
     setProfileMessage(t("Accountstatus kon niet worden gecontroleerd door een verbindingsfout. Je lokale gegevens blijven behouden; controleer je verbinding en laad opnieuw.","Account status could not be checked because of a connection error. Your local data is preserved; check your connection and reload."));
     setAuthReady(true);
     return;
@@ -203,6 +207,7 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
    setUserEmail(user?.email??null);
    setSyncUserId(null);
    if(!user){
+    setRemoteStateVerified(false);
     clearTimer(localState.profile.id);
     setRunning(false);
     setSeconds(fallbackRounds[0].time);
@@ -230,6 +235,7 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
    }
    if(!active||generation!==hydrateGeneration.current)return;
    if(remoteLoadFailed){
+    setRemoteStateVerified(false);
     setState(localState);
     const restoredRound=Math.min(Math.max(0,localState.session.round),availableRounds.length-1);
     setRunning(shouldResumeSession(localState.session.status,localState.consent.status,false));
@@ -238,27 +244,32 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
     setAuthReady(true);
     return;
    }else if(remote){
-    const sameAccount=localState.profile.id===user.id;
-    const remoteIsNewer=!sameAccount||remote.session.id!==localState.session.id||new Date(remote.session.updatedAt).getTime()>=new Date(localState.session.updatedAt).getTime();
-    setState(current=>({...remote,ageConfirmed:current.ageConfirmed&&(current.ageConfirmedFor===user.id),ageConfirmedFor:current.ageConfirmedFor===user.id?user.id:null,safety:current.safety,profile:{...remote.profile,username:remote.profile.username||current.profile.username},session:remoteIsNewer?remote.session:current.session,consent:remoteIsNewer?remote.consent:current.consent}));
-    if(remoteIsNewer){
-     const restoredRound=Math.min(Math.max(0,remote.session.round),availableRounds.length-1);
-     setRunning(shouldResumeSession(remote.session.status,remote.consent.status));
-     setSeconds(loadTimer(user.id,restoredRound,availableRounds[restoredRound].time));
-    }
+    // The verified server session and consent are authoritative. A device clock
+    // or stale local snapshot must never override a newer server revocation.
+    setState(current=>({...remote,ageConfirmed:current.ageConfirmed&&(current.ageConfirmedFor===user.id),ageConfirmedFor:current.ageConfirmedFor===user.id?user.id:null,safety:current.safety,profile:{...remote.profile,username:remote.profile.username||current.profile.username}}));
+    const restoredRound=Math.min(Math.max(0,remote.session.round),availableRounds.length-1);
+    setRunning(shouldResumeSession(remote.session.status,remote.consent.status,true));
+    setSeconds(loadTimer(user.id,restoredRound,availableRounds[restoredRound].time));
+    setRemoteStateVerified(true);
    }else{
     const sameAccount=localState.profile.id===user.id;
     const hasRecoverableLocalSession=localState.session.status!=="ready"||localState.session.round!==0;
     if(sameAccount&&hasRecoverableLocalSession){
      setState(localState);
-     setRunning(shouldResumeSession(localState.session.status,localState.consent.status));
+     setRunning(false);
      const restoredRound=Math.min(Math.max(0,localState.session.round),availableRounds.length-1);
      setSeconds(loadTimer(localState.profile.id,restoredRound,availableRounds[restoredRound].time));
+     setRemoteStateVerified(false);
+     setSyncUserId(null);
+     setProfileMessage(t("Er is geen serverprofiel gevonden voor deze account. Je lokale gegevens zijn behouden, maar de sessie kan niet veilig worden hervat. Herstel eerst het accountprofiel en laad opnieuw.","No server profile was found for this account. Your local data has been preserved, but the session cannot safely resume. Restore the account profile and reload."));
+     setAuthReady(true);
+     return;
     }else{
      clearTimer(localState.profile.id);
      setRunning(false);
      setSeconds(availableRounds[0].time);
      setState(current=>({...defaultState(),ageConfirmed:current.ageConfirmed,ageConfirmedFor:current.ageConfirmedFor,safety:current.safety}));
+     setRemoteStateVerified(false);
     }
    }
    setSyncUserId(user.id);
@@ -276,6 +287,7 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
     setScreen("admin");
    }
    if(event==="SIGNED_OUT"){
+    setRemoteStateVerified(false);
     clearTimer(state.profile.id);
     clearTimer("local-profile");
     setUserEmail(null);
@@ -294,7 +306,7 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
   return()=>{active=false;sub?.data.subscription.unsubscribe()};
  },[]);
 
- useEffect(()=>{try{saveState(state)}catch{setProfileMessage(t("Lokale opslag is niet beschikbaar. Gebruik een ingelogd account om sessiegegevens server-side op te slaan.","Local storage is unavailable. Sign in to save session data on the server."))}if(!supabaseConfigured||syncUserId){void syncRemoteState(state).then(message=>{if(message)setProfileMessage(message)}).catch(()=>setProfileMessage(t("Synchronisatie is tijdelijk niet beschikbaar. Controleer je verbinding voordat je verdergaat.","Sync is temporarily unavailable. Check your connection before continuing.")))}if(!syncUserId)return;},[state,syncUserId]);
+ useEffect(()=>{try{saveState(state)}catch{setProfileMessage(t("Lokale opslag is niet beschikbaar. Gebruik een ingelogd account om sessiegegevens server-side op te slaan.","Local storage is unavailable. Sign in to save session data on the server."))}if(!supabaseConfigured||syncUserId){void syncRemoteState(state).then(message=>{if(message){setProfileMessage(message);if(supabaseConfigured&&syncUserId)setRemoteStateVerified(false)}else if(supabaseConfigured&&syncUserId)setRemoteStateVerified(true)}).catch(()=>{if(supabaseConfigured&&syncUserId)setRemoteStateVerified(false);setProfileMessage(t("Synchronisatie is tijdelijk niet beschikbaar. Controleer je verbinding voordat je verdergaat.","Sync is temporarily unavailable. Check your connection before continuing."))})}if(!syncUserId)return;},[state,syncUserId]);
  useEffect(()=>{if(!running)return;const profileId=state.profile.id;const roundIndex=state.session.round;const initialSeconds=rounds[roundIndex]?.time??rounds[0].time;const id=setInterval(()=>setSeconds(loadTimer(profileId,roundIndex,initialSeconds)),1000);return()=>clearInterval(id)},[running,state.session.round,state.profile.id,rounds]);
  useEffect(()=>{if(seconds!==0||state.session.status!=="active")return;clearTimer(state.profile.id);setRunning(false);setSafetyAnnouncement(getSessionSafetyAnnouncement("timer-paused",language));saveTimer(state.profile.id,state.session.round,0,false);void playNotificationSound("checkin");setState(s=>({...s,notifications:[notificationEvents.checkIn(t("De tijd van deze ronde is voorbij. De sessie staat op pauze en kan veilig worden hervat.","Time is up for this round. The session is paused and can be safely resumed.")),...s.notifications].slice(0,20),session:{...s.session,status:"paused",updatedAt:new Date().toISOString()}}))},[seconds,state.session.status,rounds,language]);
 
@@ -322,7 +334,13 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
  const updateSession=(patch:Partial<AfterHoursState["session"]>)=>setState(s=>({...s,session:{...s.session,...patch,updatedAt:new Date().toISOString()}}));
  const pauseRound=()=>{setSafetyAnnouncement(getSessionSafetyAnnouncement("paused",language));setRunning(false);persistTimer(state.profile.id,round,seconds,false);updateSession({status:"paused"})};
  const startRound=()=>{
-  if(supabaseConfigured&&!syncUserId){setAuthMessage(t("Log in voordat je een sessie start, zodat consent en actieve speeltijd veilig worden opgeslagen.","Sign in before starting a session so consent and active play time can be saved securely."));setScreen("admin");return}
+  if(!canStartSessionWithVerifiedState(supabaseConfigured,Boolean(syncUserId),remoteStateVerified)){
+   if(supabaseConfigured&&!syncUserId&&!userEmail){setAuthMessage(t("Log in voordat je een sessie start, zodat consent en actieve speeltijd veilig worden opgeslagen.","Sign in before starting a session so consent and active play time can be saved securely."));setScreen("admin");return}
+   setSafetySyncMessage(t("De serverstatus van deze sessie is niet geverifieerd. De sessie blijft gepauzeerd. Controleer je verbinding en laad opnieuw voordat je verdergaat.","The server status of this session has not been verified. The session remains paused. Check your connection and reload before continuing."));
+   setRunning(false);
+   setScreen("home");
+   return;
+  }
   if(!consent){setScreen("home");return}
   const resume=state.session.status==="paused"||state.session.status==="active";
   setSafetyAnnouncement(getSessionSafetyAnnouncement(resume?"resumed":"started",language));
