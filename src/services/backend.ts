@@ -116,20 +116,21 @@ export async function updateRemoteUsername(username:string):Promise<string|null>
 }
 
 export function revokeRemoteConsent(sessionId:string,revokedAt:string):Promise<string|null>{
- if(!supabaseConfigured||!supabase||!isUuid(sessionId))return Promise.resolve(null);
+ const client=supabase;
+ if(!supabaseConfigured||!client||!isUuid(sessionId))return Promise.resolve(null);
  // Drop queued state snapshots from before STOP. If a sync is already in
  // flight, the revocation waits for it and is therefore the final server write.
  syncGeneration += 1;
  return enqueueRemoteMutation(async()=>{
-  const{data:{user},error:userError}=await supabase.auth.getUser();
+  const{data:{user},error:userError}=await client.auth.getUser();
   if(userError||!user)return userError?.message??"Geen actieve gebruiker voor consent-sync.";
-  const{data:session,error:sessionError}=await supabase.from("sessions").select("id").eq("id",sessionId).eq("profile_id",user.id).maybeSingle();
+  const{data:session,error:sessionError}=await client.from("sessions").select("id").eq("id",sessionId).eq("profile_id",user.id).maybeSingle();
   if(sessionError)return sessionError.message;
   if(!session)return null;
   // Always ask the server to enforce revocation, even if the latest consent
   // record already says revoked or is inconsistent with the session state.
   // The database RPC is responsible for idempotently stopping active/paused sessions.
-  const{error}=await supabase.rpc("set_consent_state",{p_session_id:sessionId,p_status:"revoked",p_confirmed_at:null,p_revoked_at:revokedAt});
+  const{error}=await client.rpc("set_consent_state",{p_session_id:sessionId,p_status:"revoked",p_confirmed_at:null,p_revoked_at:revokedAt});
   return error?.message??null;
  });
 }
