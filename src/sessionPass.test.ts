@@ -1,6 +1,9 @@
 import appSource from "./main.tsx?raw";
-import referencePagesStyles from "./reference-pages.css?raw";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+
+const referencePagesStyles = readFileSync(resolve(process.cwd(), "src/reference-pages.css"), "utf8");
 import { PASS_TASK_SELECTION } from "./services/sessionSafety";
 
 describe("AFTER HOURS session PASS control", () => {
