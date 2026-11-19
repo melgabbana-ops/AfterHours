@@ -39,8 +39,12 @@ export function getTaskChoiceFeedback(selection: string | null, language: "nl" |
 }
 
 /** A restored timer may run only when both persisted session and consent are active. */
-export function shouldResumeSession(sessionStatus: SessionSafetyStatus, consentStatus: ConsentSafetyStatus): boolean {
-  return sessionStatus === "active" && consentStatus === "active";
+export function shouldResumeSession(
+  sessionStatus: SessionSafetyStatus,
+  consentStatus: ConsentSafetyStatus,
+  remoteStateVerified = true,
+): boolean {
+  return remoteStateVerified && sessionStatus === "active" && consentStatus === "active";
 }
 
 /** Localized screen-reader feedback for consent and session safety transitions. */
