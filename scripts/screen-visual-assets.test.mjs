@@ -24,11 +24,11 @@ const mappings = [
   { selector: ".insights:before", asset: "reference-tarot.svg" },
   { selector: ".insights.insights-astro:before", asset: "reference-horoscope.svg" },
   { selector: ".radio-room:before", asset: "reference-radio.svg" },
-  { selector: ".aftercare-card", asset: "reference-aftercare.svg" },
+  { selector: ".aftercare-card{", asset: "reference-aftercare.svg" },
   { selector: ".completion-card", asset: "reference-completion.svg" },
   { selector: ".insights .tarot-card", asset: "reference-tarot.svg" },
   { selector: ".insights .astro-card", asset: "reference-horoscope.svg" },
-  { selector: ".radio-player", asset: "reference-radio.svg" },
+  { selector: ".radio-player{", asset: "reference-radio.svg" },
 ];
 
 const precachedAssets = [
