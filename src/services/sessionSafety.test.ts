@@ -145,4 +145,12 @@ describe("offline STOP recovery", () => {
     expect(hydrate.indexOf("revokeRemoteConsent(localState.session.id,pendingStopAt)")).toBeLessThan(hydrate.indexOf("loadRemoteState(localState.session.id)"));
     expect(mainSource).toContain('window.addEventListener("online",handleOnline)');
   });
+
+  it("preserves a pending local STOP when the account is signed out or unavailable", () => {
+    expect(mainSource).toContain("if(pendingStopAt){\n     setState(localState);\n     setCheckIn(\"stop\")");
+    const signedOut = mainSource.slice(mainSource.indexOf('if(event==="SIGNED_OUT")'), mainSource.indexOf('if(session?.user)', mainSource.indexOf('if(event==="SIGNED_OUT")')));
+    expect(signedOut).toContain("const localState=loadState()");
+    expect(signedOut).toContain("if(pendingStopAt)");
+    expect(signedOut).toContain("setState(localState)");
+  });
 });
