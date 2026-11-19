@@ -10,12 +10,13 @@ type CharacterLook = {
   hairStyle: string;
   outfit: string;
   mask: boolean;
+  tattoos: boolean;
   neckDetail: string;
   accessory: string;
 };
 const DEFAULT_LOOK: CharacterLook = {
   gender: "female", skin: "#B97855", hair: "#21151B", hairStyle: "waves",
-  outfit: "#100e0a", mask: false, neckDetail: "collar", accessory: "crescent",
+  outfit: "#100e0a", mask: false, tattoos: true, neckDetail: "collar", accessory: "crescent",
 };
 const SKINS = [
   { label: "Porcelain", color: "#F1D4C2" }, { label: "Warm", color: "#DCA889" },
@@ -47,6 +48,7 @@ export function normalizeCharacterLook(value: unknown): CharacterLook {
     hairStyle: HAIR_STYLES.some((item) => item.id === candidate.hairStyle) ? candidate.hairStyle! : DEFAULT_LOOK.hairStyle,
     outfit: OUTFITS.some((item) => item.color === candidate.outfit) ? candidate.outfit! : DEFAULT_LOOK.outfit,
     mask: typeof candidate.mask === "boolean" ? candidate.mask : DEFAULT_LOOK.mask,
+    tattoos: typeof candidate.tattoos === "boolean" ? candidate.tattoos : DEFAULT_LOOK.tattoos,
     neckDetail: ["collar", "chain", "none"].includes(candidate.neckDetail || "") ? candidate.neckDetail! : DEFAULT_LOOK.neckDetail,
     accessory: ["crescent", "earring", "sigil"].includes(candidate.accessory || "") ? candidate.accessory! : DEFAULT_LOOK.accessory,
   };
@@ -84,6 +86,18 @@ function AvatarArt({ look }: { look: CharacterLook }) {
     <path d="M81 82 C91 56 146 53 159 82 C153 68 140 63 120 65 C102 65 91 72 81 93Z" fill={look.hair}/>
     <path d="M91 124 C101 119 110 119 115 123 M125 123 C132 119 141 119 149 124" fill="none" stroke="#21120f" strokeOpacity=".72" strokeWidth="2" strokeLinecap="round"/>
     {look.mask && <path d="M83 113 C105 105 135 105 157 113 L151 143 C132 150 108 150 89 143Z" fill="#0b0907" stroke="url(#ahPortraitGold)" strokeWidth="1.2"/>}
+    {look.tattoos && <g className="character-tattoo-art" fill="none" stroke="#171310" strokeWidth="1.35" strokeLinecap="round" strokeLinejoin="round" opacity=".82">
+      {/* Chicano-inspired black-and-grey ornamental neck and collarbone ink */}
+      <path d="M91 158 C88 166 91 174 98 180 C101 183 102 187 101 190 M149 158 C152 166 149 174 142 180 C139 183 138 187 139 190"/>
+      <path d="M95 165 C99 160 104 162 105 167 C106 172 101 176 97 173 C94 171 94 168 97 166 C100 164 103 167 101 170"/>
+      <path d="M145 165 C141 160 136 162 135 167 C134 172 139 176 143 173 C146 171 146 168 143 166 C140 164 137 167 139 170"/>
+      <path d="M97 179 C101 177 104 180 103 184 M143 179 C139 177 136 180 137 184"/>
+      <path d="M108 181 C112 176 116 177 120 182 C124 177 128 176 132 181 M108 184 C113 188 116 188 120 184 C124 188 127 188 132 184"/>
+      <path d="M112 168 C115 164 118 164 120 168 C122 164 125 164 128 168 M120 168 L120 178"/>
+      <path d="M89 173 l-4 4 5 2 M151 173 l4 4 -5 2"/>
+      <path d="M106 190 C111 194 115 195 120 194 C125 195 129 194 134 190" strokeWidth="1"/>
+      <path d="M117 174 l3 -3 3 3 -3 3Z" strokeWidth=".9"/>
+    </g>}
     <path d="M101 188 L120 216 L139 188" fill="none" stroke="url(#ahPortraitGold)" strokeOpacity=".55" strokeWidth="1"/>
     {look.neckDetail==="collar"&&<><path d="M88 184 C105 201 135 201 152 184 L157 201 C137 219 103 219 83 201Z" fill="#090806" stroke="url(#ahPortraitGold)" strokeWidth="1.5"/><circle cx="120" cy="211" r="3" fill="#d8b477"/></>}
     {look.neckDetail==="chain"&&<><path d="M91 185 C108 220 132 220 149 185" fill="none" stroke="url(#ahPortraitGold)" strokeWidth="1.5"/><path d="M120 208 l4 5 -4 5 -4 -5Z" fill="#d8b477"/></>}
@@ -129,6 +143,7 @@ export default function CharacterStudio({ profileId, language = "nl" }: { profil
           <button className={look.accessory === "earring" ? "selected" : ""} aria-pressed={look.accessory === "earring"} onClick={() => update({ accessory: "earring" })}>{t("Oorbel", "Earring")}</button>
           <button className={look.accessory === "sigil" ? "selected" : ""} aria-pressed={look.accessory === "sigil"} onClick={() => update({ accessory: "sigil" })}>Sigil</button>
         </div></div>
+        <label className="character-mask-toggle"><input type="checkbox" checked={look.tattoos} onChange={(event) => update({ tattoos: event.target.checked })}/><span>{t("Chicano black-and-grey tattoo details", "Chicano black-and-grey tattoo details")}</span></label>
         <label className="character-mask-toggle"><input type="checkbox" checked={look.mask} onChange={(event) => update({ mask: event.target.checked })}/><span>{t("Voeg een elegant masker toe", "Add an elegant mask")}</span></label>
         <p className="character-save-note">{t("Je look wordt op dit apparaat bewaard. Spelvoortgang, XP en ranks blijven voor ieder character gelijk.", "Your look is saved on this device. Gameplay, XP and ranks remain the same for every character.")}</p>
       </div>
