@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { initialScreenFromSearch } from "./navigation";
+import { initialScreenFromSearch, shouldShowTeaser } from "./navigation";
 import manifestText from "../public/manifest.webmanifest?raw";
 
 describe("initialScreenFromSearch", () => {
@@ -30,5 +30,17 @@ describe("initialScreenFromSearch", () => {
   it("does not confuse unrelated query parameters with a screen", () => {
     expect(initialScreenFromSearch("?campaign=radio&ref=home")).toBe("home");
     expect(initialScreenFromSearch("?ref=home&screen=daily")).toBe("daily");
+  });
+});
+
+
+describe("shouldShowTeaser", () => {
+  it("shows the promotional landing only when explicitly requested", () => {
+    expect(shouldShowTeaser("?teaser=1")).toBe(true);
+    expect(shouldShowTeaser("")).toBe(false);
+    expect(shouldShowTeaser("?enter=1")).toBe(false);
+    expect(shouldShowTeaser("?screen=radio")).toBe(false);
+    expect(shouldShowTeaser("?screen=profile")).toBe(false);
+    expect(shouldShowTeaser("?maintenance=1")).toBe(false);
   });
 });
