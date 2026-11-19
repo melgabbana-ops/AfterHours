@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getSessionSafetyAnnouncement, getTaskChoiceFeedback, isTaskPassed, PASS_TASK_SELECTION, shouldResumeSession, shouldResumeSessionBeforeHydration } from "./sessionSafety";
+import { canStartSessionWithVerifiedState, getSessionSafetyAnnouncement, getTaskChoiceFeedback, isTaskPassed, PASS_TASK_SELECTION, shouldResumeSession, shouldResumeSessionBeforeHydration } from "./sessionSafety";
 
 describe("session resume safety", () => {
   it("resumes only when both persisted session and consent are active", () => {
@@ -31,6 +31,28 @@ describe("session resume safety", () => {
   });
 });
 
+
+describe("verified session start", () => {
+  it("keeps local-only sessions available without remote authentication", () => {
+    expect(canStartSessionWithVerifiedState(false, false, false)).toBe(true);
+  });
+
+  it("requires authentication for account-backed sessions", () => {
+    expect(canStartSessionWithVerifiedState(true, false, true)).toBe(false);
+  });
+
+  it("blocks manual resume while remote state is unverified", () => {
+    expect(canStartSessionWithVerifiedState(true, true, false)).toBe(false);
+  });
+
+  it("allows account-backed sessions only after remote state is verified", () => {
+    expect(canStartSessionWithVerifiedState(true, true, true)).toBe(true);
+  });
+
+  it("honors a server-reported consent revocation over any stale local active state", () => {
+    expect(shouldResumeSession("active", "revoked", true)).toBe(false);
+  });
+});
 
 describe("session safety announcements", () => {
   it.each([
