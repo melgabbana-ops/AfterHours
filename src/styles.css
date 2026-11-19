@@ -4583,7 +4583,7 @@ button,[role="button"],nav a{touch-action:manipulation}
 }
 
 
-/* Optional browser-local aftercare reflection. Keep it within the approved black/gold palette. */
+.sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}\n\n/* Optional browser-local aftercare reflection. Keep it within the approved black/gold palette. */
 .aftercare-private-note{margin:22px 0;padding:18px;border:1px solid rgba(203,169,103,.3);border-radius:18px;background:linear-gradient(145deg,rgba(24,20,13,.72),rgba(7,7,6,.88));}
 .aftercare-private-note-heading{display:flex;align-items:flex-start;gap:12px;color:#d8bb82;}
 .aftercare-private-note-heading>svg{flex:0 0 auto;margin-top:3px}
