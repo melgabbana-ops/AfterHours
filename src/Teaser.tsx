@@ -1,13 +1,25 @@
 import React from "react";
 
 const INTRO_VIDEO = "https://gcdn.picsart.com/editing-temp/a18ef45a-9ae8-4ce4-93b4-68e40401defc.mp4";
-import { ArrowUpRight, LockKeyhole, Sparkles, ChevronRight, Gamepad2, Layers3, MoonStar, Target, UsersRound, ShoppingBag } from "lucide-react";
+import { ArrowUpRight, LockKeyhole, Sparkles, ChevronRight, Gamepad2, Layers3, MoonStar, Target, UsersRound, ShoppingBag, Volume2, VolumeX } from "lucide-react";
 
 export default function Teaser() {
   const [language, setLanguage] = React.useState<"nl"|"en">(() => { try { return localStorage.getItem("afterhours.language") === "en" ? "en" : "nl"; } catch { return "nl"; } });
   React.useEffect(() => { try { localStorage.setItem("afterhours.language", language); document.documentElement.lang = language; } catch { /* Language preference is optional. */ } }, [language]);
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
   const [introVideoUnavailable, setIntroVideoUnavailable] = React.useState(false);
+  const [introVideoReady, setIntroVideoReady] = React.useState(false);
+  const [introMuted, setIntroMuted] = React.useState(true);
+  const introVideoRef = React.useRef<HTMLVideoElement>(null);
+  const toggleIntroAudio = () => {
+    const video = introVideoRef.current;
+    const nextMuted = !introMuted;
+    if (video) {
+      video.muted = nextMuted;
+      if (!nextMuted) void video.play().catch(() => { video.muted = true; setIntroMuted(true); });
+    }
+    setIntroMuted(nextMuted);
+  };
   const features = [
     { icon: Gamepad2, title: t("Kinky games", "Kinky games"), copy: t("Interactieve ervaringen", "Interactive experiences") },
     { icon: Layers3, title: t("Kinky tarot", "Kinky tarot"), copy: t("Kaarten en reflectie", "Cards and reflection") },
@@ -21,7 +33,8 @@ export default function Teaser() {
     <div className="teaser-top"><img className="teaser-logo" src={`${import.meta.env.BASE_URL}after-hours-brand-logo-transparent.svg`} alt="AFTER HOURS" /><div className="teaser-top-actions"><span className="teaser-private">18+ · {t("PRIVÉWERELD","PRIVATE EXPERIENCE")}</span><button className="language-toggle teaser-language-toggle" type="button" aria-label={t("Taal wijzigen","Change language")} onClick={() => setLanguage(language === "nl" ? "en" : "nl")}><span className={language === "nl" ? "language-active" : ""}>NL</span><span className="language-divider">/</span><span className={language === "en" ? "language-active" : ""}>EN</span></button></div></div>
     <section className="teaser-film teaser-film-motion" aria-label={t("AFTER HOURS-intro","AFTER HOURS intro")}>
       <div className="teaser-atmosphere" aria-hidden="true"><span/><span/><span/><i/><i/></div>
-      {introVideoUnavailable ? <div className="teaser-film-fallback" role="img" aria-label={t("Cinematische AFTER HOURS-achtergrond","Cinematic AFTER HOURS background")}/> : <video className="teaser-film-video" src={INTRO_VIDEO} autoPlay muted loop playsInline controls preload="metadata" poster={`${import.meta.env.BASE_URL}visuals/ah-cinematic-background.svg`} aria-label={t("AFTER HOURS officiële introvideo","AFTER HOURS official intro video")} onError={() => setIntroVideoUnavailable(true)}/>}
+      {introVideoUnavailable ? <div className="teaser-film-fallback" role="img" aria-label={t("Cinematische AFTER HOURS-achtergrond","Cinematic AFTER HOURS background")}/> : <video ref={introVideoRef} className="teaser-film-video" src={INTRO_VIDEO} autoPlay muted={introMuted} loop playsInline controls preload="metadata" poster={`${import.meta.env.BASE_URL}visuals/ah-cinematic-background.svg`} aria-label={t("AFTER HOURS officiële introvideo","AFTER HOURS official intro video")} onLoadedData={() => setIntroVideoReady(true)} onError={() => setIntroVideoUnavailable(true)}/>}
+      {!introVideoUnavailable && introVideoReady && <button className="teaser-audio-toggle" type="button" onClick={toggleIntroAudio} aria-label={introMuted ? t("Geluid aanzetten","Turn sound on") : t("Geluid dempen","Mute sound")} aria-pressed={!introMuted}>{introMuted ? <VolumeX size={16}/> : <Volume2 size={16}/>}<span>{introMuted ? t("GELUID AAN","SOUND ON") : t("GELUID UIT","MUTE SOUND")}</span></button>}
       <div className="teaser-film-brand">
         <img src={`${import.meta.env.BASE_URL}after-hours-brand-logo-transparent.svg`} alt="AFTER HOURS"/>
         <div><strong>AFTER HOURS</strong><span>YOUR RULES. YOUR LIMITS. YOUR EXPERIENCE.</span></div>
