@@ -167,3 +167,8 @@
  .ah-reference-home .grid.home-shortcuts{gap:7px!important}
  .ah-reference-home .home-shortcuts .tile{min-height:86px!important}
 }
+
+
+/* Home hero photographic portrait replaces the vector placeholder. */
+.ah-reference-home{--ah-cinematic-background:url("https://gcdn.picsart.com/pipeline-output/725cbaa5-4f9c-4aae-b16e-7ae8e7f4b340.png")!important}
+.ah-reference-home .hero.home-hero{background-image:linear-gradient(180deg,rgba(5,4,3,.02) 0%,rgba(5,4,3,.05) 28%,rgba(5,4,3,.42) 58%,rgba(5,4,3,.96) 100%),var(--ah-cinematic-background)!important;background-position:center 24%!important;background-size:cover!important}
