@@ -56,8 +56,10 @@ describe("AFTER HOURS screen-specific artwork", () => {
     expect(ruleFor(selector)).toContain(`/AfterHours/visuals/${asset}`);
   });
 
-  it("uses the black-and-gold home artwork on the home screen, teaser and onboarding", () => {
-    expect(mainSource).toContain("visuals/reference-home.svg");
+  it("uses the approved Home portrait with a bundled artwork fallback", () => {
+    expect(mainSource).toContain('className="hero home-hero"');
+    expect(css).toContain('url("/AfterHours/visuals/reference-home.svg")');
+    expect(css).toContain("bc8725cb-2e53-4c72-8cc0-e953ea8894ad.png");
     expect(teaserSource).toContain("visuals/reference-home.svg");
     expect(onboardingSource).toContain("visuals/reference-home.svg");
   });
