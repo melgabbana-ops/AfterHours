@@ -918,3 +918,9 @@ hr{border:0;border-top:1px solid var(--ah-line)}
 
 /* Intro video fallback: retain the local cinematic artwork if remote media is unavailable. */
 .teaser-film-fallback{position:absolute;inset:0;z-index:0;background:linear-gradient(180deg,rgba(5,4,3,.12),rgba(5,4,3,.36)),var(--ah-cinematic-background, url("../visuals/ah-cinematic-background.svg")) center/cover no-repeat;}
+
+/* Intro audio is enabled only after an explicit user gesture. */
+.teaser-audio-toggle{position:absolute;right:14px;bottom:14px;z-index:4;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:40px;padding:0 13px;border:1px solid rgba(223,189,131,.68);border-radius:3px;background:rgba(7,6,5,.84);color:#ead5b1;font:600 9px "DM Sans",sans-serif;letter-spacing:.14em;backdrop-filter:blur(10px);cursor:pointer}
+.teaser-audio-toggle svg{width:16px;height:16px;color:#dfbd83}
+.teaser-audio-toggle:focus-visible{outline:2px solid #f0d8ad;outline-offset:3px}
+@media(max-width:520px){.teaser-audio-toggle{right:10px;bottom:10px;min-height:38px;padding:0 11px;font-size:8px}}
