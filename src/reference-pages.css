@@ -234,3 +234,32 @@ input,select,textarea{accent-color:#c79b5d!important}
 }
 .onboarding-screen .onboarding-stepper span.current,.onboarding-screen .onboarding-stepper span.done{background:#d8b77e!important}
 .onboarding-screen .onboarding-next{background:linear-gradient(180deg,#e8c88f,#b98549)!important;color:#160f08!important}
+
+
+/* Mood archive: readable timeline with clear phase and privacy hierarchy. */
+.mood-history{
+ position:relative;isolation:isolate;overflow:hidden;
+ margin:18px auto 0!important;padding:18px 14px!important;
+ border:1px solid var(--ref-line)!important;border-radius:8px!important;
+ background:linear-gradient(145deg,rgba(27,19,12,.96),rgba(5,5,5,.98))!important;
+ box-shadow:0 12px 34px rgba(0,0,0,.32)!important;
+}
+.mood-history-head{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:8px!important}
+.mood-history-head .eyebrow{display:flex!important;align-items:center!important;gap:7px!important;font-size:8px!important}
+.mood-history-head button{
+ display:flex!important;align-items:center!important;gap:6px!important;
+ min-height:32px!important;padding:0 9px!important;border:1px solid var(--ref-line)!important;
+ border-radius:5px!important;background:#0b0806!important;color:var(--ref-gold-bright)!important;font-size:8px!important;
+}
+.mood-history h3{margin:17px 0 5px!important;color:#f2e2ca!important;font:19px "Cinzel",Georgia,serif!important}
+.mood-history-note{margin:0 0 13px!important;color:#bca98e!important;font-size:9px!important;line-height:1.5!important}
+.mood-history ol{display:flex!important;flex-direction:column!important;gap:7px!important;margin:0!important;padding:0!important;list-style:none!important}
+.mood-history li{
+ display:grid!important;grid-template-columns:78px minmax(0,1fr)!important;gap:4px 10px!important;
+ padding:11px 10px!important;border:1px solid rgba(216,183,126,.18)!important;border-radius:5px!important;
+ background:rgba(0,0,0,.42)!important;
+}
+.mood-history-phase{grid-row:span 2!important;align-self:center!important;color:var(--ref-gold)!important;font-size:8px!important;letter-spacing:.08em!important;text-transform:uppercase!important}
+.mood-history li strong{color:#f1e2cc!important;font:12px "Cinzel",Georgia,serif!important}
+.mood-history li time{color:#aa9a83!important;font-size:8px!important}
+@media(max-width:360px){.mood-history li{grid-template-columns:65px minmax(0,1fr)!important}}
