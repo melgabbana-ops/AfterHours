@@ -1,7 +1,6 @@
-import { readFileSync } from "node:fs";
+import consentSource from "./ConsentScreen.tsx?raw";
 import { describe, expect, it } from "vitest";
 
-const consentSource = readFileSync(new URL("./ConsentScreen.tsx", import.meta.url), "utf8");
 
 describe("consent screen accessibility", () => {
   it("groups all required acknowledgements in a labelled fieldset", () => {
