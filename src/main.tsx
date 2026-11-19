@@ -23,6 +23,7 @@ import ConsentScreen from "./ConsentScreen";
 
 
 import MoodCheckIn from "./MoodCheckIn";
+import AftercareNote from "./AftercareNote";
 
 
 
@@ -161,6 +162,7 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
  const[moodAfter,setMoodAfter]=useState<MoodCode|null>(null);
  const[moodMessage,setMoodMessage]=useState("");
  const[aftercareChoice,setAftercareChoice]=useState<"land"|"talk"|"space"|"hydrate"|"relax"|"ground"|"music"|"notes"|null>(null);
+ const[aftercareNoteStatus,setAftercareNoteStatus]=useState<"pending"|"saved"|"skipped">("pending");
  const[finishing,setFinishing]=useState(false);
  const finishingSession=useRef(false);
  const[displayNameDraft,setDisplayNameDraft]=useState(()=>state.profile.displayName);
@@ -385,6 +387,7 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
  };
  const finishSession=async()=>{
   if(finishingSession.current||!aftercareChoice)return;
+  if(aftercareNoteStatus==="pending"){setAftercareMessage(t("Sla je notitie op of kies overslaan voordat je afrondt.","Save your note or choose skip before finishing."));return;}
   if(!syncUserId){setAftercareMessage(t("Log in om deze sessie veilig af te ronden en XP op te slaan. Je sessie blijft bewaard totdat je bent ingelogd.","Sign in to finish this session safely and save XP. Your session remains saved until you sign in."));return;}
   finishingSession.current=true;
   setFinishing(true);
@@ -432,6 +435,7 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
    persistTimer(state.profile.id,n,rounds[n].time,false);
   }else{
    setAftercareChoice(null);
+   setAftercareNoteStatus("pending");
    setAftercareMessage("");
    setScreen("aftercare");
   }
@@ -592,7 +596,7 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
  <button className={aftercareChoice==="music"?"selected":""} onClick={()=>setAftercareChoice("music")}><Headphones/><strong>{t("Muziek","Music")}</strong><span>{t("Kies rustige muziek.","Choose calming music.")}</span></button>
  <button className={aftercareChoice==="talk"?"selected":""} onClick={()=>setAftercareChoice("talk")}><MessageCircle/><strong>{t("Napraten","Talk")}</strong><span>{t("Deel wat je wilt delen.","Share what you wish.")}</span></button>
  <button className={aftercareChoice==="notes"?"selected":""} onClick={()=>setAftercareChoice("notes")}><NotebookPen/><strong>{t("Notities","Notes")}</strong><span>{t("Leg een gedachte vast.","Capture a thought.")}</span></button>
-</div><div className="aftercare-note"><Shield/><span>{t("Aftercare is geen verplichting om iets te delen. Een pauze, grens of stop blijft altijd geldig.","Aftercare never obliges you to share. A pause, boundary, or stop is always valid.")}</span></div><button className="gold aftercare-complete" onClick={()=>void finishSession()} disabled={!aftercareChoice||finishing}>{finishing?t("Veilig afronden…","Finishing safely…"):t("Sessie veilig afronden","Finish session safely")}</button><button className="back" onClick={()=>setScreen("home")}>← {t("Terug","Back")}</button></section></main>}
+</div><AftercareNote ownerId={syncUserId??state.profile.id} sessionId={state.session.id} language={language} onStatusChange={setAftercareNoteStatus}/><div className="aftercare-note"><Shield/><span>{t("Aftercare is geen verplichting om iets te delen. Een pauze, grens of stop blijft altijd geldig.","Aftercare never obliges you to share. A pause, boundary, or stop is always valid.")}</span></div><button className="gold aftercare-complete" onClick={()=>void finishSession()} disabled={!aftercareChoice||aftercareNoteStatus==="pending"||finishing}>{finishing?t("Veilig afronden…","Finishing safely…"):t("Sessie veilig afronden","Finish session safely")}</button><button className="back" onClick={()=>setScreen("home")}>← {t("Terug","Back")}</button></section></main>}
 
  <React.Suspense fallback={<main className="feature-loading" role="status"><p>{t("Scherm wordt geladen…","Loading screen…")}</p></main>}>
  {screen==="capture"&&<main className="aftercare-screen"><section className="aftercare-card"><span className="eyebrow">AFTER HOURS · ASSIGNMENT CAPTURE</span><h2>{t("Opdracht vastleggen","Capture this assignment")}</h2>{captureAssignment&&<div className="assignment-captions"><strong>{captureAssignment.title}</strong><p>{captureAssignment.task}</p></div>}<p>{t("De opname is optioneel. Vraag opnieuw expliciete toestemming aan iedereen die herkenbaar in beeld of geluid komt. Je ziet eerst een voorbeeld; opslaan gebeurt pas na jouw keuze.","Recording is optional. Renew explicit consent from everyone identifiable in image or audio. You will see a preview first; saving happens only if you choose it.")}</p><MediaVault sessionId={state.session.id} language={language} assignmentTitle={captureAssignment?.title} assignmentTask={captureAssignment?.task}/><button className="back" onClick={()=>setScreen("prompts")}>← {t("Terug naar opdracht","Back to assignment")}</button></section></main>}
