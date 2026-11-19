@@ -9,6 +9,9 @@ import{Shield,Lock,Play,Pause,RotateCcw,ChevronRight,User,Settings,Home,Timer,Ch
 import"./styles.css";
 import"./approved-cinematic.css";
 import"./reference-home.css";
+import"./reference-pages.css";
+import ConsentScreen from "./ConsentScreen";
+import"./reference-home.css";
 
 
 
