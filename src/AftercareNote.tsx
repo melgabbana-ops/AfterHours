@@ -43,7 +43,7 @@ export default function AftercareNote({ ownerId, sessionId, language, onStatusCh
     setMessage(existing
       ? t("Je eerder opgeslagen notitie is geladen.", "Your previously saved note has been loaded.")
       : "");
-  }, [ownerId, sessionId, language, onStatusChange]);
+  }, [ownerId, sessionId, onStatusChange]);
 
   const updateField = (field: keyof PrivateSessionNoteDraft, value: string) => {
     const next = { ...draft, [field]: value };
