@@ -37,7 +37,7 @@
 .game-select-screen:before,.ah-session-screen:before{background-image:url("/AfterHours/visuals/reference-experience.svg")}
 .aftercare-screen:before{background-image:url("/AfterHours/visuals/reference-aftercare.svg")}
 .completion-screen:before{background-image:url("/AfterHours/visuals/reference-completion.svg")}
-.consent-screen:before{background-image:url("/AfterHours/visuals/reference-experience.svg")}
+.consent-screen:before{background-image:url("/AfterHours/visuals/reference-consent.svg")}
 .ah-profile-screen:before{background-image:url("/AfterHours/visuals/reference-profile.svg")}
 .radio-room:before{background-image:url("/AfterHours/visuals/reference-radio.svg")}
 .insights:before{background-image:url("/AfterHours/visuals/reference-tarot.svg")}
@@ -214,3 +214,23 @@ input,select,textarea{accent-color:#c79b5d!important}
  .ah-editorial-screen,.ah-profile-screen,.radio-room,.insights{max-width:560px!important;padding-left:24px!important;padding-right:24px!important}
  .consent-visual{margin-left:-24px;margin-right:-24px;padding-left:32px;padding-right:32px}
 }
+
+/* Intro, age gate and onboarding use the same approved cinematic art direction. */
+.teaser-screen,.onboarding-screen{
+ background:#050505!important;
+ --ah-cinematic-background:url("/AfterHours/visuals/reference-home.svg");
+}
+.teaser-film-fallback,.onboarding-video-fallback{
+ background:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.8)),url("/AfterHours/visuals/reference-home.svg") center/cover!important;
+}
+.gate{
+ background:linear-gradient(180deg,rgba(0,0,0,.42),rgba(0,0,0,.9)),url("/AfterHours/visuals/reference-home.svg") center/cover fixed!important;
+ color:#f4e7d2!important;
+}
+.gate h1,.gate h2{font-family:"Cinzel",Georgia,serif!important;color:#f3dfbf!important}
+.gate button{border-color:#e6c58f!important;background:linear-gradient(180deg,#e8c88f,#b98549)!important;color:#160f08!important}
+.onboarding-screen .onboarding-panel,.onboarding-screen .onboarding-feature,.onboarding-screen .onboarding-promise{
+ border-color:rgba(216,183,126,.36)!important;background:rgba(7,6,5,.9)!important;
+}
+.onboarding-screen .onboarding-stepper span.current,.onboarding-screen .onboarding-stepper span.done{background:#d8b77e!important}
+.onboarding-screen .onboarding-next{background:linear-gradient(180deg,#e8c88f,#b98549)!important;color:#160f08!important}
