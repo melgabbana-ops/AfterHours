@@ -17,6 +17,7 @@ describe("Character Studio appearance", () => {
       hairStyle: "short",
       outfit: "#3b2a1b",
       mask: true,
+      tattoos: true,
       neckDetail: "chain",
       accessory: "sigil",
     })).toEqual({
@@ -48,12 +49,13 @@ describe("Character Studio appearance", () => {
       hairStyle: "waves",
       outfit: "#100e0a",
       mask: false,
+      tattoos: true,
       neckDetail: "collar",
       accessory: "crescent",
     });
   });
   
-  it("ignores unexpected properties in saved appearance data", () => {
+  it("allows tattoos to be disabled without changing other appearance settings", () => {\n    expect(normalizeCharacterLook({ tattoos: false }).tattoos).toBe(false);\n  });\n\n  it("ignores unexpected properties in saved appearance data", () => {
     const normalized = normalizeCharacterLook({
       gender: "male",
       skin: "#784833",
@@ -68,7 +70,7 @@ describe("Character Studio appearance", () => {
 
     expect(normalized).not.toHaveProperty("unexpected");
     expect(Object.keys(normalized).sort()).toEqual([
-      "accessory", "gender", "hair", "hairStyle", "mask", "neckDetail", "outfit", "skin",
+      "accessory", "gender", "hair", "hairStyle", "mask", "neckDetail", "outfit", "skin", "tattoos",
     ]);
   });
 });
