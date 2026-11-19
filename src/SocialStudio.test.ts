@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { renderText } from "./SocialStudio";
+import socialStudioSource from "./SocialStudio.tsx?raw";
 
 describe("social copy templates", () => {
   it.each(["Instagram", "TikTok", "Facebook", "YouTube", "X", "Pinterest", "Threads", "Website"] as const)(
@@ -20,5 +21,12 @@ describe("social copy templates", () => {
   it("uses platform-specific website and X copy formats", () => {
     expect(renderText("Website", "POST", "nl", "KOP", "BERICHT", "CTA")).toBe("KOP\n\nBERICHT\n\nCTA");
     expect(renderText("X", "POST", "nl", "KOP", "BERICHT", "CTA")).toContain("#AfterHours");
+  });
+
+  it("clears stale clipboard feedback when the platform or editable copy changes", () => {
+    expect(socialStudioSource).toMatch(/setPlatform\(e\.target\.value as Platform\);setCopied\(false\);setCopyError\(false\)/);
+    expect(socialStudioSource).toMatch(/setHeadline\(e\.target\.value\);setCopied\(false\);setCopyError\(false\)/);
+    expect(socialStudioSource).toMatch(/setBody\(e\.target\.value\);setCopied\(false\);setCopyError\(false\)/);
+    expect(socialStudioSource).toMatch(/setCta\(e\.target\.value\);setCopied\(false\);setCopyError\(false\)/);
   });
 });
