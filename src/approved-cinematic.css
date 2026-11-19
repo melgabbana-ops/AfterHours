@@ -867,3 +867,50 @@ hr{border:0;border-top:1px solid var(--ah-line)}
  .radio-player{min-height:360px;padding:22px 16px 18px!important}
  .radio-disc{width:96px!important;height:96px!important}
 }
+
+
+/* MISSIONS · premium editorial quest board */
+.missions-screen{max-width:680px!important}
+.missions-hero{position:relative;padding:16px 0 22px!important;border-bottom:1px solid rgba(201,161,106,.28)!important}
+.missions-hero:after{content:"✧";position:absolute;right:8px;top:58px;color:rgba(223,189,131,.38);font:42px Georgia,serif}
+.missions-hero .back{margin:0 0 22px!important}
+.missions-hero>.eyebrow{display:block;letter-spacing:.22em}
+.missions-hero h1{max-width:340px;font-size:clamp(32px,8vw,44px)!important;line-height:1.04!important}
+.missions-hero>p{max-width:390px!important;font-size:11px!important}
+.missions-progress{margin-top:21px;padding:15px 16px;border:1px solid rgba(201,161,106,.3);border-radius:5px;background:linear-gradient(120deg,#20160d,#0b0907);box-shadow:inset 0 1px rgba(255,255,255,.035)}
+.missions-progress>div:first-child{display:flex;align-items:center;justify-content:space-between;color:#c9b58f;font-size:9px;letter-spacing:.1em;text-transform:uppercase}
+.missions-progress>div:first-child strong{font:18px "Cinzel",Georgia,serif;color:#f0d5a4}
+.missions-progress-track{height:3px!important;margin:12px 0 9px;background:#332719!important;border-radius:3px;overflow:hidden}
+.missions-progress-track i{display:block;height:100%;background:linear-gradient(90deg,#987044,#f0d8ad);box-shadow:0 0 12px rgba(223,189,131,.28)}
+.missions-progress>small{font-size:8px;color:#a99b86;letter-spacing:.05em}
+.mission-tabs{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px!important;margin:17px 0 10px}
+.mission-tabs button{min-width:0;min-height:62px!important;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:9px 5px!important;border:1px solid rgba(201,161,106,.2)!important;background:linear-gradient(145deg,#17110b,#090807)!important;color:#c7b493!important;font:10px "Cinzel",Georgia,serif!important;letter-spacing:.04em}
+.mission-tabs button small{font:7px "DM Sans",sans-serif;color:#8f826f;letter-spacing:0}
+.mission-tabs button.active{border-color:#c9a16a!important;background:linear-gradient(145deg,#2a1e11,#100c08)!important;color:#f0d8ad!important;box-shadow:inset 0 0 0 1px rgba(201,161,106,.1),0 5px 18px rgba(0,0,0,.2)}
+.mission-tabs button.active small{color:#cdb58d}
+.mission-category-subtitle{margin:0 2px 12px!important;color:#a99b86!important;font-size:9px!important;letter-spacing:.05em}
+.mission-list{display:grid;gap:10px}
+.mission-list>article{position:relative;display:grid;grid-template-columns:36px minmax(0,1fr);gap:12px;padding:15px!important;border:1px solid rgba(201,161,106,.22)!important;border-radius:5px!important;background:linear-gradient(145deg,#1a130c,#090706)!important;box-shadow:0 10px 28px rgba(0,0,0,.18)}
+.mission-list>article.completed{border-color:rgba(201,161,106,.42)!important;background:linear-gradient(145deg,#21190f,#0b0907)!important}
+.mission-icon{width:34px;height:34px;display:grid;place-items:center;border:1px solid rgba(201,161,106,.35);border-radius:50%;background:rgba(201,161,106,.06);color:#dfbd83}
+.mission-icon svg{width:16px;height:16px}
+.mission-copy{min-width:0}
+.mission-card-meta{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:1px 0 8px;color:#9e8d73;font-size:7px;letter-spacing:.13em}
+.mission-card-meta strong{white-space:nowrap;color:#dfbd83;font:10px "Cinzel",Georgia,serif;letter-spacing:.03em}
+.mission-list h2,.mission-list h3{margin:0 0 7px!important;color:#efdfc5!important;font:400 16px/1.25 "Cinzel",Georgia,serif!important;letter-spacing:.03em}
+.mission-list p{margin:0;color:#b8ac99!important;font-size:10px!important;line-height:1.6!important}
+.mission-card-footer{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-top:13px;padding-top:11px;border-top:1px solid rgba(201,161,106,.16)}
+.mission-card-footer>span{display:flex;align-items:center;gap:5px;color:#9e907a;font-size:8px}
+.mission-card-footer>span svg{width:12px;height:12px;color:#c9a16a}
+.mission-card-footer button,.mission-complete{min-height:36px!important;padding:8px 11px!important;border:1px solid rgba(201,161,106,.38)!important;border-radius:4px!important;background:#110d08!important;color:#e1c38f!important;font-size:8px!important;letter-spacing:.07em}
+.mission-list .mission-complete{grid-column:2;justify-self:start;min-height:32px!important;padding:6px 10px!important;background:linear-gradient(180deg,#d9b77f,#a87943)!important;color:#160f08!important;border-color:#d6b27a!important;font-family:"Cinzel",Georgia,serif}
+.mission-list button:disabled{opacity:.68}
+.mission-sync-message{margin:12px 0!important;padding:12px 14px!important;border-color:rgba(201,161,106,.3)!important;background:linear-gradient(120deg,#21180f,#0b0907)!important;color:#ddcba9!important;font-size:10px!important}
+.mission-sync-retry{margin:8px 0 14px!important}
+@media(max-width:420px){
+ .mission-list>article{grid-template-columns:30px minmax(0,1fr);gap:9px;padding:12px!important}
+ .mission-icon{width:29px;height:29px}
+ .mission-card-footer{align-items:flex-start}
+ .mission-card-footer button{width:100%}
+ .mission-list .mission-complete{grid-column:2}
+}
