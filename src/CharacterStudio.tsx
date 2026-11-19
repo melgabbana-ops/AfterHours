@@ -86,7 +86,7 @@ function AvatarArt({ look }: { look: CharacterLook }) {
     <path d="M81 82 C91 56 146 53 159 82 C153 68 140 63 120 65 C102 65 91 72 81 93Z" fill={look.hair}/>
     <path d="M91 124 C101 119 110 119 115 123 M125 123 C132 119 141 119 149 124" fill="none" stroke="#21120f" strokeOpacity=".72" strokeWidth="2" strokeLinecap="round"/>
     {look.mask && <path d="M83 113 C105 105 135 105 157 113 L151 143 C132 150 108 150 89 143Z" fill="#0b0907" stroke="url(#ahPortraitGold)" strokeWidth="1.2"/>}
-    {look.tattoos && <g className="character-tattoo-art" fill="none" stroke="#171310" strokeWidth="1.35" strokeLinecap="round" strokeLinejoin="round" opacity=".82">
+    {look.tattoos && <g fill="none" stroke="#171310" strokeWidth="1.35" strokeLinecap="round" strokeLinejoin="round" opacity=".82">
       {/* Chicano-inspired black-and-grey ornamental neck and collarbone ink */}
       <path d="M91 158 C88 166 91 174 98 180 C101 183 102 187 101 190 M149 158 C152 166 149 174 142 180 C139 183 138 187 139 190"/>
       <path d="M95 165 C99 160 104 162 105 167 C106 172 101 176 97 173 C94 171 94 168 97 166 C100 164 103 167 101 170"/>
