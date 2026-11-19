@@ -72,7 +72,7 @@ if (!serviceWorker.includes('const CACHE_NAME = "after-hours-v16"')) {
   process.exit(1);
 }
 
-if (!existsSync("public/visuals/ah-grand-candlelit-chamber.webp")) {
+if (!existsSync("public/visuals/ah-grand-candlelit-chamber.svg")) {
   console.error("The approved candlelit chamber background is missing.");
   process.exit(1);
 }
