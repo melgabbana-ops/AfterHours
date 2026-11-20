@@ -882,12 +882,14 @@ export default function CinematicWorld({
 
   async function deleteAllWorldData() {
     if (!remoteProfileId || !window.confirm(t("Alle scènes, kluisnotities, profielen, uitnodigingen, rituelen en ervaringsgeschiedenis definitief verwijderen?", "Permanently delete all scenes, vault notes, profiles, invitations, rituals and experience history?"))) return;
+    const wasRunning = runStatus === "active" || runStatus === "paused";
     setBusy(true);
     try {
       for (const module of MODULES) {
         for (const record of records[module]) await deleteWorldRecord(module, record.record_key, remoteProfileId);
       }
       for (const run of runs) await deleteExperienceRun(run.id, remoteProfileId);
+      if (wasRunning) onSafetyStop();
       setRecords(EMPTY_RECORDS);
       setRuns([]);
       setVaultPlain(null);
