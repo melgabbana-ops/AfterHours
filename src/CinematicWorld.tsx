@@ -889,7 +889,6 @@ export default function CinematicWorld({
         for (const record of records[module]) await deleteWorldRecord(module, record.record_key, remoteProfileId);
       }
       for (const run of runs) await deleteExperienceRun(run.id, remoteProfileId);
-      if (wasRunning) onSafetyStop();
       setRecords(EMPTY_RECORDS);
       setRuns([]);
       setVaultPlain(null);
@@ -897,6 +896,7 @@ export default function CinematicWorld({
       setActiveScene(null);
       setRunStatus(null);
       setMessage(t("Alle AFTER HOURS World-gegevens zijn verwijderd.", "All AFTER HOURS World data has been deleted."));
+      if (wasRunning) onSafetyStop();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : t("Niet alle gegevens konden worden verwijderd. Probeer opnieuw.", "Not all data could be deleted. Try again."));
       await refreshData();
