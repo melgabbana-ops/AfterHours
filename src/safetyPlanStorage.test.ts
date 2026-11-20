@@ -117,9 +117,33 @@ describe("safety plan storage", () => {
     expect(readSafetyPlan("local-profile", storage).safeword).toBe("RED");
   });
 
+  it("does not report success when storage silently drops a safety-plan write", () => {
+    const silentStorage = {
+      getItem: () => null,
+      setItem: () => undefined,
+    };
+
+    expect(writeSafetyPlan(samplePlan, "account-one", silentStorage)).toBe(false);
+  });
+
+  it("does not report success when storage silently ignores a clear request", () => {
+    const stubbornStorage = {
+      getItem: (key: string) => key === getSafetyPlanStorageKey("account-one") ? JSON.stringify(samplePlan) : null,
+      removeItem: () => undefined,
+    };
+
+    expect(clearSafetyPlan("account-one", stubbornStorage)).toBe(false);
+  });
+
   it("returns false rather than throwing when saving or clearing fails", () => {
-    expect(writeSafetyPlan(createEmptySafetyPlan(), "local-profile", { setItem: () => { throw new Error("blocked"); } })).toBe(false);
-    expect(clearSafetyPlan("local-profile", { removeItem: () => { throw new Error("blocked"); } })).toBe(false);
+    expect(writeSafetyPlan(createEmptySafetyPlan(), "local-profile", {
+      getItem: () => null,
+      setItem: () => { throw new Error("blocked"); },
+    })).toBe(false);
+    expect(clearSafetyPlan("local-profile", {
+      getItem: () => null,
+      removeItem: () => { throw new Error("blocked"); },
+    })).toBe(false);
   });
 
   it("clears only the current profile key and leaves legacy data untouched", () => {
