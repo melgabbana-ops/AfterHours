@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { filterMoodHistoryEvents, removeLocalMoodHistoryEvent } from "./moodHistory";
-import type { MoodEvent } from "./services/moods";
+import { buildMoodHistoryCsv, filterMoodHistoryEvents, removeLocalMoodHistoryEvent } from "./moodHistory";
+import type { MoodCode, MoodEvent } from "./services/moods";
 
 const events: MoodEvent[] = [
   { id: "after-1", session_id: "session-1", phase: "after", mood: "RELAXED", created_at: "2026-11-19T21:00:00.000Z" },
@@ -66,5 +66,36 @@ describe("browser-local mood history deletion", () => {
     expect(removeLocalMoodHistoryEvent("profile-a", "during-1", malformed)).toBe(false);
     const broken = { getItem: () => { throw new Error("blocked"); }, setItem: () => { throw new Error("blocked"); } };
     expect(removeLocalMoodHistoryEvent("profile-a", "during-1", broken)).toBe(false);
+  });
+});
+
+describe("mood history CSV export", () => {
+  it("exports localized phase labels and mood labels without internal identifiers", () => {
+    const csv = buildMoodHistoryCsv(events.slice(0, 1), "nl", (mood) => mood === "RELAXED" ? "Ontspannen" : mood);
+    expect(csv).toContain('"Datum (UTC)","Fase","Stemming"');
+    expect(csv).toContain('"2026-11-19T21:00:00.000Z","Achteraf","Ontspannen"');
+    expect(csv).not.toContain("after-1");
+    expect(csv).not.toContain("session-1");
+  });
+
+  it("uses English headings and phase labels when requested", () => {
+    const csv = buildMoodHistoryCsv(events.slice(1, 2), "en");
+    expect(csv).toContain('"Date (UTC)","Phase","Mood"');
+    expect(csv).toContain('"2026-11-19T20:30:00.000Z","During","STOP"');
+  });
+
+  it("neutralizes spreadsheet formula starters in untrusted text fields", () => {
+    const unsafeEvent = { ...events[0], created_at: ' =HYPERLINK("https://example.invalid")' };
+    const csv = buildMoodHistoryCsv([unsafeEvent], "en");
+    expect(csv).toContain('"\' =HYPERLINK(""https://example.invalid"")"');
+  });
+
+  it("escapes CSV quotes and commas in formatted mood labels", () => {
+    const csv = buildMoodHistoryCsv(events.slice(0, 1), "en", (_mood: MoodCode) => 'calm, "safe"');
+    expect(csv).toContain('"calm, ""safe"""');
+  });
+
+  it("exports a valid header-only CSV for an empty history", () => {
+    expect(buildMoodHistoryCsv([], "nl")).toBe('\\uFEFF"Datum (UTC)","Fase","Stemming"\\r\\n');
   });
 });
