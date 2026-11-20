@@ -25,6 +25,23 @@ describe("story chapter progress", () => {
     expect(loadCompletedStoryChapters("player-b", storage)).toEqual([]);
   });
 
+  it("does not report success when browser storage silently ignores a write", () => {
+    const silentStorage = {
+      getItem: () => null,
+      setItem: () => undefined,
+    };
+    expect(saveCompletedStoryChapters("player-a", ["arrival"], silentStorage)).toBe(false);
+    expect(loadCompletedStoryChapters("player-a", silentStorage)).toEqual([]);
+  });
+
+  it("does not report success when storage returns a different chapter list", () => {
+    const mismatchedStorage = {
+      getItem: () => JSON.stringify(["arrival"]),
+      setItem: () => undefined,
+    };
+    expect(saveCompletedStoryChapters("player-a", ["arrival", "test"], mismatchedStorage)).toBe(false);
+  });
+
   it("removes duplicate and unknown chapter ids from persisted data", () => {
     const storage = memoryStorage();
     storage.setItem("afterhours.story-progress.v1:player-a", JSON.stringify(["arrival", "arrival", "unknown", 7, "night"]));
@@ -42,6 +59,7 @@ describe("story chapter progress", () => {
     expect(saveCompletedStoryChapters("", ["arrival"], storage)).toBe(false);
     expect(loadCompletedStoryChapters("", storage)).toEqual([]);
   });
+
   it("returns the first unfinished chapter in the approved order", () => {
     expect(getNextStoryChapterId([])).toBe("arrival");
     expect(getNextStoryChapterId(["arrival", "test"])).toBe("control");
@@ -51,5 +69,4 @@ describe("story chapter progress", () => {
   it("returns no next chapter when all approved chapters are complete", () => {
     expect(getNextStoryChapterId(["arrival", "test", "control", "challenge", "boundary", "night", "after-hours"])).toBeNull();
   });
-
 });
