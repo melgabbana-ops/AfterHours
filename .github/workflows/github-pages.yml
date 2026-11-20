@@ -67,3 +67,22 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Verify published app shell without browser automation
+        env:
+          SITE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          set -euo pipefail
+          for attempt in {1..12}; do
+            if curl --fail --silent --show-error "$SITE_URL" -o /tmp/after-hours-home.html; then
+              break
+            fi
+            sleep 5
+          done
+          grep -q "AFTER HOURS" /tmp/after-hours-home.html
+          curl --fail --silent --show-error "${SITE_URL}?enter=1" -o /tmp/after-hours-entry.html
+          grep -q 'id="root"' /tmp/after-hours-entry.html
+          node --input-type=module -e 'import fs from "node:fs"; const html=fs.readFileSync("/tmp/after-hours-entry.html","utf8"); const paths=[...html.matchAll(/(?:src|href)="([^"]+\.(?:js|css))"/g)].map(match=>match[1]); if (!paths.some(path=>path.includes(".js")) || !paths.some(path=>path.includes(".css"))) process.exit(1); console.log("Published app shell and entry route verified:", paths.join(", "));'
+          while IFS= read -r path; do
+            curl --fail --silent --show-error "${SITE_URL%/}$path" -o /dev/null
+          done < <(grep -oE '(src|href)="[^"]+\.(js|css)"' /tmp/after-hours-entry.html | sed -E 's/^(src|href)="([^"]+)"$/\2/')
