@@ -305,7 +305,7 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
       setStorySyncError("");
       try {
         const localIds = loadCompletedStoryChapters(playerId);
-        const remoteIds = await loadRemoteStoryProgress();
+        const remoteIds = await loadRemoteStoryProgress(remoteProfileId);
         if (!active) return;
         const merged = [...new Set([...remoteIds, ...localIds])];
         if (merged.length !== localIds.length || merged.some((id, index) => id !== localIds[index])) {
@@ -315,7 +315,7 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
         const pending = merged.filter((id) => !remoteIds.some((remoteId) => remoteId === id));
         for (const chapterId of pending) {
           if (!active) return;
-          const error = await completeRemoteStoryChapter(chapterId);
+          const error = await completeRemoteStoryChapter(chapterId, remoteProfileId);
           if (error) throw new Error(error);
         }
         if (active) setStorySyncState("synced");
@@ -336,7 +336,7 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
       if (remoteProfileId) {
         setStorySyncState("syncing");
         setStorySyncError("");
-        void completeRemoteStoryChapter(chapterId).then((error) => {
+        void completeRemoteStoryChapter(chapterId, remoteProfileId).then((error) => {
           if (error) throw new Error(error);
           setStorySyncState("synced");
         }).catch((error) => {
