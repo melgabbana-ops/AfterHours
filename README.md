@@ -57,6 +57,12 @@ The browser must only receive the public anon key. Never place a Supabase servic
 
 ## Deployment
 
-This is a Vite production build and is ready for a Git-connected deployment platform. Set the two Supabase variables in the deployment environment before enabling remote persistence.
+GitHub Pages is the production host. The canonical production workflow is `.github/workflows/deploy-pages.yml` on `main`; production deployments must originate from the `main` branch only.
+
+The design-reference branch workflow is build validation only. It checks the GitHub Pages bundle but does not upload or deploy a production artifact. This prevents an experimental or stale design branch from replacing the live application.
+
+The deployment does not require Vercel or TinyFish. GitHub Actions builds the static client, GitHub Pages serves it, and Supabase provides authentication and remote data. The app is published under the repository base path, so entry links and PWA assets must remain base-path aware.
+
+Set `VITE_SUPABASE_URL` and the public `VITE_SUPABASE_ANON_KEY` in the build environment before enabling remote persistence. Never expose a Supabase service-role key in the browser.
 
 The PWA service worker is registered from the app shell and is safe to use without Supabase. Remote session state, consent, history, XP and authorization remain server-authoritative when Supabase is configured.

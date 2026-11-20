@@ -1,0 +1,52 @@
+name: AFTER HOURS · GitHub Pages build validation
+
+on:
+  push:
+    branches:
+      - design/reference-screen-system-nov-2026
+  pull_request:
+    branches:
+      - work/after-hours-experience-polish
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: after-hours-design-validation
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Generate lockfile
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Check Supabase migration ledger
+        run: npm run check:migrations
+
+      - name: Check canonical brand assets
+        run: npm run check:brand
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Build GitHub Pages bundle without publishing
+        env:
+          GITHUB_PAGES: "true"
+          VITE_SUPABASE_URL: https://yniocgfghcowjilqaock.supabase.co
+          VITE_SUPABASE_ANON_KEY: sb_publishable_rhJgE6NUK4Ejm9I9fhB_xw_xHoqKa4H
+        run: npm run build:pages
