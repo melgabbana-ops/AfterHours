@@ -39,16 +39,6 @@ jobs:
       - name: Install dependencies
         run: npm ci --no-audit --no-fund
 
-      - name: Verify Supabase public client configuration
-        env:
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
-        run: |
-          if [ -z "$VITE_SUPABASE_URL" ] || [ -z "$VITE_SUPABASE_ANON_KEY" ]; then
-            echo "::error::Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY as GitHub Actions repository secrets before publishing. The app would otherwise fall back to local demo mode."
-            exit 1
-          fi
-
       - name: Check Supabase migration ledger
         run: npm run check:migrations
 
@@ -61,8 +51,8 @@ jobs:
       - name: Build GitHub Pages bundle
         env:
           GITHUB_PAGES: "true"
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_SUPABASE_URL: https://yniocgfghcowjilqaock.supabase.co
+          VITE_SUPABASE_ANON_KEY: sb_publishable_rhJgE6NUK4Ejm9I9fhB_xw_xHoqKa4H
         run: npm run build:pages
 
       - name: Upload Pages artifact
