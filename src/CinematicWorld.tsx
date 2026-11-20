@@ -1,4 +1,4 @@
-import React,{useEffect,useRef,useState}from"react";
+import{useEffect,useRef,useState}from"react";
 import{ArrowLeft,ArrowRight,Lock,Unlock,Play,Pause,Square,Shield,Clapperboard,Flame,Clock3,ScrollText,Mail,Volume2,VolumeX,Star,CheckCircle2,Eye,EyeOff}from"lucide-react";
 import"./cinematic-experience.css";
 
@@ -53,7 +53,7 @@ export default function CinematicWorld({language,onBack,onSafetyStop}:Props){
  useEffect(()=>{try{const raw=localStorage.getItem(STORAGE);if(raw){const v=JSON.parse(raw);setMilestones(Array.isArray(v.milestones)?v.milestones:[]);setRole(v.role||"");setProtocol(v.protocol||"");setSceneName(v.sceneName||"");setBeats(v.beats||"");}}catch{}},[]);
  const persist=(patch:Record<string,unknown>)=>{try{const old=JSON.parse(localStorage.getItem(STORAGE)||"{}");localStorage.setItem(STORAGE,JSON.stringify({...old,...patch}));}catch{}};
  const mark=(name:string)=>{setMilestones(old=>{const next=old.includes(name)?old:[...old,name];persist({milestones:next});return next})};
- useEffect(()=>{if(!sound)return;let ctx:AudioContext|undefined;try{ctx=new AudioContext();const gain=ctx.createGain();gain.gain.value=.012;gain.connect(ctx.destination);const a=ctx.createOscillator(),b=ctx.createOscillator();a.type="sine";b.type="triangle";a.frequency.value=55;b.frequency.value=82.4;b.detune.value=-7;a.connect(gain);b.connect(gain);a.start();b.start();audioRef.current={ctx,nodes:[a,b],gain};}catch{setSound(false)}return()=>{if(audioRef.current){audioRef.current.nodes.forEach(n=>{try{n.stop()}catch{}});void audioRef.current.ctx.close();audioRef.current=null;}}},[sound]);
+ useEffect(()=>{if(!sound)return;let ctx:AudioContext|undefined;try{ctx=new AudioContext();const gain=ctx.createGain();gain.gain.value=.012;gain.connect(ctx.destination);const a=ctx.createOscillator(),b=ctx.createOscillator();a.type="sine";b.type="triangle";a.frequency.value=55;b.frequency.value=82.4;b.detune.value=-7;a.connect(gain);b.connect(gain);a.start();b.start();void ctx.resume();audioRef.current={ctx,nodes:[a,b],gain};}catch{setSound(false)}return()=>{if(audioRef.current){audioRef.current.nodes.forEach(n=>{try{n.stop()}catch{}});void audioRef.current.ctx.close();audioRef.current=null;}}},[sound]);
  const stopScene=()=>{setEntered(false);setPaused(false);setComplete(false);setChapter(0);onSafetyStop();};
  const finish=()=>{setComplete(true);setEntered(false);mark("experience");};
  const encrypt=async()=>{setVaultError("");if(pass.length<8||!note.trim())return;try{const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12)),key=await derive(pass,salt),cipher=await crypto.subtle.encrypt({name:"AES-GCM",iv},key,new TextEncoder().encode(note));localStorage.setItem("afterhours.black-vault.v1",JSON.stringify({salt:b64(salt),iv:b64(iv),cipher:b64(new Uint8Array(cipher))}));setNote("");setVaultText("");setVaultOpen(false);setVaultError(t.stored);}catch{setVaultError(t.wrong)}};
