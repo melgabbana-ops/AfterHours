@@ -22,7 +22,8 @@ const expected = [
   "20261013110946_merge_experience_rounds_read_policies.sql",
   "20261015114512_restore_atomic_completion_consent.sql",
   "20261118205045_story_chapter_account_sync.sql",
-  "20261120234051_afterhours_world_modules.sql"
+  "20261120234051_afterhours_world_modules.sql",
+  "20261120234949_afterhours_experience_interaction_log.sql"
 ];
 const actual = readdirSync(directory).filter((name) => name.endsWith(".sql")).sort();
 const baseline = [...expected].sort();
