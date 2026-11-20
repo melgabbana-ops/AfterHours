@@ -5,6 +5,7 @@ export default function Teaser() {
   const [language, setLanguage] = React.useState<"nl"|"en">(() => { try { return localStorage.getItem("afterhours.language") === "en" ? "en" : "nl"; } catch { return "nl"; } });
   React.useEffect(() => { try { localStorage.setItem("afterhours.language", language); document.documentElement.lang = language; } catch { /* Language preference is optional. */ } }, [language]);
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
+  const enterUrl = `${import.meta.env.BASE_URL}?enter=1`;
   const features = [
     { icon: Gamepad2, title: t("Kinky games", "Kinky games"), copy: t("Interactieve ervaringen", "Interactive experiences") },
     { icon: Layers3, title: t("Kinky tarot", "Kinky tarot"), copy: t("Kaarten en reflectie", "Cards and reflection") },
@@ -30,11 +31,11 @@ export default function Teaser() {
       <div className="teaser-divider"><span/></div>
       <p className="teaser-kicker">{t("JOUW REGELS. JOUW GRENZEN. JOUW ERVARING.","YOUR RULES. YOUR LIMITS. YOUR EXPERIENCE.")}</p>
       <p className="teaser-copy">{t("Een premium interactieve wereld voor volwassenen. Bewust gekozen, veilig en helemaal op jouw tempo.","A premium interactive world for adults. Deliberate, safe, and entirely at your pace.")}</p>
-      <a className="teaser-enter" href="/?enter=1">{t("IK BEN 18+ · BETREED AFTER HOURS","I AM 18+ · ENTER AFTER HOURS")} <ChevronRight size={18}/></a>
+      <a className="teaser-enter" href={enterUrl}>{t("IK BEN 18+ · BETREED AFTER HOURS","I AM 18+ · ENTER AFTER HOURS")} <ChevronRight size={18}/></a>
       <p className="teaser-age-note">{t("Leeftijdsverklaring is geen officiële leeftijdsverificatie. Toestemming wordt afzonderlijk gevraagd.","Self-declared age is not formal age verification. Consent is requested separately.")}</p>
     </section>
     <section className="moodboard-feature-grid" aria-label={t("Ontdek AFTER HOURS","Explore AFTER HOURS")}>
-      {features.map(({icon: Icon,title,copy},i)=><a className="moodboard-feature-card" href="/?enter=1" key={title}><span className="moodboard-feature-number">0{i+1}</span><Icon aria-hidden="true"/><strong>{title}</strong><small>{copy}</small></a>)}
+      {features.map(({icon: Icon,title,copy},i)=><a className="moodboard-feature-card" href={enterUrl} key={title}><span className="moodboard-feature-number">0{i+1}</span><Icon aria-hidden="true"/><strong>{title}</strong><small>{copy}</small></a>)}
     </section>
     <section className="moodboard-missions">
       <div className="moodboard-ornament" aria-hidden="true">✧</div>
@@ -46,7 +47,7 @@ export default function Teaser() {
         <article><Target/><strong>{t("Persoonlijke progressie","Personal progress")}</strong><span>{t("XP, ranks en badges","XP, ranks and badges")}</span></article>
         <article><LockKeyhole/><strong>{t("Consent first","Consent first")}</strong><span>{t("Jouw grenzen blijven leidend","Your boundaries come first")}</span></article>
       </div>
-      <a className="moodboard-secondary-cta" href="/?enter=1">{t("ONTDEK DE PRIVÉWERELD","EXPLORE THE PRIVATE WORLD")} <ChevronRight size={16}/></a>
+      <a className="moodboard-secondary-cta" href={enterUrl}>{t("ONTDEK DE PRIVÉWERELD","EXPLORE THE PRIVATE WORLD")} <ChevronRight size={16}/></a>
     </section>
     <footer className="teaser-footer"><span>{t("EXPLORE · PLAY · BELONG","EXPLORE · PLAY · BELONG")} <ArrowUpRight size={12}/></span></footer>
   </main>;
