@@ -5,6 +5,7 @@ import { pickRandomId, sessionModes, storyChapters, type SessionModeId } from ".
 import { getNextStoryChapterId, loadCompletedStoryChapters, saveCompletedStoryChapters } from "./storyProgress";
 import { completeRemoteStoryChapter, loadRemoteStoryProgress } from "./services/backend";
 import { getVoiceSafetyIntent } from "./voiceSafety";
+import { readSafetyPlan } from "./safetyPlanStorage";
 import { ArrowRight, Check, Copy, Heart, Shuffle, ShieldCheck } from "lucide-react";
 
 type PromptKind = "Kinky opdrachten" | "Kinky vragen" | "Vanille & verbinding" | "Aftercare";
@@ -271,6 +272,10 @@ const localizeGame = (game: ExperienceGame, language: "nl" | "en"): ExperienceGa
 export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment, onSafetyAction, playerId = "local-profile", remoteProfileId = null, language = "nl" }: { onBack: () => void; onComplete: (chapterId?: string) => void; onCaptureAssignment?: (assignment: { title: string; task: string }) => void; onSafetyAction?: (action: "pause" | "resume" | "stop") => boolean | void; playerId?: string; remoteProfileId?: string | null; language?: "nl" | "en" }) {
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
   const speechLocale = language === "nl" ? "nl-NL" : "en-US";
+  const getCurrentVoiceSafetyIntent = (spoken: string) => {
+    const plan = readSafetyPlan();
+    return getVoiceSafetyIntent(spoken, language, { stopWord: plan.safeword, pauseWord: plan.amberSignal });
+  };
   const historyKey = `afterhours.prompt-history.v2:${playerId}`;
   const gameHistoryKey = `afterhours.game-variant-history.v1:${playerId}`;
   const domPreferenceKey = `afterhours.dom-preference.v1:${playerId}`;
@@ -383,8 +388,7 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
     if (!speechWindow.SpeechRecognition && !speechWindow.webkitSpeechRecognition) setVoiceSupported(false);
     return () => { try { recognitionRef.current?.stop(); } catch { /* Recognition may already be stopped. */ } };
   }, []);
-  const createDomReply = (spoken: string) => {
-    const safetyIntent = getVoiceSafetyIntent(spoken, language);
+  const createDomReply = (spoken: string, safetyIntent = getCurrentVoiceSafetyIntent(spoken)) => {
     if (safetyIntent) {
       try { window.speechSynthesis?.cancel(); recognitionRef.current?.stop(); } catch { /* Safety action must not depend on speech engine state. */ }
       setVoiceListening(false);
@@ -448,8 +452,8 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
         const transcript = String(event?.results?.[0]?.[0]?.transcript ?? "").trim();
         if (!transcript) { setVoiceError(t("Ik heb geen spraak herkend. Probeer het nog eens.", "No speech was detected. Please try again.")); return; }
         setVoiceTranscript(transcript);
-        const safetyIntent = getVoiceSafetyIntent(transcript, language);
-        const reply = createDomReply(transcript);
+        const safetyIntent = getCurrentVoiceSafetyIntent(transcript);
+        const reply = createDomReply(transcript, safetyIntent);
         setDomReply(reply);
         if (safetyIntent !== "stop") speakAsDom(reply);
       };
@@ -574,7 +578,7 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
       {domReply && <div className="voice-reply"><span className="eyebrow">{domTitle.toUpperCase()} {t("ANTWOORDT","REPLIES")}</span><p>{domReply}</p></div>}
       {voiceError && <p className="voice-error" role="alert">{voiceError}</p>}
       {!voiceSupported && <p className="voice-error">{t("Deze browser ondersteunt geen ingebouwde spraakherkenning. Gebruik een actuele Safari- of Chrome-browser en sta microfoontoegang toe.","This browser does not support built-in speech recognition. Use an up-to-date Safari or Chrome browser and allow microphone access.")}</p>}
-      <p className="voice-privacy">{t("Microfoon wordt alleen gebruikt wanneer je op de spreekknop drukt. Browser-spraakherkenning kan afhankelijk van je toestel via de spraakdienst van de browser verlopen. STOP/rood activeert de app-stop; geel pauzeert de ervaring totdat jij hervat.","The microphone is used only when you tap the speak button. Depending on your device, browser speech recognition may use the browser’s speech service. STOP/red activates the app stop; yellow pauses the experience until you resume.")}</p>
+      <p className="voice-privacy">{t("Microfoon wordt alleen gebruikt wanneer je op de spreekknop drukt. Browser-spraakherkenning kan afhankelijk van je toestel via de spraakdienst van de browser verlopen. Je lokaal ingestelde stopwoord en pauzesignaal worden ook herkend en blijven op dit apparaat. STOP/rood activeert de app-stop; geel pauzeert de ervaring totdat jij hervat.","The microphone is used only when you tap the speak button. Depending on your device, browser speech recognition may use the browser’s speech service. Your locally configured safeword and pause signal are also recognized and stay on this device. STOP/red activates the app stop; yellow pauses the experience until you resume.")}</p>
     </section>}
     {mode === "cards" && <section className="prompt-count"><span>{pool.length} {t("kaarten in deze selectie","cards in this selection")}</span><span>{pool.filter((item) => !seenPromptIds.includes(item.id)).length} {t("nog niet gezien","not seen yet")}</span><span>{saved.length} {t("lokaal bewaard","saved locally")}</span></section>}
     <button className="prompt-back" onClick={onBack}><ArrowRight/> Terug</button>
