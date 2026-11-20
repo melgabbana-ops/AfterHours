@@ -294,7 +294,8 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
   const [storyProgressState, setStoryProgressState] = useState<{ playerId: string; ids: string[] }>(() => ({ playerId, ids: loadCompletedStoryChapters(playerId) }));
   const completedStoryChapters = storyProgressState.playerId === playerId ? storyProgressState.ids : loadCompletedStoryChapters(playerId);
   React.useEffect(() => {
-    if (!remoteProfileId) {
+    const expectedUserId = remoteProfileId;
+    if (!expectedUserId) {
       setStorySyncState("idle");
       setStorySyncError("");
       return;
@@ -305,7 +306,7 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
       setStorySyncError("");
       try {
         const localIds = loadCompletedStoryChapters(playerId);
-        const remoteIds = await loadRemoteStoryProgress(remoteProfileId);
+        const remoteIds = await loadRemoteStoryProgress(expectedUserId);
         if (!active) return;
         const merged = [...new Set([...remoteIds, ...localIds])];
         if (merged.length !== localIds.length || merged.some((id, index) => id !== localIds[index])) {
@@ -315,7 +316,7 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
         const pending = merged.filter((id) => !remoteIds.some((remoteId) => remoteId === id));
         for (const chapterId of pending) {
           if (!active) return;
-          const error = await completeRemoteStoryChapter(chapterId, remoteProfileId);
+          const error = await completeRemoteStoryChapter(chapterId, expectedUserId);
           if (error) throw new Error(error);
         }
         if (active) setStorySyncState("synced");
@@ -334,9 +335,10 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
       const next = [...new Set([...completedStoryChapters, chapterId])];
       if (saveCompletedStoryChapters(playerId, next)) setStoryProgressState({ playerId, ids: next });
       if (remoteProfileId) {
+        const expectedUserId = remoteProfileId;
         setStorySyncState("syncing");
         setStorySyncError("");
-        void completeRemoteStoryChapter(chapterId, remoteProfileId).then((error) => {
+        void completeRemoteStoryChapter(chapterId, expectedUserId).then((error) => {
           if (error) throw new Error(error);
           setStorySyncState("synced");
         }).catch((error) => {
