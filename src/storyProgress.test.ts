@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { loadCompletedStoryChapters, saveCompletedStoryChapters } from "./storyProgress";
+import { loadCompletedStoryChapters, matchesStoryAccount, saveCompletedStoryChapters } from "./storyProgress";
 
 function memoryStorage() {
   const values = new Map<string, string>();
@@ -10,6 +10,14 @@ function memoryStorage() {
 }
 
 describe("story chapter progress", () => {
+  it("accepts only the expected non-empty authenticated account", () => {
+    expect(matchesStoryAccount("user-a", "user-a")).toBe(true);
+    expect(matchesStoryAccount(" user-a ", "user-a")).toBe(true);
+    expect(matchesStoryAccount("user-a", "user-b")).toBe(false);
+    expect(matchesStoryAccount("", "user-a")).toBe(false);
+    expect(matchesStoryAccount("user-a", null)).toBe(false);
+  });
+
   it("persists completed chapters per player", () => {
     const storage = memoryStorage();
     expect(saveCompletedStoryChapters("player-a", ["arrival", "test"], storage)).toBe(true);
