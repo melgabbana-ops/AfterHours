@@ -59,8 +59,8 @@ export function isExplicitVoicePass(spoken: string, language: "nl" | "en"): bool
   const normalized = spoken
     .normalize("NFKC")
     .replace(/[’‘]/g, "'")
-    .replace(/[^\\p{L}\\p{N}'-]+/gu, " ")
-    .replace(/\\s+/g, " ")
+    .replace(/[.,!?;:]+/g, " ")
+    .replace(/\s+/g, " ")
     .trim()
     .toLocaleLowerCase(locale);
 
