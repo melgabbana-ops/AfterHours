@@ -855,6 +855,7 @@ export default function CinematicWorld({
 
   return (
     <main className="cw-world">
+      <div className="cw-world-backdrop" aria-hidden="true"><img src={`${import.meta.env.BASE_URL}visuals/ah-grand-candlelit-chamber.svg`} alt="" decoding="async" /></div>
       <header className="cw-header">
         <button type="button" onClick={() => void handleBack()} aria-label={t("Terug", "Back")}><ArrowLeft /></button>
         <span>AFTER HOURS · PRIVATE WORLD</span>
