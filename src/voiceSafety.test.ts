@@ -37,4 +37,31 @@ describe("voice safety intents", () => {
     expect(getVoiceSafetyIntent("I like this song", "en")).toBeNull();
     expect(getVoiceSafetyIntent("", "nl")).toBeNull();
   });
+  it("recognizes a locally configured safeword case-insensitively", () => {
+    expect(getVoiceSafetyIntent("Night Owl", "en", { stopWord: "night owl" })).toBe("stop");
+    expect(getVoiceSafetyIntent("Please, NIGHT OWL!", "en", { stopWord: "night owl" })).toBe("stop");
+  });
+
+  it("recognizes a locally configured multi-word pause signal", () => {
+    expect(getVoiceSafetyIntent("Could we use amber light please?", "en", { pauseWord: "amber light" })).toBe("pause");
+    expect(getVoiceSafetyIntent("Even een rust teken", "nl", { pauseWord: "rust teken" })).toBe("pause");
+  });
+
+  it("requires whole-word or whole-phrase boundaries for custom signals", () => {
+    expect(getVoiceSafetyIntent("The night owls are outside", "en", { stopWord: "night owl" })).toBeNull();
+    expect(getVoiceSafetyIntent("Amberlighting is pretty", "en", { pauseWord: "amber" })).toBeNull();
+  });
+
+  it("gives a configured safeword priority over a configured pause signal", () => {
+    expect(getVoiceSafetyIntent("amber light, then night owl", "en", {
+      stopWord: "night owl",
+      pauseWord: "amber light",
+    })).toBe("stop");
+  });
+
+  it("ignores empty or punctuation-only configured signals safely", () => {
+    expect(getVoiceSafetyIntent("ordinary words", "en", { stopWord: "   ", pauseWord: "" })).toBeNull();
+    expect(getVoiceSafetyIntent("Please say a.b.c now", "en", { stopWord: "a.b.c" })).toBe("stop");
+  });
+
 });
