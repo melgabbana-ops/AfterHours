@@ -21,7 +21,7 @@ export const SAFETY_PLAN_STORAGE_KEY = getSafetyPlanStorageKey("local-profile");
 
 export function getSafetyPlanStorageKey(profileId = "local-profile"): string {
   const normalizedProfileId = profileId.trim() || "local-profile";
-  return `${SAFETY_PLAN_STORAGE_PREFIX}${encodeURIComponent(normalizedProfileId)}`;
+  return \`\${SAFETY_PLAN_STORAGE_PREFIX}\${encodeURIComponent(normalizedProfileId)}\`;
 }
 
 export function hasUnscopedSafetyPlan(storage?: Pick<Storage, "getItem">): boolean {
@@ -89,10 +89,15 @@ export function readSafetyPlan(
   }
 }
 
+/**
+ * Save only when the browser can read back the exact normalized plan. This
+ * prevents the UI from claiming that a safeword was saved when storage silently
+ * dropped or altered the write.
+ */
 export function writeSafetyPlan(
   plan: SafetyPlanData,
   profileId = "local-profile",
-  storage?: Pick<Storage, "setItem">,
+  storage?: Pick<Storage, "getItem" | "setItem">,
 ): boolean {
   try {
     const target = storage ?? (typeof localStorage !== "undefined" ? localStorage : undefined);
@@ -103,22 +108,28 @@ export function writeSafetyPlan(
       amberSignal: plan.amberSignal.trim(),
       boundaries: plan.boundaries.trim(),
     });
-    target.setItem(getSafetyPlanStorageKey(profileId), JSON.stringify(normalized));
-    return true;
+    const key = getSafetyPlanStorageKey(profileId);
+    const serialized = JSON.stringify(normalized);
+    target.setItem(key, serialized);
+    return target.getItem(key) === serialized;
   } catch {
     return false;
   }
 }
 
+/**
+ * Confirm deletion before telling the user that a local safety plan is gone.
+ */
 export function clearSafetyPlan(
   profileId = "local-profile",
-  storage?: Pick<Storage, "removeItem">,
+  storage?: Pick<Storage, "getItem" | "removeItem">,
 ): boolean {
   try {
     const target = storage ?? (typeof localStorage !== "undefined" ? localStorage : undefined);
     if (!target) return false;
-    target.removeItem(getSafetyPlanStorageKey(profileId));
-    return true;
+    const key = getSafetyPlanStorageKey(profileId);
+    target.removeItem(key);
+    return target.getItem(key) === null;
   } catch {
     return false;
   }
