@@ -3,7 +3,7 @@ import type { Screen } from "./types";
 const DEEP_LINK_SCREENS: readonly Screen[] = [
   "game", "gameSelect", "complete", "profile", "admin", "insights", "radio",
   "aftercare", "prompts", "safety", "store", "onboarding", "controlroom",
-  "missions", "legal", "social", "lovense", "daily", "capture",
+  "missions", "legal", "social", "lovense", "daily", "capture", "cinematic",
 ];
 
 export function initialScreenFromSearch(search: string): Screen {
