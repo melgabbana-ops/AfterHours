@@ -4676,3 +4676,15 @@ button,[role="button"],nav a{touch-action:manipulation}
   .session-summary-grid { grid-template-columns: 1fr; }
   .session-summary-item { padding: 10px 11px; }
 }
+
+
+/* Story Mode · explicit next-chapter resume shortcut */
+.story-resume-card{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 0 14px;padding:16px;border:1px solid #80633d;border-radius:10px;background:linear-gradient(135deg,rgba(201,164,92,.11),rgba(12,10,8,.96))}
+.story-resume-copy{display:grid;gap:6px;min-width:0}
+.story-resume-copy strong{font-family:"Cinzel",Georgia,serif;font-size:15px;font-weight:500;color:#f0d79f;letter-spacing:.025em}
+.story-resume-copy p{margin:0;color:#aaa295;font-size:10px;line-height:1.6}
+.story-resume-action{display:inline-flex;align-items:center;justify-content:center;gap:8px;flex:none;min-height:44px;padding:11px 16px;border:1px solid #b28a45;border-radius:8px;background:linear-gradient(135deg,#ddb85b,#8f6a31);color:#100e0b;font-size:10px;font-weight:700;letter-spacing:.06em;touch-action:manipulation}
+.story-resume-action svg{width:14px;height:14px}
+.story-resume-action:focus-visible{outline:2px solid #f0d79f;outline-offset:3px}
+.story-complete-status{margin:0 0 14px;padding:13px 15px;border:1px solid #6f552b;border-radius:9px;background:rgba(201,164,92,.06);color:#e2c57d;font-size:11px;line-height:1.6}
+@media(max-width:560px){.story-resume-card{align-items:stretch;flex-direction:column}.story-resume-action{width:100%;min-height:48px}}
