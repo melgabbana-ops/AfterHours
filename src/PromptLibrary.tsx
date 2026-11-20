@@ -4,7 +4,7 @@ import { loadSavedPromptIds, saveSavedPromptIds } from "./promptBookmarks";
 import { pickRandomId, sessionModes, storyChapters, type SessionModeId } from "./sessionModes";
 import { getNextStoryChapterId, loadCompletedStoryChapters, saveCompletedStoryChapters } from "./storyProgress";
 import { completeRemoteStoryChapter, loadRemoteStoryProgress } from "./services/backend";
-import { getVoiceSafetyIntent } from "./voiceSafety";
+import { getVoiceSafetyIntent, isExplicitVoicePass } from "./voiceSafety";
 import { readSafetyPlan } from "./safetyPlanStorage";
 import { ArrowRight, Check, Copy, Heart, Shuffle, ShieldCheck } from "lucide-react";
 
@@ -388,6 +388,21 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
     if (!speechWindow.SpeechRecognition && !speechWindow.webkitSpeechRecognition) setVoiceSupported(false);
     return () => { try { recognitionRef.current?.stop(); } catch { /* Recognition may already be stopped. */ } };
   }, []);
+  const advanceVoicePass = () => {
+    if (mode === "cards") {
+      if (!pool.length) return false;
+      next();
+      return true;
+    }
+
+    const active = experienceGames.find((game) => game.id === activeGame);
+    if (!active || gameRound >= active.rounds.length - 1) return false;
+
+    setGameRound((currentRound) => Math.min(currentRound + 1, active.rounds.length - 1));
+    setActiveVariant(null);
+    return true;
+  };
+
   const createDomReply = (spoken: string, safetyIntent = getCurrentVoiceSafetyIntent(spoken)) => {
     if (safetyIntent) {
       try { window.speechSynthesis?.cancel(); recognitionRef.current?.stop(); } catch { /* Safety action must not depend on speech engine state. */ }
@@ -401,11 +416,25 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
       onSafetyAction?.("pause");
       return t("We pauzeren nu. De ervaring blijft gepauzeerd totdat jij zelf hervat.", "We are pausing now. The experience stays paused until you choose to resume.");
     }
-    const message = spoken.toLowerCase();
-    const goIntent = language === "nl" ? /groen|doorgaan|verder|ja, graag|ik wil wel/ : /green|continue|go on|yes please|i want to/;
-    const passIntent = language === "nl" ? /nee|pass|overslaan|niet doen/ : /no|pass|skip|don't do that|do not do that/;
+
+    if (isExplicitVoicePass(spoken, language)) {
+      const advanced = advanceVoicePass();
+      return advanced
+        ? t("Begrepen. Deze kaart of ronde is overgeslagen. Geen straf en geen puntenaftrek.", "Understood. This card or round was skipped. No penalty and no points are deducted.")
+        : t("Je mag altijd passen. Dit is de laatste ronde; er wordt niets automatisch afgerond.", "You can always pass. This is the final round; nothing is completed automatically.");
+    }
+
+    const message = spoken
+      .normalize("NFKC")
+      .replace(/[’‘]/g, "'")
+      .replace(/[^\\p{L}\\p{N}'-]+/gu, " ")
+      .replace(/\\s+/g, " ")
+      .trim()
+      .toLocaleLowerCase(language === "nl" ? "nl-NL" : "en-US");
+    const goIntent = language === "nl"
+      ? /^(?:groen|doorgaan|verder|ja graag|ik wil wel)$/u
+      : /^(?:green|continue|go on|yes please|i want to)$/u;
     if (goIntent.test(message)) return t("Ik hoor je. We blijven binnen de afspraken die je hebt gekozen. Wil je dezelfde opdracht voortzetten of een andere veilige optie kiezen?", "I hear you. We will stay within the boundaries you chose. Would you like to continue this task or choose another safe option?");
-    if (passIntent.test(message)) return t("Begrepen. Je mag passen zonder reden en zonder straf. Ik bied je een andere opdracht aan, of we stoppen hier.", "Understood. You can pass without a reason or penalty. I can offer another task, or we can stop here.");
     return t("Ik heb je gehoord. Vertel me alleen wat je wilt delen. Wil je doorgaan, de opdracht aanpassen of pauzeren? Je grenzen blijven leidend.", "I hear you. Share only what you feel comfortable sharing. Would you like to continue, change the task, or pause? Your boundaries come first.");
   };
   const speakAsDom = (text: string) => {
@@ -478,7 +507,7 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
     : t("Meesteres zegt: “Kijk naar je afspraken. Kies bewust, antwoord duidelijk en onthoud dat jouw grenzen leidend blijven.”","Mistress says: “Remember your agreements. Choose deliberately, answer clearly, and keep your boundaries in the lead.”");
 
   const changeKind = (next: (typeof kinds)[number]) => { setKind(next); setSelectedPromptId(null); setCopied(false); };
-  const next = () => {
+  function next() {
     if (!pool.length) return;
     const recent = seenPromptIds.slice(-Math.max(3, Math.min(12, Math.ceil(pool.length / 4))));
     const unused = pool.filter((item) => !seenPromptIds.includes(item.id) && item.id !== current?.id);
@@ -487,7 +516,7 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
     const choice = candidates[Math.floor(Math.random() * candidates.length)] ?? pool[0];
     setSelectedPromptId(choice.id);
     setCopied(false);
-  };
+  }
 
   const startGame = (gameId: string) => {
     const game = experienceGames.find((item) => item.id === gameId);
