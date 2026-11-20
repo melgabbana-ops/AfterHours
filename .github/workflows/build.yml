@@ -36,6 +36,8 @@ jobs:
         run: npm run check:migrations
       - name: Check canonical brand assets
         run: npm run check:brand
+      - name: Check approved black-and-gold palette
+        run: npm run check:palette
       - name: Check cinematic style coverage
         run: npm run check:cinematic
       - name: Check mobile layout foundations
