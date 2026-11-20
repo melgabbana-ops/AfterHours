@@ -11,7 +11,27 @@ export interface SafetyPlanData {
   readiness: ReadinessChecks;
 }
 
-export const SAFETY_PLAN_STORAGE_KEY = "afterhours.safety-plan.v1";
+/**
+ * v1 was shared by every app account in the same browser. Its owner cannot be
+ * determined safely, so it is intentionally left untouched and never imported.
+ */
+export const LEGACY_SAFETY_PLAN_STORAGE_KEY = "afterhours.safety-plan.v1";
+export const SAFETY_PLAN_STORAGE_PREFIX = "afterhours.safety-plan.v2:";
+export const SAFETY_PLAN_STORAGE_KEY = getSafetyPlanStorageKey("local-profile");
+
+export function getSafetyPlanStorageKey(profileId = "local-profile"): string {
+  const normalizedProfileId = profileId.trim() || "local-profile";
+  return `${SAFETY_PLAN_STORAGE_PREFIX}${encodeURIComponent(normalizedProfileId)}`;
+}
+
+export function hasUnscopedSafetyPlan(storage?: Pick<Storage, "getItem">): boolean {
+  try {
+    const source = storage ?? (typeof localStorage !== "undefined" ? localStorage : undefined);
+    return source ? source.getItem(LEGACY_SAFETY_PLAN_STORAGE_KEY) !== null : false;
+  } catch {
+    return false;
+  }
+}
 
 export const emptySafetyPlan: SafetyPlanData = {
   safeword: "",
@@ -54,11 +74,14 @@ export function createEmptySafetyPlan(): SafetyPlanData {
   };
 }
 
-export function readSafetyPlan(storage?: Pick<Storage, "getItem">): SafetyPlanData {
+export function readSafetyPlan(
+  profileId = "local-profile",
+  storage?: Pick<Storage, "getItem">,
+): SafetyPlanData {
   try {
     const source = storage ?? (typeof localStorage !== "undefined" ? localStorage : undefined);
     if (!source) return createEmptySafetyPlan();
-    const raw = source.getItem(SAFETY_PLAN_STORAGE_KEY);
+    const raw = source.getItem(getSafetyPlanStorageKey(profileId));
     if (!raw) return createEmptySafetyPlan();
     return normalizeSafetyPlan(JSON.parse(raw) as unknown);
   } catch {
@@ -68,6 +91,7 @@ export function readSafetyPlan(storage?: Pick<Storage, "getItem">): SafetyPlanDa
 
 export function writeSafetyPlan(
   plan: SafetyPlanData,
+  profileId = "local-profile",
   storage?: Pick<Storage, "setItem">,
 ): boolean {
   try {
@@ -79,18 +103,21 @@ export function writeSafetyPlan(
       amberSignal: plan.amberSignal.trim(),
       boundaries: plan.boundaries.trim(),
     });
-    target.setItem(SAFETY_PLAN_STORAGE_KEY, JSON.stringify(normalized));
+    target.setItem(getSafetyPlanStorageKey(profileId), JSON.stringify(normalized));
     return true;
   } catch {
     return false;
   }
 }
 
-export function clearSafetyPlan(storage?: Pick<Storage, "removeItem">): boolean {
+export function clearSafetyPlan(
+  profileId = "local-profile",
+  storage?: Pick<Storage, "removeItem">,
+): boolean {
   try {
     const target = storage ?? (typeof localStorage !== "undefined" ? localStorage : undefined);
     if (!target) return false;
-    target.removeItem(SAFETY_PLAN_STORAGE_KEY);
+    target.removeItem(getSafetyPlanStorageKey(profileId));
     return true;
   } catch {
     return false;
