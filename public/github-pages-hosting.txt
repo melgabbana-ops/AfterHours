@@ -1,0 +1,1 @@
+AFTER HOURS static hosting is built and published through GitHub Pages.
