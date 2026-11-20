@@ -3,8 +3,8 @@
   "short_name": "AFTER HOURS",
   "description": "AFTER HOURS: installeerbare, touch-first ervaring voor iPhone, Android, iPad en tablets.",
   "lang": "nl",
-  "start_url": "/",
-  "scope": "/",
+  "start_url": "./?enter=1",
+  "scope": "./",
   "display": "standalone",
   "display_override": [
     "standalone"
@@ -14,13 +14,13 @@
   "theme_color": "#050505",
   "icons": [
     {
-      "src": "/after-hours-icon-192.png",
+      "src": "./after-hours-icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/after-hours-icon-512.png",
+      "src": "./after-hours-icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
@@ -30,37 +30,37 @@
     {
       "name": "Ervaring",
       "short_name": "Spelen",
-      "url": "/?screen=game"
+      "url": "./?enter=1&screen=game"
     },
     {
       "name": "Profiel",
       "short_name": "Profiel",
-      "url": "/?screen=profile"
+      "url": "./?enter=1&screen=profile"
     },
     {
       "name": "Veiligheidsplan",
       "short_name": "Veiligheid",
-      "url": "/?screen=safety"
+      "url": "./?enter=1&screen=safety"
     },
     {
       "name": "Het Deck",
       "short_name": "Deck",
-      "url": "/?screen=prompts"
+      "url": "./?enter=1&screen=prompts"
     },
     {
       "name": "Radio",
       "short_name": "Radio",
-      "url": "/?screen=radio"
+      "url": "./?enter=1&screen=radio"
     },
     {
       "name": "Dagelijks ritueel",
       "short_name": "Ritueel",
-      "url": "/?screen=daily"
+      "url": "./?enter=1&screen=daily"
     },
     {
       "name": "Inzichten",
       "short_name": "Inzichten",
-      "url": "/?screen=insights"
+      "url": "./?enter=1&screen=insights"
     }
   ]
 }
