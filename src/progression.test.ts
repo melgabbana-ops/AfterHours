@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { levelFromXp, rankFromXp, rankIndexFromXp, rankNames, rankThresholds } from "./progression";
+import { levelFromXp, rankFromXp, rankIndexFromXp, rankNames, rankProgressFromXp, rankThresholds } from "./progression";
 
 describe("AFTER HOURS player rank progression", () => {
   it("uses the seven rank names approved on October 10", () => {
@@ -41,4 +41,28 @@ describe("AFTER HOURS player rank progression", () => {
       expect(levelFromXp(xp)).toBe(1);
     },
   );
+
+  it("calculates progress within each rank without showing a full bar before the next rank unlocks", () => {
+    expect(rankProgressFromXp(125)).toMatchObject({
+      xp: 125, rankIndex: 0, rankName: "THE CURIOUS", currentThreshold: 0,
+      nextThreshold: 250, nextRankName: "THE INITIATE", xpToNext: 125,
+      progressPercent: 50, isMaxRank: false,
+    });
+    expect(rankProgressFromXp(599).progressPercent).toBe(99);
+    expect(rankProgressFromXp(250)).toMatchObject({
+      rankIndex: 1, currentThreshold: 250, nextThreshold: 600,
+      nextRankName: "THE DEVOTED", xpToNext: 350, progressPercent: 0,
+    });
+  });
+
+  it("marks the highest rank as complete and safely normalizes malformed XP", () => {
+    expect(rankProgressFromXp(5000)).toMatchObject({
+      rankIndex: 6, rankName: "AFTER HOURS", nextThreshold: null,
+      nextRankName: null, xpToNext: 0, progressPercent: 100, isMaxRank: true,
+    });
+    expect(rankProgressFromXp(Number.NaN)).toMatchObject({
+      xp: 0, rankIndex: 0, xpToNext: 250, progressPercent: 0, isMaxRank: false,
+    });
+    expect(rankProgressFromXp(-50).xp).toBe(0);
+  });
 });
