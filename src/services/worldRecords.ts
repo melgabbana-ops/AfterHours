@@ -8,7 +8,7 @@ export type WorldRecord<T = Record<string, unknown>> = {
   created_at: string;
   updated_at: string;
 };
-export type ExperienceRunStatus = "active" | "paused" | "completed" | "stopped";
+export type ExperienceRunStatus = "ready" | "active" | "paused" | "completed" | "stopped";
 export type ExperienceRun = {
   id: string;
   scene_key: string;
