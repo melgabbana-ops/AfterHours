@@ -31,6 +31,8 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Validate service worker syntax
         run: node --check public/sw.js
+      - name: Verify production Pages deployment is main-only
+        run: node scripts/check-pages-deploy-guard.mjs
       - name: Validate brand and public visual assets
         run: npm run check:brand
       - name: Validate cinematic screen styling
@@ -57,7 +59,7 @@ jobs:
           path: ./dist
 
   deploy:
-    if: github.event_name != 'pull_request'
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
