@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getNextStoryChapterId, loadCompletedStoryChapters, matchesStoryAccount, saveCompletedStoryChapters } from "./storyProgress";
+import { getNextStoryChapterId, loadCompletedStoryChapters, matchesStoryAccount, persistStoryChapterCompletion, saveCompletedStoryChapters } from "./storyProgress";
 
 function memoryStorage() {
   const values = new Map<string, string>();
@@ -69,4 +69,59 @@ describe("story chapter progress", () => {
   it("returns no next chapter when all approved chapters are complete", () => {
     expect(getNextStoryChapterId(["arrival", "test", "control", "challenge", "boundary", "night", "after-hours"])).toBeNull();
   });
+
+  it("does not mark a chapter complete locally when the account RPC rejects it", async () => {
+    const storage = memoryStorage();
+    const result = await persistStoryChapterCompletion("player-a", "arrival", [], {
+      remoteProfileId: "user-a",
+      completeRemote: async () => "Account gewijzigd.",
+      storage,
+    });
+    expect(result).toEqual({ ok: false, reason: "remote-save-failed", error: "Account gewijzigd." });
+    expect(loadCompletedStoryChapters("player-a", storage)).toEqual([]);
+  });
+
+  it("waits for remote confirmation before writing the local mirror", async () => {
+    const values = new Map<string, string>();
+    const events: string[] = [];
+    const storage = {
+      getItem: (key: string) => values.get(key) ?? null,
+      setItem: (key: string, value: string) => { events.push("local"); values.set(key, value); },
+    };
+    const result = await persistStoryChapterCompletion("player-a", "arrival", [], {
+      remoteProfileId: "user-a",
+      completeRemote: async () => { events.push("remote"); return null; },
+      storage,
+    });
+    expect(events).toEqual(["remote", "local"]);
+    expect(result).toEqual({ ok: true, chapterIds: ["arrival"], localSaved: true });
+  });
+
+  it("requires verified local storage when no account sync is available", async () => {
+    const silentStorage = { getItem: () => null, setItem: () => undefined };
+    const result = await persistStoryChapterCompletion("player-a", "arrival", [], { storage: silentStorage });
+    expect(result).toEqual({ ok: false, reason: "local-save-failed" });
+  });
+
+  it("keeps account-confirmed completion when the optional local mirror is unavailable", async () => {
+    const silentStorage = { getItem: () => null, setItem: () => undefined };
+    const result = await persistStoryChapterCompletion("player-a", "arrival", [], {
+      remoteProfileId: "user-a",
+      completeRemote: async () => null,
+      storage: silentStorage,
+    });
+    expect(result).toEqual({ ok: true, chapterIds: ["arrival"], localSaved: false });
+  });
+
+  it("rejects unknown chapter IDs before making a remote request", async () => {
+    let remoteCalled = false;
+    const result = await persistStoryChapterCompletion("player-a", "unknown", [], {
+      remoteProfileId: "user-a",
+      completeRemote: async () => { remoteCalled = true; return null; },
+      storage: memoryStorage(),
+    });
+    expect(result).toEqual({ ok: false, reason: "invalid-input" });
+    expect(remoteCalled).toBe(false);
+  });
+
 });
