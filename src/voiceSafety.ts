@@ -47,3 +47,28 @@ export function getVoiceSafetyIntent(
   if (pauseIntent.test(message) || matchesConfiguredSignal(message, signals.pauseWord, locale)) return "pause";
   return null;
 }
+
+
+/**
+ * Recognize only explicit, standalone PASS requests.
+ * This is navigation, not a safety signal: STOP and PAUSE are evaluated first.
+ * A pass skips the current card/round but never completes a game or awards XP.
+ */
+export function isExplicitVoicePass(spoken: string, language: "nl" | "en"): boolean {
+  const locale = language === "nl" ? "nl-NL" : "en-US";
+  const normalized = spoken
+    .normalize("NFKC")
+    .replace(/[’‘]/g, "'")
+    .replace(/[^\\p{L}\\p{N}'-]+/gu, " ")
+    .replace(/\\s+/g, " ")
+    .trim()
+    .toLocaleLowerCase(locale);
+
+  if (!normalized) return false;
+
+  const explicitPass = language === "nl"
+    ? /^(?:pass|nee|nee bedankt|ik pas|ik wil passen|overslaan|sla over|sla deze over|deze overslaan|ik wil overslaan|ik wil deze overslaan)$/u
+    : /^(?:pass|no|no thanks|i'll pass|i will pass|skip|skip this|not this one|i want to skip|i want to skip this)$/u;
+
+  return explicitPass.test(normalized);
+}
