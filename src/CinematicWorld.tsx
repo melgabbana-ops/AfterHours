@@ -1,4 +1,4 @@
-import React,{useEffect,useMemo,useRef,useState}from"react";
+import React,{useEffect,useRef,useState}from"react";
 import{ArrowLeft,ArrowRight,Lock,Unlock,Play,Pause,Square,Shield,Clapperboard,Flame,Clock3,ScrollText,Mail,Volume2,VolumeX,Star,CheckCircle2,Eye,EyeOff}from"lucide-react";
 import"./cinematic-experience.css";
 
