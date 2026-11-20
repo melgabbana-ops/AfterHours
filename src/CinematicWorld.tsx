@@ -150,6 +150,8 @@ export default function CinematicWorld({
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [runConsent, setRunConsent] = useState(false);
+  const [selectedSceneKey, setSelectedSceneKey] = useState<string | null>(null);
+  const [resumePrepared, setResumePrepared] = useState(false);
   const [stopSignal, setStopSignal] = useState("");
   const [checkIn, setCheckIn] = useState<CheckIn>("unset");
   const [activeScene, setActiveScene] = useState<Scene | null>(null);
@@ -203,6 +205,7 @@ export default function CinematicWorld({
     .map((record) => ({ id: record.record_key, title: String(record.payload.title ?? ""), text: String(record.payload.text ?? "") }))
     .filter((card) => card.title && card.text);
   const recoverableRun = runs.find((run) => run.status === "active" || run.status === "paused") ?? null;
+  const selectedScene = scenes.find((scene) => scene.key === selectedSceneKey) ?? null;
 
   async function refreshData(userId = remoteProfileId) {
     if (!userId) return;
@@ -342,6 +345,8 @@ export default function CinematicWorld({
       setRunStatus("active");
       setCheckIn("unset");
       setRunConsent(false);
+      setSelectedSceneKey(null);
+      setResumePrepared(false);
       setStopSignal("");
       await refreshData();
       setMessage(t("Je scène is gestart. Je toestemming is voor deze run vastgelegd.", "Your scene has started. Your consent for this run has been recorded."));
@@ -381,6 +386,8 @@ export default function CinematicWorld({
       setRunStatus("active");
       setCheckIn("unset");
       setRunConsent(false);
+      setResumePrepared(false);
+      setSelectedSceneKey(null);
       setStopSignal("");
       await refreshData();
       onSafetyResume();
@@ -422,6 +429,8 @@ export default function CinematicWorld({
     setActiveRunId(null);
     setActiveScene(null);
     setRunConsent(false);
+    setResumePrepared(false);
+    setSelectedSceneKey(null);
     setStopSignal("");
     setCheckIn("unset");
     if (!fromConsentChange) setMessage(t("De scène is gestopt. Er wordt niets automatisch hervat.", "The scene has stopped. Nothing will resume automatically."));
@@ -823,7 +832,6 @@ export default function CinematicWorld({
   const ritualDrawCount = records.ritual.filter((record) => record.record_key.startsWith("draw:")).length;
   const unlocked = new Set(records.club.filter((record) => record.record_key.startsWith("milestone:")).map((record) => record.record_key.slice("milestone:".length)));
   const memberLevel = Math.max(1, Math.floor((completedRuns + sceneCount + ritualDrawCount) / 3) + 1);
-  const selectedVaultRecord = vaultRecords.find((record) => record.record_key === vaultSelectedKey) ?? vaultRecords[0];
 
   return (
     <main className="cw-world">
@@ -866,8 +874,8 @@ export default function CinematicWorld({
           {recoverableRun && !activeRunId && (
             <div className="cw-resume-card">
               <div><span className="cw-kicker">{t("OPENSTAANDE ERVARING", "UNFINISHED EXPERIENCE")}</span><h3>{String(recoverableRun.scene_snapshot.title ?? recoverableRun.scene_key)}</h3><p>{t("Laatst opgeslagen bij fase", "Last saved at step")} {recoverableRun.current_step + 1} / {recoverableRun.total_steps}. {t("Er wordt niets automatisch hervat.", "Nothing resumes automatically.")}</p></div>
-              <button type="button" className="cw-primary" onClick={() => { setRunConsent(false); setMessage(t("Bevestig opnieuw consent en je stopsignaal voordat je hervat.", "Confirm consent and your stop signal again before resuming.")); }} disabled={busy}>{t("Voorbereiden", "Prepare")}</button>
-              {runConsent && <div className="cw-run-gate"><label><input type="checkbox" checked={runConsent} onChange={(event) => setRunConsent(event.target.checked)} />{t("Ik stem nu opnieuw vrijwillig in met deze specifieke scène.", "I freely consent again to this specific scene.")}</label><input value={stopSignal} onChange={(event) => setStopSignal(event.target.value)} placeholder={t("Afgesproken stopsignaal", "Agreed stop signal")} maxLength={32} /><button type="button" className="cw-primary" disabled={!runConsent || stopSignal.trim().length < 2 || busy || !canStartExperience || !consentActive} onClick={() => void resumeScene(recoverableRun)}>{t("Hervat met nieuwe consent", "Resume with fresh consent")}</button></div>}
+              <button type="button" className="cw-primary" onClick={() => { setResumePrepared(true); setSelectedSceneKey(null); setRunConsent(false); setStopSignal(""); setMessage(t("Bevestig opnieuw consent en je stopsignaal voordat je hervat.", "Confirm consent and your stop signal again before resuming.")); }} disabled={busy}>{t("Voorbereiden", "Prepare")}</button>
+              {resumePrepared && <div className="cw-run-gate"><label><input type="checkbox" checked={runConsent} onChange={(event) => setRunConsent(event.target.checked)} />{t("Ik stem nu opnieuw vrijwillig in met deze specifieke scène.", "I freely consent again to this specific scene.")}</label><input value={stopSignal} onChange={(event) => setStopSignal(event.target.value)} placeholder={t("Afgesproken stopsignaal", "Agreed stop signal")} maxLength={32} /><button type="button" className="cw-primary" disabled={!runConsent || stopSignal.trim().length < 2 || busy || !canStartExperience || !consentActive} onClick={() => void resumeScene(recoverableRun)}>{t("Hervat met nieuwe consent", "Resume with fresh consent")}</button></div>}
             </div>
           )}
 
@@ -900,12 +908,13 @@ export default function CinematicWorld({
               <article className="cw-scene-card" key={scene.key}>
                 <div className="cw-scene-card-top"><span className="cw-kicker">{scene.custom ? t("EIGEN SCÈNE", "YOUR SCENE") : t("AFTER HOURS ORIGINAL", "AFTER HOURS ORIGINAL")}</span><span>{String(scene.steps.length).padStart(2, "0")} {t("FASES", "STEPS")}</span></div>
                 <h3>{scene.title}</h3><p>{scene.description}</p>
-                <div className="cw-card-actions"><button type="button" className="cw-primary" onClick={() => { setRunConsent(false); setStopSignal(""); setMessage(t("Bevestig de scène-consent onderaan voordat je start.", "Confirm scene consent below before starting.")); }} disabled={busy}>{t("Selecteer scène", "Select scene")}</button>{scene.custom && <button type="button" onClick={() => editScene(scene)} aria-label={t("Scène bewerken", "Edit scene")}><Clapperboard size={15} /></button>}</div>
+                <div className="cw-card-actions"><button type="button" className="cw-primary" onClick={() => { setSelectedSceneKey(scene.key); setResumePrepared(false); setRunConsent(false); setStopSignal(""); setMessage(t("Bevestig de scène-consent onderaan voordat je start.", "Confirm scene consent below before starting.")); }} disabled={busy}>{t("Selecteer scène", "Select scene")}</button>{scene.custom && <button type="button" onClick={() => editScene(scene)} aria-label={t("Scène bewerken", "Edit scene")}><Clapperboard size={15} /></button>}</div>
                 {scene.custom && <button type="button" className="cw-text-button" onClick={() => void removeScene(scene.key)}>{t("Scène verwijderen", "Delete scene")}</button>}
-                {runConsent && <div className="cw-run-gate"><label><input type="checkbox" checked={runConsent} onChange={(event) => setRunConsent(event.target.checked)} />{t("Ik geef nu vrijwillig toestemming voor deze specifieke scène.", "I freely consent to this specific scene now.")}</label><input value={stopSignal} onChange={(event) => setStopSignal(event.target.value)} placeholder={t("Afgesproken stopsignaal", "Agreed stop signal")} maxLength={32} /><button type="button" className="cw-primary" disabled={!runConsent || stopSignal.trim().length < 2 || busy || !canStartExperience || !consentActive} onClick={() => void startScene(scene)}><Play size={15} />{t("Start deze ervaring", "Start this experience")}</button></div>}
+                
               </article>
             ))}
           </div>
+          {selectedScene && !resumePrepared && !activeRunId && <div className="cw-selected-scene-gate"><div><span className="cw-kicker">{t("GEREED OM TE STARTEN", "READY TO BEGIN")}</span><h3>{selectedScene.title}</h3><p>{t("Lees de fases door, bespreek grenzen en bevestig opnieuw toestemming voor deze specifieke scène.", "Review the steps, discuss boundaries and confirm fresh consent for this specific scene.")}</p></div><div className="cw-run-gate"><label><input type="checkbox" checked={runConsent} onChange={(event) => setRunConsent(event.target.checked)} />{t("Ik geef nu vrijwillig toestemming voor deze specifieke scène.", "I freely consent to this specific scene now.")}</label><input value={stopSignal} onChange={(event) => setStopSignal(event.target.value)} placeholder={t("Afgesproken stopsignaal", "Agreed stop signal")} maxLength={32} /><button type="button" className="cw-primary" disabled={!runConsent || stopSignal.trim().length < 2 || busy || !canStartExperience || !consentActive} onClick={() => void startScene(selectedScene)}><Play size={15} />{t("Start deze ervaring", "Start this experience")}</button></div></div>}
           {!consentActive && <div className="cw-consent-gate"><ShieldCheck /><div><strong>{t("Algemene consent vereist", "App consent required")}</strong><p>{t("De Experience Engine start alleen wanneer je algemene AFTER HOURS-consent actief is én je per scène opnieuw toestemming geeft.", "The Experience Engine starts only when your general AFTER HOURS consent is active and you give fresh consent for each scene.")}</p></div><button type="button" onClick={onRequestConsent}>{t("Consent bekijken", "Review consent")}</button></div>}
         </section>
       )}
