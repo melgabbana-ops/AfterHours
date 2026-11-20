@@ -12,8 +12,8 @@ export function getVoiceSafetyIntent(spoken: string, language: "nl" | "en"): Voi
     ? /\b(?:stop(?:pen)?|rood|ik wil niet|beëindig(?:en)?|beeindig(?:en)?|klaar ermee)\b/i
     : /\b(?:stop|red|i don't want to|i do not want to|end it|finish now)\b/i;
   const pauseIntent = language === "nl"
-    ? /\b(?:geel|pauze|twijfel|langzamer|aanpassen|anders)\b/i
-    : /\b(?:yellow|pause|not sure|slower|slow down|change|adjust)\b/i;
+    ? /\b(?:geel|pauze|twijfel|langzamer|aanpassen|anders|help|onveilig|bang|pijn|niet prettig)\b/i
+    : /\b(?:yellow|pause|not sure|slower|slow down|change|adjust|help|unsafe|scared|pain|uncomfortable)\b/i;
 
   if (stopIntent.test(message)) return "stop";
   if (pauseIntent.test(message)) return "pause";
