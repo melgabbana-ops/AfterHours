@@ -3,6 +3,7 @@ import {
   clearSafetyPlan,
   createEmptySafetyPlan,
   getSafetyPlanStorageKey,
+  hasConflictingSafetySignals,
   hasUnscopedSafetyPlan,
   LEGACY_SAFETY_PLAN_STORAGE_KEY,
   normalizeSafetyPlan,
@@ -115,6 +116,28 @@ describe("safety plan storage", () => {
     }, "local-profile", storage)).toBe(true);
     expect(JSON.parse(storage.values.get(SAFETY_PLAN_STORAGE_KEY)!)).toEqual(samplePlan);
     expect(readSafetyPlan("local-profile", storage).safeword).toBe("RED");
+  });
+
+  it("detects identical signals after Unicode, case and whitespace normalization", () => {
+    expect(hasConflictingSafetySignals({ safeword: "  NIGHT   OWL ", amberSignal: "night owl" })).toBe(true);
+    expect(hasConflictingSafetySignals({ safeword: "ＲＥＤ", amberSignal: "red" })).toBe(true);
+  });
+
+  it("allows distinct or intentionally unset custom signals", () => {
+    expect(hasConflictingSafetySignals({ safeword: "RED", amberSignal: "AMBER" })).toBe(false);
+    expect(hasConflictingSafetySignals({ safeword: "RED", amberSignal: "" })).toBe(false);
+    expect(hasConflictingSafetySignals({ safeword: "", amberSignal: "AMBER" })).toBe(false);
+  });
+
+  it("refuses ambiguous signals without overwriting the previously saved plan", () => {
+    const storage = makeStorage();
+    expect(writeSafetyPlan(samplePlan, "account-one", storage)).toBe(true);
+    expect(writeSafetyPlan({
+      ...samplePlan,
+      safeword: "Same signal",
+      amberSignal: " same   SIGNAL ",
+    }, "account-one", storage)).toBe(false);
+    expect(readSafetyPlan("account-one", storage)).toEqual(samplePlan);
   });
 
   it("does not report success when storage silently drops a safety-plan write", () => {
