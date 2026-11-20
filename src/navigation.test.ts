@@ -7,7 +7,7 @@ describe("initialScreenFromSearch", () => {
     const screens = [
       "game", "gameSelect", "complete", "profile", "admin", "insights", "radio",
       "aftercare", "prompts", "safety", "store", "onboarding", "controlroom",
-      "missions", "legal", "social", "lovense", "daily", "capture",
+      "missions", "legal", "social", "lovense", "daily", "capture", "journal", "roulette",
     ];
     for (const screen of screens) {
       expect(initialScreenFromSearch(`?screen=${screen}`)).toBe(screen);
