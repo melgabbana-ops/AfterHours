@@ -156,7 +156,7 @@ export async function updateExperienceRun(args: {
     .maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) throw new Error("This experience run no longer belongs to the signed-in account.");
-  if (args.status === "stopped") {
+  if (args.status !== "active") {
     const { error: consentError } = await supabase!
       .from("afterhours_experience_run_consents")
       .update({ revoked_at: now })
@@ -164,5 +164,38 @@ export async function updateExperienceRun(args: {
       .eq("user_id", args.expectedUserId)
       .is("revoked_at", null);
     if (consentError) throw new Error("The stop was saved, but consent revocation could not be confirmed: " + consentError.message);
+  }
+}
+
+export async function resumeExperienceRun(args: {
+  runId: string;
+  expectedUserId: string;
+  currentStep: number;
+}): Promise<void> {
+  await assertWorldAccount(args.expectedUserId);
+  const now = new Date().toISOString();
+  const { data: consent, error: consentError } = await supabase!
+    .from("afterhours_experience_run_consents")
+    .update({ consented_at: now, revoked_at: null })
+    .eq("run_id", args.runId)
+    .eq("user_id", args.expectedUserId)
+    .select("id")
+    .maybeSingle();
+  if (consentError) throw new Error(consentError.message);
+  if (!consent) throw new Error("Fresh consent could not be confirmed. This scene remains paused.");
+  const { data, error } = await supabase!
+    .from("afterhours_experience_runs")
+    .update({ status: "active", current_step: args.currentStep, updated_at: now })
+    .eq("id", args.runId)
+    .eq("user_id", args.expectedUserId)
+    .select("id")
+    .maybeSingle();
+  if (error || !data) {
+    await supabase!
+      .from("afterhours_experience_run_consents")
+      .update({ revoked_at: now })
+      .eq("run_id", args.runId)
+      .eq("user_id", args.expectedUserId);
+    throw new Error(error?.message ?? "This experience run could not be resumed.");
   }
 }
