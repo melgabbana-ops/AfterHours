@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Check, ChevronDown, Sparkles } from "lucide-react";
+import { rankProgressFromXp } from "./progression";
+import "./CharacterRankEvolution.css";
 
 type Language = "nl" | "en";
 type Gender = "female" | "male";
@@ -109,10 +111,12 @@ function AvatarArt({ look }: { look: CharacterLook }) {
   </svg>;
 }
 
-export default function CharacterStudio({ profileId, language = "nl" }: { profileId: string; language?: Language }) {
+export default function CharacterStudio({ profileId, language = "nl", xp = 0 }: { profileId: string; language?: Language; xp?: number }) {
   const [look, setLook] = useState<CharacterLook>(() => loadLook(profileId));
   const [expanded, setExpanded] = useState(true);
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
+  const rank = rankProgressFromXp(xp);
+  const nextRankMessage = rank.isMaxRank ? t("Hoogste rang bereikt", "Highest rank reached") : t(`Nog ${rank.xpToNext} XP tot ${rank.nextRankName}`, `${rank.xpToNext} XP to ${rank.nextRankName}`);
   useEffect(() => { setLook(loadLook(profileId)); }, [profileId]);
   const update = (patch: Partial<CharacterLook>) => {
     const next = { ...look, ...patch };
@@ -125,7 +129,24 @@ export default function CharacterStudio({ profileId, language = "nl" }: { profil
       <ChevronDown className={expanded ? "rotated" : ""} size={17}/>
     </button>
     {expanded && <div className="character-studio-body">
-      <div className="character-preview"><AvatarArt look={look}/><div className="character-preview-caption"><span className="eyebrow">AFTER HOURS IDENTITY</span><strong>{look.gender === "female" ? t("The Femme", "The Femme") : t("The Sovereign", "The Sovereign")}</strong><small>{t("Cosmetische identiteit · altijd aanpasbaar", "Cosmetic identity · always customizable")}</small></div></div>
+      <div className="character-preview">
+        <div className={`character-art-frame character-art-rank-${rank.rankIndex}`} data-rank={rank.rankIndex}>
+          <AvatarArt look={look}/>
+        </div>
+        <div className="character-preview-details">
+          <div className="character-preview-caption"><span className="eyebrow">AFTER HOURS IDENTITY</span><strong>{look.gender === "female" ? t("The Femme", "The Femme") : t("The Sovereign", "The Sovereign")}</strong><small>{t("Cosmetische identiteit · altijd aanpasbaar", "Cosmetic identity · always customizable")}</small></div>
+          <div className="character-rank-panel">
+            <div className="character-rank-heading">
+              <span className="eyebrow">{t("RANG-EVOLUTIE", "RANK EVOLUTION")}</span>
+              <strong>{rank.rankName}</strong>
+            </div>
+            <div className="character-rank-progress-track" role="progressbar" aria-label={t("Voortgang naar volgende rang", "Progress to next rank")} aria-valuemin={0} aria-valuemax={100} aria-valuenow={rank.progressPercent} aria-valuetext={nextRankMessage}>
+              <span className="character-rank-progress-fill" style={{ width: `${rank.progressPercent}%` }}/>
+            </div>
+            <div className="character-rank-meta"><small>{nextRankMessage}</small><small>{Math.floor(rank.xp)} XP</small></div>
+          </div>
+        </div>
+      </div>
       <div className="character-options">
         <div className="character-field"><span className="eyebrow">{t("KIES JE CHARACTER", "CHOOSE YOUR CHARACTER")}</span><div className="character-segment">
           <button className={look.gender === "female" ? "selected" : ""} aria-pressed={look.gender === "female"} onClick={() => update({ gender: "female" })}>{t("Vrouwelijk", "Feminine")}{look.gender === "female" && <Check size={14}/>}</button>

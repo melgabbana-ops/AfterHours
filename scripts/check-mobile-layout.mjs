@@ -1,14 +1,15 @@
 import { readFile } from "node:fs/promises";
 
-const [html, baseStyles, cinematicStyles, meditationStyles, onboarding, heroPoster] = await Promise.all([
+const [html, baseStyles, cinematicStyles, meditationStyles, rankStyles, onboarding, heroPoster] = await Promise.all([
   readFile("index.html", "utf8"),
   readFile("src/styles.css", "utf8"),
   readFile("src/approved-cinematic.css", "utf8"),
   readFile("src/AftercareMeditation.css", "utf8"),
+  readFile("src/CharacterRankEvolution.css", "utf8"),
   readFile("src/Onboarding.tsx", "utf8"),
   readFile("public/visuals/reference-home.svg", "utf8"),
 ]);
-const styles = baseStyles + "\n" + cinematicStyles + "\n" + meditationStyles;
+const styles = baseStyles + "\n" + cinematicStyles + "\n" + meditationStyles + "\n" + rankStyles;
 
 const checks = [
   ["viewport-fit for modern mobile safe areas", /name=["']viewport["'][^>]*viewport-fit=cover/i.test(html)],
