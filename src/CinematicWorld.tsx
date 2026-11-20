@@ -32,6 +32,7 @@ type Scene = { key: string; title: string; description: string; steps: string[];
 type ScenePayload = { title: string; description: string; steps: string[]; language: "nl" | "en"; updatedAt: string };
 type RecordMap = Record<WorldModule, WorldRecord[]>;
 type CheckIn = "unset" | "green" | "yellow" | "red";
+type PathChoice = "unset" | "steady" | "gentle" | "deepen" | "skip";
 
 const MODULES: WorldModule[] = ["director", "vault", "dominion", "sensory", "invitation", "ritual", "club"];
 const EMPTY_RECORDS: RecordMap = { director: [], vault: [], dominion: [], sensory: [], invitation: [], ritual: [], club: [] };
@@ -158,6 +159,9 @@ export default function CinematicWorld({
   const [resumePrepared, setResumePrepared] = useState(false);
   const [stopSignal, setStopSignal] = useState("");
   const [checkIn, setCheckIn] = useState<CheckIn>("unset");
+  const [pathChoice, setPathChoice] = useState<PathChoice>("unset");
+  const [lastPathChoice, setLastPathChoice] = useState<PathChoice>("unset");
+  const [interactionLog, setInteractionLog] = useState<Array<{ stepIndex: number; choice: string; at: string }>>([]);
   const [activeScene, setActiveScene] = useState<Scene | null>(null);
   const [activeRunId, setActiveRunId] = useState<string | null>(null);
   const [stepIndex, setStepIndex] = useState(0);
@@ -361,6 +365,9 @@ export default function CinematicWorld({
       setStepIndex(0);
       setRunStatus("active");
       setCheckIn("unset");
+      setPathChoice("unset");
+      setLastPathChoice("unset");
+      setInteractionLog([]);
       setRunConsent(false);
       setSelectedSceneKey(null);
       setResumePrepared(false);
@@ -402,6 +409,9 @@ export default function CinematicWorld({
       setStepIndex(Math.min(run.current_step, steps.length - 1));
       setRunStatus("active");
       setCheckIn("unset");
+      setPathChoice("unset");
+      setInteractionLog(run.interaction_log ?? []);
+      setLastPathChoice((run.interaction_log?.[run.interaction_log.length - 1]?.choice as PathChoice) ?? "unset");
       setRunConsent(false);
       setResumePrepared(false);
       setSelectedSceneKey(null);
@@ -423,6 +433,7 @@ export default function CinematicWorld({
       await updateExperienceRun({ runId: activeRunId, expectedUserId: remoteProfileId, status: "paused", currentStep: stepIndex });
       setRunStatus("paused");
       setCheckIn("unset");
+      setPathChoice("unset");
       onSafetyPause();
       setMessage(t("Gepauzeerd. Voor hervatten is een nieuwe check-in en consent nodig.", "Paused. Resuming requires a fresh check-in and consent."));
       try { await refreshData(); } catch { setMessage(t("Gepauzeerd. Je verbinding is nodig om de geschiedenis te verversen.", "Paused. Reconnect to refresh the history.")); }
@@ -454,11 +465,12 @@ export default function CinematicWorld({
     setSelectedSceneKey(null);
     setStopSignal("");
     setCheckIn("unset");
+    setPathChoice("unset");
     if (!fromConsentChange) setMessage(t("De scène is gestopt. Er wordt niets automatisch hervat.", "The scene has stopped. Nothing will resume automatically."));
     onSafetyStop();
   }
 
-  async function completeScene() {
+  async function completeScene(finalInteractionLog = interactionLog) {
     if (!activeRunId || !activeScene || !remoteProfileId) return;
     setBusy(true);
     try {
@@ -467,8 +479,11 @@ export default function CinematicWorld({
         expectedUserId: remoteProfileId,
         status: "completed",
         currentStep: activeScene.steps.length,
-        completed: true
+        completed: true,
+        interactionLog: finalInteractionLog
       });
+      setInteractionLog(finalInteractionLog);
+      setPathChoice("unset");
       const firstCompletion = runs.filter((run) => run.status === "completed").length === 0;
       setRunStatus("completed");
       setCheckIn("unset");
@@ -496,14 +511,28 @@ export default function CinematicWorld({
       setMessage(t("Kies eerst groen, geel of rood bij je check-in.", "Choose green, yellow or red at your check-in first."));
       return;
     }
+    if (pathChoice === "unset") {
+      setMessage(t("Kies eerst hoe je deze fase wilt vervolgen.", "Choose how you want to continue this step first."));
+      return;
+    }
+    const nextLog = [...interactionLog, { stepIndex, choice: pathChoice, at: new Date().toISOString() }];
     if (stepIndex >= activeScene.steps.length - 1) {
-      await completeScene();
+      await completeScene(nextLog);
       return;
     }
     setBusy(true);
     try {
       const next = stepIndex + 1;
-      await updateExperienceRun({ runId: activeRunId, expectedUserId: remoteProfileId, status: "active", currentStep: next });
+      await updateExperienceRun({
+        runId: activeRunId,
+        expectedUserId: remoteProfileId,
+        status: "active",
+        currentStep: next,
+        interactionLog: nextLog
+      });
+      setInteractionLog(nextLog);
+      setLastPathChoice(pathChoice);
+      setPathChoice("unset");
       setStepIndex(next);
       setCheckIn("unset");
       await refreshData();
@@ -850,6 +879,7 @@ export default function CinematicWorld({
   const completedRuns = runs.filter((run) => run.status === "completed").length;
   const sceneCount = records.director.filter((record) => record.record_key.startsWith("scene:")).length;
   const ritualDrawCount = records.ritual.filter((record) => record.record_key.startsWith("draw:")).length;
+  const interactionCount = runs.reduce((total, run) => total + (run.interaction_log?.length ?? 0), 0);
   const unlocked = new Set(records.club.filter((record) => record.record_key.startsWith("milestone:")).map((record) => record.record_key.slice("milestone:".length)));
   const memberLevel = Math.max(1, Math.floor((completedRuns + sceneCount + ritualDrawCount) / 3) + 1);
 
@@ -908,15 +938,22 @@ export default function CinematicWorld({
               ) : (
                 <>
                   <div className="cw-step-progress"><span style={{ width: (((stepIndex + 1) / activeScene.steps.length) * 100) + "%" }} /></div>
+                  {lastPathChoice !== "unset" && <div className="cw-choice-note">{lastPathChoice === "gentle" ? t("Je koos voor een rustiger tempo.", "You chose a gentler pace.") : lastPathChoice === "deepen" ? t("Je koos voor extra verdieping en reflectie.", "You chose deeper reflection.") : lastPathChoice === "skip" ? t("De vorige fase is bewust overgeslagen.", "The previous step was consciously skipped.") : t("Je koos ervoor het afgesproken tempo aan te houden.", "You chose to keep the agreed pace.")}</div>}
                   <div className="cw-step-card"><span className="cw-kicker">{t("FASE", "STEP")} {stepIndex + 1}</span><p>{activeScene.steps[stepIndex]}</p></div>
                   <div className="cw-checkin"><strong>{t("Hoe voelt dit voor jou?", "How does this feel for you?")}</strong><div>
                     <button type="button" className={checkIn === "green" ? "selected green" : "green"} onClick={() => setCheckIn("green")}>{t("Groen · Verder", "Green · Continue")}</button>
                     <button type="button" className={checkIn === "yellow" ? "selected yellow" : "yellow"} onClick={() => { setCheckIn("yellow"); void pauseScene(); }}>{t("Geel · Pauze", "Yellow · Pause")}</button>
                     <button type="button" className={checkIn === "red" ? "selected red" : "red"} onClick={() => { setCheckIn("red"); void stopScene(); }}>{t("Rood · Stop", "Red · Stop")}</button>
                   </div><small>{t("Je stopsignaal is alleen in deze sessie nodig en wordt niet opgeslagen.", "Your stop signal is only needed in this session and is never stored.")}</small></div>
+                  <div className="cw-choice-panel"><strong>{t("Kies je volgende pad", "Choose your next path")}</strong><div>
+                    <button type="button" className={pathChoice === "steady" ? "selected" : ""} onClick={() => setPathChoice("steady")}>{t("Aangehouden tempo", "Keep this pace")}</button>
+                    <button type="button" className={pathChoice === "gentle" ? "selected" : ""} onClick={() => setPathChoice("gentle")}>{t("Zachter en rustiger", "Softer and slower")}</button>
+                    <button type="button" className={pathChoice === "deepen" ? "selected" : ""} onClick={() => setPathChoice("deepen")}>{t("Meer verdieping", "Explore deeper")}</button>
+                    <button type="button" className={pathChoice === "skip" ? "selected" : ""} onClick={() => setPathChoice("skip")}>{t("Deze fase overslaan", "Skip this step")}</button>
+                  </div><small>{t("Je keuze wordt bij deze ervaring bewaard en bepaalt de toon van de volgende fase.", "Your choice is saved with this experience and shapes the tone of the next step.")}</small></div>
                   <div className="cw-run-actions">
                     <button type="button" onClick={() => void pauseScene()} disabled={busy}><Pause size={15} />{t("Pauzeren", "Pause")}</button>
-                    <button type="button" className="cw-primary" onClick={() => void advanceStep()} disabled={busy || checkIn !== "green"}>{stepIndex === activeScene.steps.length - 1 ? t("Afronden", "Complete") : t("Volgende fase", "Next step")}<ArrowRight size={15} /></button>
+                    <button type="button" className="cw-primary" onClick={() => void advanceStep()} disabled={busy || checkIn !== "green" || pathChoice === "unset"}>{stepIndex === activeScene.steps.length - 1 ? t("Afronden", "Complete") : t("Volgende fase", "Next step")}<ArrowRight size={15} /></button>
                     <button type="button" className="cw-stop" onClick={() => void stopScene()} disabled={busy}><Square size={14} /> STOP</button>
                   </div>
                 </>
@@ -1037,6 +1074,7 @@ export default function CinematicWorld({
             <div><strong>{ritualDrawCount}</strong><span>{t("Kaarten getrokken", "Cards drawn")}</span></div>
             <div><strong>{records.invitation.length}</strong><span>{t("Uitnodigingen", "Invitations")}</span></div>
             <div><strong>{unlocked.size}</strong><span>{t("Badges verdiend", "Badges earned")}</span></div>
+            <div><strong>{interactionCount}</strong><span>{t("Keuzes gemaakt", "Choices made")}</span></div>
           </div>
           <div className="cw-badges"><h3>{t("Jouw mijlpalen", "Your milestones")}</h3>{MILESTONES.map((item) => <div key={item[0]} className={unlocked.has(item[0]) ? "earned" : ""}><span>{unlocked.has(item[0]) ? <CheckCircle2 size={17} /> : <Star size={17} />}</span><div><strong>{item[1]}</strong><small>{language === "nl" ? item[2] : item[3]}</small></div><em>{unlocked.has(item[0]) ? t("ONTGRENDELD", "UNLOCKED") : t("NOG TE VERDIENEN", "LOCKED")}</em></div>)}</div>
           <div className="cw-form-panel"><h3>{t("Jouw gegevens blijven van jou", "Your data stays yours")}</h3><p>{t("Exporteer een back-up of verwijder alle gegevens van deze acht onderdelen. Kluisnotities blijven versleuteld in de export.", "Export a backup or delete all data from these eight modules. Vault notes remain encrypted in the export.")}</p><div className="cw-card-actions"><button type="button" className="cw-primary" onClick={exportBackup} disabled={!remoteProfileId}><Download size={15} />{t("Exporteer back-up", "Export backup")}</button><button type="button" className="cw-danger" onClick={() => void deleteAllWorldData()} disabled={busy || !remoteProfileId}><Trash2 size={15} />{t("Verwijder alle World-gegevens", "Delete all World data")}</button></div></div>
