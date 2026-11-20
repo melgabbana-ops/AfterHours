@@ -400,10 +400,8 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
     const message = spoken.toLowerCase();
     const goIntent = language === "nl" ? /groen|doorgaan|verder|ja, graag|ik wil wel/ : /green|continue|go on|yes please|i want to/;
     const passIntent = language === "nl" ? /nee|pass|overslaan|niet doen/ : /no|pass|skip|don't do that|do not do that/;
-    const helpIntent = language === "nl" ? /help|onveilig|bang|pijn|niet prettig/ : /help|unsafe|scared|pain|uncomfortable/;
     if (goIntent.test(message)) return t("Ik hoor je. We blijven binnen de afspraken die je hebt gekozen. Wil je dezelfde opdracht voortzetten of een andere veilige optie kiezen?", "I hear you. We will stay within the boundaries you chose. Would you like to continue this task or choose another safe option?");
     if (passIntent.test(message)) return t("Begrepen. Je mag passen zonder reden en zonder straf. Ik bied je een andere opdracht aan, of we stoppen hier.", "Understood. You can pass without a reason or penalty. I can offer another task, or we can stop here.");
-    if (helpIntent.test(message)) return t("We stoppen de opdracht en checken eerst hoe het met je gaat. Je hoeft niets te bewijzen. Kies stoppen, pauzeren of aftercare.", "We are stopping the task and checking how you feel first. You have nothing to prove. Choose stop, pause, or aftercare.");
     return t("Ik heb je gehoord. Vertel me alleen wat je wilt delen. Wil je doorgaan, de opdracht aanpassen of pauzeren? Je grenzen blijven leidend.", "I hear you. Share only what you feel comfortable sharing. Would you like to continue, change the task, or pause? Your boundaries come first.");
   };
   const speakAsDom = (text: string) => {
