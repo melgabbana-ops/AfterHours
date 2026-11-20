@@ -28,7 +28,7 @@ function normalizeCheckpoint(value: unknown): StoryCheckpoint | null {
   const candidate = value as Record<string, unknown>;
   if (typeof candidate.chapterId !== "string") return null;
   if (!storyChapters.some((chapter) => chapter.id === candidate.chapterId)) return null;
-  if (!Number.isInteger(candidate.roundIndex)) return null;
+  if (typeof candidate.roundIndex !== "number" || !Number.isInteger(candidate.roundIndex)) return null;
   const roundIndex = candidate.roundIndex as number;
   if (roundIndex < 0 || roundIndex >= STORY_ROUND_COUNT) return null;
   return { chapterId: candidate.chapterId, roundIndex };
