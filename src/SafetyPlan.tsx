@@ -12,6 +12,7 @@ interface SafetyPlanProps {
 import {
   clearSafetyPlan,
   createEmptySafetyPlan,
+  hasConflictingSafetySignals,
   hasUnscopedSafetyPlan,
   readSafetyPlan,
   writeSafetyPlan,
@@ -64,6 +65,14 @@ export default function SafetyPlan({
       boundaries: plan.boundaries.trim().slice(0, 1000),
       readiness: { ...plan.readiness },
     };
+    if (hasConflictingSafetySignals(nextPlan)) {
+      setSaved(false);
+      setMessage(t(
+        "Je stopwoord en pauzesignaal zijn hetzelfde. Kies twee verschillende signalen, zodat STOP altijd duidelijk blijft.",
+        "Your safeword and pause signal are identical. Choose two different signals so STOP remains unambiguous.",
+      ));
+      return;
+    }
     if (writeSafetyPlan(nextPlan, profileId)) {
       setPlan(nextPlan);
       setSaved(true);
@@ -126,6 +135,7 @@ export default function SafetyPlan({
           : <button type="button" className="safety-pause-action" onClick={onResume} disabled={!onResume}><Play size={16}/>{t("HERVAT SESSIE", "RESUME SESSION")}</button>}
         <button type="button" className="safety-stop-action" onClick={onStopNow} disabled={!onStopNow}><Square size={16}/>{t("STOP NU", "STOP NOW")}</button>
       </div> : <p className="safety-room-footnote">{t("De directe pauze- en stopknoppen verschijnen hier zolang een sessie actief of gepauzeerd is.", "Immediate pause and stop controls appear here while a session is active or paused.")}</p>}
+
     </section>
 
     <label htmlFor="ah-safeword">{t("Stopwoord", "Safeword")} <span>{t("Volledig stoppen", "Stop completely")}</span></label>
@@ -135,8 +145,8 @@ export default function SafetyPlan({
     <p className="safety-plan-footnote">{t("Wanneer je vrijwillig spraakbediening start, worden deze lokale signalen gebruikt voor STOP en PAUZE. Ze worden niet naar de server gestuurd.", "When you voluntarily start voice control, these local signals are used for STOP and PAUSE. They are not sent to the server.")}</p>
     <label htmlFor="ah-boundaries">{t("Grenzen en afspraken", "Boundaries and agreements")} <span>{t("Bewaar alleen wat veilig voelt op dit apparaat.", "Only save what feels safe to keep on this device.")}</span></label>
     <textarea id="ah-boundaries" maxLength={1000} rows={3} value={plan.boundaries} onChange={(event) => update("boundaries", event.target.value)} placeholder={t("Wat is niet welkom? Wat vraagt eerst een check-in? Wat helpt bij aftercare?", "What is not welcome? What needs a check-in first? What helps with aftercare?")}/>
-    <div className="safety-plan-actions"><button className="gold" onClick={save}><Save/>{saved ? " " + t("Opgeslagen", "Saved") : " " + t("Afspraken opslaan", "Save agreements")}</button><button onClick={clear}><Trash2/> {t("Wissen", "Clear")}</button></div>
-    {message && <p className="safety-plan-message" role="status">{saved && <Check/>}{message}</p>}
+    <div className="safety-plan-actions"><button className="gold" type="button" onClick={save}><Save/>{saved ? " " + t("Opgeslagen", "Saved") : " " + t("Afspraken opslaan", "Save agreements")}</button><button type="button" onClick={clear}><Trash2/> {t("Wissen", "Clear")}</button></div>
+    {message && <p className="safety-plan-message" role="status" aria-live="polite">{saved && <Check/>}{message}</p>}
     <p className="safety-plan-footnote">{t("Een stopwoord vervangt geen communicatie. Je mag altijd stoppen, ook zonder het afgesproken woord te gebruiken.", "A safeword does not replace communication. You can always stop, even without using the agreed word.")}</p>
   </section>;
 }
