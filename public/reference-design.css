@@ -151,3 +151,28 @@ nav button.active svg{filter:drop-shadow(0 0 6px rgba(216,173,104,.35))}
  .game-select-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+
+/* 11+ Dedicated supporting pages */
+.daily-screen,.social-screen,.lovense-screen,.legal-screen,.monetization-screen,.admin-console,.character-studio,.media-vault,.prompt-library,.missions-screen,.onboarding-screen{color:var(--ah-ivory)}
+.daily-screen,.social-screen,.lovense-screen,.legal-screen,.monetization-screen,.admin-console,.prompt-library,.missions-screen,.onboarding-screen{padding:22px 18px;border:1px solid var(--ah-bronze-soft);border-radius:17px;background:linear-gradient(150deg,rgba(25,19,12,.94),rgba(7,7,6,.98));}
+.daily-heading,.social-heading,.lovense-heading,.legal-heading,.monetization-heading,.missions-hero,.prompt-hero{padding:18px 4px 24px}
+.daily-heading h2,.social-heading h2,.lovense-heading h2,.legal-heading h2,.monetization-heading h2{font:500 clamp(30px,6vw,44px)/1.1 "Cinzel",Georgia,serif}
+.daily-streak,.daily-ritual-card,.daily-next-steps,.social-editor,.social-preview,.social-output,.lovense-connect-card,.lovense-control-card,.legal-document,.monetization-free,.monetization-product,.club-membership-card,.admin-metric-card,.admin-round-card,.admin-audit-row,.character-preview,.character-options,.media-upload,.media-capture,.media-item{border:1px solid var(--ah-bronze-soft)!important;border-radius:12px!important;background:linear-gradient(145deg,#17120c,#090806)!important;box-shadow:inset 0 1px rgba(255,230,190,.035)}
+.daily-ritual-card,.social-editor,.social-preview,.lovense-connect-card,.lovense-control-card,.legal-document,.monetization-product,.club-membership-card,.admin-metric-card,.admin-round-card,.character-preview,.media-upload{padding:17px}
+.daily-glyph,.daily-card-top,.daily-prompt,.daily-practice{color:var(--ah-champagne)}
+.daily-complete,.social-actions button,.lovense-primary,.lovense-secondary,.lovense-disconnect,.monetization-button,.admin-console .gold{border-radius:9px;min-height:46px}
+.social-preview{background:radial-gradient(circle at 50% 0,rgba(177,126,58,.2),transparent 50%),#080706!important}
+.lovense-consent,.lovense-private-note,.lovense-alert,.lovense-footer,.legal-draft-alert,.monetization-notice,.monetization-trust,.club-membership-disclaimer,.admin-footnote{color:var(--ah-muted);line-height:1.6}
+.lovense-stop{background:#842f2a!important;color:white!important;border:1px solid #c16a60!important}
+.legal-doc-tabs,.prompt-filters,.mission-tabs,.onboarding-tabs{display:flex;flex-wrap:wrap;gap:8px}
+.legal-doc-tabs button,.prompt-filters button,.mission-tabs button,.onboarding-tabs button{background:#0a0907;color:var(--ah-muted);padding:10px 14px}
+.legal-doc-tabs button[aria-selected="true"],.mission-tabs button[aria-selected="true"],.onboarding-tabs button[aria-selected="true"],.prompt-filters button[aria-pressed="true"]{color:var(--ah-gold);border-color:var(--ah-gold)}
+.admin-intro,.admin-state,.admin-secure,.admin-footnote{border-color:var(--ah-bronze-soft)}
+.admin-metric-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.admin-metric-card strong,.admin-metric-card b{color:var(--ah-gold)}
+.character-preview{overflow:hidden}
+.character-options{padding:15px;margin-top:12px}
+.media-vault{margin-top:18px}
+.media-item-actions button,.media-capture-controls button{border:1px solid var(--ah-bronze-soft);border-radius:8px}
+.profile .character-studio,.profile .media-vault{border:0;background:transparent}
+@media(max-width:520px){.daily-screen,.social-screen,.lovense-screen,.legal-screen,.monetization-screen,.admin-console,.prompt-library,.missions-screen,.onboarding-screen{padding:17px 13px;border-radius:14px}.admin-metric-grid{grid-template-columns:1fr 1fr}}
