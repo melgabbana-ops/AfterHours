@@ -20,6 +20,7 @@ export type ExperienceRun = {
   updated_at: string;
   started_at: string | null;
   completed_at: string | null;
+  interaction_log: Array<{ stepIndex: number; choice: string; at: string }>;
 };
 
 async function assertWorldAccount(expectedUserId: string) {
@@ -89,7 +90,7 @@ export async function loadExperienceRuns(expectedUserId: string): Promise<Experi
   await assertWorldAccount(expectedUserId);
   const { data, error } = await supabase!
     .from("afterhours_experience_runs")
-    .select("id,scene_key,scene_snapshot,status,current_step,total_steps,created_at,updated_at,started_at,completed_at")
+    .select("id,scene_key,scene_snapshot,status,current_step,total_steps,created_at,updated_at,started_at,completed_at,interaction_log")
     .eq("user_id", expectedUserId)
     .order("updated_at", { ascending: false })
     .limit(50);
@@ -115,6 +116,7 @@ export async function createExperienceRun(args: {
       status: "active",
       current_step: 0,
       total_steps: args.totalSteps,
+      interaction_log: [],
       consent_version: "1.0",
       started_at: now,
       updated_at: now,
@@ -139,6 +141,7 @@ export async function updateExperienceRun(args: {
   status: ExperienceRunStatus;
   currentStep: number;
   completed?: boolean;
+  interactionLog?: Array<{ stepIndex: number; choice: string; at: string }>;
 }): Promise<void> {
   await assertWorldAccount(args.expectedUserId);
   const now = new Date().toISOString();
@@ -149,6 +152,7 @@ export async function updateExperienceRun(args: {
       current_step: args.currentStep,
       updated_at: now,
       ...(args.completed ? { completed_at: now } : {}),
+      ...(args.interactionLog ? { interaction_log: args.interactionLog } : {}),
     })
     .eq("id", args.runId)
     .eq("user_id", args.expectedUserId)
