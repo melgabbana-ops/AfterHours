@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  ArrowLeft, ArrowRight, BookOpen, CheckCircle2, ChevronRight, Clapperboard,
-  Copy, Download, Eye, EyeOff, Flame, LockKeyhole, Mail, Music2, Pause,
+  ArrowLeft, ArrowRight, CheckCircle2, Clapperboard,
+  Download, Eye, EyeOff, Flame, LockKeyhole, Mail, Music2, Pause,
   Play, Plus, Save, Share2, ShieldCheck, Sparkles, Square, Star, Trash2,
   UnlockKeyhole, Volume2, VolumeX
 } from "lucide-react";
@@ -23,6 +23,9 @@ type Props = {
   onSafetyPause: () => void;
   onSafetyResume: () => void;
   onSafetyStop: () => void;
+  onOpenGameLibrary: () => void;
+  onOpenAftercare: () => void;
+  onOpenSafetyPlan: () => void;
 };
 type Tab = "experience" | "director" | "vault" | "sensory" | "invitation" | "dominion" | "deck" | "club";
 type Scene = { key: string; title: string; description: string; steps: string[]; custom: boolean };
@@ -139,7 +142,8 @@ async function deriveVaultKey(passphrase: string, salt: Uint8Array): Promise<Cry
 
 export default function CinematicWorld({
   language, remoteProfileId, consentActive, canStartExperience,
-  onBack, onRequestConsent, onSafetyPause, onSafetyResume, onSafetyStop
+  onBack, onRequestConsent, onSafetyPause, onSafetyResume, onSafetyStop,
+  onOpenGameLibrary, onOpenAftercare, onOpenSafetyPlan
 }: Props) {
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
   const [tab, setTab] = useState<Tab>("experience");
@@ -165,7 +169,6 @@ export default function CinematicWorld({
   const [vaultPassphrase, setVaultPassphrase] = useState("");
   const [vaultTitle, setVaultTitle] = useState("");
   const [vaultDraft, setVaultDraft] = useState("");
-  const [vaultSelectedKey, setVaultSelectedKey] = useState<string | null>(null);
   const [vaultPlain, setVaultPlain] = useState<{ title: string; content: string } | null>(null);
   const [vaultMessage, setVaultMessage] = useState("");
   const [domRole, setDomRole] = useState("");
@@ -227,6 +230,20 @@ export default function CinematicWorld({
     let active = true;
     setLoading(true);
     setError("");
+    setRecords(EMPTY_RECORDS);
+    setRuns([]);
+    setVaultPlain(null);
+    setVaultPassphrase("");
+    setVaultDraft("");
+    setVaultTitle("");
+    setDomRole("");
+    setDomAddress("");
+    setDomHardLimits("");
+    setDomSoftLimits("");
+    setDomAftercare("");
+    setRunConsent(false);
+    setSelectedSceneKey(null);
+    setResumePrepared(false);
     if (!remoteProfileId) {
       setLoading(false);
       setError(t("Meld je aan om deze privéruimtes veilig aan je AFTER HOURS-account te koppelen.", "Sign in to securely connect these private spaces to your AFTER HOURS account."));
@@ -410,7 +427,11 @@ export default function CinematicWorld({
       await refreshData();
       setMessage(t("Gepauzeerd. Voor hervatten is een nieuwe check-in en consent nodig.", "Paused. Resuming requires a fresh check-in and consent."));
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : t("Pauzeren kon niet worden opgeslagen.", "Pause could not be saved."));
+      setRunStatus("paused");
+      setCheckIn("unset");
+      onSafetyPause();
+      onSafetyStop();
+      setError(t("De server kon de pauze niet bevestigen. De app is daarom uit voorzorg gestopt. Controleer je verbinding voordat je opnieuw begint.", "The server could not confirm the pause. The app has therefore stopped as a precaution. Check your connection before starting again."));
     } finally {
       setBusy(false);
     }
@@ -578,7 +599,6 @@ export default function CinematicWorld({
         iv: bytesToBase64(iv),
         ciphertext: bytesToBase64(new Uint8Array(encrypted))
       }, "vault-keeper");
-      setVaultSelectedKey(recordKey);
       setVaultTitle("");
       setVaultDraft("");
       setVaultPlain(null);
@@ -604,7 +624,6 @@ export default function CinematicWorld({
       );
       const parsed = JSON.parse(new TextDecoder().decode(plaintext)) as { title?: string; content?: string };
       setVaultPlain({ title: String(parsed.title ?? ""), content: String(parsed.content ?? "") });
-      setVaultSelectedKey(record.record_key);
       setVaultMessage(t("Notitie alleen in deze open sessie ontsleuteld.", "Note decrypted in this open session only."));
     } catch {
       setVaultPlain(null);
@@ -618,7 +637,6 @@ export default function CinematicWorld({
       await deleteWorldRecord("vault", key, remoteProfileId);
       setRecords((current) => ({ ...current, vault: current.vault.filter((record) => record.record_key !== key) }));
       setVaultPlain(null);
-      setVaultSelectedKey(null);
       setVaultMessage(t("Versleutelde notitie verwijderd.", "Encrypted note deleted."));
     } catch (cause) {
       setVaultMessage(cause instanceof Error ? cause.message : t("Verwijderen is niet gelukt.", "Could not delete note."));
@@ -883,7 +901,7 @@ export default function CinematicWorld({
             <div className="cw-active-scene">
               <div className="cw-scene-art"><span className="cw-kicker">{t("LIVE SCÈNE", "LIVE SCENE")} · {String(stepIndex + 1).padStart(2, "0")} / {String(activeScene.steps.length).padStart(2, "0")}</span><h3>{activeScene.title}</h3><p>{activeScene.description}</p></div>
               {runStatus === "completed" ? (
-                <div className="cw-aftercare"><CheckCircle2 /><h3>{t("De ervaring is afgerond", "Experience complete")}</h3><p>{t("Neem rustig de tijd. Vraag wat prettig voelt: water, warmte, praten, stilte of ruimte. Een korte check-in en aftercare horen bij de ervaring.", "Take your time. Ask what feels right: water, warmth, conversation, quiet or space. A check-in and aftercare are part of the experience.")}</p><button type="button" className="cw-primary" onClick={() => { setActiveScene(null); setActiveRunId(null); setRunStatus(null); setTab("club"); }}>{t("Bekijk Midnight Club", "View Midnight Club")}</button></div>
+                <div className="cw-aftercare"><CheckCircle2 /><h3>{t("De ervaring is afgerond", "Experience complete")}</h3><p>{t("Neem rustig de tijd. Vraag wat prettig voelt: water, warmte, praten, stilte of ruimte. Een korte check-in en aftercare horen bij de ervaring.", "Take your time. Ask what feels right: water, warmth, conversation, quiet or space. A check-in and aftercare are part of the experience.")}</p><div className="cw-card-actions"><button type="button" className="cw-primary" onClick={onOpenAftercare}>{t("Open AFTERCARE", "Open AFTERCARE")}</button><button type="button" onClick={() => { setActiveScene(null); setActiveRunId(null); setRunStatus(null); setTab("club"); }}>{t("Midnight Club", "Midnight Club")}</button></div></div>
               ) : (
                 <>
                   <div className="cw-step-progress"><span style={{ width: (((stepIndex + 1) / activeScene.steps.length) * 100) + "%" }} /></div>
@@ -903,6 +921,7 @@ export default function CinematicWorld({
             </div>
           )}
 
+          <div className="cw-engine-integrations"><button type="button" onClick={onOpenGameLibrary}><BookOpen size={15} />{t("Open bestaande AFTER HOURS-spellen en opdrachten", "Open existing AFTER HOURS games and prompts")}</button><button type="button" onClick={onOpenSafetyPlan}><ShieldCheck size={15} />{t("Open veiligheidsplan", "Open safety plan")}</button></div>
           <div className="cw-scene-grid">
             {scenes.map((scene) => (
               <article className="cw-scene-card" key={scene.key}>
@@ -914,7 +933,8 @@ export default function CinematicWorld({
               </article>
             ))}
           </div>
-          {selectedScene && !resumePrepared && !activeRunId && <div className="cw-selected-scene-gate"><div><span className="cw-kicker">{t("GEREED OM TE STARTEN", "READY TO BEGIN")}</span><h3>{selectedScene.title}</h3><p>{t("Lees de fases door, bespreek grenzen en bevestig opnieuw toestemming voor deze specifieke scène.", "Review the steps, discuss boundaries and confirm fresh consent for this specific scene.")}</p></div><div className="cw-run-gate"><label><input type="checkbox" checked={runConsent} onChange={(event) => setRunConsent(event.target.checked)} />{t("Ik geef nu vrijwillig toestemming voor deze specifieke scène.", "I freely consent to this specific scene now.")}</label><input value={stopSignal} onChange={(event) => setStopSignal(event.target.value)} placeholder={t("Afgesproken stopsignaal", "Agreed stop signal")} maxLength={32} /><button type="button" className="cw-primary" disabled={!runConsent || stopSignal.trim().length < 2 || busy || !canStartExperience || !consentActive} onClick={() => void startScene(selectedScene)}><Play size={15} />{t("Start deze ervaring", "Start this experience")}</button></div></div>}
+          {selectedScene && !resumePrepared && !activeRunId && <div className="cw-selected-scene-gate"><div><span className="cw-kicker">{t("GEREED OM TE STARTEN", "READY TO BEGIN")}</span><h3>{selectedScene.title}</h3><p>{t("Lees de fases door, bespreek grenzen en bevestig opnieuw toestemming voor deze specifieke scène.", "Review the steps, discuss boundaries and confirm fresh consent for this specific scene.")}</p></div><div className="cw-run-gate"><label><input type="checkbox" checked={runConsent} onChange={(event) => setRunConsent(event.target.checked)} />{t("Ik bevestig mijn eigen vrijwillige deelname aan deze specifieke scène. Andere deelnemers moeten zelf afzonderlijk instemmen.", "I confirm my own voluntary participation in this specific scene. Other participants must consent separately themselves.")}</label><input value={stopSignal} onChange={(event) => setStopSignal(event.target.value)} placeholder={t("Afgesproken stopsignaal", "Agreed stop signal")} maxLength={32} /><button type="button" className="cw-primary" disabled={!runConsent || stopSignal.trim().length < 2 || busy || !canStartExperience || !consentActive} onClick={() => void startScene(selectedScene)}><Play size={15} />{t("Start deze ervaring", "Start this experience")}</button></div></div>}
+          {!canStartExperience && consentActive && <div className="cw-consent-gate"><ShieldCheck /><div><strong>{t("Accountstatus niet bevestigd", "Account status not verified")}</strong><p>{t("De app kan je account- of serverstatus nog niet bevestigen. Er start niets totdat dit is gecontroleerd.", "The app cannot verify your account or server status yet. Nothing starts until this is checked.")}</p></div><button type="button" onClick={onRequestConsent}>{t("Account opnieuw controleren", "Recheck account")}</button></div>}
           {!consentActive && <div className="cw-consent-gate"><ShieldCheck /><div><strong>{t("Algemene consent vereist", "App consent required")}</strong><p>{t("De Experience Engine start alleen wanneer je algemene AFTER HOURS-consent actief is én je per scène opnieuw toestemming geeft.", "The Experience Engine starts only when your general AFTER HOURS consent is active and you give fresh consent for each scene.")}</p></div><button type="button" onClick={onRequestConsent}>{t("Consent bekijken", "Review consent")}</button></div>}
         </section>
       )}
