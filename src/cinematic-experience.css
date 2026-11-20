@@ -160,3 +160,10 @@
 @media(prefers-reduced-motion:reduce){
  .cw-section,.cw-scene-card,.cw-step-progress span{animation:none!important;transition:none!important;transform:none!important}
 }
+
+
+.cw-engine-integrations{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 16px}
+.cw-engine-integrations button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:10px 13px;border:1px solid rgba(207,174,121,.32);background:rgba(15,12,8,.9);color:#d9c6a4;font-size:9px;line-height:1.4}
+.cw-engine-integrations button:hover{border-color:rgba(219,184,127,.7);background:rgba(43,31,17,.8)}
+.cw-engine-integrations svg{flex:none;color:#d0ab70}
+@media(max-width:520px){.cw-engine-integrations{display:grid;grid-template-columns:1fr}.cw-engine-integrations button{width:100%;justify-content:flex-start}}
