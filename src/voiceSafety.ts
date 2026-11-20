@@ -13,7 +13,7 @@ export function getVoiceSafetyIntent(spoken: string, language: "nl" | "en"): Voi
     : /\b(?:stop|red|i don't want to|i do not want to|end it|finish now)\b/i;
   const pauseIntent = language === "nl"
     ? /\b(?:geel|pauze|twijfel|langzamer|aanpassen|anders)\b/i
-    : /\b(?:yellow|pause|not sure|slower|change|adjust)\b/i;
+    : /\b(?:yellow|pause|not sure|slower|slow down|change|adjust)\b/i;
 
   if (stopIntent.test(message)) return "stop";
   if (pauseIntent.test(message)) return "pause";
