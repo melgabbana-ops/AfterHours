@@ -248,6 +248,25 @@ export default function CinematicWorld({
     setRunConsent(false);
     setSelectedSceneKey(null);
     setResumePrepared(false);
+    setStopSignal("");
+    setCheckIn("unset");
+    setPathChoice("unset");
+    setLastPathChoice("unset");
+    setInteractionLog([]);
+    setActiveRunId(null);
+    setActiveScene(null);
+    setRunStatus(null);
+    setSceneTitle("");
+    setSceneDescription("");
+    setSceneSteps("Aankomen en afstemmen\nGrenzen en signalen bevestigen\nEen gezamenlijke opdracht kiezen\nAftercare en reflectie");
+    setInviteTitle(t("Een uitnodiging na middernacht", "A Midnight Invitation"));
+    setInviteMessage(t("Ik nodig je uit om samen iets nieuws te verkennen. Alleen als dit voor jou goed voelt. We bespreken vooraf grenzen, signalen en aftercare.", "I invite you to explore something new together. Only if it feels right to you. We will discuss boundaries, signals and aftercare first."));
+    setCustomCardTitle("");
+    setCustomCardText("");
+    setCurrentCard(null);
+    setVaultMessage("");
+    setMessage("");
+    if (audioContext.current) { void audioContext.current.close(); audioContext.current = null; masterGain.current = null; setSoundOn(false); }
     if (!remoteProfileId) {
       setLoading(false);
       setError(t("Meld je aan om deze privéruimtes veilig aan je AFTER HOURS-account te koppelen.", "Sign in to securely connect these private spaces to your AFTER HOURS account."));
@@ -809,6 +828,19 @@ export default function CinematicWorld({
     }
   }
 
+
+  async function removeRitualCard(key: string) {
+    if (!remoteProfileId || !window.confirm(t("Deze eigen reflectiekaart verwijderen?", "Delete this custom reflection card?"))) return;
+    try {
+      await deleteWorldRecord("ritual", key, remoteProfileId);
+      setRecords((current) => ({ ...current, ritual: current.ritual.filter((record) => record.record_key !== key) }));
+      if (currentCard?.id === key) setCurrentCard(null);
+      setMessage(t("Eigen kaart verwijderd.", "Custom card deleted."));
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : t("Kaart verwijderen is niet gelukt.", "Could not delete card."));
+    }
+  }
+
   async function saveCustomRitualCard() {
     if (!customCardTitle.trim() || !customCardText.trim()) return;
     try {
@@ -1059,7 +1091,7 @@ export default function CinematicWorld({
             <label>{t("Reflectievraag of ritueel", "Reflection prompt or ritual")}<textarea rows={3} value={customCardText} onChange={(event) => setCustomCardText(event.target.value)} maxLength={500} /></label>
             <button type="button" className="cw-primary" onClick={() => void saveCustomRitualCard()} disabled={busy || !remoteProfileId || !customCardTitle.trim() || !customCardText.trim()}><Plus size={15} />{t("Kaart toevoegen", "Add card")}</button>
           </div>
-          <div className="cw-saved-list"><h3>{t("Eigen kaarten en trekkingen", "Custom cards and draws")} <span>{customRitualCards.length + ritualDrawCount}</span></h3>{customRitualCards.map((card) => <div className="cw-saved-row" key={card.id}><div><strong>{card.title}</strong><small>{card.text}</small></div><button type="button" onClick={() => setCurrentCard({ id: card.id, title: card.text })}>{t("Trek", "Draw")}</button></div>)}</div>
+          <div className="cw-saved-list"><h3>{t("Eigen kaarten en trekkingen", "Custom cards and draws")} <span>{customRitualCards.length + ritualDrawCount}</span></h3>{customRitualCards.map((card) => <div className="cw-saved-row" key={card.id}><div><strong>{card.title}</strong><small>{card.text}</small></div><button type="button" onClick={() => setCurrentCard({ id: card.id, title: card.text })}>{t("Trek", "Draw")}</button><button type="button" onClick={() => void removeRitualCard(card.id)} aria-label={t("Kaart verwijderen", "Delete card")}><Trash2 size={14} /></button></div>)}</div>
         </section>
       )}
 
