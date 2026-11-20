@@ -961,7 +961,7 @@ export default function CinematicWorld({
             </div>
           )}
 
-          <div className="cw-engine-integrations"><button type="button" onClick={onOpenGameLibrary}><BookOpen size={15} />{t("Open bestaande AFTER HOURS-spellen en opdrachten", "Open existing AFTER HOURS games and prompts")}</button><button type="button" onClick={onOpenSafetyPlan}><ShieldCheck size={15} />{t("Open veiligheidsplan", "Open safety plan")}</button></div>
+          <div className="cw-engine-integrations"><button type="button" onClick={onOpenGameLibrary}><BookOpen size={15} />{t("Open bestaande AFTER HOURS-spellen en opdrachten", "Open existing AFTER HOURS games and prompts")}</button><button type="button" onClick={() => soundOn ? void stopAmbient() : void startAmbient()}><Music2 size={15} />{soundOn ? t("Soundscape uitschakelen", "Turn soundscape off") : t("Start de AFTER HOURS-soundscape", "Start the AFTER HOURS soundscape")}</button><button type="button" onClick={onOpenSafetyPlan}><ShieldCheck size={15} />{t("Open veiligheidsplan", "Open safety plan")}</button></div>
           <div className="cw-scene-grid">
             {scenes.map((scene) => (
               <article className="cw-scene-card" key={scene.key}>
