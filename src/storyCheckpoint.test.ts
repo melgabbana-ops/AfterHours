@@ -24,6 +24,7 @@ describe("Story Mode resume checkpoint", () => {
     expect(saveStoryCheckpoint("player-a", { chapterId: "arrival", roundIndex: -1 }, storage)).toBe(false);
     expect(saveStoryCheckpoint("player-a", { chapterId: "arrival", roundIndex: 3 }, storage)).toBe(false);
     expect(saveStoryCheckpoint("player-a", { chapterId: "arrival", roundIndex: 1.5 }, storage)).toBe(false);
+    expect(saveStoryCheckpoint("player-a", { chapterId: "arrival", roundIndex: "1" as unknown as number }, storage)).toBe(false);
     expect(loadStoryCheckpoint("player-a", storage)).toBeNull();
   });
 
