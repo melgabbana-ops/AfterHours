@@ -129,7 +129,7 @@
 - [ ] Aftercare starts with “De ervaring is voorbij.” and gentle guidance such as drink water, breathe calmly and take time for yourself.
 - [ ] Standalone 30-minute Aftercare Meditation remains accessible in free access without premium purchase.
 - [ ] Aftercare uses a softer, warmer light while retaining the same black/purple/gold identity.
-- [ ] Post-session order: FINAL MOOD → PRIVATE NOTE → SESSION SUMMARY.
+- [~] Post-session order: FINAL MOOD → PRIVATE NOTE → SESSION SUMMARY. The completion screen now presents a bilingual, transient summary of recorded moods, completed rounds, aftercare choice, note status and completion time. Persistent summary history and full duration / command / PASS / media / combo metrics remain outstanding.
 - [~] Optional private note prompt: “Wil je iets onthouden van deze ervaring?” with fields for how the session felt, what was liked and what the user would like to change next time; save or skip is implemented in Dutch and English.
 - [~] Notes are currently scoped by owner and session in browser-local storage with created/updated timestamps and a delete action. They are not encrypted, uploaded or synchronized across devices; server-side account storage, RLS and admin isolation remain outstanding.
 - [ ] Mood history shows before/during/after mood per session, is private to that user, and supports deletion.
