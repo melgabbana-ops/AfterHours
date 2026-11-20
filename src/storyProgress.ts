@@ -48,6 +48,60 @@ export function saveCompletedStoryChapters(playerId: string, chapterIds: readonl
   } catch { return false; }
 }
 
+
+
+export type StoryChapterCompletionResult =
+  | { ok: true; chapterIds: string[]; localSaved: boolean }
+  | { ok: false; reason: "invalid-input" | "remote-save-failed" | "local-save-failed"; error?: string };
+
+/**
+ * Complete a chapter only after its authoritative destination has confirmed it.
+ * Signed-in progress is written remotely first; local-only progress must pass
+ * the existing read-back verification before the UI may clear its checkpoint.
+ */
+export async function persistStoryChapterCompletion(
+  playerId: string,
+  chapterId: string,
+  completedChapterIds: readonly string[],
+  options: {
+    remoteProfileId?: string | null;
+    completeRemote?: (chapterId: string, expectedUserId: string) => Promise<string | null>;
+    storage?: Pick<Storage, "getItem" | "setItem">;
+  } = {},
+): Promise<StoryChapterCompletionResult> {
+  if (!playerId.trim() || !STORY_CHAPTER_IDS.has(chapterId)) {
+    return { ok: false, reason: "invalid-input" };
+  }
+
+  const nextChapterIds = [...new Set([...normalizeChapterIds(completedChapterIds), chapterId])];
+  const remoteProfileId = options.remoteProfileId;
+
+  if (remoteProfileId !== undefined && remoteProfileId !== null) {
+    const expectedUserId = remoteProfileId.trim();
+    if (!expectedUserId || !options.completeRemote) {
+      return { ok: false, reason: "remote-save-failed", error: "Story Mode-account is niet bevestigd." };
+    }
+
+    try {
+      const error = await options.completeRemote(chapterId, expectedUserId);
+      if (error) return { ok: false, reason: "remote-save-failed", error };
+    } catch (error) {
+      return {
+        ok: false,
+        reason: "remote-save-failed",
+        error: error instanceof Error ? error.message : "Story Mode-voortgang kon niet op het account worden bevestigd.",
+      };
+    }
+  }
+
+  const localSaved = saveCompletedStoryChapters(playerId, nextChapterIds, options.storage);
+  if (!localSaved && !remoteProfileId) {
+    return { ok: false, reason: "local-save-failed" };
+  }
+
+  return { ok: true, chapterIds: nextChapterIds, localSaved };
+}
+
 /** Return the first unfinished chapter in the approved story order. */
 export function getNextStoryChapterId(completedChapterIds: readonly string[]): string | null {
   const completed = new Set(normalizeChapterIds(completedChapterIds));
