@@ -29,15 +29,24 @@ export function loadCompletedStoryChapters(playerId: string, storage?: Pick<Stor
   } catch { return []; }
 }
 
+/**
+ * Persist completed chapters only when the browser can read back the exact
+ * normalized chapter list. A silent no-op or partial write must not be
+ * presented as durable progress.
+ */
 export function saveCompletedStoryChapters(playerId: string, chapterIds: readonly string[], storage?: Pick<Storage, "getItem" | "setItem">): boolean {
   try {
     const target = getStorage(storage);
     if (!target || !playerId.trim()) return false;
-    target.setItem(`${STORY_PROGRESS_KEY}:${playerId}`, JSON.stringify(normalizeChapterIds(chapterIds)));
-    return true;
+    const key = `${STORY_PROGRESS_KEY}:${playerId}`;
+    const normalized = normalizeChapterIds(chapterIds);
+    target.setItem(key, JSON.stringify(normalized));
+    const persisted = target.getItem(key);
+    if (persisted === null) return false;
+    const verified = normalizeChapterIds(JSON.parse(persisted));
+    return verified.length === normalized.length && verified.every((id, index) => id === normalized[index]);
   } catch { return false; }
 }
-
 
 /** Return the first unfinished chapter in the approved story order. */
 export function getNextStoryChapterId(completedChapterIds: readonly string[]): string | null {
