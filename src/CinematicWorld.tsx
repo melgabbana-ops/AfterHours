@@ -272,7 +272,7 @@ export default function CinematicWorld({
     };
     void load();
     return () => { active = false; };
-  }, [remoteProfileId]);
+  }, [remoteProfileId, language]);
 
   useEffect(() => {
     const profile = records.dominion.find((record) => record.record_key === "profile");
@@ -424,9 +424,9 @@ export default function CinematicWorld({
       setRunStatus("paused");
       setCheckIn("unset");
       onSafetyPause();
-      await refreshData();
       setMessage(t("Gepauzeerd. Voor hervatten is een nieuwe check-in en consent nodig.", "Paused. Resuming requires a fresh check-in and consent."));
-    } catch (cause) {
+      try { await refreshData(); } catch { setMessage(t("Gepauzeerd. Je verbinding is nodig om de geschiedenis te verversen.", "Paused. Reconnect to refresh the history.")); }
+    } catch {
       setRunStatus("paused");
       setCheckIn("unset");
       onSafetyPause();
@@ -516,6 +516,8 @@ export default function CinematicWorld({
 
   async function handleBack() {
     if (runStatus === "active") await pauseScene();
+    setVaultPassphrase("");
+    setVaultPlain(null);
     if (audioContext.current) {
       await audioContext.current.close();
       audioContext.current = null;
