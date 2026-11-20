@@ -273,7 +273,7 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
   const speechLocale = language === "nl" ? "nl-NL" : "en-US";
   const getCurrentVoiceSafetyIntent = (spoken: string) => {
-    const plan = readSafetyPlan();
+    const plan = readSafetyPlan(playerId);
     return getVoiceSafetyIntent(spoken, language, { stopWord: plan.safeword, pauseWord: plan.amberSignal });
   };
   const historyKey = `afterhours.prompt-history.v2:${playerId}`;

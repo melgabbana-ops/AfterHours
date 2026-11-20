@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Check, LockKeyhole, Pause, Play, Save, Square, Trash2 } from "lucide-react";
 interface SafetyPlanProps {
+  profileId: string;
   language?: "nl" | "en";
   sessionStatus?: "ready" | "active" | "paused" | "completed" | "stopped";
   onPause?: () => void;
@@ -11,6 +12,7 @@ interface SafetyPlanProps {
 import {
   clearSafetyPlan,
   createEmptySafetyPlan,
+  hasUnscopedSafetyPlan,
   readSafetyPlan,
   writeSafetyPlan,
   type ReadinessChecks,
@@ -18,13 +20,15 @@ import {
 } from "./safetyPlanStorage";
 
 export default function SafetyPlan({
+  profileId,
   language = "nl",
   sessionStatus = "ready",
   onPause,
   onResume,
   onStopNow,
 }: SafetyPlanProps) {
-  const [plan, setPlan] = useState<SafetyPlanData>(readSafetyPlan);
+  const [plan, setPlan] = useState<SafetyPlanData>(() => readSafetyPlan(profileId));
+  const [legacyPlanDetected, setLegacyPlanDetected] = useState(() => hasUnscopedSafetyPlan());
   const [saved, setSaved] = useState(false);
   const [message, setMessage] = useState("");
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
@@ -60,10 +64,11 @@ export default function SafetyPlan({
       boundaries: plan.boundaries.trim().slice(0, 1000),
       readiness: { ...plan.readiness },
     };
-    if (writeSafetyPlan(nextPlan)) {
+    if (writeSafetyPlan(nextPlan, profileId)) {
       setPlan(nextPlan);
       setSaved(true);
-      setMessage(t("Veiligheidsafspraken opgeslagen op dit apparaat.", "Safety agreements saved on this device."));
+      setLegacyPlanDetected(false);
+      setMessage(t("Veiligheidsafspraken opgeslagen voor dit profiel op dit apparaat.", "Safety agreements saved for this profile on this device."));
     } else {
       setSaved(false);
       setMessage(t("Opslaan is niet gelukt. Controleer de opslagruimte van je browser.", "Saving failed. Check your browser storage."));
@@ -71,7 +76,7 @@ export default function SafetyPlan({
   };
 
   const clear = () => {
-    if (clearSafetyPlan()) {
+    if (clearSafetyPlan(profileId)) {
       setPlan(createEmptySafetyPlan());
       setSaved(false);
       setMessage(t("Lokale veiligheidsafspraken verwijderd.", "Local safety agreements deleted."));
@@ -82,7 +87,8 @@ export default function SafetyPlan({
 
   return <section className="safety-plan" aria-labelledby="safety-plan-title">
     <div className="safety-plan-heading"><LockKeyhole/><div><span className="eyebrow">{t("PRIVÉ · OP DIT APPARAAT", "PRIVATE · ON THIS DEVICE")}</span><h3 id="safety-plan-title">{t("Jouw veiligheidsplan", "Your safety plan")}</h3></div></div>
-    <p className="safety-plan-intro">{t("Leg vooraf vast welke signalen je wilt gebruiken. Deze notities blijven lokaal in deze browser en worden niet naar AFTER HOURS-servers gesynchroniseerd. Iedereen met toegang tot dit browserprofiel kan ze mogelijk bekijken. Gebruik dit daarom niet op een gedeeld apparaat en noteer geen namen of andere gevoelige details.", "Set out the signals you want to use before you begin. These notes stay in this browser and are not synced to AFTER HOURS servers. Anyone with access to this browser profile may be able to view them. Do not use this on a shared device or include names or other sensitive details.")}</p>
+    <p className="safety-plan-intro">{t("Leg vooraf vast welke signalen je wilt gebruiken. Deze notities blijven lokaal in deze browser en zijn apart per AFTER HOURS-profiel opgeslagen. Ze worden niet naar AFTER HOURS-servers gesynchroniseerd. Iedereen met toegang tot dit browserprofiel kan ze mogelijk bekijken. Gebruik dit daarom niet op een gedeeld apparaat en noteer geen namen of andere gevoelige details.", "Set out the signals you want to use before you begin. These notes stay in this browser and are stored separately for each AFTER HOURS profile. They are not synced to AFTER HOURS servers. Anyone with access to this browser profile may be able to view them. Do not use this on a shared device or include names or other sensitive details.")}</p>
+    {legacyPlanDetected && <p className="safety-plan-footnote" role="status">{t("Een eerder opgeslagen veiligheidsplan had nog geen profielkoppeling. Omdat niet vaststaat bij welk profiel het hoort, is het niet automatisch overgezet of verwijderd. Voer je signalen opnieuw in voor dit profiel; de oude lokale gegevens zijn ongewijzigd gebleven.", "A safety plan from an earlier version had no profile link. Because its owner cannot be determined, it has not been imported or deleted. Re-enter your signals for this profile; the old local data remains unchanged.")}</p>}
 
     <section className="safety-room-panel" aria-labelledby="safety-room-title">
       <div className="safety-room-status">
