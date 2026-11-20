@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  ArrowLeft, ArrowRight, CheckCircle2, Clapperboard,
+  ArrowLeft, ArrowRight, BookOpen, CheckCircle2, Clapperboard,
   Download, Eye, EyeOff, Flame, LockKeyhole, Mail, Music2, Pause,
   Play, Plus, Save, Share2, ShieldCheck, Sparkles, Square, Star, Trash2,
   UnlockKeyhole, Volume2, VolumeX
