@@ -26,7 +26,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 .tile span{font-family:"DM Sans",sans-serif;font-size:12px;font-weight:600;letter-spacing:.02em}
 .tile:hover,.experience-choice:hover{border-color:rgba(237,199,131,.75)!important;background:linear-gradient(145deg,#21190f,#0c0a07)!important;transform:translateY(-2px)}
 /* 01 Home */
-.home-hero{position:relative;isolation:isolate;overflow:hidden;min-height:410px;padding:34px 26px 26px;border:1px solid rgba(216,173,104,.3);border-radius:20px;background:linear-gradient(90deg,rgba(5,5,4,.97) 0%,rgba(5,5,4,.78) 52%,rgba(5,5,4,.25) 100%),url('/design-reference/home-hero.svg') center/cover!important;box-shadow:0 22px 60px rgba(0,0,0,.42)}
+.home-hero{position:relative;isolation:isolate;overflow:hidden;min-height:410px;padding:34px 26px 26px;border:1px solid rgba(216,173,104,.3);border-radius:20px;background:linear-gradient(90deg,rgba(5,5,4,.97) 0%,rgba(5,5,4,.78) 52%,rgba(5,5,4,.25) 100%),url('./design-reference/home-hero.svg') center/cover!important;box-shadow:0 22px 60px rgba(0,0,0,.42)}
 .home-hero:after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(0deg,rgba(5,5,4,.94),transparent 65%);pointer-events:none}
 .home-wordmark{width:min(210px,65%);max-height:74px;object-fit:contain;object-position:left center;margin:0 0 48px;filter:drop-shadow(0 4px 20px #000)}
 .home-hero h2{font-size:clamp(38px,8vw,60px);margin:8px 0 12px;text-shadow:0 2px 20px #000}
@@ -40,7 +40,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 .consent-panel svg,.resume-panel>svg{color:var(--ah-champagne)}
 /* 02 Consent & safety */
 .safety-screen,.safety-plan{position:relative}
-.safety-screen .safety-plan{padding:26px 18px 22px;border:1px solid var(--ah-bronze-soft);border-radius:18px;background:linear-gradient(180deg,rgba(7,7,6,.45),#080705 62%),url('/design-reference/consent-hero.svg') center top/100% auto no-repeat,#0b0907}
+.safety-screen .safety-plan{padding:26px 18px 22px;border:1px solid var(--ah-bronze-soft);border-radius:18px;background:linear-gradient(180deg,rgba(7,7,6,.45),#080705 62%),url('./design-reference/consent-hero.svg') center top/100% auto no-repeat,#0b0907}
 .safety-plan-heading{font:500 clamp(30px,7vw,46px)/1.05 "Cinzel",Georgia,serif}
 .safety-plan-intro{color:var(--ah-muted);max-width:38rem;line-height:1.65}
 .safety-room-panel{border:1px solid var(--ah-bronze-soft);border-radius:14px;background:rgba(12,10,7,.88);padding:18px}
@@ -48,7 +48,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 .safety-emergency-controls{gap:9px}.safety-pause-action,.safety-stop-action{min-height:48px;border-radius:9px}
 .safety-plan .gold{width:100%;min-height:54px;border-radius:10px}
 /* 03 Active experience */
-.experience-shell{max-width:700px;margin:0 auto;padding:24px 20px 38px;border:1px solid rgba(216,173,104,.22);border-radius:18px;background:linear-gradient(180deg,rgba(7,7,6,.12),#080705 58%),url('/design-reference/experience-hero.svg') center top/100% auto no-repeat,#0b0907}
+.experience-shell{max-width:700px;margin:0 auto;padding:24px 20px 38px;border:1px solid rgba(216,173,104,.22);border-radius:18px;background:linear-gradient(180deg,rgba(7,7,6,.12),#080705 58%),url('./design-reference/experience-hero.svg') center top/100% auto no-repeat,#0b0907}
 .game-top{padding:0 0 12px;border-bottom:1px solid var(--ah-bronze-soft)}
 .game-top button{border-color:var(--ah-bronze-soft);border-radius:50%;color:var(--ah-gold)}
 .round-steps span{border-radius:7px;border-color:rgba(216,173,104,.22)}
@@ -62,7 +62,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 .timer strong{font-size:clamp(48px,12vw,68px);color:var(--ah-ivory)}
 .actions button{border-radius:9px;min-height:48px}.actions .stop,.danger-action{background:linear-gradient(120deg,#7f2f2b,#b14c43)!important;color:#fff!important;border-color:#c16a60!important}
 /* 04 Aftercare */
-.aftercare-card{padding:28px 20px;border:1px solid var(--ah-bronze-soft);border-radius:18px;background:linear-gradient(180deg,rgba(7,7,6,.32),#080705 62%),url('/design-reference/aftercare-hero.svg') center top/100% auto no-repeat,#0b0907}
+.aftercare-card{padding:28px 20px;border:1px solid var(--ah-bronze-soft);border-radius:18px;background:linear-gradient(180deg,rgba(7,7,6,.32),#080705 62%),url('./design-reference/aftercare-hero.svg') center top/100% auto no-repeat,#0b0907}
 .aftercare-card h2{font-size:clamp(34px,7vw,48px);margin-top:28px}
 .aftercare-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:22px 0}
 .aftercare-options button{min-height:112px;text-align:left;padding:16px;border:1px solid var(--ah-bronze-soft);border-radius:12px;background:rgba(16,13,9,.9)}
@@ -71,7 +71,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 .aftercare-options button.selected{border-color:var(--ah-gold);background:rgba(150,105,47,.16)}
 .aftercare-complete{width:100%;min-height:54px;border-radius:10px;margin-top:16px}
 /* 05 Completion */
-.completion-card{position:relative;overflow:hidden;text-align:center;padding:34px 22px;border:1px solid rgba(216,173,104,.35);border-radius:20px;background:linear-gradient(180deg,rgba(7,7,6,.35),#080705 65%),url('/design-reference/completion-hero.svg') center top/cover no-repeat,#0b0907}
+.completion-card{position:relative;overflow:hidden;text-align:center;padding:34px 22px;border:1px solid rgba(216,173,104,.35);border-radius:20px;background:linear-gradient(180deg,rgba(7,7,6,.35),#080705 65%),url('./design-reference/completion-hero.svg') center top/cover no-repeat,#0b0907}
 .completion-seal{width:70px;height:70px;border:1px solid var(--ah-champagne);border-radius:50%;display:grid;place-items:center;margin:0 auto 20px;color:var(--ah-gold);box-shadow:0 0 24px rgba(216,173,104,.16)}
 .completion-card h2{font-size:clamp(34px,7vw,48px)}
 .completion-xp{display:flex;justify-content:center;align-items:center;gap:12px;margin:26px auto;padding:18px;border:1px solid var(--ah-bronze-soft);border-radius:12px;background:rgba(10,8,6,.7)}
@@ -81,7 +81,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 .completion-stats strong,.completion-stats small{display:block}.completion-stats strong{font:500 24px "Cinzel",Georgia,serif}.completion-stats small{font-size:8px;letter-spacing:.12em;color:var(--ah-muted);margin-top:5px}
 .completion-primary,.completion-secondary{width:100%;min-height:52px;border-radius:10px;margin-top:9px}
 /* 06 Tarot / 07 Horoscope */
-.insights{border:1px solid var(--ah-bronze-soft);border-radius:18px;padding:22px 16px;background:linear-gradient(180deg,rgba(8,7,5,.18),#080705 75%),url('/design-reference/insights-hero.svg') center top/100% auto no-repeat,#0b0907}
+.insights{border:1px solid var(--ah-bronze-soft);border-radius:18px;padding:22px 16px;background:linear-gradient(180deg,rgba(8,7,5,.18),#080705 75%),url('./design-reference/insights-hero.svg') center top/100% auto no-repeat,#0b0907}
 .insights-hero{text-align:center;padding:18px 6px 24px}
 .insights-hero h2{font-size:clamp(34px,7vw,48px)}
 .insight-tabs{display:flex;gap:8px;overflow-x:auto;padding:6px 0 14px}
@@ -92,14 +92,14 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 .ah-tarot-card{filter:drop-shadow(0 14px 24px rgba(0,0,0,.42))}
 .astro-reading,.astro-daily{border:1px solid var(--ah-bronze-soft);border-radius:12px;padding:16px;background:rgba(10,8,6,.78)}
 /* 08 Radio */
-.radio-room{padding:24px 18px 32px;border:1px solid var(--ah-bronze-soft);border-radius:18px;background:linear-gradient(180deg,rgba(7,7,6,.14),#080705 60%),url('/design-reference/radio-hero.svg') center top/100% auto no-repeat,#0b0907}
+.radio-room{padding:24px 18px 32px;border:1px solid var(--ah-bronze-soft);border-radius:18px;background:linear-gradient(180deg,rgba(7,7,6,.14),#080705 60%),url('./design-reference/radio-hero.svg') center top/100% auto no-repeat,#0b0907}
 .radio-hero{text-align:center;padding:20px 8px 28px}.radio-hero h2{font-size:clamp(34px,7vw,48px)}
 .radio-player{border:1px solid var(--ah-bronze-soft)!important;border-radius:16px!important;background:rgba(9,8,6,.92)!important;padding:24px!important}
 .radio-disc{border:1px solid var(--ah-champagne)!important;box-shadow:0 0 35px rgba(216,173,104,.14)}
 .spotify-open{border:1px solid var(--ah-champagne)!important;border-radius:10px;background:linear-gradient(110deg,#b98543,#efd39b);color:#171109!important}
 .radio-note{border-radius:12px;padding:14px;margin-top:16px}
 /* 09 Profile */
-.profile{position:relative;text-align:center;padding:30px 18px;border:1px solid var(--ah-bronze-soft);border-radius:18px;background:linear-gradient(180deg,rgba(7,7,6,.22),#080705 58%),url('/design-reference/profile-hero.svg') center top/100% auto no-repeat,#0b0907}
+.profile{position:relative;text-align:center;padding:30px 18px;border:1px solid var(--ah-bronze-soft);border-radius:18px;background:linear-gradient(180deg,rgba(7,7,6,.22),#080705 58%),url('./design-reference/profile-hero.svg') center top/100% auto no-repeat,#0b0907}
 .profile .identity-avatar{width:112px;height:112px;border-color:var(--ah-champagne);box-shadow:0 0 26px rgba(216,173,104,.13)}
 .profile h2{font-size:clamp(32px,7vw,44px)}
 .profile .xp{height:7px;border-radius:99px;overflow:hidden;border:1px solid var(--ah-bronze-soft);background:#282017}
@@ -111,7 +111,7 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 /* 10 Game selection */
 .game-select-head{text-align:center;padding:24px 8px 26px}.game-select-head h2{font-size:clamp(34px,7vw,48px)}
 .game-select-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.experience-choice{position:relative;overflow:hidden;min-height:230px;padding:18px;text-align:left;border:1px solid var(--ah-bronze-soft);border-radius:15px;background:linear-gradient(180deg,rgba(7,7,6,.05),rgba(7,7,6,.94) 76%),url('/design-reference/game-selection-hero.svg') center/cover,#0b0907}
+.experience-choice{position:relative;overflow:hidden;min-height:230px;padding:18px;text-align:left;border:1px solid var(--ah-bronze-soft);border-radius:15px;background:linear-gradient(180deg,rgba(7,7,6,.05),rgba(7,7,6,.94) 76%),url('./design-reference/game-selection-hero.svg') center/cover,#0b0907}
 .experience-choice:nth-child(2){background-position:25% center}.experience-choice:nth-child(3){background-position:70% center}
 .experience-choice .choice-symbol{color:var(--ah-gold);font-size:28px}.experience-choice strong{display:block;font:500 21px "Cinzel",Georgia,serif;margin:12px 0 7px}
 .experience-choice small{display:block;color:var(--ah-muted);font-size:11px;line-height:1.5}
