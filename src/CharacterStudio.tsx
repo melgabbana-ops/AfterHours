@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Check, ChevronDown, Sparkles } from "lucide-react";
 import { rankProgressFromXp } from "./progression";
+import "./CharacterRankEvolution.css";
 
 type Language = "nl" | "en";
 type Gender = "female" | "male";
