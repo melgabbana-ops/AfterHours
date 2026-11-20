@@ -65,8 +65,8 @@ function shouldCacheRequest(request) {
 
   const cacheControl = request.headers.get("Cache-Control") || "";
   const pragma = request.headers.get("Pragma") || "";
-  if (/(?:^|,)\\s*(?:no-store|no-cache)\\b/i.test(cacheControl)) return false;
-  if (/\\bno-cache\\b/i.test(pragma)) return false;
+  if (/(?:^|,)\s*(?:no-store|no-cache)\b/i.test(cacheControl)) return false;
+  if (/\bno-cache\b/i.test(pragma)) return false;
   if (["no-store", "no-cache", "reload"].includes(request.cache)) return false;
   return true;
 }
@@ -77,7 +77,7 @@ function shouldCacheResponse(response) {
   const directives = cacheControl.split(",").map((directive) => directive.trim().toLowerCase());
   const neverCache = new Set(["no-store", "private", "no-cache", "must-revalidate", "proxy-revalidate"]);
   if (directives.some((directive) => neverCache.has(directive.split("=", 1)[0].trim()))) return false;
-  if (directives.some((directive) => /^max-age\\s*=\\s*"?0"?$/i.test(directive))) return false;
+  if (directives.some((directive) => /^max-age\s*=\s*"?0"?$/i.test(directive))) return false;
   if ((response.headers.get("Vary") || "").trim() === "*") return false;
   return true;
 }
