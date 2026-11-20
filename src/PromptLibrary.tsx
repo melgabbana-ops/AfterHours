@@ -602,7 +602,7 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
         <button type="button" className={selectedDom === "feminine" ? "selected" : ""} aria-pressed={selectedDom === "feminine"} onClick={() => setSelectedDom("feminine")}><span className="dom-picker-symbol" aria-hidden="true">♛</span><span><strong>{t("Vrouwelijke Dom","Female Dom")}</strong><small>{t("Meesteres · vrouwelijke stem","Mistress · feminine voice")}</small></span><span className="dom-picker-check">{selectedDom === "feminine" ? "✓" : "+"}</span></button>
       </div>
     </section>
-    {mode === "games" && experienceStartBlockedReason && <section className="consent-panel experience-access-notice" role="alert" aria-live="assertive">
+    {mode === "games" && experienceStartBlockedReason && <section className="consent-panel" role="alert" aria-live="assertive">
       <ShieldCheck/>
       <div>
         <strong>{experienceStartBlockedReason === "consent" ? t("Consent vereist voor begeleide ervaringen", "Consent is required for guided experiences") : t("Accountstatus niet bevestigd", "Account status is not verified")}</strong>

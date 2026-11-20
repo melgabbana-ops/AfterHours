@@ -17,7 +17,7 @@ describe("Prompt Library guided-experience access integration", () => {
   });
 
   it("shows an accessible bilingual access notice with an explicit recovery action", () => {
-    expect(promptSource).toContain('className="consent-panel experience-access-notice" role="alert" aria-live="assertive"');
+    expect(promptSource).toContain('className="consent-panel" role="alert" aria-live="assertive"');
     expect(promptSource).toContain("onClick={onRequestConsent}");
     expect(promptSource).toContain("Consent vereist voor begeleide ervaringen");
     expect(promptSource).toContain("Accountstatus niet bevestigd");
