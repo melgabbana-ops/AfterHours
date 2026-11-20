@@ -2,7 +2,7 @@ self.addEventListener("message", (event) => {
   if (event.data && event.data.type === "SKIP_WAITING") self.skipWaiting();
 });
 
-const CACHE_NAME = "after-hours-v11";
+const CACHE_NAME = "after-hours-v12";
 const APP_BASE = new URL("./", self.registration.scope);
 const asset = (path) => new URL(path, APP_BASE).toString();
 const APP_SHELL = ["", "manifest.webmanifest", "after-hours-brand-logo.svg", "after-hours-icon-192.png", "after-hours-icon-180.png", "after-hours-icon-512.png", "after-hours-icon-512.svg", "icons/after-hours-master.svg"];
