@@ -72,8 +72,11 @@ export function buildSessionSummaryRows(
   const date = new Date(summary.completedAt);
   const completedAt = Number.isFinite(date.getTime())
     ? new Intl.DateTimeFormat(language === "nl" ? "nl-NL" : "en-GB", {
-        dateStyle: "medium",
-        timeStyle: "short",
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
       }).format(date)
     : language === "nl" ? "Onbekend" : "Unknown";
 
