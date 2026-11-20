@@ -130,10 +130,15 @@ function bytesToBase64(bytes: Uint8Array): string {
 function base64ToBytes(value: string): Uint8Array {
   return Uint8Array.from(atob(value), (character) => character.charCodeAt(0));
 }
+function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
+  const copy = new Uint8Array(bytes.byteLength);
+  copy.set(bytes);
+  return copy.buffer as ArrayBuffer;
+}
 async function deriveVaultKey(passphrase: string, salt: Uint8Array): Promise<CryptoKey> {
   const material = await crypto.subtle.importKey("raw", new TextEncoder().encode(passphrase), "PBKDF2", false, ["deriveKey"]);
   return crypto.subtle.deriveKey(
-    { name: "PBKDF2", salt, iterations: 210000, hash: "SHA-256" },
+    { name: "PBKDF2", salt: toArrayBuffer(salt), iterations: 210000, hash: "SHA-256" },
     material,
     { name: "AES-GCM", length: 256 },
     false,
@@ -668,9 +673,9 @@ export default function CinematicWorld({
       if (!payload.salt || !payload.iv || !payload.ciphertext) throw new Error("Invalid encrypted vault item.");
       const key = await deriveVaultKey(vaultPassphrase, base64ToBytes(payload.salt));
       const plaintext = await crypto.subtle.decrypt(
-        { name: "AES-GCM", iv: base64ToBytes(payload.iv) },
+        { name: "AES-GCM", iv: toArrayBuffer(base64ToBytes(payload.iv)) },
         key,
-        base64ToBytes(payload.ciphertext)
+        toArrayBuffer(base64ToBytes(payload.ciphertext))
       );
       const parsed = JSON.parse(new TextDecoder().decode(plaintext)) as { title?: string; content?: string };
       setVaultPlain({ title: String(parsed.title ?? ""), content: String(parsed.content ?? "") });
