@@ -4,6 +4,7 @@ import { loadSavedPromptIds, saveSavedPromptIds } from "./promptBookmarks";
 import { pickRandomId, sessionModes, storyChapters, type SessionModeId } from "./sessionModes";
 import type { GuidedExperienceBlockReason } from "./experienceAccess";
 import { getNextStoryChapterId, loadCompletedStoryChapters, saveCompletedStoryChapters } from "./storyProgress";
+import { clearStoryCheckpoint, loadStoryCheckpoint, saveStoryCheckpoint, type StoryCheckpoint } from "./storyCheckpoint";
 import { completeRemoteStoryChapter, loadRemoteStoryProgress } from "./services/backend";
 import { getVoiceSafetyIntent, isExplicitVoicePass } from "./voiceSafety";
 import { readSafetyPlan } from "./safetyPlanStorage";
@@ -302,6 +303,31 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
   const completedStoryChapters = storyProgressState.playerId === playerId ? storyProgressState.ids : loadCompletedStoryChapters(playerId);
   const nextStoryChapterId = getNextStoryChapterId(completedStoryChapters);
   const nextStoryChapterIndex = storyChapters.findIndex((chapter) => chapter.id === nextStoryChapterId);
+  const [storyCheckpointState, setStoryCheckpointState] = useState<{ playerId: string; checkpoint: StoryCheckpoint | null }>(() => ({
+    playerId,
+    checkpoint: loadStoryCheckpoint(playerId),
+  }));
+  const storyCheckpoint = storyCheckpointState.playerId === playerId
+    ? storyCheckpointState.checkpoint
+    : loadStoryCheckpoint(playerId);
+  const visibleStoryCheckpoint = storyCheckpoint && !completedStoryChapters.includes(storyCheckpoint.chapterId)
+    ? storyCheckpoint
+    : null;
+  const storyCheckpointChapter = visibleStoryCheckpoint
+    ? storyChapters.find((chapter) => chapter.id === visibleStoryCheckpoint.chapterId)
+    : undefined;
+  const storyCheckpointRoundCount = storyCheckpointChapter
+    ? experienceGames.find((game) => game.id === storyCheckpointChapter.gameId)?.rounds.length ?? 3
+    : 3;
+  const persistStoryCheckpoint = (chapterId: string, roundIndex: number) => {
+    const checkpoint = { chapterId, roundIndex };
+    saveStoryCheckpoint(playerId, checkpoint);
+    setStoryCheckpointState({ playerId, checkpoint });
+  };
+  const removeStoryCheckpoint = () => {
+    clearStoryCheckpoint(playerId);
+    setStoryCheckpointState({ playerId, checkpoint: null });
+  };
   React.useEffect(() => {
     const expectedUserId = remoteProfileId;
     if (!expectedUserId) {
@@ -356,6 +382,7 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
         });
       }
     }
+    if (chapterId) removeStoryCheckpoint();
     setActiveStoryChapter(null);
     return chapterId;
   };
@@ -368,6 +395,7 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
   const recognitionRef = React.useRef<any>(null);
   React.useEffect(() => {
     if (!experienceStartBlockedReason || !activeGame) return;
+    removeStoryCheckpoint();
     try {
       window.speechSynthesis?.cancel();
       recognitionRef.current?.stop();
@@ -412,7 +440,12 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
     const active = experienceGames.find((game) => game.id === activeGame);
     if (!active || gameRound >= active.rounds.length - 1) return false;
 
-    setGameRound((currentRound) => Math.min(currentRound + 1, active.rounds.length - 1));
+    const nextRound = Math.min(gameRound + 1, active.rounds.length - 1);
+    setGameRound(nextRound);
+    if (sessionMode === "story" && activeStoryChapter !== null) {
+      const chapterId = storyChapters[activeStoryChapter]?.id;
+      if (chapterId) persistStoryCheckpoint(chapterId, nextRound);
+    }
     setActiveVariant(null);
     return true;
   };
@@ -422,6 +455,7 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
       try { window.speechSynthesis?.cancel(); recognitionRef.current?.stop(); } catch { /* Safety action must not depend on speech engine state. */ }
       setVoiceListening(false);
       if (safetyIntent === "stop") {
+        removeStoryCheckpoint();
         setVoicePaused(false);
         onSafetyAction?.("stop");
         return t("We stoppen nu. Je hoeft niets uit te leggen. De app heeft STOP toegepast; wil je aftercare of liever even stilte?", "We stop now. You do not need to explain. The app has applied STOP; would you like aftercare or a quiet moment?");
@@ -532,15 +566,16 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
     setCopied(false);
   }
 
-  const startGame = (gameId: string) => {
+  const startGame = (gameId: string, initialRound = 0) => {
     if (experienceStartBlockedReason) return;
     const game = experienceGames.find((item) => item.id === gameId);
-    if (!game) return;
+    if (!game || !game.rounds.length) return;
+    const safeRoundIndex = Math.max(0, Math.min(Number.isInteger(initialRound) ? initialRound : 0, game.rounds.length - 1));
     setActiveGame(gameId);
-    setGameRound(0);
+    setGameRound(safeRoundIndex);
     setVoicePaused(false);
     setVoiceError("");
-    chooseGameVariant(gameId, 0);
+    chooseGameVariant(gameId, safeRoundIndex);
   };
 
   const chooseSessionMode = (nextMode: SessionModeId) => {
@@ -561,14 +596,30 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
     startGame("boss-mode");
   };
 
-  const startStoryChapter = (chapterIndex: number) => {
+  const startStoryChapter = (chapterIndex: number, requestedRoundIndex = 0) => {
     if (experienceStartBlockedReason) return;
     const chapter = storyChapters[chapterIndex];
-    if (!chapter) return;
+    const chapterGame = chapter ? experienceGames.find((game) => game.id === chapter.gameId) : undefined;
+    if (!chapter || !chapterGame?.rounds.length) return;
+    const safeRoundIndex = Math.max(0, Math.min(
+      Number.isInteger(requestedRoundIndex) ? requestedRoundIndex : 0,
+      chapterGame.rounds.length - 1,
+    ));
+    persistStoryCheckpoint(chapter.id, safeRoundIndex);
     setSessionMode("story");
     setActiveStoryChapter(chapterIndex);
     setMode("games");
-    startGame(chapter.gameId);
+    startGame(chapter.gameId, safeRoundIndex);
+  };
+
+  const resumeStoryChapter = () => {
+    if (!visibleStoryCheckpoint || experienceStartBlockedReason) return;
+    const chapterIndex = storyChapters.findIndex((chapter) => chapter.id === visibleStoryCheckpoint.chapterId);
+    if (chapterIndex < 0) {
+      removeStoryCheckpoint();
+      return;
+    }
+    startStoryChapter(chapterIndex, visibleStoryCheckpoint.roundIndex);
   };
 
   const chooseGameVariant = (gameId: string, roundIndex: number) => {
@@ -611,9 +662,9 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
       <button type="button" onClick={onRequestConsent}>{experienceStartBlockedReason === "consent" ? t("Consent bevestigen", "Review consent") : t("Account controleren", "Check account")}</button>
     </section>}
     {mode === "games" ? <section className="experience-catalog">
-      {!activeGame ? <><section className="session-mode-section" aria-label={t("Kies een spelmodus","Choose a game mode")}><div className="session-mode-section-heading"><span className="eyebrow">FIVE WAYS INTO AFTER HOURS</span><h3>{t("Kies jouw spelmodus","Choose your game mode")}</h3><p>{t("Elke modus is een andere route. Jij houdt altijd de regie: aanpassen, passen of stoppen blijft mogelijk.","Each mode offers a different route. You stay in control: adapting, passing, or stopping is always allowed.")}</p></div><div className="session-mode-grid">{sessionModes.map((item) => <button type="button" className={sessionMode === item.id ? "session-mode-card selected" : "session-mode-card"} key={item.id} onClick={() => chooseSessionMode(item.id)} aria-pressed={sessionMode === item.id}><span className="session-mode-index">{String(sessionModes.findIndex((modeItem) => modeItem.id === item.id) + 1).padStart(2,"0")}</span><strong>{language === "en" ? item.titleEN : item.title}</strong><span>{language === "en" ? item.descriptionEN : item.descriptionNL}</span><small>{language === "en" ? item.hintEN : item.hintNL}</small></button>)}</div>{sessionMode === "story" && <div className="story-chapters"><div className="session-mode-section-heading"><span className="eyebrow">STORY MODE · 7 CHAPTERS</span><h3>{t("Jouw verhaal begint hier","Your story starts here")}</h3>{remoteProfileId && <div className="story-sync-status" role="status" aria-live="polite">{storySyncState === "syncing" ? t("Voortgang synchroniseren…","Syncing progress…") : storySyncState === "synced" ? t("Voortgang veilig gekoppeld aan je account","Progress linked to your account") : storySyncState === "error" ? <><span>{t("Je lokale voortgang is bewaard. Account-sync mislukt: ","Your local progress is saved. Account sync failed: ")}{storySyncError}</span><button type="button" className="read-assignment" onClick={() => setStorySyncRetry((value) => value + 1)}>{t("Opnieuw proberen","Try again")}</button></> : null}</div>}</div>{completedStoryChapters.length > 0 && (nextStoryChapterIndex >= 0 ? <div className="story-resume-card"><div className="story-resume-copy"><span className="eyebrow">{t("VERDER MET JE VERHAAL","CONTINUE YOUR STORY")}</span><strong>{storyChapters[nextStoryChapterIndex].title}</strong><p>{t("Je volgende open hoofdstuk staat klaar. Het start pas wanneer je zelf kiest.","Your next open chapter is ready. It starts only when you choose.")}</p></div><button type="button" className="story-resume-action" disabled={Boolean(experienceStartBlockedReason)} onClick={() => startStoryChapter(nextStoryChapterIndex)}>{t("Verdergaan","Continue")} <ArrowRight/></button></div> : <p className="story-complete-status" role="status">{t("Alle zeven hoofdstukken zijn voltooid. Je kunt elk hoofdstuk hieronder opnieuw openen.","All seven chapters are complete. You can replay any chapter below.")}</p>)}<div className="story-chapter-grid">{storyChapters.map((chapter,index) => <button type="button" key={chapter.id} className={`story-chapter-card${activeStoryChapter === index ? " selected" : ""}${completedStoryChapters.includes(chapter.id) ? " completed" : ""}`} disabled={Boolean(experienceStartBlockedReason)} onClick={() => startStoryChapter(index)}><span className="story-chapter-number">0{chapter.index}</span><strong>{chapter.title}</strong><p>{language === "en" ? chapter.descriptionEN : chapter.descriptionNL}</p><small>{completedStoryChapters.includes(chapter.id) ? t("VOLTOOID · Opnieuw spelen","COMPLETED · Replay") : t("Start hoofdstuk","Start chapter")} <ArrowRight/></small></button>)}</div></div>}</section><div className="experience-intro"><span className="eyebrow">THE EXPERIENCE COLLECTION</span><h3>{t("Kies je game.","Choose your game.")}</h3><p>{t("Volledige, begeleide scenario's met drie rondes, concrete opdrachten en een bewuste afsluiting. Alle deelnemers zijn 18+, stemmen vrij in en mogen op ieder moment passen of stoppen.","Complete guided scenarios with three rounds, clear tasks and a thoughtful closing. All participants are 18+, give free consent, and may pass or stop at any time.")}</p></div>
+      {!activeGame ? <><section className="session-mode-section" aria-label={t("Kies een spelmodus","Choose a game mode")}><div className="session-mode-section-heading"><span className="eyebrow">FIVE WAYS INTO AFTER HOURS</span><h3>{t("Kies jouw spelmodus","Choose your game mode")}</h3><p>{t("Elke modus is een andere route. Jij houdt altijd de regie: aanpassen, passen of stoppen blijft mogelijk.","Each mode offers a different route. You stay in control: adapting, passing, or stopping is always allowed.")}</p></div><div className="session-mode-grid">{sessionModes.map((item) => <button type="button" className={sessionMode === item.id ? "session-mode-card selected" : "session-mode-card"} key={item.id} onClick={() => chooseSessionMode(item.id)} aria-pressed={sessionMode === item.id}><span className="session-mode-index">{String(sessionModes.findIndex((modeItem) => modeItem.id === item.id) + 1).padStart(2,"0")}</span><strong>{language === "en" ? item.titleEN : item.title}</strong><span>{language === "en" ? item.descriptionEN : item.descriptionNL}</span><small>{language === "en" ? item.hintEN : item.hintNL}</small></button>)}</div>{sessionMode === "story" && <div className="story-chapters"><div className="session-mode-section-heading"><span className="eyebrow">STORY MODE · 7 CHAPTERS</span><h3>{t("Jouw verhaal begint hier","Your story starts here")}</h3>{remoteProfileId && <div className="story-sync-status" role="status" aria-live="polite">{storySyncState === "syncing" ? t("Voortgang synchroniseren…","Syncing progress…") : storySyncState === "synced" ? t("Voortgang veilig gekoppeld aan je account","Progress linked to your account") : storySyncState === "error" ? <><span>{t("Je lokale voortgang is bewaard. Account-sync mislukt: ","Your local progress is saved. Account sync failed: ")}{storySyncError}</span><button type="button" className="read-assignment" onClick={() => setStorySyncRetry((value) => value + 1)}>{t("Opnieuw proberen","Try again")}</button></> : null}</div>}</div>{visibleStoryCheckpoint && storyCheckpointChapter && <div className="story-resume-card"><div className="story-resume-copy"><span className="eyebrow">{t("HERVAT JE HOOFDSTUK","RESUME YOUR CHAPTER")}</span><strong>{storyCheckpointChapter.title}</strong><p>{t(`Je was bij ronde ${visibleStoryCheckpoint.roundIndex + 1} van ${storyCheckpointRoundCount}. Hervatten gebeurt pas wanneer je zelf kiest.`,`You left at round ${visibleStoryCheckpoint.roundIndex + 1} of ${storyCheckpointRoundCount}. It resumes only when you choose.`)}</p></div><button type="button" className="story-resume-action" disabled={Boolean(experienceStartBlockedReason)} onClick={resumeStoryChapter}>{t("Hervatten","Resume")} <ArrowRight/></button></div>}{completedStoryChapters.length > 0 && (nextStoryChapterIndex >= 0 ? <div className="story-resume-card"><div className="story-resume-copy"><span className="eyebrow">{t("VERDER MET JE VERHAAL","CONTINUE YOUR STORY")}</span><strong>{storyChapters[nextStoryChapterIndex].title}</strong><p>{t("Je volgende open hoofdstuk staat klaar. Het start pas wanneer je zelf kiest.","Your next open chapter is ready. It starts only when you choose.")}</p></div><button type="button" className="story-resume-action" disabled={Boolean(experienceStartBlockedReason)} onClick={() => startStoryChapter(nextStoryChapterIndex)}>{t("Verdergaan","Continue")} <ArrowRight/></button></div> : <p className="story-complete-status" role="status">{t("Alle zeven hoofdstukken zijn voltooid. Je kunt elk hoofdstuk hieronder opnieuw openen.","All seven chapters are complete. You can replay any chapter below.")}</p>)}<div className="story-chapter-grid">{storyChapters.map((chapter,index) => <button type="button" key={chapter.id} className={`story-chapter-card${activeStoryChapter === index ? " selected" : ""}${completedStoryChapters.includes(chapter.id) ? " completed" : ""}`} disabled={Boolean(experienceStartBlockedReason)} onClick={() => startStoryChapter(index)}><span className="story-chapter-number">0{chapter.index}</span><strong>{chapter.title}</strong><p>{language === "en" ? chapter.descriptionEN : chapter.descriptionNL}</p><small>{completedStoryChapters.includes(chapter.id) ? t("VOLTOOID · Opnieuw spelen","COMPLETED · Replay") : t("Start hoofdstuk","Start chapter")} <ArrowRight/></small></button>)}</div></div>}</section><div className="experience-intro"><span className="eyebrow">THE EXPERIENCE COLLECTION</span><h3>{t("Kies je game.","Choose your game.")}</h3><p>{t("Volledige, begeleide scenario's met drie rondes, concrete opdrachten en een bewuste afsluiting. Alle deelnemers zijn 18+, stemmen vrij in en mogen op ieder moment passen of stoppen.","Complete guided scenarios with three rounds, clear tasks and a thoughtful closing. All participants are 18+, give free consent, and may pass or stop at any time.")}</p></div>
         <div className="experience-grid">{experienceGames.map((sourceGame) => { const game = localizeGame(sourceGame, language); return <article className="prompt-card experience-card" key={game.id}><div className="prompt-card-top"><span className="eyebrow">{game.subtitle}</span><span className="prompt-intensity">{game.duration}</span></div><div className="prompt-glyph" aria-hidden="true">✦</div><h3>{game.title}</h3><p>{game.description}</p><div className="prompt-consent"><ShieldCheck/><span>{game.rounds.length} rounds · Consent-first · {game.level}</span></div><button className="gold" disabled={Boolean(experienceStartBlockedReason)} onClick={() => startGame(game.id)}><ArrowRight/> Start experience</button></article>; })}</div>
-      </> : (() => { const game = localizeGame(experienceGames.find((item) => item.id === activeGame)!, language); const round = game.rounds[gameRound]; return <article className="prompt-card experience-play"><div className="prompt-card-top"><span className="eyebrow">{sessionMode === "story" && activeStoryChapter !== null ? `STORY MODE · ${storyChapters[activeStoryChapter].title}` : sessionMode === "boss" ? "BOSS MODE · THE FIVE TRIALS" : sessionMode === "surprise" ? `SURPRISE MODE · ${game.title}` : game.title}</span><span className="prompt-intensity">ROUND {gameRound + 1} / {game.rounds.length}</span></div><div className="prompt-glyph" aria-hidden="true">✦</div><h3>{round.title}</h3>{sessionMode === "story" && activeStoryChapter !== null && gameRound === 0 && <p className="story-opening">{language === "en" ? storyChapters[activeStoryChapter].openingEN : storyChapters[activeStoryChapter].openingNL}</p>}<p><strong>{t("ZET DE SCÈNE","SET THE SCENE")}</strong><br/>{round.setup}</p><p className="dom-voice"><strong>{domTitle.toUpperCase()} · {t("JOUW DOM","YOUR DOM")}</strong><br/>{domVoice}</p><p className="assignment-captions"><strong>{t("JOUW OPDRACHT · ONDERTITELING","YOUR ASSIGNMENT · CAPTIONS")}</strong><br/>{language === "en" ? round.task : (activeVariant?.text ?? round.task)}</p><button type="button" className="read-assignment" onClick={() => readAssignment(`${round.title}. ${t("Opdracht","Assignment")}: ${language === "en" ? round.task : (activeVariant?.text ?? round.task)}. ${round.debrief}`)} aria-label="Lees opdracht en afsluiting hardop voor">{t("🔊 Lees opdracht hardop voor","🔊 Read assignment aloud")}</button>{onCaptureAssignment&&<button type="button" className="read-assignment" disabled={voicePaused} onClick={()=>onCaptureAssignment({title:round.title,task:language==="en"?round.task:(activeVariant?.text??round.task)})}>◉ {t("Maak foto/video voor deze opdracht","Capture photo/video for this assignment")}</button>}<p><strong>{t("CHECK-IN & NABESPREKING","CHECK-IN & DEBRIEF")}</strong><br/>{round.debrief}</p><div className="prompt-consent"><ShieldCheck/><span>{t("Stopwoord en non-verbaal signaal blijven actief. Geel = pauze en afstemmen. Rood = direct stoppen.","Your safeword and non-verbal signal remain active. Yellow = pause and check in. Red = stop immediately.")}</span></div><div className="prompt-actions"><button onClick={() => {setActiveGame(null);setGameRound(0);setActiveVariant(null);setActiveStoryChapter(null)}}>{t("Spel verlaten","Exit game")}</button>{gameRound < game.rounds.length - 1 ? <button className="gold" disabled={voicePaused} onClick={() => { const nextRound = gameRound + 1; setGameRound(nextRound); chooseGameVariant(game.id, nextRound); }}><ArrowRight/> {t("PASS · Volgende ronde","PASS · Next round")}</button> : <button className="gold" disabled={voicePaused} onClick={() => {const chapterId = completeActiveStoryChapter();setActiveGame(null);setGameRound(0);setActiveVariant(null);onComplete(chapterId ?? undefined)}}><Check/> Complete experience</button>}</div></article>; })()}
+      </> : (() => { const game = localizeGame(experienceGames.find((item) => item.id === activeGame)!, language); const round = game.rounds[gameRound]; return <article className="prompt-card experience-play"><div className="prompt-card-top"><span className="eyebrow">{sessionMode === "story" && activeStoryChapter !== null ? `STORY MODE · ${storyChapters[activeStoryChapter].title}` : sessionMode === "boss" ? "BOSS MODE · THE FIVE TRIALS" : sessionMode === "surprise" ? `SURPRISE MODE · ${game.title}` : game.title}</span><span className="prompt-intensity">ROUND {gameRound + 1} / {game.rounds.length}</span></div><div className="prompt-glyph" aria-hidden="true">✦</div><h3>{round.title}</h3>{sessionMode === "story" && activeStoryChapter !== null && gameRound === 0 && <p className="story-opening">{language === "en" ? storyChapters[activeStoryChapter].openingEN : storyChapters[activeStoryChapter].openingNL}</p>}<p><strong>{t("ZET DE SCÈNE","SET THE SCENE")}</strong><br/>{round.setup}</p><p className="dom-voice"><strong>{domTitle.toUpperCase()} · {t("JOUW DOM","YOUR DOM")}</strong><br/>{domVoice}</p><p className="assignment-captions"><strong>{t("JOUW OPDRACHT · ONDERTITELING","YOUR ASSIGNMENT · CAPTIONS")}</strong><br/>{language === "en" ? round.task : (activeVariant?.text ?? round.task)}</p><button type="button" className="read-assignment" onClick={() => readAssignment(`${round.title}. ${t("Opdracht","Assignment")}: ${language === "en" ? round.task : (activeVariant?.text ?? round.task)}. ${round.debrief}`)} aria-label="Lees opdracht en afsluiting hardop voor">{t("🔊 Lees opdracht hardop voor","🔊 Read assignment aloud")}</button>{onCaptureAssignment&&<button type="button" className="read-assignment" disabled={voicePaused} onClick={()=>onCaptureAssignment({title:round.title,task:language==="en"?round.task:(activeVariant?.text??round.task)})}>◉ {t("Maak foto/video voor deze opdracht","Capture photo/video for this assignment")}</button>}<p><strong>{t("CHECK-IN & NABESPREKING","CHECK-IN & DEBRIEF")}</strong><br/>{round.debrief}</p><div className="prompt-consent"><ShieldCheck/><span>{t("Stopwoord en non-verbaal signaal blijven actief. Geel = pauze en afstemmen. Rood = direct stoppen.","Your safeword and non-verbal signal remain active. Yellow = pause and check in. Red = stop immediately.")}</span></div><div className="prompt-actions"><button onClick={() => {setActiveGame(null);setGameRound(0);setActiveVariant(null);setActiveStoryChapter(null)}}>{t("Spel verlaten","Exit game")}</button>{gameRound < game.rounds.length - 1 ? <button className="gold" disabled={voicePaused} onClick={() => { const nextRound = gameRound + 1; setGameRound(nextRound); if (sessionMode === "story" && activeStoryChapter !== null) { const chapterId = storyChapters[activeStoryChapter]?.id; if (chapterId) persistStoryCheckpoint(chapterId, nextRound); } chooseGameVariant(game.id, nextRound); }}><ArrowRight/> {t("PASS · Volgende ronde","PASS · Next round")}</button> : <button className="gold" disabled={voicePaused} onClick={() => {const chapterId = completeActiveStoryChapter();setActiveGame(null);setGameRound(0);setActiveVariant(null);onComplete(chapterId ?? undefined)}}><Check/> Complete experience</button>}</div></article>; })()}
     </section> : <>
     <section className="prompt-card">
       <div className="prompt-card-top"><span className="eyebrow">{current.kind.toUpperCase()}</span><span className="prompt-intensity">{displayIntensity(current.intensity)}</span></div>
