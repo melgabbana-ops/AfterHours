@@ -43,6 +43,7 @@ import{levelFromXp,rankFromXp,rankIndexFromXp,rankNames,rankThresholds}from"./pr
 import{notificationEvents}from"./services/notifications";
 import{canStartSessionWithVerifiedState,getPendingStopTimestamp,getSessionSafetyAnnouncement,getTaskChoiceFeedback,isTaskPassed,PASS_TASK_SELECTION,shouldResumeSession,shouldResumeSessionBeforeHydration}from"./services/sessionSafety";
 import {getMaintenanceStatus,formatMaintenanceDate,type MaintenanceConfig} from "./maintenance";
+import { getGuidedExperienceBlockReason } from "./experienceAccess";
 const PromptLibrary = React.lazy(() => import("./PromptLibrary"));
 const Insights = React.lazy(async () => ({ default: (await import("./Insights")).Insights }));
 const RadioRoom = React.lazy(async () => ({ default: (await import("./RadioRoom")).RadioRoom }));
@@ -350,6 +351,12 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
 
  const round=state.session.round;
  const consent=state.consent.status==="active";
+ const experienceStartBlockedReason = getGuidedExperienceBlockReason({
+  consentActive: consent,
+  supabaseConfigured,
+  authenticated: Boolean(syncUserId),
+  remoteStateVerified,
+ });
  const safety=state.safety;
  const unreadNotifications=state.notifications.filter(item=>!item.read).length;
  const markNotificationRead=(id:string)=>setState(s=>({...s,notifications:s.notifications.map(item=>item.id===id?{...item,read:true}:item)}));
@@ -603,7 +610,7 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
 
  <React.Suspense fallback={<main className="feature-loading" role="status"><p>{t("Scherm wordt geladen…","Loading screen…")}</p></main>}>
  {screen==="capture"&&<main className="aftercare-screen"><section className="aftercare-card"><span className="eyebrow">AFTER HOURS · ASSIGNMENT CAPTURE</span><h2>{t("Opdracht vastleggen","Capture this assignment")}</h2>{captureAssignment&&<div className="assignment-captions"><strong>{captureAssignment.title}</strong><p>{captureAssignment.task}</p></div>}<p>{t("De opname is optioneel. Vraag opnieuw expliciete toestemming aan iedereen die herkenbaar in beeld of geluid komt. Je ziet eerst een voorbeeld; opslaan gebeurt pas na jouw keuze.","Recording is optional. Renew explicit consent from everyone identifiable in image or audio. You will see a preview first; saving happens only if you choose it.")}</p><MediaVault sessionId={state.session.id} language={language} assignmentTitle={captureAssignment?.title} assignmentTask={captureAssignment?.task}/><button className="back" onClick={()=>setScreen("prompts")}>← {t("Terug naar opdracht","Back to assignment")}</button></section></main>}
- {screen==="prompts"&&<PromptLibrary playerId={state.profile.id} remoteProfileId={syncUserId} language={language} onBack={()=>setScreen("home")} onComplete={(chapterId)=>{recordAchievement("prompt_complete",{profileId:syncUserId});if(chapterId)recordAchievement("story_chapter_complete",{profileId:syncUserId,chapterId});}} onSafetyAction={(action)=>{if(action==="stop"){handleCheckIn("stop");return true;}if(action==="pause"){if(state.session.status==="active")handleCheckIn("pause");return true;}if(state.session.status==="paused"){const allowed=canStartSessionWithVerifiedState(supabaseConfigured,Boolean(syncUserId),remoteStateVerified)&&consent;startRound();return allowed;}return true;}} onCaptureAssignment={(assignment)=>{setCaptureAssignment(assignment);setScreen("capture")}}/>}
+ {screen==="prompts"&&<PromptLibrary playerId={state.profile.id} remoteProfileId={syncUserId} language={language} experienceStartBlockedReason={experienceStartBlockedReason} onRequestConsent={()=>{if(!consent)setScreen("consent");else if(!syncUserId)setScreen("admin");else window.location.reload();}} onBack={()=>setScreen("home")} onComplete={(chapterId)=>{recordAchievement("prompt_complete",{profileId:syncUserId});if(chapterId)recordAchievement("story_chapter_complete",{profileId:syncUserId,chapterId});}} onSafetyAction={(action)=>{if(action==="stop"){handleCheckIn("stop");return true;}if(action==="pause"){if(state.session.status==="active")handleCheckIn("pause");return true;}if(state.session.status==="paused"){const allowed=canStartSessionWithVerifiedState(supabaseConfigured,Boolean(syncUserId),remoteStateVerified)&&consent;startRound();return allowed;}return true;}} onCaptureAssignment={(assignment)=>{setCaptureAssignment(assignment);setScreen("capture")}}/>}
  {screen==="missions"&&<Missions language={language} onBack={()=>setScreen("home")} onExplore={(destination)=>setScreen((destination==="aftercare"?"aftercare":destination==="safety"?"safety":destination==="insights"?"insights":destination==="prompts"?"prompts":"home"))}/> }
  {screen==="daily"&&<DailyAfterHours profileId={state.profile.id} language={language} onBack={()=>setScreen("home")} onOpenMissions={()=>setScreen("missions")} onOpenInsights={()=>setScreen("insights")}/>}
  {screen==="social"&&<SocialStudio language={language} onBack={()=>setScreen("home")}/>}
