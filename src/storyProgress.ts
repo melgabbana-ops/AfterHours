@@ -37,3 +37,10 @@ export function saveCompletedStoryChapters(playerId: string, chapterIds: readonl
     return true;
   } catch { return false; }
 }
+
+
+/** Return the first unfinished chapter in the approved story order. */
+export function getNextStoryChapterId(completedChapterIds: readonly string[]): string | null {
+  const completed = new Set(normalizeChapterIds(completedChapterIds));
+  return [...STORY_CHAPTER_IDS].find((chapterId) => !completed.has(chapterId)) ?? null;
+}

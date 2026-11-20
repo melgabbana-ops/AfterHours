@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { loadCompletedStoryChapters, matchesStoryAccount, saveCompletedStoryChapters } from "./storyProgress";
+import { getNextStoryChapterId, loadCompletedStoryChapters, matchesStoryAccount, saveCompletedStoryChapters } from "./storyProgress";
 
 function memoryStorage() {
   const values = new Map<string, string>();
@@ -42,4 +42,14 @@ describe("story chapter progress", () => {
     expect(saveCompletedStoryChapters("", ["arrival"], storage)).toBe(false);
     expect(loadCompletedStoryChapters("", storage)).toEqual([]);
   });
+  it("returns the first unfinished chapter in the approved order", () => {
+    expect(getNextStoryChapterId([])).toBe("arrival");
+    expect(getNextStoryChapterId(["arrival", "test"])).toBe("control");
+    expect(getNextStoryChapterId(["arrival", "unknown", "arrival"])).toBe("test");
+  });
+
+  it("returns no next chapter when all approved chapters are complete", () => {
+    expect(getNextStoryChapterId(["arrival", "test", "control", "challenge", "boundary", "night", "after-hours"])).toBeNull();
+  });
+
 });
