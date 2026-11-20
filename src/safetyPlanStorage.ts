@@ -74,6 +74,17 @@ export function createEmptySafetyPlan(): SafetyPlanData {
   };
 }
 
+/** Compare user-defined STOP and PAUSE phrases using the same basic normalization as voice matching. */
+export function hasConflictingSafetySignals(
+  plan: Pick<SafetyPlanData, "safeword" | "amberSignal">,
+): boolean {
+  const normalizeSignal = (value: string) =>
+    value.normalize("NFKC").replace(/\s+/g, " ").trim().toLocaleLowerCase("en-US");
+  const safeword = normalizeSignal(plan.safeword);
+  const amberSignal = normalizeSignal(plan.amberSignal);
+  return safeword.length > 0 && amberSignal.length > 0 && safeword === amberSignal;
+}
+
 export function readSafetyPlan(
   profileId = "local-profile",
   storage?: Pick<Storage, "getItem">,
@@ -108,6 +119,7 @@ export function writeSafetyPlan(
       amberSignal: plan.amberSignal.trim(),
       boundaries: plan.boundaries.trim(),
     });
+    if (hasConflictingSafetySignals(normalized)) return false;
     const key = getSafetyPlanStorageKey(profileId);
     const serialized = JSON.stringify(normalized);
     target.setItem(key, serialized);
