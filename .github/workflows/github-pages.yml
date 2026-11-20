@@ -83,6 +83,7 @@ jobs:
           curl --fail --silent --show-error "${SITE_URL}?enter=1" -o /tmp/after-hours-entry.html
           grep -q 'id="root"' /tmp/after-hours-entry.html
           node --input-type=module -e 'import fs from "node:fs"; const html=fs.readFileSync("/tmp/after-hours-entry.html","utf8"); const paths=[...html.matchAll(/(?:src|href)="([^"]+\.(?:js|css))"/g)].map(match=>match[1]); if (!paths.some(path=>path.includes(".js")) || !paths.some(path=>path.includes(".css"))) process.exit(1); console.log("Published app shell and entry route verified:", paths.join(", "));'
+          SITE_ORIGIN="$(node -p 'new URL(process.env.SITE_URL).origin')"
           while IFS= read -r path; do
-            curl --fail --silent --show-error "${SITE_URL%/}$path" -o /dev/null
+            curl --fail --silent --show-error "$SITE_ORIGIN$path" -o /dev/null
           done < <(grep -oE '(src|href)="[^"]+\.(js|css)"' /tmp/after-hours-entry.html | sed -E 's/^(src|href)="([^"]+)"$/\2/')
