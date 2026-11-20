@@ -427,8 +427,8 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
     const message = spoken
       .normalize("NFKC")
       .replace(/[’‘]/g, "'")
-      .replace(/[^\\p{L}\\p{N}'-]+/gu, " ")
-      .replace(/\\s+/g, " ")
+      .replace(/[.,!?;:]+/g, " ")
+      .replace(/\s+/g, " ")
       .trim()
       .toLocaleLowerCase(language === "nl" ? "nl-NL" : "en-US");
     const goIntent = language === "nl"
