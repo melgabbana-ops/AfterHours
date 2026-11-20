@@ -56,7 +56,7 @@ const phaseLabels: Record<MoodPhase, Record<MoodHistoryLanguage, string>> = {
 
 function csvCell(value: string): string {
   // Prefix spreadsheet formula starters so an exported text field cannot run as a formula.
-  const safeValue = /^[\\u0000-\\u0020]*[=+\\-@]/.test(value) ? "'" + value : value;
+  const safeValue = /^[\u0000-\u0020]*[=+\-@]/.test(value) ? "'" + value : value;
   return '"' + safeValue.replace(/"/g, '""') + '"';
 }
 
@@ -77,6 +77,6 @@ export function buildMoodHistoryCsv(
     phaseLabels[event.phase][language],
     formatMoodLabel(event.mood),
   ]);
-  const csv = [headers, ...rows].map((row) => row.map(csvCell).join(",")).join("\\r\\n");
-  return "\\uFEFF" + csv + "\\r\\n";
+  const csv = [headers, ...rows].map((row) => row.map(csvCell).join(",")).join("\r\n");
+  return "\uFEFF" + csv + "\r\n";
 }

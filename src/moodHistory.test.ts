@@ -96,6 +96,6 @@ describe("mood history CSV export", () => {
   });
 
   it("exports a valid header-only CSV for an empty history", () => {
-    expect(buildMoodHistoryCsv([], "nl")).toBe('\\uFEFF"Datum (UTC)","Fase","Stemming"\\r\\n');
+    expect(buildMoodHistoryCsv([], "nl")).toBe('\uFEFF"Datum (UTC)","Fase","Stemming"\r\n');
   });
 });
