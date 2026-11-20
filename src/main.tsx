@@ -106,7 +106,7 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
   if(!("serviceWorker" in navigator))return;
   let active=true;
   const announceUpdate=(registration:ServiceWorkerRegistration)=>{if(active&&registration.waiting&&navigator.serviceWorker.controller)setAppUpdateReady(true);};
-  void navigator.serviceWorker.register("/sw.js").then(registration=>{
+  void navigator.serviceWorker.register(new URL("sw.js",import.meta.env.BASE_URL)).then(registration=>{
    announceUpdate(registration);
    registration.addEventListener("updatefound",()=>{
     const installing=registration.installing;
