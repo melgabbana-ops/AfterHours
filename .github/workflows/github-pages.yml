@@ -85,5 +85,15 @@ jobs:
           node --input-type=module -e 'import fs from "node:fs"; const html=fs.readFileSync("/tmp/after-hours-entry.html","utf8"); const paths=[...html.matchAll(/(?:src|href)="([^"]+\.(?:js|css))"/g)].map(match=>match[1]); if (!paths.some(path=>path.includes(".js")) || !paths.some(path=>path.includes(".css"))) process.exit(1); console.log("Published app shell and entry route verified:", paths.join(", "));'
           SITE_ORIGIN="$(node -p 'new URL(process.env.SITE_URL).origin')"
           while IFS= read -r path; do
-            curl --fail --silent --show-error "$SITE_ORIGIN$path" -o /dev/null
+            asset_url="$SITE_ORIGIN$path"
+            if [[ "$path" == *.css ]]; then
+              curl --fail --silent --show-error "$asset_url" -o /tmp/after-hours-reference.css
+              CSS_URL="$asset_url" node --input-type=module -e 'import fs from "node:fs"; const css=fs.readFileSync("/tmp/after-hours-reference.css","utf8"); const assets=[...css.matchAll(/url\(["\x27]?([^"\x27)]+)["\x27]?\)/g)].map(match=>match[1]).filter(value=>!/^(data:|https?:|#)/i.test(value)); for (const asset of assets) console.log(new URL(asset,process.env.CSS_URL).href);' > /tmp/after-hours-css-assets.txt
+              while IFS= read -r image_url; do
+                curl --fail --silent --show-error "$image_url" -o /dev/null
+              done < /tmp/after-hours-css-assets.txt
+            else
+              curl --fail --silent --show-error "$asset_url" -o /dev/null
+            fi
           done < <(grep -oE '(src|href)="[^"]+\.(js|css)"' /tmp/after-hours-entry.html | sed -E 's/^(src|href)="([^"]+)"$/\2/')
+          echo "Published app shell, JavaScript, CSS, and CSS-referenced image assets verified."
