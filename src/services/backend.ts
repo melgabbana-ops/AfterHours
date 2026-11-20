@@ -1,5 +1,6 @@
 import type{AfterHoursState}from"../types";
 import{supabase,supabaseConfigured}from"./supabase";
+import { matchesStoryAccount } from "../storyProgress";
 
 const isUuid=(value:string)=>/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 
@@ -19,12 +20,16 @@ export interface RemoteRound{slug:string;title:string;body:string;durationSecond
 const STORY_CHAPTER_IDS = ["arrival", "test", "control", "challenge", "boundary", "night", "after-hours"] as const;
 export type StoryChapterId = (typeof STORY_CHAPTER_IDS)[number];
 
-/** Load account-owned Story Mode progress. The RPC derives the user from auth.uid(). */
-export async function loadRemoteStoryProgress(): Promise<StoryChapterId[]> {
+/** Load account-owned Story Mode progress only for the account that owns the current screen. */
+export async function loadRemoteStoryProgress(expectedUserId: string): Promise<StoryChapterId[]> {
+ if (!expectedUserId.trim()) throw new Error("Story Mode-account is niet bevestigd.");
  if (!supabaseConfigured || !supabase) return [];
  const { data: { user }, error: userError } = await supabase.auth.getUser();
  if (userError) throw new Error(userError.message);
  if (!user) throw new Error("Geen actieve gebruiker voor Story Mode-sync.");
+ if (!matchesStoryAccount(expectedUserId, user.id)) {
+  throw new Error("Het aangemelde account is gewijzigd. Open Story Mode opnieuw om voortgang veilig te synchroniseren.");
+ }
  const { data, error } = await supabase.rpc("get_story_chapter_progress");
  if (error) throw new Error(error.message);
  if (!Array.isArray(data)) throw new Error("Story Mode-voortgang kon niet worden gelezen.");
@@ -32,12 +37,16 @@ export async function loadRemoteStoryProgress(): Promise<StoryChapterId[]> {
   .filter((id: unknown): id is StoryChapterId => typeof id === "string" && (STORY_CHAPTER_IDS as readonly string[]).includes(id)))];
 }
 
-/** Idempotently sync a completed chapter to the signed-in account. */
-export async function completeRemoteStoryChapter(chapterId: string): Promise<string | null> {
+/** Idempotently sync a completed chapter only while the expected account is active. */
+export async function completeRemoteStoryChapter(chapterId: string, expectedUserId: string): Promise<string | null> {
  if (!supabaseConfigured || !supabase) return "Account-sync is niet beschikbaar.";
+ if (!expectedUserId.trim()) return "Story Mode-account is niet bevestigd.";
  if (!(STORY_CHAPTER_IDS as readonly string[]).includes(chapterId)) return "Ongeldig Story Mode-hoofdstuk.";
  const { data: { user }, error: userError } = await supabase.auth.getUser();
  if (userError || !user) return userError?.message ?? "Geen actieve gebruiker voor Story Mode-sync.";
+ if (!matchesStoryAccount(expectedUserId, user.id)) {
+  return "Het aangemelde account is gewijzigd. Open Story Mode opnieuw om voortgang veilig te synchroniseren.";
+ }
  const { error } = await supabase.rpc("complete_story_chapter", { p_chapter_id: chapterId });
  return error?.message ?? null;
 }
