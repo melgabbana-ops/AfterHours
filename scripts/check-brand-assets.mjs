@@ -14,6 +14,10 @@ const html = readFileSync("index.html", "utf8");
 const manifest = JSON.parse(readFileSync("public/manifest.webmanifest", "utf8"));
 const serviceWorker = readFileSync("public/sw.js", "utf8");
 const appSource = readFileSync("src/main.tsx", "utf8");
+if (!appSource.includes('new URL("sw.js",import.meta.env.BASE_URL)')) {
+  console.error("Service worker registration must respect the configured deployment base path.");
+  process.exit(1);
+}
 const appStyles = readFileSync("src/styles.css", "utf8");
 const maintenanceSource = readFileSync("src/UnderConstruction.tsx", "utf8");
 const teaserSource = readFileSync("src/Teaser.tsx", "utf8");
@@ -35,7 +39,7 @@ if (!manifest.icons?.some((icon) => icon.sizes === "192x192" && icon.src.replace
   process.exit(1);
 }
 
-if (!serviceWorker.includes('const CACHE_NAME = "after-hours-v11"')) {
+if (!serviceWorker.includes('const CACHE_NAME = "after-hours-v12"')) {
   console.error("Service worker cache must be bumped when the app shell or install manifest changes.");
   process.exit(1);
 }
