@@ -199,3 +199,13 @@ export async function resumeExperienceRun(args: {
     throw new Error(error?.message ?? "This experience run could not be resumed.");
   }
 }
+
+export async function deleteExperienceRun(runId: string, expectedUserId: string): Promise<void> {
+  await assertWorldAccount(expectedUserId);
+  const { error } = await supabase!
+    .from("afterhours_experience_runs")
+    .delete()
+    .eq("id", runId)
+    .eq("user_id", expectedUserId);
+  if (error) throw new Error(error.message);
+}
