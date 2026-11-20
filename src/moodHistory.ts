@@ -1,6 +1,7 @@
-import type { MoodEvent, MoodPhase } from "./services/moods";
+import type { MoodCode, MoodEvent, MoodPhase } from "./services/moods";
 
 export type MoodHistoryFilter = "all" | MoodPhase;
+export type MoodHistoryLanguage = "nl" | "en";
 
 /** Return a new list so filtering never mutates the stored history. */
 export function filterMoodHistoryEvents(
@@ -10,9 +11,8 @@ export function filterMoodHistoryEvents(
   return filter === "all" ? [...events] : events.filter((event) => event.phase === filter);
 }
 
- 
-type LocalMoodHistoryStorage = Pick<Storage, "getItem" | "setItem">;
 const LOCAL_MOOD_HISTORY_PREFIX = "afterhours.moodhistory.";
+type LocalMoodHistoryStorage = Pick<Storage, "getItem" | "setItem">;
 
 function resolveMoodHistoryStorage(storage?: LocalMoodHistoryStorage): LocalMoodHistoryStorage | undefined {
   if (storage) return storage;
@@ -31,7 +31,7 @@ export function removeLocalMoodHistoryEvent(
   if (!profile || !targetId || !target) return false;
 
   try {
-    const key = `${LOCAL_MOOD_HISTORY_PREFIX}${profile}`;
+    const key = LOCAL_MOOD_HISTORY_PREFIX + profile;
     const raw = target.getItem(key);
     if (!raw) return false;
     const parsed: unknown = JSON.parse(raw);
@@ -46,4 +46,37 @@ export function removeLocalMoodHistoryEvent(
   } catch {
     return false;
   }
+}
+
+const phaseLabels: Record<MoodPhase, Record<MoodHistoryLanguage, string>> = {
+  before: { nl: "Vooraf", en: "Before" },
+  during: { nl: "Tijdens", en: "During" },
+  after: { nl: "Achteraf", en: "Aftercare" },
+};
+
+function csvCell(value: string): string {
+  // Prefix spreadsheet formula starters so an exported text field cannot run as a formula.
+  const safeValue = /^[\u0000-\u0020]*[=+\-@]/.test(value) ? "'" + value : value;
+  return '"' + safeValue.replace(/"/g, '""') + '"';
+}
+
+/**
+ * Export only the events supplied by the caller. Internal event and session IDs are
+ * intentionally omitted; the CSV contains no account identifiers or hidden metadata.
+ */
+export function buildMoodHistoryCsv(
+  events: readonly MoodEvent[],
+  language: MoodHistoryLanguage,
+  formatMoodLabel: (mood: MoodCode) => string = (mood) => mood,
+): string {
+  const headers = language === "nl"
+    ? ["Datum (UTC)", "Fase", "Stemming"]
+    : ["Date (UTC)", "Phase", "Mood"];
+  const rows = events.map((event) => [
+    event.created_at,
+    phaseLabels[event.phase][language],
+    formatMoodLabel(event.mood),
+  ]);
+  const csv = [headers, ...rows].map((row) => row.map(csvCell).join(",")).join("\r\n");
+  return "\uFEFF" + csv + "\r\n";
 }

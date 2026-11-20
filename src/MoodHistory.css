@@ -1,0 +1,8 @@
+.mood-history-actions{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:8px}
+.mood-history-actions button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:44px;padding:9px 12px;border:1px solid rgba(200,148,69,.34);border-radius:8px;background:#100e0b;color:#e5d2aa;font-size:10px;letter-spacing:.04em}
+.mood-history-actions button:hover{border-color:#d7a84f;background:#17130d}
+.mood-history-actions button:focus-visible{outline:2px solid #f3c96b;outline-offset:3px}
+.mood-history-actions button:disabled{opacity:.5;cursor:not-allowed}
+.mood-history-actions .mood-history-export{border-color:rgba(215,168,79,.58);background:linear-gradient(135deg,rgba(88,63,29,.42),rgba(16,14,11,.98));color:#f3d99e}
+.mood-history-export-note{margin:6px 0 10px;color:#a99e8b;font-size:9px;line-height:1.5}
+@media(max-width:420px){.mood-history-head{align-items:flex-start;gap:8px}.mood-history-actions{width:100%;justify-content:stretch}.mood-history-actions button{flex:1;min-width:0;padding-inline:8px}}
