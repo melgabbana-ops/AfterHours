@@ -1,11 +1,39 @@
 export type VoiceSafetyIntent = "stop" | "pause";
 
+export interface VoiceSafetySignals {
+  stopWord?: string;
+  pauseWord?: string;
+}
+
+function matchesConfiguredSignal(message: string, signal: string | undefined, locale: string): boolean {
+  const normalizedSignal = (signal ?? "")
+    .normalize("NFKC")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLocaleLowerCase(locale);
+  if (!normalizedSignal) return false;
+
+  const escaped = normalizedSignal.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const pattern = new RegExp(`(^|[^\\p{L}\\p{N}_-])${escaped}(?=$|[^\\p{L}\\p{N}_-])`, "u");
+  return pattern.test(message);
+}
+
 /**
- * Map explicit spoken safety words to app-level actions.
+ * Map built-in and user-configured spoken safety signals to app-level actions.
+ * Custom signals are read from the local safety plan and are never sent to a server.
  * STOP has priority if a transcript contains both STOP and PAUSE language.
  */
-export function getVoiceSafetyIntent(spoken: string, language: "nl" | "en"): VoiceSafetyIntent | null {
-  const message = spoken.normalize("NFKC").toLocaleLowerCase(language === "nl" ? "nl-NL" : "en-US").trim();
+export function getVoiceSafetyIntent(
+  spoken: string,
+  language: "nl" | "en",
+  signals: VoiceSafetySignals = {},
+): VoiceSafetyIntent | null {
+  const locale = language === "nl" ? "nl-NL" : "en-US";
+  const message = spoken
+    .normalize("NFKC")
+    .replace(/\s+/g, " ")
+    .toLocaleLowerCase(locale)
+    .trim();
   if (!message) return null;
 
   const stopIntent = language === "nl"
@@ -15,7 +43,7 @@ export function getVoiceSafetyIntent(spoken: string, language: "nl" | "en"): Voi
     ? /\b(?:geel|pauze|twijfel|langzamer|aanpassen|anders|help|onveilig|bang|pijn|niet prettig)\b/i
     : /\b(?:yellow|pause|not sure|slower|slow down|change|adjust|help|unsafe|scared|pain|uncomfortable)\b/i;
 
-  if (stopIntent.test(message)) return "stop";
-  if (pauseIntent.test(message)) return "pause";
+  if (stopIntent.test(message) || matchesConfiguredSignal(message, signals.stopWord, locale)) return "stop";
+  if (pauseIntent.test(message) || matchesConfiguredSignal(message, signals.pauseWord, locale)) return "pause";
   return null;
 }
