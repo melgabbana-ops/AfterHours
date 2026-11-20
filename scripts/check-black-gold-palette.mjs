@@ -12,12 +12,12 @@ async function collectFiles(directory, matches) {
   return nested.flat();
 }
 
-const sourceStyles = await collectFiles("src", (name) => /\\.css$/i.test(name));
-const visualAssets = await collectFiles("public/visuals", (name) => /\\.svg$/i.test(name));
+const sourceStyles = await collectFiles("src", (name) => /\.css$/i.test(name));
+const visualAssets = await collectFiles("public/visuals", (name) => /\.svg$/i.test(name));
 const files = [...sourceStyles, ...visualAssets].sort();
 
-const forbiddenNames = /--[\\w-]*(?:purple|violet|magenta|aubergine|plum)[\\w-]*/i;
-const forbiddenNamedColors = /\\b(?:purple|violet|magenta|fuchsia|indigo|rebeccapurple|darkviolet|darkmagenta|mediumvioletred|blueviolet|orchid|mediumorchid|darkorchid)\\b/i;
+const forbiddenNames = /--[\w-]*(?:purple|violet|magenta|aubergine|plum)[\w-]*/i;
+const forbiddenNamedColors = /\b(?:purple|violet|magenta|fuchsia|indigo|rebeccapurple|darkviolet|darkmagenta|mediumvioletred|blueviolet|orchid|mediumorchid|darkorchid)\b/i;
 const failures = [];
 
 function rgbToHsl(r, g, b) {
@@ -47,7 +47,7 @@ function hexToHsl(hex) {
 }
 
 function rgbFunctionToHsl(body) {
-  const parts = body.trim().replace(/\\s*\\/\\s*/, " ").split(/[\\s,]+/).filter(Boolean);
+  const parts = body.trim().replace(/\s*\/\s*/, " ").split(/[\s,]+/).filter(Boolean);
   if (parts.length < 3) return null;
   const channels = parts.slice(0, 3).map((part) => {
     const value = Number.parseFloat(part);
@@ -59,7 +59,7 @@ function rgbFunctionToHsl(body) {
 }
 
 function hslFunctionToHsl(body) {
-  const parts = body.trim().replace(/\\s*\\/\\s*/, " ").split(/[\\s,]+/).filter(Boolean);
+  const parts = body.trim().replace(/\s*\/\s*/, " ").split(/[\s,]+/).filter(Boolean);
   if (parts.length < 3) return null;
   const hueToken = parts[0].toLowerCase();
   const rawHue = Number.parseFloat(hueToken);
@@ -79,8 +79,8 @@ function isPurpleFamily({ hue, saturation, lightness }) {
 for (const file of files) {
   const source = await readFile(file, "utf8");
   const withoutComments = source
-    .replace(/\\/\\*[\\s\\S]*?\\*\\//g, "")
-    .replace(/<!--[\\s\\S]*?-->/g, "");
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/<!--[\s\S]*?-->/g, "");
 
   if (forbiddenNames.test(withoutComments)) {
     failures.push(file + ": legacy purple-family custom-property name found");
@@ -89,15 +89,15 @@ for (const file of files) {
     failures.push(file + ": named purple-family color found");
   }
 
-  for (const match of withoutComments.matchAll(/#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})\\b/gi)) {
+  for (const match of withoutComments.matchAll(/#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})\b/gi)) {
     const color = hexToHsl(match[0]);
     if (color && isPurpleFamily(color)) failures.push(file + ": purple-family hex color " + match[0]);
   }
-  for (const match of withoutComments.matchAll(/rgba?\\(\\s*([^)]*)\\)/gi)) {
+  for (const match of withoutComments.matchAll(/rgba?\(\s*([^)]*)\)/gi)) {
     const color = rgbFunctionToHsl(match[1]);
     if (color && isPurpleFamily(color)) failures.push(file + ": purple-family RGB color " + match[0]);
   }
-  for (const match of withoutComments.matchAll(/hsla?\\(\\s*([^)]*)\\)/gi)) {
+  for (const match of withoutComments.matchAll(/hsla?\(\s*([^)]*)\)/gi)) {
     const color = hslFunctionToHsl(match[1]);
     if (color && isPurpleFamily(color)) failures.push(file + ": purple-family HSL color " + match[0]);
   }
@@ -114,5 +114,7 @@ if (failures.length) {
 }
 
 console.log(
-  `Black-and-gold palette passed: scanned ${sourceStyles.length} stylesheets and ${visualAssets.length} visual SVGs (hex, RGB, HSL and named colors).`,
+  "Black-and-gold palette passed: scanned " + sourceStyles.length +
+  " stylesheets and " + visualAssets.length +
+  " visual SVGs (hex, RGB, HSL and named colors).",
 );
