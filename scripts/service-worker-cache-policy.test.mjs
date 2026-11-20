@@ -4,18 +4,30 @@ import { describe, expect, it, vi } from "vitest";
 
 const workerSource = readFileSync(new URL("../public/sw.js", import.meta.url), "utf8");
 
-function startWorker(response) {
+function startWorker(response, requestOptions = {}, fetchFails = false) {
   const handlers = new Map();
+  const requestHeaders = new Map(
+    Object.entries(requestOptions.headers ?? {}).map(([key, value]) => [key.toLowerCase(), value]),
+  );
+  const { headers: _headers, ...requestOverrides } = requestOptions;
   const request = {
     method: "GET",
     mode: "cors",
+    cache: "default",
     url: "https://app.example/AfterHours/private-resource",
+    headers: { get: (name) => requestHeaders.get(name.toLowerCase()) ?? null },
+    ...requestOverrides,
   };
   const cache = {
     put: vi.fn(async () => undefined),
     delete: vi.fn(async () => true),
     match: vi.fn(async () => undefined),
   };
+  const responseError = { type: "error" };
+  const fetchMock = vi.fn(async () => {
+    if (fetchFails) throw new Error("offline");
+    return response;
+  });
   const self = {
     location: {
       href: "https://app.example/AfterHours/sw.js",
@@ -31,7 +43,13 @@ function startWorker(response) {
     keys: vi.fn(async () => []),
     delete: vi.fn(async () => true),
   };
-  runInNewContext(workerSource, { self, caches, fetch: vi.fn(async () => response), URL });
+  runInNewContext(workerSource, {
+    self,
+    caches,
+    fetch: fetchMock,
+    URL,
+    Response: { error: () => responseError },
+  });
   const waits = [];
   let responsePromise;
   handlers.get("fetch")({
@@ -42,6 +60,8 @@ function startWorker(response) {
   return {
     request,
     cache,
+    responseError,
+    fetchMock,
     complete: async () => {
       const result = await responsePromise;
       await Promise.all(waits);
@@ -96,6 +116,52 @@ describe("AFTER HOURS service-worker cache privacy", () => {
     await worker.complete();
 
     expect(worker.cache.put).not.toHaveBeenCalled();
+    expect(worker.cache.delete).toHaveBeenCalledWith(worker.request);
+  });
+
+  it.each([
+    ["no-cache directive", "public, no-cache"],
+    ["must-revalidate directive", "public, must-revalidate"],
+    ["proxy-revalidate directive", "public, proxy-revalidate"],
+    ["zero max-age directive", "public, max-age=0"],
+  ])("does not cache a response with %s", async (_label, cacheControl) => {
+    const worker = startWorker(makeResponse({ "Cache-Control": cacheControl }));
+
+    await worker.complete();
+
+    expect(worker.cache.put).not.toHaveBeenCalled();
+    expect(worker.cache.delete).toHaveBeenCalledWith(worker.request);
+  });
+
+  it.each([
+    ["Authorization header", { headers: { Authorization: "Bearer private-token" } }],
+    ["request no-store directive", { headers: { "Cache-Control": "no-store" } }],
+    ["request no-cache directive", { headers: { "Cache-Control": "no-cache" } }],
+    ["request Pragma no-cache", { headers: { Pragma: "no-cache" } }],
+    ["no-store cache mode", { cache: "no-store" }],
+    ["no-cache cache mode", { cache: "no-cache" }],
+    ["reload cache mode", { cache: "reload" }],
+  ])("does not cache a request with %s", async (_label, requestOptions) => {
+    const worker = startWorker(makeResponse({ "Cache-Control": "public, max-age=3600" }), requestOptions);
+
+    await worker.complete();
+
+    expect(worker.cache.put).not.toHaveBeenCalled();
+    expect(worker.cache.delete).toHaveBeenCalledWith(worker.request);
+  });
+
+  it("never serves an older cached response to an authenticated request while offline", async () => {
+    const worker = startWorker(
+      null,
+      { headers: { Authorization: "Bearer private-token" } },
+      true,
+    );
+    worker.cache.match.mockResolvedValue({ privateData: true });
+
+    const response = await worker.complete();
+
+    expect(response).toBe(worker.responseError);
+    expect(worker.cache.match).not.toHaveBeenCalled();
     expect(worker.cache.delete).toHaveBeenCalledWith(worker.request);
   });
 

@@ -56,16 +56,31 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-// The Cache API does not automatically enforce HTTP Cache-Control directives.
- // Never persist private/no-store responses, and remove any older cached copy so
- // it cannot be served later by the offline fallback.
- function shouldCacheResponse(response) {
-   if (!response || !response.ok) return false;
-   const cacheControl = response.headers.get("Cache-Control") || "";
-   if (/(?:^|,)\s*(?:no-store|private)\b/i.test(cacheControl)) return false;
-   if ((response.headers.get("Vary") || "").trim() === "*") return false;
-   return true;
- }
+// The Cache API does not automatically enforce HTTP cache directives.
+// The worker must not retain responses that require revalidation or belong to an
+// authenticated request, because the offline fallback cannot re-check ownership.
+function shouldCacheRequest(request) {
+  if (!request || request.method !== "GET") return false;
+  if (request.headers.get("Authorization")) return false;
+
+  const cacheControl = request.headers.get("Cache-Control") || "";
+  const pragma = request.headers.get("Pragma") || "";
+  if (/(?:^|,)\s*(?:no-store|no-cache)\b/i.test(cacheControl)) return false;
+  if (/\bno-cache\b/i.test(pragma)) return false;
+  if (["no-store", "no-cache", "reload"].includes(request.cache)) return false;
+  return true;
+}
+
+function shouldCacheResponse(response) {
+  if (!response || !response.ok) return false;
+  const cacheControl = response.headers.get("Cache-Control") || "";
+  const directives = cacheControl.split(",").map((directive) => directive.trim().toLowerCase());
+  const neverCache = new Set(["no-store", "private", "no-cache", "must-revalidate", "proxy-revalidate"]);
+  if (directives.some((directive) => neverCache.has(directive.split("=", 1)[0].trim()))) return false;
+  if (directives.some((directive) => /^max-age\s*=\s*"?0"?$/i.test(directive))) return false;
+  if ((response.headers.get("Vary") || "").trim() === "*") return false;
+  return true;
+}
 
  self.addEventListener("fetch", (event) => {
   const request = event.request;
@@ -73,19 +88,25 @@ self.addEventListener("activate", (event) => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin || !url.pathname.startsWith(BASE_PATH)) return;
 
+  const cacheableRequest = shouldCacheRequest(request);
+
   event.respondWith((async () => {
     const cache = await caches.open(CACHE_NAME);
     try {
       const response = await fetch(request);
-      if (shouldCacheResponse(response)) {
+      if (cacheableRequest && shouldCacheResponse(response)) {
         event.waitUntil(cache.put(request, response.clone()));
       } else {
-        // A denied, private, no-store or otherwise non-cacheable response must
-        // invalidate any older copy, including when the new response is 401/403.
+        // A denied, authenticated, revalidation-only or otherwise non-cacheable
+        // response must invalidate any older copy before offline fallback.
         event.waitUntil(cache.delete(request));
       }
       return response;
     } catch {
+      if (!cacheableRequest) {
+        await cache.delete(request);
+        return Response.error();
+      }
       const cached = await cache.match(request);
       if (cached) return cached;
       if (request.mode === "navigate") return (await cache.match(asset(""))) || Response.error();
