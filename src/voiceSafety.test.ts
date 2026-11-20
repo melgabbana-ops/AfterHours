@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getVoiceSafetyIntent } from "./voiceSafety";
+import { getVoiceSafetyIntent, isExplicitVoicePass } from "./voiceSafety";
 
 describe("voice safety intents", () => {
   it("recognizes Dutch STOP words and phrases", () => {
@@ -64,4 +64,31 @@ describe("voice safety intents", () => {
     expect(getVoiceSafetyIntent("Please say a.b.c now", "en", { stopWord: "a.b.c" })).toBe("stop");
   });
 
+});
+
+describe("explicit voice PASS navigation", () => {
+  it("recognizes clear Dutch pass requests", () => {
+    for (const phrase of ["PASS!", "nee", "nee bedankt", "ik pas", "ik wil deze overslaan", "sla deze over"]) {
+      expect(isExplicitVoicePass(phrase, "nl")).toBe(true);
+    }
+  });
+
+  it("recognizes clear English pass requests", () => {
+    for (const phrase of ["PASS!", "no", "no thanks", "I'll pass", "skip this", "not this one"]) {
+      expect(isExplicitVoicePass(phrase, "en")).toBe(true);
+    }
+  });
+
+  it("does not treat incidental substrings or ordinary sentences as PASS", () => {
+    for (const phrase of ["I know", "compass", "passenger", "I passed my exam", "Ik pas mijn jas"]) {
+      expect(isExplicitVoicePass(phrase, "en")).toBe(false);
+    }
+    expect(isExplicitVoicePass("Ik pas mijn jas", "nl")).toBe(false);
+  });
+
+  it("does not treat a request not to skip as PASS", () => {
+    expect(isExplicitVoicePass("I don't want to skip", "en")).toBe(false);
+    expect(isExplicitVoicePass("Do not skip", "en")).toBe(false);
+    expect(isExplicitVoicePass("Ik wil niet overslaan", "nl")).toBe(false);
+  });
 });
