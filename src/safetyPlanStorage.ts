@@ -21,7 +21,7 @@ export const SAFETY_PLAN_STORAGE_KEY = getSafetyPlanStorageKey("local-profile");
 
 export function getSafetyPlanStorageKey(profileId = "local-profile"): string {
   const normalizedProfileId = profileId.trim() || "local-profile";
-  return \`\${SAFETY_PLAN_STORAGE_PREFIX}\${encodeURIComponent(normalizedProfileId)}\`;
+  return SAFETY_PLAN_STORAGE_PREFIX + encodeURIComponent(normalizedProfileId);
 }
 
 export function hasUnscopedSafetyPlan(storage?: Pick<Storage, "getItem">): boolean {
