@@ -1,0 +1,153 @@
+/* AFTER HOURS reference screen system · obsidian / champagne / bronze */
+:root{
+ --ah-obsidian:#070706;--ah-black:#0b0a08;--ah-panel:#12100c;--ah-panel-2:#19150f;
+ --ah-bronze:#76552b;--ah-bronze-soft:rgba(190,145,77,.28);
+ --ah-champagne:#d8ad68;--ah-gold:#edc783;--ah-ivory:#f5ecdf;--ah-muted:#c1b6a6;
+ --ah-danger:#bd5550;
+}
+html,body,#root{background:#070706;color:var(--ah-ivory)}
+body{background:radial-gradient(ellipse at 50% -18%,rgba(126,84,35,.26),transparent 48%),#070706}
+.app{background:radial-gradient(ellipse at 50% -10%,rgba(125,82,35,.24),transparent 42%),linear-gradient(180deg,#0c0a07,#050505 72%)}
+header{background:rgba(5,5,4,.94);border-bottom:1px solid rgba(216,173,104,.19)}
+.wordmark img{filter:drop-shadow(0 0 12px rgba(216,173,104,.18))}
+.status span{background:#b99a64;box-shadow:0 0 8px rgba(216,173,104,.5)}
+main{max-width:900px;padding:28px 20px 52px}
+.eyebrow{color:var(--ah-champagne);letter-spacing:.2em}
+h1,h2,h3,.hero h2,.round h2,.profile h2,.admin h2,.game-select-head h2,.completion-card h2,.aftercare-card h2,.radio-hero h2,.insights-hero h2,.missions-hero h2,.prompt-hero h2{font-family:"Cinzel",Georgia,serif;color:var(--ah-ivory);font-weight:500;letter-spacing:-.025em}
+button,.tile,.experience-choice{transition:background .2s ease,border-color .2s ease,transform .2s ease,box-shadow .2s ease}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(--ah-gold);outline-offset:3px}
+.gold,.home-start,.completion-primary,.aftercare-complete,.onboarding-next{background:linear-gradient(115deg,#b98543,#f0d49c 48%,#c18c4a);color:#171109;border:1px solid #f3d7a2;box-shadow:0 8px 26px rgba(174,120,54,.16);font-weight:700}
+.gold:hover,.home-start:hover,.completion-primary:hover,.aftercare-complete:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.back,.actions button,.completion-secondary,.tile,.consent-panel,.resume-panel,.safety,.consent,.consent-panel,.auth-panel,.rank-ladder,.task-card,.aftercare-note,.radio-note,.insight-consent-note,.mission-card,.prompt-card,.legal-card,.social-card,.lovense-card{
+ border-color:var(--ah-bronze-soft)!important;background:linear-gradient(145deg,rgba(28,22,14,.92),rgba(9,8,6,.97))!important;box-shadow:inset 0 1px rgba(255,232,190,.035),0 12px 30px rgba(0,0,0,.2)
+}
+.tile{border-radius:14px;min-height:112px;padding:17px;display:flex;flex-direction:column;justify-content:space-between}
+.tile svg{color:var(--ah-champagne);margin:0 0 18px}
+.tile span{font-family:"DM Sans",sans-serif;font-size:12px;font-weight:600;letter-spacing:.02em}
+.tile:hover,.experience-choice:hover{border-color:rgba(237,199,131,.75)!important;background:linear-gradient(145deg,#21190f,#0c0a07)!important;transform:translateY(-2px)}
+/* 01 Home */
+.home-hero{position:relative;isolation:isolate;overflow:hidden;min-height:410px;padding:34px 26px 26px;border:1px solid rgba(216,173,104,.3);border-radius:20px;background:linear-gradient(90deg,rgba(5,5,4,.97) 0%,rgba(5,5,4,.78) 52%,rgba(5,5,4,.25) 100%),url('/design-reference/home-hero.svg') center/cover!important;box-shadow:0 22px 60px rgba(0,0,0,.42)}
+.home-hero:after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(0deg,rgba(5,5,4,.94),transparent 65%);pointer-events:none}
+.home-wordmark{width:min(210px,65%);max-height:74px;object-fit:contain;object-position:left center;margin:0 0 48px;filter:drop-shadow(0 4px 20px #000)}
+.home-hero h2{font-size:clamp(38px,8vw,60px);margin:8px 0 12px;text-shadow:0 2px 20px #000}
+.home-level{display:flex;align-items:center;gap:12px;max-width:280px;margin:18px 0 24px;color:var(--ah-champagne)}
+.home-level>div{flex:1}.home-level strong,.home-level small{display:block}.home-level small{font-size:10px;color:var(--ah-muted);margin-top:3px}
+.home-xp{height:3px;background:#3b3020;margin-top:8px}.home-xp i{display:block;height:100%;background:linear-gradient(90deg,#a56e34,#f3d79f)}
+.home-start{min-height:54px;width:min(100%,330px);justify-content:space-between;padding:0 20px;border-radius:10px}
+.home-shortcuts{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:18px 0}
+.home-shortcuts .tile{min-height:105px}
+.consent-panel,.resume-panel{border-radius:12px;padding:16px;margin-top:18px}
+.consent-panel svg,.resume-panel>svg{color:var(--ah-champagne)}
+/* 02 Consent & safety */
+.safety-screen,.safety-plan{position:relative}
+.safety-screen .safety-plan{padding:26px 18px 22px;border:1px solid var(--ah-bronze-soft);border-radius:18px;background:linear-gradient(180deg,rgba(7,7,6,.45),#080705 62%),url('/design-reference/consent-hero.svg') center top/100% auto no-repeat,#0b0907}
+.safety-plan-heading{font:500 clamp(30px,7vw,46px)/1.05 "Cinzel",Georgia,serif}
+.safety-plan-intro{color:var(--ah-muted);max-width:38rem;line-height:1.65}
+.safety-room-panel{border:1px solid var(--ah-bronze-soft);border-radius:14px;background:rgba(12,10,7,.88);padding:18px}
+.safety-readiness-item{border-color:rgba(216,173,104,.18)!important;background:rgba(22,18,12,.8)!important;border-radius:10px}
+.safety-emergency-controls{gap:9px}.safety-pause-action,.safety-stop-action{min-height:48px;border-radius:9px}
+.safety-plan .gold{width:100%;min-height:54px;border-radius:10px}
+/* 03 Active experience */
+.experience-shell{max-width:700px;margin:0 auto;padding:24px 20px 38px;border:1px solid rgba(216,173,104,.22);border-radius:18px;background:linear-gradient(180deg,rgba(7,7,6,.12),#080705 58%),url('/design-reference/experience-hero.svg') center top/100% auto no-repeat,#0b0907}
+.game-top{padding:0 0 12px;border-bottom:1px solid var(--ah-bronze-soft)}
+.game-top button{border-color:var(--ah-bronze-soft);border-radius:50%;color:var(--ah-gold)}
+.round-steps span{border-radius:7px;border-color:rgba(216,173,104,.22)}
+.round h2{font-size:clamp(32px,7vw,48px)}
+.task-card{padding:18px;border-radius:13px;text-align:left}
+.task-card>strong{display:block;font-size:15px;line-height:1.55;margin:8px 0 14px}
+.task-card>div{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.task-card button{border:1px solid var(--ah-bronze-soft);border-radius:8px;padding:12px 8px;background:#0a0907;font-size:11px}
+.task-card button.selected{border-color:var(--ah-gold);background:rgba(216,173,104,.14);color:var(--ah-gold)}
+.timer{width:min(250px,70vw);height:min(250px,70vw);border:2px solid var(--ah-champagne);border-radius:50%;justify-content:center;box-shadow:0 0 0 7px rgba(216,173,104,.05),0 0 35px rgba(216,173,104,.13)}
+.timer strong{font-size:clamp(48px,12vw,68px);color:var(--ah-ivory)}
+.actions button{border-radius:9px;min-height:48px}.actions .stop,.danger-action{background:linear-gradient(120deg,#7f2f2b,#b14c43)!important;color:#fff!important;border-color:#c16a60!important}
+/* 04 Aftercare */
+.aftercare-card{padding:28px 20px;border:1px solid var(--ah-bronze-soft);border-radius:18px;background:linear-gradient(180deg,rgba(7,7,6,.32),#080705 62%),url('/design-reference/aftercare-hero.svg') center top/100% auto no-repeat,#0b0907}
+.aftercare-card h2{font-size:clamp(34px,7vw,48px);margin-top:28px}
+.aftercare-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:22px 0}
+.aftercare-options button{min-height:112px;text-align:left;padding:16px;border:1px solid var(--ah-bronze-soft);border-radius:12px;background:rgba(16,13,9,.9)}
+.aftercare-options button:before{content:"✧";display:block;color:var(--ah-gold);font-size:22px;margin-bottom:10px}
+.aftercare-options button strong,.aftercare-options button span{display:block}.aftercare-options button strong{font:500 17px "Cinzel",Georgia,serif}.aftercare-options button span{font-size:11px;color:var(--ah-muted);line-height:1.5;margin-top:6px}
+.aftercare-options button.selected{border-color:var(--ah-gold);background:rgba(150,105,47,.16)}
+.aftercare-complete{width:100%;min-height:54px;border-radius:10px;margin-top:16px}
+/* 05 Completion */
+.completion-card{position:relative;overflow:hidden;text-align:center;padding:34px 22px;border:1px solid rgba(216,173,104,.35);border-radius:20px;background:linear-gradient(180deg,rgba(7,7,6,.35),#080705 65%),url('/design-reference/completion-hero.svg') center top/cover no-repeat,#0b0907}
+.completion-seal{width:70px;height:70px;border:1px solid var(--ah-champagne);border-radius:50%;display:grid;place-items:center;margin:0 auto 20px;color:var(--ah-gold);box-shadow:0 0 24px rgba(216,173,104,.16)}
+.completion-card h2{font-size:clamp(34px,7vw,48px)}
+.completion-xp{display:flex;justify-content:center;align-items:center;gap:12px;margin:26px auto;padding:18px;border:1px solid var(--ah-bronze-soft);border-radius:12px;background:rgba(10,8,6,.7)}
+.completion-xp strong{font:500 32px "Cinzel",Georgia,serif;color:var(--ah-gold)}
+.completion-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:18px 0 24px}
+.completion-stats>div{padding:14px 6px;border:1px solid var(--ah-bronze-soft);border-radius:10px;background:rgba(10,8,6,.75)}
+.completion-stats strong,.completion-stats small{display:block}.completion-stats strong{font:500 24px "Cinzel",Georgia,serif}.completion-stats small{font-size:8px;letter-spacing:.12em;color:var(--ah-muted);margin-top:5px}
+.completion-primary,.completion-secondary{width:100%;min-height:52px;border-radius:10px;margin-top:9px}
+/* 06 Tarot / 07 Horoscope */
+.insights{border:1px solid var(--ah-bronze-soft);border-radius:18px;padding:22px 16px;background:linear-gradient(180deg,rgba(8,7,5,.18),#080705 75%),url('/design-reference/insights-hero.svg') center top/100% auto no-repeat,#0b0907}
+.insights-hero{text-align:center;padding:18px 6px 24px}
+.insights-hero h2{font-size:clamp(34px,7vw,48px)}
+.insight-tabs{display:flex;gap:8px;overflow-x:auto;padding:6px 0 14px}
+.insight-tabs button{border:1px solid var(--ah-bronze-soft);border-radius:999px;padding:10px 16px;white-space:nowrap}
+.insight-tabs button[aria-selected="true"],.insight-tabs button.active{background:rgba(216,173,104,.15);border-color:var(--ah-gold);color:var(--ah-gold)}
+.tarot-card,.astro-card{border:1px solid var(--ah-bronze)!important;border-radius:16px!important;background:linear-gradient(145deg,#21180e,#090806)!important;box-shadow:0 16px 44px rgba(0,0,0,.4)}
+.tarot-spread-card{border-radius:12px;border-color:var(--ah-bronze-soft)}
+.ah-tarot-card{filter:drop-shadow(0 14px 24px rgba(0,0,0,.42))}
+.astro-reading,.astro-daily{border:1px solid var(--ah-bronze-soft);border-radius:12px;padding:16px;background:rgba(10,8,6,.78)}
+/* 08 Radio */
+.radio-room{padding:24px 18px 32px;border:1px solid var(--ah-bronze-soft);border-radius:18px;background:linear-gradient(180deg,rgba(7,7,6,.14),#080705 60%),url('/design-reference/radio-hero.svg') center top/100% auto no-repeat,#0b0907}
+.radio-hero{text-align:center;padding:20px 8px 28px}.radio-hero h2{font-size:clamp(34px,7vw,48px)}
+.radio-player{border:1px solid var(--ah-bronze-soft)!important;border-radius:16px!important;background:rgba(9,8,6,.92)!important;padding:24px!important}
+.radio-disc{border:1px solid var(--ah-champagne)!important;box-shadow:0 0 35px rgba(216,173,104,.14)}
+.spotify-open{border:1px solid var(--ah-champagne)!important;border-radius:10px;background:linear-gradient(110deg,#b98543,#efd39b);color:#171109!important}
+.radio-note{border-radius:12px;padding:14px;margin-top:16px}
+/* 09 Profile */
+.profile{position:relative;text-align:center;padding:30px 18px;border:1px solid var(--ah-bronze-soft);border-radius:18px;background:linear-gradient(180deg,rgba(7,7,6,.22),#080705 58%),url('/design-reference/profile-hero.svg') center top/100% auto no-repeat,#0b0907}
+.profile .identity-avatar{width:112px;height:112px;border-color:var(--ah-champagne);box-shadow:0 0 26px rgba(216,173,104,.13)}
+.profile h2{font-size:clamp(32px,7vw,44px)}
+.profile .xp{height:7px;border-radius:99px;overflow:hidden;border:1px solid var(--ah-bronze-soft);background:#282017}
+.profile .xp span{background:linear-gradient(90deg,#a66d35,#f1d69b);border-radius:99px}
+.profile .stats{gap:10px}.profile .stats>div{flex:1;padding:14px 5px;border:1px solid var(--ah-bronze-soft);border-radius:10px;background:rgba(10,8,6,.78)}
+.profile .stats b{color:var(--ah-gold)}
+.avatar-options button{border:1px solid var(--ah-bronze-soft);border-radius:10px;background:#0c0a07}.avatar-options button.selected{border-color:var(--ah-gold);color:var(--ah-gold)}
+.history-row{border-top:1px solid var(--ah-bronze-soft);padding:13px 4px}
+/* 10 Game selection */
+.game-select-head{text-align:center;padding:24px 8px 26px}.game-select-head h2{font-size:clamp(34px,7vw,48px)}
+.game-select-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.experience-choice{position:relative;overflow:hidden;min-height:230px;padding:18px;text-align:left;border:1px solid var(--ah-bronze-soft);border-radius:15px;background:linear-gradient(180deg,rgba(7,7,6,.05),rgba(7,7,6,.94) 76%),url('/design-reference/game-selection-hero.svg') center/cover,#0b0907}
+.experience-choice:nth-child(2){background-position:25% center}.experience-choice:nth-child(3){background-position:70% center}
+.experience-choice .choice-symbol{color:var(--ah-gold);font-size:28px}.experience-choice strong{display:block;font:500 21px "Cinzel",Georgia,serif;margin:12px 0 7px}
+.experience-choice small{display:block;color:var(--ah-muted);font-size:11px;line-height:1.5}
+.choice-action{display:flex;align-items:center;gap:7px;margin-top:18px;color:var(--ah-gold);font-size:11px;font-weight:700}
+/* Remaining routes: one common premium language, their own feature component stays in charge */
+.missions-screen,.prompt-library,.onboarding-screen,.safety-screen{color:var(--ah-ivory)}
+.missions-hero,.prompt-hero,.onboarding-panel{border:1px solid var(--ah-bronze-soft);border-radius:16px;background:linear-gradient(145deg,rgba(25,19,12,.95),rgba(7,7,6,.96));padding:22px}
+.missions-hero h2,.prompt-hero h2,.onboarding-welcome{font:500 clamp(30px,6vw,42px)/1.1 "Cinzel",Georgia,serif}
+.mission-card,.prompt-card,.onboarding-feature{border-radius:12px!important}
+.mission-tabs button,.prompt-filters button,.onboarding-tabs button{border:1px solid var(--ah-bronze-soft);border-radius:999px}
+.mission-tabs button[aria-pressed="true"],.prompt-filters button[aria-pressed="true"],.onboarding-tabs button[aria-selected="true"]{border-color:var(--ah-gold);color:var(--ah-gold);background:rgba(216,173,104,.13)}
+/* Bottom navigation and global controls */
+nav{height:calc(74px + env(safe-area-inset-bottom));padding:0 8px env(safe-area-inset-bottom);background:rgba(5,5,4,.97);border-top:1px solid rgba(216,173,104,.2);backdrop-filter:blur(18px)}
+nav button{max-width:110px;min-height:54px;color:#938878;font-size:9px;gap:4px}
+nav button svg{width:18px;height:18px}
+nav button.active{color:var(--ah-gold);text-shadow:0 0 14px rgba(216,173,104,.24)}
+nav button.active svg{filter:drop-shadow(0 0 6px rgba(216,173,104,.35))}
+.stop-controller{background:rgba(9,8,6,.97)!important;border:1px solid var(--ah-bronze-soft)!important;box-shadow:0 12px 32px rgba(0,0,0,.45)}
+@media(max-width:520px){
+ main{padding:20px 14px 44px}
+ .home-hero{min-height:390px;padding:25px 19px 22px;border-radius:16px}
+ .home-wordmark{margin-bottom:40px}
+ .home-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ .home-shortcuts .tile{min-height:94px}
+ .game-select-grid,.aftercare-options{grid-template-columns:1fr}
+ .experience-choice{min-height:180px}
+ .experience-shell,.aftercare-card,.completion-card,.profile,.insights,.radio-room{border-radius:14px}
+ .task-card>div{grid-template-columns:1fr}
+ .timer{margin:32px auto}
+ .completion-stats{gap:6px}.completion-stats>div{padding:12px 3px}
+ nav{gap:0}
+ nav button{width:20%;min-width:0;padding:0 2px;font-size:8px}
+}
+@media(min-width:800px){
+ .home-hero{padding:46px 42px;min-height:470px}
+ .home-shortcuts{grid-template-columns:repeat(4,minmax(0,1fr))}
+ .game-select-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
