@@ -20,7 +20,7 @@ const teaserSource = readFileSync("src/Teaser.tsx", "utf8");
 const onboardingSource = readFileSync("src/Onboarding.tsx", "utf8");
 const referencedIcons = new Set([
   ...[...html.matchAll(/(?:href|src)="\/(icons\/after-hours-[a-z0-9-]+\.(?:svg|png)|after-hours-[a-z0-9-]+\.(?:svg|png))"/g)].map((match) => `public/${match[1]}`),
-  ...(manifest.icons ?? []).map((icon) => `public${icon.src}`),
+  ...(manifest.icons ?? []).map((icon) => `public/${icon.src.replace(/^\.\//, "").replace(/^\//, "")}`),
   ...[...serviceWorker.matchAll(/"\/(after-hours-[a-z0-9-]+\.(?:svg|png))"/g)].map((match) => `public/${match[1]}`),
 ]);
 
@@ -29,13 +29,13 @@ if ((manifest.icons ?? []).some((icon) => !icon.src.endsWith(".png"))) {
   process.exit(1);
 }
 
-if (!manifest.icons?.some((icon) => icon.sizes === "192x192" && icon.src === "/after-hours-icon-192.png")
-  || !manifest.icons?.some((icon) => icon.sizes === "512x512" && icon.src === "/after-hours-icon-512.png" && icon.purpose.includes("maskable"))) {
+if (!manifest.icons?.some((icon) => icon.sizes === "192x192" && icon.src.replace(/^\.\//, "/") === "/after-hours-icon-192.png")
+  || !manifest.icons?.some((icon) => icon.sizes === "512x512" && icon.src.replace(/^\.\//, "/") === "/after-hours-icon-512.png" && icon.purpose.includes("maskable"))) {
   console.error("PWA manifest must include the 192px icon and maskable 512px icon.");
   process.exit(1);
 }
 
-if (!serviceWorker.includes('const CACHE_NAME = "after-hours-v10"')) {
+if (!serviceWorker.includes('const CACHE_NAME = "after-hours-v11"')) {
   console.error("Service worker cache must be bumped when the app shell or install manifest changes.");
   process.exit(1);
 }
@@ -78,14 +78,14 @@ for (const selector of [".home-wordmark", ".brand-nav", ".gate-logo"]) {
   }
 }
 
-for (const iconPath of ["/after-hours-icon-192.png", "/after-hours-brand-logo.svg"]) {
+for (const iconPath of ["after-hours-icon-192.png", "after-hours-brand-logo.svg"]) {
   if (!serviceWorker.includes(iconPath)) {
     console.error("Service worker does not reference the current app icon:", iconPath);
     process.exit(1);
   }
 }
 
-if (serviceWorker.includes("/after-hours-icon-192.svg")) {
+if (serviceWorker.includes("after-hours-icon-192.svg")) {
   console.error("Service worker still references the retired 192px SVG icon.");
   process.exit(1);
 }
