@@ -24,6 +24,7 @@ import ConsentScreen from "./ConsentScreen";
 
 import MoodCheckIn from "./MoodCheckIn";
 import AftercareNote from "./AftercareNote";
+import AftercareMeditation from "./AftercareMeditation";
 
 
 
@@ -161,7 +162,7 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
  const[moodDuring,setMoodDuring]=useState<MoodCode|null>(null);
  const[moodAfter,setMoodAfter]=useState<MoodCode|null>(null);
  const[moodMessage,setMoodMessage]=useState("");
- const[aftercareChoice,setAftercareChoice]=useState<"land"|"talk"|"space"|"hydrate"|"relax"|"ground"|"music"|"notes"|null>(null);
+ const[aftercareChoice,setAftercareChoice]=useState<"land"|"talk"|"space"|"hydrate"|"relax"|"ground"|"music"|"notes"|"meditation"|null>(null);
  const[aftercareNoteStatus,setAftercareNoteStatus]=useState<"pending"|"saved"|"skipped">("pending");
  const[finishing,setFinishing]=useState(false);
  const finishingSession=useRef(false);
@@ -595,8 +596,8 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
  <button className={aftercareChoice==="ground"?"selected":""} onClick={()=>setAftercareChoice("ground")}><Leaf/><strong>{t("Grounding","Grounding")}</strong><span>{t("Kom rustig terug in het moment.","Reconnect with the present.")}</span></button>
  <button className={aftercareChoice==="music"?"selected":""} onClick={()=>setAftercareChoice("music")}><Headphones/><strong>{t("Muziek","Music")}</strong><span>{t("Kies rustige muziek.","Choose calming music.")}</span></button>
  <button className={aftercareChoice==="talk"?"selected":""} onClick={()=>setAftercareChoice("talk")}><MessageCircle/><strong>{t("Napraten","Talk")}</strong><span>{t("Deel wat je wilt delen.","Share what you wish.")}</span></button>
- <button className={aftercareChoice==="notes"?"selected":""} onClick={()=>setAftercareChoice("notes")}><NotebookPen/><strong>{t("Notities","Notes")}</strong><span>{t("Leg een gedachte vast.","Capture a thought.")}</span></button>
-</div><AftercareNote ownerId={state.profile.id} sessionId={state.session.id} language={language} onStatusChange={setAftercareNoteStatus}/><div className="aftercare-note"><Shield/><span>{t("Aftercare is geen verplichting om iets te delen. Een pauze, grens of stop blijft altijd geldig.","Aftercare never obliges you to share. A pause, boundary, or stop is always valid.")}</span></div><button className="gold aftercare-complete" onClick={()=>void finishSession()} disabled={!aftercareChoice||aftercareNoteStatus==="pending"||finishing}>{finishing?t("Veilig afronden…","Finishing safely…"):t("Sessie veilig afronden","Finish session safely")}</button><button className="back" onClick={()=>setScreen("home")}>← {t("Terug","Back")}</button></section></main>}
+ <button type="button" aria-pressed={aftercareChoice==="meditation"} className={aftercareChoice==="meditation"?"selected":""} onClick={()=>setAftercareChoice("meditation")}><Timer/><strong>{t("Meditatie · 30 minuten","Meditation · 30 minutes")}</strong><span>{t("Een optionele, rustige begeleide oefening.","An optional, gentle guided practice.")}</span></button><button className={aftercareChoice==="notes"?"selected":""} onClick={()=>setAftercareChoice("notes")}><NotebookPen/><strong>{t("Notities","Notes")}</strong><span>{t("Leg een gedachte vast.","Capture a thought.")}</span></button>
+</div>{aftercareChoice==="meditation"&&<AftercareMeditation language={language}/>}<AftercareNote ownerId={state.profile.id} sessionId={state.session.id} language={language} onStatusChange={setAftercareNoteStatus}/><div className="aftercare-note"><Shield/><span>{t("Aftercare is geen verplichting om iets te delen. Een pauze, grens of stop blijft altijd geldig.","Aftercare never obliges you to share. A pause, boundary, or stop is always valid.")}</span></div><button className="gold aftercare-complete" onClick={()=>void finishSession()} disabled={!aftercareChoice||aftercareNoteStatus==="pending"||finishing}>{finishing?t("Veilig afronden…","Finishing safely…"):t("Sessie veilig afronden","Finish session safely")}</button><button className="back" onClick={()=>setScreen("home")}>← {t("Terug","Back")}</button></section></main>}
 
  <React.Suspense fallback={<main className="feature-loading" role="status"><p>{t("Scherm wordt geladen…","Loading screen…")}</p></main>}>
  {screen==="capture"&&<main className="aftercare-screen"><section className="aftercare-card"><span className="eyebrow">AFTER HOURS · ASSIGNMENT CAPTURE</span><h2>{t("Opdracht vastleggen","Capture this assignment")}</h2>{captureAssignment&&<div className="assignment-captions"><strong>{captureAssignment.title}</strong><p>{captureAssignment.task}</p></div>}<p>{t("De opname is optioneel. Vraag opnieuw expliciete toestemming aan iedereen die herkenbaar in beeld of geluid komt. Je ziet eerst een voorbeeld; opslaan gebeurt pas na jouw keuze.","Recording is optional. Renew explicit consent from everyone identifiable in image or audio. You will see a preview first; saving happens only if you choose it.")}</p><MediaVault sessionId={state.session.id} language={language} assignmentTitle={captureAssignment?.title} assignmentTask={captureAssignment?.task}/><button className="back" onClick={()=>setScreen("prompts")}>← {t("Terug naar opdracht","Back to assignment")}</button></section></main>}
