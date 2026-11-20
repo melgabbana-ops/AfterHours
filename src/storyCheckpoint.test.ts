@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { clearStoryCheckpoint, loadStoryCheckpoint, saveStoryCheckpoint } from "./storyCheckpoint";
+import { clearStoryCheckpoint, loadStoryCheckpoint, saveStoryCheckpoint, saveStoryCheckpointSafely } from "./storyCheckpoint";
 
 function memoryStorage() {
   const values = new Map<string, string>();
@@ -34,6 +34,30 @@ describe("Story Mode resume checkpoint", () => {
     expect(loadStoryCheckpoint("player-a", storage)).toBeNull();
     storage.setItem("afterhours.story-checkpoint.v1:player-a", JSON.stringify({ chapterId: "arrival", roundIndex: 9 }));
     expect(loadStoryCheckpoint("player-a", storage)).toBeNull();
+  });
+
+  it("clears an older checkpoint when a replacement cannot be written", () => {
+    const storage = memoryStorage();
+    expect(saveStoryCheckpoint("player-a", { chapterId: "arrival", roundIndex: 0 }, storage)).toBe(true);
+
+    const failingWriter = {
+      getItem: storage.getItem,
+      setItem: () => { throw new Error("quota exceeded"); },
+      removeItem: storage.removeItem,
+    };
+
+    expect(saveStoryCheckpointSafely("player-a", { chapterId: "control", roundIndex: 1 }, failingWriter)).toBe(false);
+    expect(loadStoryCheckpoint("player-a", storage)).toBeNull();
+  });
+
+  it("does not report success when a storage write cannot be read back", () => {
+    const silentStorage = {
+      getItem: () => null,
+      setItem: () => undefined,
+      removeItem: () => undefined,
+    };
+
+    expect(saveStoryCheckpointSafely("player-a", { chapterId: "arrival", roundIndex: 1 }, silentStorage)).toBe(false);
   });
 
   it("clears only the selected player's checkpoint", () => {

@@ -63,6 +63,34 @@ export function saveStoryCheckpoint(
   }
 }
 
+/**
+ * Save and verify a checkpoint before exposing it as resumable UI state.
+ * If a write fails or cannot be read back, remove the older checkpoint where
+ * storage still permits it so the app does not offer a stale resume position.
+ */
+export function saveStoryCheckpointSafely(
+  playerId: string,
+  checkpoint: StoryCheckpoint,
+  storage?: CheckpointStorage,
+): boolean {
+  if (!saveStoryCheckpoint(playerId, checkpoint, storage)) {
+    clearStoryCheckpoint(playerId, storage);
+    return false;
+  }
+
+  const persisted = loadStoryCheckpoint(playerId, storage);
+  if (
+    !persisted ||
+    persisted.chapterId !== checkpoint.chapterId ||
+    persisted.roundIndex !== checkpoint.roundIndex
+  ) {
+    clearStoryCheckpoint(playerId, storage);
+    return false;
+  }
+
+  return true;
+}
+
 /** Clear only the selected profile's resume point. */
 export function clearStoryCheckpoint(playerId: string, storage?: CheckpointStorage): boolean {
   try {
