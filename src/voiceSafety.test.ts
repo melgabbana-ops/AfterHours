@@ -22,6 +22,8 @@ describe("voice safety intents", () => {
   it("recognizes English PAUSE words", () => {
     expect(getVoiceSafetyIntent("Yellow", "en")).toBe("pause");
     expect(getVoiceSafetyIntent("Please slow down", "en")).toBe("pause");
+    expect(getVoiceSafetyIntent("I need help", "en")).toBe("pause");
+    expect(getVoiceSafetyIntent("Ik voel me onveilig", "nl")).toBe("pause");
   });
 
   it("gives STOP priority when a transcript contains both STOP and PAUSE", () => {
