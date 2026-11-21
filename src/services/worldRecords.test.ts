@@ -144,6 +144,13 @@ describe("AFTER HOURS private world storage", () => {
     }, { onConflict: "run_id,user_id,step_index" });
   });
 
+  it("rejects invalid run IDs before writing a shared check-in", async () => {
+    await expect(submitExperienceRunCheckIn({
+      runId: "not-a-uuid", stepIndex: 0, signal: "ready", expectedUserId: "user-a",
+    })).rejects.toThrow("Invalid experience run.");
+    expect(mocks.from).not.toHaveBeenCalled();
+  });
+
   it("rejects invalid step indexes and participant signals before writing", async () => {
     await expect(submitExperienceRunCheckIn({
       runId: "run-1", stepIndex: 40, signal: "ready", expectedUserId: "user-a",
