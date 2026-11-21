@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { BookOpen, LockKeyhole } from "lucide-react";
 import { loadPrivateSessionNote, type PrivateSessionNote } from "./services/privateNotes";
 
@@ -10,14 +10,16 @@ export default function AftercareHistoryNote({ ownerId, sessionId, language }: {
   sessionId: string;
   language: Language;
 }) {
-  const [note, setNote] = useState<PrivateSessionNote | null>(null);
-  const [expanded, setExpanded] = useState(false);
+  // Resolve the note synchronously for the current owner/session pair. This avoids
+  // briefly rendering the previous profile's note while an effect catches up.
+  const note: PrivateSessionNote | null = useMemo(
+    () => loadPrivateSessionNote(ownerId, sessionId),
+    [ownerId, sessionId],
+  );
+  const [expandedFor, setExpandedFor] = useState<string | null>(null);
+  const disclosureKey = `${ownerId}:${sessionId}`;
+  const expanded = expandedFor === disclosureKey;
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
-
-  useEffect(() => {
-    setNote(loadPrivateSessionNote(ownerId, sessionId));
-    setExpanded(false);
-  }, [ownerId, sessionId]);
 
   if (!note) return null;
   const fields: Array<[string, string]> = [
@@ -27,7 +29,7 @@ export default function AftercareHistoryNote({ ownerId, sessionId, language }: {
   ];
 
   return <div className="aftercare-history-note">
-    <button type="button" className="aftercare-history-note-toggle" aria-expanded={expanded} onClick={() => setExpanded(value => !value)}>
+    <button type="button" className="aftercare-history-note-toggle" aria-expanded={expanded} onClick={() => setExpandedFor(expanded ? null : disclosureKey)}>
       <BookOpen size={14} aria-hidden="true" />
       {expanded ? t("Notitie verbergen", "Hide note") : t("Bekijk sessienotitie", "View session note")}
     </button>
