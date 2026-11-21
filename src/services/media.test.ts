@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { normalizePrivateMediaMimeType, safeAssignmentPrefix, safeMediaSessionFolder, validatePrivateMediaFile, validatePrivateMediaPath } from "./media";
 
 describe("private media session folder safety", () => {
