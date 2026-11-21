@@ -140,6 +140,9 @@ begin
 end;
 $;
 revoke all on function private.guard_afterhours_experience_run_activation() from public, anon, authenticated;
+drop trigger if exists afterhours_experience_run_activation_guard on public.afterhours_experience_runs;
+create trigger afterhours_experience_run_activation_guard before update of status on public.afterhours_experience_runs
+for each row execute function private.guard_afterhours_experience_run_activation();
 
 create or replace function public.preview_afterhours_experience_invitation(p_token_hash text)
 returns jsonb language sql security invoker set search_path = '' as $$ select private.preview_afterhours_experience_invitation_impl(p_token_hash); $$;
