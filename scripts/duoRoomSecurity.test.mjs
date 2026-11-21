@@ -59,6 +59,32 @@ describe("proposed secure Duo backend guardrails", () => {
     expect(client).toContain('revoke_afterhours_duo_invitation');
   });
 
+  it("keeps every privileged RPC behind an authenticated SECURITY DEFINER boundary", () => {
+    const privilegedFunctions = [
+      "create_afterhours_duo_room",
+      "preview_afterhours_duo_invitation",
+      "accept_afterhours_duo_invitation",
+      "set_afterhours_duo_consent",
+      "set_afterhours_duo_room_state",
+      "revoke_afterhours_duo_invitation",
+    ];
+    for (const name of privilegedFunctions) {
+      const declaration = proposal.slice(proposal.indexOf(`function public.${name}(`));
+      expect(declaration.slice(0, declaration.indexOf("$;"))).toContain("security definer");
+      expect(declaration.slice(0, declaration.indexOf("$;"))).toContain("set search_path = ''");
+      expect(proposal).toContain(`revoke all on function public.${name}(`);
+      expect(proposal).toContain(`grant execute on function public.${name}(`);
+    }
+  });
+
+  it("makes pause, stop and consent withdrawal invalidate prior consent", () => {
+    expect(proposal).toContain("set status = 'paused', updated_at = clock_timestamp()");
+    expect(proposal).toContain("set status = p_status, updated_at = clock_timestamp()");
+    expect(proposal).toContain("if p_status in ('paused', 'stopped') then");
+    expect(proposal).toContain("set consent_revoked_at = clock_timestamp()");
+    expect(proposal).toContain("where room_id = p_room_id and removed_at is null and consent_revoked_at is null");
+  });
+
   it("authorizes both private Broadcast and Presence by authenticated room membership and exact topic", () => {
     expect(proposal).toContain("on realtime.messages for select to authenticated");
     expect(proposal).toContain("on realtime.messages for insert to authenticated");
