@@ -358,7 +358,7 @@ returns jsonb
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $$
 declare
   v_user_id uuid := auth.uid();
   v_room public.afterhours_duo_rooms%rowtype;
@@ -433,7 +433,7 @@ begin
     'updated_by_self', v_session.updated_by = v_user_id
   );
 end;
-$;
+$$;
 
 -- Return only the room state and minimal per-member consent status to a member.
 -- This is the authoritative lobby snapshot; clients never infer consent from broadcasts.

@@ -63,6 +63,29 @@ describe("proposed secure Duo backend guardrails", () => {
     expect(declaration.slice(0, declaration.indexOf("declare"))).toContain("as $$");
     expect(declaration).toContain("\nend;\n$$;");
   });
+  it("uses balanced dollar-quote delimiters for every privileged Duo RPC", () => {
+    const privilegedFunctions = [
+      "create_afterhours_duo_room",
+      "preview_afterhours_duo_invitation",
+      "accept_afterhours_duo_invitation",
+      "set_afterhours_duo_consent",
+      "set_afterhours_duo_room_state",
+      "revoke_afterhours_duo_invitation",
+      "get_afterhours_duo_room_state",
+      "advance_afterhours_duo_session",
+    ];
+    for (const name of privilegedFunctions) {
+      const functionStart = "create or replace function public." + name + "(";
+      const start = proposal.indexOf(functionStart);
+      expect(start).toBeGreaterThanOrEqual(0);
+      const next = proposal.indexOf("\ncreate or replace function public.", start + 1);
+      const declaration = proposal.slice(start, next < 0 ? proposal.length : next);
+      expect(declaration).toContain("as $$\ndeclare");
+      expect(declaration).toContain("\nend;\n$$;");
+      expect(declaration).not.toContain("\nend;\n$;");
+    }
+  });
+
   it("requires two currently consenting members before the host can activate a room", () => {
     expect(proposal).toContain("if v_room.owner_user_id <> v_user_id then");
     expect(proposal).toContain("if v_member_count <> 2 or v_consented_count <> 2 then");
@@ -144,11 +167,11 @@ describe("proposed secure Duo backend guardrails", () => {
   });
 
   it("blocks shared state mutations while the participant device is offline", () => {
-    expect(l.content).toContain('window.addEventListener("offline", handleOffline)');
-    expect(l.content).toContain('setIsOnline(false)');
-    expect(l.content).toContain('disabled={busy || !isOnline');
-    expect(l.content).toContain("Status vernieuwen");
-    expect(l.content).toContain("Refresh status");
+    expect(secureLobby).toContain('window.addEventListener("offline", handleOffline)');
+    expect(secureLobby).toContain('setIsOnline(false)');
+    expect(secureLobby).toContain('disabled={busy || !isOnline');
+    expect(secureLobby).toContain("Status vernieuwen");
+    expect(secureLobby).toContain("Refresh status");
   });
 
   it("refreshes the secure room snapshot after reconnect and app resume", () => {
