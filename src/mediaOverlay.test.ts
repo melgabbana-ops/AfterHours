@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { drawAfterHoursOverlay, mediaOverlayFrames, type OverlayFrameStyle } from "./mediaOverlay";
+import { drawAfterHoursOverlay, mediaOverlayFrames, normalizePhotoEditTransform, defaultPhotoEditTransform, type OverlayFrameStyle } from "./mediaOverlay";
 
 describe("AFTER HOURS camera overlay presets", () => {
   it("exposes the three approved overlay styles in the approved order", () => {
@@ -18,5 +18,19 @@ describe("AFTER HOURS camera overlay presets", () => {
     const source = drawAfterHoursOverlay.toString();
     expect(source).not.toMatch(/rgba\(7,\s*5,\s*9|rgba\(5,\s*4,\s*7/);
     expect(source).toContain("rgba(5,5,5");
+  });
+});
+
+describe("local photo editor transforms", () => {
+  it("starts with a neutral, non-destructive transform", () => {
+    expect(defaultPhotoEditTransform).toEqual({ rotation: 0, zoom: 1, offsetX: 0, offsetY: 0 });
+  });
+  it("clamps zoom and image position to supported bounds", () => {
+    expect(normalizePhotoEditTransform({ rotation: 90, zoom: 9, offsetX: -4, offsetY: 3 })).toEqual({
+      rotation: 90, zoom: 2.5, offsetX: -1, offsetY: 1,
+    });
+  });
+  it("rejects unsupported rotation values and non-finite controls", () => {
+    expect(normalizePhotoEditTransform({ rotation: 45 as 0, zoom: Number.NaN, offsetX: Number.POSITIVE_INFINITY, offsetY: Number.NaN })).toEqual(defaultPhotoEditTransform);
   });
 });
