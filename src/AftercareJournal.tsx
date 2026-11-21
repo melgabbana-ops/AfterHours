@@ -248,7 +248,7 @@ export default function AftercareJournal({ language, onClose }: { language: Lang
         <input id="ah-journal-backup-passphrase" type="password" value={backupPassphrase} onChange={event=>setBackupPassphrase(event.target.value)} autoComplete="off"/>
         <label className="ah-journal-backup-import" htmlFor="ah-journal-backup-file">{t("Versleutelde back-up importeren","Import encrypted backup")}<input id="ah-journal-backup-file" type="file" accept=".ahjournal,application/json" onChange={event=>void importBackup(event)} disabled={busy||backupPassphrase.length===0}/></label>
       </div>
-      <div className="ah-journal-lock-row"><span><LockKeyhole size={13}/>{t("Kluis ontgrendeld op dit apparaat","Vault unlocked on this device")}</span><button type="button" onClick={lock}>{t("Vergrendelen","Lock vault")}</button></div>
+      <div className="ah-journal-lock-row"><span><LockKeyhole size={13}/>{t("Kluis ontgrendeld op dit apparaat","Vault unlocked on this device")}</span><button type="button" onClick={() => lock()}>{t("Vergrendelen","Lock vault")}</button></div>
     </div>}
     <div className="ah-journal-privacy"><LockKeyhole size={15}/><p>{t("Je notitietekst wordt lokaal versleuteld met AES‑GCM 256-bit. Je wachtzin wordt niet opgeslagen. Zonder wachtzin is herstel niet mogelijk. Dit dagboek wordt niet gesynchroniseerd met je account of andere apparaten.", "Your journal text is encrypted locally with AES‑GCM 256-bit. Your passphrase is never stored. Without it, recovery is impossible. This journal is not synced to your account or other devices.")}</p></div>
     {error&&<p className="ah-journal-error" role="alert">{error}</p>}
