@@ -221,6 +221,9 @@ begin
   if v_user_id is null then
     raise exception 'Sign in to update Duo consent.' using errcode = '28000';
   end if;
+  if p_consent is null then
+    raise exception 'A consent decision is required.' using errcode = '22023';
+  end if;
 
   select * into v_room
   from public.afterhours_duo_rooms
@@ -273,7 +276,7 @@ begin
   if v_user_id is null then
     raise exception 'Sign in to control this Duo room.' using errcode = '28000';
   end if;
-  if p_status not in ('active', 'paused', 'stopped') then
+  if p_status is null or p_status not in ('active', 'paused', 'stopped') then
     raise exception 'This Duo room state is invalid.' using errcode = '22023';
   end if;
 
@@ -378,6 +381,10 @@ create policy afterhours_duo_member_receive_private
       where m.user_id = (select auth.uid())
         and m.removed_at is null
         and ('afterhours-duo:' || m.room_id::text) = (select realtime.topic())
+        and exists (
+          select 1 from public.afterhours_duo_rooms r
+          where r.id = m.room_id and r.status <> 'stopped' and r.expires_at > now()
+        )
     )
   );
 
