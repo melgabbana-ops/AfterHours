@@ -66,6 +66,40 @@ describe("browser-local aftercare notes", () => {
     expect(loadPrivateSessionNote("owner-a", "session-2", storage)).not.toBeNull();
   });
 
+  it("does not report success when browser storage silently drops a note", () => {
+    const silentStorage = {
+      getItem: () => null,
+      setItem: () => undefined,
+      removeItem: () => undefined,
+    };
+    expect(savePrivateSessionNote("owner-a", "session-1", draft, silentStorage, "2026-11-21T08:00:00.000Z")).toBeNull();
+  });
+
+  it("does not report success when browser storage changes the saved payload", () => {
+    const alteredStorage = {
+      getItem: () => JSON.stringify({ unexpected: true }),
+      setItem: () => undefined,
+      removeItem: () => undefined,
+    };
+    expect(savePrivateSessionNote("owner-a", "session-1", draft, alteredStorage, "2026-11-21T08:00:00.000Z")).toBeNull();
+  });
+
+  it("does not report deletion success when browser storage ignores the removal", () => {
+    const existing = JSON.stringify({
+      ownerId: "owner-a",
+      sessionId: "session-1",
+      ...draft,
+      createdAt: "2026-11-21T08:00:00.000Z",
+      updatedAt: "2026-11-21T08:00:00.000Z",
+    });
+    const stubbornStorage = {
+      getItem: () => existing,
+      setItem: () => undefined,
+      removeItem: () => undefined,
+    };
+    expect(deletePrivateSessionNote("owner-a", "session-1", stubbornStorage)).toBe(false);
+  });
+
   it("fails safely when storage is unavailable or throws", () => {
     const broken = { getItem: () => { throw new Error("blocked"); }, setItem: () => { throw new Error("blocked"); }, removeItem: () => { throw new Error("blocked"); } };
     expect(loadPrivateSessionNote("owner-a", "session-1", broken)).toBeNull();
