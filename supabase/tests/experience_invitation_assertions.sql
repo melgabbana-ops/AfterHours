@@ -76,6 +76,24 @@ begin
   exception when sqlstate '22023' then null;
   end;
 
+  begin
+    insert into public.afterhours_experience_invitations(run_id,inviter_user_id,token_hash,expires_at)
+    values('22222222-2222-4222-8222-222222222222','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',repeat('f',64),now()+interval '1 day');
+    raise exception 'An invitation was inserted for an active run' using errcode='ZX009';
+  exception when sqlstate '42501' then null;
+  end;
+  begin
+    update public.afterhours_experience_runs set status='active'
+    where id='44444444-4444-4444-8444-444444444444';
+    raise exception 'Host resumed while an invitation was still pending' using errcode='ZX010';
+  exception when sqlstate '42501' then null;
+  end;
+  update public.afterhours_experience_invitations set status='revoked' where token_hash=repeat('e',64);
+  update public.afterhours_experience_runs set status='active' where id='44444444-4444-4444-8444-444444444444';
+  if not exists(select 1 from public.afterhours_experience_runs where id='44444444-4444-4444-8444-444444444444' and status='active') then
+    raise exception 'Host could not resume after resolving the pending invitation';
+  end if;
+
   perform set_config('request.jwt.claim.sub','bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',false);
   v_result:=public.withdraw_afterhours_experience_consent('11111111-1111-4111-8111-111111111111');
   if v_result->>'status'<>'stopped' then raise exception 'Consent withdrawal did not stop the shared run: %',v_result; end if;
