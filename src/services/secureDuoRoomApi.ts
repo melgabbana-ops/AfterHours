@@ -74,7 +74,7 @@ export async function previewSecureDuoInvitation(token: string, client?: DuoClie
 }
 
 /** Accepting is a deliberate action; the SQL RPC binds the guest account to the room. */
-export async function acceptSecureDuoInvitation(token: string, client?: DuoClient | null): Promise<SecureDuoRoomResult> {
+export async function acceptSecureDuoInvitation(token: string, client?: DuoClient | null): Promise<SecureDuoInvitationAccepted> {
   const activeClient = getClient(client);
   await requireUser(activeClient);
   const tokenHash = await hashDuoInvitationToken(token);
@@ -84,7 +84,7 @@ export async function acceptSecureDuoInvitation(token: string, client?: DuoClien
   if (typeof payload.room_id !== "string" || !UUID_PATTERN.test(payload.room_id) || payload.status !== "accepted") {
     throw new Error("De server gaf geen geldige Duo-deelnamebevestiging terug.");
   }
-  return { roomId: payload.room_id, status: "lobby" };
+  return { roomId: payload.room_id, accepted: true };
 }
 
 /** Each participant controls their own consent. Revoking either side pauses the room server-side. */
