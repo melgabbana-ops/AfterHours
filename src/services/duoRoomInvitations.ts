@@ -31,3 +31,25 @@ export async function hashDuoInvitationToken(value: string): Promise<string> {
   const digest = await globalThis.crypto.subtle.digest("SHA-256", new TextEncoder().encode(token));
   return toHex(new Uint8Array(digest));
 }
+
+/**
+ * Keep the bearer token in the URL fragment. Fragments are not sent in HTTP
+ * requests or Referer headers, unlike query-string invitation secrets.
+ */
+export function createDuoInvitationUrl(baseUrl: string, token: string): string {
+  const normalized = normalizeDuoInvitationToken(token);
+  if (!normalized) throw new Error("This Duo invitation link is invalid.");
+  const url = new URL(baseUrl);
+  url.hash = new URLSearchParams({ "duo-invite": normalized }).toString();
+  return url.toString();
+}
+
+/** Read the invitation token from the fragment without accepting or consuming it. */
+export function readDuoInvitationToken(urlValue: string): string {
+  try {
+    const url = new URL(urlValue);
+    return normalizeDuoInvitationToken(new URLSearchParams(url.hash.slice(1)).get("duo-invite"));
+  } catch {
+    return "";
+  }
+}
