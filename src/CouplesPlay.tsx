@@ -27,7 +27,11 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
   const [mode, setMode] = useState<Mode>(initialCode ? "remote" : "local");
   const [roomCode, setRoomCode] = useState(initialCode);
   const [joinCode, setJoinCode] = useState(initialCode);
-  const [participantId] = useState(() => crypto.randomUUID());
+  const [localParticipantId] = useState(() => crypto.randomUUID());
+  const [authenticatedUserId, setAuthenticatedUserId] = useState<string | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
+  // Identity hint only. Private-channel RLS is still required for trusted membership.
+  const participantId = authenticatedUserId ?? localParticipantId;
   const [name, setName] = useState("");
   const [partnerName, setPartnerName] = useState("");
   const [myConsent, setMyConsent] = useState(false);
@@ -54,9 +58,40 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
   }, [roomCode]);
 
   useEffect(() => {
+    if (!supabaseConfigured || !supabase) {
+      setAuthChecked(true);
+      setAuthenticatedUserId(null);
+      return;
+    }
+    const client = supabase;
+    let alive = true;
+    const { data: { subscription } } = client.auth.onAuthStateChange((_event, session) => {
+      if (!alive) return;
+      setAuthenticatedUserId(session?.user?.id ?? null);
+      setAuthChecked(true);
+    });
+    void client.auth.getUser().then(({ data, error }) => {
+      if (!alive) return;
+      setAuthenticatedUserId(error ? null : data.user?.id ?? null);
+      setAuthChecked(true);
+    });
+    return () => { alive = false; subscription.unsubscribe(); };
+  }, []);
+
+  useEffect(() => {
     if (mode !== "remote" || !roomCode || !supabaseConfigured || !supabase) {
       setConnected(false);
       setParticipants([]);
+      return;
+    }
+    if (!authChecked) return;
+    if (!authenticatedUserId) {
+      setConnected(false);
+      setParticipants([]);
+      setMessage(t(
+        "Log eerst in met je AFTER HOURS-account om online Duo te gebruiken. Lokaal samen spelen blijft beschikbaar.",
+        "Sign in to your AFTER HOURS account before using online Duo. Local play remains available."
+      ));
       return;
     }
     let alive = true;
@@ -130,7 +165,7 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
       channelRef.current = null;
       void client.removeChannel(channel);
     };
-  }, [mode, roomCode, participantId]);
+  }, [mode, roomCode, participantId, authChecked, authenticatedUserId]);
 
   useEffect(() => {
     if (mode === "remote" && connected && channelRef.current) {
@@ -242,7 +277,7 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
         </div> : <>
           <div className="couples-room-code"><small>{t("JULLIE KAMERCODE", "YOUR ROOM CODE")}</small><strong>{roomCode}</strong><button type="button" onClick={()=>void shareInvite()}><Copy size={15}/>{t("Deel uitnodiging", "Share invite")}</button></div>
           <div className="couples-connection" role="status">{connected ? <><Wifi size={17}/>{t("Verbonden met de kamer met code", "Connected to room with a code")}</> : <><WifiOff size={17}/>{t("Verbinding maken…", "Connecting…")}</>}</div>
-          <p className="couples-consent-note">{t("Let op: dit is nog geen account-beveiligde privékamer. Iedereen met de code kan proberen deel te nemen. Deel daarom geen gevoelige informatie.", "Important: this is not yet an account-secured private room. Anyone with the code may attempt to join. Do not share sensitive information.")}</p>
+          <p className="couples-consent-note">{t("Online Duo vereist een ingelogd account. De kamer gebruikt voorlopig nog een gedeelde code en is niet afgeschermd met accountgebonden uitnodigingen. Deel geen gevoelige informatie of media.", "Online Duo requires a signed-in account. The room still uses a shared code and is not yet protected by account-bound invitations. Do not share sensitive information or media.")}</p>
           <label className="couples-join-code">{t("Jouw naam", "Your name")}<input value={name} onChange={e=>setName(e.target.value)} maxLength={24} placeholder={t("Naam", "Name")}/></label>
           <div className="couples-presence"><Users size={17}/><strong>{participants.length} / 2</strong><span>{partnerPresent ? t("Partner is aanwezig", "Partner is here") : t("Wachten op je partner…", "Waiting for your partner…")}</span></div>
           <label className="couples-consent"><input type="checkbox" checked={myConsent} onChange={e=>{setMyConsent(e.target.checked);if(!e.target.checked){setStatus("lobby");void channelRef.current?.send({type:"broadcast",event:"reset-consent",payload:{stopped:false}});}}}/><span>{t("Ik stem vrijwillig in met deze ervaring.", "I freely consent to this experience.")}</span></label>
