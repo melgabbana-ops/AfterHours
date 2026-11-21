@@ -43,6 +43,11 @@ const checks = [
   ["tablet experience cards use a three-column layout", tabletStyles.includes("grid-template-columns: repeat(3, minmax(0, 1fr)) !important;")],
   ["tablet navigation controls keep 56px touch targets", tabletStyles.includes("min-height: 56px !important;")],
   ["tablet navigation respects iPad safe-area insets", tabletStyles.includes("env(safe-area-inset-bottom, 0px)") && tabletStyles.includes("env(safe-area-inset-left, 0px)")],
+  ["tablet camera preview hides the uncomposited source video", /\.media-live-source\s*\{\s*display:\s*none\s*!important/.test(tabletStyles)],
+  ["tablet camera preview keeps the branded composite centered and bounded", tabletStyles.includes(".media-live-composite") && tabletStyles.includes("max-height: min(62dvh, 620px) !important;")],
+  ["tablet camera overlay watermark stays anchored above the preview", tabletStyles.includes(".media-live-watermark") && tabletStyles.includes("pointer-events: none !important;")],
+  ["tablet media frame choices use three comfortable columns", tabletStyles.includes(".media-frame-picker > div") && tabletStyles.includes("grid-template-columns: repeat(3, minmax(0, 1fr)) !important;")],
+  ["tablet capture consent spans the complete control row", tabletStyles.includes(".media-capture-controls > .media-consent-check") && tabletStyles.includes("grid-column: 1 / -1 !important;")],
 ];
 
 const failed = checks.filter(([, passed]) => !passed);
