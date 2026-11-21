@@ -650,7 +650,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
             </div>
           )}
           {signedUrl && <a className="media-signed-link" href={signedUrl} target="_blank" rel="noopener noreferrer">{t("Open privébestand (link verloopt na 60 seconden)", "Open private file (link expires after 60 seconds)")}</a>}
-          {message && <small role="status">{message}</small>}
+          {message && <small role="status" aria-live="polite" aria-atomic="true">{message}</small>}
         </>
       )}
     </section>
