@@ -48,7 +48,7 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
   connectedRef.current = connected;
   const partnerPresent = participants.some(person => person.participantId !== participantId);
   const partnerConsented = participants.some(person => person.participantId !== participantId && person.consent === true);
-  const ready = mode === "local" ? myConsent && localPartnerConsent : canStartRemotePlay({ connected, participantCount: participants.length, partnerPresent, ownConsent: myConsent, partnerConsent: partnerConsented });
+  const ready = mode === "local" ? myConsent && localPartnerConsent : canStartRemotePlay({ connected, serverAuthorized: false, participantCount: participants.length, partnerPresent, ownConsent: myConsent, partnerConsent: partnerConsented });
   const inviteUrl = useMemo(() => {
     const url = new URL(window.location.href);
     url.search = "";
@@ -126,6 +126,7 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
       const liveParticipants = Object.values(channel.presenceState<PresenceMeta>()).flat();
       if (next.status === "active" && !canStartRemotePlay({
         connected: connectedRef.current,
+        serverAuthorized: false,
         participantCount: liveParticipants.length,
         partnerPresent: liveParticipants.some(person => person.participantId !== participantId),
         ownConsent: consentRef.current,
@@ -194,8 +195,8 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
     if (mode === "remote") {
       if (nextStatus === "active" && status !== "active") {
         const consentReady = status === "paused"
-          ? canResumeRemotePlay({ connected, participantCount: participants.length, partnerPresent, ownConsent: myConsent, partnerConsent: partnerConsented })
-          : canStartRemotePlay({ connected, participantCount: participants.length, partnerPresent, ownConsent: myConsent, partnerConsent: partnerConsented });
+          ? canResumeRemotePlay({ connected, serverAuthorized: false, participantCount: participants.length, partnerPresent, ownConsent: myConsent, partnerConsent: partnerConsented })
+          : canStartRemotePlay({ connected, serverAuthorized: false, participantCount: participants.length, partnerPresent, ownConsent: myConsent, partnerConsent: partnerConsented });
         if (!consentReady) {
           setMessage(t("Hervatten kan pas als precies twee deelnemers verbonden zijn en beiden opnieuw instemmen.", "Resume requires exactly two connected participants and fresh consent from both."));
           return false;
