@@ -48,7 +48,7 @@ function fromBase64(value: string): Uint8Array {
   return bytes;
 }
 function parseVault(raw: string | null): StoredVault | null {
-  if (!raw) return null;
+  if (raw === null) return null;
   try {
     const value: unknown = JSON.parse(raw);
     if (!value || typeof value !== "object" || Array.isArray(value)) return null;
@@ -116,7 +116,7 @@ export async function createPrivateJournalVault(
   }
   const target = storageTarget(storage);
   if (!target) throw new Error("Lokale opslag is niet beschikbaar.");
-  if (target.getItem(PRIVATE_JOURNAL_STORAGE_KEY)) throw new Error("Er bestaat al een journal-kluis. Ontgrendel deze eerst.");
+  if (target.getItem(PRIVATE_JOURNAL_STORAGE_KEY) !== null) throw new Error("Er bestaat al journal-opslag. Ontgrendel of herstel deze eerst; bestaande gegevens worden niet overschreven.");
   const salt = webCrypto().getRandomValues(new Uint8Array(16));
   const key = await deriveKey(passphrase, salt);
   const verifier = await encryptText(key, VERIFIER);
