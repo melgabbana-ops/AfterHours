@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { ArrowLeft, BookOpen, LockKeyhole, LockOpen, Plus, Save, Trash2 } from "lucide-react";
 import {
   createPrivateJournalVault,
@@ -27,15 +27,6 @@ export default function AftercareJournal({ language, onClose }: { language: Lang
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
-
-  useEffect(() => () => {
-    setKey(null);
-    setEntries([]);
-    setPassphrase("");
-    setConfirmation("");
-    setTitle("");
-    setBody("");
-  }, []);
 
   const openVault = async (event: React.FormEvent) => {
     event.preventDefault();
