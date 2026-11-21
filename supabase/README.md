@@ -4,7 +4,7 @@ AFTER HOURS uses Supabase/PostgreSQL for account-scoped progress, session safety
 
 ## Migration history
 
-The version prefix in each file under `supabase/migrations/` must match the version recorded in the connected production project's Supabase migration ledger. The current production ledger has 24 entries. The file names below have been aligned to that ledger without changing SQL contents or applying any database change.
+The version prefix in each file under `supabase/migrations/` must match the version recorded in the connected production project's Supabase migration ledger. The current production ledger has 25 entries. The file names below have been aligned to that ledger without changing SQL contents or applying any database change.
 
 | Production ledger version | Migration file |
 |---|---|
@@ -32,6 +32,7 @@ The version prefix in each file under `supabase/migrations/` must match the vers
 | `20261121000055` | `20261121000055_afterhours_participant_consent_withdrawal.sql` |
 | `20261121000106` | `20261121000106_afterhours_shared_run_consent_guard.sql` |
 | `20261121000215` | `20261121000215_afterhours_revoke_shared_consents_on_pause_or_end.sql` |
+| `20261121000315` | `20261121000315_afterhours_invitation_accepted_user_index.sql` |
 
 Run `npm run check:migrations` to verify that the checked-in file list still matches this deployed baseline. When adding a migration, use the version that was actually recorded by the reviewed migration workflow, then update the guard and this table in the same change. Never rename or replay an already-applied production migration casually.
 
