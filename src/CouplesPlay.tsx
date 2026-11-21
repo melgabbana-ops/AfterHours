@@ -21,6 +21,11 @@ function newCode() {
   return Array.from(bytes, value => alphabet[value % alphabet.length]).join("");
 }
 
+// Flip only after the secure Duo migration is applied and two-account tests pass.
+function secureDuoBackendAvailable(): boolean {
+  return false;
+}
+
 export default function CouplesPlay({ language, onBack }: { language: Language; onBack: () => void }) {
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
   // Legacy public room-code links are deliberately ignored. Remote rooms return
@@ -87,15 +92,16 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
     }
     if (!authChecked) return;
     // Never connect to the legacy public room-code topic. The new private-room
-    // adapter is prepared separately and remains unavailable until its reviewed
-    // database proposal is actually deployed and integration-tested.
-    setConnected(false);
-    setParticipants([]);
-    setMessage(t(
-      "Online Duo is tijdelijk uitgeschakeld terwijl de privé-uitnodigingen en serverbeveiliging worden afgerond. Gebruik voorlopig Lokaal samen.",
-      "Online Duo is temporarily unavailable while private invitations and server-side access controls are completed. Use Together locally for now."
-    ));
-    return;
+    // adapter remains disabled until its reviewed schema is deployed and tested.
+    if (mode === "remote" && !secureDuoBackendAvailable()) {
+      setConnected(false);
+      setParticipants([]);
+      setMessage(t(
+        "Online Duo is tijdelijk uitgeschakeld terwijl de privé-uitnodigingen en serverbeveiliging worden afgerond. Gebruik voorlopig Lokaal samen.",
+        "Online Duo is temporarily unavailable while private invitations and server-side access controls are completed. Use Together locally for now."
+      ));
+      return;
+    }
     if (!authenticatedUserId) {
       setConnected(false);
       setParticipants([]);
