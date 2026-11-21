@@ -35,6 +35,12 @@ describe("secure Duo invitation tokens", () => {
     expect(readDuoInvitationToken(invite)).toBe(token);
   });
 
+  it("rejects non-web and credential-bearing invitation base URLs", () => {
+    const token = "c".repeat(64);
+    expect(() => createDuoInvitationUrl("javascript:alert(1)", token)).toThrow("safe web address");
+    expect(() => createDuoInvitationUrl("https://user:pass@example.test/duo", token)).toThrow("safe web address");
+  });
+
   it("rejects malformed tokens and safely ignores unrelated fragments", () => {
     expect(() => createDuoInvitationUrl("https://example.test/duo", "not-a-token")).toThrow("invalid");
     expect(readDuoInvitationToken("https://example.test/duo#section")).toBe("");
