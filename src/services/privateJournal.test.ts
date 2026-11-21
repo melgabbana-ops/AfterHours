@@ -33,6 +33,8 @@ describe("encrypted private journal vault", () => {
     expect(journalSource).toContain('lockGeneration.current += 1;');
     expect(journalSource).toContain('"De journal-kluis is vergrendeld."');
     expect(journalSource).toContain('"Journal automatisch vergrendeld toen de app naar de achtergrond ging.');
+    expect(journalSource).toContain('aria-busy={busy}');
+    expect(journalSource).toContain('className="ah-journal-delete" onClick={()=>void remove()} disabled={busy}');
   });
   it("encrypts entry text before it reaches browser storage and unlocks it again", async () => {
     const storage = memoryStorage();
