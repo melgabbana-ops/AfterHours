@@ -71,7 +71,7 @@ function inspectClassExpression(file, expression) {
       } else literalParts.push(head);
       for (const span of node.templateSpans) {
         literalParts.push(span.literal.text);
-        if (span.literal.text.endsWith("-")) dynamicPrefixes.push(span.literal.text);
+        dynamicPrefixes.push(...span.literal.text.split(/\s+/).filter((token) => token.endsWith("-")));
       }
       return;
     }
