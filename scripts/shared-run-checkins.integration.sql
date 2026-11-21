@@ -1,4 +1,4 @@
-\\set ON_ERROR_STOP on
+\set ON_ERROR_STOP on
 
 create role anon nologin;
 create role authenticated nologin;
@@ -68,7 +68,7 @@ create policy afterhours_run_consents_select_self
   on public.afterhours_experience_run_consents for select to authenticated
   using (user_id = (select auth.uid()));
 
-\\i supabase/proposals/20261121001230_afterhours_shared_run_checkins.sql
+\i supabase/proposals/20261121001230_afterhours_shared_run_checkins.sql
 
 insert into auth.users(id) values
   ('00000000-0000-4000-8000-000000000001'),
@@ -196,4 +196,4 @@ begin
   end;
 end $$;
 
-\\echo 'Shared-run check-in integration tests passed.'
+\echo 'Shared-run check-in integration tests passed.'
