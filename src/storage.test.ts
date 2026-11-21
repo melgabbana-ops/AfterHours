@@ -63,6 +63,31 @@ describe("local persistence", () => {
     expect(loadState()).toEqual(state);
   });
 
+  it("rejects a saved session that belongs to a different profile", () => {
+    const state = defaultState();
+    state.profile.id = "profile-current";
+    state.session.profileId = "profile-previous";
+    localStorageMock.setItem("afterhours.state.v1", JSON.stringify(state));
+
+    const restored = loadState();
+
+    expect(restored.profile.username).toBe("nightwalker");
+    expect(restored.session.profileId).toBe(restored.profile.id);
+    expect(restored.session.status).toBe("ready");
+  });
+
+  it("rejects blank profile and session identities", () => {
+    const state = defaultState();
+    state.profile.id = "   ";
+    state.session.profileId = "   ";
+    localStorageMock.setItem("afterhours.state.v1", JSON.stringify(state));
+
+    const restored = loadState();
+
+    expect(restored.profile.id).toBe("local-profile");
+    expect(restored.session.profileId).toBe(restored.profile.id);
+  });
+
   it("falls back safely when stored state is malformed", () => {
     localStorageMock.setItem("afterhours.state.v1", "{broken");
 
