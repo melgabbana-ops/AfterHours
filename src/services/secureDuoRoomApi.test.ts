@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   acceptSecureDuoInvitation, createSecureDuoRoom, previewSecureDuoInvitation,
-  revokeSecureDuoInvitation, setSecureDuoConsent, setSecureDuoRoomState,
+  revokeSecureDuoInvitation, setSecureDuoConsent, setSecureDuoRoomState,\n  isSecureDuoLiveState, joinSecureDuoRealtime,
 } from "./secureDuoRoomApi";
 
 const id="123e4567-e89b-42d3-a456-426614174000";
@@ -70,5 +70,46 @@ describe("secure account-bound Duo room API",()=>{
     expect(client.rpc.mock.calls[0][0]).toBe("create_afterhours_duo_room");
     expect(client.rpc.mock.calls[0][1].p_invitation_token_hash).not.toBe(room.token);
     vi.unstubAllGlobals();
+  });
+});
+
+
+describe("private Duo Realtime transport",()=>{
+  it("accepts only minimal state hints and rejects answer or media payloads",()=>{
+    const valid={round:2,status:"paused",updatedAt:"2026-11-21T21:00:00.000Z"};
+    expect(isSecureDuoLiveState(valid)).toBe(true);
+    expect(isSecureDuoLiveState({...valid,answer:"private text"})).toBe(false);
+    expect(isSecureDuoLiveState({...valid,round:99})).toBe(false);
+    expect(isSecureDuoLiveState({...valid,updatedAt:"not-a-date"})).toBe(false);
+  });
+
+  it("joins the UUID-only private topic and authorizes state changes before broadcasting",async()=>{
+    const channel:any={
+      on:vi.fn().mockReturnThis(),
+      subscribe:vi.fn((callback:any)=>{callback("SUBSCRIBED");return channel;}),
+      track:vi.fn().mockResolvedValue("ok"),
+      presenceState:vi.fn().mockReturnValue({[id]:[{online:true}]}),
+      send:vi.fn().mockResolvedValue("ok"),
+      untrack:vi.fn().mockResolvedValue("ok"),
+    };
+    const client=makeClient({
+      channel:vi.fn().mockReturnValue(channel),
+      removeChannel:vi.fn().mockResolvedValue("ok"),
+      rpc:vi.fn().mockResolvedValue({data:{room_id:id,status:"active"},error:null}),
+    });
+    const connection=await joinSecureDuoRealtime(id,{},client);
+    expect(client.channel).toHaveBeenCalledWith("afterhours-duo:"+id,expect.objectContaining({config:expect.objectContaining({private:true})}));
+    await connection.setRoomState("active",1);
+    expect(client.rpc).toHaveBeenCalledWith("set_afterhours_duo_room_state",{p_room_id:id,p_status:"active"});
+    expect(channel.send).toHaveBeenCalledWith(expect.objectContaining({event:"duo-state",payload:expect.objectContaining({round:1,status:"active"})}));
+    expect(connection.presence()).toEqual({[id]:[{online:true}]});
+    await connection.leave();
+    expect(client.removeChannel).toHaveBeenCalledWith(channel);
+  });
+
+  it("rejects invalid room ids before opening a Realtime channel",async()=>{
+    const client=makeClient({channel:vi.fn()});
+    await expect(joinSecureDuoRealtime("bad-id",{},client)).rejects.toThrow("ongeldig");
+    expect(client.channel).not.toHaveBeenCalled();
   });
 });
