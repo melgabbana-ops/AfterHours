@@ -16,7 +16,7 @@ vi.mock("./supabase", () => ({
   supabase: { auth: { getUser: mocks.getUser }, from: mocks.from },
 }));
 
-import { loadWorldRecords, saveWorldRecord } from "./worldRecords";
+import { loadExperienceRuns, loadWorldRecords, saveWorldRecord } from "./worldRecords";
 
 const chain = {
   select: mocks.select,
@@ -54,6 +54,29 @@ describe("AFTER HOURS private world storage", () => {
     expect(mocks.from).toHaveBeenCalledWith("afterhours_world_records");
     expect(mocks.eq).toHaveBeenNthCalledWith(1, "user_id", "user-a");
     expect(mocks.eq).toHaveBeenNthCalledWith(2, "module", "director");
+  });
+
+  it("loads only runs permitted by consent-based RLS without hiding shared participant runs", async () => {
+    const rows = [{
+      id: "run-1",
+      user_id: "host-user",
+      scene_key: "builtin:trust-protocol",
+      scene_snapshot: { title: "Shared scene", steps: ["Check in"] },
+      status: "paused",
+      current_step: 0,
+      total_steps: 1,
+      created_at: "2026-11-21T00:00:00Z",
+      updated_at: "2026-11-21T00:00:00Z",
+      started_at: "2026-11-21T00:00:00Z",
+      completed_at: null,
+      interaction_log: []
+    }];
+    mocks.limit.mockResolvedValue({ data: rows, error: null });
+
+    await expect(loadExperienceRuns("user-a")).resolves.toEqual(rows);
+    expect(mocks.from).toHaveBeenCalledWith("afterhours_experience_runs");
+    expect(mocks.select).toHaveBeenCalledWith("id,user_id,scene_key,scene_snapshot,status,current_step,total_steps,created_at,updated_at,started_at,completed_at,interaction_log");
+    expect(mocks.eq).not.toHaveBeenCalled();
   });
 
   it("upserts records only after verifying the same authenticated account", async () => {

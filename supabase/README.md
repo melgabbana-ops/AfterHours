@@ -4,7 +4,7 @@ AFTER HOURS uses Supabase/PostgreSQL for account-scoped progress, session safety
 
 ## Migration history
 
-The version prefix in each file under `supabase/migrations/` must match the version recorded in the connected production project's Supabase migration ledger. The current production ledger has 18 entries. The file names below have been aligned to that ledger without changing SQL contents or applying any database change.
+The version prefix in each file under `supabase/migrations/` must match the version recorded in the connected production project's Supabase migration ledger. The current production ledger has 27 entries. The file names below have been aligned to that ledger without changing SQL contents or applying any database change.
 
 | Production ledger version | Migration file |
 |---|---|
@@ -26,6 +26,15 @@ The version prefix in each file under `supabase/migrations/` must match the vers
 | `20261013110946` | `20261013110946_merge_experience_rounds_read_policies.sql` |
 | `20261015114512` | `20261015114512_restore_atomic_completion_consent.sql` |
 | `20261118205045` | `20261118205045_story_chapter_account_sync.sql` |
+| `20261120234051` | `20261120234051_afterhours_world_modules.sql` |
+| `20261120234949` | `20261120234949_afterhours_experience_interaction_log.sql` |
+| `20261120235944` | `20261120235944_afterhours_shared_experience_invitations.sql` |
+| `20261121000055` | `20261121000055_afterhours_participant_consent_withdrawal.sql` |
+| `20261121000106` | `20261121000106_afterhours_shared_run_consent_guard.sql` |
+| `20261121000215` | `20261121000215_afterhours_revoke_shared_consents_on_pause_or_end.sql` |
+| `20261121000315` | `20261121000315_afterhours_invitation_accepted_user_index.sql` |
+| `20261121000345` | `20261121000345_afterhours_experience_invitation_preview.sql` |
+| `20261121000429` | `20261121000429_afterhours_invite_requires_paused_run.sql` |
 
 Run `npm run check:migrations` to verify that the checked-in file list still matches this deployed baseline. When adding a migration, use the version that was actually recorded by the reviewed migration workflow, then update the guard and this table in the same change. Never rename or replay an already-applied production migration casually.
 
@@ -58,3 +67,10 @@ Consent is session-scoped and auditable. Revocation must stop an active or pause
 ## Private media storage
 
 The `after-hours-private-media` bucket must remain private. Object paths use `<auth.uid()>/<session-id>/<filename>`; storage policies must scope access to the first folder and enforce upload limits. Use authenticated storage operations or short-lived signed URLs. Never make this bucket public.
+
+
+## Shared experience invitations and participant consent
+
+The three shared-experience migrations add one-time invitation links for an existing paused experience. The host must pause first and keep the experience paused while the recipient reviews and accepts. Only a SHA-256 token hash is stored; raw invitation tokens exist only in the sender's browser and shared link. The recipient must sign in with their own account, preview the exact scene title, description and steps, and explicitly accept. Acceptance records a separate consent row for that account.
+
+Participants can withdraw their consent. The withdrawal RPC revokes their consent and stops the shared run in the same database transaction. A database activation guard prevents the owner from reactivating a run after any accepted participant has withdrawn; fresh consent must be obtained through a new invitation. Invitation rows are visible only to their inviter, while accepted participants can read the run under the consent-based RLS policy. The participant-facing UI is read-only for the host's run and includes an explicit withdraw-and-stop action. Pausing, completing, or stopping a run revokes every participant's consent. Resuming requires the owner to reconfirm and every invited participant to accept a fresh invitation.

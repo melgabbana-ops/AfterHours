@@ -11,6 +11,7 @@ export type WorldRecord<T = Record<string, unknown>> = {
 export type ExperienceRunStatus = "ready" | "active" | "paused" | "completed" | "stopped";
 export type ExperienceRun = {
   id: string;
+  user_id: string;
   scene_key: string;
   scene_snapshot: Record<string, unknown>;
   status: ExperienceRunStatus;
@@ -90,8 +91,7 @@ export async function loadExperienceRuns(expectedUserId: string): Promise<Experi
   await assertWorldAccount(expectedUserId);
   const { data, error } = await supabase!
     .from("afterhours_experience_runs")
-    .select("id,scene_key,scene_snapshot,status,current_step,total_steps,created_at,updated_at,started_at,completed_at,interaction_log")
-    .eq("user_id", expectedUserId)
+    .select("id,user_id,scene_key,scene_snapshot,status,current_step,total_steps,created_at,updated_at,started_at,completed_at,interaction_log")
     .order("updated_at", { ascending: false })
     .limit(50);
   if (error) throw new Error(error.message);
@@ -145,7 +145,7 @@ export async function updateExperienceRun(args: {
 }): Promise<void> {
   await assertWorldAccount(args.expectedUserId);
   const now = new Date().toISOString();
-  const { data, error } = await supabase!
+  let updateQuery = supabase!
     .from("afterhours_experience_runs")
     .update({
       status: args.status,
@@ -155,9 +155,9 @@ export async function updateExperienceRun(args: {
       ...(args.interactionLog ? { interaction_log: args.interactionLog } : {}),
     })
     .eq("id", args.runId)
-    .eq("user_id", args.expectedUserId)
-    .select("id")
-    .maybeSingle();
+    .eq("user_id", args.expectedUserId);
+  if (args.status === "active") updateQuery = updateQuery.eq("status", "active");
+  const { data, error } = await updateQuery.select("id").maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) throw new Error("This experience run no longer belongs to the signed-in account.");
   if (args.status !== "active") {
@@ -212,4 +212,94 @@ export async function deleteExperienceRun(runId: string, expectedUserId: string)
     .eq("id", runId)
     .eq("user_id", expectedUserId);
   if (error) throw new Error(error.message);
+}
+
+
+export type ExperienceInvitation = {
+  id: string;
+  run_id: string;
+  token_hash: string;
+  status: "pending" | "accepted" | "revoked" | "expired";
+  accepted_at: string | null;
+  expires_at: string;
+  created_at: string;
+};
+
+export async function loadExperienceInvitations(expectedUserId: string): Promise<ExperienceInvitation[]> {
+  await assertWorldAccount(expectedUserId);
+  const { data, error } = await supabase!
+    .from("afterhours_experience_invitations")
+    .select("id,run_id,token_hash,status,accepted_at,expires_at,created_at")
+    .eq("inviter_user_id", expectedUserId)
+    .order("created_at", { ascending: false })
+    .limit(50);
+  if (error) throw new Error(error.message);
+  return (data ?? []) as ExperienceInvitation[];
+}
+
+export async function createExperienceInvitation(args: {
+  runId: string;
+  tokenHash: string;
+  expectedUserId: string;
+}): Promise<ExperienceInvitation> {
+  await assertWorldAccount(args.expectedUserId);
+  if (!/^[a-f0-9]{64}$/.test(args.tokenHash)) throw new Error("Invalid invitation token hash.");
+  const { data, error } = await supabase!
+    .from("afterhours_experience_invitations")
+    .insert({
+      run_id: args.runId,
+      inviter_user_id: args.expectedUserId,
+      token_hash: args.tokenHash,
+      expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+    })
+    .select("id,run_id,token_hash,status,accepted_at,expires_at,created_at")
+    .single();
+  if (error) throw new Error(error.message);
+  return data as ExperienceInvitation;
+}
+
+export async function revokeExperienceInvitation(invitationId: string, expectedUserId: string): Promise<void> {
+  await assertWorldAccount(expectedUserId);
+  const { data, error } = await supabase!
+    .from("afterhours_experience_invitations")
+    .update({ status: "revoked" })
+    .eq("id", invitationId)
+    .eq("inviter_user_id", expectedUserId)
+    .eq("status", "pending")
+    .select("id")
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!data) throw new Error("This invitation is no longer pending or does not belong to this account.");
+}
+
+export async function acceptExperienceInvitation(tokenHash: string, expectedUserId: string): Promise<{ invitation_id: string; run_id: string; status: string; accepted_at: string }> {
+  await assertWorldAccount(expectedUserId);
+  if (!/^[a-f0-9]{64}$/.test(tokenHash)) throw new Error("This invitation link is invalid.");
+  const { data, error } = await supabase!.rpc("accept_afterhours_experience_invitation", { p_token_hash: tokenHash });
+  if (error) throw new Error(error.message);
+  return data as { invitation_id: string; run_id: string; status: string; accepted_at: string };
+}
+
+
+export async function withdrawExperienceConsent(runId: string, expectedUserId: string): Promise<void> {
+  await assertWorldAccount(expectedUserId);
+  const { error } = await supabase!.rpc("withdraw_afterhours_experience_consent", { p_run_id: runId });
+  if (error) throw new Error(error.message);
+}
+
+
+export type ExperienceInvitationPreview = {
+  run_id: string;
+  title: string;
+  description: string;
+  steps: string[];
+  expires_at: string;
+};
+
+export async function previewExperienceInvitation(tokenHash: string, expectedUserId: string): Promise<ExperienceInvitationPreview> {
+  await assertWorldAccount(expectedUserId);
+  if (!/^[a-f0-9]{64}$/.test(tokenHash)) throw new Error("This invitation link is invalid.");
+  const { data, error } = await supabase!.rpc("preview_afterhours_experience_invitation", { p_token_hash: tokenHash });
+  if (error) throw new Error(error.message);
+  return data as ExperienceInvitationPreview;
 }
