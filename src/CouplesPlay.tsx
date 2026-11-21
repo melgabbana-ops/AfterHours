@@ -162,7 +162,7 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
   };
   const shareInvite = async () => {
     try {
-      if (navigator.share) await navigator.share({ title: "AFTER HOURS Duo", text: t("Kom naar onze privékamer.", "Join our private room."), url: inviteUrl });
+      if (navigator.share) await navigator.share({ title: "AFTER HOURS Duo", text: t("Kom naar onze Duo-kamer met code.", "Join our Duo room with a code."), url: inviteUrl });
       else { await navigator.clipboard.writeText(inviteUrl); setMessage(t("Uitnodigingslink gekopieerd.", "Invite link copied.")); }
     } catch { setMessage(t("Delen is niet gelukt. Deel de kamercode handmatig.", "Could not share. Send the room code manually.")); }
   };
@@ -191,7 +191,7 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
         <MonitorSmartphone/><strong>{t("Lokaal samen", "Together locally")}</strong><span>{t("Eén telefoon, tablet of iPad. Om de beurt antwoorden.", "One phone, tablet or iPad. Take turns answering.")}</span>
       </button>
       <button type="button" className={mode === "remote" ? "couples-mode-card selected" : "couples-mode-card"} onClick={() => { setMode("remote"); setMyConsent(false); setStatus("lobby"); }} disabled={status === "active" || status === "paused"}>
-        <Wifi/><strong>{t("Op afstand", "Long distance")}</strong><span>{t("Verbind twee apparaten met een privékamer.", "Connect two devices through a private room.")}</span>
+        <Wifi/><strong>{t("Op afstand", "Long distance")}</strong><span>{t("Verbind twee apparaten met een kamer met code.", "Connect two devices through a room with a code.")}</span>
       </button>
     </div>
     {mode === "local" ? <section className="couples-lobby">
@@ -204,17 +204,17 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
       <label className="couples-consent"><input type="checkbox" checked={localPartnerConsent} onChange={e=>setLocalPartnerConsent(e.target.checked)}/><span>{t("Speler 2 stemt vrijwillig in.", "Player 2 freely consents.")}</span></label>
       <button type="button" className="couples-primary" disabled={!ready} onClick={()=>void publish(0, "active")}><Play size={16}/>{t("Start samen", "Start together")}</button>
     </section> : <section className="couples-lobby">
-      <span className="eyebrow">REMOTE · PRIVATE ROOM</span><h3>{t("Verbind jullie apparaten", "Connect your devices")}</h3>
+      <span className="eyebrow">REMOTE · ROOM CODE</span><h3>{t("Verbind jullie apparaten", "Connect your devices")}</h3>
       {!supabaseConfigured ? <p role="alert">{t("Online koppelspel vereist een geconfigureerde realtime-verbinding. Lokaal spelen blijft beschikbaar.", "Online couple play requires a configured realtime connection. Local play remains available.")}</p> : <>
         {!roomCode ? <div className="couples-room-entry">
           <label className="couples-join-code">{t("Kamercode invoeren", "Enter room code")}<input value={joinCode} onChange={e=>setJoinCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,10))} maxLength={10} autoComplete="off" placeholder={t("10 tekens", "10 characters")}/></label>
-          <button type="button" className="couples-primary" disabled={joinCode.length !== 10} onClick={()=>{setRoomCode(joinCode);setMyConsent(false);setStatus("lobby");setRound(0);}}><Link2 size={16}/>{t("Deelnemen aan privékamer", "Join private room")}</button>
+          <button type="button" className="couples-primary" disabled={joinCode.length !== 10} onClick={()=>{setRoomCode(joinCode);setMyConsent(false);setStatus("lobby");setRound(0);}}><Link2 size={16}/>{t("Deelnemen aan kamer met code", "Join room with a code")}</button>
           <span className="couples-entry-divider">{t("of maak zelf een kamer aan", "or create your own room")}</span>
-          <button type="button" className="couples-secondary" onClick={createRoom}><Users size={16}/>{t("Maak een privékamer", "Create a private room")}</button>
+          <button type="button" className="couples-secondary" onClick={createRoom}><Users size={16}/>{t("Maak een kamer met code", "Create a room with a code")}</button>
         </div> : <>
           <div className="couples-room-code"><small>{t("JULLIE KAMERCODE", "YOUR ROOM CODE")}</small><strong>{roomCode}</strong><button type="button" onClick={()=>void shareInvite()}><Copy size={15}/>{t("Deel uitnodiging", "Share invite")}</button></div>
-          <div className="couples-connection" role="status">{connected ? <><Wifi size={17}/>{t("Verbonden met de privékamer", "Connected to private room")}</> : <><WifiOff size={17}/>{t("Verbinding maken…", "Connecting…")}</>}</div>
-          <p className="couples-consent-note">{t("Deel de kamercode alleen met je partner. Iedereen met de code kan proberen deel te nemen.", "Only share the room code with your partner. Anyone with the code can attempt to join.")}</p>
+          <div className="couples-connection" role="status">{connected ? <><Wifi size={17}/>{t("Verbonden met de kamer met code", "Connected to room with a code")}</> : <><WifiOff size={17}/>{t("Verbinding maken…", "Connecting…")}</>}</div>
+          <p className="couples-consent-note">{t("Let op: dit is nog geen account-beveiligde privékamer. Iedereen met de code kan proberen deel te nemen. Deel daarom geen gevoelige informatie.", "Important: this is not yet an account-secured private room. Anyone with the code may attempt to join. Do not share sensitive information.")}</p>
           <label className="couples-join-code">{t("Jouw naam", "Your name")}<input value={name} onChange={e=>setName(e.target.value)} maxLength={24} placeholder={t("Naam", "Name")}/></label>
           <div className="couples-presence"><Users size={17}/><strong>{participants.length} / 2</strong><span>{partnerPresent ? t("Partner is aanwezig", "Partner is here") : t("Wachten op je partner…", "Waiting for your partner…")}</span></div>
           <label className="couples-consent"><input type="checkbox" checked={myConsent} onChange={e=>{setMyConsent(e.target.checked);if(!e.target.checked){setStatus("lobby");void channelRef.current?.send({type:"broadcast",event:"reset-consent",payload:{stopped:false}});}}}/><span>{t("Ik stem vrijwillig in met deze ervaring.", "I freely consent to this experience.")}</span></label>
