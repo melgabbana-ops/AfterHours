@@ -83,8 +83,12 @@ export function savePrivateSessionNote(
     updatedAt: now,
   };
   try {
-    target.setItem(key, JSON.stringify(note));
-    return note;
+    const serialized = JSON.stringify(note);
+    target.setItem(key, serialized);
+    const persisted = target.getItem(key);
+    if (persisted !== serialized) return null;
+    const verified: unknown = JSON.parse(persisted);
+    return isPrivateSessionNote(verified, note.ownerId, note.sessionId) ? verified : null;
   } catch {
     return null;
   }
@@ -96,7 +100,7 @@ export function deletePrivateSessionNote(ownerId: string, sessionId: string, sto
   if (!target || !key) return false;
   try {
     target.removeItem(key);
-    return true;
+    return target.getItem(key) === null;
   } catch {
     return false;
   }
