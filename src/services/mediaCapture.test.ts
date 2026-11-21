@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { appendMediaCaptureChunk, discardMediaCapture, MAX_MEDIA_CAPTURE_BYTES, stopMediaStreams } from "./mediaCapture";
+import { appendMediaCaptureChunk, discardMediaCapture, MAX_MEDIA_CAPTURE_BYTES, stopMediaStreams, waitForVideoReady } from "./mediaCapture";
 
 describe("media capture cleanup", () => {
   it("stops every track across camera and composited streams", () => {
@@ -104,5 +104,66 @@ describe("media capture size guard", () => {
     expect(appendMediaCaptureChunk(chunks, Number.NaN, new Blob(["x"]), 10)).toBeNull();
     expect(appendMediaCaptureChunk(chunks, 0, new Blob(["x"]), Number.POSITIVE_INFINITY)).toBeNull();
     expect(chunks).toHaveLength(0);
+  });
+});
+
+describe("camera video readiness", () => {
+  function fakeVideo() {
+    return Object.assign(new EventTarget(), { videoWidth: 0, videoHeight: 0, error: null }) as unknown as HTMLVideoElement;
+  }
+
+  it("rechecks dimensions after attaching listeners to close the ready-event race", async () => {
+    vi.useFakeTimers();
+    try {
+      const video = fakeVideo();
+      let widthReads = 0;
+      Object.defineProperty(video, "videoWidth", { get: () => (++widthReads === 1 ? 0 : 1280) });
+      Object.defineProperty(video, "videoHeight", { get: () => 720 });
+      await expect(waitForVideoReady(video, 5000)).resolves.toBeUndefined();
+      expect(widthReads).toBeGreaterThanOrEqual(2);
+      expect(vi.getTimerCount()).toBe(0);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("resolves when loadeddata supplies actual video dimensions", async () => {
+    const video = fakeVideo();
+    const ready = waitForVideoReady(video, 5000);
+    Object.defineProperty(video, "videoWidth", { value: 640 });
+    Object.defineProperty(video, "videoHeight", { value: 480 });
+    video.dispatchEvent(new Event("loadeddata"));
+    await expect(ready).resolves.toBeUndefined();
+  });
+
+  it("rejects media errors and removes all event listeners", async () => {
+    const video = fakeVideo();
+    const remove = vi.spyOn(video, "removeEventListener");
+    const ready = waitForVideoReady(video, 5000, "timeout", "media error");
+    video.dispatchEvent(new Event("error"));
+    await expect(ready).rejects.toThrow("media error");
+    expect(remove).toHaveBeenCalledTimes(3);
+  });
+
+  it("rejects a timeout and cleans up its timer and listeners", async () => {
+    vi.useFakeTimers();
+    try {
+      const video = fakeVideo();
+      const remove = vi.spyOn(video, "removeEventListener");
+      const ready = waitForVideoReady(video, 250, "camera timeout");
+      const assertion = expect(ready).rejects.toThrow("camera timeout");
+      await vi.advanceTimersByTimeAsync(250);
+      await assertion;
+      expect(remove).toHaveBeenCalledTimes(3);
+      expect(vi.getTimerCount()).toBe(0);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("detects an error that happened before listeners could be attached", async () => {
+    const video = fakeVideo();
+    Object.defineProperty(video, "error", { value: { code: 4 } });
+    await expect(waitForVideoReady(video, 5000, "timeout", "early error")).rejects.toThrow("early error");
   });
 });

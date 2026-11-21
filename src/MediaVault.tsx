@@ -9,7 +9,7 @@ import {
 } from "./services/media";
 import { supabase, supabaseConfigured } from "./services/supabase";
 import { composeImageWithOverlay, drawCameraFrame, mediaOverlayFrames, type OverlayFrameStyle } from "./mediaOverlay";
-import { appendMediaCaptureChunk, discardMediaCapture, MAX_MEDIA_CAPTURE_BYTES, stopMediaStreams } from "./services/mediaCapture";
+import { appendMediaCaptureChunk, discardMediaCapture, MAX_MEDIA_CAPTURE_BYTES, stopMediaStreams, waitForVideoReady } from "./services/mediaCapture";
 
 interface MediaVaultProps {
   sessionId: string;
@@ -217,10 +217,12 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
         video.srcObject=stream;
         await video.play();
         if(!mountedRef.current)return;
-        if(video.videoWidth===0) await new Promise<void>((resolve,reject)=>{
-          const timeout=window.setTimeout(()=>reject(new Error(t("De camera startte niet op tijd.","The camera did not start in time."))),5000);
-          video.addEventListener("loadedmetadata",()=>{window.clearTimeout(timeout);resolve()},{once:true});
-        });
+        await waitForVideoReady(
+          video,
+          5000,
+          t("De camera startte niet op tijd.","The camera did not start in time."),
+          t("De camera kon geen beeld leveren.","The camera could not provide a video frame."),
+        );
         if(!mountedRef.current)return;
         canvas.width=Math.min(1920,video.videoWidth);
         canvas.height=Math.max(1,Math.round(canvas.width/(video.videoWidth/video.videoHeight)));
