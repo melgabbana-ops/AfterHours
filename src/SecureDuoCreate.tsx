@@ -158,19 +158,17 @@ export default function SecureDuoCreate({ authenticated, language, onLogin, onBa
             <p className="couples-consent-note">
               {nl ? "Geldig tot: " : "Expires: "}{formattedExpiry || (nl ? "onbekend" : "unknown")}
             </p>
-            <div className="couples-actions">
-              <button type="button" className="couples-primary" onClick={() => void shareLink()}>
-                {nl ? "Delen" : "Share"}
-              </button>
-              <button type="button" className="couples-secondary" onClick={() => void copyLink()}>
-                {nl ? "Link kopiëren" : "Copy link"}
-              </button>
-              <button type="button" className="couples-back-bottom" onClick={() => void revoke()} disabled={revoking}>
-                {revoking
-                  ? (nl ? "Intrekken…" : "Revoking…")
-                  : (nl ? "Uitnodiging intrekken" : "Revoke invitation")}
-              </button>
-            </div>
+            <button type="button" className="couples-primary" onClick={() => void shareLink()}>
+              {nl ? "Delen" : "Share"}
+            </button>
+            <button type="button" className="couples-primary" onClick={() => void copyLink()}>
+              {nl ? "Link kopiëren" : "Copy link"}
+            </button>
+            <button type="button" className="couples-back-bottom" onClick={() => void revoke()} disabled={revoking}>
+              {revoking
+                ? (nl ? "Intrekken…" : "Revoking…")
+                : (nl ? "Uitnodiging intrekken" : "Revoke invitation")}
+            </button>
             <p className="couples-safety">
               {nl
                 ? "Behandel deze link als een sleutel. Deel hem niet openbaar. De uitnodiging is eenmalig en verloopt automatisch."
