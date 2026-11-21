@@ -18,7 +18,7 @@ describe("shared experience check-in migration", () => {
   });
 
   it("limits each experience to one accepted invitee plus its owner", () => {
-    expect(migration).toMatch(/create unique index if not exists afterhours_experience_invitations_one_accepted_participant_per_run[\s\S]*?on public\.afterhours_experience_invitations \(run_id\)[\s\S]*?where status = 'accepted' and accepted_user_id is not null/i);
+    expect(migration).toMatch(/create unique index if not exists afterhours_invites_one_accepted_per_run[\s\S]*?on public\.afterhours_experience_invitations \(run_id\)[\s\S]*?where status = 'accepted' and accepted_user_id is not null/i);
   });
 
   it("allows reads only to the participant or the owner of the related run", () => {
