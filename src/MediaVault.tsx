@@ -9,8 +9,8 @@ import {
   type PrivateMediaItem,
 } from "./services/media";
 import { supabase, supabaseConfigured } from "./services/supabase";
-import { composeImageWithOverlay, drawCameraFrame, mediaOverlayFrames, type OverlayFrameStyle } from "./mediaOverlay";
-import { appendMediaCaptureChunk, canRecoverInterruptedCapture, discardMediaCapture, MAX_MEDIA_CAPTURE_BYTES, missingCaptureTrack, stopMediaRecorder, stopMediaStreams, selectMediaRecorderMimeType, waitForVideoReady, watchMediaStreamInterruption } from "./services/mediaCapture";
+import { composeImageWithOverlay, composeImageWithEdits, defaultPhotoEditTransform, drawCameraFrame, mediaOverlayFrames, type OverlayFrameStyle, type PhotoEditTransform } from "./mediaOverlay";
+import { appendMediaCaptureChunk, canRecoverInterruptedCapture, discardMediaCapture, MAX_MEDIA_CAPTURE_BYTES, missingCaptureTrack, requestMediaStream, stopMediaRecorder, stopMediaStreams, selectMediaRecorderMimeType, waitForVideoReady, watchMediaStreamInterruption } from "./services/mediaCapture";
 
 interface MediaVaultProps {
   sessionId: string;
@@ -46,6 +46,8 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
   const [isPhotoCameraOpen,setIsPhotoCameraOpen] = useState(false);
   const [liveStream,setLiveStream] = useState<MediaStream|null>(null);
   const [pendingCapture,setPendingCapture] = useState<File|null>(null);
+  const [pendingOriginalFile,setPendingOriginalFile] = useState<File|null>(null);
+  const [photoEdits,setPhotoEdits] = useState<PhotoEditTransform>(defaultPhotoEditTransform);
   const [pendingUrl,setPendingUrl] = useState("");
   const [isSavingCapture,setIsSavingCapture] = useState(false);
   const mountedRef = useRef(false);
@@ -202,6 +204,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
       validatePrivateMediaFile(previewFile);
       if(pendingUrl) URL.revokeObjectURL(pendingUrl);
       setPendingCapture(previewFile);
+      setPendingOriginalFile(overlayApplied?file:null);
       setPendingUrl(URL.createObjectURL(previewFile));
       setMessage(overlayApplied
         ?t("AH-overlay toegepast. Controleer de foto en kies daarna zelf voor privé opslaan.","AH overlay applied. Review the photo, then choose whether to save it privately.")
@@ -211,6 +214,28 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
     }catch(error){
       if(mountedRef.current)setMessage(error instanceof Error ? error.message : t("Dit bestand kan niet worden gebruikt.","This file cannot be used."));
     }finally{if(mountedRef.current)setBusy(false)}
+  };
+
+  const updatePendingImageEdit=async(style:OverlayFrameStyle,edits:PhotoEditTransform)=>{
+    const original=pendingOriginalFile;
+    if(!original||!pendingCapture||busy||isSavingCapture)return;
+    setBusy(true);
+    setMessage("");
+    try{
+      const updated=await composeImageWithEdits(original,style,edits);
+      if(!mountedRef.current)return;
+      validatePrivateMediaFile(updated);
+      setFrameStyle(style);
+      setPhotoEdits(edits);
+      setPendingCapture(updated);
+      if(pendingUrl) URL.revokeObjectURL(pendingUrl);
+      setPendingUrl(URL.createObjectURL(updated));
+      setMessage(t("Foto bewerkt. Controleer de preview voordat je privé opslaat.","Photo edited. Review the preview before saving it privately."));
+    }catch(error){
+      if(mountedRef.current)setMessage(error instanceof Error?error.message:t("De foto kon niet worden bijgewerkt.","Could not update the photo."));
+    }finally{
+      if(mountedRef.current)setBusy(false);
+    }
   };
 
   const startCapture=async()=>{
@@ -228,11 +253,11 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
     setMessage("");
     captureInterruptedRef.current=false;
     try{
-      const stream=await navigator.mediaDevices.getUserMedia(captureKind==="photo"
+      const stream=await requestMediaStream(()=>navigator.mediaDevices.getUserMedia(captureKind==="photo"
         ? {video:{facingMode:{ideal:cameraFacing},width:{ideal:1920},height:{ideal:1080}},audio:false}
         : captureKind==="video"
           ? {video:{facingMode:{ideal:cameraFacing},width:{ideal:1280},height:{ideal:720}},audio:true}
-          : {video:false,audio:true});
+          : {video:false,audio:true}),30000,t("De toestemmingsaanvraag voor camera of microfoon duurde te lang. Controleer je browserinstellingen en probeer opnieuw.","The camera or microphone permission request took too long. Check your browser settings and try again."));
       if(!mountedRef.current){stopMediaStreams([stream]);return;}
       const missingTrack=missingCaptureTrack(stream,captureKind!=="voice",captureKind!=="photo");
       if(missingTrack){
@@ -369,6 +394,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
             const extension=interruptedType.includes("mp4")?".mp4":interruptedType.includes("ogg")?".ogg":".webm";
             const partialFile=new File([interruptedBlob],`after-hours-${captureKind}-recovered-${Date.now()}${extension}`,{type:interruptedType});
             setPendingCapture(partialFile);
+            setPendingOriginalFile(null);
             // Release any previous local preview URL before replacing it.
             if(pendingUrl)URL.revokeObjectURL(pendingUrl);
             setPendingUrl(URL.createObjectURL(interruptedBlob));
@@ -396,12 +422,14 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
         const file=new File([blob],`after-hours-${captureKind}-${Date.now()}${extension}`,{type});
         if(pendingUrl)URL.revokeObjectURL(pendingUrl);
         setPendingCapture(file);
+        setPendingOriginalFile(null);
         setPendingUrl(URL.createObjectURL(blob));
         setMessage(t("Voorbeeld klaar. Controleer de opname en sla alleen op als je dat nog steeds wilt.","Preview ready. Review the recording and save it only if you still want to."));
       };
       recorder.start(1000);
       setIsRecording(true);
       setPendingCapture(null);
+      setPendingOriginalFile(null);
       if(pendingUrl){URL.revokeObjectURL(pendingUrl);setPendingUrl("");}
       captureTimeoutRef.current=window.setTimeout(()=>{
         if(!mountedRef.current)return;
@@ -452,6 +480,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
       const saved=await upload(pendingCapture);
       if(!saved||!mountedRef.current)return;
       setPendingCapture(null);
+      setPendingOriginalFile(null);
       if(pendingUrl){URL.revokeObjectURL(pendingUrl);setPendingUrl("");}
       setCaptureConsent(false);
     }finally{
@@ -463,6 +492,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
   const discardCapture=()=>{
     if(saveInProgressRef.current)return;
     setPendingCapture(null);
+    setPendingOriginalFile(null);
     if(pendingUrl){URL.revokeObjectURL(pendingUrl);setPendingUrl("");}
     setCaptureConsent(false);
     setMessage(t("Media weggegooid. Er is niets geüpload.","Media discarded. Nothing was uploaded."));
@@ -537,8 +567,8 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
               <input type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/avif,image/heic,image/heif" capture="environment" disabled={busy||isRecording||!!pendingCapture} onChange={event=>{const file=event.currentTarget.files?.[0];void stageSelectedFile(file);event.currentTarget.value="";}}/>
             </label>
             <div className="media-frame-picker" role="group" aria-label={t("Stijl van de AFTER HOURS-overlay","AFTER HOURS overlay style")}>
-              <span>{t("Kies je AH-frame","Choose your AH frame")}</span>
-              <div>{mediaOverlayFrames.map(frame=><button key={frame.id} type="button" className={frameStyle===frame.id?"selected":""} aria-pressed={frameStyle===frame.id} onClick={()=>setFrameStyle(frame.id)} disabled={isRecording||busy||!!pendingCapture}><strong>{language==="nl"?frame.titleNL:frame.titleEN}</strong><small>{language==="nl"?frame.descriptionNL:frame.descriptionEN}</small></button>)}</div>
+              <span>{pendingOriginalFile?t("Pas het frame van je preview aan","Adjust the preview frame"):t("Kies je AH-frame","Choose your AH frame")}</span>
+              <div>{mediaOverlayFrames.map(frame=><button key={frame.id} type="button" className={frameStyle===frame.id?"selected":""} aria-pressed={frameStyle===frame.id} onClick={()=>pendingOriginalFile?void updatePendingImageEdit(frame.id,photoEdits):setFrameStyle(frame.id)} disabled={isRecording||busy||isPhotoCameraOpen||!!pendingCapture&&!pendingOriginalFile}><strong>{language==="nl"?frame.titleNL:frame.titleEN}</strong><small>{language==="nl"?frame.descriptionNL:frame.descriptionEN}</small></button>)}</div>
             </div>
             <p className="media-overlay-note">{t("Het gekozen frame wordt in de camera-preview, nieuwe video-opnamen en foto's gebrand. Bestaande video's worden niet aangepast.","The selected frame is burned into the camera preview, new video recordings and photos. Existing videos are not modified.")}</p>
             <div className="media-capture-controls">
@@ -550,6 +580,39 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
             </div>
             {isRecording&&<div className="media-recording-status" role="status"><span/> {t("Opname actief. Je kunt op elk moment stoppen.","Recording is active. You can stop at any time.")}<strong className="media-recording-clock" aria-label={t("Resterende opnametijd","Recording time remaining")}>00:{String(recordingRemainingSeconds).padStart(2,"0")}</strong><div className="media-recording-progress" role="progressbar" aria-valuemin={0} aria-valuemax={60} aria-valuenow={recordingSeconds} aria-label={t("Opnameduur van maximaal 60 seconden","Recording duration, maximum 60 seconds")}><span style={{width:`${(recordingSeconds/60)*100}%`}}/></div></div>}
             {liveStream&&(captureKind==="video"||captureKind==="photo")&&<div className="media-live-frame"><video className="media-live-source" ref={livePreviewRef} autoPlay muted playsInline aria-hidden="true"/><canvas className="media-live-preview media-live-composite" ref={liveCanvasRef} aria-label={t("Live cameravoorbeeld met AFTER HOURS-overlay","Live camera preview with AFTER HOURS overlay")}/><span className="media-live-watermark">AFTER HOURS <i>◐</i></span></div>}
+            {pendingCapture&&pendingOriginalFile&&<div className="media-photo-editor" aria-label={t("Foto bewerken","Edit photo")}>
+              <strong>{t("FOTO-EDITOR","PHOTO EDITOR")}</strong>
+              <div className="media-item-actions">
+                <button type="button" onClick={()=>void updatePendingImageEdit(frameStyle,{...photoEdits,rotation:((photoEdits.rotation+270)%360) as PhotoEditTransform["rotation"]})} disabled={busy}>{t("↶ Linksom draaien","↶ Rotate left")}</button>
+                <button type="button" onClick={()=>void updatePendingImageEdit(frameStyle,{...photoEdits,rotation:((photoEdits.rotation+90)%360) as PhotoEditTransform["rotation"]})} disabled={busy}>{t("Rechtsom draaien ↷","Rotate right ↷")}</button>
+                <button type="button" onClick={()=>void updatePendingImageEdit(frameStyle,defaultPhotoEditTransform)} disabled={busy}>{t("Herstellen","Reset")}</button>
+              </div>
+              <label>{t("Uitsnede / zoom","Crop / zoom")} · {photoEdits.zoom.toFixed(1)}×
+                <input type="range" min="1" max="2.5" step="0.1" value={photoEdits.zoom} disabled={busy} onChange={event=>void updatePendingImageEdit(frameStyle,{...photoEdits,zoom:Number(event.target.value)})}/>
+              </label>
+              <label>{t("Horizontale positie","Horizontal position")}
+                <input type="range" min="-1" max="1" step="0.05" value={photoEdits.offsetX} disabled={busy} onChange={event=>void updatePendingImageEdit(frameStyle,{...photoEdits,offsetX:Number(event.target.value)})}/>
+              </label>
+              <label>{t("Verticale positie","Vertical position")}
+                <input type="range" min="-1" max="1" step="0.05" value={photoEdits.offsetY} disabled={busy} onChange={event=>void updatePendingImageEdit(frameStyle,{...photoEdits,offsetY:Number(event.target.value)})}/>
+              </label>
+              <div className="media-photo-editor-grade">
+                <strong>{t("KLEUR & LICHT","COLOR & LIGHT")}</strong>
+                <label>{t("Helderheid","Brightness")} · {Math.round(photoEdits.brightness*100)}%
+                  <input type="range" min="0.65" max="1.35" step="0.01" value={photoEdits.brightness} disabled={busy} onChange={event=>void updatePendingImageEdit(frameStyle,{...photoEdits,brightness:Number(event.target.value)})}/>
+                </label>
+                <label>{t("Contrast","Contrast")} · {Math.round(photoEdits.contrast*100)}%
+                  <input type="range" min="0.7" max="1.4" step="0.01" value={photoEdits.contrast} disabled={busy} onChange={event=>void updatePendingImageEdit(frameStyle,{...photoEdits,contrast:Number(event.target.value)})}/>
+                </label>
+                <label>{t("Verzadiging","Saturation")} · {Math.round(photoEdits.saturation*100)}%
+                  <input type="range" min="0" max="1.8" step="0.01" value={photoEdits.saturation} disabled={busy} onChange={event=>void updatePendingImageEdit(frameStyle,{...photoEdits,saturation:Number(event.target.value)})}/>
+                </label>
+                <label>{t("Kleurtemperatuur","Color temperature")} · {photoEdits.warmth>0?"+":""}{Math.round(photoEdits.warmth*100)}
+                  <input type="range" min="-1" max="1" step="0.02" value={photoEdits.warmth} disabled={busy} onChange={event=>void updatePendingImageEdit(frameStyle,{...photoEdits,warmth:Number(event.target.value)})}/>
+                </label>
+              </div>
+              <small>{t("Origineel blijft behouden tot je de bewerkte foto opslaat. Alle aanpassingen worden lokaal verwerkt.","The original is preserved until you save the edited photo. All adjustments are processed locally.")}</small>
+            </div>}
             {pendingCapture&&pendingUrl&&<div className="media-pending-preview">
               <strong>{t("Lokale preview","Local preview")} · {formatSize(pendingCapture.size)}</strong>
               {pendingCapture.type.startsWith("image/")?<img src={pendingUrl} alt={t("Lokale voorbeeldweergave van geselecteerde afbeelding","Local preview of selected image")}/>:pendingCapture.type.startsWith("video/")?<video src={pendingUrl} controls playsInline/>:<audio src={pendingUrl} controls/>}
@@ -563,11 +626,11 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
             </button>
           </div>
           {loading ? <small>{t("Privébestanden laden…", "Loading private files…")}</small> : items.length === 0 ? (
-            <small>{t("Nog geen bestanden gevonden. Je bestanden zijn alleen zichtbaar na veilig inloggen.", "No files yet. Your files are only visible after you sign in securely.")}</small>
+            <small role="status" aria-live="polite">{t("Nog geen bestanden gevonden. Je bestanden zijn alleen zichtbaar na veilig inloggen.", "No files yet. Your files are only visible after you sign in securely.")}</small>
           ) : (
-            <div className="media-list">
+            <div className="media-list" role="list" aria-label={t("Bestanden in je privékluis", "Files in your private vault")}>
               {items.map(item => (
-                <div className="media-item" key={item.path}>
+                <div className="media-item" key={item.path} role="listitem">
                   <div className="media-item-copy">
                     <strong>{displayName(item.name)}</strong>
                     <small>{item.contentType ?? t("Privébestand", "Private file")} · {formatSize(item.size)}</small>
@@ -588,7 +651,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
             </div>
           )}
           {signedUrl && <a className="media-signed-link" href={signedUrl} target="_blank" rel="noopener noreferrer">{t("Open privébestand (link verloopt na 60 seconden)", "Open private file (link expires after 60 seconds)")}</a>}
-          {message && <small role="status">{message}</small>}
+          {message && <small role="status" aria-live="polite" aria-atomic="true">{message}</small>}
         </>
       )}
     </section>
