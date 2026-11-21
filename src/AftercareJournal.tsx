@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, BookOpen, LockKeyhole, LockOpen, Plus, Save, Trash2 } from "lucide-react";
 import {
   createPrivateJournalVault,
@@ -9,6 +9,7 @@ import {
   loadPrivateJournalEntries,
   PRIVATE_JOURNAL_ENTRY_LIMIT,
   PRIVATE_JOURNAL_MIN_PASSPHRASE,
+  privateJournalStorageForOwner,
   savePrivateJournalEntry,
   unlockPrivateJournalVault,
   type PrivateJournalEntry,
@@ -16,8 +17,9 @@ import {
 import "./private-journal.css";
 
 type Language = "nl" | "en";
-export default function AftercareJournal({ language, onClose }: { language: Language; onClose: () => void }) {
-  const [vaultExists, setVaultExists] = useState(() => hasPrivateJournalVault());
+export default function AftercareJournal({ ownerId, language, onClose }: { ownerId: string; language: Language; onClose: () => void }) {
+  const journalStorage = useMemo(() => privateJournalStorageForOwner(ownerId), [ownerId]);
+  const [vaultExists, setVaultExists] = useState(() => hasPrivateJournalVault(journalStorage));
   const [key, setKey] = useState<CryptoKey | null>(null);
   const [passphrase, setPassphrase] = useState("");
   const [confirmation, setConfirmation] = useState("");
@@ -74,13 +76,13 @@ export default function AftercareJournal({ language, onClose }: { language: Lang
     try {
       let unlocked: CryptoKey;
       if (vaultExists) {
-        unlocked = await unlockPrivateJournalVault(passphrase);
+        unlocked = await unlockPrivateJournalVault(passphrase, journalStorage);
       } else {
         if (passphrase !== confirmation) throw new Error(t("De wachtzinnen komen niet overeen.", "The passphrases do not match."));
-        unlocked = await createPrivateJournalVault(passphrase, undefined, () => generation === lockGeneration.current && document.visibilityState === "visible");
+        unlocked = await createPrivateJournalVault(passphrase, journalStorage, () => generation === lockGeneration.current && document.visibilityState === "visible");
         setVaultExists(true);
       }
-      const loaded = await loadPrivateJournalEntries(unlocked);
+      const loaded = await loadPrivateJournalEntries(unlocked, journalStorage);
       if (generation !== lockGeneration.current || document.visibilityState !== "visible") return;
       setKey(unlocked);
       setEntries(loaded);
@@ -119,8 +121,8 @@ export default function AftercareJournal({ language, onClose }: { language: Lang
     setMessage("");
     try {
       const canCommit = () => generation === lockGeneration.current && document.visibilityState === "visible";
-      const saved = await savePrivateJournalEntry(key, { title, body }, activeId ?? undefined, undefined, undefined, canCommit);
-      const loaded = await loadPrivateJournalEntries(key);
+      const saved = await savePrivateJournalEntry(key, { title, body }, activeId ?? undefined, journalStorage, undefined, canCommit);
+      const loaded = await loadPrivateJournalEntries(key, journalStorage);
       if (!canCommit()) return;
       setEntries(loaded);
       setActiveId(saved.id);
@@ -141,7 +143,7 @@ export default function AftercareJournal({ language, onClose }: { language: Lang
       const deleted = await deletePrivateJournalEntry(
         activeId,
         key,
-        undefined,
+        journalStorage,
         () => generation === lockGeneration.current && document.visibilityState === "visible",
       );
       if (generation !== lockGeneration.current) return;
@@ -164,7 +166,7 @@ export default function AftercareJournal({ language, onClose }: { language: Lang
     setError("");
     setMessage("");
     try {
-      const backup = await exportPrivateJournalBackup(key);
+      const backup = await exportPrivateJournalBackup(key, journalStorage);
       if (generation !== lockGeneration.current || document.visibilityState !== "visible") return;
       const blob = new Blob([backup], { type: "application/vnd.afterhours.journal+json" });
       const url = URL.createObjectURL(blob);
@@ -195,7 +197,7 @@ export default function AftercareJournal({ language, onClose }: { language: Lang
       if (file.size > 5_000_000) throw new Error(t("Het back-upbestand is te groot (maximaal 5 MB).", "The backup file is too large (maximum 5 MB)."));
       const backupText = await file.text();
       const canCommit = () => generation === lockGeneration.current && document.visibilityState === "visible";
-      const imported = await importPrivateJournalBackup(key, backupText, backupPassphrase, undefined, canCommit);
+      const imported = await importPrivateJournalBackup(key, backupText, backupPassphrase, journalStorage, canCommit);
       const loaded = await loadPrivateJournalEntries(key);
       if (!canCommit()) return;
       setEntries(loaded);
