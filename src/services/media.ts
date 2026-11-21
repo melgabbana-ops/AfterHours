@@ -72,7 +72,11 @@ export function safePrivateMediaFileName(value: string): string {
 }
 
 export function safeMediaSessionFolder(value: string): string {
-  const segment = safePrivateMediaFileName(value || "general");
+  const trimmed = value.trim();
+  // A dot-only path segment is not a meaningful session identifier. Map it
+  // to the shared safe folder rather than the generic filename fallback.
+  if (!trimmed || trimmed === "." || trimmed === "..") return "general";
+  const segment = safePrivateMediaFileName(trimmed);
   return segment === "." || segment === ".." ? "general" : segment;
 }
 
