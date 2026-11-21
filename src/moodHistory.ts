@@ -1,4 +1,4 @@
-import type { MoodCode, MoodEvent, MoodPhase } from "./services/moods";
+import { isMoodEvent, type MoodCode, type MoodEvent, type MoodPhase } from "./services/moods";
 
 export type MoodHistoryFilter = "all" | MoodPhase;
 export type MoodHistoryLanguage = "nl" | "en";
@@ -17,6 +17,26 @@ type LocalMoodHistoryStorage = Pick<Storage, "getItem" | "setItem">;
 function resolveMoodHistoryStorage(storage?: LocalMoodHistoryStorage): LocalMoodHistoryStorage | undefined {
   if (storage) return storage;
   try { return globalThis.localStorage; } catch { return undefined; }
+}
+
+/** Read only valid, profile-scoped local entries before they reach the UI or CSV export. */
+export function readLocalMoodHistoryEvents(
+  profileId: string,
+  storage?: LocalMoodHistoryStorage,
+): MoodEvent[] {
+  const profile = profileId.trim();
+  const target = resolveMoodHistoryStorage(storage);
+  if (!profile || !target) return [];
+
+  try {
+    const raw = target.getItem(LOCAL_MOOD_HISTORY_PREFIX + profile);
+    if (!raw) return [];
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(isMoodEvent);
+  } catch {
+    return [];
+  }
 }
 
 /** Remove one browser-local entry without touching another profile or server history. */

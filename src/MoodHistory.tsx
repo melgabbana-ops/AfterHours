@@ -2,10 +2,9 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Download, History, RefreshCw, Trash2 } from "lucide-react";
 import { loadMoodHistoryRemote, type MoodCode, type MoodEvent, type MoodPhase } from "./services/moods";
 import { supabaseConfigured } from "./services/supabase";
-import { buildMoodHistoryCsv, filterMoodHistoryEvents, removeLocalMoodHistoryEvent, type MoodHistoryFilter } from "./moodHistory";
+import { buildMoodHistoryCsv, filterMoodHistoryEvents, readLocalMoodHistoryEvents, removeLocalMoodHistoryEvent, type MoodHistoryFilter } from "./moodHistory";
 import "./MoodHistory.css";
 
-type LocalMoodEvent = MoodEvent;
 type MoodHistorySource = "local" | "remote";
 const label: Record<MoodCode, [string, string]> = {
   KINKY: ["Kinky", "Kinky"], EXCITED: ["Opgewonden", "Excited"], CURIOUS: ["Nieuwsgierig", "Curious"], CALM: ["Rustig", "Calm"], PLAYFUL: ["Speels", "Playful"], CONFIDENT: ["Zelfverzekerd", "Confident"], UNSURE: ["Onzeker / twijfel", "Unsure"],
@@ -14,16 +13,6 @@ const label: Record<MoodCode, [string, string]> = {
 };
 const phaseLabel: Record<MoodPhase, [string, string]> = { before: ["Vooraf", "Before"], during: ["Tijdens", "During"], after: ["Achteraf", "Aftercare"] };
 
-function readLocal(profileId: string): LocalMoodEvent[] {
-  try {
-    const raw = JSON.parse(localStorage.getItem("afterhours.moodhistory." + profileId) || "[]");
-    if (!Array.isArray(raw)) return [];
-    return raw.filter((item): item is LocalMoodEvent => Boolean(item) && typeof item.id === "string" && typeof item.session_id === "string"
-      && (item.phase === "before" || item.phase === "during" || item.phase === "after")
-      && typeof item.mood === "string" && Object.prototype.hasOwnProperty.call(label, item.mood)
-      && typeof item.created_at === "string");
-  } catch { return []; }
-}
 
 export default function MoodHistory({ profileId, language }: { profileId: string; language: "nl" | "en" }) {
   const [events, setEvents] = useState<MoodEvent[]>([]);
@@ -38,14 +27,14 @@ export default function MoodHistory({ profileId, language }: { profileId: string
   const refresh = useCallback(async () => {
     setLoading(true); setVisibleCount(10); setMessage(""); setPendingDelete(null);
     if (!supabaseConfigured) {
-      setSource("local"); setEvents(readLocal(profileId)); setMessage(t("Alleen lokaal op dit apparaat opgeslagen.", "Stored locally on this device only.")); setLoading(false); return;
+      setSource("local"); setEvents(readLocalMoodHistoryEvents(profileId)); setMessage(t("Alleen lokaal op dit apparaat opgeslagen.", "Stored locally on this device only.")); setLoading(false); return;
     }
     try {
       const remote = await loadMoodHistoryRemote(40);
       if (remote) { setSource("remote"); setEvents(remote); setMessage(t("Privé opgeslagen bij je account.", "Privately stored with your account.")); }
-      else { setSource("local"); setEvents(readLocal(profileId)); setMessage(t("Alleen lokaal op dit apparaat opgeslagen.", "Stored locally on this device only.")); }
+      else { setSource("local"); setEvents(readLocalMoodHistoryEvents(profileId)); setMessage(t("Alleen lokaal op dit apparaat opgeslagen.", "Stored locally on this device only.")); }
     } catch {
-      setSource("local"); setEvents(readLocal(profileId));
+      setSource("local"); setEvents(readLocalMoodHistoryEvents(profileId));
       setMessage(t("Serverhistorie niet beschikbaar. Dit toont alleen lokale vermeldingen.", "Server history unavailable. Showing local entries only."));
     } finally { setLoading(false); }
   }, [profileId, language]);

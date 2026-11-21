@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildMoodHistoryCsv, filterMoodHistoryEvents, removeLocalMoodHistoryEvent } from "./moodHistory";
+import { buildMoodHistoryCsv, filterMoodHistoryEvents, readLocalMoodHistoryEvents, removeLocalMoodHistoryEvent } from "./moodHistory";
 import type { MoodCode, MoodEvent } from "./services/moods";
 
 const events: MoodEvent[] = [
@@ -39,6 +39,41 @@ function memoryStorage() {
     setItem: (key: string, value: string) => { values.set(key, value); },
   };
 }
+
+describe("browser-local mood history validation", () => {
+  it("keeps only complete, phase-valid entries with parseable timestamps", () => {
+    const storage = memoryStorage();
+    const rawEntries: unknown[] = [
+      ...events,
+      { ...events[0], created_at: "not-a-date" },
+      { ...events[0], id: "   " },
+      { ...events[0], session_id: "" },
+      { ...events[0], phase: "unknown" },
+      { ...events[0], mood: "UNKNOWN" },
+      null,
+      [],
+    ];
+    const raw = JSON.stringify(rawEntries);
+    storage.setItem("afterhours.moodhistory.profile-a", raw);
+
+    expect(readLocalMoodHistoryEvents("profile-a", storage)).toEqual(events);
+    expect(storage.getItem("afterhours.moodhistory.profile-a")).toBe(raw);
+  });
+
+  it("does not read another profile and safely handles malformed or unavailable storage", () => {
+    const storage = memoryStorage();
+    storage.setItem("afterhours.moodhistory.profile-a", JSON.stringify(events));
+    expect(readLocalMoodHistoryEvents("profile-b", storage)).toEqual([]);
+    expect(readLocalMoodHistoryEvents(" ", storage)).toEqual([]);
+
+    storage.setItem("afterhours.moodhistory.profile-b", "{");
+    expect(readLocalMoodHistoryEvents("profile-b", storage)).toEqual([]);
+
+    const blocked = { getItem: () => { throw new Error("blocked"); }, setItem: () => { throw new Error("blocked"); } };
+    expect(readLocalMoodHistoryEvents("profile-a", blocked)).toEqual([]);
+  });
+});
+
 
 describe("browser-local mood history deletion", () => {
   it("deletes only the selected entry for the selected profile", () => {
