@@ -22,7 +22,7 @@ const mappings = [
   { selector: ".ah-profile-screen:before", asset: "reference-profile.svg" },
   { selector: ".consent-screen:before", asset: "reference-consent.svg" },
   { selector: ".insights:before", asset: "reference-tarot.svg" },
-  { selector: ".insights.insights-astro:before", asset: "reference-horoscope.svg" },
+  { selector: '.insights[data-tab="astro"]:before', asset: "reference-horoscope.svg" },
   { selector: ".radio-room:before", asset: "reference-radio.svg" },
   { selector: ".aftercare-card{", asset: "reference-aftercare.svg" },
   { selector: ".completion-card", asset: "reference-completion.svg" },
@@ -65,7 +65,7 @@ describe("AFTER HOURS screen-specific artwork", () => {
   });
 
   it("switches the Insights backdrop with the selected tab", () => {
-    expect(insightsSource).toContain('className={`insights insights-${tab}`}');
+    expect(insightsSource).toContain('className="insights" data-tab={tab}');
   });
 
   it("ships every screen artwork asset with the service worker shell", () => {
