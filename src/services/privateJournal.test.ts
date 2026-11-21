@@ -3,7 +3,9 @@ import { describe, expect, it } from "vitest";
 import {
   createPrivateJournalVault,
   deletePrivateJournalEntry,
+  exportPrivateJournalBackup,
   hasPrivateJournalVault,
+  importPrivateJournalBackup,
   loadPrivateJournalEntries,
   PRIVATE_JOURNAL_STORAGE_KEY,
   savePrivateJournalEntry,
@@ -51,6 +53,25 @@ describe("encrypted private journal vault", () => {
     const key = await createPrivateJournalVault("een lange unieke wachtzin", storage);
     await savePrivateJournalEntry(key, { title: "Privé", body: "Niet zichtbaar zonder sleutel." }, undefined, storage);
     await expect(unlockPrivateJournalVault("een totaal andere wachtzin", storage)).rejects.toThrow("Wachtzin onjuist");
+  });
+
+  it("exports ciphertext and merges a backup encrypted with a different passphrase", async () => {
+    const currentStorage = memoryStorage();
+    const backupStorage = memoryStorage();
+    const currentKey = await createPrivateJournalVault("huidige unieke wachtzin", currentStorage);
+    const backupKey = await createPrivateJournalVault("oude unieke backup wachtzin", backupStorage);
+    await savePrivateJournalEntry(currentKey, { title: "Huidig", body: "Blijft behouden." }, undefined, currentStorage);
+    await savePrivateJournalEntry(backupKey, { title: "Uit back-up", body: "Wordt samengevoegd." }, undefined, backupStorage);
+    const backup = await exportPrivateJournalBackup(backupKey, backupStorage);
+    expect(backup).not.toContain("Wordt samengevoegd.");
+    await expect(importPrivateJournalBackup(currentKey, backup, "verkeerde backup wachtzin", currentStorage)).rejects.toThrow("vergrendeld");
+    const imported = await importPrivateJournalBackup(currentKey, backup, "oude unieke backup wachtzin", currentStorage);
+    expect(imported).toBe(1);
+    const entries = await loadPrivateJournalEntries(currentKey, currentStorage);
+    expect(entries.map(entry => entry.title).sort()).toEqual(["Huidig", "Uit back-up"]);
+    const stored = currentStorage.getItem(PRIVATE_JOURNAL_STORAGE_KEY) ?? "";
+    expect(stored).not.toContain("Blijft behouden.");
+    expect(stored).not.toContain("Wordt samengevoegd.");
   });
 
   it("rejects a stale key even when the replacement vault has no entries", async () => {
