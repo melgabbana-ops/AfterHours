@@ -93,9 +93,22 @@ describe("encrypted private journal vault", () => {
     expect(edited.createdAt).toBe(first.createdAt);
     expect(edited.updatedAt).toBe("2026-11-21T11:00:00.000Z");
     const second = await savePrivateJournalEntry(key, { title: "Tweede", body: "Nog een notitie" }, undefined, storage);
-    expect(deletePrivateJournalEntry(first.id, storage)).toBe(true);
+    expect(await deletePrivateJournalEntry(first.id, key, storage)).toBe(true);
     const entries = await loadPrivateJournalEntries(key, storage);
     expect(entries.map(entry => entry.id)).toEqual([second.id]);
+  });
+
+  it("requires the matching key before deleting and cancels deletion after lock", async () => {
+    const storage = memoryStorage();
+    const key = await createPrivateJournalVault("een lange unieke wachtzin", storage);
+    const entry = await savePrivateJournalEntry(key, { title: "Behouden", body: "Alleen met de juiste sleutel verwijderen." }, undefined, storage);
+    const otherStorage = memoryStorage();
+    const wrongKey = await createPrivateJournalVault("een andere lange wachtzin", otherStorage);
+
+    expect(await deletePrivateJournalEntry(entry.id, wrongKey, storage)).toBe(false);
+    expect((await loadPrivateJournalEntries(key, storage)).map(item => item.id)).toEqual([entry.id]);
+    expect(await deletePrivateJournalEntry(entry.id, key, storage, () => false)).toBe(false);
+    expect((await loadPrivateJournalEntries(key, storage)).map(item => item.id)).toEqual([entry.id]);
   });
 
   it("preserves an existing empty or malformed storage value instead of replacing it with a new vault", async () => {
