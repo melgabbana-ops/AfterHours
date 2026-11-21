@@ -1,5 +1,5 @@
 import journalSource from "../AftercareJournal.tsx?raw";
-import { readFileSync } from "node:fs";
+import journalStyles from "../private-journal.css?inline";
 import { describe, expect, it } from "vitest";
 import {
   createPrivateJournalVault,
@@ -13,8 +13,6 @@ import {
   savePrivateJournalEntry,
   unlockPrivateJournalVault,
 } from "./privateJournal";
-
-const journalStyles = readFileSync(new URL("../private-journal.css", import.meta.url), "utf8");
 
 function memoryStorage() {
   const values = new Map<string, string>();
