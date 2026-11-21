@@ -74,6 +74,20 @@ export default function SecureDuoLobby({ roomId, language, onBack }: Props) {
     return () => { alive = false; window.clearInterval(interval); };
   }, [roomId, nl]);
 
+  // Refresh promptly when a participant returns to the app or reconnects.
+  useEffect(() => {
+    const handleOnline = () => { void refresh(); };
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") void refresh();
+    };
+    window.addEventListener("online", handleOnline);
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [refresh]);
+
   const act = async (action: () => Promise<void>, success: string, failure: string) => {
     if (busy) return;
     setBusy(true);
@@ -119,6 +133,13 @@ export default function SecureDuoLobby({ roomId, language, onBack }: Props) {
             <div className="couples-connection" role="status">
               {nl ? "Kamersituatie: " : "Room status: "}{statusText(snapshot.status)}
             </div>
+            {!navigator.onLine && (
+              <p className="couples-safety" role="status">
+                {nl
+                  ? "Je apparaat is offline. De getoonde kamerstatus kan verouderd zijn. Acties worden niet als gedeeld bevestigd."
+                  : "Your device is offline. The displayed room status may be out of date. Actions will not be confirmed as shared."}
+              </p>
+            )}
             <div className="couples-consent-note">
               <strong>{nl ? "Jouw toestemming" : "Your consent"}</strong>
               <p>{own?.consented
