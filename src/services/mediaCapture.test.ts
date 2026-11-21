@@ -135,6 +135,20 @@ describe("camera video readiness", () => {
     video.dispatchEvent(new Event("loadeddata"));
     await expect(ready).resolves.toBeUndefined();
   });
+  it("does not treat metadata as ready until both video dimensions are available", async () => {
+    const video = fakeVideo();
+    const ready = waitForVideoReady(video, 5000);
+    let settled = false;
+    void ready.then(() => { settled = true; });
+    Object.defineProperty(video, "videoWidth", { value: 640 });
+    video.dispatchEvent(new Event("loadedmetadata"));
+    await Promise.resolve();
+    expect(settled).toBe(false);
+    Object.defineProperty(video, "videoHeight", { value: 480 });
+    video.dispatchEvent(new Event("loadeddata"));
+    await expect(ready).resolves.toBeUndefined();
+    expect(settled).toBe(true);
+  });
 
   it("rejects media errors and removes all event listeners", async () => {
     const video = fakeVideo();
