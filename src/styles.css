@@ -4725,3 +4725,51 @@ button,[role="button"],nav a{touch-action:manipulation}
   .media-capture-controls>button,.media-pending-preview .media-item-actions button{min-height:48px}
   .media-live-preview,.media-live-frame .media-live-composite{max-height:min(62svh,620px)}
 }
+
+
+/* Media Vault keyboard access and touch feedback */
+.media-capture-controls select:focus-visible,
+.media-capture-controls>button:focus-visible,
+.media-pending-preview .media-item-actions button:focus-visible,
+.media-vault-head button:focus-visible,
+.media-item-actions button:focus-visible,
+.media-upload:focus-within{
+  outline:2px solid var(--ah-gold-light);
+  outline-offset:3px;
+}
+.media-capture-controls select,
+.media-capture-controls>button,
+.media-pending-preview .media-item-actions button,
+.media-vault-head button,
+.media-item-actions button,
+.media-upload{
+  min-height:48px;
+}
+.media-upload input:focus-visible{
+  outline:2px solid var(--ah-gold-light);
+  outline-offset:4px;
+}
+.media-capture-controls select:disabled,
+.media-capture-controls>button:disabled,
+.media-vault-head button:disabled,
+.media-item-actions button:disabled{
+  cursor:not-allowed;
+}
+@media (prefers-reduced-motion:no-preference){
+  .media-frame-picker button,
+  .media-capture-controls>button,
+  .media-pending-preview .media-item-actions button,
+  .media-vault-head button,
+  .media-item-actions button{
+    transition:border-color .16s ease,background-color .16s ease,opacity .16s ease;
+  }
+}
+@media (min-width:521px) and (max-width:900px){
+  .media-capture-controls{grid-template-columns:repeat(2,minmax(0,1fr));align-items:end}
+  .media-capture-controls>.media-consent-check,
+  .media-capture-controls>button,
+  .media-capture-controls>.media-stop-recording{grid-column:1/-1}
+  .media-capture-controls>label:not(.media-consent-check){min-width:0}
+  .media-capture-controls select{min-width:0}
+  .media-pending-preview .media-item-actions{gap:12px}
+}
