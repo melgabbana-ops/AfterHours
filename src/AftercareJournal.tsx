@@ -198,7 +198,7 @@ export default function AftercareJournal({ ownerId, language, onClose }: { owner
       const backupText = await file.text();
       const canCommit = () => generation === lockGeneration.current && document.visibilityState === "visible";
       const imported = await importPrivateJournalBackup(key, backupText, backupPassphrase, journalStorage, canCommit);
-      const loaded = await loadPrivateJournalEntries(key);
+      const loaded = await loadPrivateJournalEntries(key, journalStorage);
       if (!canCommit()) return;
       setEntries(loaded);
       setActiveId(null);
