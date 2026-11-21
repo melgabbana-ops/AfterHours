@@ -23,7 +23,7 @@ function newCode() {
 
 export default function CouplesPlay({ language, onBack }: { language: Language; onBack: () => void }) {
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
-  const initialCode = useMemo(() => new URLSearchParams(window.location.search).get("couple")?.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 10) || "", []);
+  const initialCode = useMemo(() => { const code = new URLSearchParams(window.location.search).get("couple")?.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 10) || ""; return code.length === 10 ? code : ""; }, []);
   const [mode, setMode] = useState<Mode>(initialCode ? "remote" : "local");
   const [roomCode, setRoomCode] = useState(initialCode);
   const [joinCode, setJoinCode] = useState(initialCode);
