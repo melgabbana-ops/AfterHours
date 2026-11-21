@@ -50,6 +50,8 @@ describe("proposed secure Duo backend guardrails", () => {
     expect(acceptance).toContain("insert into public.afterhours_duo_room_members (room_id, user_id, role)");
     expect(acceptance).toContain("values (v_room.id, v_user_id, 'guest')");
     expect(acceptance).not.toContain("consented_at");
+    expect(client).toContain("Accepting joins the lobby only");
+    expect(client).not.toContain("explicit consent action in the invitation review screen");
   });
 
   it("uses a complete PL/pgSQL dollar-quoted body for the room snapshot RPC", () => {
