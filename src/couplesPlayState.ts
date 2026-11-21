@@ -1,3 +1,10 @@
+export const ROOM_CODE_LENGTH = 16;
+
+export function normalizeRoomCode(value: string | null | undefined): string {
+  const code = (value ?? "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, ROOM_CODE_LENGTH);
+  return code.length === ROOM_CODE_LENGTH ? code : "";
+}
+
 export interface RemotePlayReadiness {
   connected: boolean;
   participantCount: number;
