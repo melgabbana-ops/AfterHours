@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowLeft, BookOpen, LockKeyhole, LockOpen, Plus, Save, Trash2 } from "lucide-react";
 import {
   createPrivateJournalVault,
@@ -26,10 +26,42 @@ export default function AftercareJournal({ language, onClose }: { language: Lang
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const lockGeneration = useRef(0);
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
+
+  const lock = useCallback(() => {
+    lockGeneration.current += 1;
+    setKey(null);
+    setEntries([]);
+    setActiveId(null);
+    setTitle("");
+    setBody("");
+    setPassphrase("");
+    setConfirmation("");
+    setBusy(false);
+    setMessage(language === "nl"
+      ? "Journal automatisch vergrendeld toen de app naar de achtergrond ging. Niet-opgeslagen tekst is gewist."
+      : "Journal automatically locked when the app went into the background. Unsaved text was cleared.");
+    setError("");
+  }, [language]);
+
+  useEffect(() => {
+    const lockWhenHidden = () => {
+      if (document.visibilityState !== "visible") lock();
+    };
+    const lockOnPageHide = () => lock();
+    document.addEventListener("visibilitychange", lockWhenHidden);
+    window.addEventListener("pagehide", lockOnPageHide);
+    lockWhenHidden();
+    return () => {
+      document.removeEventListener("visibilitychange", lockWhenHidden);
+      window.removeEventListener("pagehide", lockOnPageHide);
+    };
+  }, [lock]);
 
   const openVault = async (event: React.FormEvent) => {
     event.preventDefault();
+    const generation = lockGeneration.current;
     setBusy(true);
     setError("");
     setMessage("");
@@ -39,10 +71,11 @@ export default function AftercareJournal({ language, onClose }: { language: Lang
         unlocked = await unlockPrivateJournalVault(passphrase);
       } else {
         if (passphrase !== confirmation) throw new Error(t("De wachtzinnen komen niet overeen.", "The passphrases do not match."));
-        unlocked = await createPrivateJournalVault(passphrase);
+        unlocked = await createPrivateJournalVault(passphrase, undefined, () => generation === lockGeneration.current && document.visibilityState === "visible");
         setVaultExists(true);
       }
       const loaded = await loadPrivateJournalEntries(unlocked);
+      if (generation !== lockGeneration.current || document.visibilityState !== "visible") return;
       setKey(unlocked);
       setEntries(loaded);
       setActiveId(null);
@@ -52,9 +85,9 @@ export default function AftercareJournal({ language, onClose }: { language: Lang
       setConfirmation("");
       setMessage(t("Je privékluis is ontgrendeld.", "Your private vault is unlocked."));
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : t("Ontgrendelen is niet gelukt.", "Could not unlock the vault."));
+      if (generation === lockGeneration.current) setError(reason instanceof Error ? reason.message : t("Ontgrendelen is niet gelukt.", "Could not unlock the vault."));
     } finally {
-      setBusy(false);
+      if (generation === lockGeneration.current) setBusy(false);
     }
   };
 
@@ -74,21 +107,24 @@ export default function AftercareJournal({ language, onClose }: { language: Lang
   };
   const save = async () => {
     if (!key) return;
+    const generation = lockGeneration.current;
     setBusy(true);
     setError("");
     setMessage("");
     try {
-      const saved = await savePrivateJournalEntry(key, { title, body }, activeId ?? undefined);
+      const canCommit = () => generation === lockGeneration.current && document.visibilityState === "visible";
+      const saved = await savePrivateJournalEntry(key, { title, body }, activeId ?? undefined, undefined, undefined, canCommit);
       const loaded = await loadPrivateJournalEntries(key);
+      if (!canCommit()) return;
       setEntries(loaded);
       setActiveId(saved.id);
       setTitle(saved.title);
       setBody(saved.body);
       setMessage(t("Versleuteld opgeslagen op dit apparaat.", "Encrypted and saved on this device."));
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : t("Opslaan is niet gelukt.", "Could not save the entry."));
+      if (generation === lockGeneration.current) setError(reason instanceof Error ? reason.message : t("Opslaan is niet gelukt.", "Could not save the entry."));
     } finally {
-      setBusy(false);
+      if (generation === lockGeneration.current) setBusy(false);
     }
   };
   const remove = () => {
@@ -101,18 +137,6 @@ export default function AftercareJournal({ language, onClose }: { language: Lang
     startNew();
     setMessage(t("Notitie verwijderd.", "Entry deleted."));
   };
-  const lock = () => {
-    setKey(null);
-    setEntries([]);
-    setActiveId(null);
-    setTitle("");
-    setBody("");
-    setPassphrase("");
-    setConfirmation("");
-    setMessage(t("De journal-kluis is vergrendeld.", "The journal vault is locked."));
-    setError("");
-  };
-
   return <section className="ah-private-journal" aria-labelledby="ah-private-journal-title">
     <header className="ah-private-journal-head">
       <div className="ah-private-journal-brand"><LockKeyhole aria-hidden="true"/><span className="eyebrow">AFTER HOURS · PRIVATE JOURNAL</span></div>
