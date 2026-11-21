@@ -211,3 +211,30 @@
   .cw-invite-link button { width: 100%; }
   .cw-saved-row .cw-danger { white-space: normal; }
 }
+
+
+.cw-invite-preview {
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 1px solid rgba(214, 177, 105, 0.24);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.32);
+}
+.cw-invite-preview > strong {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--cw-gold, #d6b169);
+  font-size: 1.08rem;
+}
+.cw-invite-preview ol {
+  margin: 0.8rem 0;
+  padding-left: 1.25rem;
+}
+.cw-invite-preview li {
+  padding: 0.25rem 0;
+  line-height: 1.5;
+}
+.cw-invite-preview small {
+  display: block;
+  opacity: 0.72;
+}
