@@ -1,6 +1,7 @@
 import React,{useCallback,useEffect,useRef,useState}from"react";
 import{BookHeart,LockKeyhole,Plus,Trash2,Unlock}from"lucide-react";
 import{AFTERCARE_JOURNAL_LEGACY_STORAGE_KEY,getAftercareJournalStorageKey}from"./aftercareJournalStorage";
+import{AftercareJournalError,getAftercareJournalErrorMessage,getAftercareJournalFailure}from"./aftercareJournalErrors";
 import"./AftercareJournal.css";
 
 type Entry={id:string;createdAt:string;title:string;feeling:string;needs:string;reflection:string};
@@ -19,19 +20,39 @@ async function deriveKey(passphrase:string,salt:Uint8Array){
 }
 function bytesToBase64(bytes:Uint8Array){let binary="";bytes.forEach(value=>binary+=String.fromCharCode(value));return btoa(binary);}
 function base64ToBytes(value:string){return Uint8Array.from(atob(value),char=>char.charCodeAt(0));}
+function readJournalStorage(key:string):string|null{
+ try{return localStorage.getItem(key);}catch{throw new AftercareJournalError("storage");}
+}
+function writeJournalStorage(key:string,value:string):void{
+ try{localStorage.setItem(key,value);if(localStorage.getItem(key)!==value)throw new Error("storage verification failed");}
+ catch(error){if(error instanceof AftercareJournalError)throw error;throw new AftercareJournalError("storage");}
+}
 async function encryptEntries(entries:Entry[],passphrase:string){
  const salt=crypto.getRandomValues(new Uint8Array(16));const iv=crypto.getRandomValues(new Uint8Array(12));const key=await deriveKey(passphrase,salt);
  const cipher=await crypto.subtle.encrypt({name:"AES-GCM",iv:toArrayBuffer(iv)},key,toArrayBuffer(encoder.encode(JSON.stringify(entries))));
  return JSON.stringify({version:1,salt:bytesToBase64(salt),iv:bytesToBase64(iv),cipher:bytesToBase64(new Uint8Array(cipher))});
 }
 async function decryptEntries(raw:string,passphrase:string):Promise<Entry[]>{
- const envelope=JSON.parse(raw) as {version:number;salt:string;iv:string;cipher:string};
- if(envelope.version!==1)throw new Error("unsupported");
- const key=await deriveKey(passphrase,base64ToBytes(envelope.salt));
- const plain=await crypto.subtle.decrypt({name:"AES-GCM",iv:toArrayBuffer(base64ToBytes(envelope.iv))},key,toArrayBuffer(base64ToBytes(envelope.cipher)));
- const parsed:unknown=JSON.parse(decoder.decode(plain));
- if(!Array.isArray(parsed)||!parsed.every(item=>item&&typeof item.id==="string"&&typeof item.reflection==="string"))throw new Error("invalid");
- return parsed as Entry[];
+  if(!globalThis.crypto?.subtle)throw new AftercareJournalError("cryptoUnavailable");
+  let envelope:unknown;
+  try{envelope=JSON.parse(raw);}catch{throw new AftercareJournalError("invalidEnvelope");}
+  if(!envelope||typeof envelope!=="object")throw new AftercareJournalError("invalidEnvelope");
+  const candidate=envelope as Record<string,unknown>;
+  if(candidate.version!==1)throw new AftercareJournalError("unsupportedVersion");
+  if(typeof candidate.salt!=="string"||typeof candidate.iv!=="string"||typeof candidate.cipher!=="string")throw new AftercareJournalError("invalidEnvelope");
+  let salt:Uint8Array,iv:Uint8Array,cipher:Uint8Array;
+  try{salt=base64ToBytes(candidate.salt);iv=base64ToBytes(candidate.iv);cipher=base64ToBytes(candidate.cipher);}catch{throw new AftercareJournalError("invalidEnvelope");}
+  if(salt.length!==16||iv.length!==12||cipher.length<16)throw new AftercareJournalError("invalidEnvelope");
+  let key:CryptoKey;
+  try{key=await deriveKey(passphrase,salt);}catch{throw new AftercareJournalError("cryptoUnavailable");}
+  let plain:ArrayBuffer;
+  try{plain=await crypto.subtle.decrypt({name:"AES-GCM",iv:toArrayBuffer(iv)},key,toArrayBuffer(cipher));}
+  catch{throw new AftercareJournalError("authentication");}
+  let parsed:unknown;
+  try{parsed=JSON.parse(decoder.decode(plain));}catch{throw new AftercareJournalError("invalidPayload");}
+  const validEntry=(item:unknown):item is Entry=>Boolean(item&&typeof item==="object"&&typeof (item as Entry).id==="string"&&typeof (item as Entry).createdAt==="string"&&typeof (item as Entry).title==="string"&&typeof (item as Entry).feeling==="string"&&typeof (item as Entry).needs==="string"&&typeof (item as Entry).reflection==="string");
+  if(!Array.isArray(parsed)||!parsed.every(validEntry))throw new AftercareJournalError("invalidPayload");
+  return parsed;
 }
 
 type Props={profileId:string;language:"nl"|"en";onBack:()=>void};
@@ -61,10 +82,10 @@ export default function AftercareJournal({profileId,language,onBack}:Props){
   setStorageReady(false);
   if(!storageKey){setHasVault(false);setHasLegacyVault(false);setMessage(t("Er is geen geldig profiel gevonden. Open je profiel opnieuw en probeer het nog eens.","No valid profile was found. Reopen your profile and try again."));setStorageReady(true);return;}
   try{
-   setHasVault(Boolean(localStorage.getItem(storageKey)));
-   setHasLegacyVault(Boolean(localStorage.getItem(AFTERCARE_JOURNAL_LEGACY_STORAGE_KEY)));
-  }catch{
-   setHasVault(false);setHasLegacyVault(false);setMessage(t("Opslag is niet beschikbaar op dit apparaat.","Storage is unavailable on this device."));
+   setHasVault(Boolean(readJournalStorage(storageKey)));
+   setHasLegacyVault(Boolean(readJournalStorage(AFTERCARE_JOURNAL_LEGACY_STORAGE_KEY)));
+  }catch(error){
+   setHasVault(false);setHasLegacyVault(false);setMessage(getAftercareJournalErrorMessage(getAftercareJournalFailure(error,"storage"),language));
   }finally{setStorageReady(true);}
  },[storageKey,language]);
  const unlock=async()=>{
@@ -74,21 +95,20 @@ export default function AftercareJournal({profileId,language,onBack}:Props){
   const generation=lockGeneration.current;
   setUnlocking(true);
   try{
-   const raw=localStorage.getItem(storageKey);
+   const raw=readJournalStorage(storageKey);
    let loaded:Entry[];
    if(raw)loaded=await decryptEntries(raw,pass);
    else{
     const encrypted=await encryptEntries([],pass);
     if(generation!==lockGeneration.current||document.visibilityState!=="visible")return;
-    localStorage.setItem(storageKey,encrypted);
-    if(localStorage.getItem(storageKey)!==encrypted)throw new Error("storage verification failed");
+    writeJournalStorage(storageKey,encrypted);
     loaded=[];
    }
    if(generation!==lockGeneration.current||document.visibilityState!=="visible")return;
    setEntries(loaded);
    setUnlocked(true);setHasVault(true);setMessage(t("Je profielgebonden journal is lokaal en versleuteld geopend.","Your profile-specific journal is open and encrypted on this device."));
-  }catch{
-   if(generation===lockGeneration.current)setMessage(t("Niet geopend. Controleer je wachtzin of browseropslag.","Could not unlock. Check your passphrase or browser storage."));
+  }catch(error){
+   if(generation===lockGeneration.current)setMessage(getAftercareJournalErrorMessage(getAftercareJournalFailure(error),language));
   }finally{
    if(generation===lockGeneration.current)setUnlocking(false);
   }
@@ -100,13 +120,12 @@ export default function AftercareJournal({profileId,language,onBack}:Props){
   try{
    const encrypted=await encryptEntries(next,pass);
    if(generation!==lockGeneration.current||document.visibilityState!=="visible")return false;
-   localStorage.setItem(storageKey,encrypted);
-   if(localStorage.getItem(storageKey)!==encrypted)throw new Error("storage verification failed");
+   writeJournalStorage(storageKey,encrypted);
    if(generation!==lockGeneration.current||document.visibilityState!=="visible")return false;
    setEntries(next);setMessage(t("Versleuteld opgeslagen voor dit profiel op dit apparaat.","Encrypted and saved for this profile on this device."));
    return true;
-  }catch{
-   if(generation===lockGeneration.current)setMessage(t("Opslaan is niet gelukt. Je wijzigingen zijn niet bevestigd; probeer opnieuw.","Save failed. Your changes were not confirmed; please try again."));
+  }catch(error){
+   if(generation===lockGeneration.current)setMessage(getAftercareJournalErrorMessage(getAftercareJournalFailure(error,"storage"),language));
    return false;
   }finally{
    if(generation===lockGeneration.current)setSaving(false);
