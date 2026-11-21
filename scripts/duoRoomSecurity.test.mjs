@@ -144,11 +144,11 @@ describe("proposed secure Duo backend guardrails", () => {
   });
 
   it("blocks shared state mutations while the participant device is offline", () => {
-    expect(l.content).toContain('window.addEventListener("offline", handleOffline)');
-    expect(l.content).toContain('setIsOnline(false)');
-    expect(l.content).toContain('disabled={busy || !isOnline');
-    expect(l.content).toContain("Status vernieuwen");
-    expect(l.content).toContain("Refresh status");
+    expect(secureLobby).toContain('window.addEventListener("offline", handleOffline)');
+    expect(secureLobby).toContain('setIsOnline(false)');
+    expect(secureLobby).toContain('disabled={busy || !isOnline');
+    expect(secureLobby).toContain("Status vernieuwen");
+    expect(secureLobby).toContain("Refresh status");
   });
 
   it("refreshes the secure room snapshot after reconnect and app resume", () => {
