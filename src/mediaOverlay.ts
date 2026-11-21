@@ -239,3 +239,17 @@ export function getPhotoEditHistoryEntry(
   const entry = history[index];
   return entry ? { entry, index } : null;
 }
+
+export function getPhotoEditHistoryShortcut(input: {
+  key: string;
+  ctrlKey: boolean;
+  metaKey: boolean;
+  shiftKey: boolean;
+  altKey: boolean;
+}): -1 | 1 | null {
+  if ((!input.ctrlKey && !input.metaKey) || input.altKey) return null;
+  const key = input.key.toLowerCase();
+  if (key === "z") return input.shiftKey ? 1 : -1;
+  if (key === "y" && !input.shiftKey) return 1;
+  return null;
+}
