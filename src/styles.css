@@ -4777,3 +4777,17 @@ button,[role="button"],nav a{touch-action:manipulation}
 .couples-invitation-review>p{color:#d0c3af;font-size:14px;line-height:1.65}
 .couples-invitation-review [role="alert"]{color:#e6b6a7}
 .couples-invitation-review [role="status"]{color:#e4c88e}
+
+
+/* Local Duo: private turn-by-turn answers stay in the current device session. */
+.couples-local-answer{display:grid;gap:12px;padding:16px;border:1px solid #51432f;border-radius:10px;background:#100e0b}
+.couples-local-turn{display:grid;gap:5px}
+.couples-local-turn strong{color:#f1d59a;font-size:17px}
+.couples-local-answer-field{display:grid;gap:7px;color:#c8bda9;font-size:12px}
+.couples-local-answer-field textarea{width:100%;min-height:92px;resize:vertical;padding:12px;border:1px solid #51432f;border-radius:8px;background:#090908;color:#f4ead9;font:inherit;line-height:1.55}
+.couples-local-answer-field textarea:focus{outline:2px solid #c49b52;outline-offset:2px}
+.couples-local-answer-status{display:flex;flex-wrap:wrap;gap:10px;color:#d6c7af;font-size:12px}
+.couples-local-reveal{display:grid;gap:10px}
+.couples-local-reveal article{padding:12px;border-left:2px solid #c49b52;background:#0b0a08}
+.couples-local-reveal strong{color:#f1d59a;font-size:13px}
+.couples-local-reveal p{margin:7px 0 0;color:#e5dac8;font-size:13px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}
