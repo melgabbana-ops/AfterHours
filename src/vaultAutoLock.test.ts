@@ -48,9 +48,11 @@ describe("Black Vault automatic locking", () => {
     const onLock = vi.fn();
     const cleanup = bindVaultAutoLock(windowTarget, documentTarget, () => true, onLock);
 
-    vi.advanceTimersByTime(4 * 60 * 1000);
+    vi.advanceTimersByTime(3 * 60 * 1000);
+    windowTarget.dispatchEvent(new Event("pointerdown"));
+    vi.advanceTimersByTime(3 * 60 * 1000);
     windowTarget.dispatchEvent(new Event("keydown"));
-    vi.advanceTimersByTime(4 * 60 * 1000);
+    vi.advanceTimersByTime(3 * 60 * 1000);
     windowTarget.dispatchEvent(new Event("touchstart"));
     vi.advanceTimersByTime(5 * 60 * 1000 - 1);
     expect(onLock).not.toHaveBeenCalled();
