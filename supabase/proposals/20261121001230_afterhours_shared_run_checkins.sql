@@ -107,4 +107,113 @@ create policy afterhours_run_checkins_update_own_current_step
     )
   );
 
+
+-- A paused accepted participant can review the still-paused run and explicitly renew consent.
+create or replace function private.afterhours_is_accepted_run_participant(p_run_id uuid, p_user_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $function$
+  select p_user_id = auth.uid()
+    and exists (
+      select 1
+      from public.afterhours_experience_invitations i
+      where i.run_id = p_run_id
+        and i.accepted_user_id = p_user_id
+        and i.status = 'accepted'
+    );
+$function$;
+
+revoke all on function private.afterhours_is_accepted_run_participant(uuid, uuid) from public, anon;
+grant usage on schema private to authenticated;
+grant execute on function private.afterhours_is_accepted_run_participant(uuid, uuid) to authenticated;
+
+drop policy if exists afterhours_experience_runs_select_owner_or_consented
+  on public.afterhours_experience_runs;
+create policy afterhours_experience_runs_select_owner_or_consented
+  on public.afterhours_experience_runs
+  for select to authenticated
+  using (
+    user_id = (select auth.uid())
+    or exists (
+      select 1
+      from public.afterhours_experience_run_consents c
+      where c.run_id = afterhours_experience_runs.id
+        and c.user_id = (select auth.uid())
+        and c.revoked_at is null
+    )
+    or (
+      status = 'paused'
+      and (select private.afterhours_is_accepted_run_participant(id, (select auth.uid())))
+    )
+  );
+
+create or replace function private.renew_afterhours_experience_consent_impl(p_run_id uuid)
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $function$
+declare
+  v_user_id uuid := auth.uid();
+  v_consent_version text;
+  v_now timestamptz := clock_timestamp();
+begin
+  if v_user_id is null then
+    raise exception 'Sign in before renewing consent.' using errcode = '28000';
+  end if;
+
+  select r.consent_version
+    into v_consent_version
+  from public.afterhours_experience_runs r
+  join public.afterhours_experience_invitations i
+    on i.run_id = r.id
+   and i.inviter_user_id = r.user_id
+   and i.accepted_user_id = v_user_id
+   and i.status = 'accepted'
+  where r.id = p_run_id
+    and r.status = 'paused'
+    and r.user_id <> v_user_id
+  order by i.accepted_at desc
+  limit 1
+  for update of r;
+
+  if v_consent_version is null then
+    raise exception 'This paused experience is not available for renewed consent.' using errcode = 'P0002';
+  end if;
+
+  insert into public.afterhours_experience_run_consents (
+    run_id, user_id, consent_version, consented_at, revoked_at
+  )
+  values (p_run_id, v_user_id, v_consent_version, v_now, null)
+  on conflict (run_id, user_id) do update
+    set consent_version = excluded.consent_version,
+        consented_at = excluded.consented_at,
+        revoked_at = null;
+
+  return jsonb_build_object(
+    'run_id', p_run_id,
+    'consent_version', v_consent_version,
+    'consented_at', v_now
+  );
+end;
+$function$;
+
+revoke all on function private.renew_afterhours_experience_consent_impl(uuid) from public, anon, authenticated;
+grant execute on function private.renew_afterhours_experience_consent_impl(uuid) to authenticated;
+
+create or replace function public.renew_afterhours_experience_consent(p_run_id uuid)
+returns jsonb
+language sql
+security invoker
+set search_path = ''
+as $function$
+  select private.renew_afterhours_experience_consent_impl(p_run_id);
+$function$;
+
+revoke all on function public.renew_afterhours_experience_consent(uuid) from public, anon;
+grant execute on function public.renew_afterhours_experience_consent(uuid) to authenticated;
+
 commit;
