@@ -41,6 +41,15 @@ Run `npm run check:migrations` to verify that the checked-in file list still mat
 
 For a new Supabase project, review and apply migrations in version order before enabling remote persistence. If a database was originally created by manually applying SQL, inspect its live schema and migration registry and reconcile/baseline history deliberately before using `supabase db push`. Do not blindly replay a base schema against an existing database.
 
+
+## Pending migration review
+
+| Version | Migration file | Status |
+|---|---|---|
+| `20261121001230` | `20261121001230_afterhours_shared_run_checkins.sql` | Pending review and rollout; not present in the live production ledger |
+
+The production migration ledger was checked read-only on 2026-11-21 and still contains 28 applied versions. The check-in migration is tracked in the repository so CI can validate the complete migration file set, but it has **not** been applied to production. Apply it only after the SQL/RLS tests and two-account validation pass through the authorized migration workflow.
+
 ## Story Mode account sync
 
 `20261118205045_story_chapter_account_sync.sql` is recorded in the connected production migration ledger and has been applied successfully. Chapter completion is account-owned, authenticated through `auth.uid()`, limited to the seven approved chapter IDs, and idempotent. Local progress remains available when no account is signed in.
