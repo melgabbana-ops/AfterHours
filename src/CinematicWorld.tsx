@@ -566,6 +566,7 @@ export default function CinematicWorld({
     const runId = activeRunId;
     const userId = remoteProfileId;
     const currentStep = stepIndex;
+    let serverConfirmed = !runId || !userId;
 
     // STOP is local and immediate. Network confirmation happens only after
     // any already-started run mutation has settled, so a late pause/update
@@ -584,9 +585,6 @@ export default function CinematicWorld({
       setMessage(t("STOP is direct uitgevoerd. De serverstatus wordt bevestigd.", "STOP has been applied immediately. Confirming the server state."));
     }
 
-    try {
-      let serverConfirmed = !runId || !userId;
-      let serverConfirmed = !runId || !userId;
     try {
       if (runId && userId) {
         const pendingMutation = runMutationRef.current;
