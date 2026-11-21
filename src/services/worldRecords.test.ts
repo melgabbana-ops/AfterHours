@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
   eq: vi.fn(),
   order: vi.fn(),
   limit: vi.fn(),
+  in: vi.fn(),
   upsert: vi.fn(),
   single: vi.fn(),
 }));
@@ -16,13 +17,14 @@ vi.mock("./supabase", () => ({
   supabase: { auth: { getUser: mocks.getUser }, from: mocks.from },
 }));
 
-import { loadExperienceRuns, loadWorldRecords, saveWorldRecord } from "./worldRecords";
+import { loadExperienceRunCheckIns, loadExperienceRuns, loadWorldRecords, saveWorldRecord, submitExperienceRunCheckIn } from "./worldRecords";
 
 const chain = {
   select: mocks.select,
   eq: mocks.eq,
   order: mocks.order,
   limit: mocks.limit,
+  in: mocks.in,
   upsert: mocks.upsert,
   single: mocks.single,
 };
@@ -35,6 +37,7 @@ describe("AFTER HOURS private world storage", () => {
     mocks.select.mockReturnValue(chain);
     mocks.eq.mockReturnValue(chain);
     mocks.order.mockReturnValue(chain);
+    mocks.in.mockReturnValue(chain);
     mocks.upsert.mockReturnValue(chain);
   });
 
@@ -97,4 +100,62 @@ describe("AFTER HOURS private world storage", () => {
       .rejects.toThrow("Auth unavailable");
     expect(mocks.from).not.toHaveBeenCalled();
   });
+
+  it("returns an empty check-in list without querying Supabase when there are no runs", async () => {
+    await expect(loadExperienceRunCheckIns([], "user-a")).resolves.toEqual([]);
+    expect(mocks.from).not.toHaveBeenCalled();
+  });
+
+  it("refuses to load check-ins when the authenticated account changed", async () => {
+    mocks.getUser.mockResolvedValue({ data: { user: { id: "user-b" } }, error: null });
+    await expect(loadExperienceRunCheckIns(["run-1"], "user-a"))
+      .rejects.toThrow("The signed-in account changed.");
+    expect(mocks.from).not.toHaveBeenCalled();
+  });
+
+  it("caps check-in reads to fifty run identifiers and 200 rows", async () => {
+    mocks.limit.mockResolvedValue({ data: [], error: null });
+    const runIds = Array.from({ length: 75 }, (_, index) => `run-${index}`);
+    await expect(loadExperienceRunCheckIns(runIds, "user-a")).resolves.toEqual([]);
+    expect(mocks.in).toHaveBeenCalledWith("run_id", runIds.slice(0, 50));
+    expect(mocks.limit).toHaveBeenCalledWith(200);
+  });
+
+  it("loads only the requested run check-ins after verifying the account", async () => {
+    const rows = [{ id: "checkin-1", run_id: "run-1", user_id: "user-a", step_index: 0, signal: "pause_requested", created_at: "2026-11-21T00:00:00Z" }];
+    mocks.limit.mockResolvedValue({ data: rows, error: null });
+    await expect(loadExperienceRunCheckIns(["run-1"], "user-a")).resolves.toEqual(rows);
+    expect(mocks.from).toHaveBeenCalledWith("afterhours_experience_run_checkins");
+    expect(mocks.in).toHaveBeenCalledWith("run_id", ["run-1"]);
+  });
+
+  it("upserts only the signed-in participant's current-step signal", async () => {
+    mocks.upsert.mockResolvedValue({ error: null });
+    await expect(submitExperienceRunCheckIn({
+      runId: "run-1", stepIndex: 2, signal: "pause_requested", expectedUserId: "user-a",
+    })).resolves.toBeUndefined();
+    expect(mocks.from).toHaveBeenCalledWith("afterhours_experience_run_checkins");
+    expect(mocks.upsert).toHaveBeenCalledWith({
+      run_id: "run-1", user_id: "user-a", step_index: 2, signal: "pause_requested",
+    }, { onConflict: "run_id,user_id,step_index" });
+  });
+
+  it("rejects invalid step indexes and participant signals before writing", async () => {
+    await expect(submitExperienceRunCheckIn({
+      runId: "run-1", stepIndex: 40, signal: "ready", expectedUserId: "user-a",
+    })).rejects.toThrow("Invalid experience step.");
+    await expect(submitExperienceRunCheckIn({
+      runId: "run-1", stepIndex: 0, signal: "unexpected" as never, expectedUserId: "user-a",
+    })).rejects.toThrow("Invalid participant signal.");
+    expect(mocks.from).not.toHaveBeenCalled();
+  });
+
+  it("refuses to submit a check-in for a different authenticated account", async () => {
+    mocks.getUser.mockResolvedValue({ data: { user: { id: "user-b" } }, error: null });
+    await expect(submitExperienceRunCheckIn({
+      runId: "run-1", stepIndex: 0, signal: "ready", expectedUserId: "user-a",
+    })).rejects.toThrow("The signed-in account changed.");
+    expect(mocks.from).not.toHaveBeenCalled();
+  });
+
 });
