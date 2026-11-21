@@ -41,6 +41,7 @@ export default function AftercareJournal({ language, onClose }: { language: Lang
     setBody("");
     setPassphrase("");
     setConfirmation("");
+    setBackupPassphrase("");
     setBusy(false);
     setMessage(automatic
       ? language === "nl"
