@@ -23,8 +23,15 @@ describe("consent screen accessibility", () => {
   });
 
   it("still requires all four acknowledgements before consent can continue", () => {
-    expect(consentSource).toContain("const ready=checks.every(Boolean);");
+    expect(consentSource).toContain("const checkedCount=checks.filter(Boolean).length;");
+    expect(consentSource).toContain("const ready=checkedCount===labels.length;");
     expect(consentSource).toContain("disabled={!ready}");
+  });
+
+  it("announces the current agreement count in Dutch and English", () => {
+    expect(consentSource).toContain('aria-describedby="consent-checks-help consent-checks-progress"');
+    expect(consentSource).toContain('id="consent-checks-progress" role="status" aria-live="polite" aria-atomic="true"');
+    expect(consentSource).toContain('t(`${checkedCount} van ${labels.length} afspraken aangevinkt.`, `${checkedCount} of ${labels.length} agreements checked.`)');
   });
 
   it("preserves the explicit STOP, PAUZE and consent-withdrawal guidance", () => {

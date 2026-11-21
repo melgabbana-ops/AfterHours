@@ -11,7 +11,8 @@ export default function ConsentScreen({language="nl",onConfirm,onBack}:{language
   t("Ik kan op elk moment pauzeren of stoppen.","I can pause or stop at any time."),
   t("Ik bevind mij in een veilige en private omgeving.","I am in a safe and private space.")
  ];
- const ready=checks.every(Boolean);
+ const checkedCount=checks.filter(Boolean).length;
+ const ready=checkedCount===labels.length;
  const revealSafetyNote=()=>{
   const note=document.getElementById("consent-safety-note");
   if(!note)return;
@@ -25,9 +26,10 @@ export default function ConsentScreen({language="nl",onConfirm,onBack}:{language
    <p>{t("Een bewuste ervaring begint met duidelijke afspraken. Jij houdt altijd de regie over jouw grenzen.","A mindful experience starts with clear agreements. You always remain in control of your boundaries.")}</p>
   </section>
   <section className="consent-form" aria-label={t("Consentformulier","Consent form")}>
-   <fieldset className="consent-checks" aria-describedby="consent-checks-help">
+   <fieldset className="consent-checks" aria-describedby="consent-checks-help consent-checks-progress">
     <legend className="consent-checks-legend">{t("Bevestig alle afspraken","Confirm all agreements")}</legend>
     <p className="consent-checks-help" id="consent-checks-help">{t("Vink alle vier afspraken aan om verder te gaan.","Check all four agreements to continue.")}</p>
+    <p className="consent-checks-progress" id="consent-checks-progress" role="status" aria-live="polite" aria-atomic="true">{t(`${checkedCount} van ${labels.length} afspraken aangevinkt.`, `${checkedCount} of ${labels.length} agreements checked.`)}</p>
     {labels.map((label,index)=><label className={"consent-check "+(checks[index]?"checked":"")} key={index}>
      <input type="checkbox" checked={checks[index]} onChange={e=>setChecks(old=>old.map((v,i)=>i===index?e.target.checked:v))}/>
      <span className="custom-check" aria-hidden="true">✓</span><span>{label}</span>
