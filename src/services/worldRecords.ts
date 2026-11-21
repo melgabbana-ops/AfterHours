@@ -279,3 +279,10 @@ export async function acceptExperienceInvitation(tokenHash: string, expectedUser
   if (error) throw new Error(error.message);
   return data as { invitation_id: string; run_id: string; status: string; accepted_at: string };
 }
+
+
+export async function withdrawExperienceConsent(runId: string, expectedUserId: string): Promise<void> {
+  await assertWorldAccount(expectedUserId);
+  const { error } = await supabase!.rpc("withdraw_afterhours_experience_consent", { p_run_id: runId });
+  if (error) throw new Error(error.message);
+}
