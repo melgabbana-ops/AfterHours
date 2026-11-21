@@ -18,7 +18,10 @@ create index if not exists afterhours_run_checkins_run_step
 alter table public.afterhours_experience_run_checkins enable row level security;
 revoke all on public.afterhours_experience_run_checkins from public, anon, authenticated;
 grant select, insert on public.afterhours_experience_run_checkins to authenticated;
-grant update (signal) on public.afterhours_experience_run_checkins to authenticated;
+-- PostgREST upsert updates every supplied column; RLS below still constrains
+-- both the existing row and the proposed row to the signed-in participant's
+-- currently consented run and current step.
+grant update (run_id, user_id, step_index, signal) on public.afterhours_experience_run_checkins to authenticated;
 
 create policy afterhours_run_checkins_read_owner_or_participant
   on public.afterhours_experience_run_checkins
