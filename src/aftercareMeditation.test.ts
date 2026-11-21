@@ -3,6 +3,7 @@ import {
   AFTERCARE_MEDITATION_DURATION_SECONDS,
   AFTERCARE_MEDITATION_PHASES,
   formatAftercareMeditationTime,
+  getAftercareMeditationAccessibleTime,
   getAftercareMeditationPhase,
   getAftercareMeditationProgressPercent,
   getAftercareMeditationRemainingSeconds,
@@ -61,5 +62,22 @@ describe("30-minute aftercare meditation", () => {
     expect(formatAftercareMeditationTime(65)).toBe("01:05");
     expect(formatAftercareMeditationTime(1800)).toBe("30:00");
     expect(formatAftercareMeditationTime(Number.NaN)).toBe("00:00");
+  });
+
+  it("creates natural Dutch and English labels for screen readers", () => {
+    expect(getAftercareMeditationAccessibleTime(65, "nl")).toBe("1 minuut en 5 seconden resterend");
+    expect(getAftercareMeditationAccessibleTime(65, "en")).toBe("1 minute and 5 seconds remaining");
+    expect(getAftercareMeditationAccessibleTime(60, "nl")).toBe("1 minuut resterend");
+    expect(getAftercareMeditationAccessibleTime(60, "en")).toBe("1 minute remaining");
+    expect(getAftercareMeditationAccessibleTime(1800, "nl")).toBe("30 minuten resterend");
+    expect(getAftercareMeditationAccessibleTime(1800, "en")).toBe("30 minutes remaining");
+  });
+
+  it("handles zero, singular seconds and invalid timer values accessibly", () => {
+    expect(getAftercareMeditationAccessibleTime(1, "nl")).toBe("1 seconde resterend");
+    expect(getAftercareMeditationAccessibleTime(1, "en")).toBe("1 second remaining");
+    expect(getAftercareMeditationAccessibleTime(0, "nl")).toBe("0 seconden resterend");
+    expect(getAftercareMeditationAccessibleTime(-10, "en")).toBe("0 seconds remaining");
+    expect(getAftercareMeditationAccessibleTime(Number.NaN, "nl")).toBe("0 seconden resterend");
   });
 });

@@ -82,3 +82,24 @@ export function formatAftercareMeditationTime(seconds: number): string {
   const remainder = (safeSeconds % 60).toString().padStart(2, "0");
   return minutes + ":" + remainder;
 }
+
+/** A concise localized label for assistive technology; the visible clock stays compact. */
+export function getAftercareMeditationAccessibleTime(seconds: number, language: "nl" | "en"): string {
+  const safeSeconds = Number.isFinite(seconds) ? Math.max(0, Math.floor(seconds)) : 0;
+  const minutes = Math.floor(safeSeconds / 60);
+  const remainder = safeSeconds % 60;
+
+  if (language === "nl") {
+    const minuteLabel = minutes === 1 ? "minuut" : "minuten";
+    const secondLabel = remainder === 1 ? "seconde" : "seconden";
+    if (minutes === 0) return remainder + " " + secondLabel + " resterend";
+    if (remainder === 0) return minutes + " " + minuteLabel + " resterend";
+    return minutes + " " + minuteLabel + " en " + remainder + " " + secondLabel + " resterend";
+  }
+
+  const minuteLabel = minutes === 1 ? "minute" : "minutes";
+  const secondLabel = remainder === 1 ? "second" : "seconds";
+  if (minutes === 0) return remainder + " " + secondLabel + " remaining";
+  if (remainder === 0) return minutes + " " + minuteLabel + " remaining";
+  return minutes + " " + minuteLabel + " and " + remainder + " " + secondLabel + " remaining";
+}
