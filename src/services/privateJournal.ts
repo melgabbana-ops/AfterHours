@@ -100,6 +100,13 @@ async function decryptText(key: CryptoKey, encrypted: { iv: string; ciphertext: 
   );
   return new TextDecoder().decode(clear);
 }
+async function assertVaultKey(key: CryptoKey, vault: StoredVault): Promise<void> {
+  try {
+    if (await decryptText(key, vault.verifier) !== VERIFIER) throw new Error("wrong key");
+  } catch {
+    throw new Error("De journal-kluis is vergrendeld of de sleutel hoort niet bij deze kluis.");
+  }
+}
 function persistVault(target: JournalStorage, vault: StoredVault): void {
   const serialized = JSON.stringify(vault);
   target.setItem(PRIVATE_JOURNAL_STORAGE_KEY, serialized);
@@ -155,6 +162,7 @@ export async function loadPrivateJournalEntries(
   if (!target) throw new Error("Lokale opslag is niet beschikbaar.");
   const vault = parseVault(target.getItem(PRIVATE_JOURNAL_STORAGE_KEY));
   if (!vault) throw new Error("De journal-kluis ontbreekt of is beschadigd.");
+  await assertVaultKey(key, vault);
   const entries = await Promise.all(vault.entries.map(async (row) => {
     const parsed: unknown = JSON.parse(await decryptText(key, row));
     if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("Ongeldige journalnotitie.");
@@ -185,6 +193,7 @@ export async function savePrivateJournalEntry(
   if (!target) throw new Error("Lokale opslag is niet beschikbaar.");
   const vault = parseVault(target.getItem(PRIVATE_JOURNAL_STORAGE_KEY));
   if (!vault) throw new Error("De journal-kluis ontbreekt of is beschadigd.");
+  await assertVaultKey(key, vault);
   const existing = entryId ? vault.entries.find((row) => row.id === entryId) : undefined;
   if (entryId && !existing) throw new Error("Deze notitie bestaat niet meer.");
   const entry: PrivateJournalEntry = {
