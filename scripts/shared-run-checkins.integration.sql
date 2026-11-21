@@ -94,7 +94,7 @@ values
 set role authenticated;
 select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000002',false);
 
-do $$
+do $
 declare visible_runs integer;
 begin
   select count(*) into visible_runs
@@ -103,7 +103,36 @@ begin
   if visible_runs <> 1 then
     raise exception 'Accepted invitee cannot see paused run after consent revocation.';
   end if;
-end $$;
+end $;
+
+do $
+begin
+  begin
+    perform public.get_afterhours_shared_run_consent_status('10000000-0000-4000-8000-000000000001');
+    raise exception 'A participant viewed owner-only consent status.';
+  exception when insufficient_privilege then
+    null;
+  end;
+end $;
+
+reset role;
+select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000001',false);
+set role authenticated;
+
+do $
+declare status jsonb;
+begin
+  status := public.get_afterhours_shared_run_consent_status('10000000-0000-4000-8000-000000000001');
+  if (status->>'participant_count')::integer <> 1
+    or (status->>'consented_count')::integer <> 0
+    or (status->>'all_consented')::boolean then
+    raise exception 'Host did not see pending participant re-consent.';
+  end if;
+end $;
+
+reset role;
+select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000002',false);
+set role authenticated;
 
 select public.renew_afterhours_experience_consent('10000000-0000-4000-8000-000000000001');
 
@@ -172,7 +201,7 @@ reset role;
 select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000001',false);
 set role authenticated;
 
-do $$
+do $
 declare host_visible_checkins integer;
 begin
   select count(*) into host_visible_checkins
@@ -181,7 +210,18 @@ begin
   if host_visible_checkins <> 1 then
     raise exception 'Run owner cannot see the participant check-in.';
   end if;
-end $$;
+end $;
+
+do $
+declare status jsonb;
+begin
+  status := public.get_afterhours_shared_run_consent_status('10000000-0000-4000-8000-000000000001');
+  if (status->>'participant_count')::integer <> 1
+    or (status->>'consented_count')::integer <> 1
+    or not (status->>'all_consented')::boolean then
+    raise exception 'Host did not see the renewed participant consent.';
+  end if;
+end $;
 
 reset role;
 do $$
