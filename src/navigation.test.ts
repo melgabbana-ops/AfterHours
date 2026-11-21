@@ -7,7 +7,7 @@ describe("initialScreenFromSearch", () => {
     const screens = [
       "game", "gameSelect", "complete", "profile", "admin", "insights", "radio",
       "aftercare", "prompts", "safety", "store", "onboarding", "controlroom",
-      "missions", "legal", "social", "lovense", "daily", "capture", "cinematic", "couples",
+      "missions", "legal", "social", "lovense", "daily", "capture", "cinematic", "couples", "kinktest",
     ];
     for (const screen of screens) {
       expect(initialScreenFromSearch(`?screen=${screen}`)).toBe(screen);
@@ -46,5 +46,12 @@ describe("shouldShowTeaser", () => {
     expect(shouldShowTeaser("?screen=radio")).toBe(false);
     expect(shouldShowTeaser("?screen=profile")).toBe(false);
     expect(shouldShowTeaser("?maintenance=1")).toBe(false);
+  });
+});
+
+
+describe("Kink Profile deep link", () => {
+  it("opens the Kink Profile test from a direct link", () => {
+    expect(initialScreenFromSearch("?screen=kinktest")).toBe("kinktest");
   });
 });
