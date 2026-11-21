@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import {
+  advanceSecureDuoSession,
   getSecureDuoRoomState,
   setSecureDuoConsent,
   setSecureDuoRoomState,
@@ -8,6 +9,14 @@ import {
 
 type Language = "nl" | "en";
 type Props = { roomId: string; language: Language; onBack: () => void };
+
+const sharedPrompts = [
+  { nl: "Wat heb je vandaag nodig om je op je gemak te voelen?", en: "What do you need today to feel comfortable?" },
+  { nl: "Welk signaal gebruiken jullie voor een korte pauze?", en: "What signal will you use for a short pause?" },
+  { nl: "Wat zouden jullie vandaag graag samen willen ontdekken?", en: "What would you like to explore together today?" },
+  { nl: "Wil je doorgaan, aanpassen, pauzeren of stoppen?", en: "Would you like to continue, adjust, pause, or stop?" },
+  { nl: "Welke vorm van aftercare past nu bij jullie?", en: "What kind of aftercare would feel right now?" },
+];
 
 /**
  * Secure Duo lobby. Database RPC snapshots are authoritative; Realtime events
@@ -85,6 +94,7 @@ export default function SecureDuoLobby({ roomId, language, onBack }: Props) {
     && snapshot.members.every(member => member.consented);
   const isHost = own?.role === "host";
   const isStopped = snapshot?.status === "stopped";
+  const activePrompt = snapshot ? sharedPrompts[snapshot.session.step] : null;
   const canStart = isHost && bothConsented
     && (snapshot?.status === "lobby" || snapshot?.status === "paused");
 
@@ -121,6 +131,43 @@ export default function SecureDuoLobby({ roomId, language, onBack }: Props) {
                     : (nl ? "Deelnemer heeft nog niet ingestemd." : "Participant has not consented yet."))
                 : (nl ? "Wacht op acceptatie van de persoonlijke uitnodiging." : "Waiting for the personal invitation to be accepted.")}</p>
             </div>
+            {snapshot.status === "active" && activePrompt && (
+              <section className="couples-consent-note" aria-live="polite" aria-label={nl ? "Gedeelde spelstap" : "Shared game step"}>
+                <strong>{nl ? "Gedeelde stap" : "Shared step"} {snapshot.session.step + 1} / {sharedPrompts.length}</strong>
+                <p>{nl ? activePrompt.nl : activePrompt.en}</p>
+                <div className="couples-actions">
+                  <button
+                    type="button"
+                    className="couples-back-bottom"
+                    disabled={busy || snapshot.session.step === 0}
+                    onClick={() => void act(
+                      () => advanceSecureDuoSession(roomId, "previous", snapshot.session.revision).then(() => undefined),
+                      nl ? "Vorige stap gedeeld." : "Previous step synchronized.",
+                      nl ? "De stap is gewijzigd op het andere apparaat. Status wordt vernieuwd." : "The step changed on the other device. Refreshing the shared state.",
+                    )}
+                  >
+                    {nl ? "Vorige" : "Previous"}
+                  </button>
+                  <button
+                    type="button"
+                    className="couples-primary"
+                    disabled={busy || snapshot.session.step === sharedPrompts.length - 1}
+                    onClick={() => void act(
+                      () => advanceSecureDuoSession(roomId, "next", snapshot.session.revision).then(() => undefined),
+                      nl ? "Volgende stap gedeeld." : "Next step synchronized.",
+                      nl ? "De stap is gewijzigd op het andere apparaat. Status wordt vernieuwd." : "The step changed on the other device. Refreshing the shared state.",
+                    )}
+                  >
+                    {nl ? "Volgende stap" : "Next step"}
+                  </button>
+                </div>
+                <p className="couples-safety">
+                  {nl
+                    ? "De server synchroniseert deze stap voor beide deelnemers. Bij gelijktijdige wijzigingen wordt een verouderde actie geweigerd."
+                    : "The server synchronizes this step for both participants. Simultaneous stale updates are rejected."}
+                </p>
+              </section>
+            )}
             {!isStopped && (
               <>
                 <button
