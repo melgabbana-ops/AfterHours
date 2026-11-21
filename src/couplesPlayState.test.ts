@@ -31,7 +31,7 @@ describe("remote couple play safety", () => {
 describe("remote room code validation", () => {
   it("accepts only complete 16-character codes and normalizes case and separators", () => {
     expect(ROOM_CODE_LENGTH).toBe(16);
-    expect(normalizeRoomCode("ab-cd efgh ijkl mn23")).toBe("ABCDEFGHIJKLMNOP".slice(0, 16));
+    expect(normalizeRoomCode("ab-cd efgh ijkl mn23")).toBe("ABCDEFGHIJKLMN23");
     expect(normalizeRoomCode("123456789012345" )).toBe("");
     expect(normalizeRoomCode(null)).toBe("");
   });
