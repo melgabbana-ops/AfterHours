@@ -145,7 +145,7 @@ export async function updateExperienceRun(args: {
 }): Promise<void> {
   await assertWorldAccount(args.expectedUserId);
   const now = new Date().toISOString();
-  const { data, error } = await supabase!
+  let updateQuery = supabase!
     .from("afterhours_experience_runs")
     .update({
       status: args.status,
@@ -155,9 +155,9 @@ export async function updateExperienceRun(args: {
       ...(args.interactionLog ? { interaction_log: args.interactionLog } : {}),
     })
     .eq("id", args.runId)
-    .eq("user_id", args.expectedUserId)
-    .select("id")
-    .maybeSingle();
+    .eq("user_id", args.expectedUserId);
+  if (args.status === "active") updateQuery = updateQuery.eq("status", "active");
+  const { data, error } = await updateQuery.select("id").maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) throw new Error("This experience run no longer belongs to the signed-in account.");
   if (args.status !== "active") {
