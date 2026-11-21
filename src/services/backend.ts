@@ -1,6 +1,7 @@
 import type{AfterHoursState}from"../types";
 import{supabase,supabaseConfigured}from"./supabase";
 import { matchesStoryAccount } from "../storyProgress";
+import { parseBossModeAwardReceipt, type BossModeAwardReceipt } from "../bossProgress";
 
 const isUuid=(value:string)=>/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 
@@ -152,6 +153,30 @@ export async function completeRemoteSession(sessionId:string,rounds:number):Prom
  const{data,error}=await supabase.rpc("complete_session",{p_session_id:sessionId,p_rounds:rounds});
  if(error)return {error:error.message,xpEarned:0,alreadyCompleted:false};
  return {error:null,xpEarned:Number(data?.xp_earned??120),alreadyCompleted:Boolean(data?.already_completed)};
+}
+
+/** Award one explicitly completed Boss Mode step through the account-owned XP ledger. */
+export async function completeRemoteBossModeStep(
+ sessionId: string,
+ stepIndex: number,
+ expectedUserId: string,
+): Promise<{ error: string | null; receipt: BossModeAwardReceipt | null }> {
+ if (!supabaseConfigured || !supabase) return { error: "Server-opslag is niet beschikbaar; er is geen XP toegekend.", receipt: null };
+ if (!isUuid(sessionId)) return { error: "Server-sessie kan niet veilig worden gecontroleerd.", receipt: null };
+ if (!Number.isInteger(stepIndex) || stepIndex < 0 || stepIndex > 4) return { error: "Ongeldige BOSS MODE-stap.", receipt: null };
+ if (!expectedUserId.trim()) return { error: "BOSS MODE-account is niet bevestigd.", receipt: null };
+ try {
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  if (userError || !user) return { error: userError?.message ?? "Geen actieve gebruiker voor BOSS MODE-XP.", receipt: null };
+  if (!matchesStoryAccount(expectedUserId, user.id)) return { error: "Het aangemelde account is gewijzigd. Open BOSS MODE opnieuw.", receipt: null };
+  const { data, error } = await supabase.rpc("complete_boss_mode_step", { p_session_id: sessionId, p_step_index: stepIndex });
+  if (error) return { error: error.message, receipt: null };
+  const receipt = parseBossModeAwardReceipt(data);
+  if (!receipt) return { error: "De server gaf geen geldige BOSS MODE-beloningsbevestiging terug.", receipt: null };
+  return { error: null, receipt };
+ } catch (error) {
+  return { error: error instanceof Error ? error.message : "BOSS MODE-XP kon niet veilig worden bevestigd.", receipt: null };
+ }
 }
 
 export function syncRemoteState(state:AfterHoursState):Promise<string|null>{
