@@ -3,7 +3,9 @@ import { ArrowLeft, BookOpen, LockKeyhole, LockOpen, Plus, Save, Trash2 } from "
 import {
   createPrivateJournalVault,
   deletePrivateJournalEntry,
+  exportPrivateJournalBackup,
   hasPrivateJournalVault,
+  importPrivateJournalBackup,
   loadPrivateJournalEntries,
   PRIVATE_JOURNAL_ENTRY_LIMIT,
   PRIVATE_JOURNAL_MIN_PASSPHRASE,
@@ -26,6 +28,7 @@ export default function AftercareJournal({ language, onClose }: { language: Lang
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [backupPassphrase, setBackupPassphrase] = useState("");
   const lockGeneration = useRef(0);
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
 
@@ -139,6 +142,61 @@ export default function AftercareJournal({ language, onClose }: { language: Lang
     startNew();
     setMessage(t("Notitie verwijderd.", "Entry deleted."));
   };
+
+  const exportBackup = async () => {
+    if (!key) return;
+    const generation = lockGeneration.current;
+    setBusy(true);
+    setError("");
+    setMessage("");
+    try {
+      const backup = await exportPrivateJournalBackup(key);
+      if (generation !== lockGeneration.current || document.visibilityState !== "visible") return;
+      const blob = new Blob([backup], { type: "application/vnd.afterhours.journal+json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `after-hours-journal-${new Date().toISOString().slice(0, 10)}.ahjournal`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1500);
+      setMessage(t("Versleutelde back-up geëxporteerd. Bewaar het bestand op een veilige plek.", "Encrypted backup exported. Store the file somewhere safe."));
+    } catch (reason) {
+      if (generation === lockGeneration.current) setError(reason instanceof Error ? reason.message : t("Back-up exporteren is niet gelukt.", "Could not export the backup."));
+    } finally {
+      if (generation === lockGeneration.current) setBusy(false);
+    }
+  };
+
+  const importBackup = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const input = event.currentTarget;
+    const file = input.files?.[0];
+    if (!file || !key) return;
+    const generation = lockGeneration.current;
+    setBusy(true);
+    setError("");
+    setMessage("");
+    try {
+      if (file.size > 5_000_000) throw new Error(t("Het back-upbestand is te groot (maximaal 5 MB).", "The backup file is too large (maximum 5 MB)."));
+      const backupText = await file.text();
+      const canCommit = () => generation === lockGeneration.current && document.visibilityState === "visible";
+      const imported = await importPrivateJournalBackup(key, backupText, backupPassphrase, undefined, canCommit);
+      const loaded = await loadPrivateJournalEntries(key);
+      if (!canCommit()) return;
+      setEntries(loaded);
+      setActiveId(null);
+      setTitle("");
+      setBody("");
+      setBackupPassphrase("");
+      setMessage(t(`${imported} back-upnotities gecontroleerd en samengevoegd.`, `${imported} backup entries verified and merged.`));
+    } catch (reason) {
+      if (generation === lockGeneration.current) setError(reason instanceof Error ? reason.message : t("Back-up herstellen is niet gelukt.", "Could not restore the backup."));
+    } finally {
+      input.value = "";
+      if (generation === lockGeneration.current) setBusy(false);
+    }
+  };
   return <section className="ah-private-journal" aria-labelledby="ah-private-journal-title">
     <header className="ah-private-journal-head">
       <div className="ah-private-journal-brand"><LockKeyhole aria-hidden="true"/><span className="eyebrow">AFTER HOURS · PRIVATE JOURNAL</span></div>
@@ -167,6 +225,14 @@ export default function AftercareJournal({ language, onClose }: { language: Lang
         <textarea id="ah-journal-body" value={body} maxLength={PRIVATE_JOURNAL_ENTRY_LIMIT} rows={8} onChange={event=>setBody(event.target.value)} placeholder={t("Schrijf vrijuit. Je woorden worden versleuteld voordat ze worden opgeslagen.", "Write freely. Your words are encrypted before they are stored.")}/>
         <small className="ah-journal-count">{body.length.toLocaleString(language==="en"?"en-GB":"nl-NL")} / {PRIVATE_JOURNAL_ENTRY_LIMIT}</small>
         <div className="ah-journal-actions"><button type="button" className="ah-journal-primary" onClick={()=>void save()} disabled={busy||(!title.trim()&&!body.trim())}><Save size={15}/>{t("Versleuteld opslaan","Save encrypted")}</button>{activeId&&<button type="button" className="ah-journal-delete" onClick={remove}><Trash2 size={15}/>{t("Verwijderen","Delete")}</button>}</div>
+      </div>
+      <div className="ah-journal-backup">
+        <span className="eyebrow">{t("VERSLEUTELDE BACK-UP","ENCRYPTED BACKUP")}</span>
+        <p>{t("Maak een versleutelde kopie of voeg een back-up samen met dit dagboek. De wachtzin van het back-upbestand is nodig om het te openen.", "Create an encrypted copy or merge a backup into this journal. The backup file's passphrase is required to open it.")}</p>
+        <button type="button" className="ah-journal-backup-export" onClick={()=>void exportBackup()} disabled={busy}><Save size={14}/>{t("Back-up exporteren","Export backup")}</button>
+        <label htmlFor="ah-journal-backup-passphrase">{t("Wachtzin van back-up","Backup passphrase")}</label>
+        <input id="ah-journal-backup-passphrase" type="password" value={backupPassphrase} onChange={event=>setBackupPassphrase(event.target.value)} autoComplete="off"/>
+        <label className="ah-journal-backup-import" htmlFor="ah-journal-backup-file">{t("Versleutelde back-up importeren","Import encrypted backup")}<input id="ah-journal-backup-file" type="file" accept=".ahjournal,application/json" onChange={event=>void importBackup(event)} disabled={busy||backupPassphrase.length===0}/></label>
       </div>
       <div className="ah-journal-lock-row"><span><LockKeyhole size={13}/>{t("Kluis ontgrendeld op dit apparaat","Vault unlocked on this device")}</span><button type="button" onClick={lock}>{t("Vergrendelen","Lock vault")}</button></div>
     </div>}
