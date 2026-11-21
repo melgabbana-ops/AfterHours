@@ -180,6 +180,17 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
   }, [mode, connected, status, partnerPresent]);
 
   const publish = async (nextRound: number, nextStatus: PlayStatus) => {
+    // Remote room-code broadcasts are not protected by account-bound private-channel
+    // authorization yet. Fail closed: never allow an active remote session until the
+    // server-side invitation and membership policies are implemented and verified.
+    if (mode === "remote" && nextStatus === "active") {
+      setStatus(status === "active" ? "paused" : "lobby");
+      setMessage(t(
+        "Online Duo is tijdelijk geblokkeerd totdat accountgebonden uitnodigingen en serverbeveiliging klaar zijn. Gebruik voorlopig Lokaal samen.",
+        "Online Duo is temporarily disabled until account-bound invitations and server-side access controls are ready. Use Together locally for now."
+      ));
+      return false;
+    }
     if (mode === "remote") {
       if (nextStatus === "active" && status !== "active") {
         const consentReady = status === "paused"
@@ -277,7 +288,7 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
         </div> : <>
           <div className="couples-room-code"><small>{t("JULLIE KAMERCODE", "YOUR ROOM CODE")}</small><strong>{roomCode}</strong><button type="button" onClick={()=>void shareInvite()}><Copy size={15}/>{t("Deel uitnodiging", "Share invite")}</button></div>
           <div className="couples-connection" role="status">{connected ? <><Wifi size={17}/>{t("Verbonden met de kamer met code", "Connected to room with a code")}</> : <><WifiOff size={17}/>{t("Verbinding maken…", "Connecting…")}</>}</div>
-          <p className="couples-consent-note">{t("Online Duo vereist een ingelogd account. De kamer gebruikt voorlopig nog een gedeelde code en is niet afgeschermd met accountgebonden uitnodigingen. Deel geen gevoelige informatie of media.", "Online Duo requires a signed-in account. The room still uses a shared code and is not yet protected by account-bound invitations. Do not share sensitive information or media.")}</p>
+          <p className="couples-consent-note" role="alert">{t("Online Duo is momenteel alleen als technische preview beschikbaar. Starten is geblokkeerd totdat uitnodigingen aan accounts zijn gekoppeld en de server de kamertoegang afdwingt. Gebruik Lokaal samen voor een sessie.", "Online Duo is currently a technical preview only. Starting is blocked until invitations are account-bound and the server enforces room access. Use Together locally for a session.")}</p>
           <label className="couples-join-code">{t("Jouw naam", "Your name")}<input value={name} onChange={e=>setName(e.target.value)} maxLength={24} placeholder={t("Naam", "Name")}/></label>
           <div className="couples-presence"><Users size={17}/><strong>{participants.length} / 2</strong><span>{partnerPresent ? t("Partner is aanwezig", "Partner is here") : t("Wachten op je partner…", "Waiting for your partner…")}</span></div>
           <label className="couples-consent"><input type="checkbox" checked={myConsent} onChange={e=>{setMyConsent(e.target.checked);if(!e.target.checked){setStatus("lobby");void channelRef.current?.send({type:"broadcast",event:"reset-consent",payload:{stopped:false}});}}}/><span>{t("Ik stem vrijwillig in met deze ervaring.", "I freely consent to this experience.")}</span></label>
