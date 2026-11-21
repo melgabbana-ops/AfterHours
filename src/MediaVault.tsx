@@ -228,6 +228,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
       setFrameStyle(style);
       setPhotoEdits(edits);
       setPendingCapture(updated);
+      if(pendingUrl) URL.revokeObjectURL(pendingUrl);
       setPendingUrl(URL.createObjectURL(updated));
       setMessage(t("Foto bewerkt. Controleer de preview voordat je privé opslaat.","Photo edited. Review the preview before saving it privately."));
     }catch(error){
