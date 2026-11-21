@@ -104,7 +104,7 @@ function persistVault(target: JournalStorage, vault: StoredVault): void {
 export function hasPrivateJournalVault(storage?: JournalStorage): boolean {
   const target = storageTarget(storage);
   if (!target) return false;
-  try { return parseVault(target.getItem(PRIVATE_JOURNAL_STORAGE_KEY)) !== null; } catch { return false; }
+  try { return target.getItem(PRIVATE_JOURNAL_STORAGE_KEY) !== null; } catch { return false; }
 }
 
 export async function createPrivateJournalVault(
