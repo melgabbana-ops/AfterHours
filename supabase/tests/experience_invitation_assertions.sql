@@ -89,12 +89,20 @@ begin
   end;
 
   if has_function_privilege('anon','public.accept_afterhours_experience_invitation(text)','EXECUTE')
+     or has_function_privilege('anon','public.preview_afterhours_experience_invitation(text)','EXECUTE')
+     or has_function_privilege('anon','public.withdraw_afterhours_experience_consent(uuid)','EXECUTE')
      or has_function_privilege('anon','private.accept_afterhours_experience_invitation_impl(text)','EXECUTE')
+     or has_function_privilege('anon','private.preview_afterhours_experience_invitation_impl(text)','EXECUTE')
+     or has_function_privilege('anon','private.withdraw_afterhours_experience_consent_impl(uuid)','EXECUTE')
      or has_schema_privilege('anon','private','USAGE') then
     raise exception 'Anonymous role can execute or reach invitation RPCs';
   end if;
   if not has_function_privilege('authenticated','public.accept_afterhours_experience_invitation(text)','EXECUTE')
+     or not has_function_privilege('authenticated','public.preview_afterhours_experience_invitation(text)','EXECUTE')
+     or not has_function_privilege('authenticated','public.withdraw_afterhours_experience_consent(uuid)','EXECUTE')
      or not has_function_privilege('authenticated','private.accept_afterhours_experience_invitation_impl(text)','EXECUTE')
+     or not has_function_privilege('authenticated','private.preview_afterhours_experience_invitation_impl(text)','EXECUTE')
+     or not has_function_privilege('authenticated','private.withdraw_afterhours_experience_consent_impl(uuid)','EXECUTE')
      or not has_schema_privilege('authenticated','private','USAGE') then
     raise exception 'Authenticated role cannot reach the approved invitation RPC path';
   end if;
