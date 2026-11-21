@@ -90,6 +90,12 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
       void channelRef.current.track({ participantId, displayName: name.trim() || t("Deelnemer", "Participant"), consent: myConsent });
     }
   }, [myConsent, name, connected, mode, participantId]);
+  useEffect(() => {
+    if (mode === "remote" && connected && status === "active" && !partnerPresent) {
+      setStatus("paused");
+      setMessage(t("Je partner heeft de kamer verlaten. De ervaring is automatisch gepauzeerd.", "Your partner left the room. The experience paused automatically."));
+    }
+  }, [mode, connected, status, partnerPresent]);
 
   const publish = async (nextRound: number, nextStatus: PlayStatus) => {
     setRound(nextRound);
@@ -111,13 +117,18 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
       else { await navigator.clipboard.writeText(inviteUrl); setMessage(t("Uitnodigingslink gekopieerd.", "Invite link copied.")); }
     } catch { setMessage(t("Delen is niet gelukt. Deel de kamercode handmatig.", "Could not share. Send the room code manually.")); }
   };
-  const stop = () => {
+  const stop = async () => {
     setMyConsent(false);
     setLocalPartnerConsent(false);
-    void publish(round, "stopped");
-    if (mode === "remote" && channelRef.current) void channelRef.current.send({ type: "broadcast", event: "reset-consent", payload: { stopped: true } });
+    if (mode === "remote" && channelRef.current) {
+      await channelRef.current.send({ type: "broadcast", event: "reset-consent", payload: { stopped: true } });
+    }
+    await publish(round, "stopped");
   };
-  const leave = () => { if (status === "active" || status === "paused") stop(); onBack(); };
+  const leave = async () => {
+    if (status === "active" || status === "paused") await stop();
+    onBack();
+  };
 
   return <main className="couples-play-screen ah-editorial-screen">
     <header className="couples-play-header">
@@ -165,13 +176,13 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
       <div className="couples-question"><small>{t("PRAAT SAMEN", "TALK TOGETHER")}</small><strong>{language==="nl"?prompts[round].nl:prompts[round].en}</strong></div>
       <div className="couples-round-actions">
         <button type="button" onClick={()=>void publish(Math.max(0,round-1),"active")} disabled={round===0||status==="stopped"}>{t("Vorige", "Previous")}</button>
-        <button type="button" onClick={()=>void publish(round,status==="paused"?"active":"paused")} disabled={status==="stopped"}><Pause size={15}/>{status==="paused"?t("Hervat","Resume"):t("Pauze","Pause")}</button>
+        <button type="button" onClick={()=>void publish(round,status==="paused"?"active":"paused")} disabled={status==="stopped"||(status==="paused"&&mode==="remote"&&(!partnerPresent||!partnerConsented))}><Pause size={15}/>{status==="paused"?t("Hervat","Resume"):t("Pauze","Pause")}</button>
         <button type="button" className="couples-primary" onClick={()=>void publish(Math.min(prompts.length-1,round+1),"active")} disabled={round===prompts.length-1||status!=="active"}>{t("Volgende", "Next")}</button>
       </div>
-      <button type="button" className="couples-stop" onClick={stop}><ShieldCheck size={16}/>{t("Stop de ervaring", "Stop experience")}</button>{status === "stopped" && <button type="button" className="couples-primary" onClick={() => void publish(0, "lobby")}>{t("Terug naar de lobby", "Return to lobby")}</button>}
+      <button type="button" className="couples-stop" onClick={()=>void stop()}><ShieldCheck size={16}/>{t("Stop de ervaring", "Stop experience")}</button>{status === "stopped" && <button type="button" className="couples-primary" onClick={() => void publish(0, "lobby")}>{t("Terug naar de lobby", "Return to lobby")}</button>}
     </section>}
     <aside className="couples-safety"><ShieldCheck size={18}/><p>{t("Consent kan altijd worden ingetrokken. Pauze en stop hebben direct voorrang. De kamercode is geen vervanging voor privacy of persoonlijke afspraken.", "Consent can always be withdrawn. Pause and stop always take priority. A room code is not a substitute for privacy or personal boundaries.")}</p></aside>
     {message && <p className="couples-message" role="status">{message}</p>}
-    <button type="button" className="couples-back-bottom" onClick={onBack}>{t("Terug naar ervaringen", "Back to experiences")}</button>
+    <button type="button" className="couples-back-bottom" onClick={leave}>{t("Terug naar ervaringen", "Back to experiences")}</button>
   </main>;
 }
