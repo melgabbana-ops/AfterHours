@@ -54,6 +54,18 @@ export function appendMediaCaptureChunk(
 }
 type CaptureRecorder = Pick<MediaRecorder, "state" | "stop" | "ondataavailable" | "onstop" | "onerror">;
 
+/** Request a recorder stop once, tolerating browser state changes between checks and stop(). */
+export function stopMediaRecorder(recorder: Pick<MediaRecorder, "state" | "stop"> | null | undefined): boolean {
+  if (!recorder || recorder.state === "inactive") return false;
+  try {
+    recorder.stop();
+    return true;
+  } catch {
+    // MediaRecorder can become inactive between the state check and stop().
+    return false;
+  }
+}
+
 /** Stop every camera/microphone track, even if one browser track has already ended. */
 export function stopMediaStreams(streams: readonly (CaptureStream | null | undefined)[]): void {
   const stoppedTracks = new Set<MediaStreamTrack>();
