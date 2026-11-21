@@ -85,7 +85,7 @@ export async function listPrivateMedia(): Promise<PrivateMediaItem[]> {
   const items: PrivateMediaItem[] = [];
   // Storage list() is paginated. Walk every page so older sessions and large
   // vaults do not silently disappear after the first 100 entries.
-  for ( (let folderOffset = 0; ; folderOffset += STORAGE_PAGE_SIZE) {
+  for (let folderOffset = 0; ; folderOffset += STORAGE_PAGE_SIZE) {
     const { data: folders, error: folderError } = await storage.list(userId, {
       limit: STORAGE_PAGE_SIZE,
       offset: folderOffset,
