@@ -418,7 +418,7 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
     return;
    }
    const earned=remoteResult.xpEarned;
-   setCompletionSummary({earned,level:levelFromXp(state.profile.xp+earned),rounds:rounds.length,completedAt,moodBefore,moodDuring,moodAfter,aftercareChoice,noteStatus:aftercareNoteStatus==="saved"?"saved":"skipped"});
+   setCompletionSummary({earned,level:levelFromXp(state.profile.xp+earned),rounds:rounds.length,completedAt,startedAt:state.session.startedAt,moodBefore,moodDuring,moodAfter,aftercareChoice,noteStatus:aftercareNoteStatus==="saved"?"saved":"skipped"});
    recordAchievement("session_complete",{completedSessions:state.profile.sessions+1,profileId:syncUserId});
    void playNotificationSound("message");
    setState(s=>{const nextXp=s.profile.xp+earned;return {...s,consent:{status:"pending",confirmedAt:null,revokedAt:null},profile:{...s.profile,xp:nextXp,level:levelFromXp(nextXp),sessions:s.profile.sessions+1},history:[{id:"session-"+Date.now(),completedAt,xpEarned:earned,rounds:rounds.length},...s.history].slice(0,12),notifications:[notificationEvents.message(t("Sessie voltooid","Session complete"),t("De volledige Experience is afgerond en veilig opgeslagen. +","The full experience has been completed and saved securely. +")+earned+" XP "+t("is toegevoegd.","has been awarded.")),...s.notifications].slice(0,20),session:{...s.session,round:0,status:"completed",startedAt:null,updatedAt:completedAt}}});
