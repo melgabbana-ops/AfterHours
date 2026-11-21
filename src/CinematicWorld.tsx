@@ -735,8 +735,9 @@ export default function CinematicWorld({
 
   async function saveVaultNote() {
     setError("");
-    if (!remoteProfileId) { setError(t("Meld je aan om de versleutelde kluis te gebruiken.", "Sign in to use the encrypted vault.")); return; }
+    if (!remoteProfileId) { setVaultPassphrase(""); setError(t("Meld je aan om de versleutelde kluis te gebruiken.", "Sign in to use the encrypted vault.")); return; }
     if (vaultPassphrase.length < 10 || !vaultTitle.trim() || !vaultDraft.trim()) {
+      setVaultPassphrase("");
       setVaultMessage(t("Gebruik minimaal 10 tekens als wachtzin en vul titel en notitie in.", "Use a passphrase of at least 10 characters and enter a title and note."));
       return;
     }
@@ -769,8 +770,8 @@ export default function CinematicWorld({
   }
 
   async function unlockVault(record: WorldRecord | undefined) {
-    if (!record) { setVaultMessage(t("Er is nog geen versleutelde notitie.", "There is no encrypted note yet.")); return; }
-    if (vaultPassphrase.length < 10) { setVaultMessage(t("Vul eerst je wachtzin in.", "Enter your passphrase first.")); return; }
+    if (!record) { setVaultPassphrase(""); setVaultMessage(t("Er is nog geen versleutelde notitie.", "There is no encrypted note yet.")); return; }
+    if (vaultPassphrase.length < 10) { setVaultPassphrase(""); setVaultMessage(t("Vul eerst je wachtzin in.", "Enter your passphrase first.")); return; }
     try {
       const payload = record.payload as { salt?: string; iv?: string; ciphertext?: string };
       if (!payload.salt || !payload.iv || !payload.ciphertext) throw new Error("Invalid encrypted vault item.");
