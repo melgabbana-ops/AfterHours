@@ -561,6 +561,7 @@ export default function CinematicWorld({
     if (stopPendingRef.current) return;
     stopPendingRef.current = true;
     setStopPending(true);
+    setError("");
 
     const runId = activeRunId;
     const userId = remoteProfileId;
@@ -584,6 +585,7 @@ export default function CinematicWorld({
     }
 
     try {
+      let serverConfirmed = !runId || !userId;
       if (runId && userId) {
         const pendingMutation = runMutationRef.current;
         if (pendingMutation) await pendingMutation.catch(() => undefined);
@@ -592,6 +594,7 @@ export default function CinematicWorld({
           // The existing RPC locks the run and revokes consent in the same
           // transaction as stopping it.
           await withdrawExperienceConsent(runId, userId);
+          serverConfirmed = true;
         } catch {
           // Keep a guarded fallback for accounts whose consent row was already
           // revoked by a prior safety transition.
@@ -602,6 +605,7 @@ export default function CinematicWorld({
               status: "stopped",
               currentStep
             });
+            serverConfirmed = true;
           } catch {
             setError(t(
               "STOP is direct op dit apparaat uitgevoerd, maar de server kon de stop niet bevestigen. Blijf gestopt en controleer je verbinding voordat je opnieuw begint.",
@@ -610,13 +614,16 @@ export default function CinematicWorld({
           }
         }
 
+        if (serverConfirmed) {
+          setRuns((current) => current.map((run) => run.id === runId ? { ...run, status: "stopped" } : run));
+        }
         try {
           await refreshData(userId);
         } catch {
           // The local scene is already stopped; stale history must not block STOP.
         }
       }
-      if (!fromConsentChange) {
+      if (!fromConsentChange && serverConfirmed) {
         setMessage(t("De scène is gestopt. Er wordt niets automatisch hervat.", "The scene has stopped. Nothing will resume automatically."));
       }
     } finally {
