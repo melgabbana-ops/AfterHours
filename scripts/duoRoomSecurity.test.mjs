@@ -32,6 +32,23 @@ describe("proposed secure Duo backend guardrails", () => {
     expect(proposal).toContain("status = 'accepted', accepted_user_id = v_user_id");
   });
 
+  it("does not treat invitation acceptance as consent to participate", () => {
+    const acceptance = proposal.slice(
+      proposal.indexOf("function public.accept_afterhours_duo_invitation("),
+      proposal.indexOf("function public.set_afterhours_duo_consent("),
+    );
+    expect(acceptance).toContain("insert into public.afterhours_duo_room_members (room_id, user_id, role)");
+    expect(acceptance).toContain("values (v_room.id, v_user_id, 'guest')");
+    expect(acceptance).not.toContain("consented_at");
+  });
+
+  it("uses a complete PL/pgSQL dollar-quoted body for the room snapshot RPC", () => {
+    const declaration = proposal.slice(proposal.indexOf("function public.get_afterhours_duo_room_state("));
+    expect(declaration).toContain("set search_path = ''\\nas $\\ndeclare");
+    expect(declaration).toContain("return jsonb_build_object(");
+    expect(declaration).toContain("\\nend;\\n$;");
+  });
+
   it("requires two currently consenting members before the host can activate a room", () => {
     expect(proposal).toContain("if v_room.owner_user_id <> v_user_id then");
     expect(proposal).toContain("if v_member_count <> 2 or v_consented_count <> 2 then");
