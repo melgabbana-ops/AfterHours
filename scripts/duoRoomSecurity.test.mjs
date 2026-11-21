@@ -143,6 +143,14 @@ describe("proposed secure Duo backend guardrails", () => {
     expect(proposal).toContain("where room_id = p_room_id and removed_at is null and consent_revoked_at is null");
   });
 
+  it("keeps secure Duo aftercare per browser and out of persistent storage", () => {
+    expect(secureLobby).toContain("aftercareChoices");
+    expect(secureLobby).toContain("These choices stay in your browser and are not shared or saved.");
+    expect(secureLobby).toContain("Dit lijstje blijft alleen in jouw browser en wordt niet gedeeld of opgeslagen.");
+    expect(secureLobby).not.toContain("set_afterhours_duo_aftercare");
+    expect(secureLobby).not.toContain("localStorage");
+  });
+
   it("renders the server-backed shared prompt cursor in the dormant secure lobby", () => {
     expect(secureLobby).toContain("advanceSecureDuoSession");
     expect(secureLobby).toContain("snapshot.session.revision");
