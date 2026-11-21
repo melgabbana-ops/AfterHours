@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { appendMediaCaptureChunk, discardMediaCapture, MAX_MEDIA_CAPTURE_BYTES, missingCaptureTrack, stopMediaRecorder, stopMediaStreams, waitForVideoReady, watchMediaStreamInterruption } from "./mediaCapture";
+import { appendMediaCaptureChunk, canRecoverInterruptedCapture, discardMediaCapture, MAX_MEDIA_CAPTURE_BYTES, missingCaptureTrack, stopMediaRecorder, stopMediaStreams, waitForVideoReady, watchMediaStreamInterruption } from "./mediaCapture";
 
 describe("media capture cleanup", () => {
   it("stops every track across camera and composited streams", () => {
@@ -280,5 +280,21 @@ describe("required capture tracks", () => {
 
   it("does not require a microphone for still photos", () => {
     expect(missingCaptureTrack(stream([track()], []), true, false)).toBeNull();
+  });
+});
+
+
+describe("interrupted capture recovery", () => {
+  it("allows a non-empty partial preview within the storage limit", () => {
+    expect(canRecoverInterruptedCapture(1)).toBe(true);
+    expect(canRecoverInterruptedCapture(MAX_MEDIA_CAPTURE_BYTES)).toBe(true);
+  });
+
+  it("rejects empty, oversized, negative, or non-finite captures", () => {
+    expect(canRecoverInterruptedCapture(0)).toBe(false);
+    expect(canRecoverInterruptedCapture(MAX_MEDIA_CAPTURE_BYTES + 1)).toBe(false);
+    expect(canRecoverInterruptedCapture(-1)).toBe(false);
+    expect(canRecoverInterruptedCapture(Number.NaN)).toBe(false);
+    expect(canRecoverInterruptedCapture(1, Number.POSITIVE_INFINITY)).toBe(false);
   });
 });
