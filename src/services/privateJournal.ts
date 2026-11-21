@@ -233,6 +233,7 @@ export async function importPrivateJournalBackup(
   backupText: string,
   backupPassphrase: string,
   storage?: JournalStorage,
+  canCommit: () => boolean = () => true,
 ): Promise<number> {
   if (backupText.length > 5_000_000) throw new Error("Dit back-upbestand is te groot.");
   let parsed: unknown;
@@ -261,6 +262,7 @@ export async function importPrivateJournalBackup(
     updatedAt: entry.updatedAt,
     ...(await encryptText(currentKey, JSON.stringify(entry))),
   })));
+  if (!canCommit()) throw new Error("Journal vergrendeld voordat de back-up kon worden hersteld.");
   persistVault(target, { ...currentVault, entries: encryptedRows });
   return backupEntries.length;
 }
