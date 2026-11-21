@@ -54,6 +54,16 @@ describe("encrypted private journal vault", () => {
     expect(entries.map(entry => entry.id)).toEqual([second.id]);
   });
 
+  it("preserves an existing empty or malformed storage value instead of replacing it with a new vault", async () => {
+    const storage = memoryStorage();
+    storage.setItem(PRIVATE_JOURNAL_STORAGE_KEY, "");
+    await expect(createPrivateJournalVault("een lange unieke wachtzin", storage)).rejects.toThrow("Er bestaat al journal-opslag");
+    expect(storage.getItem(PRIVATE_JOURNAL_STORAGE_KEY)).toBe("");
+
+    await expect(unlockPrivateJournalVault("een lange unieke wachtzin", storage)).rejects.toThrow("ontbreekt of is beschadigd");
+    expect(storage.getItem(PRIVATE_JOURNAL_STORAGE_KEY)).toBe("");
+  });
+
   it("rejects short passphrases and empty entries", async () => {
     const storage = memoryStorage();
     await expect(createPrivateJournalVault("kort", storage)).rejects.toThrow("minimaal 12");
