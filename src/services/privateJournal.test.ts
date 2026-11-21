@@ -208,4 +208,42 @@ describe("encrypted private journal vault", () => {
     expect(journalStyles).toContain(".ah-journal-editor input{min-height:44px}");
   });
 
+  it("reports blocked browser storage reads without attempting to initialize or overwrite a vault", async () => {
+    let writes = 0;
+    const blockedStorage = {
+      getItem: () => { throw new Error("SecurityError"); },
+      setItem: () => { writes += 1; },
+      removeItem: () => undefined,
+    };
+
+    expect(hasPrivateJournalVault(blockedStorage)).toBe(false);
+    await expect(createPrivateJournalVault("een lange unieke wachtzin", blockedStorage))
+      .rejects.toThrow("Lokale opslag is niet toegankelijk");
+    await expect(unlockPrivateJournalVault("een lange unieke wachtzin", blockedStorage))
+      .rejects.toThrow("Lokale opslag is niet toegankelijk");
+    expect(writes).toBe(0);
+  });
+
+  it("preserves the encrypted vault when browser storage rejects a write", async () => {
+    const backingStorage = memoryStorage();
+    const key = await createPrivateJournalVault("een lange unieke wachtzin", backingStorage);
+    await savePrivateJournalEntry(key, { title: "Bestaande notitie", body: "Deze inhoud moet behouden blijven." }, undefined, backingStorage);
+    const before = backingStorage.getItem(PRIVATE_JOURNAL_STORAGE_KEY);
+
+    const quotaBlockedStorage = {
+      getItem: (storageKey: string) => backingStorage.getItem(storageKey),
+      setItem: () => { throw new Error("QuotaExceededError"); },
+      removeItem: (storageKey: string) => backingStorage.removeItem(storageKey),
+    };
+
+    await expect(savePrivateJournalEntry(
+      key,
+      { title: "Nieuwe notitie", body: "Deze opslag wordt geweigerd." },
+      undefined,
+      quotaBlockedStorage,
+    )).rejects.toThrow("Lokale opslag kan niet worden bijgewerkt");
+    expect(backingStorage.getItem(PRIVATE_JOURNAL_STORAGE_KEY)).toBe(before);
+    expect((await loadPrivateJournalEntries(key, backingStorage)).map(entry => entry.title)).toEqual(["Bestaande notitie"]);
+  });
+
 });
