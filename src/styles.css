@@ -4770,3 +4770,10 @@ button,[role="button"],nav a{touch-action:manipulation}
 /* Duo experience card uses the same restrained black-and-champagne visual system. */
 .experience-choice.couple-choice{border-color:rgba(212,175,55,.48)!important;background:radial-gradient(ellipse at 90% 0%,rgba(107,79,31,.3),transparent 48%),linear-gradient(145deg,#21190d,#080706 80%)!important}
 .experience-choice.couple-choice .choice-symbol{border-color:rgba(212,175,55,.62);color:#f0d58f}
+
+/* Private invitation review: clear consent checkpoint in the same black-and-gold system. */
+.couples-invitation-review{border-color:#80653b;background:linear-gradient(145deg,#1b1812,#0d0c0a)}
+.couples-invitation-review h4{margin:2px 0 0;color:#f1d59a;font-size:clamp(18px,3vw,22px);line-height:1.35}
+.couples-invitation-review>p{color:#d0c3af;font-size:14px;line-height:1.65}
+.couples-invitation-review [role="alert"]{color:#e6b6a7}
+.couples-invitation-review [role="status"]{color:#e4c88e}
