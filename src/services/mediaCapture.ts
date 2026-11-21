@@ -1,3 +1,38 @@
+
+/** Bound a permission prompt so a stalled camera/microphone request cannot lock the capture UI forever. */
+export function requestMediaStream(
+  request: () => Promise<MediaStream>,
+  timeoutMs = 30000,
+  timeoutMessage = "The camera or microphone permission request timed out.",
+): Promise<MediaStream> {
+  return new Promise((resolve, reject) => {
+    let settled = false;
+    const timeout = setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      reject(new Error(timeoutMessage));
+    }, timeoutMs);
+
+    Promise.resolve()
+      .then(request)
+      .then(stream => {
+        if (settled) {
+          stopMediaStreams([stream]);
+          return;
+        }
+        settled = true;
+        clearTimeout(timeout);
+        resolve(stream);
+      })
+      .catch(error => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timeout);
+        reject(error);
+      });
+  });
+}
+
 export const MAX_MEDIA_CAPTURE_BYTES = 20 * 1024 * 1024;
 /** Wait for real video dimensions without missing an already-fired metadata event. */
 export function waitForVideoReady(
