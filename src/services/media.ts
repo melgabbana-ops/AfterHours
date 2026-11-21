@@ -2,6 +2,7 @@ import { supabase, supabaseConfigured } from "./supabase";
 
 const BUCKET = "after-hours-private-media";
 const MAX_FILE_BYTES = 20 * 1024 * 1024;
+const STORAGE_PAGE_SIZE = 1000;
 const ALLOWED_TYPES = new Set([
   "image/jpeg",
   "image/png",
@@ -80,30 +81,41 @@ async function currentUserId(): Promise<string> {
 
 export async function listPrivateMedia(): Promise<PrivateMediaItem[]> {
   const userId = await currentUserId();
-  const { data: folders, error: folderError } = await supabase!.storage.from(BUCKET).list(userId, {
-    limit: 100,
-    sortBy: { column: "name", order: "asc" },
-  });
-  if (folderError) throw folderError;
+  const storage = supabase!.storage.from(BUCKET);
   const items: PrivateMediaItem[] = [];
-  for (const folder of folders ?? []) {
-    if (!folder.name) continue;
-    const prefix = `${userId}/${folder.name}`;
-    const { data, error } = await supabase!.storage.from(BUCKET).list(prefix, {
-      limit: 100,
-      sortBy: { column: "created_at", order: "desc" },
+  // Storage list() is paginated. Walk every page so older sessions and large
+  // vaults do not silently disappear after the first 100 entries.
+  for ( (let folderOffset = 0; ; folderOffset += STORAGE_PAGE_SIZE) {
+    const { data: folders, error: folderError } = await storage.list(userId, {
+      limit: STORAGE_PAGE_SIZE,
+      offset: folderOffset,
+      sortBy: { column: "name", order: "asc" },
     });
-    if (error) throw error;
-    for (const item of data ?? []) {
-      if (!item.name || !item.id) continue;
-      items.push({
-        name: item.name,
-        path: `${prefix}/${item.name}`,
-        size: Number(item.metadata?.size ?? 0),
-        createdAt: item.created_at ?? null,
-        contentType: typeof item.metadata?.mimetype === "string" ? item.metadata.mimetype : null,
-      });
+    if (folderError) throw folderError;
+    for (const folder of folders ?? []) {
+      if (!folder.name) continue;
+      const prefix = `${userId}/${folder.name}`;
+      for (let fileOffset = 0; ; fileOffset += STORAGE_PAGE_SIZE) {
+        const { data, error } = await storage.list(prefix, {
+          limit: STORAGE_PAGE_SIZE,
+          offset: fileOffset,
+          sortBy: { column: "created_at", order: "desc" },
+        });
+        if (error) throw error;
+        for (const item of data ?? []) {
+          if (!item.name || !item.id) continue;
+          items.push({
+            name: item.name,
+            path: `${prefix}/${item.name}`,
+            size: Number(item.metadata?.size ?? 0),
+            createdAt: item.created_at ?? null,
+            contentType: typeof item.metadata?.mimetype === "string" ? item.metadata.mimetype : null,
+          });
+        }
+        if ((data?.length ?? 0) < STORAGE_PAGE_SIZE) break;
+      }
     }
+    if ((folders?.length ?? 0) < STORAGE_PAGE_SIZE) break;
   }
   return items.sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? "")).slice(0, 100);
 }
