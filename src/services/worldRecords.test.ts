@@ -193,4 +193,24 @@ describe("AFTER HOURS private world storage", () => {
     expect(mocks.rpc).not.toHaveBeenCalled();
   });
 
+  it("loads owner-only consent status from the server RPC", async () => {
+    mocks.rpc.mockResolvedValue({ data: { participant_count: 1, consented_count: 1, all_consented: true }, error: null });
+    await expect(loadExperienceRunConsentStatus("11111111-1111-4111-8111-111111111111", "user-a"))
+      .resolves.toEqual({ participantCount: 1, consentedCount: 1, allConsented: true });
+    expect(mocks.rpc).toHaveBeenCalledWith("get_afterhours_shared_run_consent_status", { p_run_id: "11111111-1111-4111-8111-111111111111" });
+  });
+
+  it("rejects malformed consent status payloads", async () => {
+    mocks.rpc.mockResolvedValue({ data: { participant_count: "1", consented_count: 0, all_consented: false }, error: null });
+    await expect(loadExperienceRunConsentStatus("11111111-1111-4111-8111-111111111111", "user-a"))
+      .rejects.toThrow("Invalid shared-run consent status.");
+  });
+
+  it("does not load consent status after the authenticated account changes", async () => {
+    mocks.getUser.mockResolvedValue({ data: { user: { id: "user-b" } }, error: null });
+    await expect(loadExperienceRunConsentStatus("11111111-1111-4111-8111-111111111111", "user-a"))
+      .rejects.toThrow("The signed-in account changed.");
+    expect(mocks.rpc).not.toHaveBeenCalled();
+  });
+
 });
