@@ -138,10 +138,10 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
       <p>{t("Kies samen op één apparaat of speel ieder vanaf je eigen locatie.", "Play together on one device or each from your own location.")}</p>
     </header>
     <div className="couples-mode-grid">
-      <button type="button" className={mode === "local" ? "couples-mode-card selected" : "couples-mode-card"} onClick={() => { setMode("local"); setMyConsent(false); setLocalPartnerConsent(false); setStatus("lobby"); setRound(0); }}>
+      <button type="button" className={mode === "local" ? "couples-mode-card selected" : "couples-mode-card"} onClick={() => { setMode("local"); setMyConsent(false); setLocalPartnerConsent(false); setStatus("lobby"); setRound(0); }} disabled={status === "active" || status === "paused"}>
         <MonitorSmartphone/><strong>{t("Lokaal samen", "Together locally")}</strong><span>{t("Eén telefoon, tablet of iPad. Om de beurt antwoorden.", "One phone, tablet or iPad. Take turns answering.")}</span>
       </button>
-      <button type="button" className={mode === "remote" ? "couples-mode-card selected" : "couples-mode-card"} onClick={() => { setMode("remote"); setMyConsent(false); setStatus("lobby"); }}>
+      <button type="button" className={mode === "remote" ? "couples-mode-card selected" : "couples-mode-card"} onClick={() => { setMode("remote"); setMyConsent(false); setStatus("lobby"); }} disabled={status === "active" || status === "paused"}>
         <Wifi/><strong>{t("Op afstand", "Long distance")}</strong><span>{t("Verbind twee apparaten met een privékamer.", "Connect two devices through a private room.")}</span>
       </button>
     </div>
