@@ -64,7 +64,26 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
     const channel = client.channel("couples-" + roomCode, { config: { presence: { key: participantId }, broadcast: { self: false } } });
     channelRef.current = channel;
     channel.on("presence", { event: "sync" }, () => {
-      if (alive) setParticipants(Object.values(channel.presenceState<PresenceMeta>()).flat());
+      if (!alive) return;
+      const liveParticipants = Object.values(channel.presenceState<PresenceMeta>()).flat();
+      setParticipants(liveParticipants);
+      // Keep the lobby honest: the Duo flow supports exactly two devices.
+      // This is a UX guard only; server-side private-channel authorization is
+      // still required before this room can be treated as access-controlled.
+      const alreadyTracked = liveParticipants.some(person => person.participantId === participantId);
+      if (!alreadyTracked && liveParticipants.length >= 2) {
+        void channel.untrack();
+        setConnected(false);
+        setMessage(t(
+          "Deze Duo-kamer zit vol. Er kunnen maximaal twee apparaten deelnemen.",
+          "This Duo room is full. A maximum of two devices can participate."
+        ));
+      } else if (liveParticipants.length > 2) {
+        setMessage(t(
+          "Er zijn te veel apparaten in deze kamer. Starten blijft geblokkeerd totdat er precies twee deelnemers zijn.",
+          "Too many devices are in this room. Starting stays blocked until exactly two participants remain."
+        ));
+      }
     });
     channel.on("broadcast", { event: "play-state" }, ({ payload }) => {
       if (!alive || !payload || typeof payload !== "object") return;
@@ -90,6 +109,15 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
     channel.subscribe(async state => {
       if (!alive) return;
       if (state === "SUBSCRIBED") {
+        const liveParticipants = Object.values(channel.presenceState<PresenceMeta>()).flat();
+        if (liveParticipants.length >= 2 && !liveParticipants.some(person => person.participantId === participantId)) {
+          setConnected(false);
+          setMessage(t(
+            "Deze Duo-kamer zit vol. Er kunnen maximaal twee apparaten deelnemen.",
+            "This Duo room is full. A maximum of two devices can participate."
+          ));
+          return;
+        }
         setConnected(true);
         await channel.track({ participantId, displayName: name.trim() || t("Deelnemer", "Participant"), consent: myConsent });
       } else if (state === "CHANNEL_ERROR" || state === "TIMED_OUT" || state === "CLOSED") {
