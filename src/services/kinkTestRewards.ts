@@ -7,7 +7,7 @@ export interface KinkTestReward {
   totalXp: number | null;
 }
 
-export function isKinkTestRewardPayload(value: unknown): value is KinkTestReward {
+type KinkTestRewardPayload = { xp_earned: number; already_awarded: boolean; total_xp: number | null };\n\nexport function isKinkTestRewardPayload(value: unknown): value is KinkTestRewardPayload {
   if (!value || typeof value !== "object" || Array.isArray(value)) return false;
   const row = value as Record<string, unknown>;
   return typeof row.xp_earned === "number"
