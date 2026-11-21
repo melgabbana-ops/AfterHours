@@ -1,4 +1,4 @@
-import React,{useEffect,useState}from"react";
+import React,{useCallback,useEffect,useRef,useState}from"react";
 import{BookHeart,LockKeyhole,Plus,Trash2,Unlock}from"lucide-react";
 import{AFTERCARE_JOURNAL_LEGACY_STORAGE_KEY,getAftercareJournalStorageKey}from"./aftercareJournalStorage";
 import"./AftercareJournal.css";
@@ -38,8 +38,25 @@ type Props={profileId:string;language:"nl"|"en";onBack:()=>void};
 export default function AftercareJournal({profileId,language,onBack}:Props){
  const storageKey=getAftercareJournalStorageKey(profileId);
  const[pass,setPass]=useState("");const[unlocked,setUnlocked]=useState(false);const[hasVault,setHasVault]=useState(false);const[hasLegacyVault,setHasLegacyVault]=useState(false);const[storageReady,setStorageReady]=useState(false);const[entries,setEntries]=useState<Entry[]>([]);
- const[title,setTitle]=useState("");const[feeling,setFeeling]=useState("");const[needs,setNeeds]=useState("");const[reflection,setReflection]=useState("");const[message,setMessage]=useState("");const[saving,setSaving]=useState(false);const[unlocking,setUnlocking]=useState(false);
+ const[title,setTitle]=useState("");const[feeling,setFeeling]=useState("");const[needs,setNeeds]=useState("");const[reflection,setReflection]=useState("");const[message,setMessage]=useState("");const[saving,setSaving]=useState(false);const[unlocking,setUnlocking]=useState(false);const lockGeneration=useRef(0);
  const t=(nl:string,en:string)=>language==="nl"?nl:en;
+ const lock=useCallback(()=>{
+  lockGeneration.current+=1;
+  setUnlocked(false);setPass("");setEntries([]);setTitle("");setFeeling("");setNeeds("");setReflection("");
+  setSaving(false);setUnlocking(false);
+  setMessage(language==="nl"?"Journal automatisch vergrendeld toen de app naar de achtergrond ging. Niet-opgeslagen tekst is gewist. Open het opnieuw met je wachtzin.":"Journal automatically locked when the app went into the background. Unsaved text was cleared. Unlock it again with your passphrase.");
+ },[language]);
+ useEffect(()=>{
+  const lockWhenHidden=()=>{if(document.visibilityState!=="visible")lock();};
+  const lockOnPageHide=()=>lock();
+  document.addEventListener("visibilitychange",lockWhenHidden);
+  window.addEventListener("pagehide",lockOnPageHide);
+  lockWhenHidden();
+  return()=>{
+   document.removeEventListener("visibilitychange",lockWhenHidden);
+   window.removeEventListener("pagehide",lockOnPageHide);
+  };
+ },[lock]);
  useEffect(()=>{
   setStorageReady(false);
   if(!storageKey){setHasVault(false);setHasLegacyVault(false);setMessage(t("Er is geen geldig profiel gevonden. Open je profiel opnieuw en probeer het nog eens.","No valid profile was found. Reopen your profile and try again."));setStorageReady(true);return;}
@@ -54,33 +71,46 @@ export default function AftercareJournal({profileId,language,onBack}:Props){
   if(!storageKey){setMessage(t("Er is geen geldig profiel gevonden. Je journal is niet geopend.","No valid profile was found. Your journal was not opened."));return;}
   if(pass.length<8){setMessage(t("Gebruik minimaal 8 tekens voor je wachtzin.","Use at least 8 characters for your passphrase."));return;}
   if(unlocking)return;
+  const generation=lockGeneration.current;
   setUnlocking(true);
   try{
    const raw=localStorage.getItem(storageKey);
-   if(raw){const loaded=await decryptEntries(raw,pass);setEntries(loaded);}
+   let loaded:Entry[];
+   if(raw)loaded=await decryptEntries(raw,pass);
    else{
     const encrypted=await encryptEntries([],pass);
+    if(generation!==lockGeneration.current||document.visibilityState!=="visible")return;
     localStorage.setItem(storageKey,encrypted);
     if(localStorage.getItem(storageKey)!==encrypted)throw new Error("storage verification failed");
-    setEntries([]);
+    loaded=[];
    }
+   if(generation!==lockGeneration.current||document.visibilityState!=="visible")return;
+   setEntries(loaded);
    setUnlocked(true);setHasVault(true);setMessage(t("Je profielgebonden journal is lokaal en versleuteld geopend.","Your profile-specific journal is open and encrypted on this device."));
-  }catch{setMessage(t("Niet geopend. Controleer je wachtzin of browseropslag.","Could not unlock. Check your passphrase or browser storage."));}
-  finally{setUnlocking(false);}
+  }catch{
+   if(generation===lockGeneration.current)setMessage(t("Niet geopend. Controleer je wachtzin of browseropslag.","Could not unlock. Check your passphrase or browser storage."));
+  }finally{
+   if(generation===lockGeneration.current)setUnlocking(false);
+  }
  };
  const persist=async(next:Entry[]):Promise<boolean>=>{
   if(!storageKey||saving)return false;
+  const generation=lockGeneration.current;
   setSaving(true);
   try{
    const encrypted=await encryptEntries(next,pass);
+   if(generation!==lockGeneration.current||document.visibilityState!=="visible")return false;
    localStorage.setItem(storageKey,encrypted);
    if(localStorage.getItem(storageKey)!==encrypted)throw new Error("storage verification failed");
+   if(generation!==lockGeneration.current||document.visibilityState!=="visible")return false;
    setEntries(next);setMessage(t("Versleuteld opgeslagen voor dit profiel op dit apparaat.","Encrypted and saved for this profile on this device."));
    return true;
   }catch{
-   setMessage(t("Opslaan is niet gelukt. Je wijzigingen zijn niet bevestigd; probeer opnieuw.","Save failed. Your changes were not confirmed; please try again."));
+   if(generation===lockGeneration.current)setMessage(t("Opslaan is niet gelukt. Je wijzigingen zijn niet bevestigd; probeer opnieuw.","Save failed. Your changes were not confirmed; please try again."));
    return false;
-  }finally{setSaving(false);}
+  }finally{
+   if(generation===lockGeneration.current)setSaving(false);
+  }
  };
  const add=async()=>{
   if(saving||(!reflection.trim()&&!feeling.trim()&&!needs.trim()))return;
@@ -88,7 +118,7 @@ export default function AftercareJournal({profileId,language,onBack}:Props){
   if(await persist([entry,...entries])){setTitle("");setFeeling("");setNeeds("");setReflection("");}
  };
  const remove=async(id:string)=>{if(saving)return;await persist(entries.filter(entry=>entry.id!==id));};
- const lock=()=>{setUnlocked(false);setPass("");setEntries([]);setTitle("");setFeeling("");setNeeds("");setReflection("");};
+
  return <main className="ah-journal-screen ah-editorial-screen"><section className="ah-journal-card"><span className="eyebrow">AFTER HOURS · PRIVATE JOURNAL</span><div className="ah-journal-title"><BookHeart/><div><h2>{t("Aftercare Journal","Aftercare Journal")}</h2><p>{t("Een rustige plek om stil te staan bij wat je voelt en nodig hebt.","A quiet place to reflect on what you feel and need.")}</p></div></div>
  {!unlocked?<div className="ah-journal-lock"><LockKeyhole/><h3>{t(hasVault?"Open je journal":"Maak je privéjournal aan",hasVault?"Unlock your journal":"Create your private journal")}</h3><p>{t("Je wachtzin versleutelt je notities met AES-GCM op dit apparaat. We kunnen deze niet herstellen als je hem vergeet.","Your passphrase encrypts notes with AES-GCM on this device. It cannot be recovered if forgotten.")}</p>{hasLegacyVault&&!hasVault&&<p className="ah-journal-legacy-notice" role="status">{t("Er is een eerder journal zonder profielkoppeling gevonden. Het wordt niet automatisch geopend of verplaatst, zodat privénotities niet tussen profielen worden gedeeld. De oude versleutelde gegevens blijven onaangeroerd.","An older journal without a profile link was found. It is not opened or moved automatically, so private notes are not shared between profiles. The old encrypted data remains untouched.")}</p>}<label htmlFor="ah-journal-pass">{t("Privé-wachtzin","Private passphrase")}</label><input id="ah-journal-pass" type="password" autoComplete={hasVault?"current-password":"new-password"} minLength={8} value={pass} onChange={event=>setPass(event.target.value)} onKeyDown={event=>{if(event.key==="Enter")void unlock();}}/><button className="gold" onClick={()=>void unlock()} disabled={!storageReady||!storageKey||pass.length<8||unlocking}><Unlock/>{unlocking?t("Controleren…","Checking…"):t("Journal openen","Unlock journal")}</button></div>:<>
  <div className="ah-journal-toolbar"><span>{entries.length} {t("notities","entries")}</span><button type="button" onClick={lock} disabled={saving}><LockKeyhole/>{t("Vergrendelen","Lock")}</button></div>
