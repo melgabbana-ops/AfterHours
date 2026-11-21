@@ -138,6 +138,23 @@ describe("proposed secure Duo backend guardrails", () => {
     expect(proposal).toContain("where room_id = p_room_id and removed_at is null and consent_revoked_at is null");
   });
 
+  it("synchronizes only the finite shared prompt cursor with revision checks and active consent", () => {
+    expect(proposal).toContain("create table if not exists public.afterhours_duo_session_state");
+    expect(proposal).toContain("current_step between 0 and 4");
+    expect(proposal).toContain("revision bigint not null default 0");
+    expect(proposal).toContain("function public.advance_afterhours_duo_session(");
+    expect(proposal).toContain("p_expected_revision bigint");
+    expect(proposal).toContain("v_session.revision <> p_expected_revision");
+    expect(proposal).toContain("v_room.status <> 'active'");
+    expect(proposal).toContain("v_member_count <> 2 or v_consented_count <> 2");
+    expect(proposal).toContain("'current_step', v_session.current_step");
+    expect(proposal).toContain("'revision', v_session.revision");
+    expect(proposal).toContain("revoke all on function public.advance_afterhours_duo_session(uuid, text, bigint)");
+    expect(proposal).toContain("grant execute on function public.advance_afterhours_duo_session(uuid, text, bigint) to authenticated");
+    expect(client).toContain('advance_afterhours_duo_session');
+    expect(client).toContain('Number(session.current_step) > 4');
+  });
+
   it("authorizes both private Broadcast and Presence by authenticated room membership and exact topic", () => {
     expect(proposal).toContain("on realtime.messages for select to authenticated");
     expect(proposal).toContain("on realtime.messages for insert to authenticated");
