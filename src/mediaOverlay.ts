@@ -151,7 +151,7 @@ export async function composeImageWithEdits(file: File, style: OverlayFrameStyle
     if (!ctx) throw new Error("Photo editing is not supported in this browser.");
     ctx.translate(width / 2, height / 2);
     ctx.rotate((transform.rotation * Math.PI) / 180);
-    const baseScale = Math.max(width / sourceWidth, height / sourceHeight) * transform.zoom;
+    const baseScale = Math.max(width / logicalWidth, height / logicalHeight) * transform.zoom;
     const drawWidth = sourceWidth * baseScale;
     const drawHeight = sourceHeight * baseScale;
     ctx.drawImage(image, -drawWidth / 2 + transform.offsetX * (drawWidth - width) / 2, -drawHeight / 2 + transform.offsetY * (drawHeight - height) / 2, drawWidth, drawHeight);
