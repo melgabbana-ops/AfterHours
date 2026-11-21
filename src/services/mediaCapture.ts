@@ -121,3 +121,17 @@ export function watchMediaStreamInterruption(
   if (tracks.some(track => track.readyState === "ended")) handleEnded();
   return cleanup;
 }
+
+export type MediaCaptureFailure = "permission-denied" | "no-device" | "device-busy" | "unsupported-constraints" | "unknown";
+
+/** Convert browser-specific capture exceptions into stable, actionable UI categories. */
+export function classifyMediaCaptureFailure(error: unknown): MediaCaptureFailure {
+  const name = error && typeof error === "object" && "name" in error
+    ? String((error as { name?: unknown }).name ?? "")
+    : "";
+  if (name === "NotAllowedError" || name === "SecurityError") return "permission-denied";
+  if (name === "NotFoundError" || name === "DevicesNotFoundError") return "no-device";
+  if (name === "NotReadableError" || name === "TrackStartError" || name === "AbortError") return "device-busy";
+  if (name === "OverconstrainedError" || name === "ConstraintNotSatisfiedError") return "unsupported-constraints";
+  return "unknown";
+}
