@@ -13,7 +13,6 @@ const photoFallbacks = [
   [".ah-profile-screen:before,.ah-profile-screen .profile", "f8a86f1b-af63-4831-bdc7-75741d1f1131.png", "reference-profile.svg"],
   [".radio-room:before,.radio-hero,.radio-player,.radio-note", "5dbe1964-e376-4d2a-b693-1b06392abd82.png", "reference-radio.svg"],
   [".insights:before,.insights .insights-hero,.insights .tarot-card", "fad8c8e3-1edc-4ec5-96ea-40a5486e4128.png", "reference-tarot.svg"],
-  [".insights.insights-astro:before,.insights .astro-card", "fad8c8e3-1edc-4ec5-96ea-40a5486e4128.png", "reference-horoscope.svg"],
   [".game-select-screen:before,.ah-session-screen:before,.experience-choice", "ee9b2312-7f4d-4299-b241-d3e16982fa36.png", "reference-experience.svg"],
 ];
 
@@ -29,6 +28,13 @@ describe("offline-safe editorial photography", () => {
     const rule = lastRule(selector);
     expect(rule).toContain(remoteAsset);
     expect(rule).toContain(`/AfterHours/visuals/${localAsset}`);
+  });
+
+
+  it("uses bundled horoscope artwork without a temporary external image dependency", () => {
+    const rule = lastRule('.insights[data-tab="astro"]:before,.insights .astro-card');
+    expect(rule).toContain("/AfterHours/visuals/ah-horoscope-photo.svg");
+    expect(rule).not.toContain("gcdn.picsart.com");
   });
 
   it("falls back from the profile portrait to bundled artwork when the image host fails", () => {
