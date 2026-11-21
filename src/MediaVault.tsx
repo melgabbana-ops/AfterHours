@@ -61,6 +61,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
   const saveInProgressRef = useRef(false);
   const streamInterruptionCleanupRef = useRef<(() => void) | null>(null);
   const captureInterruptedRef = useRef(false);
+  const captureFailedRef = useRef(false);
   const captureStartInFlightRef = useRef(false);
 
 
@@ -76,6 +77,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
       streamInterruptionCleanupRef.current?.();
       streamInterruptionCleanupRef.current=null;
       captureInterruptedRef.current=false;
+    captureFailedRef.current=false;
       captureStartInFlightRef.current=false;
       if(renderFrameRef.current!==null) window.cancelAnimationFrame(renderFrameRef.current);
       // Leaving the vault discards an unfinished recording instead of creating a preview.
@@ -323,13 +325,22 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
       recorder.onerror=()=>{
         // Suppress any trailing stop event: a recorder error must never publish
         // the remaining chunks as if this were a clean, user-approved preview.
-        captureInterruptedRef.current=true;
+        captureFailedRef.current=true;
+        captureInterruptedRef.current=false;
         stopCaptureTracks();
         setCaptureConsent(false);
         if(mountedRef.current)setMessage(t("De opname is mislukt en de tijdelijke gegevens zijn weggegooid. Controleer camera- of microfoontoestemming en probeer opnieuw.","Recording failed and temporary data was discarded. Check camera or microphone permission and try again."));
       };
       recorder.onstop=()=>{
         if(!mountedRef.current){chunksRef.current=[];return;}
+        if(captureFailedRef.current){
+          captureFailedRef.current=false;
+          chunksRef.current=[];
+          captureBytesRef.current=0;
+          captureSizeExceededRef.current=false;
+          stopCaptureTracks();
+          return;
+        }
         const interrupted=captureInterruptedRef.current;
         captureInterruptedRef.current=false;
         if(interrupted){
