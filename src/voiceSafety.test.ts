@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getVoiceSafetyIntent, isExplicitVoicePass } from "./voiceSafety";
+import { getVoiceSafetyIntent, isExplicitVoicePass, isVoiceRecognitionCurrent, stopVoiceRecognition } from "./voiceSafety";
 
 describe("voice safety intents", () => {
   it("recognizes Dutch STOP words and phrases", () => {
@@ -90,5 +90,56 @@ describe("explicit voice PASS navigation", () => {
     expect(isExplicitVoicePass("I don't want to skip", "en")).toBe(false);
     expect(isExplicitVoicePass("Do not skip", "en")).toBe(false);
     expect(isExplicitVoicePass("Ik wil niet overslaan", "nl")).toBe(false);
+  });
+});
+
+
+describe("voice recognition profile isolation", () => {
+  it("accepts callbacks only from the recognizer started for the active profile", () => {
+    const originalRecognition = {};
+    const replacementRecognition = {};
+
+    expect(isVoiceRecognitionCurrent("profile-a", "profile-a", originalRecognition, originalRecognition)).toBe(true);
+    expect(isVoiceRecognitionCurrent("profile-b", "profile-a", originalRecognition, originalRecognition)).toBe(false);
+    expect(isVoiceRecognitionCurrent("profile-a", "profile-a", replacementRecognition, originalRecognition)).toBe(false);
+  });
+
+  it("detaches every browser callback before stopping recognition", () => {
+    const recognition: {
+      stop: () => void;
+      onstart: unknown;
+      onend: unknown;
+      onerror: unknown;
+      onresult: unknown;
+    } = {
+      onstart: () => undefined,
+      onend: () => undefined,
+      onerror: () => undefined,
+      onresult: () => undefined,
+      stop: () => {
+        expect(recognition.onstart).toBeNull();
+        expect(recognition.onend).toBeNull();
+        expect(recognition.onerror).toBeNull();
+        expect(recognition.onresult).toBeNull();
+      },
+    };
+
+    stopVoiceRecognition(recognition);
+  });
+
+  it("does not throw if the browser has already stopped recognition", () => {
+    const recognition = {
+      onstart: () => undefined,
+      onend: () => undefined,
+      onerror: () => undefined,
+      onresult: () => undefined,
+      stop: () => { throw new Error("already stopped"); },
+    };
+
+    expect(() => stopVoiceRecognition(recognition)).not.toThrow();
+    expect(recognition.onstart).toBeNull();
+    expect(recognition.onend).toBeNull();
+    expect(recognition.onerror).toBeNull();
+    expect(recognition.onresult).toBeNull();
   });
 });
