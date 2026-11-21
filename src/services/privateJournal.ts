@@ -47,6 +47,11 @@ function fromBase64(value: string): Uint8Array {
   for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
   return bytes;
 }
+function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
+  const copy = new Uint8Array(bytes.byteLength);
+  copy.set(bytes);
+  return copy.buffer as ArrayBuffer;
+}
 function parseVault(raw: string | null): StoredVault | null {
   if (raw === null) return null;
   try {
@@ -75,7 +80,7 @@ async function deriveKey(passphrase: string, salt: Uint8Array): Promise<CryptoKe
   const crypto = webCrypto();
   const material = await crypto.subtle.importKey("raw", new TextEncoder().encode(passphrase), "PBKDF2", false, ["deriveKey"]);
   return crypto.subtle.deriveKey(
-    { name: "PBKDF2", salt, iterations: 310_000, hash: "SHA-256" },
+    { name: "PBKDF2", salt: toArrayBuffer(salt), iterations: 310_000, hash: "SHA-256" },
     material,
     { name: "AES-GCM", length: 256 },
     false,
@@ -84,14 +89,14 @@ async function deriveKey(passphrase: string, salt: Uint8Array): Promise<CryptoKe
 }
 async function encryptText(key: CryptoKey, text: string): Promise<{ iv: string; ciphertext: string }> {
   const iv = webCrypto().getRandomValues(new Uint8Array(12));
-  const encrypted = await webCrypto().subtle.encrypt({ name: "AES-GCM", iv }, key, new TextEncoder().encode(text));
+  const encrypted = await webCrypto().subtle.encrypt({ name: "AES-GCM", iv: toArrayBuffer(iv) }, key, toArrayBuffer(new TextEncoder().encode(text)));
   return { iv: toBase64(iv), ciphertext: toBase64(new Uint8Array(encrypted)) };
 }
 async function decryptText(key: CryptoKey, encrypted: { iv: string; ciphertext: string }): Promise<string> {
   const clear = await webCrypto().subtle.decrypt(
-    { name: "AES-GCM", iv: fromBase64(encrypted.iv) },
+    { name: "AES-GCM", iv: toArrayBuffer(fromBase64(encrypted.iv)) },
     key,
-    fromBase64(encrypted.ciphertext),
+    toArrayBuffer(fromBase64(encrypted.ciphertext)),
   );
   return new TextDecoder().decode(clear);
 }
