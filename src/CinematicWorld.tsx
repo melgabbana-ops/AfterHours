@@ -913,6 +913,14 @@ export default function CinematicWorld({
     }
   }
 
+  function dismissIncomingInvitation() {
+    setIncomingInviteToken(null);
+    setInvitePreview(null);
+    setInvitePreviewLoading(false);
+    setError("");
+    setMessage(t("Uitnodiging gesloten. Er is geen toestemming gegeven en niets geaccepteerd.", "Invitation closed. No consent was given and nothing was accepted."));
+  }
+
   async function acceptIncomingInvitation() {
     if (!remoteProfileId || !incomingInviteToken || !invitePreview) return;
     setBusy(true);
@@ -1262,7 +1270,10 @@ export default function CinematicWorld({
               {!remoteProfileId ? <p>{t("Log in op je eigen AFTER HOURS-account om de scène te bekijken en eventueel te accepteren.", "Sign in to your own AFTER HOURS account to preview and optionally accept the scene.")}</p> : null}
               {invitePreviewLoading && <p>{t("Scène veilig ophalen…", "Loading scene securely…")}</p>}
               {invitePreview && <div className="cw-invite-preview"><strong>{invitePreview.title}</strong>{invitePreview.description && <p>{invitePreview.description}</p>}<ol>{invitePreview.steps.slice(0, 12).map((step, index) => <li key={index}>{step}</li>)}</ol><small>{t("Uitnodiging verloopt", "Invitation expires")} {new Date(invitePreview.expires_at).toLocaleString(language === "nl" ? "nl-NL" : "en-GB")}</small></div>}
-              <button type="button" className="cw-primary" disabled={busy || !remoteProfileId || !invitePreview || invitePreviewLoading} onClick={() => void acceptIncomingInvitation()}><CheckCircle2 size={15} />{t("Ik accepteer en geef mijn eigen toestemming", "Accept and give my own consent")}</button>
+              <div className="cw-controls">
+                <button type="button" className="cw-primary" disabled={busy || !remoteProfileId || !invitePreview || invitePreviewLoading} onClick={() => void acceptIncomingInvitation()}><CheckCircle2 size={15} />{t("Ik accepteer en geef mijn eigen toestemming", "Accept and give my own consent")}</button>
+                <button type="button" disabled={busy} onClick={dismissIncomingInvitation}>{t("Niet nu, uitnodiging sluiten", "Not now, close invitation")}</button>
+              </div>
             </div>
           )}
           <div className="cw-form-panel">
