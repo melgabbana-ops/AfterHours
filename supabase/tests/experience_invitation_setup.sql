@@ -48,7 +48,7 @@ create table public.afterhours_experience_invitations(
   check((status='accepted')=(accepted_user_id is not null and accepted_at is not null))
 );
 grant select on public.afterhours_experience_runs,public.afterhours_experience_run_consents,public.afterhours_experience_invitations to authenticated;
-grant insert,update on public.afterhours_experience_runs,public.afterhours_experience_invitations to authenticated;
+grant insert,update on public.afterhours_experience_runs,public.afterhours_experience_invitations,public.afterhours_experience_run_consents to authenticated;
 insert into auth.users(id) values
  ('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'),
  ('bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'),
