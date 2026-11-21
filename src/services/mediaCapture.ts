@@ -133,3 +133,15 @@ export function watchMediaStreamInterruption(
   if (tracks.some(track => track.readyState === "ended")) handleEnded();
   return cleanup;
 }
+
+
+/** Identify a missing or already-ended required camera/microphone track before recording. */
+export function missingCaptureTrack(
+  stream: Pick<MediaStream, "getVideoTracks" | "getAudioTracks">,
+  needsVideo: boolean,
+  needsAudio: boolean,
+): "video" | "audio" | null {
+  if (needsVideo && !stream.getVideoTracks().some(track => track.readyState === "live")) return "video";
+  if (needsAudio && !stream.getAudioTracks().some(track => track.readyState === "live")) return "audio";
+  return null;
+}
