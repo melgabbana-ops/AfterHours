@@ -45,6 +45,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
   const [liveStream,setLiveStream] = useState<MediaStream|null>(null);
   const [pendingCapture,setPendingCapture] = useState<File|null>(null);
   const [pendingUrl,setPendingUrl] = useState("");
+  const [isSavingCapture,setIsSavingCapture] = useState(false);
   const mountedRef = useRef(false);
   const livePreviewRef = useRef<HTMLVideoElement|null>(null);
   const liveCanvasRef = useRef<HTMLCanvasElement|null>(null);
@@ -395,6 +396,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
   const saveCapture=async()=>{
     if(!pendingCapture||!mountedRef.current||saveInProgressRef.current)return;
     saveInProgressRef.current=true;
+    setIsSavingCapture(true);
     try{
       const saved=await upload(pendingCapture);
       if(!saved||!mountedRef.current)return;
@@ -403,10 +405,12 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
       setCaptureConsent(false);
     }finally{
       saveInProgressRef.current=false;
+      if(mountedRef.current)setIsSavingCapture(false);
     }
   };
 
   const discardCapture=()=>{
+    if(saveInProgressRef.current)return;
     setPendingCapture(null);
     if(pendingUrl){URL.revokeObjectURL(pendingUrl);setPendingUrl("");}
     setCaptureConsent(false);
@@ -498,7 +502,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
             {pendingCapture&&pendingUrl&&<div className="media-pending-preview">
               <strong>{t("Lokale preview","Local preview")} · {formatSize(pendingCapture.size)}</strong>
               {pendingCapture.type.startsWith("image/")?<img src={pendingUrl} alt={t("Lokale voorbeeldweergave van geselecteerde afbeelding","Local preview of selected image")}/>:pendingCapture.type.startsWith("video/")?<video src={pendingUrl} controls playsInline/>:<audio src={pendingUrl} controls/>}
-              <div className="media-item-actions"><button type="button" onClick={()=>void saveCapture()} disabled={busy}>{t("Opslaan in privékluis","Save to private vault")}</button><button type="button" onClick={discardCapture} disabled={busy}>{t("Weggooien","Discard")}</button></div>
+              <div className="media-item-actions"><button type="button" onClick={()=>void saveCapture()} disabled={busy||isSavingCapture}>{isSavingCapture?t("Opslaan…","Saving…"):t("Opslaan in privékluis","Save to private vault")}</button><button type="button" onClick={discardCapture} disabled={busy||isSavingCapture}>{t("Weggooien","Discard")}</button></div>
             </div>}
           </section>
           <div className="media-vault-head">
