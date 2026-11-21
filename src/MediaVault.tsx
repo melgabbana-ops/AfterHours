@@ -321,8 +321,12 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
         captureBytesRef.current=nextBytes;
       };
       recorder.onerror=()=>{
+        // Suppress any trailing stop event: a recorder error must never publish
+        // the remaining chunks as if this were a clean, user-approved preview.
+        captureInterruptedRef.current=true;
         stopCaptureTracks();
-        if(mountedRef.current)setMessage(t("De opname is onderbroken. Controleer de cameratoestemming en probeer opnieuw.","Recording was interrupted. Check camera permissions and try again."));
+        setCaptureConsent(false);
+        if(mountedRef.current)setMessage(t("De opname is mislukt en de tijdelijke gegevens zijn weggegooid. Controleer camera- of microfoontoestemming en probeer opnieuw.","Recording failed and temporary data was discarded. Check camera or microphone permission and try again."));
       };
       recorder.onstop=()=>{
         if(!mountedRef.current){chunksRef.current=[];return;}
