@@ -1,5 +1,18 @@
 import { describe, expect, it } from "vitest";
-import { normalizePrivateMediaMimeType, safeAssignmentPrefix, safeMediaSessionFolder, validatePrivateMediaFile, validatePrivateMediaPath } from "./media";
+import { canApplyMediaOverlay, normalizePrivateMediaMimeType, safeAssignmentPrefix, safeMediaSessionFolder, safePrivateMediaFileName, validatePrivateMediaFile, validatePrivateMediaPath } from "./media";
+
+describe("private media filename safety", () => {
+  it("replaces empty and dot-only names with a safe filename", () => {
+    expect(safePrivateMediaFileName(".")).toBe("bestand");
+    expect(safePrivateMediaFileName("..")).toBe("bestand");
+    expect(safePrivateMediaFileName("///")).toBe("bestand");
+  });
+
+  it("keeps ordinary filenames and bounds their length", () => {
+    expect(safePrivateMediaFileName("my-video.mp4")).toBe("my-video.mp4");
+    expect(safePrivateMediaFileName("a".repeat(140))).toHaveLength(100);
+  });
+});
 
 describe("private media session folder safety", () => {
   it("uses a general folder for dot path segments", () => {
@@ -16,6 +29,19 @@ describe("private media session folder safety", () => {
 describe("private media upload validation", () => {
   it("accepts a non-empty image under the 20 MB limit", () => {
     expect(() => validatePrivateMediaFile({ type: "image/jpeg", size: 1024 })).not.toThrow();
+  });
+
+  it("accepts iPhone HEIC and HEIF photos and QuickTime MOV videos", () => {
+    expect(() => validatePrivateMediaFile({ type: "image/heic", size: 1024 })).not.toThrow();
+    expect(() => validatePrivateMediaFile({ type: "image/heif", size: 1024 })).not.toThrow();
+    expect(() => validatePrivateMediaFile({ type: "video/quicktime", size: 1024 })).not.toThrow();
+  });
+
+  it("does not send HEIC/HEIF images through canvas overlay composition", () => {
+    expect(canApplyMediaOverlay("image/jpeg")).toBe(true);
+    expect(canApplyMediaOverlay("image/heic")).toBe(false);
+    expect(canApplyMediaOverlay("image/heif")).toBe(false);
+    expect(canApplyMediaOverlay("image/heic; codecs=foo")).toBe(false);
   });
 
   it("accepts a non-empty video file under the 20 MB limit", () => {

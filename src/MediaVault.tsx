@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  canApplyMediaOverlay,
   createPrivateMediaUrl,
   deletePrivateMedia,
   listPrivateMedia,
@@ -9,7 +10,7 @@ import {
 } from "./services/media";
 import { supabase, supabaseConfigured } from "./services/supabase";
 import { composeImageWithOverlay, drawCameraFrame, mediaOverlayFrames, type OverlayFrameStyle } from "./mediaOverlay";
-import { appendMediaCaptureChunk, discardMediaCapture, MAX_MEDIA_CAPTURE_BYTES, stopMediaStreams, waitForVideoReady, watchMediaStreamInterruption } from "./services/mediaCapture";
+import { appendMediaCaptureChunk, canRecoverInterruptedCapture, discardMediaCapture, MAX_MEDIA_CAPTURE_BYTES, missingCaptureTrack, stopMediaRecorder, stopMediaStreams, selectMediaRecorderMimeType, waitForVideoReady, watchMediaStreamInterruption } from "./services/mediaCapture";
 
 interface MediaVaultProps {
   sessionId: string;
@@ -45,6 +46,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
   const [liveStream,setLiveStream] = useState<MediaStream|null>(null);
   const [pendingCapture,setPendingCapture] = useState<File|null>(null);
   const [pendingUrl,setPendingUrl] = useState("");
+  const [isSavingCapture,setIsSavingCapture] = useState(false);
   const mountedRef = useRef(false);
   const livePreviewRef = useRef<HTMLVideoElement|null>(null);
   const liveCanvasRef = useRef<HTMLCanvasElement|null>(null);
@@ -57,8 +59,10 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
   const captureBytesRef = useRef(0);
   const captureSizeExceededRef = useRef(false);
   const captureTimeoutRef = useRef<number|undefined>(undefined);
+  const saveInProgressRef = useRef(false);
   const streamInterruptionCleanupRef = useRef<(() => void) | null>(null);
   const captureInterruptedRef = useRef(false);
+  const captureFailedRef = useRef(false);
   const captureStartInFlightRef = useRef(false);
 
 
@@ -74,6 +78,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
       streamInterruptionCleanupRef.current?.();
       streamInterruptionCleanupRef.current=null;
       captureInterruptedRef.current=false;
+    captureFailedRef.current=false;
       captureStartInFlightRef.current=false;
       if(renderFrameRef.current!==null) window.cancelAnimationFrame(renderFrameRef.current);
       // Leaving the vault discards an unfinished recording instead of creating a preview.
@@ -181,15 +186,18 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
     setBusy(true);
     try{
       validatePrivateMediaFile(file);
-      const previewFile=file.type.startsWith("image/")&&!overlayAlreadyApplied?await composeImageWithOverlay(file,frameStyleRef.current):file;
+      const overlayApplied=canApplyMediaOverlay(file.type)&&!overlayAlreadyApplied;
+      const previewFile=overlayApplied?await composeImageWithOverlay(file,frameStyleRef.current):file;
       if(!mountedRef.current)return;
       validatePrivateMediaFile(previewFile);
       if(pendingUrl) URL.revokeObjectURL(pendingUrl);
       setPendingCapture(previewFile);
       setPendingUrl(URL.createObjectURL(previewFile));
-      setMessage(file.type.startsWith("image/")
+      setMessage(overlayApplied
         ?t("AH-overlay toegepast. Controleer de foto en kies daarna zelf voor privé opslaan.","AH overlay applied. Review the photo, then choose whether to save it privately.")
-        :t("Voorbeeld klaar. Kies daarna zelf voor privé opslaan. Bestaande video's worden niet opnieuw gerenderd.","Preview ready. Choose whether to save privately. Existing videos are not re-rendered."));
+        :file.type.startsWith("image/")&&!overlayAlreadyApplied
+          ?t("Voorbeeld klaar. Dit fotoformaat wordt ongewijzigd bewaard omdat de browser het niet betrouwbaar via canvas kan verwerken.","Preview ready. This photo format will be kept unchanged because the browser cannot reliably process it through canvas.")
+          :t("Voorbeeld klaar. Kies daarna zelf voor privé opslaan. Bestaande video's worden niet opnieuw gerenderd.","Preview ready. Choose whether to save privately. Existing videos are not re-rendered."));
     }catch(error){
       if(mountedRef.current)setMessage(error instanceof Error ? error.message : t("Dit bestand kan niet worden gebruikt.","This file cannot be used."));
     }finally{if(mountedRef.current)setBusy(false)}
@@ -216,14 +224,19 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
           ? {video:{facingMode:{ideal:cameraFacing},width:{ideal:1280},height:{ideal:720}},audio:true}
           : {video:false,audio:true});
       if(!mountedRef.current){stopMediaStreams([stream]);return;}
+      const missingTrack=missingCaptureTrack(stream,captureKind!=="voice",captureKind!=="photo");
+      if(missingTrack){
+        stopMediaStreams([stream]);
+        throw new Error(missingTrack==="video"
+          ? t("De camera heeft geen actief videosignaal geleverd. Controleer de cameratoestemming en probeer opnieuw.","The camera did not provide an active video track. Check camera permission and try again.")
+          : t("De microfoon heeft geen actief audiosignaal geleverd. Controleer de microfoontoestemming en probeer opnieuw.","The microphone did not provide an active audio track. Check microphone permission and try again."));
+      }
       streamRef.current=stream;
       streamInterruptionCleanupRef.current=watchMediaStreamInterruption(stream,()=>{
         if(!mountedRef.current)return;
         captureInterruptedRef.current=true;
         const activeRecorder=recorderRef.current;
-        if(activeRecorder&&activeRecorder.state!=="inactive"){
-          try{activeRecorder.stop();return;}catch{/* Fall through to immediate local cleanup. */}
-        }
+        if(stopMediaRecorder(activeRecorder))return;
         stopCaptureTracks();
         setCaptureConsent(false);
         setMessage(t("Camera of microfoon is onderbroken. Er is niets opgeslagen. Start opnieuw als je wilt.","Camera or microphone was interrupted. Nothing was saved. Start again if you want."));
@@ -298,7 +311,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
       const candidates=captureKind==="video"
         ? ["video/mp4","video/webm;codecs=vp8,opus","video/webm"]
         : ["audio/mp4","audio/webm;codecs=opus","audio/webm","audio/ogg;codecs=opus"];
-      const mimeType=candidates.find(type=>MediaRecorder.isTypeSupported(type));
+      const mimeType=selectMediaRecorderMimeType(candidates,type=>MediaRecorder.isTypeSupported(type));
       const recorder=mimeType?new MediaRecorder(recorderStream,{mimeType}):new MediaRecorder(recorderStream);
       recorderRef.current=recorder;
       recorder.ondataavailable=event=>{
@@ -308,26 +321,51 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
           captureSizeExceededRef.current=true;
           chunksRef.current=[];
           captureBytesRef.current=0;
-          if(recorder.state==="recording")recorder.stop();
+          if(stopMediaRecorder(recorder))return;
           return;
         }
         captureBytesRef.current=nextBytes;
       };
       recorder.onerror=()=>{
+        // Suppress any trailing stop event: a recorder error must never publish
+        // the remaining chunks as if this were a clean, user-approved preview.
+        captureFailedRef.current=true;
+        captureInterruptedRef.current=false;
         stopCaptureTracks();
-        if(mountedRef.current)setMessage(t("De opname is onderbroken. Controleer de cameratoestemming en probeer opnieuw.","Recording was interrupted. Check camera permissions and try again."));
+        setCaptureConsent(false);
+        if(mountedRef.current)setMessage(t("De opname is mislukt en de tijdelijke gegevens zijn weggegooid. Controleer camera- of microfoontoestemming en probeer opnieuw.","Recording failed and temporary data was discarded. Check camera or microphone permission and try again."));
       };
       recorder.onstop=()=>{
         if(!mountedRef.current){chunksRef.current=[];return;}
+        if(captureFailedRef.current){
+          captureFailedRef.current=false;
+          chunksRef.current=[];
+          captureBytesRef.current=0;
+          captureSizeExceededRef.current=false;
+          stopCaptureTracks();
+          return;
+        }
         const interrupted=captureInterruptedRef.current;
         captureInterruptedRef.current=false;
         if(interrupted){
+          const interruptedType=recorder.mimeType||(captureKind==="video"?"video/webm":"audio/webm");
+          const interruptedBlob=new Blob(chunksRef.current,{type:interruptedType});
           chunksRef.current=[];
           captureBytesRef.current=0;
           captureSizeExceededRef.current=false;
           stopCaptureTracks();
           setCaptureConsent(false);
-          setMessage(t("Camera of microfoon is onderbroken. De onvolledige opname is weggegooid en niets is opgeslagen.","Camera or microphone was interrupted. The incomplete recording was discarded and nothing was saved."));
+          if(canRecoverInterruptedCapture(interruptedBlob.size)){
+            const extension=interruptedType.includes("mp4")?".mp4":interruptedType.includes("ogg")?".ogg":".webm";
+            const partialFile=new File([interruptedBlob],`after-hours-${captureKind}-recovered-${Date.now()}${extension}`,{type:interruptedType});
+            setPendingCapture(partialFile);
+            // Release any previous local preview URL before replacing it.
+            if(pendingUrl)URL.revokeObjectURL(pendingUrl);
+            setPendingUrl(URL.createObjectURL(interruptedBlob));
+            setMessage(t("Opname onderbroken. Er is een lokaal gedeeltelijk voorbeeld hersteld. Controleer het bestand en bevestig opnieuw toestemming voordat je het privé opslaat.","Recording interrupted. A local partial preview was recovered. Review it and reconfirm consent before saving it privately."));
+          }else{
+            setMessage(t("Camera of microfoon is onderbroken. Er was geen bruikbaar gedeeltelijk voorbeeld. Er is niets opgeslagen.","Camera or microphone was interrupted. No usable partial preview was available. Nothing was saved."));
+          }
           return;
         }
         const sizeExceeded=captureSizeExceededRef.current;
@@ -357,8 +395,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
       if(pendingUrl){URL.revokeObjectURL(pendingUrl);setPendingUrl("");}
       captureTimeoutRef.current=window.setTimeout(()=>{
         if(!mountedRef.current)return;
-        if(recorder.state==="recording"){
-          recorder.stop();
+        if(stopMediaRecorder(recorder)){
           setMessage(t("De opname is automatisch gestopt na 60 seconden.","Recording stopped automatically after 60 seconds."));
         }
       },60_000);
@@ -388,19 +425,31 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
 
   const stopCapture=()=>{
     const recorder=recorderRef.current;
-    if(recorder&&recorder.state!=="inactive")recorder.stop();
+    stopMediaRecorder(recorder);
   };
 
   const saveCapture=async()=>{
-    if(!pendingCapture||!mountedRef.current)return;
-    const saved=await upload(pendingCapture);
-    if(!saved||!mountedRef.current)return;
-    setPendingCapture(null);
-    if(pendingUrl){URL.revokeObjectURL(pendingUrl);setPendingUrl("");}
-    setCaptureConsent(false);
+    if(!pendingCapture||!mountedRef.current||saveInProgressRef.current)return;
+    if(!captureConsent){
+      setMessage(t("Bevestig opnieuw dat iedereen akkoord is voordat je deze opname privé opslaat.","Please reconfirm that everyone agrees before saving this recording privately."));
+      return;
+    }
+    saveInProgressRef.current=true;
+    setIsSavingCapture(true);
+    try{
+      const saved=await upload(pendingCapture);
+      if(!saved||!mountedRef.current)return;
+      setPendingCapture(null);
+      if(pendingUrl){URL.revokeObjectURL(pendingUrl);setPendingUrl("");}
+      setCaptureConsent(false);
+    }finally{
+      saveInProgressRef.current=false;
+      if(mountedRef.current)setIsSavingCapture(false);
+    }
   };
 
   const discardCapture=()=>{
+    if(saveInProgressRef.current)return;
     setPendingCapture(null);
     if(pendingUrl){URL.revokeObjectURL(pendingUrl);setPendingUrl("");}
     setCaptureConsent(false);
@@ -458,7 +507,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
             <span>{busy ? t("Even wachten…", "Please wait…") : t("Afbeelding, video of audio kiezen", "Choose image, video or audio")}</span>
             <input
               type="file"
-              accept="image/jpeg,image/png,image/webp,image/gif,image/avif,video/webm,video/mp4,audio/mpeg,audio/mp4,audio/aac,audio/wav,audio/x-wav,audio/ogg,audio/webm,audio/flac"
+              accept="image/jpeg,image/png,image/webp,image/gif,image/avif,image/heic,image/heif,video/webm,video/mp4,video/quicktime,audio/mpeg,audio/mp4,audio/aac,audio/wav,audio/x-wav,audio/ogg,audio/webm,audio/flac"
               disabled={busy||isRecording||!!pendingCapture}
               onChange={event => {
                 const file = event.currentTarget.files?.[0];
@@ -473,7 +522,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
             <p>{t("Opnames zijn optioneel. Geef alleen toestemming wanneer iedereen vrij en duidelijk akkoord is. De opname wordt eerst lokaal getoond en pas na jouw keuze geüpload.","Recordings are optional. Proceed only when everyone freely and clearly agrees. The recording is previewed locally and uploaded only after you choose to save it.")}</p>
             <label className="media-upload media-photo-capture">
               <span>{t("Maak een foto met de camera","Take a photo with the camera")}</span>
-              <input type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/avif" capture="environment" disabled={busy||isRecording||!!pendingCapture} onChange={event=>{const file=event.currentTarget.files?.[0];void stageSelectedFile(file);event.currentTarget.value="";}}/>
+              <input type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/avif,image/heic,image/heif" capture="environment" disabled={busy||isRecording||!!pendingCapture} onChange={event=>{const file=event.currentTarget.files?.[0];void stageSelectedFile(file);event.currentTarget.value="";}}/>
             </label>
             <div className="media-frame-picker" role="group" aria-label={t("Stijl van de AFTER HOURS-overlay","AFTER HOURS overlay style")}>
               <span>{t("Kies je AH-frame","Choose your AH frame")}</span>
@@ -492,7 +541,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
             {pendingCapture&&pendingUrl&&<div className="media-pending-preview">
               <strong>{t("Lokale preview","Local preview")} · {formatSize(pendingCapture.size)}</strong>
               {pendingCapture.type.startsWith("image/")?<img src={pendingUrl} alt={t("Lokale voorbeeldweergave van geselecteerde afbeelding","Local preview of selected image")}/>:pendingCapture.type.startsWith("video/")?<video src={pendingUrl} controls playsInline/>:<audio src={pendingUrl} controls/>}
-              <div className="media-item-actions"><button type="button" onClick={()=>void saveCapture()} disabled={busy}>{t("Opslaan in privékluis","Save to private vault")}</button><button type="button" onClick={discardCapture} disabled={busy}>{t("Weggooien","Discard")}</button></div>
+              <div className="media-item-actions"><button type="button" onClick={()=>void saveCapture()} disabled={busy||isSavingCapture}>{isSavingCapture?t("Opslaan…","Saving…"):t("Opslaan in privékluis","Save to private vault")}</button><button type="button" onClick={discardCapture} disabled={busy||isSavingCapture}>{t("Weggooien","Discard")}</button></div>
             </div>}
           </section>
           <div className="media-vault-head">

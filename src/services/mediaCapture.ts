@@ -54,6 +54,18 @@ export function appendMediaCaptureChunk(
 }
 type CaptureRecorder = Pick<MediaRecorder, "state" | "stop" | "ondataavailable" | "onstop" | "onerror">;
 
+/** Request a recorder stop once, tolerating browser state changes between checks and stop(). */
+export function stopMediaRecorder(recorder: Pick<MediaRecorder, "state" | "stop"> | null | undefined): boolean {
+  if (!recorder || recorder.state === "inactive") return false;
+  try {
+    recorder.stop();
+    return true;
+  } catch {
+    // MediaRecorder can become inactive between the state check and stop().
+    return false;
+  }
+}
+
 /** Stop every camera/microphone track, even if one browser track has already ended. */
 export function stopMediaStreams(streams: readonly (CaptureStream | null | undefined)[]): void {
   const stoppedTracks = new Set<MediaStreamTrack>();
@@ -120,4 +132,38 @@ export function watchMediaStreamInterruption(
   // Recheck after listener registration to close the readyState/listener race.
   if (tracks.some(track => track.readyState === "ended")) handleEnded();
   return cleanup;
+}
+
+
+/** Identify a missing or already-ended required camera/microphone track before recording. */
+export function missingCaptureTrack(
+  stream: Pick<MediaStream, "getVideoTracks" | "getAudioTracks">,
+  needsVideo: boolean,
+  needsAudio: boolean,
+): "video" | "audio" | null {
+  if (needsVideo && !stream.getVideoTracks().some(track => track.readyState === "live")) return "video";
+  if (needsAudio && !stream.getAudioTracks().some(track => track.readyState === "live")) return "audio";
+  return null;
+}
+
+
+/** An interrupted capture may be previewed locally only when it contains usable, bounded data. */
+export function canRecoverInterruptedCapture(blobSize: number, maxBytes = MAX_MEDIA_CAPTURE_BYTES): boolean {
+  return Number.isFinite(blobSize) && Number.isFinite(maxBytes) && blobSize > 0 && maxBytes >= 0 && blobSize <= maxBytes;
+}
+
+
+/** Pick the first browser-supported recording format, or let MediaRecorder choose its default. */
+export function selectMediaRecorderMimeType(
+  candidates: readonly string[],
+  isTypeSupported: (mimeType: string) => boolean,
+): string | undefined {
+  for (const candidate of candidates) {
+    try {
+      if (isTypeSupported(candidate)) return candidate;
+    } catch {
+      // A browser may expose MediaRecorder but fail a format capability query.
+    }
+  }
+  return undefined;
 }

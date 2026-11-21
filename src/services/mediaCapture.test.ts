@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { appendMediaCaptureChunk, discardMediaCapture, MAX_MEDIA_CAPTURE_BYTES, stopMediaStreams, waitForVideoReady, watchMediaStreamInterruption } from "./mediaCapture";
+import { appendMediaCaptureChunk, canRecoverInterruptedCapture, discardMediaCapture, MAX_MEDIA_CAPTURE_BYTES, missingCaptureTrack, stopMediaRecorder, stopMediaStreams, selectMediaRecorderMimeType, waitForVideoReady, watchMediaStreamInterruption } from "./mediaCapture";
 
 describe("media capture cleanup", () => {
   it("stops every track across camera and composited streams", () => {
@@ -230,5 +230,92 @@ describe("media stream interruption", () => {
 
     expect(onInterrupted).toHaveBeenCalledOnce();
     cleanup();
+  });
+});
+
+
+describe("safe recorder stop", () => {
+  it("stops an active recorder once", () => {
+    const stop = vi.fn();
+    expect(stopMediaRecorder({ state: "recording", stop })).toBe(true);
+    expect(stop).toHaveBeenCalledOnce();
+  });
+
+  it("does not stop an inactive recorder", () => {
+    const stop = vi.fn();
+    expect(stopMediaRecorder({ state: "inactive", stop })).toBe(false);
+    expect(stop).not.toHaveBeenCalled();
+  });
+
+  it("contains a state race when the browser deactivates the recorder before stop", () => {
+    const stop = vi.fn(() => { throw new DOMException("Recorder is inactive", "InvalidStateError"); });
+    expect(stopMediaRecorder({ state: "recording", stop })).toBe(false);
+    expect(stop).toHaveBeenCalledOnce();
+  });
+
+  it("accepts a missing recorder during asynchronous startup", () => {
+    expect(stopMediaRecorder(null)).toBe(false);
+  });
+});
+
+
+describe("required capture tracks", () => {
+  const track = (readyState: MediaStreamTrackState = "live") => ({ readyState }) as MediaStreamTrack;
+  const stream = (video: MediaStreamTrack[], audio: MediaStreamTrack[]) => ({
+    getVideoTracks: () => video,
+    getAudioTracks: () => audio,
+  });
+
+  it("requires a live camera track for photo and video capture", () => {
+    expect(missingCaptureTrack(stream([], [track()]), true, false)).toBe("video");
+    expect(missingCaptureTrack(stream([track("ended")], [track()]), true, false)).toBe("video");
+    expect(missingCaptureTrack(stream([track()], []), true, false)).toBeNull();
+  });
+
+  it("requires a live microphone track for voice and video capture", () => {
+    expect(missingCaptureTrack(stream([track()], []), false, true)).toBe("audio");
+    expect(missingCaptureTrack(stream([track()], [track("ended")]), false, true)).toBe("audio");
+    expect(missingCaptureTrack(stream([track()], [track()]), true, true)).toBeNull();
+  });
+
+  it("does not require a microphone for still photos", () => {
+    expect(missingCaptureTrack(stream([track()], []), true, false)).toBeNull();
+  });
+});
+
+
+describe("interrupted capture recovery", () => {
+  it("allows a non-empty partial preview within the storage limit", () => {
+    expect(canRecoverInterruptedCapture(1)).toBe(true);
+    expect(canRecoverInterruptedCapture(MAX_MEDIA_CAPTURE_BYTES)).toBe(true);
+  });
+
+  it("rejects empty, oversized, negative, or non-finite captures", () => {
+    expect(canRecoverInterruptedCapture(0)).toBe(false);
+    expect(canRecoverInterruptedCapture(MAX_MEDIA_CAPTURE_BYTES + 1)).toBe(false);
+    expect(canRecoverInterruptedCapture(-1)).toBe(false);
+    expect(canRecoverInterruptedCapture(Number.NaN)).toBe(false);
+    expect(canRecoverInterruptedCapture(1, Number.POSITIVE_INFINITY)).toBe(false);
+  });
+});
+
+
+describe("recording format selection", () => {
+  it("selects the first format supported by the current browser", () => {
+    const supported = vi.fn((type: string) => type === "video/webm");
+    expect(selectMediaRecorderMimeType(["video/mp4", "video/webm", "video/ogg"], supported)).toBe("video/webm");
+    expect(supported).toHaveBeenCalledTimes(2);
+  });
+
+  it("returns undefined when the browser should choose its default format", () => {
+    expect(selectMediaRecorderMimeType(["audio/mp4", "audio/webm"], () => false)).toBeUndefined();
+  });
+
+  it("continues checking formats when a browser capability query throws", () => {
+    const supported = vi.fn((type: string) => {
+      if (type === "audio/mp4") throw new Error("unsupported query");
+      return type === "audio/webm";
+    });
+    expect(selectMediaRecorderMimeType(["audio/mp4", "audio/webm"], supported)).toBe("audio/webm");
   });
 });
