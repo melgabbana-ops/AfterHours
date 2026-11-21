@@ -197,11 +197,10 @@ begin
     raise exception 'This Duo room is full or unavailable.' using errcode = 'P0002';
   end if;
 
-  insert into public.afterhours_duo_room_members (
-    room_id, user_id, role, consented_at
-  ) values (
-    v_room.id, v_user_id, 'guest', clock_timestamp()
-  );
+  -- Accepting an invitation joins the room; it is not consent to participate.
+  -- The guest must explicitly opt in through set_afterhours_duo_consent.
+  insert into public.afterhours_duo_room_members (room_id, user_id, role)
+  values (v_room.id, v_user_id, 'guest');
 
   update public.afterhours_duo_invitations
   set status = 'accepted', accepted_user_id = v_user_id, accepted_at = clock_timestamp()
