@@ -2,7 +2,7 @@
 do $definition_tests$
 declare v_definition text; v_run_lock integer; v_invite_lock integer;
 begin
-  select regexp_replace(lower(pg_get_functiondef('private.accept_afterhours_experience_invitation_impl(text)'::regprocedure)), '\\s+', '', 'g') into v_definition;
+  select regexp_replace(lower(pg_get_functiondef('private.accept_afterhours_experience_invitation_impl(text)'::regprocedure)), '\s+', '', 'g') into v_definition;
   v_run_lock:=position('whereid=v_locked_run_id' in v_definition);
   v_invite_lock:=position('whereid=v_invitation.id' in v_definition);
   if v_run_lock=0 or v_invite_lock=0 or v_run_lock>v_invite_lock then
