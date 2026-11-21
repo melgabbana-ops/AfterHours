@@ -122,6 +122,7 @@ export function hasPrivateJournalVault(storage?: JournalStorage): boolean {
 export async function createPrivateJournalVault(
   passphrase: string,
   storage?: JournalStorage,
+  canCommit: () => boolean = () => true,
 ): Promise<CryptoKey> {
   if (passphrase.length < PRIVATE_JOURNAL_MIN_PASSPHRASE) {
     throw new Error("Kies een wachtzin van minimaal 12 tekens.");
@@ -132,6 +133,7 @@ export async function createPrivateJournalVault(
   const salt = webCrypto().getRandomValues(new Uint8Array(16));
   const key = await deriveKey(passphrase, salt);
   const verifier = await encryptText(key, VERIFIER);
+  if (!canCommit()) throw new Error("Journal vergrendeld voordat de kluis kon worden aangemaakt.");
   persistVault(target, { version: 1, salt: toBase64(salt), verifier, entries: [] });
   return key;
 }
@@ -183,6 +185,7 @@ export async function savePrivateJournalEntry(
   entryId?: string,
   storage?: JournalStorage,
   now = new Date().toISOString(),
+  canCommit: () => boolean = () => true,
 ): Promise<PrivateJournalEntry> {
   const title = typeof draft.title === "string" ? draft.title.trim().slice(0, 120) : "";
   const body = typeof draft.body === "string" ? draft.body.trim() : "";
@@ -204,6 +207,7 @@ export async function savePrivateJournalEntry(
     updatedAt: now,
   };
   const encrypted = await encryptText(key, JSON.stringify(entry));
+  if (!canCommit()) throw new Error("Journal vergrendeld voordat de notitie kon worden opgeslagen.");
   const row: EncryptedJournalEntry = { id: entry.id, createdAt: entry.createdAt, updatedAt: entry.updatedAt, ...encrypted };
   const entries = existing
     ? vault.entries.map((item) => item.id === entry.id ? row : item)
