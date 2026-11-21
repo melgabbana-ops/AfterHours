@@ -9,6 +9,51 @@ export interface SecureDuoRoom {
   expiresAt: string;
 }
 
+export interface SecureDuoRoomSnapshot {
+  roomId: string;
+  status: "lobby" | "active" | "paused" | "stopped";
+  expiresAt: string;
+  members: Array<{ role: "host" | "guest"; isSelf: boolean; consented: boolean }>;
+}
+
+/** Fetch the authoritative, member-scoped lobby state from the database. */
+export async function getSecureDuoRoomState(roomId: string): Promise<SecureDuoRoomSnapshot> {
+  const client = requireClient();
+  await requireUserId();
+  const { data, error } = await client.rpc("get_afterhours_duo_room_state", {
+    p_room_id: requireRoomId(roomId),
+  });
+  if (error) throw error;
+  const value = data as {
+    room_id?: unknown;
+    status?: unknown;
+    expires_at?: unknown;
+    members?: unknown;
+  } | null;
+  if (!value || typeof value.room_id !== "string" || typeof value.expires_at !== "string"
+    || !["lobby", "active", "paused", "stopped"].includes(String(value.status))
+    || !Array.isArray(value.members)) {
+    throw new Error("The Duo server returned an invalid room snapshot.");
+  }
+  const members = value.members.map((member: unknown) => {
+    const item = member as { role?: unknown; is_self?: unknown; consented?: unknown };
+    if ((item.role !== "host" && item.role !== "guest")
+      || typeof item.is_self !== "boolean" || typeof item.consented !== "boolean") {
+      throw new Error("The Duo server returned invalid participant status.");
+    }
+    return { role: item.role, isSelf: item.is_self, consented: item.consented };
+  });
+  if (members.length > 2 || members.filter(member => member.isSelf).length !== 1) {
+    throw new Error("The Duo server returned an unexpected participant count.");
+  }
+  return {
+    roomId: requireRoomId(value.room_id),
+    status: value.status as SecureDuoRoomSnapshot["status"],
+    expiresAt: value.expires_at,
+    members,
+  };
+}
+
 function requireClient() {
   if (!supabaseConfigured || !supabase) throw new Error("Online Duo is not configured yet.");
   return supabase;
