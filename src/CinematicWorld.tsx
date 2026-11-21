@@ -228,7 +228,7 @@ export default function CinematicWorld({
 
   async function refreshData(userId = remoteProfileId) {
     if (!userId) return;
-    const [director, vault, dominion, sensory, invitation, ritual, club, history] = await Promise.all([
+    const [director, vault, dominion, sensory, invitation, ritual, club, history, invites] = await Promise.all([
       loadWorldRecords("director", userId),
       loadWorldRecords("vault", userId),
       loadWorldRecords("dominion", userId),
@@ -236,10 +236,12 @@ export default function CinematicWorld({
       loadWorldRecords("invitation", userId),
       loadWorldRecords("ritual", userId),
       loadWorldRecords("club", userId),
-      loadExperienceRuns(userId)
+      loadExperienceRuns(userId),
+      loadExperienceInvitations(userId)
     ]);
     setRecords({ director, vault, dominion, sensory, invitation, ritual, club });
     setRuns(history);
+    setExperienceInvites(invites);
   }
 
   useEffect(() => {
@@ -304,7 +306,6 @@ export default function CinematicWorld({
         setRecords({ director, vault, dominion, sensory, invitation, ritual, club });
         setRuns(history);
         setExperienceInvites(invites);
-      setExperienceInvites(invites);
       } catch (cause) {
         if (active) setError(cause instanceof Error ? cause.message : t("Privégegevens konden niet worden geladen.", "Private data could not be loaded."));
       } finally {
