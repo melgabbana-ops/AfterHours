@@ -51,3 +51,27 @@ describe("local couple play readiness", () => {
     expect(canStartLocalPlay({ ...ready, partnerName: "" })).toBe(false);
   });
 });
+
+
+describe("local shared-device answers", () => {
+  it("stores trimmed answers per player without mutating the previous round state", async () => {
+    const { saveLocalRoundAnswer } = await import("./couplesPlayState");
+    const original = { player2: "Already answered" };
+    const next = saveLocalRoundAnswer(original, "player1", "  My answer  ");
+    expect(next).toEqual({ player1: "My answer", player2: "Already answered" });
+    expect(original).toEqual({ player2: "Already answered" });
+  });
+
+  it("ignores empty answers and caps a response at 1000 characters", async () => {
+    const { saveLocalRoundAnswer } = await import("./couplesPlayState");
+    const original = { player1: "Existing" };
+    expect(saveLocalRoundAnswer(original, "player2", "   ")).toBe(original);
+    expect(saveLocalRoundAnswer({}, "player1", "x".repeat(1200)).player1).toHaveLength(1000);
+  });
+
+  it("alternates the local turn between the two named players", async () => {
+    const { nextLocalPlayer } = await import("./couplesPlayState");
+    expect(nextLocalPlayer("player1")).toBe("player2");
+    expect(nextLocalPlayer("player2")).toBe("player1");
+  });
+});
