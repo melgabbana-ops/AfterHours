@@ -63,6 +63,28 @@ describe("proposed secure Duo backend guardrails", () => {
     expect(declaration.slice(0, declaration.indexOf("declare"))).toContain("as $$");
     expect(declaration).toContain("\nend;\n$$;");
   });
+  it("uses balanced dollar-quote delimiters for every privileged Duo RPC", () => {
+    const privilegedFunctions = [
+      "create_afterhours_duo_room",
+      "preview_afterhours_duo_invitation",
+      "accept_afterhours_duo_invitation",
+      "set_afterhours_duo_consent",
+      "set_afterhours_duo_room_state",
+      "revoke_afterhours_duo_invitation",
+      "get_afterhours_duo_room_state",
+      "advance_afterhours_duo_session",
+    ];
+    for (const name of privilegedFunctions) {
+      const start = proposal.indexOf(`create or replace function public.${name}(`);
+      expect(start).toBeGreaterThanOrEqual(0);
+      const next = proposal.indexOf("\\ncreate or replace function public.", start + 1);
+      const declaration = proposal.slice(start, next < 0 ? proposal.length : next);
+      expect(declaration.match(/\\bas \\$\\$\\s*declare/)).not.toBeNull();
+      expect(declaration.match(/\\nend;\\n\\$\\$;/)).not.toBeNull();
+      expect(declaration).not.toContain("\\nend;\\n$;");
+    }
+  });
+
   it("requires two currently consenting members before the host can activate a room", () => {
     expect(proposal).toContain("if v_room.owner_user_id <> v_user_id then");
     expect(proposal).toContain("if v_member_count <> 2 or v_consented_count <> 2 then");
