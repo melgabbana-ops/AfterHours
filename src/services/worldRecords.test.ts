@@ -8,6 +8,10 @@ const mocks = vi.hoisted(() => ({
   order: vi.fn(),
   limit: vi.fn(),
   upsert: vi.fn(),
+  insert: vi.fn(),
+  update: vi.fn(),
+  delete: vi.fn(),
+  maybeSingle: vi.fn(),
   single: vi.fn(),
 }));
 
@@ -16,7 +20,7 @@ vi.mock("./supabase", () => ({
   supabase: { auth: { getUser: mocks.getUser }, from: mocks.from },
 }));
 
-import { loadExperienceRuns, loadWorldRecords, saveWorldRecord } from "./worldRecords";
+import { createExperienceRun, loadExperienceRuns, loadWorldRecords, saveWorldRecord } from "./worldRecords";
 
 const chain = {
   select: mocks.select,
@@ -24,6 +28,10 @@ const chain = {
   order: mocks.order,
   limit: mocks.limit,
   upsert: mocks.upsert,
+  insert: mocks.insert,
+  update: mocks.update,
+  delete: mocks.delete,
+  maybeSingle: mocks.maybeSingle,
   single: mocks.single,
 };
 
@@ -36,6 +44,70 @@ describe("AFTER HOURS private world storage", () => {
     mocks.eq.mockReturnValue(chain);
     mocks.order.mockReturnValue(chain);
     mocks.upsert.mockReturnValue(chain);
+    mocks.insert.mockReturnValue(chain);
+    mocks.update.mockReturnValue(chain);
+    mocks.delete.mockReturnValue(chain);
+    mocks.maybeSingle.mockResolvedValue({ data: null, error: null });
+    mocks.single.mockResolvedValue({ data: null, error: null });
+  });
+
+  it("creates a run paused, records owner consent, and only then activates it", async () => {
+    mocks.single.mockResolvedValue({ data: { id: "run-1" }, error: null });
+    mocks.maybeSingle.mockResolvedValue({ data: { id: "run-1" }, error: null });
+
+    await expect(createExperienceRun({
+      sceneKey: "builtin:trust-protocol",
+      sceneSnapshot: { title: "Trust protocol", steps: ["Check in"] },
+      totalSteps: 1,
+      expectedUserId: "user-a",
+    })).resolves.toBe("run-1");
+
+    expect(mocks.insert).toHaveBeenNthCalledWith(1, expect.objectContaining({
+      user_id: "user-a",
+      status: "paused",
+      started_at: null,
+    }));
+    expect(mocks.insert).toHaveBeenNthCalledWith(2, expect.objectContaining({
+      run_id: "run-1",
+      user_id: "user-a",
+      consent_version: "1.0",
+    }));
+    expect(mocks.update).toHaveBeenCalledWith(expect.objectContaining({
+      status: "active",
+      started_at: expect.any(String),
+    }));
+    expect(mocks.maybeSingle).toHaveBeenCalled();
+  });
+
+  it("deletes the paused run and never activates it when owner consent cannot be saved", async () => {
+    mocks.single.mockResolvedValue({ data: { id: "run-2" }, error: null });
+    mocks.insert.mockReturnValueOnce(chain).mockResolvedValueOnce({ error: { message: "consent denied" } });
+
+    await expect(createExperienceRun({
+      sceneKey: "builtin:trust-protocol",
+      sceneSnapshot: { title: "Trust protocol", steps: ["Check in"] },
+      totalSteps: 1,
+      expectedUserId: "user-a",
+    })).rejects.toThrow("The consent record could not be saved.");
+
+    expect(mocks.update).not.toHaveBeenCalled();
+    expect(mocks.delete).toHaveBeenCalled();
+  });
+
+  it("revokes consent and cleans up when the database refuses to activate the run", async () => {
+    mocks.single.mockResolvedValue({ data: { id: "run-3" }, error: null });
+    mocks.maybeSingle.mockResolvedValue({ data: null, error: { message: "activation blocked" } });
+
+    await expect(createExperienceRun({
+      sceneKey: "builtin:trust-protocol",
+      sceneSnapshot: { title: "Trust protocol", steps: ["Check in"] },
+      totalSteps: 1,
+      expectedUserId: "user-a",
+    })).rejects.toThrow("activation blocked");
+
+    expect(mocks.update).toHaveBeenCalledWith(expect.objectContaining({ status: "active" }));
+    expect(mocks.update).toHaveBeenCalledWith({ revoked_at: expect.any(String) });
+    expect(mocks.delete).toHaveBeenCalled();
   });
 
   it("refuses to read another account's records before making a database query", async () => {
