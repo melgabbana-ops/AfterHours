@@ -29,7 +29,7 @@ export default function AftercareJournal({ language, onClose }: { language: Lang
   const lockGeneration = useRef(0);
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
 
-  const lock = useCallback(() => {
+  const lock = useCallback((automatic = false) => {
     lockGeneration.current += 1;
     setKey(null);
     setEntries([]);
@@ -39,17 +39,19 @@ export default function AftercareJournal({ language, onClose }: { language: Lang
     setPassphrase("");
     setConfirmation("");
     setBusy(false);
-    setMessage(language === "nl"
-      ? "Journal automatisch vergrendeld toen de app naar de achtergrond ging. Niet-opgeslagen tekst is gewist."
-      : "Journal automatically locked when the app went into the background. Unsaved text was cleared.");
+    setMessage(automatic
+      ? language === "nl"
+        ? "Journal automatisch vergrendeld toen de app naar de achtergrond ging. Niet-opgeslagen tekst is gewist."
+        : "Journal automatically locked when the app went into the background. Unsaved text was cleared."
+      : language === "nl" ? "De journal-kluis is vergrendeld." : "The journal vault is locked.");
     setError("");
   }, [language]);
 
   useEffect(() => {
     const lockWhenHidden = () => {
-      if (document.visibilityState !== "visible") lock();
+      if (document.visibilityState !== "visible") lock(true);
     };
-    const lockOnPageHide = () => lock();
+    const lockOnPageHide = () => lock(true);
     document.addEventListener("visibilitychange", lockWhenHidden);
     window.addEventListener("pagehide", lockOnPageHide);
     lockWhenHidden();
