@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import historyNoteSource from "../AftercareHistoryNote.tsx?raw";
 import {
   deletePrivateSessionNote,
   isPrivateSessionNote,
@@ -105,5 +106,16 @@ describe("browser-local aftercare notes", () => {
     expect(loadPrivateSessionNote("owner-a", "session-1", broken)).toBeNull();
     expect(savePrivateSessionNote("owner-a", "session-1", draft, broken)).toBeNull();
     expect(deletePrivateSessionNote("owner-a", "session-1", broken)).toBe(false);
+  });
+});
+
+
+describe("aftercare history disclosure", () => {
+  it("resolves notes against the current owner/session pair without an effect delay", () => {
+    expect(historyNoteSource).toContain("useMemo(");
+    expect(historyNoteSource).toContain("[ownerId, sessionId]");
+    expect(historyNoteSource).toContain("const disclosureKey = `${ownerId}:${sessionId}`;");
+    expect(historyNoteSource).toContain("const expanded = expandedFor === disclosureKey;");
+    expect(historyNoteSource).toContain("Deze sessienotitie is niet versleuteld.");
   });
 });
