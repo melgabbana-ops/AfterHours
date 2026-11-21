@@ -1145,6 +1145,8 @@ export default function CinematicWorld({
         <LocalCouplesMode
           language={language}
           consentActive={consentActive}
+          onSafetyPause={onSafetyPause}
+          onSafetyResume={onSafetyResume}
           onSafetyStop={onSafetyStop}
         />
       )}
