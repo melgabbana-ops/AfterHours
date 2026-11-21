@@ -111,3 +111,48 @@ describe("private assignment media prefix", () => {
     expect(prefix).toMatch(/^[a-zA-Z0-9._-]+$/);
   });
 });
+
+
+describe("private media storage pagination", () => {
+  it("fetches every page using stable offsets until a short page is returned", async () => {
+    const fetchPage = vi.fn(async (offset: number, limit: number) => {
+      if (offset === 0) return Array.from({ length: limit }, (_, index) => `first-${index}`);
+      if (offset === 100) return ["last-a", "last-b"];
+      return [];
+    });
+
+    const result = await collectStoragePages(fetchPage);
+
+    expect(result).toHaveLength(102);
+    expect(result.slice(-2)).toEqual(["last-a", "last-b"]);
+    expect(fetchPage.mock.calls).toEqual([[0, 100], [100, 100]]);
+  });
+
+  it("requests a final empty page when the result count is an exact page multiple", async () => {
+    const fetchPage = vi.fn(async (offset: number, limit: number) =>
+      offset === 0 ? Array.from({ length: limit }, (_, index) => index) : [],
+    );
+
+    const result = await collectStoragePages(fetchPage, 4);
+
+    expect(result).toEqual([0, 1, 2, 3]);
+    expect(fetchPage.mock.calls).toEqual([[0, 4], [4, 4]]);
+  });
+
+  it("rejects invalid page sizes before making a request", async () => {
+    const fetchPage = vi.fn(async () => []);
+
+    await expect(collectStoragePages(fetchPage, 0)).rejects.toThrow(RangeError);
+    await expect(collectStoragePages(fetchPage, 1.5)).rejects.toThrow(RangeError);
+    expect(fetchPage).not.toHaveBeenCalled();
+  });
+
+  it("propagates storage page errors rather than returning a partial vault", async () => {
+    const fetchPage = vi.fn(async (offset: number) => {
+      if (offset === 0) return [1, 2];
+      throw new Error("storage unavailable");
+    });
+
+    await expect(collectStoragePages(fetchPage, 2)).rejects.toThrow("storage unavailable");
+  });
+});
