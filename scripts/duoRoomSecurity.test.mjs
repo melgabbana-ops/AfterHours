@@ -44,10 +44,9 @@ describe("proposed secure Duo backend guardrails", () => {
 
   it("uses a complete PL/pgSQL dollar-quoted body for the room snapshot RPC", () => {
     const declaration = proposal.slice(proposal.indexOf("function public.get_afterhours_duo_room_state("));
-    expect(declaration.slice(0, declaration.indexOf("declare"))).toContain("as $");
-    expect(declaration).toContain("\nend;\n$;");
+    expect(declaration.slice(0, declaration.indexOf("declare"))).toContain("as $$");
+    expect(declaration).toContain("\nend;\n$$;");
   });
-
   it("requires two currently consenting members before the host can activate a room", () => {
     expect(proposal).toContain("if v_room.owner_user_id <> v_user_id then");
     expect(proposal).toContain("if v_member_count <> 2 or v_consented_count <> 2 then");
