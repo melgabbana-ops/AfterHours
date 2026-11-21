@@ -18,6 +18,10 @@ const invitationUi = readFileSync(
   fileURLToPath(new URL("../src/SecureDuoInvitation.tsx", import.meta.url)),
   "utf8",
 );
+const secureLobby = readFileSync(
+  fileURLToPath(new URL("../src/SecureDuoLobby.tsx", import.meta.url)),
+  "utf8",
+);
 
 describe("proposed secure Duo backend guardrails", () => {
   it("keeps room, member and invitation tables RLS-protected and denies direct client writes", () => {
@@ -140,11 +144,11 @@ describe("proposed secure Duo backend guardrails", () => {
   });
 
   it("renders the server-backed shared prompt cursor in the dormant secure lobby", () => {
-    expect(lobbyFile.content).toContain("advanceSecureDuoSession");
-    expect(lobbyFile.content).toContain("snapshot.session.revision");
-    expect(lobbyFile.content).toContain("Gedeelde stap");
-    expect(lobbyFile.content).toContain("Shared step");
-    expect(lobbyFile.content).toContain("De server synchroniseert deze stap");
+    expect(secureLobby).toContain("advanceSecureDuoSession");
+    expect(secureLobby).toContain("snapshot.session.revision");
+    expect(secureLobby).toContain("Gedeelde stap");
+    expect(secureLobby).toContain("Shared step");
+    expect(secureLobby).toContain("De server synchroniseert deze stap");
   });
 
   it("backfills a zeroed shared cursor for rooms that already exist", () => {
