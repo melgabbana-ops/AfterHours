@@ -78,23 +78,50 @@ async function currentUserId(): Promise<string> {
   return data.user.id;
 }
 
-export async function listPrivateMedia(): Promise<PrivateMediaItem[]> {
-  const userId = await currentUserId();
-  const { data: folders, error: folderError } = await supabase!.storage.from(BUCKET).list(userId, {
-    limit: 100,
-    sortBy: { column: "name", order: "asc" },
-  });
-  if (folderError) throw folderError;
-  const items: PrivateMediaItem[] = [];
-  for (const folder of folders ?? []) {
-    if (!folder.name) continue;
-    const prefix = `${userId}/${folder.name}`;
-    const { data, error } = await supabase!.storage.from(BUCKET).list(prefix, {
-      limit: 100,
-      sortBy: { column: "created_at", order: "desc" },
+type StorageListEntry = {
+  name: string;
+  id: string | null;
+  metadata: { size?: number; mimetype?: string } | null;
+  created_at: string | null;
+};
+
+export async function collectStoragePages<T>(
+  fetchPage: (offset: number, limit: number) => Promise<T[]>,
+  pageSize = 100,
+): Promise<T[]> {
+  if (!Number.isSafeInteger(pageSize) || pageSize < 1) {
+    throw new RangeError("Storage page size must be a positive safe integer.");
+  }
+  const entries: T[] = [];
+  for (let offset = 0; ; offset += pageSize) {
+    const page = await fetchPage(offset, pageSize);
+    entries.push(...page);
+    if (page.length < pageSize) break;
+  }
+  return entries;
+}
+
+async function listStoragePages(path: string, sortColumn: "name" | "created_at"): Promise<StorageListEntry[]> {
+  return collectStoragePages(async (offset, limit) => {
+    const { data, error } = await supabase!.storage.from(BUCKET).list(path, {
+      limit,
+      offset,
+      sortBy: { column: sortColumn, order: sortColumn === "created_at" ? "desc" : "asc" },
     });
     if (error) throw error;
-    for (const item of data ?? []) {
+    return (data ?? []) as StorageListEntry[];
+  });
+}
+export async function listPrivateMedia(): Promise<PrivateMediaItem[]> {
+  const userId = await currentUserId();
+  // Fetch every session folder: an alphabetical first-page limit could hide newer sessions.
+  const folders = await listStoragePages(userId, "name");
+  const items: PrivateMediaItem[] = [];
+  for (const folder of folders) {
+    if (!folder.name) continue;
+    const prefix = `${userId}/${folder.name}`;
+    const files = await listStoragePages(prefix, "created_at");
+    for (const item of files) {
       if (!item.name || !item.id) continue;
       items.push({
         name: item.name,
