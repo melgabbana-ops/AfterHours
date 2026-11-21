@@ -94,7 +94,7 @@ values
 set role authenticated;
 select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000002',false);
 
-do $
+do $$
 declare visible_runs integer;
 begin
   select count(*) into visible_runs
@@ -103,9 +103,9 @@ begin
   if visible_runs <> 1 then
     raise exception 'Accepted invitee cannot see paused run after consent revocation.';
   end if;
-end $;
+end $$;
 
-do $
+do $$
 begin
   begin
     perform public.get_afterhours_shared_run_consent_status('10000000-0000-4000-8000-000000000001');
@@ -113,13 +113,13 @@ begin
   exception when insufficient_privilege then
     null;
   end;
-end $;
+end $$;
 
 reset role;
 select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000001',false);
 set role authenticated;
 
-do $
+do $$
 declare status jsonb;
 begin
   status := public.get_afterhours_shared_run_consent_status('10000000-0000-4000-8000-000000000001');
@@ -128,7 +128,7 @@ begin
     or (status->>'all_consented')::boolean then
     raise exception 'Host did not see pending participant re-consent.';
   end if;
-end $;
+end $$;
 
 reset role;
 select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000002',false);
@@ -201,7 +201,7 @@ reset role;
 select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000001',false);
 set role authenticated;
 
-do $
+do $$
 declare host_visible_checkins integer;
 begin
   select count(*) into host_visible_checkins
@@ -210,9 +210,9 @@ begin
   if host_visible_checkins <> 1 then
     raise exception 'Run owner cannot see the participant check-in.';
   end if;
-end $;
+end $$;
 
-do $
+do $$
 declare status jsonb;
 begin
   status := public.get_afterhours_shared_run_consent_status('10000000-0000-4000-8000-000000000001');
@@ -221,7 +221,7 @@ begin
     or not (status->>'all_consented')::boolean then
     raise exception 'Host did not see the renewed participant consent.';
   end if;
-end $;
+end $$;
 
 reset role;
 do $$
