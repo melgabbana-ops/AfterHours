@@ -40,3 +40,22 @@ export function canResumeRemotePlay(state: {
 export function canStartLocalPlay(state: { ownConsent: boolean; partnerConsent: boolean; ownName: string; partnerName: string }): boolean {
   return state.ownConsent && state.partnerConsent && state.ownName.trim().length > 0 && state.partnerName.trim().length > 0;
 }
+
+
+export type LocalPlayer = "player1" | "player2";
+export type LocalRoundAnswers = Partial<Record<LocalPlayer, string>>;
+
+/** Keep local shared-device answers in memory only, never in Realtime or storage. */
+export function saveLocalRoundAnswer(
+  current: LocalRoundAnswers,
+  player: LocalPlayer,
+  value: string,
+): LocalRoundAnswers {
+  const answer = value.trim().slice(0, 1000);
+  if (!answer) return current;
+  return { ...current, [player]: answer };
+}
+
+export function nextLocalPlayer(player: LocalPlayer): LocalPlayer {
+  return player === "player1" ? "player2" : "player1";
+}
