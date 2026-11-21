@@ -48,6 +48,7 @@ create table public.afterhours_experience_invitations(
   check((status='accepted')=(accepted_user_id is not null and accepted_at is not null))
 );
 grant select on public.afterhours_experience_runs,public.afterhours_experience_run_consents,public.afterhours_experience_invitations to authenticated;
+grant insert,update on public.afterhours_experience_runs,public.afterhours_experience_invitations to authenticated;
 insert into auth.users(id) values
  ('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'),
  ('bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'),
@@ -55,13 +56,16 @@ insert into auth.users(id) values
 insert into public.afterhours_experience_runs(id,user_id,scene_key,scene_snapshot,status,total_steps) values
  ('11111111-1111-4111-8111-111111111111','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','scene-one','{"title":"Private scene","description":"A safe test","steps":[{"title":"Step 1"}]}'::jsonb,'paused',1),
  ('22222222-2222-4222-8222-222222222222','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','scene-two','{"title":"Active scene","steps":[]}'::jsonb,'active',1),
- ('33333333-3333-4333-8333-333333333333','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','scene-three','{"title":"Expired scene","steps":[]}'::jsonb,'paused',1);
+ ('33333333-3333-4333-8333-333333333333','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','scene-three','{"title":"Expired scene","steps":[]}'::jsonb,'paused',1),
+ ('44444444-4444-4444-8444-444444444444','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','scene-four','{"title":"Pending invite scene","steps":[]}'::jsonb,'paused',1);
 insert into public.afterhours_experience_run_consents(run_id,user_id,consent_version) values
  ('11111111-1111-4111-8111-111111111111','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','1.0'),
  ('22222222-2222-4222-8222-222222222222','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','1.0'),
- ('33333333-3333-4333-8333-333333333333','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','1.0');
+ ('33333333-3333-4333-8333-333333333333','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','1.0'),
+ ('44444444-4444-4444-8444-444444444444','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','1.0');
 insert into public.afterhours_experience_invitations(id,run_id,inviter_user_id,token_hash,expires_at) values
  ('aaaaaaaa-1111-4111-8111-aaaaaaaaaaaa','11111111-1111-4111-8111-111111111111','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',repeat('a',64),now()+interval '1 day'),
  ('bbbbbbbb-1111-4111-8111-bbbbbbbbbbbb','22222222-2222-4222-8222-222222222222','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',repeat('b',64),now()+interval '1 day'),
  ('cccccccc-1111-4111-8111-cccccccccccc','33333333-3333-4333-8333-333333333333','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',repeat('c',64),now()-interval '1 day'),
- ('dddddddd-1111-4111-8111-dddddddddddd','11111111-1111-4111-8111-111111111111','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',repeat('d',64),now()+interval '1 day');
+ ('dddddddd-1111-4111-8111-dddddddddddd','11111111-1111-4111-8111-111111111111','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',repeat('d',64),now()+interval '1 day'),
+ ('eeeeeeee-1111-4111-8111-eeeeeeeeeeee','44444444-4444-4444-8444-444444444444','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',repeat('e',64),now()+interval '1 day');
