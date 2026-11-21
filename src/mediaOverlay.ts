@@ -120,6 +120,34 @@ export interface PhotoEditTransform {
   warmth: number;
 }
 export const defaultPhotoEditTransform: PhotoEditTransform = { rotation: 0, zoom: 1, offsetX: 0, offsetY: 0, brightness: 1, contrast: 1, saturation: 1, warmth: 0 };
+export type PhotoEditPresetId = "natural" | "warm" | "cinematic" | "monochrome" | "soft";
+export interface PhotoEditPreset {
+  id: PhotoEditPresetId;
+  titleNL: string;
+  titleEN: string;
+  brightness: number;
+  contrast: number;
+  saturation: number;
+  warmth: number;
+}
+export const photoEditPresets: readonly PhotoEditPreset[] = [
+  { id: "natural", titleNL: "Natuurlijk", titleEN: "Natural", brightness: 1, contrast: 1, saturation: 1, warmth: 0 },
+  { id: "warm", titleNL: "Warm goud", titleEN: "Warm gold", brightness: 1.04, contrast: 1.06, saturation: 1.08, warmth: .48 },
+  { id: "cinematic", titleNL: "Cinematisch", titleEN: "Cinematic", brightness: .94, contrast: 1.22, saturation: .82, warmth: .12 },
+  { id: "monochrome", titleNL: "Monochroom", titleEN: "Monochrome", brightness: 1.02, contrast: 1.16, saturation: 0, warmth: 0 },
+  { id: "soft", titleNL: "Zacht licht", titleEN: "Soft light", brightness: 1.12, contrast: .88, saturation: .92, warmth: .2 },
+];
+export function applyPhotoEditPreset(current: PhotoEditTransform, presetId: PhotoEditPresetId): PhotoEditTransform {
+  const preset = photoEditPresets.find((item) => item.id === presetId) ?? photoEditPresets[0];
+  return normalizePhotoEditTransform({
+    ...current,
+    brightness: preset.brightness,
+    contrast: preset.contrast,
+    saturation: preset.saturation,
+    warmth: preset.warmth,
+  });
+}
+
 export function normalizePhotoEditTransform(value: PhotoEditTransform): PhotoEditTransform {
   const rotations = [0, 90, 180, 270] as const;
   const rotation = rotations.includes(value.rotation) ? value.rotation : 0;
