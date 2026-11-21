@@ -4772,3 +4772,11 @@ button,[role="button"],nav a{touch-action:manipulation}
 /* Duo experience card uses the same restrained black-and-champagne visual system. */
 .experience-choice.couple-choice{border-color:rgba(212,175,55,.48)!important;background:radial-gradient(ellipse at 90% 0%,rgba(107,79,31,.3),transparent 48%),linear-gradient(145deg,#21190d,#080706 80%)!important}
 .experience-choice.couple-choice .choice-symbol{border-color:rgba(212,175,55,.62);color:#f0d58f}
+
+
+/* Private recording countdown: visible, high-contrast and touch-friendly. */
+.media-recording-status{display:flex;align-items:center;flex-wrap:wrap;gap:10px}
+.media-recording-clock{margin-left:auto;color:#f0d58f;font-variant-numeric:tabular-nums;font-size:1rem;letter-spacing:.08em}
+.media-recording-progress{flex:1 0 100%;height:5px;overflow:hidden;border-radius:999px;background:#393127}
+.media-recording-progress>span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#b28a45,#f0d58f);transition:width .25s linear}
+@media(prefers-reduced-motion:reduce){.media-recording-progress>span{transition:none}}
