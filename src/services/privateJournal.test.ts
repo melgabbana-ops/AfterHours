@@ -1,3 +1,4 @@
+import journalSource from "../AftercareJournal.tsx?raw";
 import { describe, expect, it } from "vitest";
 import {
   createPrivateJournalVault,
@@ -19,6 +20,16 @@ function memoryStorage() {
 }
 
 describe("encrypted private journal vault", () => {
+  it("locks on background and page hide, removes listeners and clears in-memory text", () => {
+    expect(journalSource).toContain('document.addEventListener("visibilitychange", lockWhenHidden)');
+    expect(journalSource).toContain('window.addEventListener("pagehide", lockOnPageHide)');
+    expect(journalSource).toContain('document.removeEventListener("visibilitychange", lockWhenHidden)');
+    expect(journalSource).toContain('window.removeEventListener("pagehide", lockOnPageHide)');
+    expect(journalSource).toContain('setKey(null)');
+    expect(journalSource).toContain('setPassphrase("")');
+    expect(journalSource).toContain('setEntries([])');
+    expect(journalSource).toContain('lockGeneration.current += 1;');
+  });
   it("encrypts entry text before it reaches browser storage and unlocks it again", async () => {
     const storage = memoryStorage();
     const key = await createPrivateJournalVault("een lange unieke wachtzin", storage);
@@ -72,6 +83,24 @@ describe("encrypted private journal vault", () => {
 
     await expect(unlockPrivateJournalVault("een lange unieke wachtzin", storage)).rejects.toThrow("ontbreekt of is beschadigd");
     expect(storage.getItem(PRIVATE_JOURNAL_STORAGE_KEY)).toBe("");
+  });
+
+  it("does not create or save a vault after the journal has been locked", async () => {
+    const storage = memoryStorage();
+    await expect(createPrivateJournalVault("een lange unieke wachtzin", storage, () => false)).rejects.toThrow("Journal vergrendeld");
+    expect(storage.getItem(PRIVATE_JOURNAL_STORAGE_KEY)).toBeNull();
+
+    const key = await createPrivateJournalVault("een lange unieke wachtzin", storage);
+    await expect(savePrivateJournalEntry(
+      key,
+      { title: "Concept", body: "Mag niet worden opgeslagen na vergrendelen." },
+      undefined,
+      storage,
+      "2026-11-21T12:00:00.000Z",
+      () => false,
+    )).rejects.toThrow("Journal vergrendeld");
+    const entries = await loadPrivateJournalEntries(key, storage);
+    expect(entries).toHaveLength(0);
   });
 
   it("rejects short passphrases and empty entries", async () => {
