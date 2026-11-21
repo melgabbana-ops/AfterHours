@@ -21,6 +21,11 @@ export interface SecureDuoRoomResult {
   status: RoomStatus;
 }
 
+export interface SecureDuoInvitationAccepted {
+  roomId: string;
+  accepted: true;
+}
+
 function getClient(client?: DuoClient | null): DuoClient {
   const activeClient = client ?? supabase;
   if (!activeClient) throw new Error("Online Duo is niet beschikbaar. Configureer eerst de AFTER HOURS-backend.");
