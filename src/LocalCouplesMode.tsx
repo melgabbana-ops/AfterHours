@@ -8,6 +8,8 @@ type Signal = "unset" | "green" | "yellow" | "red";
 type Props = {
   language: Language;
   consentActive: boolean;
+  onSafetyPause: () => void;
+  onSafetyResume: () => void;
   onSafetyStop: () => void;
 };
 
@@ -68,7 +70,7 @@ const SCENES = {
   }
 } as const;
 
-export default function LocalCouplesMode({ language, consentActive, onSafetyStop }: Props) {
+export default function LocalCouplesMode({ language, consentActive, onSafetyPause, onSafetyResume, onSafetyStop }: Props) {
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
   const [sceneKey, setSceneKey] = useState<keyof typeof SCENES>("connection");
   const [names, setNames] = useState([t("Deelnemer 1", "Participant 1"), t("Deelnemer 2", "Participant 2")]);
@@ -97,12 +99,15 @@ export default function LocalCouplesMode({ language, consentActive, onSafetyStop
     }
     if (value === "yellow") {
       setStage("paused");
+      onSafetyPause();
       setNotice(t("PAUZE gekozen. Neem de tijd en stem opnieuw af. Hervatten kan alleen als jullie allebei groen aangeven.", "PAUSE selected. Take your time and check in. Resume only when both of you choose green."));
       return;
     }
     if (next.every((signal) => signal === "green")) {
-      if (stage === "paused") setNotice(t("Jullie hebben allebei opnieuw groen aangegeven.", "Both of you have chosen green again."));
-      else setNotice(t("Jullie hebben allebei groen aangegeven.", "Both of you have chosen green."));
+      if (stage === "paused") {
+        onSafetyResume();
+        setNotice(t("Jullie hebben allebei opnieuw groen aangegeven.", "Both of you have chosen green again."));
+      } else setNotice(t("Jullie hebben allebei groen aangegeven.", "Both of you have chosen green."));
       setStage("active");
     }
   }
