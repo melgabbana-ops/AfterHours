@@ -72,7 +72,9 @@ export function safePrivateMediaFileName(value: string): string {
 }
 
 export function safeMediaSessionFolder(value: string): string {
-  const segment = safePrivateMediaFileName(value || "general");
+  const candidate = value.trim();
+  if (!candidate || candidate === "." || candidate === "..") return "general";
+  const segment = safePrivateMediaFileName(candidate);
   return segment === "." || segment === ".." ? "general" : segment;
 }
 
