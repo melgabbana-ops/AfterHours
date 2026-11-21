@@ -4697,3 +4697,5 @@ button,[role="button"],nav a{touch-action:manipulation}
 .safety-signal-visibility:hover{border-color:#c89445;color:#f3c96b}
 .safety-signal-visibility:focus-visible{outline:2px solid #f3c96b;outline-offset:2px}
 .safety-signal-visibility svg{width:18px;height:18px}
+.aftercare-private-note-confirm{margin-top:14px;padding:14px;border:1px solid rgba(190,105,88,.38);border-radius:12px;background:rgba(60,20,18,.16)}
+.aftercare-private-note-confirm>p{margin:0;color:#e8d5c8;font-size:.88rem;line-height:1.55}
