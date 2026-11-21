@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { CheckCircle2, Heart, Pause, Play, ShieldCheck, Square, Users } from "lucide-react";
 
 type Language = "nl" | "en";
@@ -85,12 +85,6 @@ export default function LocalCouplesMode({ language, consentActive, onSafetyStop
   const steps = language === "nl" ? scene.steps : scene.stepsEn;
   const ready = consentActive && consents.every(Boolean) && stopWord.trim().length >= 2 &&
     pauseWord.trim().length >= 2 && stopWord.trim().toLowerCase() !== pauseWord.trim().toLowerCase();
-  const status = useMemo(() => {
-    if (signals.includes("red")) return "stopped";
-    if (signals.includes("yellow")) return "paused";
-    return "active";
-  }, [signals]);
-
   function setSignal(index: 0 | 1, value: Signal) {
     const next: [Signal, Signal] = [...signals];
     next[index] = value;
@@ -98,6 +92,7 @@ export default function LocalCouplesMode({ language, consentActive, onSafetyStop
     if (value === "red") {
       setStage("stopped");
       setNotice(t("STOP gekozen. De lokale ervaring is direct beëindigd.", "STOP selected. The local experience has ended immediately."));
+      onSafetyStop();
       return;
     }
     if (value === "yellow") {
@@ -106,8 +101,9 @@ export default function LocalCouplesMode({ language, consentActive, onSafetyStop
       return;
     }
     if (next.every((signal) => signal === "green")) {
+      if (stage === "paused") setNotice(t("Jullie hebben allebei opnieuw groen aangegeven.", "Both of you have chosen green again."));
+      else setNotice(t("Jullie hebben allebei groen aangegeven.", "Both of you have chosen green."));
       setStage("active");
-      setNotice(t("Jullie hebben allebei groen aangegeven.", "Both of you have chosen green."));
     }
   }
 
@@ -158,7 +154,7 @@ export default function LocalCouplesMode({ language, consentActive, onSafetyStop
         <p>{t("Een lokale tweepersoonsmodus zonder accountkoppeling. Beide deelnemers geven afzonderlijk toestemming en checken per stap in.", "A local two-person mode without account linking. Each participant gives consent separately and checks in at every step.")}</p>
       </div>
 
-      <div className="cw-local-note"><ShieldCheck size={18} /><span>{t("Deze modus werkt alleen op dit toestel. Er worden geen namen, keuzes of sessiegegevens opgeslagen of gedeeld.", "This mode runs only on this device. Names, choices and session details are not saved or shared.")}</span></div>
+      <div className="cw-local-note"><ShieldCheck size={18} /><span>{t("Deze modus werkt alleen op dit toestel. Er worden geen namen, keuzes of sessiegegevens opgeslagen of gedeeld. De app luistert niet naar gesproken stopwoorden: gebruik de STOP- en PAUZE-knoppen.", "This mode runs only on this device. Names, choices and session details are not saved or shared. Spoken safewords are not monitored: use the STOP and PAUSE buttons.")}</span></div>
 
       {stage === "setup" ? (
         <>
@@ -217,7 +213,7 @@ export default function LocalCouplesMode({ language, consentActive, onSafetyStop
               {stage === "paused" && <p className="cw-local-warning">{t("De route staat stil. Hervatten kan pas als beide deelnemers opnieuw groen kiezen.", "The path is paused. Resume only after both participants choose green again.")}</p>}
               <div className="cw-local-actions">
                 <button type="button" className="cw-primary" disabled={!signals.every((signal) => signal === "green")} onClick={advance}><CheckCircle2 size={15} />{t("Verder", "Continue")}</button>
-                <button type="button" onClick={passStep}>{t("Sla deze stap over", "Pass this step")}</button>
+                <button type="button" onClick={passStep} disabled={stage !== "active"}>{t("Sla deze stap over", "Pass this step")}</button>
                 <button type="button" className="cw-danger" onClick={stop}><Square size={14} />{t("Beëindig direct", "Stop now")}</button>
               </div>
             </>
