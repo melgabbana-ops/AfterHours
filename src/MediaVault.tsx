@@ -10,7 +10,7 @@ import {
 } from "./services/media";
 import { supabase, supabaseConfigured } from "./services/supabase";
 import { composeImageWithOverlay, composeImageWithEdits, defaultPhotoEditTransform, drawCameraFrame, mediaOverlayFrames, type OverlayFrameStyle, type PhotoEditTransform } from "./mediaOverlay";
-import { appendMediaCaptureChunk, canRecoverInterruptedCapture, discardMediaCapture, MAX_MEDIA_CAPTURE_BYTES, missingCaptureTrack, stopMediaRecorder, stopMediaStreams, selectMediaRecorderMimeType, waitForVideoReady, watchMediaStreamInterruption } from "./services/mediaCapture";
+import { appendMediaCaptureChunk, canRecoverInterruptedCapture, discardMediaCapture, MAX_MEDIA_CAPTURE_BYTES, missingCaptureTrack, requestMediaStream, stopMediaRecorder, stopMediaStreams, selectMediaRecorderMimeType, waitForVideoReady, watchMediaStreamInterruption } from "./services/mediaCapture";
 
 interface MediaVaultProps {
   sessionId: string;
@@ -252,11 +252,11 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
     setMessage("");
     captureInterruptedRef.current=false;
     try{
-      const stream=await navigator.mediaDevices.getUserMedia(captureKind==="photo"
+      const stream=await requestMediaStream(()=>navigator.mediaDevices.getUserMedia(captureKind==="photo"
         ? {video:{facingMode:{ideal:cameraFacing},width:{ideal:1920},height:{ideal:1080}},audio:false}
         : captureKind==="video"
           ? {video:{facingMode:{ideal:cameraFacing},width:{ideal:1280},height:{ideal:720}},audio:true}
-          : {video:false,audio:true});
+          : {video:false,audio:true}),30000,t("De toestemmingsaanvraag voor camera of microfoon duurde te lang. Controleer je browserinstellingen en probeer opnieuw.","The camera or microphone permission request took too long. Check your browser settings and try again."));
       if(!mountedRef.current){stopMediaStreams([stream]);return;}
       const missingTrack=missingCaptureTrack(stream,captureKind!=="voice",captureKind!=="photo");
       if(missingTrack){
