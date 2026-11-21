@@ -21,7 +21,7 @@ if (stylesheetFiles.length === 0) throw new Error("No CSS files found under src/
 const styles = (await Promise.all(stylesheetFiles.map((file) => readFile(file, "utf8")))).join("\n");
 const cssClasses = new Set([...styles.matchAll(/\.([_a-zA-Z][\w-]*)/g)].map((match) => match[1]));
 const missing = new Map();
-const classPattern = new RegExp("className=(?:\"([^\"]+)\"|'([^']+)'|{\\x60([^\\x60]+)\\x60})", "g");
+const classPattern = /className=(?:"([^"]+)"|'([^']+)'|{([^}]+)})/g;
 
 function reportMissing(file, className) {
   const relative = path.relative(root, file);
@@ -32,7 +32,7 @@ function reportMissing(file, className) {
 for (const file of sourceFiles) {
   const source = await readFile(file, "utf8");
   for (const match of source.matchAll(classPattern)) {
-    const rawClassValue = match[1] ?? match[2] ?? match[3] ?? "";
+    const rawClassValue = (match[1] ?? match[2] ?? match[3] ?? "").replaceAll(String.fromCharCode(96), "");
     const dynamicPrefixes = [...rawClassValue.matchAll(/([A-Za-z_][a-zA-Z0-9_-]*-)\$\{/g)].map((item) => item[1]);
     const classValue = rawClassValue.replace(/\$\{[^}]*\}/g, " ");
     for (const className of classValue.split(/\s+/).filter(Boolean)) {
@@ -51,4 +51,4 @@ if (missing.size) {
   console.error("Cinematic style coverage failed. Add styles or remove obsolete class names.");
   process.exit(1);
 }
-console.log(\`Cinematic style coverage passed: \${sourceFiles.length} source files and \${stylesheetFiles.length} stylesheets scanned; dynamic class families matched against CSS selectors.\`);
+console.log("Cinematic style coverage passed: " + sourceFiles.length + " source files and " + stylesheetFiles.length + " stylesheets scanned; dynamic class families matched against CSS selectors.");
