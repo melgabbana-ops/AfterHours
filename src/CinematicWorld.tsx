@@ -1023,6 +1023,7 @@ export default function CinematicWorld({
 
   async function renewSharedRunConsent(run: ExperienceRun) {
     if (!remoteProfileId || run.user_id === remoteProfileId || run.status !== "paused" || activeConsentRunIds.includes(run.id)) return;
+    if (!requestStartAccess()) return;
     if (!window.confirm(t(
       "Geef je opnieuw vrijwillig toestemming om deze gepauzeerde ervaring eventueel te hervatten?",
       "Do you freely consent again to potentially resuming this paused experience?"
