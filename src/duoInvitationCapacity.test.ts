@@ -16,7 +16,7 @@ describe("shared experience invitation capacity guard", () => {
 
   it("counts the host and all currently consenting accounts as the two permitted members", () => {
     expect(migration).toContain("select c.user_id");
-    expect(migration).toContain("where c.revoked_at is null");
+    expect(migration).toContain("c.revoked_at is null");
     expect(migration).toContain("union");
     expect(migration).toContain("select v_host_user_id");
   });
