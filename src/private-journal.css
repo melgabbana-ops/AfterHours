@@ -46,3 +46,6 @@
 .ah-journal-message{border:1px solid rgba(211,174,112,.25);color:#e2c58f;background:rgba(83,61,28,.15)}
 @media(max-width:520px){.ah-private-journal{padding:14px}.ah-journal-workspace{grid-template-columns:1fr}.ah-journal-list{max-height:180px;overflow:auto}.ah-journal-list>button{display:inline-block;width:calc(50% - 5px);margin-right:5px;vertical-align:top}.ah-journal-editor textarea{min-height:155px}.ah-journal-lock-row{align-items:flex-start}.ah-journal-privacy{margin-top:14px}}
 @media(prefers-reduced-motion:reduce){.ah-private-journal *{scroll-behavior:auto!important;transition:none!important}}
+
+.ah-open-journal{width:100%;min-height:46px;margin:12px 0 8px;display:flex;align-items:center;justify-content:center;gap:9px;border:1px solid rgba(211,174,112,.48);border-radius:5px;background:linear-gradient(145deg,rgba(39,29,16,.85),rgba(8,7,6,.95));color:#e7c991;font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase}
+.ah-open-journal:focus-visible,.ah-journal-close:focus-visible,.ah-journal-primary:focus-visible,.ah-journal-delete:focus-visible,.ah-journal-lock-row button:focus-visible{outline:2px solid #f0d49a;outline-offset:3px}
