@@ -1,4 +1,5 @@
 import journalSource from "../AftercareJournal.tsx?raw";
+import journalStyles from "../private-journal.css?raw";
 import { describe, expect, it } from "vitest";
 import {
   createPrivateJournalVault,
@@ -177,4 +178,28 @@ describe("encrypted private journal vault", () => {
     await expect(savePrivateJournalEntry(key, { title: " ", body: " " }, undefined, storage)).rejects.toThrow("Schrijf eerst");
     expect(hasPrivateJournalVault(storage)).toBe(true);
   });
+
+  it("gives journal controls visible gold keyboard focus and 44px touch targets", () => {
+    const focusTargets = [
+      ".ah-journal-close:focus-visible",
+      ".ah-journal-list-head button:focus-visible",
+      ".ah-journal-list>button:focus-visible",
+      ".ah-journal-primary:focus-visible",
+      ".ah-journal-delete:focus-visible",
+      ".ah-journal-backup-export:focus-visible",
+      ".ah-journal-backup-import:focus-within",
+      ".ah-journal-backup-import input:focus-visible",
+      ".ah-journal-lock-row button:focus-visible",
+      ".aftercare-history-note-toggle:focus-visible",
+      ".ah-journal-unlock input:focus-visible",
+      ".ah-journal-editor input:focus-visible",
+      ".ah-journal-editor textarea:focus-visible",
+      ".ah-journal-backup>input:focus-visible",
+    ];
+    for (const selector of focusTargets) expect(journalStyles).toContain(selector);
+    expect(journalStyles).toContain("outline:2px solid #f0d49a");
+    expect(journalStyles).toContain(".ah-journal-list-head button{width:44px;min-height:44px}");
+    expect(journalStyles).toContain(".ah-journal-unlock input,.ah-journal-editor input{min-height:44px}");
+  });
+
 });
