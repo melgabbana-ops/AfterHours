@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { appendMediaCaptureChunk, discardMediaCapture, MAX_MEDIA_CAPTURE_BYTES, stopMediaRecorder, stopMediaStreams, waitForVideoReady, watchMediaStreamInterruption } from "./mediaCapture";
+import { appendMediaCaptureChunk, discardMediaCapture, MAX_MEDIA_CAPTURE_BYTES, missingCaptureTrack, stopMediaRecorder, stopMediaStreams, waitForVideoReady, watchMediaStreamInterruption } from "./mediaCapture";
 
 describe("media capture cleanup", () => {
   it("stops every track across camera and composited streams", () => {
@@ -255,5 +255,30 @@ describe("safe recorder stop", () => {
 
   it("accepts a missing recorder during asynchronous startup", () => {
     expect(stopMediaRecorder(null)).toBe(false);
+  });
+});
+
+
+describe("required capture tracks", () => {
+  const track = (readyState: MediaStreamTrackState = "live") => ({ readyState }) as MediaStreamTrack;
+  const stream = (video: MediaStreamTrack[], audio: MediaStreamTrack[]) => ({
+    getVideoTracks: () => video,
+    getAudioTracks: () => audio,
+  });
+
+  it("requires a live camera track for photo and video capture", () => {
+    expect(missingCaptureTrack(stream([], [track()]), true, false)).toBe("video");
+    expect(missingCaptureTrack(stream([track("ended")], [track()]), true, false)).toBe("video");
+    expect(missingCaptureTrack(stream([track()], []), true, false)).toBeNull();
+  });
+
+  it("requires a live microphone track for voice and video capture", () => {
+    expect(missingCaptureTrack(stream([track()], []), false, true)).toBe("audio");
+    expect(missingCaptureTrack(stream([track()], [track("ended")]), false, true)).toBe("audio");
+    expect(missingCaptureTrack(stream([track()], [track()]), true, true)).toBeNull();
+  });
+
+  it("does not require a microphone for still photos", () => {
+    expect(missingCaptureTrack(stream([track()], []), true, false)).toBeNull();
   });
 });
