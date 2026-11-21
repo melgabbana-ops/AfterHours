@@ -85,7 +85,7 @@ export default function LocalCouplesMode({ language, consentActive, onSafetyPaus
   const steps = language === "nl" ? scene.steps : scene.stepsEn;
   const ready = consentActive && consents.every(Boolean);
   function setSignal(index: 0 | 1, value: LocalCouplesSignal) {
-    const next: [Signal, Signal] = [...signals];
+    const next: [LocalCouplesSignal, LocalCouplesSignal] = [...signals];
     next[index] = value;
     setSignals(next);
     if (value === "red") {
