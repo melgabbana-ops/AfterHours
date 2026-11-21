@@ -461,7 +461,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
   };
 
   return (
-    <section className="media-vault auth-panel" aria-labelledby="media-vault-title">
+    <section className="media-vault auth-panel" aria-labelledby="media-vault-title" aria-busy={busy || loading}>
       <span className="eyebrow">{t("PRIVÉOPSLAG", "PRIVATE STORAGE")}</span>
       <h3 id="media-vault-title">{assignmentTitle ? t("Opname bij opdracht", "Assignment capture") : t("Mijn privékluis", "My private vault")}</h3>
       {assignmentTitle&&<div className="assignment-captions"><strong>{assignmentTitle}</strong>{assignmentTask&&<p>{assignmentTask}</p>}<small>{t("Media wordt opgeslagen in de privékluis onder de huidige sessie. De opdracht wordt niet als openbare metadata gepubliceerd.","Media is stored privately under the current session. Assignment details are not published as public metadata.")}</small></div>}
@@ -517,7 +517,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
               {loading ? t("Laden…", "Loading…") : t("Vernieuwen", "Refresh")}
             </button>
           </div>
-          {loading ? <small>{t("Privébestanden laden…", "Loading private files…")}</small> : items.length === 0 ? (
+          {loading ? <small role="status" aria-live="polite">{t("Privébestanden laden…", "Loading private files…")}</small> : items.length === 0 ? (
             <small>{t("Nog geen bestanden gevonden. Je bestanden zijn alleen zichtbaar na veilig inloggen.", "No files yet. Your files are only visible after you sign in securely.")}</small>
           ) : (
             <div className="media-list">
@@ -543,7 +543,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
             </div>
           )}
           {signedUrl && <a className="media-signed-link" href={signedUrl} target="_blank" rel="noopener noreferrer">{t("Open privébestand (link verloopt na 60 seconden)", "Open private file (link expires after 60 seconds)")}</a>}
-          {message && <small role="status">{message}</small>}
+          {message && <small role="status" aria-live="polite" aria-atomic="true">{message}</small>}
         </>
       )}
     </section>
