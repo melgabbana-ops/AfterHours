@@ -104,7 +104,7 @@ export default function AftercareNote({ ownerId, sessionId, language, onStatusCh
     <button type="button" className="ah-open-journal" aria-expanded={journalOpen} onClick={() => setJournalOpen(value => !value)}>
       <BookOpen size={16}/>{journalOpen ? t("Privéjournal sluiten", "Close private journal") : t("Open versleuteld privéjournal", "Open encrypted private journal")}
     </button>
-    {journalOpen && <AftercareJournal language={language} onClose={() => setJournalOpen(false)}/>}
+    {journalOpen && <AftercareJournal key={ownerId} ownerId={ownerId} language={language} onClose={() => setJournalOpen(false)}/>}
     <p className="aftercare-private-note-privacy">
       {t("Deze sessienotitie wordt alleen lokaal in deze browser opgeslagen en is niet versleuteld. Voor persoonlijke reflecties kun je het aparte versleutelde privéjournal openen.", "This session note is stored only in this browser and is not encrypted. For personal reflections, open the separate encrypted private journal.")}
     </p>
