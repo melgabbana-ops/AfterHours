@@ -254,6 +254,7 @@ export default function CinematicWorld({
   const invitableRuns = runs.filter((run) => run.user_id === remoteProfileId && run.status === "paused");
   const joinedRuns = runs.filter((run) => run.user_id !== remoteProfileId && ["active", "paused", "completed", "stopped"].includes(run.status));
   const hasLiveJoinedRuns = joinedRuns.some((run) => run.status === "active" || run.status === "paused");
+  const hasLiveSharedRuns = hasLiveJoinedRuns || runs.some((run) => run.user_id === remoteProfileId && (run.status === "active" || run.status === "paused") && experienceInvites.some((invite) => invite.run_id === run.id && invite.status === "accepted"));
   const selectedScene = scenes.find((scene) => scene.key === selectedSceneKey) ?? null;
 
   async function refreshData(userId = remoteProfileId) {
@@ -350,7 +351,7 @@ export default function CinematicWorld({
   }, [remoteProfileId, language]);
 
   useEffect(() => {
-    if (!remoteProfileId || tab !== "invitation" || !hasLiveJoinedRuns) return;
+    if (!remoteProfileId || tab !== "invitation" || !hasLiveSharedRuns) return;
     let active = true;
     let refreshing = false;
     const refreshSharedRuns = async () => {
@@ -376,7 +377,7 @@ export default function CinematicWorld({
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.clearInterval(timer);
     };
-  }, [remoteProfileId, tab, hasLiveJoinedRuns]);
+  }, [remoteProfileId, tab, hasLiveSharedRuns]);
 
   useEffect(() => {
     let active = true;
