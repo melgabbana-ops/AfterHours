@@ -9,7 +9,7 @@ import {
   type PrivateMediaItem,
 } from "./services/media";
 import { supabase, supabaseConfigured } from "./services/supabase";
-import { applyPhotoEditPreset, composeImageWithOverlay, composeImageWithEdits, defaultPhotoEditTransform, drawCameraFrame, mediaOverlayFrames, photoEditPresets, type OverlayFrameStyle, type PhotoEditPresetId, type PhotoEditTransform } from "./mediaOverlay";
+import { appendPhotoEditHistory, applyPhotoEditPreset, composeImageWithOverlay, composeImageWithEdits, defaultPhotoEditTransform, drawCameraFrame, getPhotoEditHistoryEntry, mediaOverlayFrames, photoEditPresets, type OverlayFrameStyle, type PhotoEditHistoryEntry, type PhotoEditPresetId, type PhotoEditTransform } from "./mediaOverlay";
 import { appendMediaCaptureChunk, canRecoverInterruptedCapture, discardMediaCapture, MAX_MEDIA_CAPTURE_BYTES, missingCaptureTrack, requestMediaStream, stopMediaRecorder, stopMediaStreams, selectMediaRecorderMimeType, waitForVideoReady, watchMediaStreamInterruption } from "./services/mediaCapture";
 
 interface MediaVaultProps {
@@ -50,6 +50,8 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
   const [originalPreviewUrl,setOriginalPreviewUrl] = useState("");
   const [showOriginalPhoto,setShowOriginalPhoto] = useState(false);
   const [photoEdits,setPhotoEdits] = useState<PhotoEditTransform>(defaultPhotoEditTransform);
+  const [photoHistory,setPhotoHistory] = useState<PhotoEditHistoryEntry[]>([]);
+  const [photoHistoryIndex,setPhotoHistoryIndex] = useState(-1);
   const [pendingUrl,setPendingUrl] = useState("");
   const [isSavingCapture,setIsSavingCapture] = useState(false);
   const mountedRef = useRef(false);
@@ -215,6 +217,10 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
       if(pendingUrl) URL.revokeObjectURL(pendingUrl);
       setPendingCapture(previewFile);
       setPendingOriginalFile(overlayApplied?file:null);
+      setPhotoEdits(defaultPhotoEditTransform);
+      const initialHistory:PhotoEditHistoryEntry[] = overlayApplied?[{style:frameStyleRef.current,edits:defaultPhotoEditTransform}]:[];
+      setPhotoHistory(initialHistory);
+      setPhotoHistoryIndex(initialHistory.length-1);
       setPendingUrl(URL.createObjectURL(previewFile));
       setMessage(overlayApplied
         ?t("AH-overlay toegepast. Controleer de foto en kies daarna zelf voor privé opslaan.","AH overlay applied. Review the photo, then choose whether to save it privately.")
@@ -226,26 +232,40 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
     }finally{if(mountedRef.current)setBusy(false)}
   };
 
-  const updatePendingImageEdit=async(style:OverlayFrameStyle,edits:PhotoEditTransform)=>{
+  const updatePendingImageEdit=async(style:OverlayFrameStyle,edits:PhotoEditTransform,recordHistory=true):Promise<boolean>=>{
     const original=pendingOriginalFile;
-    if(!original||!pendingCapture||busy||isSavingCapture)return;
+    if(!original||!pendingCapture||busy||isSavingCapture)return false;
     setBusy(true);
     setMessage("");
     try{
       const updated=await composeImageWithEdits(original,style,edits);
-      if(!mountedRef.current)return;
+      if(!mountedRef.current)return false;
       validatePrivateMediaFile(updated);
       setFrameStyle(style);
       setPhotoEdits(edits);
+      if(recordHistory){
+        const next=appendPhotoEditHistory(photoHistory,photoHistoryIndex,{style,edits});
+        setPhotoHistory(next.history);
+        setPhotoHistoryIndex(next.index);
+      }
       setPendingCapture(updated);
       if(pendingUrl) URL.revokeObjectURL(pendingUrl);
       setPendingUrl(URL.createObjectURL(updated));
       setMessage(t("Foto bewerkt. Controleer de preview voordat je privé opslaat.","Photo edited. Review the preview before saving it privately."));
+      return true;
     }catch(error){
       if(mountedRef.current)setMessage(error instanceof Error?error.message:t("De foto kon niet worden bijgewerkt.","Could not update the photo."));
+      return false;
     }finally{
       if(mountedRef.current)setBusy(false);
     }
+  };
+
+  const movePhotoHistory=async(direction:-1|1)=>{
+    const target=getPhotoEditHistoryEntry(photoHistory,photoHistoryIndex,direction);
+    if(!target||busy||isSavingCapture)return;
+    const restored=await updatePendingImageEdit(target.entry.style,target.entry.edits,false);
+    if(restored)setPhotoHistoryIndex(target.index);
   };
 
   const startCapture=async()=>{
@@ -593,6 +613,8 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
             {pendingCapture&&pendingOriginalFile&&<div className="media-photo-editor" aria-label={t("Foto bewerken","Edit photo")}>
               <strong>{t("FOTO-EDITOR","PHOTO EDITOR")}</strong>
               <div className="media-item-actions">
+                <button type="button" onClick={()=>void movePhotoHistory(-1)} disabled={busy||photoHistoryIndex<=0} aria-label={t("Vorige bewerking","Undo last edit")}>{t("Ongedaan maken","Undo")}</button>
+                <button type="button" onClick={()=>void movePhotoHistory(1)} disabled={busy||photoHistoryIndex<0||photoHistoryIndex>=photoHistory.length-1} aria-label={t("Bewerking opnieuw uitvoeren","Redo edit")}>{t("Opnieuw","Redo")}</button>
                 <button type="button" onClick={()=>void updatePendingImageEdit(frameStyle,{...photoEdits,rotation:((photoEdits.rotation+270)%360) as PhotoEditTransform["rotation"]})} disabled={busy}>{t("↶ Linksom draaien","↶ Rotate left")}</button>
                 <button type="button" onClick={()=>void updatePendingImageEdit(frameStyle,{...photoEdits,rotation:((photoEdits.rotation+90)%360) as PhotoEditTransform["rotation"]})} disabled={busy}>{t("Rechtsom draaien ↷","Rotate right ↷")}</button>
                 <button type="button" onClick={()=>void updatePendingImageEdit(frameStyle,defaultPhotoEditTransform)} disabled={busy}>{t("Herstellen","Reset")}</button>

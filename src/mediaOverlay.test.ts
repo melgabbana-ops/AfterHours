@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applyPhotoEditPreset, drawAfterHoursOverlay, mediaOverlayFrames, normalizePhotoEditTransform, defaultPhotoEditTransform, photoEditPresets, type OverlayFrameStyle } from "./mediaOverlay";
+import { appendPhotoEditHistory, applyPhotoEditPreset, drawAfterHoursOverlay, getPhotoEditHistoryEntry, mediaOverlayFrames, normalizePhotoEditTransform, defaultPhotoEditTransform, photoEditPresets, type OverlayFrameStyle } from "./mediaOverlay";
 
 describe("AFTER HOURS camera overlay presets", () => {
   it("exposes the three approved overlay styles in the approved order", () => {
@@ -54,5 +54,30 @@ describe("local photo editor presets", () => {
   });
   it("uses a true zero-saturation monochrome preset", () => {
     expect(applyPhotoEditPreset(defaultPhotoEditTransform, "monochrome").saturation).toBe(0);
+  });
+});
+
+describe("photo edit history", () => {
+  it("adds snapshots, truncates the redo branch and caps history at 30 entries", () => {
+    const first = { style: "clean" as const, edits: defaultPhotoEditTransform };
+    const second = { style: "cinematic" as const, edits: { ...defaultPhotoEditTransform, brightness: 1.1 } };
+    const history = appendPhotoEditHistory([first, second], 0, { style: "after-hours", edits: defaultPhotoEditTransform });
+    expect(history.history.map((entry) => entry.style)).toEqual(["clean", "after-hours"]);
+    expect(history.index).toBe(1);
+    let capped = appendPhotoEditHistory([], -1, first);
+    for (let index = 0; index < 35; index += 1) {
+      capped = appendPhotoEditHistory(capped.history, capped.index, { style: "clean", edits: { ...defaultPhotoEditTransform, brightness: .65 + (index % 60) / 100 } });
+    }
+    expect(capped.history).toHaveLength(30);
+  });
+  it("moves backward and forward only when a snapshot exists", () => {
+    const history = [
+      { style: "clean" as const, edits: defaultPhotoEditTransform },
+      { style: "cinematic" as const, edits: { ...defaultPhotoEditTransform, contrast: 1.2 } },
+    ];
+    expect(getPhotoEditHistoryEntry(history, 1, -1)?.index).toBe(0);
+    expect(getPhotoEditHistoryEntry(history, 0, -1)).toBeNull();
+    expect(getPhotoEditHistoryEntry(history, 0, 1)?.entry.style).toBe("cinematic");
+    expect(getPhotoEditHistoryEntry(history, 1, 1)).toBeNull();
   });
 });
