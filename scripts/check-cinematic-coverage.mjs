@@ -49,7 +49,13 @@ function inspectClassExpression(file, expression) {
     if (ts.isBinaryExpression(node)) {
       const operator = node.operatorToken.kind;
       if (operator === ts.SyntaxKind.PlusToken) {
-        collect(node.left);
+        if (ts.isStringLiteral(node.left) && !ts.isStringLiteral(node.right) && !ts.isNoSubstitutionTemplateLiteral(node.right)) {
+          const match = node.left.text.match(/(?:^|\\s)([A-Za-z_][\\w-]*-)$/);
+          if (match) {
+            literalParts.push(node.left.text.slice(0, node.left.text.length - match[1].length));
+            dynamicPrefixes.push(match[1]);
+          } else collect(node.left);
+        } else collect(node.left);
         collect(node.right);
       } else if (operator === ts.SyntaxKind.AmpersandAmpersandToken || operator === ts.SyntaxKind.BarBarToken || operator === ts.SyntaxKind.QuestionQuestionToken) {
         collect(node.right);
@@ -57,8 +63,12 @@ function inspectClassExpression(file, expression) {
       return;
     }
     if (ts.isTemplateExpression(node)) {
-      literalParts.push(node.head.text);
-      if (node.head.text.endsWith("-")) dynamicPrefixes.push(node.head.text);
+      const head = node.head.text;
+      const match = head.match(/(?:^|\\s)([A-Za-z_][\\w-]*-)$/);
+      if (match) {
+        literalParts.push(head.slice(0, head.length - match[1].length));
+        dynamicPrefixes.push(match[1]);
+      } else literalParts.push(head);
       for (const span of node.templateSpans) {
         literalParts.push(span.literal.text);
         if (span.literal.text.endsWith("-")) dynamicPrefixes.push(span.literal.text);
