@@ -59,6 +59,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
   const captureTimeoutRef = useRef<number|undefined>(undefined);
   const streamInterruptionCleanupRef = useRef<(() => void) | null>(null);
   const captureInterruptedRef = useRef(false);
+  const captureStartInFlightRef = useRef(false);
 
 
   useEffect(()=>{
@@ -73,6 +74,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
       streamInterruptionCleanupRef.current?.();
       streamInterruptionCleanupRef.current=null;
       captureInterruptedRef.current=false;
+      captureStartInFlightRef.current=false;
       if(renderFrameRef.current!==null) window.cancelAnimationFrame(renderFrameRef.current);
       // Leaving the vault discards an unfinished recording instead of creating a preview.
       // Detach recorder callbacks before stopping tracks so no late event can update an unmounted view.
@@ -202,6 +204,9 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
       setMessage(t("Opnemen wordt niet ondersteund door deze browser. Probeer een recente browser of gebruik Bestand kiezen.","Recording is not supported by this browser. Try a recent browser or choose a file instead."));
       return;
     }
+    if(captureStartInFlightRef.current)return;
+    captureStartInFlightRef.current=true;
+    setBusy(true);
     setMessage("");
     captureInterruptedRef.current=false;
     try{
@@ -223,6 +228,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
         setCaptureConsent(false);
         setMessage(t("Camera of microfoon is onderbroken. Er is niets opgeslagen. Start opnieuw als je wilt.","Camera or microphone was interrupted. Nothing was saved. Start again if you want."));
       });
+      if(streamRef.current!==stream)return;
       setLiveStream(stream);
       chunksRef.current=[];
       captureBytesRef.current=0;
@@ -361,6 +367,9 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
       if(!mountedRef.current)return;
       setCaptureConsent(false);
       setMessage(error instanceof Error?t(error.message,"Recording could not start: "+error.message):t("Geen toegang tot camera of microfoon. Controleer de browsertoestemming.","Camera or microphone access was denied. Check browser permissions."));
+    }finally{
+      captureStartInFlightRef.current=false;
+      if(mountedRef.current)setBusy(false);
     }
   };
 
