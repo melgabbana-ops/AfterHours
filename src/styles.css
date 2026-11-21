@@ -4876,3 +4876,14 @@ button,[role="button"],nav a{touch-action:manipulation}
   letter-spacing: .16em;
 }
 .media-photo-editor-grade label { display: grid; gap: .4rem; }
+
+/* Photo editor: quick looks and original/edited comparison */
+.media-photo-editor-presets{display:grid;gap:.55rem;padding:.8rem 0;border-top:1px solid rgba(215,168,79,.25)}
+.media-photo-editor-presets>strong{color:#D7A84F;font-size:.7rem;letter-spacing:.16em}
+.media-photo-editor-presets>div{display:flex;flex-wrap:wrap;gap:.5rem}
+.media-photo-editor .media-photo-preset,.media-photo-compare button{flex:1 1 auto;min-height:44px;padding:9px 12px;border:1px solid rgba(215,168,79,.48);border-radius:9px;background:#100e0b;color:#ead9b6;font-size:.8rem}
+.media-photo-editor .media-photo-preset:hover,.media-photo-compare button:hover{border-color:#e3c17a;background:#21190d}
+.media-photo-compare{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:8px 0}
+.media-photo-compare button{flex:0 1 auto}
+.media-photo-compare small{color:#d7bd86;font-size:.78rem}
+@media(max-width:520px){.media-photo-editor-presets>div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.media-photo-compare{align-items:stretch;flex-direction:column}.media-photo-compare button{width:100%}}

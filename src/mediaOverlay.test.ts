@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { drawAfterHoursOverlay, mediaOverlayFrames, normalizePhotoEditTransform, defaultPhotoEditTransform, type OverlayFrameStyle } from "./mediaOverlay";
+import { applyPhotoEditPreset, drawAfterHoursOverlay, mediaOverlayFrames, normalizePhotoEditTransform, defaultPhotoEditTransform, photoEditPresets, type OverlayFrameStyle } from "./mediaOverlay";
 
 describe("AFTER HOURS camera overlay presets", () => {
   it("exposes the three approved overlay styles in the approved order", () => {
@@ -40,5 +40,19 @@ describe("photo color grading bounds", () => {
     expect(normalizePhotoEditTransform({ ...defaultPhotoEditTransform, brightness: 0, contrast: 9, saturation: -2, warmth: -8 })).toMatchObject({
       brightness: 0.65, contrast: 1.4, saturation: 0, warmth: -1,
     });
+  });
+});
+
+describe("local photo editor presets", () => {
+  it("provides five named, bilingual color looks", () => {
+    expect(photoEditPresets.map((preset) => preset.id)).toEqual(["natural", "warm", "cinematic", "monochrome", "soft"]);
+    expect(photoEditPresets.every((preset) => preset.titleNL && preset.titleEN)).toBe(true);
+  });
+  it("changes only color grading and preserves crop and rotation", () => {
+    const edited = applyPhotoEditPreset({ ...defaultPhotoEditTransform, rotation: 90, zoom: 1.8, offsetX: .3 }, "cinematic");
+    expect(edited).toMatchObject({ rotation: 90, zoom: 1.8, offsetX: .3, brightness: .94, contrast: 1.22, saturation: .82, warmth: .12 });
+  });
+  it("uses a true zero-saturation monochrome preset", () => {
+    expect(applyPhotoEditPreset(defaultPhotoEditTransform, "monochrome").saturation).toBe(0);
   });
 });
