@@ -326,7 +326,7 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
         <button type="button" onClick={()=>void publish(round,status==="paused"?"active":"paused")} disabled={status==="stopped"||(status==="paused"&&mode==="remote"&&!canResumeRemotePlay({connected,serverAuthorized:false,participantCount:participants.length,partnerPresent,ownConsent:myConsent,partnerConsent:partnerConsented}))}><Pause size={15}/>{status==="paused"?t("Hervat","Resume"):t("Pauze","Pause")}</button>
         {round === prompts.length - 1 ? <button type="button" className="couples-primary" onClick={()=>void stop()} disabled={status!=="active"}>{t("Afronden + aftercare", "Finish + aftercare")}</button> : <button type="button" className="couples-primary" onClick={()=>void publish(round+1,"active")} disabled={status!=="active"}>{t("Volgende", "Next")}</button>}
       </div>
-      <button type="button" className="couples-stop" onClick={()=>void stop()}><ShieldCheck size={16}/>{t("Stop de ervaring", "Stop experience")}</button>{status === "stopped" && <button type="button" className="couples-primary" onClick={() => void publish(0, "lobby")}>{t("Terug naar de lobby", "Return to lobby")}</button>}
+      <button type="button" className="couples-stop" onClick={()=>void stop()}><ShieldCheck size={16}/>{t("Stop de ervaring", "Stop experience")}</button>
     </section>}
     {status === "stopped" && <section className="couples-lobby couples-aftercare" aria-labelledby="couples-aftercare-title">
       <span className="eyebrow">AFTER THE EXPERIENCE</span>
