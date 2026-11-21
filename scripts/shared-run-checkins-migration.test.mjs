@@ -12,6 +12,8 @@ describe("shared experience check-in migration", () => {
     expect(migration).toMatch(/revoke all on public\.afterhours_experience_run_checkins from public, anon, authenticated/i);
     expect(migration).toMatch(/grant select, insert on public\.afterhours_experience_run_checkins to authenticated/i);
     expect(migration).toMatch(/grant update \(run_id, user_id, step_index, signal\) on public\.afterhours_experience_run_checkins to authenticated/i);
+    expect(migration).toMatch(/create or replace function public\.afterhours_guard_run_checkin_identity\(\)[\s\S]*?new\.run_id is distinct from old\.run_id[\s\S]*?new\.user_id is distinct from old\.user_id[\s\S]*?new\.step_index is distinct from old\.step_index/i);
+    expect(migration).toMatch(/create trigger afterhours_run_checkins_identity_guard[\s\S]*?before update on public\.afterhours_experience_run_checkins/i);
   });
 
   it("allows reads only to the participant or the owner of the related run", () => {
