@@ -9,7 +9,7 @@ import {
 } from "./services/media";
 import { supabase, supabaseConfigured } from "./services/supabase";
 import { composeImageWithOverlay, drawCameraFrame, mediaOverlayFrames, type OverlayFrameStyle } from "./mediaOverlay";
-import { appendMediaCaptureChunk, discardMediaCapture, MAX_MEDIA_CAPTURE_BYTES, missingCaptureTrack, stopMediaRecorder, stopMediaStreams, waitForVideoReady, watchMediaStreamInterruption } from "./services/mediaCapture";
+import { appendMediaCaptureChunk, canRecoverInterruptedCapture, discardMediaCapture, MAX_MEDIA_CAPTURE_BYTES, missingCaptureTrack, stopMediaRecorder, stopMediaStreams, waitForVideoReady, watchMediaStreamInterruption } from "./services/mediaCapture";
 
 interface MediaVaultProps {
   sessionId: string;
@@ -336,7 +336,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
           captureSizeExceededRef.current=false;
           stopCaptureTracks();
           setCaptureConsent(false);
-          if(interruptedBlob.size>0&&interruptedBlob.size<=MAX_MEDIA_CAPTURE_BYTES){
+          if(canRecoverInterruptedCapture(interruptedBlob.size)){
             const extension=interruptedType.includes("mp4")?".mp4":interruptedType.includes("ogg")?".ogg":".webm";
             const partialFile=new File([interruptedBlob],`after-hours-${captureKind}-recovered-${Date.now()}${extension}`,{type:interruptedType});
             setPendingCapture(partialFile);
