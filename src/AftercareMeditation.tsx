@@ -4,6 +4,7 @@ import {
   AFTERCARE_MEDITATION_DURATION_SECONDS,
   AFTERCARE_MEDITATION_PHASES,
   formatAftercareMeditationTime,
+  getAftercareMeditationAccessibleTime,
   getAftercareMeditationPhase,
   getAftercareMeditationProgressPercent,
   getAftercareMeditationRemainingSeconds,
@@ -104,7 +105,12 @@ export default function AftercareMeditation({ language }: { language: Language }
       </div>
 
       <div className="aftercare-meditation-clock">
-        <time>{formatAftercareMeditationTime(remainingSeconds)}</time>
+        <time
+          dateTime={`PT${remainingSeconds}S`}
+          aria-label={getAftercareMeditationAccessibleTime(remainingSeconds, language)}
+        >
+          {formatAftercareMeditationTime(remainingSeconds)}
+        </time>
         <span>{t("resterend", "remaining")}</span>
       </div>
 
