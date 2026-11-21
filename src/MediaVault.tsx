@@ -423,6 +423,8 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
 
   const openItem = async (item: PrivateMediaItem) => {
     if(!mountedRef.current)return;
+    // Opening another item exits any unfinished delete-confirmation state.
+    setDeletingPath("");
     setBusy(true);
     setMessage("");
     setSignedUrl("");
@@ -527,7 +529,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
                   </div>
                   {deletingPath === item.path ? (
                     <div className="media-item-actions">
-                      <button type="button" onClick={() => void removeItem(item.path)} disabled={busy}>{t("Bevestig", "Confirm")}</button>
+                      <button type="button" onClick={() => void removeItem(item.path)} disabled={busy} aria-label={t(`Verwijder ${displayName(item.name)} definitief`, `Permanently delete ${displayName(item.name)}`)}>{t("Definitief verwijderen", "Delete permanently")}</button>
                       <button type="button" onClick={() => setDeletingPath("")} disabled={busy}>{t("Annuleer", "Cancel")}</button>
                     </div>
                   ) : (
