@@ -120,6 +120,29 @@ export async function loadExperienceRunCheckIns(runIds: string[], expectedUserId
   return (data ?? []) as ExperienceRunCheckIn[];
 }
 
+export async function loadOwnExperienceRunConsentIds(runIds: string[], expectedUserId: string): Promise<string[]> {
+  await assertWorldAccount(expectedUserId);
+  if (!runIds.length) return [];
+  const { data, error } = await supabase!
+    .from("afterhours_experience_run_consents")
+    .select("run_id")
+    .in("run_id", runIds.slice(0, 50))
+    .eq("user_id", expectedUserId)
+    .is("revoked_at", null)
+    .limit(50);
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((row: { run_id: string }) => row.run_id);
+}
+
+export async function renewExperienceRunConsent(runId: string, expectedUserId: string): Promise<void> {
+  await assertWorldAccount(expectedUserId);
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(runId)) {
+    throw new Error("Invalid experience run.");
+  }
+  const { error } = await supabase!.rpc("renew_afterhours_experience_consent", { p_run_id: runId });
+  if (error) throw new Error(error.message);
+}
+
 export async function submitExperienceRunCheckIn(args: {
   runId: string;
   stepIndex: number;
