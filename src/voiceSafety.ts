@@ -97,12 +97,13 @@ export function stopVoiceRecognition(recognition: VoiceRecognitionHandle | null 
   }
 }
 
-/** Accept an event only from the recognizer that was started for the active profile. */
+/** Accept an event only from a recognizer with a non-empty active profile identity. */
 export function isVoiceRecognitionCurrent<T>(
   activeProfileId: string,
   startedProfileId: string,
   activeRecognition: T | null | undefined,
   startedRecognition: T,
 ): boolean {
+  if (!activeProfileId.trim() || !startedProfileId.trim()) return false;
   return activeProfileId === startedProfileId && activeRecognition === startedRecognition;
 }
