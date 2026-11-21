@@ -67,6 +67,7 @@ function isState(value:unknown):value is AfterHoursState{
   &&(consent.revokedAt===null||typeof consent.revokedAt==="string")
   &&!!profile
   &&typeof profile.id==="string"
+  &&profile.id.trim().length>0
   &&typeof profile.displayName==="string"
   &&typeof profile.username==="string"
   &&(profile.avatarStyle===undefined||profile.avatarStyle==="sigil"||profile.avatarStyle==="collar"||profile.avatarStyle==="key"||profile.avatarStyle==="crown")
@@ -77,6 +78,8 @@ function isState(value:unknown):value is AfterHoursState{
   &&!!session
   &&typeof session.id==="string"
   &&typeof session.profileId==="string"
+  &&session.profileId.trim().length>0
+  &&session.profileId===profile.id
   &&(session.status==="ready"||session.status==="active"||session.status==="paused"||session.status==="completed"||session.status==="stopped")
   &&typeof session.round==="number"
   &&Number.isInteger(session.round)
