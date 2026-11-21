@@ -45,9 +45,31 @@ export function privateJournalStorageForOwner(ownerId: string, backingStorage?: 
   };
 }
 
+const STORAGE_READ_ERROR = "Lokale opslag is niet toegankelijk. Controleer of sitegegevens zijn toegestaan en probeer opnieuw.";
+const STORAGE_WRITE_ERROR = "Lokale opslag kan niet worden bijgewerkt. Controleer de beschikbare opslagruimte en browserinstellingen.";
+
 function storageTarget(storage?: JournalStorage): JournalStorage | undefined {
-  if (storage) return storage;
-  try { return globalThis.localStorage; } catch { return undefined; }
+  let target = storage;
+  if (!target) {
+    try { target = globalThis.localStorage; } catch { return undefined; }
+  }
+  if (!target) return undefined;
+
+  const backingStorage = target;
+  return {
+    getItem(key) {
+      try { return backingStorage.getItem(key); }
+      catch { throw new Error(STORAGE_READ_ERROR); }
+    },
+    setItem(key, value) {
+      try { backingStorage.setItem(key, value); }
+      catch { throw new Error(STORAGE_WRITE_ERROR); }
+    },
+    removeItem(key) {
+      try { backingStorage.removeItem(key); }
+      catch { throw new Error(STORAGE_WRITE_ERROR); }
+    },
+  };
 }
 function webCrypto(): Crypto {
   if (!globalThis.crypto?.subtle || !globalThis.crypto.getRandomValues) {
