@@ -85,21 +85,32 @@ type StorageListEntry = {
   created_at: string | null;
 };
 
-async function listStoragePages(path: string, sortColumn: "name" | "created_at"): Promise<StorageListEntry[]> {
-  const pageSize = 100;
-  const entries: StorageListEntry[] = [];
+export async function collectStoragePages<T>(
+  fetchPage: (offset: number, limit: number) => Promise<T[]>,
+  pageSize = 100,
+): Promise<T[]> {
+  if (!Number.isSafeInteger(pageSize) || pageSize < 1) {
+    throw new RangeError("Storage page size must be a positive safe integer.");
+  }
+  const entries: T[] = [];
   for (let offset = 0; ; offset += pageSize) {
-    const { data, error } = await supabase!.storage.from(BUCKET).list(path, {
-      limit: pageSize,
-      offset,
-      sortBy: { column: sortColumn, order: sortColumn === "created_at" ? "desc" : "asc" },
-    });
-    if (error) throw error;
-    const page = (data ?? []) as StorageListEntry[];
+    const page = await fetchPage(offset, pageSize);
     entries.push(...page);
     if (page.length < pageSize) break;
   }
   return entries;
+}
+
+async function listStoragePages(path: string, sortColumn: "name" | "created_at"): Promise<StorageListEntry[]> {
+  return collectStoragePages(async (offset, limit) => {
+    const { data, error } = await supabase!.storage.from(BUCKET).list(path, {
+      limit,
+      offset,
+      sortBy: { column: sortColumn, order: sortColumn === "created_at" ? "desc" : "asc" },
+    });
+    if (error) throw error;
+    return (data ?? []) as StorageListEntry[];
+  });
 }
 export async function listPrivateMedia(): Promise<PrivateMediaItem[]> {
   const userId = await currentUserId();
