@@ -1,15 +1,16 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
-  ArrowLeft, ArrowRight, BookOpen, CheckCircle2, Clapperboard,
+  ArrowLeft, ArrowRight, BookOpen, CheckCircle2, Clapperboard, Copy,
   Download, Eye, EyeOff, Flame, LockKeyhole, Mail, Music2, Pause,
   Play, Plus, Save, Share2, ShieldCheck, Sparkles, Square, Star, Trash2,
   UnlockKeyhole, Volume2, VolumeX
 } from "lucide-react";
 import {
-  createExperienceRun, deleteExperienceRun, deleteWorldRecord,
-  loadExperienceRuns, loadWorldRecords, resumeExperienceRun,
+  acceptExperienceInvitation, createExperienceInvitation, createExperienceRun,
+  deleteExperienceRun, deleteWorldRecord, loadExperienceInvitations,
+  loadExperienceRuns, loadWorldRecords, resumeExperienceRun, revokeExperienceInvitation,
   saveWorldRecord, updateExperienceRun,
-  type ExperienceRun, type WorldModule, type WorldRecord
+  type ExperienceInvitation, type ExperienceRun, type WorldModule, type WorldRecord
 } from "./services/worldRecords";
 import "./cinematic-experience.css";
 
@@ -152,9 +153,13 @@ export default function CinematicWorld({
   onOpenGameLibrary, onOpenAftercare, onOpenSafetyPlan
 }: Props) {
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
-  const [tab, setTab] = useState<Tab>("experience");
+  const [tab, setTab] = useState<Tab>(() => new URLSearchParams(window.location.search).has("invite") ? "invitation" : "experience");
   const [records, setRecords] = useState<RecordMap>(EMPTY_RECORDS);
   const [runs, setRuns] = useState<ExperienceRun[]>([]);
+  const [experienceInvites, setExperienceInvites] = useState<ExperienceInvitation[]>([]);
+  const [selectedInviteRunId, setSelectedInviteRunId] = useState("");
+  const [inviteLink, setInviteLink] = useState("");
+  const [incomingInviteToken, setIncomingInviteToken] = useState<string | null>(() => new URLSearchParams(window.location.search).get("invite"));
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -216,7 +221,8 @@ export default function CinematicWorld({
     .filter((record) => record.record_key.startsWith("card:"))
     .map((record) => ({ id: record.record_key, title: String(record.payload.title ?? ""), text: String(record.payload.text ?? "") }))
     .filter((card) => card.title && card.text);
-  const recoverableRun = runs.find((run) => run.status === "active" || run.status === "paused") ?? null;
+  const recoverableRun = runs.find((run) => run.user_id === remoteProfileId && (run.status === "active" || run.status === "paused")) ?? null;
+  const invitableRuns = runs.filter((run) => run.user_id === remoteProfileId && (run.status === "active" || run.status === "paused"));
   const selectedScene = scenes.find((scene) => scene.key === selectedSceneKey) ?? null;
 
   async function refreshData(userId = remoteProfileId) {
@@ -241,6 +247,9 @@ export default function CinematicWorld({
     setError("");
     setRecords(EMPTY_RECORDS);
     setRuns([]);
+    setExperienceInvites([]);
+    setInviteLink("");
+    setSelectedInviteRunId("");
     setVaultPlain(null);
     setVaultPassphrase("");
     setVaultDraft("");
@@ -279,7 +288,7 @@ export default function CinematicWorld({
     }
     const load = async () => {
       try {
-        const [director, vault, dominion, sensory, invitation, ritual, club, history] = await Promise.all([
+        const [director, vault, dominion, sensory, invitation, ritual, club, history, invites] = await Promise.all([
           loadWorldRecords("director", remoteProfileId),
           loadWorldRecords("vault", remoteProfileId),
           loadWorldRecords("dominion", remoteProfileId),
@@ -287,11 +296,14 @@ export default function CinematicWorld({
           loadWorldRecords("invitation", remoteProfileId),
           loadWorldRecords("ritual", remoteProfileId),
           loadWorldRecords("club", remoteProfileId),
-          loadExperienceRuns(remoteProfileId)
+          loadExperienceRuns(remoteProfileId),
+          loadExperienceInvitations(remoteProfileId)
         ]);
         if (!active) return;
         setRecords({ director, vault, dominion, sensory, invitation, ritual, club });
         setRuns(history);
+        setExperienceInvites(invites);
+      setExperienceInvites(invites);
       } catch (cause) {
         if (active) setError(cause instanceof Error ? cause.message : t("Privégegevens konden niet worden geladen.", "Private data could not be loaded."));
       } finally {
@@ -782,6 +794,90 @@ export default function CinematicWorld({
     if (masterGain.current) masterGain.current.gain.setTargetAtTime(value, masterGain.current.context.currentTime, 0.2);
   }
 
+  async function createRunInvitation(runId: string) {
+    if (!remoteProfileId) return;
+    const run = runs.find((item) => item.id === runId && item.user_id === remoteProfileId);
+    if (!run || !["active", "paused"].includes(run.status)) {
+      setError(t("Kies een eigen actieve of gepauzeerde ervaring.", "Choose your own active or paused experience."));
+      return;
+    }
+    setBusy(true);
+    setError("");
+    setInviteLink("");
+    try {
+      const tokenBytes = crypto.getRandomValues(new Uint8Array(32));
+      const token = Array.from(tokenBytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
+      const digest = await crypto.subtle.digest("SHA-256", tokenBytes);
+      const tokenHash = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+      await createExperienceInvitation({ runId, tokenHash, expectedUserId: remoteProfileId });
+      const url = new URL(window.location.href);
+      url.searchParams.set("screen", "cinematic");
+      url.searchParams.set("invite", token);
+      url.hash = "";
+      setInviteLink(url.toString());
+      await refreshData();
+      try {
+        if (navigator.share) {
+          await navigator.share({ title: t("AFTER HOURS · uitnodiging", "AFTER HOURS · invitation"), text: t("Je bent uitgenodigd om deel te nemen. Je kiest zelf of je accepteert. Inloggen is vereist.", "You are invited to participate. You choose whether to accept. Sign-in is required."), url: url.toString() });
+        } else if (navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText(url.toString());
+          setMessage(t("Veilige uitnodigingslink gekopieerd. De link verloopt over zeven dagen.", "Secure invitation link copied. It expires in seven days."));
+        } else {
+          setMessage(t("Uitnodigingslink aangemaakt. Kopieer de link hieronder.", "Invitation link created. Copy the link below."));
+        }
+      } catch (cause) {
+        if (!(cause instanceof Error && cause.name === "AbortError")) throw cause;
+        setMessage(t("Delen geannuleerd. De link blijft hieronder beschikbaar.", "Sharing cancelled. The link remains available below."));
+      }
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : t("Uitnodiging kon niet worden aangemaakt.", "Could not create invitation."));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function acceptIncomingInvitation() {
+    if (!remoteProfileId || !incomingInviteToken) return;
+    setBusy(true);
+    setError("");
+    try {
+      const tokenBytes = new Uint8Array(incomingInviteToken.match(/.{1,2}/g)?.map((byte) => Number.parseInt(byte, 16)) ?? []);
+      if (tokenBytes.length !== 32 || Array.from(tokenBytes).some((byte) => !Number.isFinite(byte))) {
+        throw new Error(t("Deze uitnodigingslink is ongeldig.", "This invitation link is invalid."));
+      }
+      const digest = await crypto.subtle.digest("SHA-256", tokenBytes);
+      const tokenHash = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+      const accepted = await acceptExperienceInvitation(tokenHash, remoteProfileId);
+      setIncomingInviteToken(null);
+      const url = new URL(window.location.href);
+      url.searchParams.delete("invite");
+      window.history.replaceState({}, "", url.toString());
+      await refreshData();
+      setMessage(t("Uitnodiging geaccepteerd. Je eigen toestemming is vastgelegd voor deze ervaring. De eigenaar beheert de sessie; je kunt op ieder moment je toestemming intrekken via je accountinstellingen.", "Invitation accepted. Your own consent has been recorded for this experience. The owner manages the session; you can withdraw consent at any time through your account settings."));
+      setTab("invitation");
+      void accepted;
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : t("Uitnodiging accepteren is niet gelukt.", "Could not accept invitation."));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function revokeInvite(invite: ExperienceInvitation) {
+    if (!remoteProfileId || invite.status !== "pending") return;
+    if (!window.confirm(t("Deze uitnodigingslink direct ongeldig maken?", "Revoke this invitation link immediately?"))) return;
+    setBusy(true);
+    try {
+      await revokeExperienceInvitation(invite.id, remoteProfileId);
+      await refreshData();
+      setMessage(t("Uitnodigingslink ingetrokken.", "Invitation link revoked."));
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : t("Uitnodiging intrekken is niet gelukt.", "Could not revoke invitation."));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function createInvitation(shareAfterSave = false) {
     setBusy(true);
     setError("");
@@ -1063,13 +1159,25 @@ export default function CinematicWorld({
 
       {tab === "invitation" && (
         <section className="cw-section">
-          <div className="cw-section-heading"><span className="cw-kicker">05 · A MOMENT TO REMEMBER</span><h2><Mail /> The Secret Invitation</h2><p>{t("Maak een persoonlijke uitnodiging en deel hem zelf. De ontvanger kiest altijd vrij of die reageert of deelneemt.", "Create a personal invitation and share it yourself. The recipient always freely chooses whether to respond or participate.")}</p></div>
+          <div className="cw-section-heading"><span className="cw-kicker">05 · A MOMENT TO REMEMBER</span><h2><Mail /> The Secret Invitation</h2><p>{t("Deel een beveiligde, eenmalige uitnodigingslink voor een lopende ervaring. De ontvanger moet inloggen en geeft zelf expliciet toestemming. Een uitnodiging is nooit automatisch akkoord.", "Share a secure, single-use invitation link for an ongoing experience. The recipient must sign in and explicitly consent. An invitation is never automatic agreement.")}</p></div>
+          {incomingInviteToken && (
+            <div className="cw-form-panel cw-invite-accept">
+              <span className="cw-kicker">{t("PERSOONLIJKE UITNODIGING", "PERSONAL INVITATION")}</span>
+              <h3>{t("Je bent uitgenodigd", "You are invited")}</h3>
+              <p>{t("Bekijk eerst de afspraken met de organisator. Door te accepteren leg je alleen jouw eigen toestemming vast. Je kunt later altijd stoppen of je toestemming intrekken.", "Review the arrangements with the host first. Accepting records only your own consent. You can always stop later or withdraw consent.")}</p>
+              {!remoteProfileId ? <p>{t("Log in op je eigen AFTER HOURS-account om deze uitnodiging te accepteren.", "Sign in to your own AFTER HOURS account to accept this invitation.")}</p> : null}
+              <button type="button" className="cw-primary" disabled={busy || !remoteProfileId} onClick={() => void acceptIncomingInvitation()}><CheckCircle2 size={15} />{t("Ik accepteer en geef mijn eigen toestemming", "Accept and give my own consent")}</button>
+            </div>
+          )}
           <div className="cw-form-panel">
-            <label>{t("Titel", "Title")}<input value={inviteTitle} onChange={(event) => setInviteTitle(event.target.value)} maxLength={100} /></label>
-            <label>{t("Persoonlijke boodschap", "Personal message")}<textarea rows={5} value={inviteMessage} onChange={(event) => setInviteMessage(event.target.value)} maxLength={1800} /></label>
-            <div className="cw-card-actions"><button type="button" className="cw-primary" disabled={busy || !remoteProfileId || !inviteTitle.trim() || !inviteMessage.trim()} onClick={() => void createInvitation(false)}><Save size={15} />{t("Concept opslaan", "Save draft")}</button><button type="button" disabled={busy || !remoteProfileId || !inviteTitle.trim() || !inviteMessage.trim()} onClick={() => void createInvitation(true)}><Share2 size={15} />{t("Opslaan en delen", "Save and share")}</button></div>
+            <h3>{t("Deel een ervaring", "Invite someone to an experience")}</h3>
+            <p>{t("Kies een eigen actieve of gepauzeerde ervaring. De link is maximaal zeven dagen geldig, kan één keer worden geaccepteerd en bevat geen wachtwoord of persoonsgegevens.", "Choose your own active or paused experience. The link is valid for up to seven days, can be accepted once and contains no password or personal data.")}</p>
+            <label>{t("Ervaring", "Experience")}<select value={selectedInviteRunId} onChange={(event) => setSelectedInviteRunId(event.target.value)}><option value="">{t("Kies een ervaring", "Choose an experience")}</option>{invitableRuns.map((run) => <option key={run.id} value={run.id}>{String(run.scene_snapshot.title ?? run.scene_key)} · {run.status === "active" ? t("Actief", "Active") : t("Gepauzeerd", "Paused")}</option>)}</select></label>
+            <button type="button" className="cw-primary" disabled={busy || !remoteProfileId || !selectedInviteRunId} onClick={() => void createRunInvitation(selectedInviteRunId)}><Share2 size={15} />{t("Maak veilige uitnodigingslink", "Create secure invitation link")}</button>
+            {inviteLink && <div className="cw-invite-link"><label>{t("Jouw eenmalige uitnodigingslink", "Your one-time invitation link")}<input readOnly value={inviteLink} /></label><button type="button" onClick={() => { void navigator.clipboard?.writeText(inviteLink); setMessage(t("Uitnodigingslink gekopieerd.", "Invitation link copied.")); }}><Copy size={15} />{t("Kopieer link", "Copy link")}</button></div>}
           </div>
-          <div className="cw-saved-list"><h3>{t("Eerdere uitnodigingen", "Previous invitations")} <span>{records.invitation.length}</span></h3>{records.invitation.map((record) => <div className="cw-saved-row" key={record.record_key}><div><strong>{String(record.payload.title ?? t("Uitnodiging", "Invitation"))}</strong><small>{record.payload.shareStatus === "shared" ? t("Gedeeld", "Shared") : t("Concept", "Draft")} · {new Date(record.updated_at).toLocaleDateString(language === "nl" ? "nl-NL" : "en-GB")}</small></div><button type="button" onClick={() => { setInviteTitle(String(record.payload.title ?? "")); setInviteMessage(String(record.payload.message ?? "")); }}>{t("Open", "Open")}</button></div>)}</div>
+          <div className="cw-saved-list"><h3>{t("Uitnodigingen en toestemmingen", "Invitations and consent")} <span>{experienceInvites.length}</span></h3>{experienceInvites.map((invite) => <div className="cw-saved-row" key={invite.id}><div><strong>{invite.status === "accepted" ? t("Toestemming ontvangen", "Consent received") : invite.status === "pending" && new Date(invite.expires_at).getTime() <= Date.now() ? t("Verlopen", "Expired") : t(invite.status === "revoked" ? "Ingetrokken" : "Wacht op acceptatie", invite.status === "revoked" ? "Revoked" : "Awaiting acceptance")}</strong><small>{t("Geldig tot", "Expires")} {new Date(invite.expires_at).toLocaleString(language === "nl" ? "nl-NL" : "en-GB")}{invite.accepted_at ? " · " + t("Geaccepteerd", "Accepted") + " " + new Date(invite.accepted_at).toLocaleString(language === "nl" ? "nl-NL" : "en-GB") : ""}</small></div>{invite.status === "pending" && new Date(invite.expires_at).getTime() > Date.now() ? <button type="button" disabled={busy} onClick={() => void revokeInvite(invite)}>{t("Intrekken", "Revoke")}</button> : null}</div>)}</div>
+          <div className="cw-saved-list"><h3>{t("Eerdere uitnodigingsconcepten", "Previous invitation drafts")} <span>{records.invitation.length}</span></h3>{records.invitation.map((record) => <div className="cw-saved-row" key={record.record_key}><div><strong>{String(record.payload.title ?? t("Uitnodiging", "Invitation"))}</strong><small>{record.payload.shareStatus === "shared" ? t("Gedeeld", "Shared") : t("Concept", "Draft")} · {new Date(record.updated_at).toLocaleDateString(language === "nl" ? "nl-NL" : "en-GB")}</small></div><button type="button" onClick={() => { setInviteTitle(String(record.payload.title ?? "")); setInviteMessage(String(record.payload.message ?? "")); }}>{t("Open", "Open")}</button></div>)}</div>
         </section>
       )}
 
