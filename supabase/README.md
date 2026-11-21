@@ -4,7 +4,7 @@ AFTER HOURS uses Supabase/PostgreSQL for account-scoped progress, session safety
 
 ## Migration history
 
-The version prefix in each file under `supabase/migrations/` must match the version recorded in the connected production project's Supabase migration ledger. The current production ledger has 27 entries. The file names below have been aligned to that ledger without changing SQL contents or applying any database change.
+The version prefix in each file under `supabase/migrations/` must match the version recorded in the connected production project's Supabase migration ledger. The current production ledger has 28 entries. The file names below have been aligned to that ledger without changing SQL contents or applying any database change.
 
 | Production ledger version | Migration file |
 |---|---|
@@ -35,6 +35,7 @@ The version prefix in each file under `supabase/migrations/` must match the vers
 | `20261121000315` | `20261121000315_afterhours_invitation_accepted_user_index.sql` |
 | `20261121000345` | `20261121000345_afterhours_experience_invitation_preview.sql` |
 | `20261121000429` | `20261121000429_afterhours_invite_requires_paused_run.sql` |
+| `20261121001151` | `20261121001151_afterhours_consent_rls_recursion_guard.sql` |
 
 Run `npm run check:migrations` to verify that the checked-in file list still matches this deployed baseline. When adding a migration, use the version that was actually recorded by the reviewed migration workflow, then update the guard and this table in the same change. Never rename or replay an already-applied production migration casually.
 
@@ -68,9 +69,10 @@ Consent is session-scoped and auditable. Revocation must stop an active or pause
 
 The `after-hours-private-media` bucket must remain private. Object paths use `<auth.uid()>/<session-id>/<filename>`; storage policies must scope access to the first folder and enforce upload limits. Use authenticated storage operations or short-lived signed URLs. Never make this bucket public.
 
-
 ## Shared experience invitations and participant consent
 
-The three shared-experience migrations add one-time invitation links for an existing paused experience. The host must pause first and keep the experience paused while the recipient reviews and accepts. Only a SHA-256 token hash is stored; raw invitation tokens exist only in the sender's browser and shared link. The recipient must sign in with their own account, preview the exact scene title, description and steps, and explicitly accept. Acceptance records a separate consent row for that account.
+The shared-experience migrations add one-time invitation links for an existing paused experience. The host must pause first and keep the experience paused while the recipient reviews and accepts. Only a SHA-256 token hash is stored; raw invitation tokens exist only in the sender's browser and shared link. The recipient must sign in with their own account, preview the exact scene title, description and steps, and explicitly accept. Acceptance records a separate consent row for that account.
 
 Participants can withdraw their consent. The withdrawal RPC revokes their consent and stops the shared run in the same database transaction. A database activation guard prevents the owner from reactivating a run after any accepted participant has withdrawn; fresh consent must be obtained through a new invitation. Invitation rows are visible only to their inviter, while accepted participants can read the run under the consent-based RLS policy. The participant-facing UI is read-only for the host's run and includes an explicit withdraw-and-stop action. Pausing, completing, or stopping a run revokes every participant's consent. Resuming requires the owner to reconfirm and every invited participant to accept a fresh invitation.
+
+The consent RLS policies use a narrowly scoped helper in the non-exposed `private` schema to verify run ownership without recursively evaluating the run and consent policies. The helper checks the authenticated identity against the run owner and is executable only by authenticated clients through the policy path. A live two-account database test covers invitation preview, acceptance, participant read-only access, owner resume, and participant withdrawal.
