@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  canApplyMediaOverlay,
   createPrivateMediaUrl,
   deletePrivateMedia,
   listPrivateMedia,
@@ -185,15 +186,18 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
     setBusy(true);
     try{
       validatePrivateMediaFile(file);
-      const previewFile=file.type.startsWith("image/")&&!overlayAlreadyApplied?await composeImageWithOverlay(file,frameStyleRef.current):file;
+      const overlayApplied=canApplyMediaOverlay(file.type)&&!overlayAlreadyApplied;
+      const previewFile=overlayApplied?await composeImageWithOverlay(file,frameStyleRef.current):file;
       if(!mountedRef.current)return;
       validatePrivateMediaFile(previewFile);
       if(pendingUrl) URL.revokeObjectURL(pendingUrl);
       setPendingCapture(previewFile);
       setPendingUrl(URL.createObjectURL(previewFile));
-      setMessage(file.type.startsWith("image/")
+      setMessage(overlayApplied
         ?t("AH-overlay toegepast. Controleer de foto en kies daarna zelf voor privé opslaan.","AH overlay applied. Review the photo, then choose whether to save it privately.")
-        :t("Voorbeeld klaar. Kies daarna zelf voor privé opslaan. Bestaande video's worden niet opnieuw gerenderd.","Preview ready. Choose whether to save privately. Existing videos are not re-rendered."));
+        :file.type.startsWith("image/")&&!overlayAlreadyApplied
+          ?t("Voorbeeld klaar. Dit fotoformaat wordt ongewijzigd bewaard omdat de browser het niet betrouwbaar via canvas kan verwerken.","Preview ready. This photo format will be kept unchanged because the browser cannot reliably process it through canvas.")
+          :t("Voorbeeld klaar. Kies daarna zelf voor privé opslaan. Bestaande video's worden niet opnieuw gerenderd.","Preview ready. Choose whether to save privately. Existing videos are not re-rendered."));
     }catch(error){
       if(mountedRef.current)setMessage(error instanceof Error ? error.message : t("Dit bestand kan niet worden gebruikt.","This file cannot be used."));
     }finally{if(mountedRef.current)setBusy(false)}
@@ -503,7 +507,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
             <span>{busy ? t("Even wachten…", "Please wait…") : t("Afbeelding, video of audio kiezen", "Choose image, video or audio")}</span>
             <input
               type="file"
-              accept="image/jpeg,image/png,image/webp,image/gif,image/avif,video/webm,video/mp4,audio/mpeg,audio/mp4,audio/aac,audio/wav,audio/x-wav,audio/ogg,audio/webm,audio/flac"
+              accept="image/jpeg,image/png,image/webp,image/gif,image/avif,image/heic,image/heif,video/webm,video/mp4,video/quicktime,audio/mpeg,audio/mp4,audio/aac,audio/wav,audio/x-wav,audio/ogg,audio/webm,audio/flac"
               disabled={busy||isRecording||!!pendingCapture}
               onChange={event => {
                 const file = event.currentTarget.files?.[0];
@@ -518,7 +522,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
             <p>{t("Opnames zijn optioneel. Geef alleen toestemming wanneer iedereen vrij en duidelijk akkoord is. De opname wordt eerst lokaal getoond en pas na jouw keuze geüpload.","Recordings are optional. Proceed only when everyone freely and clearly agrees. The recording is previewed locally and uploaded only after you choose to save it.")}</p>
             <label className="media-upload media-photo-capture">
               <span>{t("Maak een foto met de camera","Take a photo with the camera")}</span>
-              <input type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/avif" capture="environment" disabled={busy||isRecording||!!pendingCapture} onChange={event=>{const file=event.currentTarget.files?.[0];void stageSelectedFile(file);event.currentTarget.value="";}}/>
+              <input type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/avif,image/heic,image/heif" capture="environment" disabled={busy||isRecording||!!pendingCapture} onChange={event=>{const file=event.currentTarget.files?.[0];void stageSelectedFile(file);event.currentTarget.value="";}}/>
             </label>
             <div className="media-frame-picker" role="group" aria-label={t("Stijl van de AFTER HOURS-overlay","AFTER HOURS overlay style")}>
               <span>{t("Kies je AH-frame","Choose your AH frame")}</span>
