@@ -1329,9 +1329,28 @@ export default function CinematicWorld({
               <div className="cw-remote-progress" role="progressbar" aria-label={t("Voortgang gezamenlijke ervaring", "Shared experience progress")} aria-valuemin={0} aria-valuemax={run.total_steps} aria-valuenow={run.status === "completed" ? run.total_steps : stepNumber}><span style={{ width: run.status === "completed" ? "100%" : `${progress}%` }} /></div>
               <small>{t("Stap", "Step")} {run.status === "completed" ? run.total_steps : stepNumber} / {run.total_steps}</small>
               {typeof stepText === "string" && (run.status === "active" || run.status === "paused") && <p className="cw-remote-step-text">{stepText}</p>}
+              {run.status === "active" && (() => {
+                const myCheckIn = sharedCheckIns.find((item) => item.run_id === run.id && item.user_id === remoteProfileId && item.step_index === run.current_step);
+                return <div className="cw-remote-checkin">
+                  <strong>{t("Jouw check-in voor deze stap", "Your check-in for this step")}</strong>
+                  {myCheckIn ? <small>{myCheckIn.signal === "ready" ? t("Je hebt aangegeven dat je klaar bent.", "You marked yourself ready.") : myCheckIn.signal === "pause_requested" ? t("Pauzeverzoek verstuurd.", "Pause request sent.") : t("Stopverzoek verstuurd.", "Stop request sent.")}</small> : <div>
+                    <button type="button" disabled={busy} onClick={() => void sendSharedCheckIn(run, "ready")}>{t("Ik ben klaar", "I'm ready")}</button>
+                    <button type="button" disabled={busy} onClick={() => void sendSharedCheckIn(run, "pause_requested")}>{t("Vraag pauze", "Request pause")}</button>
+                    <button type="button" className="cw-danger" disabled={busy} onClick={() => void sendSharedCheckIn(run, "stop_requested")}>{t("Stop en trek consent in", "Stop and withdraw consent")}</button>
+                  </div>}
+                </div>;
+              })()}
               {(run.status === "active" || run.status === "paused") && <button type="button" className="cw-danger" disabled={busy} onClick={() => void withdrawSharedConsent(run.id)}>{t("Toestemming intrekken en stoppen", "Withdraw consent and stop")}</button>}
             </div>;
           })}</div>}
+          {runs.filter((run) => run.user_id === remoteProfileId && (run.status === "active" || run.status === "paused")).map((run) => {
+            const signals = sharedCheckIns.filter((item) => item.run_id === run.id && item.step_index === run.current_step);
+            return signals.length ? <div className="cw-remote-checkin cw-host-checkins" key={run.id}>
+              <strong>{t("Deelnemerscheck-in", "Participant check-in")} · {String(run.scene_snapshot.title ?? run.scene_key)}</strong>
+              {signals.map((signal) => <small key={signal.id}>{signal.signal === "ready" ? t("Deelnemer is klaar", "Participant is ready") : signal.signal === "pause_requested" ? t("Deelnemer vraagt om pauze", "Participant requests a pause") : t("Deelnemer vraagt om te stoppen", "Participant requests to stop")} · {new Date(signal.created_at).toLocaleTimeString(language === "nl" ? "nl-NL" : "en-GB", { hour: "2-digit", minute: "2-digit" })}</small>)}
+              {signals.some((signal) => signal.signal === "pause_requested") && <small>{t("Pauzeer de ervaring via de bedieningsknoppen. Er wordt nooit automatisch hervat.", "Pause the experience using the controls. It never resumes automatically.")}</small>}
+            </div> : null;
+          })}
           <div className="cw-saved-list"><h3>{t("Uitnodigingen en toestemmingen", "Invitations and consent")} <span>{experienceInvites.length}</span></h3>{experienceInvites.map((invite) => <div className="cw-saved-row" key={invite.id}><div><strong>{invite.status === "accepted" ? t("Toestemming ontvangen", "Consent received") : invite.status === "pending" && new Date(invite.expires_at).getTime() <= Date.now() ? t("Verlopen", "Expired") : t(invite.status === "revoked" ? "Ingetrokken" : "Wacht op acceptatie", invite.status === "revoked" ? "Revoked" : "Awaiting acceptance")}</strong><small>{t("Geldig tot", "Expires")} {new Date(invite.expires_at).toLocaleString(language === "nl" ? "nl-NL" : "en-GB")}{invite.accepted_at ? " · " + t("Geaccepteerd", "Accepted") + " " + new Date(invite.accepted_at).toLocaleString(language === "nl" ? "nl-NL" : "en-GB") : ""}</small></div>{invite.status === "pending" && new Date(invite.expires_at).getTime() > Date.now() ? <button type="button" disabled={busy} onClick={() => void revokeInvite(invite)}>{t("Intrekken", "Revoke")}</button> : null}</div>)}</div>
           <div className="cw-saved-list"><h3>{t("Eerdere uitnodigingsconcepten", "Previous invitation drafts")} <span>{records.invitation.length}</span></h3>{records.invitation.map((record) => <div className="cw-saved-row" key={record.record_key}><div><strong>{String(record.payload.title ?? t("Uitnodiging", "Invitation"))}</strong><small>{record.payload.shareStatus === "shared" ? t("Gedeeld", "Shared") : t("Concept", "Draft")} · {new Date(record.updated_at).toLocaleDateString(language === "nl" ? "nl-NL" : "en-GB")}</small></div><button type="button" onClick={() => { setInviteTitle(String(record.payload.title ?? "")); setInviteMessage(String(record.payload.message ?? "")); }}>{t("Open", "Open")}</button></div>)}</div>
         </section>
