@@ -2,13 +2,13 @@
 do $definition_tests$
 declare v_definition text; v_run_lock integer; v_invite_lock integer;
 begin
-  select pg_get_functiondef('private.accept_afterhours_experience_invitation_impl(text)'::regprocedure) into v_definition;
-  v_run_lock:=position('where id=v_locked_run_id' in lower(v_definition));
-  v_invite_lock:=position('where id=v_invitation.id' in lower(v_definition));
+  select regexp_replace(lower(pg_get_functiondef('private.accept_afterhours_experience_invitation_impl(text)'::regprocedure)), '\\s+', '', 'g') into v_definition;
+  v_run_lock:=position('whereid=v_locked_run_id' in v_definition);
+  v_invite_lock:=position('whereid=v_invitation.id' in v_definition);
   if v_run_lock=0 or v_invite_lock=0 or v_run_lock>v_invite_lock then
     raise exception 'Accept RPC must lock the run before locking the invitation';
   end if;
-  if position('for update' in lower(v_definition))=0 then raise exception 'Accept RPC must lock its rows'; end if;
+  if position('forupdate' in v_definition)=0 then raise exception 'Accept RPC must lock its rows'; end if;
   if exists(select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace
     where n.nspname='public' and p.proname in (
       'preview_afterhours_experience_invitation','accept_afterhours_experience_invitation','withdraw_afterhours_experience_consent'
