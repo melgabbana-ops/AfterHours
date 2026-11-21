@@ -28,6 +28,7 @@ export default function SecureDuoLobby({ roomId, language, onBack }: Props) {
   const nl = language === "nl";
   const [snapshot, setSnapshot] = useState<SecureDuoRoomSnapshot | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isOnline, setIsOnline] = useState(() => navigator.onLine);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -76,14 +77,17 @@ export default function SecureDuoLobby({ roomId, language, onBack }: Props) {
 
   // Refresh promptly when a participant returns to the app or reconnects.
   useEffect(() => {
-    const handleOnline = () => { void refresh(); };
+    const handleOnline = () => { setIsOnline(true); void refresh(); };
+    const handleOffline = () => setIsOnline(false);
     const handleVisibility = () => {
       if (document.visibilityState === "visible") void refresh();
     };
     window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
     document.addEventListener("visibilitychange", handleVisibility);
     return () => {
       window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
       document.removeEventListener("visibilitychange", handleVisibility);
     };
   }, [refresh]);
@@ -133,7 +137,10 @@ export default function SecureDuoLobby({ roomId, language, onBack }: Props) {
             <div className="couples-connection" role="status">
               {nl ? "Kamersituatie: " : "Room status: "}{statusText(snapshot.status)}
             </div>
-            {!navigator.onLine && (
+            <button type="button" className="couples-back-bottom" onClick={() => void refresh()} disabled={loading}>
+              {nl ? "Status vernieuwen" : "Refresh status"}
+            </button>
+            {!isOnline && (
               <p className="couples-safety" role="status">
                 {nl
                   ? "Je apparaat is offline. De getoonde kamerstatus kan verouderd zijn. Acties worden niet als gedeeld bevestigd."
@@ -162,7 +169,7 @@ export default function SecureDuoLobby({ roomId, language, onBack }: Props) {
                   <button
                     type="button"
                     className="couples-back-bottom"
-                    disabled={busy || snapshot.session.step === 0}
+                    disabled={busy || !isOnline || snapshot.session.step === 0}
                     onClick={() => void act(
                       () => advanceSecureDuoSession(roomId, "previous", snapshot.session.revision).then(() => undefined),
                       nl ? "Vorige stap gedeeld." : "Previous step synchronized.",
@@ -174,7 +181,7 @@ export default function SecureDuoLobby({ roomId, language, onBack }: Props) {
                   <button
                     type="button"
                     className="couples-primary"
-                    disabled={busy || snapshot.session.step === sharedPrompts.length - 1}
+                    disabled={busy || !isOnline || snapshot.session.step === sharedPrompts.length - 1}
                     onClick={() => void act(
                       () => advanceSecureDuoSession(roomId, "next", snapshot.session.revision).then(() => undefined),
                       nl ? "Volgende stap gedeeld." : "Next step synchronized.",
@@ -196,7 +203,7 @@ export default function SecureDuoLobby({ roomId, language, onBack }: Props) {
                 <button
                   type="button"
                   className="couples-primary"
-                  disabled={busy || Boolean(own?.consented) || snapshot.status === "active"}
+                  disabled={busy || !isOnline || Boolean(own?.consented) || snapshot.status === "active"}
                   onClick={() => void act(
                     () => setSecureDuoConsent(roomId, true),
                     nl ? "Jouw toestemming is vastgelegd." : "Your consent has been recorded.",
@@ -209,7 +216,7 @@ export default function SecureDuoLobby({ roomId, language, onBack }: Props) {
                   <button
                     type="button"
                     className="couples-back-bottom"
-                    disabled={busy}
+                    disabled={busy || !isOnline}
                     onClick={() => void act(
                       () => setSecureDuoConsent(roomId, false),
                       nl ? "Toestemming ingetrokken. De kamer is gepauzeerd." : "Consent withdrawn. The room is paused.",
@@ -223,7 +230,7 @@ export default function SecureDuoLobby({ roomId, language, onBack }: Props) {
                   <button
                     type="button"
                     className="couples-primary"
-                    disabled={busy}
+                    disabled={busy || !isOnline}
                     onClick={() => void act(
                       () => setSecureDuoRoomState(roomId, "active"),
                       nl ? "De kamer is actief." : "The room is active.",
@@ -237,7 +244,7 @@ export default function SecureDuoLobby({ roomId, language, onBack }: Props) {
                   <button
                     type="button"
                     className="couples-primary"
-                    disabled={busy}
+                    disabled={busy || !isOnline}
                     onClick={() => void act(
                       () => setSecureDuoRoomState(roomId, "paused"),
                       nl ? "De kamer is gepauzeerd." : "The room is paused.",
@@ -250,7 +257,7 @@ export default function SecureDuoLobby({ roomId, language, onBack }: Props) {
                 <button
                   type="button"
                   className="couples-back-bottom"
-                  disabled={busy}
+                  disabled={busy || !isOnline}
                   onClick={() => void act(
                     () => setSecureDuoRoomState(roomId, "stopped"),
                     nl ? "De kamer is definitief gestopt." : "The room has been permanently stopped.",
