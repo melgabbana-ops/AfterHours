@@ -286,3 +286,20 @@ export async function withdrawExperienceConsent(runId: string, expectedUserId: s
   const { error } = await supabase!.rpc("withdraw_afterhours_experience_consent", { p_run_id: runId });
   if (error) throw new Error(error.message);
 }
+
+
+export type ExperienceInvitationPreview = {
+  run_id: string;
+  title: string;
+  description: string;
+  steps: string[];
+  expires_at: string;
+};
+
+export async function previewExperienceInvitation(tokenHash: string, expectedUserId: string): Promise<ExperienceInvitationPreview> {
+  await assertWorldAccount(expectedUserId);
+  if (!/^[a-f0-9]{64}$/.test(tokenHash)) throw new Error("This invitation link is invalid.");
+  const { data, error } = await supabase!.rpc("preview_afterhours_experience_invitation", { p_token_hash: tokenHash });
+  if (error) throw new Error(error.message);
+  return data as ExperienceInvitationPreview;
+}
