@@ -35,6 +35,22 @@ describe("shared experience check-in migration", () => {
     expect(migration).toMatch(/with check \([\s\S]*?user_id = \(select auth\.uid\(\)\)[\s\S]*?r\.current_step = afterhours_experience_run_checkins\.step_index/i);
   });
 
+  it("lets accepted participants see a paused run after consent was revoked", () => {
+    expect(migration).toMatch(/private\.afterhours_is_accepted_run_participant/);
+    expect(migration).toMatch(/status = 'paused'[\s\S]*?afterhours_is_accepted_run_participant/i);
+    expect(migration).toMatch(/accepted_user_id = p_user_id[\s\S]*?status = 'accepted'/i);
+  });
+
+  it("renews consent only for the accepted invitee on a paused run", () => {
+    expect(migration).toMatch(/private\.renew_afterhours_experience_consent_impl/);
+    expect(migration).toMatch(/r\.status = 'paused'/i);
+    expect(migration).toMatch(/i\.accepted_user_id = v_user_id/i);
+    expect(migration).toMatch(/i\.status = 'accepted'/i);
+    expect(migration).toMatch(/on conflict \(run_id, user_id\) do update[\s\S]*?revoked_at = null/i);
+    expect(migration).toMatch(/public\.renew_afterhours_experience_consent[\s\S]*?security invoker/i);
+    expect(migration).toMatch(/grant execute on function public\.renew_afterhours_experience_consent\(uuid\) to authenticated/i);
+  });
+
   it("rejects invalid step indexes and unsupported signals", () => {
     expect(migration).toMatch(/step_index >= 0 and step_index < 40/i);
     expect(migration).toMatch(/signal in \('ready', 'pause_requested', 'stop_requested'\)/i);
