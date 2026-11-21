@@ -8,6 +8,7 @@ import {
   importPrivateJournalBackup,
   loadPrivateJournalEntries,
   PRIVATE_JOURNAL_STORAGE_KEY,
+  privateJournalStorageForOwner,
   savePrivateJournalEntry,
   unlockPrivateJournalVault,
 } from "./privateJournal";
@@ -36,6 +37,20 @@ describe("encrypted private journal vault", () => {
     expect(journalSource).toContain('aria-busy={busy}');
     expect(journalSource).toContain('className="ah-journal-delete" onClick={()=>void remove()} disabled={busy}');
   });
+  it("isolates journal vaults by owner within the same browser storage", async () => {
+    const backingStorage = memoryStorage();
+    const aliceStorage = privateJournalStorageForOwner("account-alice", backingStorage);
+    const bobStorage = privateJournalStorageForOwner("account-bob", backingStorage);
+    const aliceKey = await createPrivateJournalVault("alice eigen wachtzin 2026", aliceStorage);
+    await savePrivateJournalEntry(aliceKey, { title: "Alleen voor Alice", body: "Privé reflectie." }, undefined, aliceStorage);
+
+    expect(hasPrivateJournalVault(aliceStorage)).toBe(true);
+    expect(hasPrivateJournalVault(bobStorage)).toBe(false);
+    expect(bobStorage.getItem(PRIVATE_JOURNAL_STORAGE_KEY)).toBeNull();
+    await expect(loadPrivateJournalEntries(aliceKey, bobStorage)).rejects.toThrow("ontbreekt of is beschadigd");
+    expect(backingStorage.getItem(PRIVATE_JOURNAL_STORAGE_KEY)).toBeNull();
+  });
+
   it("encrypts entry text before it reaches browser storage and unlocks it again", async () => {
     const storage = memoryStorage();
     const key = await createPrivateJournalVault("een lange unieke wachtzin", storage);
