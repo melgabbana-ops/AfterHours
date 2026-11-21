@@ -80,7 +80,7 @@ export function drawAfterHoursOverlay(ctx:CanvasRenderingContext2D,width:number,
     trackedText(ctx,"PRIVATE FRAME  ·  18+",width-pad-short*.18,bar*.53,short*.0015);
     ctx.fillStyle=gold;ctx.font=`500 ${Math.max(7,short*.012)}px Arial,sans-serif`;
     trackedText(ctx,"YOUR RULES  ·  YOUR LIMITS",pad+short*.028,height-bar*.37,short*.002);
-    ctx.fillStyle="#B9A8BC";ctx.font=`500 ${Math.max(7,short*.01)}px Arial,sans-serif`;
+    ctx.fillStyle=ivory;ctx.font=`500 ${Math.max(7,short*.01)}px Arial,sans-serif`;
     trackedText(ctx,"AH",width-pad-short*.045,height-bar*.37,short*.002);
   }
   ctx.restore();
