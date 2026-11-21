@@ -31,7 +31,8 @@ const expected = [
   "20261121000315_afterhours_invitation_accepted_user_index.sql",
   "20261121000345_afterhours_experience_invitation_preview.sql",
   "20261121000429_afterhours_invite_requires_paused_run.sql",
-  "20261121001151_afterhours_consent_rls_recursion_guard.sql"
+  "20261121001151_afterhours_consent_rls_recursion_guard.sql",
+  "20261121001230_afterhours_shared_run_checkins.sql"
 ];
 const actual = readdirSync(directory).filter((name) => name.endsWith(".sql")).sort();
 const baseline = [...expected].sort();
@@ -50,4 +51,4 @@ if (missing.length || unexpected.length || duplicates.length || versions.length 
   process.exit(1);
 }
 
-console.log(`Supabase migration filenames match the production ledger baseline (${actual.length} migrations).`);
+console.log(`Supabase migration filenames match the reviewed baseline (${actual.length} files: 28 deployed, 1 pending review).`);
