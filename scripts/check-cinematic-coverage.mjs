@@ -1,5 +1,6 @@
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
+import ts from "typescript";
 
 const root = process.cwd();
 const sourceRoot = path.join(root, "src");
@@ -11,17 +12,16 @@ async function collect(directory) {
     const fullPath = path.join(directory, entry.name);
     if (entry.isDirectory()) { await collect(fullPath); continue; }
     if (!entry.isFile()) continue;
-    if (/\.tsx?$/.test(entry.name)) sourceFiles.push(fullPath);
-    if (/\.css$/i.test(entry.name)) stylesheetFiles.push(fullPath);
+    if (/\\.tsx?$/.test(entry.name)) sourceFiles.push(fullPath);
+    if (/\\.css$/i.test(entry.name)) stylesheetFiles.push(fullPath);
   }
 }
 
 await collect(sourceRoot);
-if (stylesheetFiles.length === 0) throw new Error("No CSS files found under src/.");
-const styles = (await Promise.all(stylesheetFiles.map((file) => readFile(file, "utf8")))).join("\n");
-const cssClasses = new Set([...styles.matchAll(/\.([_a-zA-Z][\w-]*)/g)].map((match) => match[1]));
+if (stylesheetFiles.length === 0) throw new Error("No CSS files found under src/");
+const styles = (await Promise.all(stylesheetFiles.map((file) => readFile(file, "utf8")))).join("\\n");
+const cssClasses = new Set([...styles.matchAll(/\\.([_a-zA-Z][\\w-]*)/g)].map((match) => match[1]));
 const missing = new Map();
-const classPattern = /className=(?:"([^"]+)"|'([^']+)'|{([^}]+)})/g;
 
 function reportMissing(file, className) {
   const relative = path.relative(root, file);
@@ -29,21 +29,47 @@ function reportMissing(file, className) {
   missing.get(relative).add(className);
 }
 
-for (const file of sourceFiles) {
-  const source = await readFile(file, "utf8");
-  for (const match of source.matchAll(classPattern)) {
-    const rawClassValue = (match[1] ?? match[2] ?? match[3] ?? "").replaceAll(String.fromCharCode(96), "");
-    const dynamicPrefixes = [...rawClassValue.matchAll(/([A-Za-z_][a-zA-Z0-9_-]*-)\$\{/g)].map((item) => item[1]);
-    const classValue = rawClassValue.replace(/\$\{[^}]*\}/g, " ");
-    for (const className of classValue.split(/\s+/).filter(Boolean)) {
+function inspectClassExpression(file, expression) {
+  const literalParts = [];
+  const dynamicPrefixes = [];
+  function visit(node) {
+    if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) {
+      literalParts.push(node.text);
+    } else if (ts.isTemplateHead(node) || ts.isTemplateMiddle(node) || ts.isTemplateTail(node)) {
+      literalParts.push(node.text);
+      if (node.text.endsWith("-")) dynamicPrefixes.push(node.text);
+    }
+    ts.forEachChild(node, visit);
+  }
+  visit(expression);
+
+  for (const part of literalParts) {
+    for (const className of part.split(/[\\s,]+/).filter(Boolean)) {
       if (!cssClasses.has(className)) reportMissing(file, className);
     }
-    for (const prefix of dynamicPrefixes) {
-      if (![...cssClasses].some((selectorClass) => selectorClass.startsWith(prefix))) {
-        reportMissing(file, prefix + "<dynamic>");
-      }
+  }
+  for (const prefix of dynamicPrefixes) {
+    if (![...cssClasses].some((selectorClass) => selectorClass.startsWith(prefix))) {
+      reportMissing(file, prefix + "<dynamic>");
     }
   }
+}
+
+for (const file of sourceFiles) {
+  const source = await readFile(file, "utf8");
+  const scriptKind = file.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS;
+  const parsed = ts.createSourceFile(file, source, ts.ScriptTarget.Latest, true, scriptKind);
+  function visit(node) {
+    if (ts.isJsxAttribute(node) && ts.isIdentifier(node.name) && node.name.text === "className" && node.initializer) {
+      if (ts.isStringLiteral(node.initializer)) {
+        inspectClassExpression(file, node.initializer);
+      } else if (ts.isJsxExpression(node.initializer) && node.initializer.expression) {
+        inspectClassExpression(file, node.initializer.expression);
+      }
+    }
+    ts.forEachChild(node, visit);
+  }
+  visit(parsed);
 }
 
 if (missing.size) {
@@ -51,4 +77,4 @@ if (missing.size) {
   console.error("Cinematic style coverage failed. Add styles or remove obsolete class names.");
   process.exit(1);
 }
-console.log("Cinematic style coverage passed: " + sourceFiles.length + " source files and " + stylesheetFiles.length + " stylesheets scanned; dynamic class families matched against CSS selectors.");
+console.log("Cinematic style coverage passed: " + sourceFiles.length + " source files and " + stylesheetFiles.length + " stylesheets scanned using the TypeScript JSX parser.");
