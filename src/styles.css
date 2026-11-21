@@ -1415,6 +1415,9 @@ input:focus-visible,button:focus-visible{outline-color:var(--ah-gold-light)}
  box-shadow:0 0 0 5px rgba(222, 174, 91,.035),0 16px 38px rgba(0, 0, 0,.34)!important
 }
 .media-live-frame:after{content:"";position:absolute;inset:7px;border:1px solid rgba(222, 174, 91,.12);border-radius:10px;pointer-events:none;z-index:1}
+/* Keep portrait phone cameras fully visible instead of squeezing them into a landscape preview. */
+.media-live-frame canvas.media-live-composite{height:auto!important;aspect-ratio:auto!important;max-height:min(68svh,560px)!important;object-fit:contain!important}
+@media(max-width:520px){.media-live-frame canvas.media-live-composite{max-height:min(68svh,420px)!important}}
 .media-live-watermark{
  top:15px!important;left:15px!important;border:1px solid rgba(222, 174, 91,.48)!important;border-radius:8px!important;
  background:rgba(9, 8, 5,.82)!important;backdrop-filter:blur(8px);
