@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { bindVaultAutoLock } from "./vaultAutoLock";
 import { consumeInvitationTokenFromUrl } from "./invitationUrl";
 import {
@@ -200,7 +200,7 @@ export default function CinematicWorld({
     if (message) setVaultMessage(message);
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const consumed = consumeInvitationTokenFromUrl(window.location.href);
     if (consumed.hadInviteParameter) {
       window.history.replaceState(window.history.state, "", consumed.sanitizedUrl);
