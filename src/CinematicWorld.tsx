@@ -444,7 +444,7 @@ export default function CinematicWorld({
   }
 
   async function startScene(scene: Scene) {
-    if (stopPendingRef.current) return;
+    if (stopPendingRef.current || stopPending) return;
     setError("");
     setMessage("");
     if (!requestStartAccess()) return;
@@ -480,7 +480,7 @@ export default function CinematicWorld({
   }
 
   async function resumeScene(run: ExperienceRun) {
-    if (stopPendingRef.current) return;
+    if (stopPendingRef.current || stopPending) return;
     setError("");
     setMessage("");
     if (!requestStartAccess()) return;
@@ -526,7 +526,7 @@ export default function CinematicWorld({
   }
 
   async function pauseScene() {
-    if (!activeRunId || !remoteProfileId || stopPendingRef.current) return;
+    if (!activeRunId || !remoteProfileId || stopPendingRef.current || stopPending) return;
     setBusy(true);
     const mutation = updateExperienceRun({
       runId: activeRunId,
@@ -586,6 +586,8 @@ export default function CinematicWorld({
 
     try {
       let serverConfirmed = !runId || !userId;
+      let serverConfirmed = !runId || !userId;
+    try {
       if (runId && userId) {
         const pendingMutation = runMutationRef.current;
         if (pendingMutation) await pendingMutation.catch(() => undefined);
@@ -628,12 +630,14 @@ export default function CinematicWorld({
       }
     } finally {
       stopPendingRef.current = false;
-      setStopPending(false);
+      // If the server could not confirm STOP, keep new runs blocked until the
+      // user reloads and rechecks the authoritative server state.
+      setStopPending(!serverConfirmed);
     }
   }
 
   async function completeScene(finalInteractionLog = interactionLog) {
-    if (!activeRunId || !activeScene || !remoteProfileId || stopPendingRef.current) return;
+    if (!activeRunId || !activeScene || !remoteProfileId || stopPendingRef.current || stopPending) return;
     setBusy(true);
     const mutation = updateExperienceRun({
       runId: activeRunId,
@@ -672,7 +676,7 @@ export default function CinematicWorld({
   }
 
   async function advanceStep() {
-    if (!activeScene || !activeRunId || !remoteProfileId || runStatus !== "active" || stopPendingRef.current) return;
+    if (!activeScene || !activeRunId || !remoteProfileId || runStatus !== "active" || stopPendingRef.current || stopPending) return;
     if (checkIn === "red") { await stopScene(); return; }
     if (checkIn === "yellow") { await pauseScene(); return; }
     if (checkIn !== "green") {
