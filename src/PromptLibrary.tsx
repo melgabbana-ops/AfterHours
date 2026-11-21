@@ -7,7 +7,7 @@ import { getNextStoryChapterId, loadCompletedStoryChapters, persistStoryChapterC
 import { BOSS_MODE_STEP_COUNT, isBossModeFullyCompleted, markBossStepCompleted } from "./bossProgress";
 import { clearStoryCheckpoint, loadStoryCheckpoint, saveStoryCheckpointSafely, type StoryCheckpoint } from "./storyCheckpoint";
 import { completeRemoteStoryChapter, loadRemoteStoryProgress } from "./services/backend";
-import { getVoiceSafetyIntent, isExplicitVoicePass } from "./voiceSafety";
+import { getVoiceSafetyIntent, isExplicitVoicePass, isVoiceRecognitionCurrent, stopVoiceRecognition } from "./voiceSafety";
 import { readSafetyPlan } from "./safetyPlanStorage";
 import { ArrowRight, Check, Copy, Heart, Shuffle, ShieldCheck } from "lucide-react";
 
@@ -414,6 +414,9 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
   const [domReply, setDomReply] = useState("");
   const [voiceError, setVoiceError] = useState("");
   const recognitionRef = React.useRef<any>(null);
+  const recognitionProfileIdRef = React.useRef<string | null>(null);
+  const voiceProfileIdRef = React.useRef(playerId);
+  voiceProfileIdRef.current = playerId;
   React.useEffect(() => {
     if (!experienceStartBlockedReason || !activeGame) return;
     removeStoryCheckpoint();
@@ -453,8 +456,23 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
   React.useEffect(() => {
     const speechWindow = window as any;
     if (!speechWindow.SpeechRecognition && !speechWindow.webkitSpeechRecognition) setVoiceSupported(false);
-    return () => { try { recognitionRef.current?.stop(); } catch { /* Recognition may already be stopped. */ } };
-  }, []);
+    const profileIdAtSetup = playerId;
+    return () => {
+      if (recognitionProfileIdRef.current === profileIdAtSetup) {
+        stopVoiceRecognition(recognitionRef.current);
+        recognitionRef.current = null;
+        recognitionProfileIdRef.current = null;
+      }
+      try { window.speechSynthesis?.cancel(); } catch { /* Speech may already be idle. */ }
+      if (voiceProfileIdRef.current !== profileIdAtSetup) {
+        setVoiceListening(false);
+        setVoicePaused(false);
+        setVoiceTranscript("");
+        setDomReply("");
+        setVoiceError("");
+      }
+    };
+  }, [playerId]);
   const advanceVoicePass = () => {
     if (mode === "cards") {
       if (!pool.length) return false;
@@ -542,15 +560,28 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
     const Recognition = speechWindow.SpeechRecognition || speechWindow.webkitSpeechRecognition;
     if (!Recognition) { setVoiceSupported(false); setVoiceError(t("Spraakherkenning wordt niet ondersteund in deze browser. Probeer Safari of Chrome en controleer de microfoonrechten.", "Speech recognition is not supported in this browser. Try Safari or Chrome and check microphone permissions.")); return; }
     try {
+      const recognitionProfileId = playerId;
       const recognition = new Recognition();
       recognitionRef.current = recognition;
+      recognitionProfileIdRef.current = recognitionProfileId;
+      const isCurrentRecognition = () => isVoiceRecognitionCurrent(
+        voiceProfileIdRef.current,
+        recognitionProfileId,
+        recognitionRef.current,
+        recognition,
+      );
       recognition.lang = speechLocale;
       recognition.interimResults = false;
       recognition.maxAlternatives = 1;
-      recognition.onstart = () => setVoiceListening(true);
-      recognition.onend = () => setVoiceListening(false);
-      recognition.onerror = (event: any) => { setVoiceListening(false); setVoiceError(event?.error === "not-allowed" ? t("Microfoontoegang is geblokkeerd. Geef AFTER HOURS toestemming in je browserinstellingen.", "Microphone access is blocked. Allow AFTER HOURS in your browser settings.") : t("Ik kon je niet goed verstaan. Probeer het opnieuw of controleer je microfoon.", "I couldn’t understand that. Please try again or check your microphone.")); };
+      recognition.onstart = () => { if (isCurrentRecognition()) setVoiceListening(true); };
+      recognition.onend = () => { if (isCurrentRecognition()) setVoiceListening(false); };
+      recognition.onerror = (event: any) => {
+        if (!isCurrentRecognition()) return;
+        setVoiceListening(false);
+        setVoiceError(event?.error === "not-allowed" ? t("Microfoontoegang is geblokkeerd. Geef AFTER HOURS toestemming in je browserinstellingen.", "Microphone access is blocked. Allow AFTER HOURS in your browser settings.") : t("Ik kon je niet goed verstaan. Probeer het opnieuw of controleer je microfoon.", "I couldn’t understand that. Please try again or check your microphone."));
+      };
       recognition.onresult = (event: any) => {
+        if (!isCurrentRecognition()) return;
         const transcript = String(event?.results?.[0]?.[0]?.transcript ?? "").trim();
         if (!transcript) { setVoiceError(t("Ik heb geen spraak herkend. Probeer het nog eens.", "No speech was detected. Please try again.")); return; }
         setVoiceTranscript(transcript);
