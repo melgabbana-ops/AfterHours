@@ -49,3 +49,14 @@
 
 .ah-open-journal{width:100%;min-height:46px;margin:12px 0 8px;display:flex;align-items:center;justify-content:center;gap:9px;border:1px solid rgba(211,174,112,.48);border-radius:5px;background:linear-gradient(145deg,rgba(39,29,16,.85),rgba(8,7,6,.95));color:#e7c991;font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase}
 .ah-open-journal:focus-visible,.ah-journal-close:focus-visible,.ah-journal-primary:focus-visible,.ah-journal-delete:focus-visible,.ah-journal-lock-row button:focus-visible{outline:2px solid #f0d49a;outline-offset:3px}
+
+.ah-journal-backup{grid-column:1/-1;padding:14px;border:1px solid rgba(211,174,112,.2);border-radius:5px;background:rgba(5,4,3,.72)}
+.ah-journal-backup>.eyebrow{display:block;margin:0 0 7px}
+.ah-journal-backup>p{margin:0 0 10px;color:#a99d89;font-size:8px;line-height:1.55}
+.ah-journal-backup>label{display:block;margin:12px 0 6px;color:#d8bd8d;font-size:8px;letter-spacing:.13em}
+.ah-journal-backup>input{width:100%;min-height:42px;padding:9px;border:1px solid rgba(211,174,112,.3);border-radius:4px;background:#050505;color:#f0dfc0;font:inherit;font-size:11px}
+.ah-journal-backup-export,.ah-journal-backup-import{min-height:44px;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 12px;border:1px solid rgba(211,174,112,.4);border-radius:4px;color:#e2c58f;background:#100d09;font-size:8px;font-weight:600;letter-spacing:.1em;text-transform:uppercase}
+.ah-journal-backup-import{position:relative;margin-top:9px;cursor:pointer}
+.ah-journal-backup-import input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.ah-journal-backup-export:disabled,.ah-journal-backup-import:has(input:disabled){opacity:.4;cursor:not-allowed}
+@media(max-width:520px){.ah-journal-backup{padding:12px}}
