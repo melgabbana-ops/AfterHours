@@ -61,4 +61,14 @@ describe("shared experience check-in migration", () => {
     expect(migration).toMatch(/signal in \('ready', 'pause_requested', 'stop_requested'\)/i);
     expect(migration).toMatch(/unique \(run_id, user_id, step_index\)/i);
   });
+  it("keeps consent renewal behind an authenticated invoker wrapper", () => {
+    expect(migration).toMatch(/create or replace function private\\.renew_afterhours_experience_consent_impl\\(p_run_id uuid\\)[\\s\\S]*?security definer[\\s\\S]*?set search_path = ''/i);
+    expect(migration).toMatch(/v_user_id uuid := auth\\.uid\\(\\)/i);
+    expect(migration).toMatch(/i\\.inviter_user_id = r\\.user_id[\\s\\S]*?i\\.accepted_user_id = v_user_id[\\s\\S]*?i\\.status = 'accepted'/i);
+    expect(migration).toMatch(/revoke all on function private\\.renew_afterhours_experience_consent_impl\\(uuid\\) from public, anon, authenticated/i);
+    expect(migration).toMatch(/grant execute on function private\\.renew_afterhours_experience_consent_impl\\(uuid\\) to authenticated/i);
+    expect(migration).toMatch(/create or replace function public\\.renew_afterhours_experience_consent\\(p_run_id uuid\\)[\\s\\S]*?security invoker[\\s\\S]*?select private\\.renew_afterhours_experience_consent_impl\\(p_run_id\\)/i);
+    expect(migration).toMatch(/revoke all on function public\\.renew_afterhours_experience_consent\\(uuid\\) from public, anon/i);
+  });
+
 });
