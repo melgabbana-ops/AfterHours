@@ -9,7 +9,7 @@ import {
 } from "./services/media";
 import { supabase, supabaseConfigured } from "./services/supabase";
 import { composeImageWithOverlay, drawCameraFrame, mediaOverlayFrames, type OverlayFrameStyle } from "./mediaOverlay";
-import { appendMediaCaptureChunk, discardMediaCapture, MAX_MEDIA_CAPTURE_BYTES, stopMediaStreams, waitForVideoReady, watchMediaStreamInterruption } from "./services/mediaCapture";
+import { appendMediaCaptureChunk, discardMediaCapture, MAX_MEDIA_CAPTURE_BYTES, stopMediaRecorder, stopMediaStreams, waitForVideoReady, watchMediaStreamInterruption } from "./services/mediaCapture";
 
 interface MediaVaultProps {
   sessionId: string;
@@ -223,9 +223,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
         if(!mountedRef.current)return;
         captureInterruptedRef.current=true;
         const activeRecorder=recorderRef.current;
-        if(activeRecorder&&activeRecorder.state!=="inactive"){
-          try{activeRecorder.stop();return;}catch{/* Fall through to immediate local cleanup. */}
-        }
+        if(stopMediaRecorder(activeRecorder))return;
         stopCaptureTracks();
         setCaptureConsent(false);
         setMessage(t("Camera of microfoon is onderbroken. Er is niets opgeslagen. Start opnieuw als je wilt.","Camera or microphone was interrupted. Nothing was saved. Start again if you want."));
@@ -310,7 +308,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
           captureSizeExceededRef.current=true;
           chunksRef.current=[];
           captureBytesRef.current=0;
-          if(recorder.state==="recording")recorder.stop();
+          if(stopMediaRecorder(recorder))return;
           return;
         }
         captureBytesRef.current=nextBytes;
@@ -359,8 +357,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
       if(pendingUrl){URL.revokeObjectURL(pendingUrl);setPendingUrl("");}
       captureTimeoutRef.current=window.setTimeout(()=>{
         if(!mountedRef.current)return;
-        if(recorder.state==="recording"){
-          recorder.stop();
+        if(stopMediaRecorder(recorder)){
           setMessage(t("De opname is automatisch gestopt na 60 seconden.","Recording stopped automatically after 60 seconds."));
         }
       },60_000);
@@ -390,7 +387,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
 
   const stopCapture=()=>{
     const recorder=recorderRef.current;
-    if(recorder&&recorder.state!=="inactive")recorder.stop();
+    stopMediaRecorder(recorder);
   };
 
   const saveCapture=async()=>{
