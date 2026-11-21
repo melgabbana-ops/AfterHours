@@ -38,6 +38,10 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
   const [status, setStatus] = useState<PlayStatus>("lobby");
   const [message, setMessage] = useState("");
   const channelRef = useRef<any>(null);
+  const consentRef = useRef(myConsent);
+  const connectedRef = useRef(connected);
+  consentRef.current = myConsent;
+  connectedRef.current = connected;
   const partnerPresent = participants.some(person => person.participantId !== participantId);
   const partnerConsented = participants.some(person => person.participantId !== participantId && person.consent === true);
   const ready = mode === "local" ? myConsent && localPartnerConsent : canStartRemotePlay({ connected, participantCount: participants.length, partnerPresent, ownConsent: myConsent, partnerConsent: partnerConsented });
@@ -67,10 +71,10 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
       const next = payload as { round?: number; status?: PlayStatus };
       const liveParticipants = Object.values(channel.presenceState<PresenceMeta>()).flat();
       if (next.status === "active" && !canStartRemotePlay({
-        connected,
+        connected: connectedRef.current,
         participantCount: liveParticipants.length,
         partnerPresent: liveParticipants.some(person => person.participantId !== participantId),
-        ownConsent: myConsent,
+        ownConsent: consentRef.current,
         partnerConsent: liveParticipants.some(person => person.participantId !== participantId && person.consent === true)
       })) {
         setStatus("paused");
