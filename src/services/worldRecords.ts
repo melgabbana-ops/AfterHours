@@ -9,6 +9,15 @@ export type WorldRecord<T = Record<string, unknown>> = {
   updated_at: string;
 };
 export type ExperienceRunStatus = "ready" | "active" | "paused" | "completed" | "stopped";
+export type ExperienceRunCheckInSignal = "ready" | "pause_requested" | "stop_requested";
+export type ExperienceRunCheckIn = {
+  id: string;
+  run_id: string;
+  user_id: string;
+  step_index: number;
+  signal: ExperienceRunCheckInSignal;
+  created_at: string;
+};
 export type ExperienceRun = {
   id: string;
   user_id: string;
@@ -96,6 +105,66 @@ export async function loadExperienceRuns(expectedUserId: string): Promise<Experi
     .limit(50);
   if (error) throw new Error(error.message);
   return (data ?? []) as ExperienceRun[];
+}
+
+export async function loadExperienceRunCheckIns(runIds: string[], expectedUserId: string): Promise<ExperienceRunCheckIn[]> {
+  await assertWorldAccount(expectedUserId);
+  if (!runIds.length) return [];
+  const { data, error } = await supabase!
+    .from("afterhours_experience_run_checkins")
+    .select("id,run_id,user_id,step_index,signal,created_at")
+    .in("run_id", runIds.slice(0, 50))
+    .order("created_at", { ascending: false })
+    .limit(200);
+  if (error) throw new Error(error.message);
+  return (data ?? []) as ExperienceRunCheckIn[];
+}
+
+export async function loadOwnExperienceRunConsentIds(runIds: string[], expectedUserId: string): Promise<string[]> {
+  await assertWorldAccount(expectedUserId);
+  if (!runIds.length) return [];
+  const { data, error } = await supabase!
+    .from("afterhours_experience_run_consents")
+    .select("run_id")
+    .in("run_id", runIds.slice(0, 50))
+    .eq("user_id", expectedUserId)
+    .is("revoked_at", null)
+    .limit(50);
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((row: { run_id: string }) => row.run_id);
+}
+
+export async function renewExperienceRunConsent(runId: string, expectedUserId: string): Promise<void> {
+  await assertWorldAccount(expectedUserId);
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(runId)) {
+    throw new Error("Invalid experience run.");
+  }
+  const { error } = await supabase!.rpc("renew_afterhours_experience_consent", { p_run_id: runId });
+  if (error) throw new Error(error.message);
+}
+
+export async function submitExperienceRunCheckIn(args: {
+  runId: string;
+  stepIndex: number;
+  signal: ExperienceRunCheckInSignal;
+  expectedUserId: string;
+}): Promise<void> {
+  const user = await assertWorldAccount(args.expectedUserId);
+  if (!Number.isInteger(args.stepIndex) || args.stepIndex < 0 || args.stepIndex >= 40) {
+    throw new Error("Invalid experience step.");
+  }
+  if (!["ready", "pause_requested", "stop_requested"].includes(args.signal)) {
+    throw new Error("Invalid participant signal.");
+  }
+  const { error } = await supabase!
+    .from("afterhours_experience_run_checkins")
+    .upsert({
+      run_id: args.runId,
+      user_id: user.id,
+      step_index: args.stepIndex,
+      signal: args.signal,
+    }, { onConflict: "run_id,user_id,step_index" });
+  if (error) throw new Error(error.message);
 }
 
 export async function createExperienceRun(args: {
