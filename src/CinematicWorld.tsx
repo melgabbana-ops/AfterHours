@@ -161,13 +161,7 @@ export default function CinematicWorld({
   const [experienceInvites, setExperienceInvites] = useState<ExperienceInvitation[]>([]);
   const [selectedInviteRunId, setSelectedInviteRunId] = useState("");
   const [inviteLink, setInviteLink] = useState("");
-  const [incomingInviteToken, setIncomingInviteToken] = useState<string | null>(() => {
-    const consumed = consumeInvitationTokenFromUrl(window.location.href);
-    if (consumed.hadInviteParameter) {
-      window.history.replaceState(window.history.state, "", consumed.sanitizedUrl);
-    }
-    return consumed.token;
-  });
+  const [incomingInviteToken, setIncomingInviteToken] = useState<string | null>(() => consumeInvitationTokenFromUrl(window.location.href).token);
   const [invitePreview, setInvitePreview] = useState<ExperienceInvitationPreview | null>(null);
   const [invitePreviewLoading, setInvitePreviewLoading] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -204,6 +198,13 @@ export default function CinematicWorld({
     setVaultTitle("");
     setVaultDraft("");
     if (message) setVaultMessage(message);
+  }, []);
+
+  useEffect(() => {
+    const consumed = consumeInvitationTokenFromUrl(window.location.href);
+    if (consumed.hadInviteParameter) {
+      window.history.replaceState(window.history.state, "", consumed.sanitizedUrl);
+    }
   }, []);
 
   useEffect(() => bindVaultAutoLock(
