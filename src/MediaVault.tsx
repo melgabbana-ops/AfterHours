@@ -57,6 +57,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
   const captureBytesRef = useRef(0);
   const captureSizeExceededRef = useRef(false);
   const captureTimeoutRef = useRef<number|undefined>(undefined);
+  const saveInProgressRef = useRef(false);
 
 
   useEffect(()=>{
@@ -353,12 +354,17 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
   };
 
   const saveCapture=async()=>{
-    if(!pendingCapture||!mountedRef.current)return;
-    const saved=await upload(pendingCapture);
-    if(!saved||!mountedRef.current)return;
-    setPendingCapture(null);
-    if(pendingUrl){URL.revokeObjectURL(pendingUrl);setPendingUrl("");}
-    setCaptureConsent(false);
+    if(!pendingCapture||!mountedRef.current||saveInProgressRef.current)return;
+    saveInProgressRef.current=true;
+    try{
+      const saved=await upload(pendingCapture);
+      if(!saved||!mountedRef.current)return;
+      setPendingCapture(null);
+      if(pendingUrl){URL.revokeObjectURL(pendingUrl);setPendingUrl("");}
+      setCaptureConsent(false);
+    }finally{
+      saveInProgressRef.current=false;
+    }
   };
 
   const discardCapture=()=>{
