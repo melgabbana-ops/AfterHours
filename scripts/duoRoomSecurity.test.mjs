@@ -143,6 +143,14 @@ describe("proposed secure Duo backend guardrails", () => {
     expect(proposal).toContain("where room_id = p_room_id and removed_at is null and consent_revoked_at is null");
   });
 
+  it("refreshes the secure room snapshot after reconnect and app resume", () => {
+    expect(secureLobby).toContain('window.addEventListener("online", handleOnline)');
+    expect(secureLobby).toContain('document.addEventListener("visibilitychange", handleVisibility)');
+    expect(secureLobby).toContain('document.visibilityState === "visible"');
+    expect(secureLobby).toContain("navigator.onLine");
+    expect(secureLobby).toContain("displayed room status may be out of date");
+  });
+
   it("keeps secure Duo aftercare per browser and out of persistent storage", () => {
     expect(secureLobby).toContain("aftercareChoices");
     expect(secureLobby).toContain("These choices stay in your browser and are not shared or saved.");
