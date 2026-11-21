@@ -4771,3 +4771,10 @@ button,[role="button"],nav a{touch-action:manipulation}
 .couples-back-bottom{margin-top:12px}
 @media(max-width:520px){.couples-mode-grid,.couples-name-fields{grid-template-columns:1fr}.couples-mode-card{min-height:112px}.couples-round-actions{grid-template-columns:1fr 1fr}.couples-round-actions .couples-primary{grid-column:1/-1}}
 @media(min-width:700px){.couples-play-screen{padding-bottom:70px}.couples-mode-card{min-height:160px}}
+
+/* Remote duo room entry: distinct join and create paths, responsive on narrow screens. */
+.couples-room-entry{display:grid;gap:14px;max-width:520px;margin:18px auto 0}
+.couples-room-entry .couples-primary,.couples-room-entry .couples-secondary{width:100%}
+.couples-secondary{display:inline-flex;justify-content:center;align-items:center;gap:9px;min-height:46px;padding:11px 16px;border:1px solid #6b5738;border-radius:8px;background:#11100e;color:#e8d7b7;font-weight:700}
+.couples-entry-divider{display:flex;align-items:center;gap:12px;color:#8f8779;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
+.couples-entry-divider:before,.couples-entry-divider:after{content:"";height:1px;flex:1;background:#3b3429}
