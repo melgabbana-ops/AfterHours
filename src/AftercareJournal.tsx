@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { bindVaultAutoLock, type VaultAutoLockReason } from "./vaultAutoLock";
 import { ArrowLeft, BookOpen, LockKeyhole, LockOpen, Plus, Save, Trash2 } from "lucide-react";
 import {
   createPrivateJournalVault,
@@ -34,7 +35,7 @@ export default function AftercareJournal({ ownerId, language, onClose }: { owner
   const lockGeneration = useRef(0);
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
 
-  const lock = useCallback((automatic = false) => {
+  const lock = useCallback((reason?: VaultAutoLockReason) => {
     lockGeneration.current += 1;
     setKey(null);
     setEntries([]);
@@ -45,27 +46,29 @@ export default function AftercareJournal({ ownerId, language, onClose }: { owner
     setConfirmation("");
     setBackupPassphrase("");
     setBusy(false);
-    setMessage(automatic
+    setMessage(reason === "idle"
       ? language === "nl"
-        ? "Journal automatisch vergrendeld toen de app naar de achtergrond ging. Niet-opgeslagen tekst is gewist."
-        : "Journal automatically locked when the app went into the background. Unsaved text was cleared."
-      : language === "nl" ? "De journal-kluis is vergrendeld." : "The journal vault is locked.");
+        ? "Journal automatisch vergrendeld na 5 minuten inactiviteit. Niet-opgeslagen tekst is gewist."
+        : "Journal automatically locked after 5 minutes of inactivity. Unsaved text was cleared."
+      : reason === "background"
+        ? language === "nl"
+          ? "Journal automatisch vergrendeld toen de app naar de achtergrond ging. Niet-opgeslagen tekst is gewist."
+          : "Journal automatically locked when the app went into the background. Unsaved text was cleared."
+        : language === "nl" ? "De journal-kluis is vergrendeld." : "The journal vault is locked.");
     setError("");
   }, [language]);
 
-  useEffect(() => {
-    const lockWhenHidden = () => {
-      if (document.visibilityState !== "visible") lock(true);
-    };
-    const lockOnPageHide = () => lock(true);
-    document.addEventListener("visibilitychange", lockWhenHidden);
-    window.addEventListener("pagehide", lockOnPageHide);
-    lockWhenHidden();
-    return () => {
-      document.removeEventListener("visibilitychange", lockWhenHidden);
-      window.removeEventListener("pagehide", lockOnPageHide);
-    };
-  }, [lock]);
+  useEffect(() => bindVaultAutoLock(
+    window,
+    document,
+    () => key !== null,
+    (reason) => lock(reason),
+  ), [key, lock]);
+
+  useEffect(() => () => {
+    // Invalidate pending crypto/storage work when the journal is closed or unmounted.
+    lockGeneration.current += 1;
+  }, []);
 
   const openVault = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -216,7 +219,7 @@ export default function AftercareJournal({ ownerId, language, onClose }: { owner
   return <section className="ah-private-journal" aria-labelledby="ah-private-journal-title" aria-busy={busy}>
     <header className="ah-private-journal-head">
       <div className="ah-private-journal-brand"><LockKeyhole aria-hidden="true"/><span className="eyebrow">AFTER HOURS · PRIVATE JOURNAL</span></div>
-      <button type="button" className="ah-journal-close" onClick={onClose}><ArrowLeft size={15}/>{t("Terug","Back")}</button>
+      <button type="button" className="ah-journal-close" onClick={() => { lock(); onClose(); }}><ArrowLeft size={15}/>{t("Terug","Back")}</button>
     </header>
     <div className="ah-private-journal-intro">
       <span className="ah-journal-mark"><BookOpen aria-hidden="true"/></span>

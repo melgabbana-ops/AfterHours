@@ -27,17 +27,20 @@ function memoryStorage() {
 }
 
 describe("encrypted private journal vault", () => {
-  it("locks on background and page hide, removes listeners and clears in-memory text", () => {
-    expect(journalSource).toContain('document.addEventListener("visibilitychange", lockWhenHidden)');
-    expect(journalSource).toContain('window.addEventListener("pagehide", lockOnPageHide)');
-    expect(journalSource).toContain('document.removeEventListener("visibilitychange", lockWhenHidden)');
-    expect(journalSource).toContain('window.removeEventListener("pagehide", lockOnPageHide)');
+  it("auto-locks the local journal on inactivity or background and invalidates work on close", () => {
+    expect(journalSource).toContain('import { bindVaultAutoLock, type VaultAutoLockReason } from "./vaultAutoLock";');
+    expect(journalSource).toContain('() => key !== null');
+    expect(journalSource).toContain('(reason) => lock(reason)');
+    expect(journalSource).toContain('useEffect(() => () => {');
+    expect(journalSource).toContain('lockGeneration.current += 1;');
+    expect(journalSource).toContain('"Journal automatisch vergrendeld na 5 minuten inactiviteit.');
+    expect(journalSource).toContain('"Journal automatically locked after 5 minutes of inactivity.');
+    expect(journalSource).toContain('"Journal automatisch vergrendeld toen de app naar de achtergrond ging.');
+    expect(journalSource).toContain('onClick={() => { lock(); onClose(); }}');
     expect(journalSource).toContain('setKey(null)');
     expect(journalSource).toContain('setPassphrase("")');
     expect(journalSource).toContain('setEntries([])');
-    expect(journalSource).toContain('lockGeneration.current += 1;');
     expect(journalSource).toContain('"De journal-kluis is vergrendeld."');
-    expect(journalSource).toContain('"Journal automatisch vergrendeld toen de app naar de achtergrond ging.');
     expect(journalSource).toContain('aria-busy={busy}');
     expect(journalSource).toContain('className="ah-journal-delete" onClick={()=>void remove()} disabled={busy}');
   });
