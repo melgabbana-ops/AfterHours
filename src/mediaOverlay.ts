@@ -108,6 +108,100 @@ export async function composeImageWithOverlay(file:File,style:OverlayFrameStyle)
     return new File([blob],basename+"-after-hours.jpg",{type:"image/jpeg",lastModified:Date.now()});
   } finally {URL.revokeObjectURL(objectUrl);}
 }
+
+export interface PhotoEditTransform {
+  rotation: 0 | 90 | 180 | 270;
+  zoom: number;
+  offsetX: number;
+  offsetY: number;
+  brightness: number;
+  contrast: number;
+  saturation: number;
+  warmth: number;
+}
+export const defaultPhotoEditTransform: PhotoEditTransform = { rotation: 0, zoom: 1, offsetX: 0, offsetY: 0, brightness: 1, contrast: 1, saturation: 1, warmth: 0 };
+export type PhotoEditPresetId = "natural" | "warm" | "cinematic" | "monochrome" | "soft";
+export interface PhotoEditPreset {
+  id: PhotoEditPresetId;
+  titleNL: string;
+  titleEN: string;
+  brightness: number;
+  contrast: number;
+  saturation: number;
+  warmth: number;
+}
+export const photoEditPresets: readonly PhotoEditPreset[] = [
+  { id: "natural", titleNL: "Natuurlijk", titleEN: "Natural", brightness: 1, contrast: 1, saturation: 1, warmth: 0 },
+  { id: "warm", titleNL: "Warm goud", titleEN: "Warm gold", brightness: 1.04, contrast: 1.06, saturation: 1.08, warmth: .48 },
+  { id: "cinematic", titleNL: "Cinematisch", titleEN: "Cinematic", brightness: .94, contrast: 1.22, saturation: .82, warmth: .12 },
+  { id: "monochrome", titleNL: "Monochroom", titleEN: "Monochrome", brightness: 1.02, contrast: 1.16, saturation: 0, warmth: 0 },
+  { id: "soft", titleNL: "Zacht licht", titleEN: "Soft light", brightness: 1.12, contrast: .88, saturation: .92, warmth: .2 },
+];
+export function applyPhotoEditPreset(current: PhotoEditTransform, presetId: PhotoEditPresetId): PhotoEditTransform {
+  const preset = photoEditPresets.find((item) => item.id === presetId) ?? photoEditPresets[0];
+  return normalizePhotoEditTransform({
+    ...current,
+    brightness: preset.brightness,
+    contrast: preset.contrast,
+    saturation: preset.saturation,
+    warmth: preset.warmth,
+  });
+}
+
+export function normalizePhotoEditTransform(value: PhotoEditTransform): PhotoEditTransform {
+  const rotations = [0, 90, 180, 270] as const;
+  const rotation = rotations.includes(value.rotation) ? value.rotation : 0;
+  return {
+    rotation,
+    zoom: Math.min(2.5, Math.max(1, Number.isFinite(value.zoom) ? value.zoom : 1)),
+    offsetX: Math.min(1, Math.max(-1, Number.isFinite(value.offsetX) ? value.offsetX : 0)),
+    offsetY: Math.min(1, Math.max(-1, Number.isFinite(value.offsetY) ? value.offsetY : 0)),
+    brightness: Math.min(1.35, Math.max(0.65, Number.isFinite(value.brightness) ? value.brightness : 1)),
+    contrast: Math.min(1.4, Math.max(0.7, Number.isFinite(value.contrast) ? value.contrast : 1)),
+    saturation: Math.min(1.8, Math.max(0, Number.isFinite(value.saturation) ? value.saturation : 1)),
+    warmth: Math.min(1, Math.max(-1, Number.isFinite(value.warmth) ? value.warmth : 0)),
+  };
+}
+export async function composeImageWithEdits(file: File, style: OverlayFrameStyle, edits: PhotoEditTransform): Promise<File> {
+  if (!file.type.startsWith("image/")) return file;
+  const transform = normalizePhotoEditTransform(edits);
+  const objectUrl = URL.createObjectURL(file);
+  try {
+    const image = new Image();
+    image.decoding = "async";
+    image.src = objectUrl;
+    await image.decode();
+    const sourceWidth = image.naturalWidth || image.width;
+    const sourceHeight = image.naturalHeight || image.height;
+    if (!sourceWidth || !sourceHeight) throw new Error("Could not read the selected image.");
+    const rotated = transform.rotation === 90 || transform.rotation === 270;
+    const logicalWidth = rotated ? sourceHeight : sourceWidth;
+    const logicalHeight = rotated ? sourceWidth : sourceHeight;
+    const scale = Math.min(1, 2560 / Math.max(logicalWidth, logicalHeight));
+    const width = Math.max(1, Math.round(logicalWidth * scale));
+    const height = Math.max(1, Math.round(logicalHeight * scale));
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("Photo editing is not supported in this browser.");
+    const baseScale = Math.max(width / logicalWidth, height / logicalHeight) * transform.zoom;
+    const drawWidth = sourceWidth * baseScale;
+    const drawHeight = sourceHeight * baseScale;
+    ctx.translate(width / 2 + transform.offsetX * (logicalWidth * baseScale - width) / 2, height / 2 + transform.offsetY * (logicalHeight * baseScale - height) / 2);
+    ctx.rotate((transform.rotation * Math.PI) / 180);
+    const sepia = Math.max(0, transform.warmth) * 0.32;
+    const coolShift = Math.max(0, -transform.warmth) * 8;
+    ctx.filter = `brightness(${transform.brightness}) contrast(${transform.contrast}) saturate(${transform.saturation}) sepia(${sepia}) hue-rotate(${coolShift}deg)`;
+    ctx.drawImage(image, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
+    ctx.filter = "none";
+    drawAfterHoursOverlay(ctx, width, height, style);
+    const blob = await new Promise<Blob>((resolve, reject) => canvas.toBlob(value => value ? resolve(value) : reject(new Error("Could not render the edited photo.")), "image/jpeg", .92));
+    const basename = file.name.replace(/\\.[^.]+$/, "").replace(/[^a-zA-Z0-9_-]+/g, "-").slice(0, 70) || "after-hours-photo";
+    return new File([blob], basename + "-after-hours.jpg", { type: "image/jpeg", lastModified: Date.now() });
+  } finally { URL.revokeObjectURL(objectUrl); }
+}
+
 export function drawCameraFrame(ctx:CanvasRenderingContext2D,video:HTMLVideoElement,width:number,height:number,style:OverlayFrameStyle) {
   if(video.videoWidth<1||video.videoHeight<1)return;
   const sourceRatio=video.videoWidth/video.videoHeight;
