@@ -119,6 +119,79 @@
     white-space: nowrap;
   }
 
+  /* Camera capture gets a tablet-sized stage while retaining the same live overlay. */
+  .media-vault {
+    padding: 24px !important;
+  }
+
+  .media-capture {
+    padding: 24px !important;
+    gap: 16px !important;
+  }
+
+  .media-capture-controls {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    align-items: start !important;
+  }
+
+  .media-capture-controls > .media-consent-check {
+    grid-column: 1 / -1 !important;
+  }
+
+  .media-frame-picker > div {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+  }
+
+  .media-frame-picker button {
+    min-width: 0 !important;
+    min-height: 76px !important;
+  }
+
+  .media-live-frame {
+    position: relative !important;
+    width: min(100%, 920px) !important;
+    margin-inline: auto !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(216, 183, 126, .42) !important;
+    border-radius: 10px !important;
+    background: #050505 !important;
+  }
+
+  .media-live-source {
+    display: none !important;
+  }
+
+  .media-live-composite {
+    width: 100% !important;
+    max-height: min(62dvh, 620px) !important;
+    aspect-ratio: 16 / 9 !important;
+    object-fit: contain !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+  }
+
+  .media-live-watermark {
+    position: absolute !important;
+    top: 14px !important;
+    right: 16px !important;
+    z-index: 2 !important;
+    padding: 7px 10px !important;
+    border: 1px solid rgba(216, 183, 126, .55) !important;
+    border-radius: 4px !important;
+    background: rgba(5, 5, 5, .72) !important;
+    color: #f0d6a4 !important;
+    font-size: 10px !important;
+    letter-spacing: .16em !important;
+    pointer-events: none !important;
+  }
+
+  .media-pending-preview {
+    width: min(100%, 920px) !important;
+    margin-inline: auto !important;
+  }
+
   .aftercare-private-note,
   .session-summary {
     max-width: 880px;
