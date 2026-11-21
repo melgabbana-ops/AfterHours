@@ -165,6 +165,9 @@ export default function CinematicWorld({
   const [invitePreviewLoading, setInvitePreviewLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [stopPending, setStopPending] = useState(false);
+  const stopPendingRef = useRef(false);
+  const runMutationRef = useRef<Promise<unknown> | null>(null);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [runConsent, setRunConsent] = useState(false);
@@ -441,6 +444,7 @@ export default function CinematicWorld({
   }
 
   async function startScene(scene: Scene) {
+    if (stopPendingRef.current) return;
     setError("");
     setMessage("");
     if (!requestStartAccess()) return;
@@ -476,6 +480,7 @@ export default function CinematicWorld({
   }
 
   async function resumeScene(run: ExperienceRun) {
+    if (stopPendingRef.current) return;
     setError("");
     setMessage("");
     if (!requestStartAccess()) return;
@@ -521,10 +526,18 @@ export default function CinematicWorld({
   }
 
   async function pauseScene() {
-    if (!activeRunId || !remoteProfileId) return;
+    if (!activeRunId || !remoteProfileId || stopPendingRef.current) return;
     setBusy(true);
+    const mutation = updateExperienceRun({
+      runId: activeRunId,
+      expectedUserId: remoteProfileId,
+      status: "paused",
+      currentStep: stepIndex
+    });
+    runMutationRef.current = mutation;
     try {
-      await updateExperienceRun({ runId: activeRunId, expectedUserId: remoteProfileId, status: "paused", currentStep: stepIndex });
+      await mutation;
+      if (stopPendingRef.current) return;
       setRunStatus("paused");
       setCheckIn("unset");
       setPathChoice("unset");
@@ -532,25 +545,30 @@ export default function CinematicWorld({
       setMessage(t("Gepauzeerd. Voor hervatten is een nieuwe check-in en consent nodig.", "Paused. Resuming requires a fresh check-in and consent."));
       try { await refreshData(); } catch { setMessage(t("Gepauzeerd. Je verbinding is nodig om de geschiedenis te verversen.", "Paused. Reconnect to refresh the history.")); }
     } catch {
+      if (stopPendingRef.current) return;
       setRunStatus("paused");
       setCheckIn("unset");
       onSafetyPause();
       onSafetyStop();
       setError(t("De server kon de pauze niet bevestigen. De app is daarom uit voorzorg gestopt. Controleer je verbinding voordat je opnieuw begint.", "The server could not confirm the pause. The app has therefore stopped as a precaution. Check your connection before starting again."));
     } finally {
+      if (runMutationRef.current === mutation) runMutationRef.current = null;
       setBusy(false);
     }
   }
 
   async function stopScene(fromConsentChange = false) {
-    if (activeRunId && remoteProfileId) {
-      try {
-        await updateExperienceRun({ runId: activeRunId, expectedUserId: remoteProfileId, status: "stopped", currentStep: stepIndex });
-        await refreshData();
-      } catch (cause) {
-        setError(cause instanceof Error ? cause.message : t("De stop is lokaal uitgevoerd, maar de serverbevestiging ontbreekt.", "The stop was applied locally, but server confirmation is missing."));
-      }
-    }
+    if (stopPendingRef.current) return;
+    stopPendingRef.current = true;
+    setStopPending(true);
+
+    const runId = activeRunId;
+    const userId = remoteProfileId;
+    const currentStep = stepIndex;
+
+    // STOP is local and immediate. Network confirmation happens only after
+    // any already-started run mutation has settled, so a late pause/update
+    // cannot overwrite the final stop request.
     setRunStatus(null);
     setActiveRunId(null);
     setActiveScene(null);
@@ -560,22 +578,68 @@ export default function CinematicWorld({
     setStopSignal("");
     setCheckIn("unset");
     setPathChoice("unset");
-    if (!fromConsentChange) setMessage(t("De scène is gestopt. Er wordt niets automatisch hervat.", "The scene has stopped. Nothing will resume automatically."));
     onSafetyStop();
+    if (!fromConsentChange) {
+      setMessage(t("STOP is direct uitgevoerd. De serverstatus wordt bevestigd.", "STOP has been applied immediately. Confirming the server state."));
+    }
+
+    try {
+      if (runId && userId) {
+        const pendingMutation = runMutationRef.current;
+        if (pendingMutation) await pendingMutation.catch(() => undefined);
+
+        try {
+          // The existing RPC locks the run and revokes consent in the same
+          // transaction as stopping it.
+          await withdrawExperienceConsent(runId, userId);
+        } catch {
+          // Keep a guarded fallback for accounts whose consent row was already
+          // revoked by a prior safety transition.
+          try {
+            await updateExperienceRun({
+              runId,
+              expectedUserId: userId,
+              status: "stopped",
+              currentStep
+            });
+          } catch {
+            setError(t(
+              "STOP is direct op dit apparaat uitgevoerd, maar de server kon de stop niet bevestigen. Blijf gestopt en controleer je verbinding voordat je opnieuw begint.",
+              "STOP was applied immediately on this device, but the server could not confirm it. Stay stopped and verify your connection before starting again."
+            ));
+          }
+        }
+
+        try {
+          await refreshData(userId);
+        } catch {
+          // The local scene is already stopped; stale history must not block STOP.
+        }
+      }
+      if (!fromConsentChange) {
+        setMessage(t("De scène is gestopt. Er wordt niets automatisch hervat.", "The scene has stopped. Nothing will resume automatically."));
+      }
+    } finally {
+      stopPendingRef.current = false;
+      setStopPending(false);
+    }
   }
 
   async function completeScene(finalInteractionLog = interactionLog) {
-    if (!activeRunId || !activeScene || !remoteProfileId) return;
+    if (!activeRunId || !activeScene || !remoteProfileId || stopPendingRef.current) return;
     setBusy(true);
+    const mutation = updateExperienceRun({
+      runId: activeRunId,
+      expectedUserId: remoteProfileId,
+      status: "completed",
+      currentStep: activeScene.steps.length,
+      completed: true,
+      interactionLog: finalInteractionLog
+    });
+    runMutationRef.current = mutation;
     try {
-      await updateExperienceRun({
-        runId: activeRunId,
-        expectedUserId: remoteProfileId,
-        status: "completed",
-        currentStep: activeScene.steps.length,
-        completed: true,
-        interactionLog: finalInteractionLog
-      });
+      await mutation;
+      if (stopPendingRef.current) return;
       setInteractionLog(finalInteractionLog);
       setPathChoice("unset");
       const firstCompletion = runs.filter((run) => run.status === "completed").length === 0;
@@ -591,14 +655,17 @@ export default function CinematicWorld({
       await refreshData();
       setMessage(t("Ervaring afgerond. De aftercarefase staat nu centraal.", "Experience complete. Aftercare is now the focus."));
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : t("Afronden kon niet worden opgeslagen.", "Could not save completion."));
+      if (!stopPendingRef.current) {
+        setError(cause instanceof Error ? cause.message : t("Afronden kon niet worden opgeslagen.", "Could not save completion."));
+      }
     } finally {
+      if (runMutationRef.current === mutation) runMutationRef.current = null;
       setBusy(false);
     }
   }
 
   async function advanceStep() {
-    if (!activeScene || !activeRunId || !remoteProfileId || runStatus !== "active") return;
+    if (!activeScene || !activeRunId || !remoteProfileId || runStatus !== "active" || stopPendingRef.current) return;
     if (checkIn === "red") { await stopScene(); return; }
     if (checkIn === "yellow") { await pauseScene(); return; }
     if (checkIn !== "green") {
@@ -615,15 +682,18 @@ export default function CinematicWorld({
       return;
     }
     setBusy(true);
+    const next = stepIndex + 1;
+    const mutation = updateExperienceRun({
+      runId: activeRunId,
+      expectedUserId: remoteProfileId,
+      status: "active",
+      currentStep: next,
+      interactionLog: nextLog
+    });
+    runMutationRef.current = mutation;
     try {
-      const next = stepIndex + 1;
-      await updateExperienceRun({
-        runId: activeRunId,
-        expectedUserId: remoteProfileId,
-        status: "active",
-        currentStep: next,
-        interactionLog: nextLog
-      });
+      await mutation;
+      if (stopPendingRef.current) return;
       setInteractionLog(nextLog);
       setLastPathChoice(pathChoice);
       setPathChoice("unset");
@@ -631,16 +701,19 @@ export default function CinematicWorld({
       setCheckIn("unset");
       await refreshData();
     } catch (cause) {
-      // Fail closed if another participant withdrew consent or the server state changed.
-      setRunStatus(null);
-      setActiveRunId(null);
-      setActiveScene(null);
-      setRunConsent(false);
-      setCheckIn("unset");
-      setPathChoice("unset");
-      onSafetyStop();
-      setError(cause instanceof Error ? cause.message : t("De voortgang kon niet worden opgeslagen. De ervaring is uit voorzorg gestopt.", "Progress could not be saved. The experience was stopped as a precaution."));
+      if (!stopPendingRef.current) {
+        // Fail closed if another participant withdrew consent or the server state changed.
+        setRunStatus(null);
+        setActiveRunId(null);
+        setActiveScene(null);
+        setRunConsent(false);
+        setCheckIn("unset");
+        setPathChoice("unset");
+        onSafetyStop();
+        setError(cause instanceof Error ? cause.message : t("De voortgang kon niet worden opgeslagen. De ervaring is uit voorzorg gestopt.", "Progress could not be saved. The experience was stopped as a precaution."));
+      }
     } finally {
+      if (runMutationRef.current === mutation) runMutationRef.current = null;
       setBusy(false);
     }
   }
@@ -1146,8 +1219,8 @@ export default function CinematicWorld({
           {recoverableRun && !activeRunId && (
             <div className="cw-resume-card">
               <div><span className="cw-kicker">{t("OPENSTAANDE ERVARING", "UNFINISHED EXPERIENCE")}</span><h3>{String(recoverableRun.scene_snapshot.title ?? recoverableRun.scene_key)}</h3><p>{t("Laatst opgeslagen bij fase", "Last saved at step")} {recoverableRun.current_step + 1} / {recoverableRun.total_steps}. {t("Er wordt niets automatisch hervat.", "Nothing resumes automatically.")}</p></div>
-              <button type="button" className="cw-primary" onClick={() => { setResumePrepared(true); setSelectedSceneKey(null); setRunConsent(false); setStopSignal(""); setMessage(t("Bevestig opnieuw consent en je stopsignaal voordat je hervat.", "Confirm consent and your stop signal again before resuming.")); }} disabled={busy}>{t("Voorbereiden", "Prepare")}</button>
-              {resumePrepared && <div className="cw-run-gate"><label><input type="checkbox" checked={runConsent} onChange={(event) => setRunConsent(event.target.checked)} />{t("Ik stem nu opnieuw vrijwillig in met deze specifieke scène.", "I freely consent again to this specific scene.")}</label><input value={stopSignal} onChange={(event) => setStopSignal(event.target.value)} placeholder={t("Afgesproken stopsignaal", "Agreed stop signal")} maxLength={32} /><button type="button" className="cw-primary" disabled={!runConsent || stopSignal.trim().length < 2 || busy || !canStartExperience || !consentActive} onClick={() => void resumeScene(recoverableRun)}>{t("Hervat met nieuwe consent", "Resume with fresh consent")}</button></div>}
+              <button type="button" className="cw-primary" onClick={() => { setResumePrepared(true); setSelectedSceneKey(null); setRunConsent(false); setStopSignal(""); setMessage(t("Bevestig opnieuw consent en je stopsignaal voordat je hervat.", "Confirm consent and your stop signal again before resuming.")); }} disabled={busy || stopPending}>{t("Voorbereiden", "Prepare")}</button>
+              {resumePrepared && <div className="cw-run-gate"><label><input type="checkbox" checked={runConsent} onChange={(event) => setRunConsent(event.target.checked)} />{t("Ik stem nu opnieuw vrijwillig in met deze specifieke scène.", "I freely consent again to this specific scene.")}</label><input value={stopSignal} onChange={(event) => setStopSignal(event.target.value)} placeholder={t("Afgesproken stopsignaal", "Agreed stop signal")} maxLength={32} /><button type="button" className="cw-primary" disabled={!runConsent || stopSignal.trim().length < 2 || busy || stopPending || !canStartExperience || !consentActive} onClick={() => void resumeScene(recoverableRun)}>{t("Hervat met nieuwe consent", "Resume with fresh consent")}</button></div>}
             </div>
           )}
 
@@ -1175,7 +1248,7 @@ export default function CinematicWorld({
                   <div className="cw-run-actions">
                     <button type="button" onClick={() => void pauseScene()} disabled={busy}><Pause size={15} />{t("Pauzeren", "Pause")}</button>
                     <button type="button" className="cw-primary" onClick={() => void advanceStep()} disabled={busy || checkIn !== "green" || pathChoice === "unset"}>{stepIndex === activeScene.steps.length - 1 ? t("Afronden", "Complete") : t("Volgende fase", "Next step")}<ArrowRight size={15} /></button>
-                    <button type="button" className="cw-stop" onClick={() => void stopScene()} disabled={busy}><Square size={14} /> STOP</button>
+                    <button type="button" className="cw-stop" onClick={() => void stopScene()} aria-label={t("Ervaring onmiddellijk stoppen", "Stop experience immediately")}><Square size={14} /> STOP</button>
                   </div>
                 </>
               )}
@@ -1188,13 +1261,13 @@ export default function CinematicWorld({
               <article className="cw-scene-card" key={scene.key}>
                 <div className="cw-scene-card-top"><span className="cw-kicker">{scene.custom ? t("EIGEN SCÈNE", "YOUR SCENE") : t("AFTER HOURS ORIGINAL", "AFTER HOURS ORIGINAL")}</span><span>{String(scene.steps.length).padStart(2, "0")} {t("FASES", "STEPS")}</span></div>
                 <h3>{scene.title}</h3><p>{scene.description}</p>
-                <div className="cw-card-actions"><button type="button" className="cw-primary" onClick={() => { setSelectedSceneKey(scene.key); setResumePrepared(false); setRunConsent(false); setStopSignal(""); setMessage(t("Bevestig de scène-consent onderaan voordat je start.", "Confirm scene consent below before starting.")); }} disabled={busy}>{t("Selecteer scène", "Select scene")}</button>{scene.custom && <button type="button" onClick={() => editScene(scene)} aria-label={t("Scène bewerken", "Edit scene")}><Clapperboard size={15} /></button>}</div>
+                <div className="cw-card-actions"><button type="button" className="cw-primary" onClick={() => { setSelectedSceneKey(scene.key); setResumePrepared(false); setRunConsent(false); setStopSignal(""); setMessage(t("Bevestig de scène-consent onderaan voordat je start.", "Confirm scene consent below before starting.")); }} disabled={busy || stopPending}>{t("Selecteer scène", "Select scene")}</button>{scene.custom && <button type="button" onClick={() => editScene(scene)} aria-label={t("Scène bewerken", "Edit scene")}><Clapperboard size={15} /></button>}</div>
                 {scene.custom && <button type="button" className="cw-text-button" onClick={() => void removeScene(scene.key)}>{t("Scène verwijderen", "Delete scene")}</button>}
                 
               </article>
             ))}
           </div>
-          {selectedScene && !resumePrepared && !activeRunId && <div className="cw-selected-scene-gate"><div><span className="cw-kicker">{t("GEREED OM TE STARTEN", "READY TO BEGIN")}</span><h3>{selectedScene.title}</h3><p>{t("Lees de fases door, bespreek grenzen en bevestig opnieuw toestemming voor deze specifieke scène.", "Review the steps, discuss boundaries and confirm fresh consent for this specific scene.")}</p></div><div className="cw-run-gate"><label><input type="checkbox" checked={runConsent} onChange={(event) => setRunConsent(event.target.checked)} />{t("Ik bevestig mijn eigen vrijwillige deelname aan deze specifieke scène. Andere deelnemers moeten zelf afzonderlijk instemmen.", "I confirm my own voluntary participation in this specific scene. Other participants must consent separately themselves.")}</label><input value={stopSignal} onChange={(event) => setStopSignal(event.target.value)} placeholder={t("Afgesproken stopsignaal", "Agreed stop signal")} maxLength={32} /><button type="button" className="cw-primary" disabled={!runConsent || stopSignal.trim().length < 2 || busy || !canStartExperience || !consentActive} onClick={() => void startScene(selectedScene)}><Play size={15} />{t("Start deze ervaring", "Start this experience")}</button></div></div>}
+          {selectedScene && !resumePrepared && !activeRunId && <div className="cw-selected-scene-gate"><div><span className="cw-kicker">{t("GEREED OM TE STARTEN", "READY TO BEGIN")}</span><h3>{selectedScene.title}</h3><p>{t("Lees de fases door, bespreek grenzen en bevestig opnieuw toestemming voor deze specifieke scène.", "Review the steps, discuss boundaries and confirm fresh consent for this specific scene.")}</p></div><div className="cw-run-gate"><label><input type="checkbox" checked={runConsent} onChange={(event) => setRunConsent(event.target.checked)} />{t("Ik bevestig mijn eigen vrijwillige deelname aan deze specifieke scène. Andere deelnemers moeten zelf afzonderlijk instemmen.", "I confirm my own voluntary participation in this specific scene. Other participants must consent separately themselves.")}</label><input value={stopSignal} onChange={(event) => setStopSignal(event.target.value)} placeholder={t("Afgesproken stopsignaal", "Agreed stop signal")} maxLength={32} /><button type="button" className="cw-primary" disabled={!runConsent || stopSignal.trim().length < 2 || busy || stopPending || !canStartExperience || !consentActive} onClick={() => void startScene(selectedScene)}><Play size={15} />{t("Start deze ervaring", "Start this experience")}</button></div></div>}
           {!canStartExperience && consentActive && <div className="cw-consent-gate"><ShieldCheck /><div><strong>{t("Accountstatus niet bevestigd", "Account status not verified")}</strong><p>{t("De app kan je account- of serverstatus nog niet bevestigen. Er start niets totdat dit is gecontroleerd.", "The app cannot verify your account or server status yet. Nothing starts until this is checked.")}</p></div><button type="button" onClick={onRequestConsent}>{t("Account opnieuw controleren", "Recheck account")}</button></div>}
           {!consentActive && <div className="cw-consent-gate"><ShieldCheck /><div><strong>{t("Algemene consent vereist", "App consent required")}</strong><p>{t("De Experience Engine start alleen wanneer je algemene AFTER HOURS-consent actief is én je per scène opnieuw toestemming geeft.", "The Experience Engine starts only when your general AFTER HOURS consent is active and you give fresh consent for each scene.")}</p></div><button type="button" onClick={onRequestConsent}>{t("Consent bekijken", "Review consent")}</button></div>}
         </section>
