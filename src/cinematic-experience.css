@@ -113,6 +113,17 @@
 .cw-saved-row strong{overflow-wrap:anywhere;color:#e6d5b9;font-size:10px}
 .cw-saved-row small{overflow-wrap:anywhere;color:#a99b86;font-size:8px;line-height:1.45}
 .cw-saved-row>button{display:inline-flex;align-items:center;justify-content:center;gap:5px;min-height:38px;padding:7px 9px;border:1px solid rgba(207,174,121,.28);color:#d8bd8c;font-size:8px;white-space:nowrap}
+.cw-remote-sync-note{margin:0 0 10px;color:#a99b86;font-size:9px;line-height:1.5}
+.cw-remote-run-card{display:grid;gap:8px;margin:8px 0;padding:13px;border:1px solid rgba(207,174,121,.24);background:linear-gradient(135deg,rgba(30,23,16,.94),rgba(9,8,7,.96))}
+.cw-remote-run-heading{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.cw-remote-run-heading strong{color:#ead8b9;font:500 13px Cinzel,Georgia,serif}
+.cw-remote-run-heading>span{padding:4px 7px;border:1px solid rgba(207,174,121,.24);color:#c1ad8c;font-size:8px;letter-spacing:.08em;text-transform:uppercase}
+.cw-remote-run-heading>span.is-active{border-color:rgba(122,170,128,.55);color:#a8c6a4}
+.cw-remote-progress{height:5px;overflow:hidden;background:rgba(207,174,121,.14)}
+.cw-remote-progress>span{display:block;height:100%;background:linear-gradient(90deg,#a57e48,#e0c18a);transition:width .25s ease}
+.cw-remote-run-card>small{color:#b4a58e;font-size:9px}
+.cw-remote-step-text{margin:0;color:#dfd2bc;font-size:11px;line-height:1.65}
+.cw-remote-run-card>button{justify-self:start}
 .cw-inline-message{margin:0;color:#d5b47d;font-size:9px;line-height:1.5}
 .cw-privacy-note{color:#9e927f;font-size:9px;line-height:1.65}
 .cw-decrypted{margin:14px 0;padding:15px;border:1px solid rgba(207,174,121,.42);background:rgba(0,0,0,.45)}
