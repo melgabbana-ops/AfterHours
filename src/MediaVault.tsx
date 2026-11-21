@@ -46,6 +46,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
   const [isPhotoCameraOpen,setIsPhotoCameraOpen] = useState(false);
   const [liveStream,setLiveStream] = useState<MediaStream|null>(null);
   const [pendingCapture,setPendingCapture] = useState<File|null>(null);
+  const [pendingOriginalFile,setPendingOriginalFile] = useState<File|null>(null);
   const [pendingUrl,setPendingUrl] = useState("");
   const [isSavingCapture,setIsSavingCapture] = useState(false);
   const mountedRef = useRef(false);
@@ -202,6 +203,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
       validatePrivateMediaFile(previewFile);
       if(pendingUrl) URL.revokeObjectURL(pendingUrl);
       setPendingCapture(previewFile);
+      setPendingOriginalFile(overlayApplied?file:null);
       setPendingUrl(URL.createObjectURL(previewFile));
       setMessage(overlayApplied
         ?t("AH-overlay toegepast. Controleer de foto en kies daarna zelf voor privé opslaan.","AH overlay applied. Review the photo, then choose whether to save it privately.")
@@ -211,6 +213,26 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
     }catch(error){
       if(mountedRef.current)setMessage(error instanceof Error ? error.message : t("Dit bestand kan niet worden gebruikt.","This file cannot be used."));
     }finally{if(mountedRef.current)setBusy(false)}
+  };
+
+  const updatePendingImageOverlay=async(style:OverlayFrameStyle)=>{
+    const original=pendingOriginalFile;
+    if(!original||!pendingCapture||busy||isSavingCapture)return;
+    setBusy(true);
+    setMessage("");
+    try{
+      const updated=await composeImageWithOverlay(original,style);
+      if(!mountedRef.current)return;
+      validatePrivateMediaFile(updated);
+      setFrameStyle(style);
+      setPendingCapture(updated);
+      setPendingUrl(URL.createObjectURL(updated));
+      setMessage(t("Frame bijgewerkt. Controleer de nieuwe preview voordat je privé opslaat.","Frame updated. Review the new preview before saving it privately."));
+    }catch(error){
+      if(mountedRef.current)setMessage(error instanceof Error?error.message:t("Het frame kon niet worden bijgewerkt.","Could not update the frame."));
+    }finally{
+      if(mountedRef.current)setBusy(false);
+    }
   };
 
   const startCapture=async()=>{
@@ -369,6 +391,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
             const extension=interruptedType.includes("mp4")?".mp4":interruptedType.includes("ogg")?".ogg":".webm";
             const partialFile=new File([interruptedBlob],`after-hours-${captureKind}-recovered-${Date.now()}${extension}`,{type:interruptedType});
             setPendingCapture(partialFile);
+            setPendingOriginalFile(null);
             // Release any previous local preview URL before replacing it.
             if(pendingUrl)URL.revokeObjectURL(pendingUrl);
             setPendingUrl(URL.createObjectURL(interruptedBlob));
@@ -396,12 +419,14 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
         const file=new File([blob],`after-hours-${captureKind}-${Date.now()}${extension}`,{type});
         if(pendingUrl)URL.revokeObjectURL(pendingUrl);
         setPendingCapture(file);
+        setPendingOriginalFile(null);
         setPendingUrl(URL.createObjectURL(blob));
         setMessage(t("Voorbeeld klaar. Controleer de opname en sla alleen op als je dat nog steeds wilt.","Preview ready. Review the recording and save it only if you still want to."));
       };
       recorder.start(1000);
       setIsRecording(true);
       setPendingCapture(null);
+      setPendingOriginalFile(null);
       if(pendingUrl){URL.revokeObjectURL(pendingUrl);setPendingUrl("");}
       captureTimeoutRef.current=window.setTimeout(()=>{
         if(!mountedRef.current)return;
@@ -452,6 +477,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
       const saved=await upload(pendingCapture);
       if(!saved||!mountedRef.current)return;
       setPendingCapture(null);
+      setPendingOriginalFile(null);
       if(pendingUrl){URL.revokeObjectURL(pendingUrl);setPendingUrl("");}
       setCaptureConsent(false);
     }finally{
@@ -463,6 +489,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
   const discardCapture=()=>{
     if(saveInProgressRef.current)return;
     setPendingCapture(null);
+    setPendingOriginalFile(null);
     if(pendingUrl){URL.revokeObjectURL(pendingUrl);setPendingUrl("");}
     setCaptureConsent(false);
     setMessage(t("Media weggegooid. Er is niets geüpload.","Media discarded. Nothing was uploaded."));
@@ -537,8 +564,8 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
               <input type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/avif,image/heic,image/heif" capture="environment" disabled={busy||isRecording||!!pendingCapture} onChange={event=>{const file=event.currentTarget.files?.[0];void stageSelectedFile(file);event.currentTarget.value="";}}/>
             </label>
             <div className="media-frame-picker" role="group" aria-label={t("Stijl van de AFTER HOURS-overlay","AFTER HOURS overlay style")}>
-              <span>{t("Kies je AH-frame","Choose your AH frame")}</span>
-              <div>{mediaOverlayFrames.map(frame=><button key={frame.id} type="button" className={frameStyle===frame.id?"selected":""} aria-pressed={frameStyle===frame.id} onClick={()=>setFrameStyle(frame.id)} disabled={isRecording||busy||!!pendingCapture}><strong>{language==="nl"?frame.titleNL:frame.titleEN}</strong><small>{language==="nl"?frame.descriptionNL:frame.descriptionEN}</small></button>)}</div>
+              <span>{pendingOriginalFile?t("Pas het frame van je preview aan","Adjust the preview frame"):t("Kies je AH-frame","Choose your AH frame")}</span>
+              <div>{mediaOverlayFrames.map(frame=><button key={frame.id} type="button" className={frameStyle===frame.id?"selected":""} aria-pressed={frameStyle===frame.id} onClick={()=>pendingOriginalFile?void updatePendingImageOverlay(frame.id):setFrameStyle(frame.id)} disabled={isRecording||busy||isPhotoCameraOpen||!!pendingCapture&&!pendingOriginalFile}><strong>{language==="nl"?frame.titleNL:frame.titleEN}</strong><small>{language==="nl"?frame.descriptionNL:frame.descriptionEN}</small></button>)}</div>
             </div>
             <p className="media-overlay-note">{t("Het gekozen frame wordt in de camera-preview, nieuwe video-opnamen en foto's gebrand. Bestaande video's worden niet aangepast.","The selected frame is burned into the camera preview, new video recordings and photos. Existing videos are not modified.")}</p>
             <div className="media-capture-controls">
