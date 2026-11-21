@@ -9,7 +9,7 @@ import {
   type PrivateMediaItem,
 } from "./services/media";
 import { supabase, supabaseConfigured } from "./services/supabase";
-import { appendPhotoEditHistory, applyPhotoEditPreset, composeImageWithOverlay, composeImageWithEdits, defaultPhotoEditTransform, drawCameraFrame, getPhotoEditHistoryEntry, mediaOverlayFrames, photoEditPresets, type OverlayFrameStyle, type PhotoEditHistoryEntry, type PhotoEditPresetId, type PhotoEditTransform } from "./mediaOverlay";
+import { appendPhotoEditHistory, applyPhotoEditPreset, composeImageWithOverlay, composeImageWithEdits, defaultPhotoEditTransform, drawCameraFrame, getPhotoEditHistoryEntry, getPhotoEditHistoryShortcut, mediaOverlayFrames, photoEditPresets, type OverlayFrameStyle, type PhotoEditHistoryEntry, type PhotoEditPresetId, type PhotoEditTransform } from "./mediaOverlay";
 import { appendMediaCaptureChunk, canRecoverInterruptedCapture, discardMediaCapture, MAX_MEDIA_CAPTURE_BYTES, missingCaptureTrack, requestMediaStream, stopMediaRecorder, stopMediaStreams, selectMediaRecorderMimeType, waitForVideoReady, watchMediaStreamInterruption } from "./services/mediaCapture";
 
 interface MediaVaultProps {
