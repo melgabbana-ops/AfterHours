@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
-  awardLocalKinkTestXp, calculateKinkProfile, clearKinkProfileResult,
-  kinkCategories, kinkQuestions, loadKinkProfileResult, saveKinkProfileResult,
+  awardLocalKinkTestXp, calculateKinkProfile, clearKinkProfileResult, hasCompleteKinkAnswers,
+  isValidKinkProfileResult, kinkCategories, kinkQuestions, loadKinkProfileResult, saveKinkProfileResult,
 } from "./kinkTest";
 
 function installStorage() {
@@ -20,6 +20,21 @@ describe("AFTER HOURS Kink Profile test",()=>{
     expect(kinkCategories).toHaveLength(8);
     expect(kinkQuestions).toHaveLength(24);
     for(const category of kinkCategories) expect(kinkQuestions.filter(q=>q.category===category.id)).toHaveLength(3);
+  });
+  it("requires every known question exactly once before completion",()=>{
+    const complete=Object.fromEntries(kinkQuestions.map(q=>[q.id,"curious"]));
+    expect(hasCompleteKinkAnswers(complete)).toBe(true);
+    const missing={...complete}; delete missing.p1;
+    expect(hasCompleteKinkAnswers(missing)).toBe(false);
+    expect(hasCompleteKinkAnswers({...complete,extra:"yes"})).toBe(false);
+    expect(hasCompleteKinkAnswers({...complete,p1:"maybe"})).toBe(false);
+  });
+  it("validates stored profile summaries before displaying them",()=>{
+    const result=calculateKinkProfile(Object.fromEntries(kinkQuestions.map(q=>[q.id,"curious"])));
+    expect(isValidKinkProfileResult(result)).toBe(true);
+    expect(isValidKinkProfileResult({...result,categoryScores:[]})).toBe(false);
+    expect(isValidKinkProfileResult({...result,topCategories:["power","power","power"]})).toBe(false);
+    expect(isValidKinkProfileResult({...result,categoryScores:result.categoryScores.map(score=>({...score,percentage:999}))})).toBe(false);
   });
   it("calculates a profile without treating hard limits as interest",()=>{
     const answers=Object.fromEntries(kinkQuestions.map(q=>[q.id,q.category==="power"?"yes":q.category==="service"?"limit":"no"])) as Record<string, "yes"|"limit"|"no">;
