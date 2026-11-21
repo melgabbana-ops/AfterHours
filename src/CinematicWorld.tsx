@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { bindVaultAutoLock } from "./vaultAutoLock";
+import { consumeInvitationTokenFromUrl } from "./invitationUrl";
 import {
   ArrowLeft, ArrowRight, BookOpen, CheckCircle2, Clapperboard, Copy,
   Download, Eye, EyeOff, Flame, LockKeyhole, Mail, Music2, Pause,
@@ -160,7 +161,13 @@ export default function CinematicWorld({
   const [experienceInvites, setExperienceInvites] = useState<ExperienceInvitation[]>([]);
   const [selectedInviteRunId, setSelectedInviteRunId] = useState("");
   const [inviteLink, setInviteLink] = useState("");
-  const [incomingInviteToken, setIncomingInviteToken] = useState<string | null>(() => new URLSearchParams(window.location.search).get("invite"));
+  const [incomingInviteToken, setIncomingInviteToken] = useState<string | null>(() => {
+    const consumed = consumeInvitationTokenFromUrl(window.location.href);
+    if (consumed.hadInviteParameter) {
+      window.history.replaceState(window.history.state, "", consumed.sanitizedUrl);
+    }
+    return consumed.token;
+  });
   const [invitePreview, setInvitePreview] = useState<ExperienceInvitationPreview | null>(null);
   const [invitePreviewLoading, setInvitePreviewLoading] = useState(false);
   const [loading, setLoading] = useState(true);
