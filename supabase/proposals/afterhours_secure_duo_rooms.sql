@@ -326,6 +326,61 @@ begin
 end;
 $$;
 
+-- Return only the room state and minimal per-member consent status to a member.
+-- This is the authoritative lobby snapshot; clients never infer consent from broadcasts.
+create or replace function public.get_afterhours_duo_room_state(p_room_id uuid)
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $
+declare
+  v_user_id uuid := auth.uid();
+  v_room public.afterhours_duo_rooms%rowtype;
+  v_members jsonb;
+begin
+  if v_user_id is null then
+    raise exception 'Sign in to view this Duo room.' using errcode = '28000';
+  end if;
+
+  select * into v_room
+  from public.afterhours_duo_rooms
+  where id = p_room_id;
+
+  if not found or v_room.expires_at <= now() then
+    raise exception 'This Duo room is no longer available.' using errcode = 'P0002';
+  end if;
+
+  if not exists (
+    select 1 from public.afterhours_duo_room_members m
+    where m.room_id = p_room_id and m.user_id = v_user_id and m.removed_at is null
+  ) then
+    raise exception 'You are not a member of this Duo room.' using errcode = '42501';
+  end if;
+
+  select coalesce(
+    jsonb_agg(
+      jsonb_build_object(
+        'role', m.role,
+        'is_self', m.user_id = v_user_id,
+        'consented', m.consented_at is not null
+          and (m.consent_revoked_at is null or m.consent_revoked_at < m.consented_at)
+      ) order by m.role
+    ),
+    '[]'::jsonb
+  ) into v_members
+  from public.afterhours_duo_room_members m
+  where m.room_id = p_room_id and m.removed_at is null;
+
+  return jsonb_build_object(
+    'room_id', v_room.id,
+    'status', v_room.status,
+    'expires_at', v_room.expires_at,
+    'members', v_members
+  );
+end;
+$;
+
 create or replace function public.revoke_afterhours_duo_invitation(p_room_id uuid)
 returns jsonb
 language plpgsql
@@ -364,12 +419,14 @@ revoke all on function public.preview_afterhours_duo_invitation(text) from publi
 revoke all on function public.accept_afterhours_duo_invitation(text) from public, anon;
 revoke all on function public.set_afterhours_duo_consent(uuid, boolean) from public, anon;
 revoke all on function public.set_afterhours_duo_room_state(uuid, text) from public, anon;
+revoke all on function public.get_afterhours_duo_room_state(uuid) from public, anon;
 revoke all on function public.revoke_afterhours_duo_invitation(uuid) from public, anon;
 grant execute on function public.create_afterhours_duo_room(text) to authenticated;
 grant execute on function public.preview_afterhours_duo_invitation(text) to authenticated;
 grant execute on function public.accept_afterhours_duo_invitation(text) to authenticated;
 grant execute on function public.set_afterhours_duo_consent(uuid, boolean) to authenticated;
 grant execute on function public.set_afterhours_duo_room_state(uuid, text) to authenticated;
+grant execute on function public.get_afterhours_duo_room_state(uuid) to authenticated;
 grant execute on function public.revoke_afterhours_duo_invitation(uuid) to authenticated;
 
 -- Private Broadcast + Presence are allowed only on the exact topic of a room
