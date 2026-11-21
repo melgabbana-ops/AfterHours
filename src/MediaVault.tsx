@@ -46,6 +46,8 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
   const [pendingCapture,setPendingCapture] = useState<File|null>(null);
   const [pendingUrl,setPendingUrl] = useState("");
   const mountedRef = useRef(false);
+  const languageRef = useRef(language);
+  languageRef.current = language;
   const livePreviewRef = useRef<HTMLVideoElement|null>(null);
   const liveCanvasRef = useRef<HTMLCanvasElement|null>(null);
   const compositionStreamRef = useRef<MediaStream|null>(null);
@@ -72,10 +74,12 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
     if(!signedUrl)return;
     const timeout=window.setTimeout(()=>{
       setSignedUrl("");
-      setMessage(t("De tijdelijke link is verlopen. Open het bestand opnieuw voor een nieuwe link.","This temporary link has expired. Open the file again to create a fresh link."));
+      setMessage(languageRef.current==="nl"
+        ? "De tijdelijke link is verlopen. Open het bestand opnieuw voor een nieuwe link."
+        : "This temporary link has expired. Open the file again to create a fresh link.");
     },60_000);
     return ()=>window.clearTimeout(timeout);
-  },[signedUrl,language]);
+  },[signedUrl]);
   useEffect(()=>{
     mountedRef.current=true;
     return ()=>{
@@ -419,6 +423,8 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
 
   const openItem = async (item: PrivateMediaItem) => {
     if(!mountedRef.current)return;
+    // Opening another item exits any unfinished delete-confirmation state.
+    setDeletingPath("");
     setBusy(true);
     setMessage("");
     setSignedUrl("");
@@ -523,7 +529,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
                   </div>
                   {deletingPath === item.path ? (
                     <div className="media-item-actions">
-                      <button type="button" onClick={() => void removeItem(item.path)} disabled={busy}>{t("Bevestig", "Confirm")}</button>
+                      <button type="button" onClick={() => void removeItem(item.path)} disabled={busy} aria-label={t(`Verwijder ${displayName(item.name)} definitief`, `Permanently delete ${displayName(item.name)}`)}>{t("Definitief verwijderen", "Delete permanently")}</button>
                       <button type="button" onClick={() => setDeletingPath("")} disabled={busy}>{t("Annuleer", "Cancel")}</button>
                     </div>
                   ) : (

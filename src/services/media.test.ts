@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizePrivateMediaMimeType, safeAssignmentPrefix, safeMediaSessionFolder, validatePrivateMediaFile, validatePrivateMediaPath } from "./media";
+import { collectStoragePages, normalizePrivateMediaMimeType, safeAssignmentPrefix, safeMediaSessionFolder, validatePrivateMediaFile, validatePrivateMediaPath } from "./media";
 
 describe("private media session folder safety", () => {
   it("uses a general folder for dot path segments", () => {
@@ -109,5 +109,47 @@ describe("private assignment media prefix", () => {
     const prefix = safeAssignmentPrefix("É".repeat(120));
     expect(prefix.length).toBeLessThanOrEqual(41);
     expect(prefix).toMatch(/^[a-zA-Z0-9._-]+$/);
+  });
+});
+
+
+describe("private storage pagination", () => {
+  const entry = (name: string) => ({
+    name,
+    id: name,
+    metadata: null,
+    created_at: null,
+  });
+
+  it("loads subsequent pages in 100-item offsets until a short page", async () => {
+    const calls: Array<{ offset: number; limit: number }> = [];
+    const result = await collectStoragePages(async (offset, limit) => {
+      calls.push({ offset, limit });
+      if (offset === 0) return Array.from({ length: 100 }, (_, index) => entry(`first-${index}`));
+      if (offset === 100) return [entry("last")];
+      return [];
+    });
+
+    expect(calls).toEqual([{ offset: 0, limit: 100 }, { offset: 100, limit: 100 }]);
+    expect(result).toHaveLength(101);
+    expect(result[100].name).toBe("last");
+  });
+
+  it("checks the next page when the total is an exact multiple of 100", async () => {
+    const offsets: number[] = [];
+    const result = await collectStoragePages(async (offset) => {
+      offsets.push(offset);
+      return offset === 0 ? Array.from({ length: 100 }, (_, index) => entry(`item-${index}`)) : [];
+    });
+
+    expect(offsets).toEqual([0, 100]);
+    expect(result).toHaveLength(100);
+  });
+
+  it("propagates storage page errors instead of returning an incomplete archive", async () => {
+    await expect(collectStoragePages(async (offset) => {
+      if (offset === 0) return [entry("first")];
+      throw new Error("storage unavailable");
+    })).rejects.toThrow("storage unavailable");
   });
 });
