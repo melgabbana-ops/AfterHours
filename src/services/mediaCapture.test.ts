@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { appendMediaCaptureChunk, canRecoverInterruptedCapture, discardMediaCapture, MAX_MEDIA_CAPTURE_BYTES, missingCaptureTrack, stopMediaRecorder, stopMediaStreams, selectMediaRecorderMimeType, waitForVideoReady, watchMediaStreamInterruption } from "./mediaCapture";
+import { appendMediaCaptureChunk, canRecoverInterruptedCapture, discardMediaCapture, MAX_MEDIA_CAPTURE_BYTES, missingCaptureTrack, requestMediaStream, stopMediaRecorder, stopMediaStreams, selectMediaRecorderMimeType, waitForVideoReady, watchMediaStreamInterruption } from "./mediaCapture";
 
 describe("media capture cleanup", () => {
   it("stops every track across camera and composited streams", () => {
@@ -317,5 +317,53 @@ describe("recording format selection", () => {
       return type === "audio/webm";
     });
     expect(selectMediaRecorderMimeType(["audio/mp4", "audio/webm"], supported)).toBe("audio/webm");
+  });
+});
+
+
+describe("camera and microphone permission timeout", () => {
+  it("returns a stream when permission is granted before the timeout", async () => {
+    vi.useFakeTimers();
+    try {
+      const track = { stop: vi.fn() };
+      const stream = { getTracks: () => [track] } as unknown as MediaStream;
+      await expect(requestMediaStream(async () => stream, 30000)).resolves.toBe(stream);
+      expect(vi.getTimerCount()).toBe(0);
+      expect(track.stop).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("rejects a permission prompt that remains unresolved", async () => {
+    vi.useFakeTimers();
+    try {
+      const pending = requestMediaStream(() => new Promise<MediaStream>(() => undefined), 1000, "permission timeout");
+      const assertion = expect(pending).rejects.toThrow("permission timeout");
+      await vi.advanceTimersByTimeAsync(1000);
+      await assertion;
+      expect(vi.getTimerCount()).toBe(0);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("stops a stream granted after the permission prompt has timed out", async () => {
+    vi.useFakeTimers();
+    try {
+      let grant!: (stream: MediaStream) => void;
+      const track = { stop: vi.fn() };
+      const stream = { getTracks: () => [track] } as unknown as MediaStream;
+      const pending = requestMediaStream(() => new Promise<MediaStream>(resolve => { grant = resolve; }), 1000);
+      const assertion = expect(pending).rejects.toThrow("timed out");
+      await vi.advanceTimersByTimeAsync(1000);
+      await assertion;
+      grant(stream);
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(track.stop).toHaveBeenCalledOnce();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
