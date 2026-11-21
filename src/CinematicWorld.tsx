@@ -932,7 +932,12 @@ export default function CinematicWorld({
         setMessage(t("Delen geannuleerd. De link blijft hieronder beschikbaar.", "Sharing cancelled. The link remains available below."));
       }
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : t("Uitnodiging kon niet worden aangemaakt.", "Could not create invitation."));
+      const detail = cause instanceof Error ? cause.message : "";
+      if (detail.includes("Invitations can only be created while")) {
+        setError(t("Pauzeer de ervaring voordat je een uitnodiging maakt.", "Pause the experience before creating an invitation."));
+      } else {
+        setError(detail || t("Uitnodiging kon niet worden aangemaakt.", "Could not create invitation."));
+      }
     } finally {
       setBusy(false);
     }
