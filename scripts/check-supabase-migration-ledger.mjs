@@ -29,7 +29,8 @@ const expected = [
   "20261121000106_afterhours_shared_run_consent_guard.sql",
   "20261121000215_afterhours_revoke_shared_consents_on_pause_or_end.sql",
   "20261121000315_afterhours_invitation_accepted_user_index.sql",
-  "20261121000345_afterhours_experience_invitation_preview.sql"
+  "20261121000345_afterhours_experience_invitation_preview.sql",
+  "20261121000429_afterhours_invite_requires_paused_run.sql"
 ];
 const actual = readdirSync(directory).filter((name) => name.endsWith(".sql")).sort();
 const baseline = [...expected].sort();
