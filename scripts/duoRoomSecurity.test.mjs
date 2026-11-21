@@ -120,6 +120,7 @@ describe("proposed secure Duo backend guardrails", () => {
       "set_afterhours_duo_room_state",
       "revoke_afterhours_duo_invitation",
       "get_afterhours_duo_room_state",
+      "advance_afterhours_duo_session",
     ];
     for (const name of privilegedFunctions) {
       const declaration = proposal.slice(proposal.indexOf(`function public.${name}(`));
@@ -136,6 +137,12 @@ describe("proposed secure Duo backend guardrails", () => {
     expect(proposal).toContain("if p_status in ('paused', 'stopped') then");
     expect(proposal).toContain("set consent_revoked_at = clock_timestamp()");
     expect(proposal).toContain("where room_id = p_room_id and removed_at is null and consent_revoked_at is null");
+  });
+
+  it("backfills a zeroed shared cursor for rooms that already exist", () => {
+    expect(proposal).toContain("insert into public.afterhours_duo_session_state (room_id)");
+    expect(proposal).toContain("select id from public.afterhours_duo_rooms");
+    expect(proposal).toContain("on conflict (room_id) do nothing");
   });
 
   it("synchronizes only the finite shared prompt cursor with revision checks and active consent", () => {
