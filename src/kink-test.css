@@ -1,0 +1,86 @@
+
+/* AFTER HOURS Kink Profile Discovery Lab */
+.ah-kink-test{max-width:760px;margin:0 auto;padding:22px 18px 50px;color:var(--ah-ivory)}
+.ah-kink-test>.back{margin-bottom:24px}
+.kink-hero{position:relative;overflow:hidden;padding:26px 22px 24px;border:1px solid #4c3c25;background:radial-gradient(circle at 90% 0%,rgba(183,129,36,.16),transparent 42%),linear-gradient(145deg,#17130d,#090807);text-align:center}
+.kink-hero-mark,.kink-result-seal{width:76px;height:76px;margin:0 auto 22px;border:1px solid #9a743b;border-radius:50%;display:grid;place-items:center;position:relative;font-family:"Cinzel",serif;font-size:24px;color:#e6c17b;box-shadow:0 0 35px rgba(200,148,69,.12),inset 0 0 22px rgba(200,148,69,.08)}
+.kink-hero-mark span,.kink-result-seal span{position:absolute;right:9px;top:7px;font-size:12px;color:#f3c96b}
+.kink-kicker{font-size:9px;letter-spacing:.2em;color:#c5a56e}
+.kink-hero h1,.kink-result-top h1{font:500 clamp(30px,7vw,46px)/1.08 "Cinzel",serif;margin:14px 0;color:#f2e8d8}
+.kink-hero h1 i{display:block;color:#d7a84f}
+.kink-hero>p:not(.kink-kicker),.kink-result-top>p{max-width:530px;margin:0 auto;color:#bdb7ac;font-size:13px;line-height:1.75}
+.kink-privacy-note{display:flex;gap:10px;align-items:flex-start;text-align:left;margin-top:22px;padding:13px;border:1px solid rgba(200,148,69,.22);background:#0b0a08;color:#d3c5ad;font-size:11px;line-height:1.55}
+.kink-privacy-note svg{flex:none;color:#d7a84f}
+.kink-progress-head{display:flex;justify-content:space-between;margin:25px 0 9px;color:#bdb7ac;font-size:9px;letter-spacing:.15em}
+.kink-progress-head strong{color:#e5c27f}
+.kink-progress{height:3px;background:#2a241a;margin-bottom:18px}
+.kink-progress span{display:block;height:100%;background:linear-gradient(90deg,#8f6316,#f3c96b);transition:width .25s}
+.kink-question-card{border:1px solid #493b27;background:linear-gradient(145deg,#15120d,#0b0a08);padding:22px}
+.kink-question-category{display:flex;align-items:center;gap:9px;color:#e5c27f}
+.kink-question-category span{font-size:20px}
+.kink-question-category small{font-size:9px;letter-spacing:.14em;text-transform:uppercase}
+.kink-question-count{display:block;margin-top:26px;color:#8e877a;font-size:9px;letter-spacing:.18em}
+.kink-question-card h2{font:500 clamp(21px,5vw,29px)/1.35 "Cinzel",serif;color:#f1e6d4;margin:12px 0}
+.kink-question-card>p{font-size:11px;color:#a9a195;line-height:1.6}
+.kink-answer-list{display:grid;gap:8px;margin:22px 0}
+.kink-answer-list button{min-height:48px;display:flex;align-items:center;gap:11px;text-align:left;padding:11px 13px;border:1px solid #332c20;background:#0a0907;color:#d7cbb9;font-size:12px}
+.kink-answer-list button.selected{border-color:#c89445;background:linear-gradient(90deg,rgba(200,148,69,.15),rgba(200,148,69,.035));color:#f5d89d}
+.kink-answer-dot{width:19px;height:19px;border:1px solid #675333;border-radius:50%;display:grid;place-items:center;color:#f3c96b;flex:none}
+.kink-answer-list button>span:nth-child(2){flex:1}
+.kink-answer-list button small{color:#c7a66b;font-size:9px}
+.kink-nav-actions,.kink-result-actions{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.kink-primary,.kink-secondary,.kink-danger{min-height:46px;padding:12px 16px;display:inline-flex;align-items:center;justify-content:center;gap:9px;border:1px solid #876b3b;font-size:10px;letter-spacing:.08em}
+.kink-primary{background:linear-gradient(110deg,#76521d,#bd8d42);color:#fff5e4;border-color:#c69a55}
+.kink-secondary{color:#d6c6aa;border-color:#51432f}
+.kink-primary:disabled,.kink-secondary:disabled{opacity:.35;cursor:not-allowed}
+.kink-footer-hint{text-align:center;margin:16px 0;color:#7f786d;font-size:10px}
+.kink-error{color:#e6a6a0;font-size:11px}
+.kink-saved-link{display:flex;align-items:center;gap:8px;margin:18px auto 0;color:#d4b475;font-size:10px}
+.kink-result-top{text-align:center;padding:18px 12px 28px}
+.kink-result-seal{width:64px;height:64px;font-size:20px}
+.kink-profile-result{border:1px solid #4d3c24;background:linear-gradient(145deg,#15120d,#090807);padding:20px;margin-bottom:16px}
+.kink-archetype{text-align:center;padding:8px 0 20px;border-bottom:1px solid #3c3121}
+.kink-archetype h2{font:500 clamp(24px,6vw,34px)/1.2 "Cinzel",serif;color:#f0d39a;margin:12px 0}
+.kink-archetype p{color:#aaa194;font-size:11px}
+.kink-top-categories{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:16px 0;border-bottom:1px solid #3c3121}
+.kink-top-categories div{display:grid;gap:7px;min-width:0}
+.kink-top-categories span{color:#c89a4c;font:14px "Cinzel",serif}
+.kink-top-categories strong{font-size:10px;line-height:1.45;color:#e4d5bc}
+.kink-score-list{padding-top:20px}
+.kink-score-row{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(70px,1fr) 38px;align-items:center;gap:10px;margin:14px 0}
+.kink-score-row>div:first-child{display:grid;gap:4px}
+.kink-score-row strong{font-size:10px;color:#e2d4bf}
+.kink-score-row small{font-size:9px;color:#8f887d}
+.kink-score-row>b{text-align:right;color:#d8b66f;font-size:10px}
+.kink-score-track{height:4px;background:#30291e}
+.kink-score-track span{display:block;height:100%;background:linear-gradient(90deg,#8f6316,#e4c17b)}
+.kink-result-facts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:22px}
+.kink-result-facts div{padding:13px 6px;text-align:center;background:#0b0a08;border:1px solid #342b1e}
+.kink-result-facts strong,.kink-result-facts small{display:block}
+.kink-result-facts strong{font:22px "Cinzel",serif;color:#e4c17b}
+.kink-result-facts small{margin-top:5px;color:#a69b88;font-size:8px;line-height:1.4}
+.kink-disclaimer{margin:18px 0 0;padding-top:15px;border-top:1px solid #3c3121;color:#958d80;font-size:9px;line-height:1.65}
+.kink-reward-card{display:flex;align-items:center;gap:16px;padding:18px;border:1px solid #8b6938;background:radial-gradient(circle at 0 0,rgba(200,148,69,.15),transparent 70%),#100e0b;margin:16px 0}
+.kink-reward-icon{width:48px;height:48px;display:grid;place-items:center;border:1px solid #9a743b;color:#f3c96b;flex:none}
+.kink-reward-card h3{font:26px "Cinzel",serif;color:#f3d28f;margin:2px 0}
+.kink-reward-card p{font-size:10px;line-height:1.5;color:#c2b6a2;margin:3px 0}
+.kink-reward-card small{font-size:9px;color:#d8b66f}
+.kink-unlocks{padding:17px;border:1px solid #3b3122;margin:16px 0;background:#0c0b09}
+.kink-unlocks>div{display:flex;align-items:center;gap:11px;padding:10px 0;border-top:1px solid #2b251b}
+.kink-unlocks>div>span{color:#d8b66f;font-size:20px}
+.kink-unlocks strong,.kink-unlocks small{display:block}
+.kink-unlocks strong{font:15px "Cinzel",serif;color:#e9d4ad}
+.kink-unlocks small{font-size:9px;color:#a69b88;margin-top:3px}
+.kink-save-card{padding:17px;border:1px solid #3c3325;background:#0d0c0a;margin:16px 0}
+.kink-save-card>div{display:flex;gap:11px;color:#d8b66f}
+.kink-save-card>div>div{flex:1}
+.kink-save-card strong{font-size:12px;color:#e7d7bd}
+.kink-save-card p{font-size:10px;line-height:1.55;color:#a69b88;margin:6px 0 12px}
+.kink-save-card label{display:flex;align-items:center;gap:9px;color:#d8c9af;font-size:10px}
+.kink-save-card input{accent-color:#c89445;width:17px;height:17px}
+.kink-save-card>.kink-primary{margin-top:14px}
+.kink-saved-note{display:block;color:#a6bd92;font-size:9px;margin-top:9px}
+.kink-danger{margin:10px 0;color:#d59c91;border-color:#69403a}
+.kink-result-actions{margin-top:20px}
+@media(min-width:700px){.ah-kink-test{padding:32px 28px 70px}.kink-hero{padding:38px 40px}.kink-question-card{padding:30px}.kink-profile-result{padding:28px}}
+@media(max-width:390px){.kink-question-card{padding:16px}.kink-score-row{grid-template-columns:minmax(0,1fr) 70px 32px;gap:7px}.kink-top-categories{gap:5px}.kink-top-categories strong{font-size:9px}}
