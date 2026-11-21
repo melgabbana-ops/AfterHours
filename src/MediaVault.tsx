@@ -329,12 +329,22 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
         const interrupted=captureInterruptedRef.current;
         captureInterruptedRef.current=false;
         if(interrupted){
+          const interruptedType=recorder.mimeType||(captureKind==="video"?"video/webm":"audio/webm");
+          const interruptedBlob=new Blob(chunksRef.current,{type:interruptedType});
           chunksRef.current=[];
           captureBytesRef.current=0;
           captureSizeExceededRef.current=false;
           stopCaptureTracks();
           setCaptureConsent(false);
-          setMessage(t("Camera of microfoon is onderbroken. De onvolledige opname is weggegooid en niets is opgeslagen.","Camera or microphone was interrupted. The incomplete recording was discarded and nothing was saved."));
+          if(interruptedBlob.size>0&&interruptedBlob.size<=MAX_MEDIA_CAPTURE_BYTES){
+            const extension=interruptedType.includes("mp4")?".mp4":interruptedType.includes("ogg")?".ogg":".webm";
+            const partialFile=new File([interruptedBlob],`after-hours-${captureKind}-recovered-${Date.now()}${extension}`,{type:interruptedType});
+            setPendingCapture(partialFile);
+            setPendingUrl(URL.createObjectURL(interruptedBlob));
+            setMessage(t("Opname onderbroken. Er is een lokaal gedeeltelijk voorbeeld hersteld. Controleer het bestand en bevestig opnieuw toestemming voordat je het privé opslaat.","Recording interrupted. A local partial preview was recovered. Review it and reconfirm consent before saving it privately."));
+          }else{
+            setMessage(t("Camera of microfoon is onderbroken. Er was geen bruikbaar gedeeltelijk voorbeeld. Er is niets opgeslagen.","Camera or microphone was interrupted. No usable partial preview was available. Nothing was saved."));
+          }
           return;
         }
         const sizeExceeded=captureSizeExceededRef.current;
@@ -399,6 +409,10 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
 
   const saveCapture=async()=>{
     if(!pendingCapture||!mountedRef.current||saveInProgressRef.current)return;
+    if(!captureConsent){
+      setMessage(t("Bevestig opnieuw dat iedereen akkoord is voordat je deze opname privé opslaat.","Please reconfirm that everyone agrees before saving this recording privately."));
+      return;
+    }
     saveInProgressRef.current=true;
     setIsSavingCapture(true);
     try{
