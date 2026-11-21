@@ -538,7 +538,16 @@ export default function CinematicWorld({
       onSafetyResume();
       setMessage(t("De scène is hervat na een nieuwe consentbevestiging.", "The scene resumed after fresh consent confirmation."));
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : t("Hervatten is niet gelukt.", "Could not resume the scene."));
+      const detail = cause instanceof Error ? cause.message : "";
+      if (detail.includes("Resolve or revoke pending invitations")) {
+        setError(t("Los eerst openstaande uitnodigingen op: laat ze accepteren of trek ze in voordat je hervat.", "Resolve pending invitations first: let participants accept or revoke the invitations before resuming."));
+      } else if (detail.includes("A participant has withdrawn consent")) {
+        setError(t("Een deelnemer heeft toestemming ingetrokken. Hervat pas na een nieuwe uitnodiging en toestemming.", "A participant withdrew consent. Resume only after a new invitation and fresh consent."));
+      } else if (detail.includes("Fresh owner consent")) {
+        setError(t("Bevestig opnieuw je eigen toestemming voordat je de scène hervat.", "Confirm your own consent again before resuming the scene."));
+      } else {
+        setError(detail || t("Hervatten is niet gelukt.", "Could not resume the scene."));
+      }
     } finally {
       setBusy(false);
     }
