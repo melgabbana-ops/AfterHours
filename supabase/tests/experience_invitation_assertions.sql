@@ -35,7 +35,7 @@ end; $definition_tests$;
 
 set role authenticated;
 do $tests$
-declare v_result jsonb; v_status text; v_revoked timestamptz;
+declare v_result jsonb; v_status text; v_revoked timestamptz; v_new_run_id uuid;
 begin
   perform set_config('request.jwt.claim.sub','bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',false);
   v_result:=public.preview_afterhours_experience_invitation(repeat('a',64));
@@ -85,6 +85,23 @@ begin
     raise exception 'An inviter previewed their own invitation' using errcode='ZX007';
   exception when sqlstate '22023' then null;
   end;
+
+  begin
+    insert into public.afterhours_experience_runs(user_id,scene_key,scene_snapshot,status,total_steps)
+    values('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','direct-active','{}'::jsonb,'active',1);
+    raise exception 'A run was inserted active without owner consent' using errcode='ZX011';
+  exception when sqlstate '42501' then null;
+  end;
+  insert into public.afterhours_experience_runs(user_id,scene_key,scene_snapshot,status,total_steps)
+  values('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','consent-first','{}'::jsonb,'paused',1)
+  returning id into v_new_run_id;
+  insert into public.afterhours_experience_run_consents(run_id,user_id,consent_version)
+  values(v_new_run_id,'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','1.0');
+  update public.afterhours_experience_runs set status='active'
+  where id=v_new_run_id and status='paused';
+  if not exists(select 1 from public.afterhours_experience_runs where id=v_new_run_id and status='active') then
+    raise exception 'A run could not activate after fresh owner consent was recorded';
+  end if;
 
   insert into public.afterhours_experience_invitations(run_id,inviter_user_id,token_hash,expires_at)
   values('33333333-3333-4333-8333-333333333333','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',repeat('7',64),now()+interval '1 day');
