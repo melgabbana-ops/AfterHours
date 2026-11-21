@@ -100,12 +100,33 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
   }, [mode, connected, status, partnerPresent]);
 
   const publish = async (nextRound: number, nextStatus: PlayStatus) => {
+    if (mode === "remote") {
+      const channel = channelRef.current;
+      if (!connected || !channel) {
+        if (nextStatus === "paused" || nextStatus === "stopped") {
+          setRound(nextRound);
+          setStatus(nextStatus);
+        } else {
+          setStatus(status === "active" ? "paused" : "lobby");
+        }
+        setMessage(t("Geen stabiele verbinding. De wijziging is lokaal veiliggesteld, maar niet met je partner gedeeld.", "Connection is not stable. The change was kept locally safe, but was not shared with your partner."));
+        return false;
+      }
+      const result = await channel.send({ type: "broadcast", event: "play-state", payload: { round: nextRound, status: nextStatus } });
+      if (result !== "ok") {
+        if (nextStatus === "paused" || nextStatus === "stopped") {
+          setRound(nextRound);
+          setStatus(nextStatus);
+        } else {
+          setStatus(status === "active" ? "paused" : "lobby");
+        }
+        setMessage(t("Update niet gedeeld. De ervaring is lokaal gepauzeerd. Controleer de verbinding.", "Update not shared. The experience was paused locally. Check the connection."));
+        return false;
+      }
+    }
     setRound(nextRound);
     setStatus(nextStatus);
-    if (mode === "remote" && channelRef.current) {
-      const result = await channelRef.current.send({ type: "broadcast", event: "play-state", payload: { round: nextRound, status: nextStatus } });
-      if (result !== "ok") setMessage(t("Update niet gedeeld. Controleer de verbinding.", "Update not shared. Check the connection."));
-    }
+    return true;
   };
   const createRoom = () => {
     setRoomCode(newCode());
