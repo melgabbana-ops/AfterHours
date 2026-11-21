@@ -149,12 +149,12 @@ export async function composeImageWithEdits(file: File, style: OverlayFrameStyle
     canvas.height = height;
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error("Photo editing is not supported in this browser.");
-    ctx.translate(width / 2, height / 2);
-    ctx.rotate((transform.rotation * Math.PI) / 180);
     const baseScale = Math.max(width / logicalWidth, height / logicalHeight) * transform.zoom;
     const drawWidth = sourceWidth * baseScale;
     const drawHeight = sourceHeight * baseScale;
-    ctx.drawImage(image, -drawWidth / 2 + transform.offsetX * (drawWidth - width) / 2, -drawHeight / 2 + transform.offsetY * (drawHeight - height) / 2, drawWidth, drawHeight);
+    ctx.translate(width / 2 + transform.offsetX * (logicalWidth * baseScale - width) / 2, height / 2 + transform.offsetY * (logicalHeight * baseScale - height) / 2);
+    ctx.rotate((transform.rotation * Math.PI) / 180);
+    ctx.drawImage(image, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
     drawAfterHoursOverlay(ctx, width, height, style);
     const blob = await new Promise<Blob>((resolve, reject) => canvas.toBlob(value => value ? resolve(value) : reject(new Error("Could not render the edited photo.")), "image/jpeg", .92));
     const basename = file.name.replace(/\\.[^.]+$/, "").replace(/[^a-zA-Z0-9_-]+/g, "-").slice(0, 70) || "after-hours-photo";
