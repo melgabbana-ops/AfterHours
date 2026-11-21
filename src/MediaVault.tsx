@@ -9,7 +9,7 @@ import {
 } from "./services/media";
 import { supabase, supabaseConfigured } from "./services/supabase";
 import { composeImageWithOverlay, drawCameraFrame, mediaOverlayFrames, type OverlayFrameStyle } from "./mediaOverlay";
-import { appendMediaCaptureChunk, discardMediaCapture, MAX_MEDIA_CAPTURE_BYTES, stopMediaStreams, waitForVideoReady } from "./services/mediaCapture";
+import { appendMediaCaptureChunk, discardMediaCapture, MAX_MEDIA_CAPTURE_BYTES, stopMediaStreams, waitForVideoReady, watchMediaStreamInterruption } from "./services/mediaCapture";
 
 interface MediaVaultProps {
   sessionId: string;
@@ -57,6 +57,9 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
   const captureBytesRef = useRef(0);
   const captureSizeExceededRef = useRef(false);
   const captureTimeoutRef = useRef<number|undefined>(undefined);
+  const streamInterruptionCleanupRef = useRef<(() => void) | null>(null);
+  const captureInterruptedRef = useRef(false);
+  const captureStartInFlightRef = useRef(false);
 
 
   useEffect(()=>{
@@ -68,6 +71,10 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
     return ()=>{
       mountedRef.current=false;
       if(captureTimeoutRef.current!==undefined) window.clearTimeout(captureTimeoutRef.current);
+      streamInterruptionCleanupRef.current?.();
+      streamInterruptionCleanupRef.current=null;
+      captureInterruptedRef.current=false;
+      captureStartInFlightRef.current=false;
       if(renderFrameRef.current!==null) window.cancelAnimationFrame(renderFrameRef.current);
       // Leaving the vault discards an unfinished recording instead of creating a preview.
       // Detach recorder callbacks before stopping tracks so no late event can update an unmounted view.
@@ -147,6 +154,8 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
   };
 
   const stopCaptureTracks=()=>{
+    streamInterruptionCleanupRef.current?.();
+    streamInterruptionCleanupRef.current=null;
     if(renderFrameRef.current!==null){window.cancelAnimationFrame(renderFrameRef.current);renderFrameRef.current=null;}
     stopMediaStreams([compositionStreamRef.current,streamRef.current]);
     compositionStreamRef.current=null;
@@ -195,7 +204,11 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
       setMessage(t("Opnemen wordt niet ondersteund door deze browser. Probeer een recente browser of gebruik Bestand kiezen.","Recording is not supported by this browser. Try a recent browser or choose a file instead."));
       return;
     }
+    if(captureStartInFlightRef.current)return;
+    captureStartInFlightRef.current=true;
+    setBusy(true);
     setMessage("");
+    captureInterruptedRef.current=false;
     try{
       const stream=await navigator.mediaDevices.getUserMedia(captureKind==="photo"
         ? {video:{facingMode:{ideal:cameraFacing},width:{ideal:1920},height:{ideal:1080}},audio:false}
@@ -204,26 +217,38 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
           : {video:false,audio:true});
       if(!mountedRef.current){stopMediaStreams([stream]);return;}
       streamRef.current=stream;
+      streamInterruptionCleanupRef.current=watchMediaStreamInterruption(stream,()=>{
+        if(!mountedRef.current)return;
+        captureInterruptedRef.current=true;
+        const activeRecorder=recorderRef.current;
+        if(activeRecorder&&activeRecorder.state!=="inactive"){
+          try{activeRecorder.stop();return;}catch{/* Fall through to immediate local cleanup. */}
+        }
+        stopCaptureTracks();
+        setCaptureConsent(false);
+        setMessage(t("Camera of microfoon is onderbroken. Er is niets opgeslagen. Start opnieuw als je wilt.","Camera or microphone was interrupted. Nothing was saved. Start again if you want."));
+      });
+      if(streamRef.current!==stream)return;
       setLiveStream(stream);
       chunksRef.current=[];
       captureBytesRef.current=0;
       captureSizeExceededRef.current=false;
       if(captureKind==="photo"){
         await new Promise<void>(resolve=>window.requestAnimationFrame(()=>window.requestAnimationFrame(()=>resolve())));
-        if(!mountedRef.current)return;
+        if(!mountedRef.current||streamRef.current!==stream)return;
         const video=livePreviewRef.current;
         const canvas=liveCanvasRef.current;
         if(!video||!canvas)throw new Error(t("De camera-preview is niet beschikbaar.","Camera preview is not available."));
         video.srcObject=stream;
         await video.play();
-        if(!mountedRef.current)return;
+        if(!mountedRef.current||streamRef.current!==stream)return;
         await waitForVideoReady(
           video,
           5000,
           t("De camera startte niet op tijd.","The camera did not start in time."),
           t("De camera kon geen beeld leveren.","The camera could not provide a video frame."),
         );
-        if(!mountedRef.current)return;
+        if(!mountedRef.current||streamRef.current!==stream)return;
         canvas.width=Math.min(1920,video.videoWidth);
         canvas.height=Math.max(1,Math.round(canvas.width/(video.videoWidth/video.videoHeight)));
         const ctx=canvas.getContext("2d");
@@ -241,20 +266,20 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
       let recorderStream=stream;
       if(captureKind==="video"){
         await new Promise<void>(resolve=>window.requestAnimationFrame(()=>window.requestAnimationFrame(()=>resolve())));
-        if(!mountedRef.current)return;
+        if(!mountedRef.current||streamRef.current!==stream)return;
         const video=livePreviewRef.current;
         const canvas=liveCanvasRef.current;
         if(!video||!canvas||typeof canvas.captureStream!=="function")throw new Error(t("Deze browser kan de AH-overlay niet in de video opnemen. Gebruik een recente browser of maak een foto.","This browser cannot composite the AH overlay into video. Try a recent browser or take a photo."));
         video.srcObject=stream;
         await video.play();
-        if(!mountedRef.current)return;
+        if(!mountedRef.current||streamRef.current!==stream)return;
         await waitForVideoReady(
           video,
           5000,
           t("De camera startte niet op tijd.","The camera did not start in time."),
           t("De camera kon geen beeld leveren.","The camera could not provide a video frame."),
         );
-        if(!mountedRef.current)return;
+        if(!mountedRef.current||streamRef.current!==stream)return;
         const ratio=video.videoWidth/video.videoHeight;
         canvas.width=Math.min(1920,video.videoWidth);
         canvas.height=Math.max(1,Math.round(canvas.width/ratio));
@@ -294,6 +319,17 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
       };
       recorder.onstop=()=>{
         if(!mountedRef.current){chunksRef.current=[];return;}
+        const interrupted=captureInterruptedRef.current;
+        captureInterruptedRef.current=false;
+        if(interrupted){
+          chunksRef.current=[];
+          captureBytesRef.current=0;
+          captureSizeExceededRef.current=false;
+          stopCaptureTracks();
+          setCaptureConsent(false);
+          setMessage(t("Camera of microfoon is onderbroken. De onvolledige opname is weggegooid en niets is opgeslagen.","Camera or microphone was interrupted. The incomplete recording was discarded and nothing was saved."));
+          return;
+        }
         const sizeExceeded=captureSizeExceededRef.current;
         const type=recorder.mimeType|| (captureKind==="video"?"video/webm":"audio/webm");
         const blob=new Blob(chunksRef.current,{type});
@@ -331,6 +367,9 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
       if(!mountedRef.current)return;
       setCaptureConsent(false);
       setMessage(error instanceof Error?t(error.message,"Recording could not start: "+error.message):t("Geen toegang tot camera of microfoon. Controleer de browsertoestemming.","Camera or microphone access was denied. Check browser permissions."));
+    }finally{
+      captureStartInFlightRef.current=false;
+      if(mountedRef.current)setBusy(false);
     }
   };
 

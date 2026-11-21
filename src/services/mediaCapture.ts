@@ -89,3 +89,35 @@ export function discardMediaCapture(
   }
   stopMediaStreams(streams);
 }
+
+
+/** Notify once when any camera or microphone track ends unexpectedly. */
+export function watchMediaStreamInterruption(
+  stream: Pick<MediaStream, "getTracks">,
+  onInterrupted: () => void,
+): () => void {
+  const tracks = stream.getTracks();
+  let active = true;
+  function handleEnded() {
+    if (!active) return;
+    cleanup();
+    onInterrupted();
+  }
+  const cleanup = () => {
+    if (!active) return;
+    active = false;
+    tracks.forEach(track => track.removeEventListener("ended", handleEnded));
+  };
+
+  // A track can end before listeners are attached, especially during device changes.
+  if (tracks.some(track => track.readyState === "ended")) {
+    active = false;
+    onInterrupted();
+    return () => undefined;
+  }
+
+  tracks.forEach(track => track.addEventListener("ended", handleEnded));
+  // Recheck after listener registration to close the readyState/listener race.
+  if (tracks.some(track => track.readyState === "ended")) handleEnded();
+  return cleanup;
+}
