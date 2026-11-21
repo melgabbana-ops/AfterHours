@@ -22,7 +22,7 @@ const mappings = [
   { selector: ".ah-profile-screen:before", asset: "reference-profile.svg" },
   { selector: ".consent-screen:before", asset: "reference-consent.svg" },
   { selector: ".insights:before", asset: "reference-tarot.svg" },
-  { selector: '.insights[data-tab="astro"]:before', asset: "reference-horoscope.svg" },
+  { selector: '.insights[data-tab="astro"]:before', asset: "ah-horoscope-photo.svg" },
   { selector: ".radio-room:before", asset: "reference-radio.svg" },
   { selector: ".aftercare-card{", asset: "reference-aftercare.svg" },
   { selector: ".completion-card", asset: "reference-completion.svg" },
