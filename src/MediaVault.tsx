@@ -9,7 +9,7 @@ import {
 } from "./services/media";
 import { supabase, supabaseConfigured } from "./services/supabase";
 import { composeImageWithOverlay, drawCameraFrame, mediaOverlayFrames, type OverlayFrameStyle } from "./mediaOverlay";
-import { appendMediaCaptureChunk, discardMediaCapture, MAX_MEDIA_CAPTURE_BYTES, stopMediaStreams, waitForVideoReady, watchMediaStreamInterruption } from "./services/mediaCapture";
+import { appendMediaCaptureChunk, classifyMediaCaptureFailure, discardMediaCapture, MAX_MEDIA_CAPTURE_BYTES, stopMediaStreams, waitForVideoReady, watchMediaStreamInterruption } from "./services/mediaCapture";
 
 interface MediaVaultProps {
   sessionId: string;
@@ -366,7 +366,15 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
       stopCaptureTracks();
       if(!mountedRef.current)return;
       setCaptureConsent(false);
-      setMessage(error instanceof Error?t(error.message,"Recording could not start: "+error.message):t("Geen toegang tot camera of microfoon. Controleer de browsertoestemming.","Camera or microphone access was denied. Check browser permissions."));
+      const failure = classifyMediaCaptureFailure(error);
+      const guidance = {
+        "permission-denied": t("Camera- of microfoontoegang geweigerd. Geef AFTER HOURS toestemming in de browserinstellingen en probeer opnieuw.", "Camera or microphone access was denied. Allow AFTER HOURS in your browser settings, then try again."),
+        "no-device": t("Geen geschikte camera of microfoon gevonden. Controleer of het apparaat beschikbaar is of kies Bestand kiezen.", "No compatible camera or microphone was found. Check device availability or choose a file instead."),
+        "device-busy": t("Camera of microfoon is al in gebruik door een andere app. Sluit die app en probeer opnieuw.", "The camera or microphone is already in use by another app. Close that app and try again."),
+        "unsupported-constraints": t("Deze camera ondersteunt de gevraagde instellingen niet. Wissel van camera of gebruik Bestand kiezen.", "This camera does not support the requested settings. Switch cameras or choose a file instead."),
+        "unknown": t("Geen toegang tot camera of microfoon. Controleer de browsertoestemming en probeer opnieuw.", "Could not access the camera or microphone. Check browser permissions and try again."),
+      };
+      setMessage(guidance[failure]);
     }finally{
       captureStartInFlightRef.current=false;
       if(mountedRef.current)setBusy(false);

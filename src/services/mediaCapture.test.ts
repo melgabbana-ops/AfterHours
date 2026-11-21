@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { appendMediaCaptureChunk, discardMediaCapture, MAX_MEDIA_CAPTURE_BYTES, stopMediaStreams, waitForVideoReady, watchMediaStreamInterruption } from "./mediaCapture";
+import { appendMediaCaptureChunk, classifyMediaCaptureFailure, discardMediaCapture, MAX_MEDIA_CAPTURE_BYTES, stopMediaStreams, waitForVideoReady, watchMediaStreamInterruption } from "./mediaCapture";
 
 describe("media capture cleanup", () => {
   it("stops every track across camera and composited streams", () => {
@@ -230,5 +230,29 @@ describe("media stream interruption", () => {
 
     expect(onInterrupted).toHaveBeenCalledOnce();
     cleanup();
+  });
+});
+
+
+describe("camera and microphone permission guidance", () => {
+  it.each([
+    ["NotAllowedError", "permission-denied"],
+    ["SecurityError", "permission-denied"],
+    ["NotFoundError", "no-device"],
+    ["DevicesNotFoundError", "no-device"],
+    ["NotReadableError", "device-busy"],
+    ["TrackStartError", "device-busy"],
+    ["AbortError", "device-busy"],
+    ["OverconstrainedError", "unsupported-constraints"],
+    ["ConstraintNotSatisfiedError", "unsupported-constraints"],
+    ["UnknownError", "unknown"],
+  ] as const)("classifies %s as %s", (name, expected) => {
+    expect(classifyMediaCaptureFailure({ name })).toBe(expected);
+  });
+
+  it("safely handles non-object and unnamed errors", () => {
+    expect(classifyMediaCaptureFailure(null)).toBe("unknown");
+    expect(classifyMediaCaptureFailure("denied")).toBe("unknown");
+    expect(classifyMediaCaptureFailure({ message: "failed" })).toBe("unknown");
   });
 });
