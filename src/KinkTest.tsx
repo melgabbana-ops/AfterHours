@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import "./kink-test.css";
 import { ArrowLeft, ArrowRight, Award, Check, ChevronRight, Eye, Lock, RotateCcw, ShieldCheck, Sparkles, Trash2 } from "lucide-react";
 import {
-  calculateKinkProfile, kinkCategories, kinkQuestions, loadKinkProfileResult,
+  calculateKinkProfile, hasCompleteKinkAnswers, kinkCategories, kinkQuestions, loadKinkProfileResult,
   saveKinkProfileResult, clearKinkProfileResult, type KinkAnswer, type KinkProfileResult,
 } from "./kinkTest";
 import { recordAchievement } from "./achievements";
@@ -49,7 +49,7 @@ export default function KinkTest({profileId,language,onBack,onReward}:Props) {
   const progress=Math.round((Object.keys(answers).length/kinkQuestions.length)*100);
 
   const finish=async()=>{
-    if(Object.keys(answers).length!==kinkQuestions.length)return;
+    if(!hasCompleteKinkAnswers(answers))return;
     const calculated=calculateKinkProfile(answers);
     setResult(calculated);
     setBusy(true);setError("");
@@ -106,7 +106,7 @@ export default function KinkTest({profileId,language,onBack,onReward}:Props) {
           <button className="kink-secondary" onClick={()=>setIndex(i=>Math.max(0,i-1))} disabled={index===0}><ArrowLeft size={15}/>{t("Vorige","Previous")}</button>
           {index<kinkQuestions.length-1
             ?<button className="kink-primary" onClick={()=>setIndex(i=>i+1)}>{t("Volgende","Next")}<ArrowRight size={15}/></button>
-            :<button className="kink-primary" onClick={()=>void finish()} disabled={!selected||Object.keys(answers).length!==kinkQuestions.length||busy}>{busy?t("Profiel maken…","Building profile…"):t("Onthul mijn profiel","Reveal my profile")}<Sparkles size={15}/></button>}
+            :<button className="kink-primary" onClick={()=>void finish()} disabled={!selected||!hasCompleteKinkAnswers(answers)||busy}>{busy?t("Profiel maken…","Building profile…"):t("Onthul mijn profiel","Reveal my profile")}<Sparkles size={15}/></button>}
         </div>
         {error&&<p className="kink-error" role="alert">{error}</p>}
       </section>
