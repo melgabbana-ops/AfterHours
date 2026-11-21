@@ -71,9 +71,8 @@ describe("shared experience check-in migration", () => {
     expect(migration).toMatch(/revoke all on function public\.renew_afterhours_experience_consent\(uuid\) from public, anon/i);
   });
   it("uses matching tagged dollar quotes for every SQL function", () => {
-    expect(migration.match(/\\bas \\$function\\$/gi) ?? []).toHaveLength(4);
-    expect(migration.match(/\\$function\\$;/g) ?? []).toHaveLength(4);
-    expect(migration).not.toMatch(/\\bas \\$\\s/i);
+    expect(migration.match(/\bas \$function\$/gi) ?? []).toHaveLength(4);
+    expect(migration.match(/\$function\$;/g) ?? []).toHaveLength(4);
+    expect(migration).not.toMatch(/\bas \$\s/i);
   });
-
 });
