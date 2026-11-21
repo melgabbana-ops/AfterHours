@@ -273,17 +273,18 @@ export default function CinematicWorld({
       loadExperienceRuns(userId),
       loadExperienceInvitations(userId)
     ]);
-    setRecords({ director, vault, dominion, sensory, invitation, ritual, club });
-    setRuns(history);
     const [checkIns, activeConsentIds] = await Promise.all([
       loadExperienceRunCheckIns(history.map((run) => run.id), userId),
       loadOwnExperienceRunConsentIds(history.map((run) => run.id), userId),
     ]);
-    setSharedCheckIns(checkIns);
-    setActiveConsentRunIds(activeConsentIds);
     const ownRunStatuses = await Promise.all(history
       .filter((run) => run.user_id === userId && (run.status === "active" || run.status === "paused"))
       .map(async (run) => [run.id, await loadExperienceRunConsentStatus(run.id, userId)] as const));
+    if (userId !== remoteProfileId) return;
+    setRecords({ director, vault, dominion, sensory, invitation, ritual, club });
+    setRuns(history);
+    setSharedCheckIns(checkIns);
+    setActiveConsentRunIds(activeConsentIds);
     setRunConsentStatuses(Object.fromEntries(ownRunStatuses));
     setExperienceInvites(invites);
   }
@@ -349,18 +350,18 @@ export default function CinematicWorld({
           loadExperienceRuns(remoteProfileId),
           loadExperienceInvitations(remoteProfileId)
         ]);
-        if (!active) return;
-        setRecords({ director, vault, dominion, sensory, invitation, ritual, club });
-        setRuns(history);
         const [checkIns, activeConsentIds] = await Promise.all([
           loadExperienceRunCheckIns(history.map((run) => run.id), remoteProfileId),
           loadOwnExperienceRunConsentIds(history.map((run) => run.id), remoteProfileId),
         ]);
-        setSharedCheckIns(checkIns);
-        setActiveConsentRunIds(activeConsentIds);
         const ownRunStatuses = await Promise.all(history
           .filter((run) => run.user_id === remoteProfileId && (run.status === "active" || run.status === "paused"))
           .map(async (run) => [run.id, await loadExperienceRunConsentStatus(run.id, remoteProfileId)] as const));
+        if (!active) return;
+        setRecords({ director, vault, dominion, sensory, invitation, ritual, club });
+        setRuns(history);
+        setSharedCheckIns(checkIns);
+        setActiveConsentRunIds(activeConsentIds);
         setRunConsentStatuses(Object.fromEntries(ownRunStatuses));
         setExperienceInvites(invites);
       } catch (cause) {
