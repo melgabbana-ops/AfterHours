@@ -248,10 +248,12 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
         video.srcObject=stream;
         await video.play();
         if(!mountedRef.current)return;
-        if(video.videoWidth===0) await new Promise<void>((resolve,reject)=>{
-          const timeout=window.setTimeout(()=>reject(new Error(t("De camera startte niet op tijd.","The camera did not start in time."))),5000);
-          video.addEventListener("loadedmetadata",()=>{window.clearTimeout(timeout);resolve()},{once:true});
-        });
+        await waitForVideoReady(
+          video,
+          5000,
+          t("De camera startte niet op tijd.","The camera did not start in time."),
+          t("De camera kon geen beeld leveren.","The camera could not provide a video frame."),
+        );
         if(!mountedRef.current)return;
         const ratio=video.videoWidth/video.videoHeight;
         canvas.width=Math.min(1920,video.videoWidth);
