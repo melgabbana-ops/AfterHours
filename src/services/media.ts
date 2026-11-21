@@ -78,9 +78,16 @@ async function currentUserId(): Promise<string> {
   return data.user.id;
 }
 
-async function listStoragePages(path: string, sortColumn: "name" | "created_at"): Promise<Awaited<ReturnType<NonNullable<typeof supabase>["storage"]["from"]>["list"]> extends Promise<infer T> ? NonNullable<T>["data"] : never> {
+type StorageListEntry = {
+  name: string;
+  id: string | null;
+  metadata: { size?: number; mimetype?: string } | null;
+  created_at: string | null;
+};
+
+async function listStoragePages(path: string, sortColumn: "name" | "created_at"): Promise<StorageListEntry[]> {
   const pageSize = 100;
-  const entries = [];
+  const entries: StorageListEntry[] = [];
   for (let offset = 0; ; offset += pageSize) {
     const { data, error } = await supabase!.storage.from(BUCKET).list(path, {
       limit: pageSize,
@@ -88,13 +95,12 @@ async function listStoragePages(path: string, sortColumn: "name" | "created_at")
       sortBy: { column: sortColumn, order: sortColumn === "created_at" ? "desc" : "asc" },
     });
     if (error) throw error;
-    const page = data ?? [];
+    const page = (data ?? []) as StorageListEntry[];
     entries.push(...page);
     if (page.length < pageSize) break;
   }
   return entries;
 }
-
 export async function listPrivateMedia(): Promise<PrivateMediaItem[]> {
   const userId = await currentUserId();
   // Fetch every session folder: an alphabetical first-page limit could hide newer sessions.
