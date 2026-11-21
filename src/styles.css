@@ -4770,3 +4770,11 @@ button,[role="button"],nav a{touch-action:manipulation}
 /* Duo experience card uses the same restrained black-and-champagne visual system. */
 .experience-choice.couple-choice{border-color:rgba(212,175,55,.48)!important;background:radial-gradient(ellipse at 90% 0%,rgba(107,79,31,.3),transparent 48%),linear-gradient(145deg,#21190d,#080706 80%)!important}
 .experience-choice.couple-choice .choice-symbol{border-color:rgba(212,175,55,.62);color:#f0d58f}
+
+
+/* Local Duo aftercare: private, temporary selections on the shared device. */
+.couples-aftercare{margin-top:18px;border-color:#80653b;background:linear-gradient(145deg,#1b1710,#0d0c0a)}
+.couples-aftercare>p{margin:0;color:#c8bda9;font-size:13px;line-height:1.65}
+.couples-aftercare-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.couples-aftercare-options .couples-consent{min-height:54px;align-items:center;padding:12px;border:1px solid #40372b;border-radius:9px;background:#100f0c}
+@media(max-width:560px){.couples-aftercare-options{grid-template-columns:1fr}}
