@@ -4770,3 +4770,65 @@ button,[role="button"],nav a{touch-action:manipulation}
 /* Duo experience card uses the same restrained black-and-champagne visual system. */
 .experience-choice.couple-choice{border-color:rgba(212,175,55,.48)!important;background:radial-gradient(ellipse at 90% 0%,rgba(107,79,31,.3),transparent 48%),linear-gradient(145deg,#21190d,#080706 80%)!important}
 .experience-choice.couple-choice .choice-symbol{border-color:rgba(212,175,55,.62);color:#f0d58f}
+
+
+/* iPad and wide-tablet private media layout: stable two-column controls and vault rows. */
+@media (min-width:901px) and (max-width:1280px) {
+  .media-capture {
+    padding: clamp(18px, 2.4vw, 28px);
+    gap: 18px;
+  }
+  .media-capture-controls {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: end;
+    gap: 14px;
+  }
+  .media-capture-controls > label {
+    min-width: 0;
+  }
+  .media-capture-controls .media-consent-check {
+    grid-column: 1 / -1;
+    align-items: flex-start;
+  }
+  .media-capture-controls > button,
+  .media-capture-controls .media-item-actions button {
+    min-height: 48px;
+  }
+  .media-frame-picker > div {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .media-frame-picker button {
+    min-height: 88px;
+  }
+  .media-item {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 16px;
+  }
+  .media-item-actions {
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+  }
+  .media-item-actions button {
+    min-width: 112px;
+    min-height: 48px;
+  }
+  .media-live-preview,
+  .media-live-frame .media-live-composite {
+    max-height: min(68dvh, 760px);
+  }
+}
+@media (min-width:700px) and (max-width:1280px) and (orientation:landscape) {
+  .media-vault {
+    width: 100%;
+    max-width: 1080px;
+    margin-inline: auto;
+  }
+  .media-live-frame {
+    max-width: 900px;
+    margin-inline: auto;
+  }
+}
