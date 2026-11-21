@@ -15,7 +15,7 @@ Status meanings:
 
 | Approved feature | Current source evidence | Status | Remaining work / acceptance test |
 |---|---|---|---|
-| Official logo / black-gold brand | `public/after-hours-logo.svg`, `src/styles.css`, `src/Teaser.tsx` | Partial | Some styles still use near-black and legacy gold rather than the approved deep-plum palette. Verify the exact approved logo and consistent sizing on every screen. |
+| Official logo / approved brand system | `public/after-hours-logo.svg`, `public/icons/after-hours-master.svg`, `src/styles.css`, `scripts/check-brand-assets.mjs` | Implemented in code / device verification pending | Canonical master SVG is an exact copy of the approved logo; the shared UI palette uses deep aubergine, velvet plum and champagne gold. CI checks logo identity and that referenced favicon/PWA assets exist. Verify the mark at actual iOS/Android installed-icon sizes and visually inspect key screens at narrow phone and tablet widths. |
 | Cinematic teaser | `src/Teaser.tsx`, `public/under-construction.html` | Partial | Trailer is hosted on an external Picsart URL. Verify availability, mobile playback, fallback and final approved reveal text/video. |
 | 18+ gate | `src/main.tsx` | Partial | Currently a self-declaration, not age verification. Legal/product review needed before release. Consent is separately checked. |
 | Four-step onboarding | `src/Onboarding.tsx` | Implemented in code / Verify | Install guidance and trailer markup exist. Verify only-first-time behavior, Skip/Later, persisted completion, all languages and mobile media playback. |
