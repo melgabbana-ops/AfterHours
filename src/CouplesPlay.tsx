@@ -23,10 +23,11 @@ function newCode() {
 
 export default function CouplesPlay({ language, onBack }: { language: Language; onBack: () => void }) {
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
-  const initialCode = useMemo(() => normalizeRoomCode(new URLSearchParams(window.location.search).get("couple")), []);
-  const [mode, setMode] = useState<Mode>(initialCode ? "remote" : "local");
-  const [roomCode, setRoomCode] = useState(initialCode);
-  const [joinCode, setJoinCode] = useState(initialCode);
+  // Legacy public room-code links are deliberately ignored. Remote rooms return
+  // only after the account-bound invitation backend has been deployed and verified.
+  const [mode, setMode] = useState<Mode>("local");
+  const [roomCode, setRoomCode] = useState("");
+  const [joinCode, setJoinCode] = useState("");
   const [localParticipantId] = useState(() => crypto.randomUUID());
   const [authenticatedUserId, setAuthenticatedUserId] = useState<string | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
@@ -85,6 +86,16 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
       return;
     }
     if (!authChecked) return;
+    // Never connect to the legacy public room-code topic. The new private-room
+    // adapter is prepared separately and remains unavailable until its reviewed
+    // database proposal is actually deployed and integration-tested.
+    setConnected(false);
+    setParticipants([]);
+    setMessage(t(
+      "Online Duo is tijdelijk uitgeschakeld terwijl de privé-uitnodigingen en serverbeveiliging worden afgerond. Gebruik voorlopig Lokaal samen.",
+      "Online Duo is temporarily unavailable while private invitations and server-side access controls are completed. Use Together locally for now."
+    ));
+    return;
     if (!authenticatedUserId) {
       setConnected(false);
       setParticipants([]);
@@ -265,8 +276,8 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
       <button type="button" className={mode === "local" ? "couples-mode-card selected" : "couples-mode-card"} onClick={() => { setMode("local"); setMyConsent(false); setLocalPartnerConsent(false); setStatus("lobby"); setRound(0); }} disabled={status === "active" || status === "paused"}>
         <MonitorSmartphone/><strong>{t("Lokaal samen", "Together locally")}</strong><span>{t("Eén telefoon, tablet of iPad. Om de beurt antwoorden.", "One phone, tablet or iPad. Take turns answering.")}</span>
       </button>
-      <button type="button" className={mode === "remote" ? "couples-mode-card selected" : "couples-mode-card"} onClick={() => { setMode("remote"); setMyConsent(false); setStatus("lobby"); }} disabled={status === "active" || status === "paused"}>
-        <Wifi/><strong>{t("Op afstand", "Long distance")}</strong><span>{t("Verbind twee apparaten met een kamer met code.", "Connect two devices through a room with a code.")}</span>
+      <button type="button" className="couples-mode-card" disabled aria-describedby="couples-remote-unavailable">
+        <Wifi/><strong>{t("Op afstand · binnenkort", "Long distance · coming soon")}</strong><span id="couples-remote-unavailable">{t("Wordt opnieuw opgebouwd met privé-uitnodigingen en accountbeveiliging.", "Being rebuilt with private invitations and account-level access controls.")}</span>
       </button>
     </div>
     {mode === "local" ? <section className="couples-lobby">
