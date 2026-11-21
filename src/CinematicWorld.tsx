@@ -575,7 +575,15 @@ export default function CinematicWorld({
       setCheckIn("unset");
       await refreshData();
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : t("De voortgang kon niet worden opgeslagen.", "Progress could not be saved."));
+      // Fail closed if another participant withdrew consent or the server state changed.
+      setRunStatus(null);
+      setActiveRunId(null);
+      setActiveScene(null);
+      setRunConsent(false);
+      setCheckIn("unset");
+      setPathChoice("unset");
+      onSafetyStop();
+      setError(cause instanceof Error ? cause.message : t("De voortgang kon niet worden opgeslagen. De ervaring is uit voorzorg gestopt.", "Progress could not be saved. The experience was stopped as a precaution."));
     } finally {
       setBusy(false);
     }
