@@ -19,9 +19,10 @@ describe("remote couple play safety", () => {
   });
 
   it("requires the partner to be present and consenting before resuming", () => {
-    expect(canResumeRemotePlay({ connected: true, partnerPresent: true, partnerConsent: true })).toBe(true);
-    expect(canResumeRemotePlay({ connected: true, partnerPresent: false, partnerConsent: true })).toBe(false);
-    expect(canResumeRemotePlay({ connected: true, partnerPresent: true, partnerConsent: false })).toBe(false);
-    expect(canResumeRemotePlay({ connected: false, partnerPresent: true, partnerConsent: true })).toBe(false);
+    expect(canResumeRemotePlay({ connected: true, partnerPresent: true, ownConsent: true, partnerConsent: true })).toBe(true);
+    expect(canResumeRemotePlay({ connected: true, partnerPresent: false, ownConsent: true, partnerConsent: true })).toBe(false);
+    expect(canResumeRemotePlay({ connected: true, partnerPresent: true, ownConsent: false, partnerConsent: true })).toBe(false);
+    expect(canResumeRemotePlay({ connected: true, partnerPresent: true, ownConsent: true, partnerConsent: false })).toBe(false);
+    expect(canResumeRemotePlay({ connected: false, partnerPresent: true, ownConsent: true, partnerConsent: true })).toBe(false);
   });
 });
