@@ -4863,3 +4863,16 @@ button,[role="button"],nav a{touch-action:manipulation}
   .media-photo-editor { padding: .8rem; }
   .media-photo-editor .media-item-actions button { flex-basis: 100%; }
 }
+
+.media-photo-editor-grade {
+  display: grid;
+  gap: .75rem;
+  padding-top: .85rem;
+  border-top: 1px solid rgba(215, 168, 79, .25);
+}
+.media-photo-editor-grade > strong {
+  color: #D7A84F;
+  font-size: .7rem;
+  letter-spacing: .16em;
+}
+.media-photo-editor-grade label { display: grid; gap: .4rem; }
