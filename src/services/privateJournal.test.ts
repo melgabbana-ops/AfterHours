@@ -40,6 +40,16 @@ describe("encrypted private journal vault", () => {
     await expect(unlockPrivateJournalVault("een totaal andere wachtzin", storage)).rejects.toThrow("Wachtzin onjuist");
   });
 
+  it("rejects a stale key even when the replacement vault has no entries", async () => {
+    const originalStorage = memoryStorage();
+    const replacementStorage = memoryStorage();
+    const oldKey = await createPrivateJournalVault("eerste unieke wachtzin", originalStorage);
+    await createPrivateJournalVault("tweede unieke wachtzin", replacementStorage);
+    await expect(loadPrivateJournalEntries(oldKey, replacementStorage)).rejects.toThrow("vergrendeld");
+    await expect(savePrivateJournalEntry(oldKey, { title: "Test", body: "Nooit opslaan" }, undefined, replacementStorage)).rejects.toThrow("vergrendeld");
+    expect(replacementStorage.getItem(PRIVATE_JOURNAL_STORAGE_KEY)).not.toContain("Nooit opslaan");
+  });
+
   it("preserves entry identity and creation date when editing, and deletes only the selected entry", async () => {
     const storage = memoryStorage();
     const key = await createPrivateJournalVault("een lange unieke wachtzin", storage);
