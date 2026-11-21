@@ -212,3 +212,30 @@ export function drawCameraFrame(ctx:CanvasRenderingContext2D,video:HTMLVideoElem
   ctx.drawImage(video,sx,sy,sw,sh,0,0,width,height);
   drawAfterHoursOverlay(ctx,width,height,style);
 }
+export interface PhotoEditHistoryEntry {
+  style: OverlayFrameStyle;
+  edits: PhotoEditTransform;
+}
+export function appendPhotoEditHistory(
+  history: readonly PhotoEditHistoryEntry[],
+  currentIndex: number,
+  entry: PhotoEditHistoryEntry,
+): { history: PhotoEditHistoryEntry[]; index: number } {
+  const retained = history.slice(0, Math.max(0, currentIndex + 1));
+  const previous = retained[retained.length - 1];
+  const unchanged = previous?.style === entry.style &&
+    (Object.keys(defaultPhotoEditTransform) as Array<keyof PhotoEditTransform>).every((key) => previous.edits[key] === entry.edits[key]);
+  if (unchanged) return { history: [...retained], index: retained.length - 1 };
+  const next = [...retained, { style: entry.style, edits: { ...entry.edits } }];
+  if (next.length > 30) next.shift();
+  return { history: next, index: next.length - 1 };
+}
+export function getPhotoEditHistoryEntry(
+  history: readonly PhotoEditHistoryEntry[],
+  currentIndex: number,
+  direction: -1 | 1,
+): { entry: PhotoEditHistoryEntry; index: number } | null {
+  const index = currentIndex + direction;
+  const entry = history[index];
+  return entry ? { entry, index } : null;
+}
