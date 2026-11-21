@@ -109,7 +109,7 @@ export async function previewSecureDuoInvitation(token: string): Promise<{ roomI
   return { roomId: requireRoomId(value.room_id), status: value.status, expiresAt: value.expires_at };
 }
 
-/** Accepting is the participant's explicit consent action in the invitation review screen. */
+/** Accepting joins the lobby only; the participant must opt in separately through the consent RPC. */
 export async function acceptSecureDuoInvitation(token: string): Promise<string> {
   await requireUserId();
   const client = requireClient();
