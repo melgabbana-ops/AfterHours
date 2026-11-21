@@ -71,6 +71,44 @@ export interface KinkProfileResult {
   answeredCount: number;
 }
 
+const validAnswerValues = new Set<KinkAnswer>(["limit", "no", "unsure", "curious", "interested", "yes"]);
+
+export function hasCompleteKinkAnswers(answers: Record<string, unknown>): answers is Record<string, KinkAnswer> {
+  const keys = Object.keys(answers);
+  return keys.length === kinkQuestions.length
+    && kinkQuestions.every(question => Object.prototype.hasOwnProperty.call(answers, question.id)
+      && validAnswerValues.has(answers[question.id] as KinkAnswer))
+    && keys.every(key => kinkQuestions.some(question => question.id === key));
+}
+
+export function isValidKinkProfileResult(value: unknown): value is KinkProfileResult {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const result = value as Record<string, unknown>;
+  if (result.version !== KINK_TEST_VERSION
+    || typeof result.completedAt !== "string" || !Number.isFinite(Date.parse(result.completedAt))
+    || typeof result.archetypeId !== "string" || !kinkCategories.some(category => category.id === result.archetypeId)
+    || !Array.isArray(result.categoryScores) || result.categoryScores.length !== kinkCategories.length
+    || !Array.isArray(result.topCategories) || result.topCategories.length !== 3
+    || !Number.isInteger(result.curiosityCount) || (result.curiosityCount as number) < 0 || (result.curiosityCount as number) > 24
+    || !Number.isInteger(result.hardLimitCount) || (result.hardLimitCount as number) < 0 || (result.hardLimitCount as number) > 24
+    || !Number.isInteger(result.answeredCount) || (result.answeredCount as number) < 0 || (result.answeredCount as number) > 24) return false;
+
+  const scores = result.categoryScores as unknown[];
+  const validScores = kinkCategories.every(category => {
+    const score = scores.find(item => !!item && typeof item === "object" && (item as Record<string, unknown>).id === category.id) as Record<string, unknown> | undefined;
+    return !!score
+      && Number.isInteger(score.score) && (score.score as number) >= 0 && (score.score as number) <= 12
+      && score.maxScore === 12
+      && Number.isInteger(score.percentage) && score.percentage === Math.round((score.score as number) / 12 * 100)
+      && Number.isInteger(score.hardLimitCount) && (score.hardLimitCount as number) >= 0 && (score.hardLimitCount as number) <= 3;
+  });
+  const top = result.topCategories as unknown[];
+  return validScores
+    && top.every(id => typeof id === "string" && kinkCategories.some(category => category.id === id))
+    && new Set(top).size === 3
+    && result.archetypeId === top[0];
+}
+
 export function calculateKinkProfile(answers: Record<string, KinkAnswer>, completedAt = new Date().toISOString()): KinkProfileResult {
   const categoryScores = kinkCategories.map(category => {
     const questions = kinkQuestions.filter(question => question.category === category.id);
@@ -99,7 +137,7 @@ const resultKey = (profileId: string) => `afterhours.kink-profile.v1.${profileId
 const rewardKey = (profileId: string) => `afterhours.kink-profile.reward.v1.${profileId}`;
 
 export function saveKinkProfileResult(profileId: string, result: KinkProfileResult): boolean {
-  if (!profileId.trim()) return false;
+  if (!profileId.trim() || !isValidKinkProfileResult(result)) return false;
   try {
     localStorage.setItem(resultKey(profileId), JSON.stringify(result));
     return true;
@@ -111,11 +149,8 @@ export function loadKinkProfileResult(profileId: string): KinkProfileResult | nu
   try {
     const raw = localStorage.getItem(resultKey(profileId));
     if (!raw) return null;
-    const parsed = JSON.parse(raw) as KinkProfileResult;
-    if (parsed.version !== KINK_TEST_VERSION || !Array.isArray(parsed.categoryScores)
-      || parsed.categoryScores.length !== kinkCategories.length
-      || !kinkCategories.every(category => parsed.categoryScores.some(score => score.id === category.id && Number.isFinite(score.percentage)))) return null;
-    return parsed;
+    const parsed: unknown = JSON.parse(raw);
+    return isValidKinkProfileResult(parsed) ? parsed : null;
   } catch { return null; }
 }
 
