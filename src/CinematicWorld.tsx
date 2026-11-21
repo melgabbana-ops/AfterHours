@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { bindVaultAutoLock } from "./vaultAutoLock";
 import {
   ArrowLeft, ArrowRight, BookOpen, CheckCircle2, Clapperboard, Copy,
   Download, Eye, EyeOff, Flame, LockKeyhole, Mail, Music2, Pause,
@@ -198,46 +199,21 @@ export default function CinematicWorld({
     if (message) setVaultMessage(message);
   }, []);
 
-  useEffect(() => {
-    const lockIfSensitive = () => {
-      if (vaultSensitiveRef.current) {
-        lockVault(language === "nl" ? "Kluis automatisch vergrendeld." : "Vault automatically locked.");
-      }
-    };
-    const onVisibilityChange = () => {
-      if (document.visibilityState !== "visible") lockIfSensitive();
-    };
-    document.addEventListener("visibilitychange", onVisibilityChange);
-    window.addEventListener("pagehide", lockIfSensitive);
-    return () => {
-      document.removeEventListener("visibilitychange", onVisibilityChange);
-      window.removeEventListener("pagehide", lockIfSensitive);
-    };
-  }, [language, lockVault]);
+  useEffect(() => bindVaultAutoLock(
+    window,
+    document,
+    () => vaultSensitiveRef.current,
+    (reason) => lockVault(
+      reason === "idle"
+        ? (language === "nl" ? "Kluis automatisch vergrendeld na inactiviteit." : "Vault automatically locked after inactivity.")
+        : (language === "nl" ? "Kluis automatisch vergrendeld." : "Vault automatically locked."),
+    ),
+  ), [vaultSensitive, language, lockVault]);
 
   useEffect(() => {
     if (tab === "vault" || !vaultSensitive) return;
     lockVault(language === "nl" ? "Kluis vergrendeld bij verlaten van de kluis." : "Vault locked when leaving the vault.");
   }, [tab, vaultSensitive, language, lockVault]);
-
-  useEffect(() => {
-    if (!vaultSensitive) return;
-    let timeout = window.setTimeout(() => {
-      lockVault(language === "nl" ? "Kluis automatisch vergrendeld na inactiviteit." : "Vault automatically locked after inactivity.");
-    }, 5 * 60 * 1000);
-    const resetIdleTimer = () => {
-      window.clearTimeout(timeout);
-      timeout = window.setTimeout(() => {
-        lockVault(language === "nl" ? "Kluis automatisch vergrendeld na inactiviteit." : "Vault automatically locked after inactivity.");
-      }, 5 * 60 * 1000);
-    };
-    const activityEvents = ["pointerdown", "keydown", "touchstart"] as const;
-    activityEvents.forEach((eventName) => window.addEventListener(eventName, resetIdleTimer, { passive: true }));
-    return () => {
-      window.clearTimeout(timeout);
-      activityEvents.forEach((eventName) => window.removeEventListener(eventName, resetIdleTimer));
-    };
-  }, [vaultSensitive, language, lockVault]);
   const [domRole, setDomRole] = useState("");
   const [domAddress, setDomAddress] = useState("");
   const [domHardLimits, setDomHardLimits] = useState("");
