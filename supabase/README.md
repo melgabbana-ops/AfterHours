@@ -4,7 +4,7 @@ AFTER HOURS uses Supabase/PostgreSQL for account-scoped progress, session safety
 
 ## Migration history
 
-The version prefix in each file under `supabase/migrations/` must match the version recorded in the connected production project's Supabase migration ledger. The current production ledger has 23 entries. The file names below have been aligned to that ledger without changing SQL contents or applying any database change.
+The version prefix in each file under `supabase/migrations/` must match the version recorded in the connected production project's Supabase migration ledger. The current production ledger has 24 entries. The file names below have been aligned to that ledger without changing SQL contents or applying any database change.
 
 | Production ledger version | Migration file |
 |---|---|
@@ -31,6 +31,7 @@ The version prefix in each file under `supabase/migrations/` must match the vers
 | `20261120235944` | `20261120235944_afterhours_shared_experience_invitations.sql` |
 | `20261121000055` | `20261121000055_afterhours_participant_consent_withdrawal.sql` |
 | `20261121000106` | `20261121000106_afterhours_shared_run_consent_guard.sql` |
+| `20261121000215` | `20261121000215_afterhours_revoke_shared_consents_on_pause_or_end.sql` |
 
 Run `npm run check:migrations` to verify that the checked-in file list still matches this deployed baseline. When adding a migration, use the version that was actually recorded by the reviewed migration workflow, then update the guard and this table in the same change. Never rename or replay an already-applied production migration casually.
 
@@ -69,4 +70,4 @@ The `after-hours-private-media` bucket must remain private. Object paths use `<a
 
 The three shared-experience migrations add one-time invitation links for an existing active or paused experience. Only a SHA-256 token hash is stored; raw invitation tokens exist only in the sender's browser and shared link. The recipient must sign in with their own account and explicitly accept. Acceptance records a separate consent row for that account.
 
-Participants can withdraw their consent. The withdrawal RPC revokes their consent and stops the shared run in the same database transaction. A database activation guard prevents the owner from reactivating a run after any accepted participant has withdrawn; fresh consent must be obtained through a new invitation. Invitation rows are visible only to their inviter, while accepted participants can read the run under the consent-based RLS policy. The participant-facing UI is read-only for the host's run and includes an explicit withdraw-and-stop action.
+Participants can withdraw their consent. The withdrawal RPC revokes their consent and stops the shared run in the same database transaction. A database activation guard prevents the owner from reactivating a run after any accepted participant has withdrawn; fresh consent must be obtained through a new invitation. Invitation rows are visible only to their inviter, while accepted participants can read the run under the consent-based RLS policy. The participant-facing UI is read-only for the host's run and includes an explicit withdraw-and-stop action. Pausing, completing, or stopping a run revokes every participant's consent. Resuming requires the owner to reconfirm and every invited participant to accept a fresh invitation.
