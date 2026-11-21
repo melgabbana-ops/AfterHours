@@ -70,3 +70,26 @@
 .aftercare-history-note-content small{display:block;margin-top:10px;color:#918571;font-size:8px}
 .aftercare-history-note-privacy{display:flex;align-items:flex-start;gap:6px;margin:0;color:#b7a27d;font-size:8px;line-height:1.5}
 .aftercare-history-note-privacy svg{flex:none;margin-top:1px}
+
+/* Consistent keyboard focus and comfortable touch targets for the private journal. */
+.ah-journal-close,
+.ah-journal-lock-row button,
+.aftercare-history-note-toggle,
+.ah-journal-backup>input,
+.ah-journal-unlock input,
+.ah-journal-editor input{min-height:44px}
+.ah-journal-list-head button{width:44px;min-height:44px}
+.ah-journal-close:focus-visible,
+.ah-journal-list-head button:focus-visible,
+.ah-journal-list>button:focus-visible,
+.ah-journal-primary:focus-visible,
+.ah-journal-delete:focus-visible,
+.ah-journal-backup-export:focus-visible,
+.ah-journal-backup-import:focus-within,
+.ah-journal-backup-import input:focus-visible,
+.ah-journal-lock-row button:focus-visible,
+.aftercare-history-note-toggle:focus-visible,
+.ah-journal-unlock input:focus-visible,
+.ah-journal-editor input:focus-visible,
+.ah-journal-editor textarea:focus-visible,
+.ah-journal-backup>input:focus-visible{outline:2px solid #f0d49a;outline-offset:3px}
