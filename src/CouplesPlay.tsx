@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, Copy, Link2, MonitorSmartphone, Pause, Play, ShieldCheck, Users, Wifi, WifiOff } from "lucide-react";
 import { supabase, supabaseConfigured } from "./services/supabase";
 import { canResumeRemotePlay, canStartRemotePlay, canStartLocalPlay, shouldPauseRemotePlay, normalizeRoomCode, ROOM_CODE_LENGTH } from "./couplesPlayState";
+import { acceptDuoInvitation, previewDuoInvitation, type DuoInvitationPreview } from "./services/duoRoomApi";
 
 type Language = "nl" | "en";
 type Mode = "local" | "remote";
@@ -30,6 +31,11 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
   const [localParticipantId] = useState(() => crypto.randomUUID());
   const [authenticatedUserId, setAuthenticatedUserId] = useState<string | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
+  const [incomingInviteToken, setIncomingInviteToken] = useState(() => new URLSearchParams(window.location.search).get("duoInvite") ?? "");
+  const [incomingInvite, setIncomingInvite] = useState<DuoInvitationPreview | null>(null);
+  const [inviteLoading, setInviteLoading] = useState(false);
+  const [inviteAccepted, setInviteAccepted] = useState(false);
+  const [inviteError, setInviteError] = useState("");
   // Identity hint only. Private-channel RLS is still required for trusted membership.
   const participantId = authenticatedUserId ?? localParticipantId;
   const [name, setName] = useState("");
@@ -56,6 +62,44 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
     url.searchParams.set("couple", roomCode);
     return url.toString();
   }, [roomCode]);
+
+  useEffect(() => {
+    if (!incomingInviteToken) return;
+    // Remove the bearer token from the address bar immediately; keep it only in
+    // component memory until the invite is previewed or accepted.
+    const url = new URL(window.location.href);
+    url.searchParams.delete("duoInvite");
+    window.history.replaceState({}, "", url.toString());
+    if (!authChecked) return;
+    if (!authenticatedUserId) {
+      setInviteError(t("Log eerst in om deze persoonlijke uitnodiging veilig te bekijken.", "Sign in first to securely preview this personal invitation."));
+      return;
+    }
+    let alive = true;
+    setInviteLoading(true);
+    void previewDuoInvitation(incomingInviteToken).then(preview => {
+      if (alive) { setIncomingInvite(preview); setInviteError(""); }
+    }).catch(error => {
+      if (alive) setInviteError(error instanceof Error ? error.message : t("Uitnodiging kon niet worden geopend.", "The invitation could not be opened."));
+    }).finally(() => { if (alive) setInviteLoading(false); });
+    return () => { alive = false; };
+  }, [incomingInviteToken, authChecked, authenticatedUserId]);
+
+  const acceptIncomingInvite = async () => {
+    if (!incomingInviteToken || !incomingInvite || inviteLoading) return;
+    setInviteLoading(true);
+    setInviteError("");
+    try {
+      await acceptDuoInvitation(incomingInviteToken);
+      setInviteAccepted(true);
+      setIncomingInviteToken("");
+      setMessage(t("Je deelname en toestemming zijn vastgelegd. De ervaring blijft gepauzeerd totdat de host de volgende stap veilig activeert.", "Your participation and consent have been recorded. The experience remains paused until the host safely activates the next step."));
+    } catch (error) {
+      setInviteError(error instanceof Error ? error.message : t("Uitnodiging kon niet worden geaccepteerd.", "The invitation could not be accepted."));
+    } finally {
+      setInviteLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!supabaseConfigured || !supabase) {
@@ -261,6 +305,19 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
       <h2>{t("Samen spelen", "Play together")}</h2>
       <p>{t("Kies samen op één apparaat of speel ieder vanaf je eigen locatie.", "Play together on one device or each from your own location.")}</p>
     </header>
+    {incomingInviteToken && <section className="couples-lobby couples-invitation-review" aria-live="polite">
+      <span className="eyebrow">PRIVATE DUO INVITATION</span>
+      <h3>{t("Uitnodiging bekijken", "Review invitation")}</h3>
+      {inviteLoading && <p>{t("Uitnodiging veilig ophalen…", "Securely loading invitation…")}</p>}
+      {inviteError && <p role="alert">{inviteError}</p>}
+      {incomingInvite && !inviteAccepted && <>
+        <h4>{incomingInvite.title}</h4>
+        <p>{incomingInvite.description}</p>
+        <p className="couples-consent-note">{t("Bekijk eerst de inhoud. Alleen met de knop hieronder accepteer je de uitnodiging en geef je toestemming voor deelname. Je kunt altijd stoppen.", "Review the details first. Only the button below accepts the invitation and records your consent to participate. You can always stop.")}</p>
+        <button type="button" className="couples-primary" disabled={inviteLoading} onClick={()=>void acceptIncomingInvite()}><ShieldCheck size={16}/>{t("Ik heb gelezen en stem in", "I have reviewed and consent")}</button>
+      </>}
+      {inviteAccepted && <p role="status">{t("Uitnodiging geaccepteerd.", "Invitation accepted.")}</p>}
+    </section>}
     <div className="couples-mode-grid">
       <button type="button" className={mode === "local" ? "couples-mode-card selected" : "couples-mode-card"} onClick={() => { setMode("local"); setMyConsent(false); setLocalPartnerConsent(false); setStatus("lobby"); setRound(0); }} disabled={status === "active" || status === "paused"}>
         <MonitorSmartphone/><strong>{t("Lokaal samen", "Together locally")}</strong><span>{t("Eén telefoon, tablet of iPad. Om de beurt antwoorden.", "One phone, tablet or iPad. Take turns answering.")}</span>
