@@ -58,14 +58,16 @@ function parseVault(raw: string | null): StoredVault | null {
       || !Array.isArray(vault.entries)) return null;
     const verifier = vault.verifier as Record<string, unknown>;
     if (typeof verifier.iv !== "string" || typeof verifier.ciphertext !== "string") return null;
-    const entries = vault.entries.filter((item): item is EncryptedJournalEntry => {
-      if (!item || typeof item !== "object" || Array.isArray(item)) return false;
+    const entries: EncryptedJournalEntry[] = [];
+    for (const item of vault.entries) {
+      if (!item || typeof item !== "object" || Array.isArray(item)) return null;
       const row = item as Record<string, unknown>;
-      return typeof row.id === "string" && typeof row.createdAt === "string"
-        && Number.isFinite(Date.parse(row.createdAt)) && typeof row.updatedAt === "string"
-        && Number.isFinite(Date.parse(row.updatedAt)) && typeof row.iv === "string"
-        && typeof row.ciphertext === "string";
-    });
+      if (typeof row.id !== "string" || !row.id
+        || typeof row.createdAt !== "string" || !Number.isFinite(Date.parse(row.createdAt))
+        || typeof row.updatedAt !== "string" || !Number.isFinite(Date.parse(row.updatedAt))
+        || typeof row.iv !== "string" || typeof row.ciphertext !== "string") return null;
+      entries.push({ id: row.id, createdAt: row.createdAt, updatedAt: row.updatedAt, iv: row.iv, ciphertext: row.ciphertext });
+    }
     return { version: 1, salt: vault.salt, verifier: { iv: verifier.iv, ciphertext: verifier.ciphertext }, entries };
   } catch { return null; }
 }
