@@ -21,15 +21,25 @@ const classPattern = /className=(?:"([^"]+)"|'([^']+)'|{`([^`]+)`})/g;
 for (const file of sourceFiles) {
   const source = await readFile(file, "utf8");
   for (const match of source.matchAll(classPattern)) {
-    const classValue = (match[1] ?? match[2] ?? match[3] ?? "").replace(/\$\{[^}]*\}/g, " ");
-    for (const className of classValue.split(/\s+/).filter(Boolean)) {
-      const escaped = className.replace(/[.*+?^\${}()|[\]\\]/g, "\\$&");
-      const selector = new RegExp("\\." + escaped + "(?![\\w-])");
-      if (!selector.test(styles)) {
-        const relative = path.relative(root, file);
-        if (!missing.has(relative)) missing.set(relative, new Set());
-        missing.get(relative).add(className);
-      }
+    const rawClassValue = match[1] ?? match[2] ?? match[3] ?? "";
+    const dynamicPrefixes = [...rawClassValue.matchAll(/([A-Za-z_][\\w-]*-)\\$\\{/g)].map((item) => item[1]);
+    const classValue = rawClassValue.replace(/\\$\\{[^}]*\\}/g, " ");
+    const declaredClasses = classValue.split(/\\s+/).filter(Boolean);
+    const hasSelector = (className) => {
+      const escaped = className.replace(/[.*+?^\\${}()|[\\]\\\\]/g, "\\\\$&");
+      return new RegExp("\\\\." + escaped + "(?![\\\\w-])").test(styles);
+    };
+    const hasDynamicSelector = (prefix) => {
+      const escaped = prefix.replace(/[.*+?^\\${}()|[\\]\\\\]/g, "\\\\$&");
+      return new RegExp("\\\\." + escaped + "[\\\\w-]+(?![\\\\w-])").test(styles);
+    };
+    const missingClasses = declaredClasses.filter((className) => !hasSelector(className));
+    const missingPrefixes = dynamicPrefixes.filter((prefix) => !hasDynamicSelector(prefix));
+    if (missingClasses.length || missingPrefixes.length) {
+      const relative = path.relative(root, file);
+      if (!missing.has(relative)) missing.set(relative, new Set());
+      for (const className of missingClasses) missing.get(relative).add(className);
+      for (const prefix of missingPrefixes) missing.get(relative).add(prefix + "<dynamic>");
     }
   }
 }
@@ -39,4 +49,4 @@ if (missing.size) {
   console.error("Cinematic style coverage failed. Add styles or remove obsolete class names.");
   process.exit(1);
 }
-console.log("Cinematic style coverage passed: every statically declared JSX class, including template-literal classes, has a stylesheet rule.");
+console.log("Cinematic style coverage passed: every static JSX class and every dynamic template-literal class prefix has a matching stylesheet rule.");
