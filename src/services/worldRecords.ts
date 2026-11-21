@@ -106,20 +106,20 @@ export async function createExperienceRun(args: {
 }): Promise<string> {
   const user = await assertWorldAccount(args.expectedUserId);
   if (!args.sceneKey.trim() || args.totalSteps < 1 || args.totalSteps > 40) throw new Error("Invalid experience scene.");
-  const now = new Date().toISOString();
+  const createdAt = new Date().toISOString();
   const { data: run, error } = await supabase!
     .from("afterhours_experience_runs")
     .insert({
       user_id: user.id,
       scene_key: args.sceneKey,
       scene_snapshot: args.sceneSnapshot,
-      status: "active",
+      status: "paused",
       current_step: 0,
       total_steps: args.totalSteps,
       interaction_log: [],
       consent_version: "1.0",
-      started_at: now,
-      updated_at: now,
+      started_at: null,
+      updated_at: createdAt,
     })
     .select("id")
     .single();
@@ -127,12 +127,31 @@ export async function createExperienceRun(args: {
 
   const { error: consentError } = await supabase!
     .from("afterhours_experience_run_consents")
-    .insert({ run_id: run.id, user_id: user.id, consent_version: "1.0", consented_at: now });
+    .insert({ run_id: run.id, user_id: user.id, consent_version: "1.0", consented_at: createdAt });
   if (consentError) {
     await supabase!.from("afterhours_experience_runs").delete().eq("id", run.id).eq("user_id", user.id);
     throw new Error("The consent record could not be saved. The scene was not started. " + consentError.message);
   }
-  return run.id as string;
+
+  const startedAt = new Date().toISOString();
+  const { data: activatedRun, error: activationError } = await supabase!
+    .from("afterhours_experience_runs")
+    .update({ status: "active", started_at: startedAt, updated_at: startedAt })
+    .eq("id", run.id)
+    .eq("user_id", user.id)
+    .eq("status", "paused")
+    .select("id")
+    .maybeSingle();
+  if (activationError || !activatedRun) {
+    await supabase!
+      .from("afterhours_experience_run_consents")
+      .update({ revoked_at: startedAt })
+      .eq("run_id", run.id)
+      .eq("user_id", user.id);
+    await supabase!.from("afterhours_experience_runs").delete().eq("id", run.id).eq("user_id", user.id);
+    throw new Error("The scene could not be activated after consent was saved. " + (activationError?.message ?? "The run is no longer available."));
+  }
+  return activatedRun.id as string;
 }
 
 export async function updateExperienceRun(args: {
