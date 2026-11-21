@@ -41,7 +41,10 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
   const [name, setName] = useState("");
   const [partnerName, setPartnerName] = useState("");
   const [myConsent, setMyConsent] = useState(false);
-  const [localPartnerConsent, setLocalPartnerConsent] = useState(false);\n  const [localTurn, setLocalTurn] = useState<LocalPlayer>("player1");\n  const [localAnswer, setLocalAnswer] = useState("");\n  const [localAnswers, setLocalAnswers] = useState<Record<number, LocalRoundAnswers>>({});
+  const [localPartnerConsent, setLocalPartnerConsent] = useState(false);
+  const [localTurn, setLocalTurn] = useState<LocalPlayer>("player1");
+  const [localAnswer, setLocalAnswer] = useState("");
+  const [localAnswers, setLocalAnswers] = useState<Record<number, LocalRoundAnswers>>({});
   const [connected, setConnected] = useState(false);
   const [participants, setParticipants] = useState<PresenceMeta[]>([]);
   const [round, setRound] = useState(0);
@@ -53,7 +56,15 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
   consentRef.current = myConsent;
   connectedRef.current = connected;
   const partnerPresent = participants.some(person => person.participantId !== participantId);
-  const partnerConsented = participants.some(person => person.participantId !== participantId && person.consent === true);\n  const roundAnswers = localAnswers[round] ?? {};\n  const saveCurrentLocalAnswer = () => {\n    const nextAnswers = saveLocalRoundAnswer(roundAnswers, localTurn, localAnswer);\n    if (nextAnswers === roundAnswers) return;\n    setLocalAnswers(previous => ({ ...previous, [round]: nextAnswers }));\n    setLocalAnswer("");\n    setLocalTurn(nextLocalPlayer(localTurn));\n  };
+  const partnerConsented = participants.some(person => person.participantId !== participantId && person.consent === true);
+  const roundAnswers = localAnswers[round] ?? {};
+  const saveCurrentLocalAnswer = () => {
+    const nextAnswers = saveLocalRoundAnswer(roundAnswers, localTurn, localAnswer);
+    if (nextAnswers === roundAnswers) return;
+    setLocalAnswers(previous => ({ ...previous, [round]: nextAnswers }));
+    setLocalAnswer("");
+    setLocalTurn(nextLocalPlayer(localTurn));
+  };
   const ready = mode === "local" ? canStartLocalPlay({ ownConsent: myConsent, partnerConsent: localPartnerConsent, ownName: name, partnerName }) : canStartRemotePlay({ connected, serverAuthorized: false, participantCount: participants.length, partnerPresent, ownConsent: myConsent, partnerConsent: partnerConsented });
   const inviteUrl = useMemo(() => {
     const url = new URL(window.location.href);
