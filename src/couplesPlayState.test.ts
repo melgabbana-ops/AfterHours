@@ -2,13 +2,14 @@ import { describe, expect, it } from "vitest";
 import { canStartRemotePlay, canResumeRemotePlay, shouldPauseRemotePlay, normalizeRoomCode, ROOM_CODE_LENGTH } from "./couplesPlayState";
 
 describe("remote couple play safety", () => {
-  const ready = { connected: true, participantCount: 2, partnerPresent: true, ownConsent: true, partnerConsent: true };
+  const ready = { connected: true, serverAuthorized: true, participantCount: 2, partnerPresent: true, ownConsent: true, partnerConsent: true };
 
   it("starts only when exactly two connected participants both consent", () => {
     expect(canStartRemotePlay(ready)).toBe(true);
     expect(canStartRemotePlay({ ...ready, participantCount: 3 })).toBe(false);
     expect(canStartRemotePlay({ ...ready, partnerConsent: false })).toBe(false);
     expect(canStartRemotePlay({ ...ready, connected: false })).toBe(false);
+    expect(canStartRemotePlay({ ...ready, serverAuthorized: false })).toBe(false);
   });
 
   it("pauses an active remote experience when the partner disconnects", () => {
@@ -19,11 +20,11 @@ describe("remote couple play safety", () => {
   });
 
   it("requires the partner to be present and consenting before resuming", () => {
-    expect(canResumeRemotePlay({ connected: true, participantCount: 2, partnerPresent: true, ownConsent: true, partnerConsent: true })).toBe(true);
-    expect(canResumeRemotePlay({ connected: true, participantCount: 2, partnerPresent: false, ownConsent: true, partnerConsent: true })).toBe(false);
-    expect(canResumeRemotePlay({ connected: true, participantCount: 2, partnerPresent: true, ownConsent: false, partnerConsent: true })).toBe(false);
-    expect(canResumeRemotePlay({ connected: true, participantCount: 2, partnerPresent: true, ownConsent: true, partnerConsent: false })).toBe(false);
-    expect(canResumeRemotePlay({ connected: false, participantCount: 2, partnerPresent: true, ownConsent: true, partnerConsent: true })).toBe(false);
+    expect(canResumeRemotePlay({ connected: true, serverAuthorized: true, participantCount: 2, partnerPresent: true, ownConsent: true, partnerConsent: true })).toBe(true);
+    expect(canResumeRemotePlay({ connected: true, serverAuthorized: true, participantCount: 2, partnerPresent: false, ownConsent: true, partnerConsent: true })).toBe(false);
+    expect(canResumeRemotePlay({ connected: true, serverAuthorized: true, participantCount: 2, partnerPresent: true, ownConsent: false, partnerConsent: true })).toBe(false);
+    expect(canResumeRemotePlay({ connected: true, serverAuthorized: true, participantCount: 2, partnerPresent: true, ownConsent: true, partnerConsent: false })).toBe(false);
+    expect(canResumeRemotePlay({ connected: false, serverAuthorized: true, participantCount: 2, partnerPresent: true, ownConsent: true, partnerConsent: true })).toBe(false);
   });
 });
 
