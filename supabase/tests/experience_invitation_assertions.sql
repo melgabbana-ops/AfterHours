@@ -76,6 +76,8 @@ begin
   exception when sqlstate '22023' then null;
   end;
 
+  insert into public.afterhours_experience_invitations(run_id,inviter_user_id,token_hash,expires_at)
+  values('33333333-3333-4333-8333-333333333333','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',repeat('g',64),now()+interval '1 day');
   begin
     insert into public.afterhours_experience_invitations(run_id,inviter_user_id,token_hash,expires_at)
     values('22222222-2222-4222-8222-222222222222','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',repeat('f',64),now()+interval '1 day');
