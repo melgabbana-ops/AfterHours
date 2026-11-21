@@ -48,6 +48,19 @@ create index if not exists afterhours_duo_invitations_expiry
   on public.afterhours_duo_invitations (expires_at)
   where status = 'pending';
 
+-- The shared game cursor contains no personal notes or arbitrary client payload.
+-- Only the finite, reviewed prompt sequence (steps 0-4) can be synchronized.
+create table if not exists public.afterhours_duo_session_state (
+  room_id uuid primary key references public.afterhours_duo_rooms(id) on delete cascade,
+  current_step smallint not null default 0 check (current_step between 0 and 4),
+  revision bigint not null default 0 check (revision >= 0),
+  updated_by uuid references auth.users(id) on delete set null,
+  updated_at timestamptz not null default now()
+);
+alter table public.afterhours_duo_session_state enable row level security;
+revoke all on public.afterhours_duo_session_state from public, anon, authenticated;
+
+
 alter table public.afterhours_duo_rooms enable row level security;
 alter table public.afterhours_duo_room_members enable row level security;
 alter table public.afterhours_duo_invitations enable row level security;
@@ -96,6 +109,8 @@ begin
   insert into public.afterhours_duo_rooms (owner_user_id, expires_at)
   values (v_user_id, v_expires_at)
   returning id into v_room_id;
+
+  insert into public.afterhours_duo_session_state (room_id) values (v_room_id);
 
   insert into public.afterhours_duo_room_members (room_id, user_id, role)
   values (v_room_id, v_user_id, 'host');
@@ -325,6 +340,94 @@ begin
 end;
 $$;
 
+-- Atomically move the shared prompt cursor using optimistic concurrency.
+-- Room-row locking serializes this with pause/stop and consent changes.
+create or replace function public.advance_afterhours_duo_session(
+  p_room_id uuid,
+  p_direction text,
+  p_expected_revision bigint
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = ''
+as $
+declare
+  v_user_id uuid := auth.uid();
+  v_room public.afterhours_duo_rooms%rowtype;
+  v_session public.afterhours_duo_session_state%rowtype;
+  v_member_count integer;
+  v_consented_count integer;
+  v_next_step integer;
+begin
+  if v_user_id is null then
+    raise exception 'Sign in to update this Duo session.' using errcode = '28000';
+  end if;
+  if p_direction is null or p_direction not in ('next', 'previous')
+    or p_expected_revision is null or p_expected_revision < 0 then
+    raise exception 'The Duo session update is invalid.' using errcode = '22023';
+  end if;
+
+  select * into v_room
+  from public.afterhours_duo_rooms
+  where id = p_room_id
+  for update;
+
+  if not found or v_room.expires_at <= now() or v_room.status <> 'active' then
+    raise exception 'The Duo session is not active.' using errcode = '55000';
+  end if;
+  if not exists (
+    select 1 from public.afterhours_duo_room_members m
+    where m.room_id = p_room_id and m.user_id = v_user_id and m.removed_at is null
+  ) then
+    raise exception 'You are not a member of this Duo room.' using errcode = '42501';
+  end if;
+
+  select count(*), count(*) filter (
+    where consented_at is not null and consent_revoked_at is null
+  )
+  into v_member_count, v_consented_count
+  from public.afterhours_duo_room_members
+  where room_id = p_room_id and removed_at is null;
+
+  if v_member_count <> 2 or v_consented_count <> 2 then
+    raise exception 'Both participants must remain present and consenting.' using errcode = '55000';
+  end if;
+
+  select * into v_session
+  from public.afterhours_duo_session_state
+  where room_id = p_room_id
+  for update;
+
+  if not found then
+    raise exception 'The Duo session state is unavailable.' using errcode = 'P0002';
+  end if;
+  if v_session.revision <> p_expected_revision then
+    raise exception 'The Duo session changed on the other device. Refresh before continuing.' using errcode = '40001';
+  end if;
+
+  v_next_step := v_session.current_step + case when p_direction = 'next' then 1 else -1 end;
+  if v_next_step < 0 or v_next_step > 4 then
+    raise exception 'There are no more steps in that direction.' using errcode = '22023';
+  end if;
+
+  update public.afterhours_duo_session_state
+  set current_step = v_next_step,
+      revision = revision + 1,
+      updated_by = v_user_id,
+      updated_at = clock_timestamp()
+  where room_id = p_room_id
+  returning * into v_session;
+
+  return jsonb_build_object(
+    'room_id', p_room_id,
+    'current_step', v_session.current_step,
+    'revision', v_session.revision,
+    'updated_by_self', v_session.updated_by = v_user_id
+  );
+end;
+$;
+
 -- Return only the room state and minimal per-member consent status to a member.
 -- This is the authoritative lobby snapshot; clients never infer consent from broadcasts.
 create or replace function public.get_afterhours_duo_room_state(p_room_id uuid)
@@ -337,6 +440,7 @@ declare
   v_user_id uuid := auth.uid();
   v_room public.afterhours_duo_rooms%rowtype;
   v_members jsonb;
+  v_session public.afterhours_duo_session_state%rowtype;
 begin
   if v_user_id is null then
     raise exception 'Sign in to view this Duo room.' using errcode = '28000';
@@ -357,6 +461,10 @@ begin
     raise exception 'You are not a member of this Duo room.' using errcode = '42501';
   end if;
 
+  select * into v_session
+  from public.afterhours_duo_session_state
+  where room_id = p_room_id;
+
   select coalesce(
     jsonb_agg(
       jsonb_build_object(
@@ -375,7 +483,12 @@ begin
     'room_id', v_room.id,
     'status', v_room.status,
     'expires_at', v_room.expires_at,
-    'members', v_members
+    'members', v_members,
+    'session', jsonb_build_object(
+      'current_step', v_session.current_step,
+      'revision', v_session.revision,
+      'updated_by_self', v_session.updated_by = v_user_id
+    )
   );
 end;
 $$;
@@ -413,6 +526,8 @@ begin
 end;
 $$;
 
+revoke all on function public.advance_afterhours_duo_session(uuid, text, bigint) from public, anon;
+grant execute on function public.advance_afterhours_duo_session(uuid, text, bigint) to authenticated;
 revoke all on function public.create_afterhours_duo_room(text) from public, anon;
 revoke all on function public.preview_afterhours_duo_invitation(text) from public, anon;
 revoke all on function public.accept_afterhours_duo_invitation(text) from public, anon;
