@@ -10,8 +10,8 @@ import {
   acceptExperienceInvitation, createExperienceInvitation, createExperienceRun, previewExperienceInvitation,
   deleteExperienceRun, deleteWorldRecord, loadExperienceInvitations,
   loadExperienceRuns, loadWorldRecords, resumeExperienceRun, revokeExperienceInvitation,
-  saveWorldRecord, updateExperienceRun, withdrawExperienceConsent,
-  type ExperienceInvitation, type ExperienceInvitationPreview, type ExperienceRun, type WorldModule, type WorldRecord
+  saveWorldRecord, updateExperienceRun, withdrawExperienceConsent, loadExperienceRunCheckIns, submitExperienceRunCheckIn,
+  type ExperienceInvitation, type ExperienceInvitationPreview, type ExperienceRun, type ExperienceRunCheckIn, type ExperienceRunCheckInSignal, type WorldModule, type WorldRecord
 } from "./services/worldRecords";
 import "./cinematic-experience.css";
 
@@ -156,7 +156,7 @@ export default function CinematicWorld({
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
   const [tab, setTab] = useState<Tab>(() => new URLSearchParams(window.location.search).has("invite") ? "invitation" : "experience");
   const [records, setRecords] = useState<RecordMap>(EMPTY_RECORDS);
-  const [runs, setRuns] = useState<ExperienceRun[]>([]);
+  const [runs, setRuns] = useState<ExperienceRun[]>([]);\n  const [sharedCheckIns, setSharedCheckIns] = useState<ExperienceRunCheckIn[]>([]);
   const [experienceInvites, setExperienceInvites] = useState<ExperienceInvitation[]>([]);
   const [selectedInviteRunId, setSelectedInviteRunId] = useState("");
   const [inviteLink, setInviteLink] = useState("");
@@ -973,6 +973,27 @@ export default function CinematicWorld({
       onSafetyStop();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : t("Toestemming intrekken is niet gelukt.", "Could not withdraw consent."));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function sendSharedCheckIn(run: ExperienceRun, signal: ExperienceRunCheckInSignal) {
+    if (!remoteProfileId || run.user_id === remoteProfileId || run.status !== "active") return;
+    setBusy(true);
+    setError("");
+    try {
+      await submitExperienceRunCheckIn({ runId: run.id, stepIndex: run.current_step, signal, expectedUserId: remoteProfileId });
+      await refreshData();
+      if (signal === "stop_requested") {
+        await withdrawSharedConsent(run.id);
+      } else {
+        setMessage(signal === "pause_requested"
+          ? t("Pauzeverzoek verstuurd. De host ziet dit direct bij de gedeelde ervaring.", "Pause request sent. The host will see it on the shared experience.")
+          : t("Je check-in is verstuurd.", "Your check-in has been sent."));
+      }
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : t("Check-in versturen is niet gelukt.", "Could not send check-in."));
     } finally {
       setBusy(false);
     }
