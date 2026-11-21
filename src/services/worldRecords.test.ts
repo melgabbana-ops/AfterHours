@@ -48,6 +48,7 @@ describe("AFTER HOURS private world storage", () => {
     mocks.update.mockReturnValue(chain);
     mocks.delete.mockReturnValue(chain);
     mocks.maybeSingle.mockResolvedValue({ data: null, error: null });
+    mocks.single.mockResolvedValue({ data: null, error: null });
   });
 
   it("creates a run paused, records owner consent, and only then activates it", async () => {
