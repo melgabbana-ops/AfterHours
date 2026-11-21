@@ -73,11 +73,13 @@ export default function SecureDuoInvitation({
     }
   };
 
-  const expiresAt = preview
+  const expiryDate = preview ? new Date(preview.expiresAt) : null;
+  const validExpiry = expiryDate !== null && Number.isFinite(expiryDate.getTime());
+  const expiresAt = validExpiry
     ? new Intl.DateTimeFormat(nl ? "nl-NL" : "en-GB", {
         dateStyle: "medium",
         timeStyle: "short",
-      }).format(new Date(preview.expiresAt))
+      }).format(expiryDate)
     : "";
 
   return (
@@ -110,7 +112,7 @@ export default function SecureDuoInvitation({
                 : (nl ? "wachtkamer" : "lobby")}
             </div>
             <p className="couples-consent-note">
-              {nl ? "Uitnodiging geldig tot: " : "Invitation expires: "}{expiresAt}
+              {nl ? "Uitnodiging geldig tot: " : "Invitation expires: "}{expiresAt || (nl ? "onbekend" : "unknown")}
             </p>
             <p className="couples-consent-note">
               {nl
