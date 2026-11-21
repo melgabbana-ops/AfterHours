@@ -271,6 +271,7 @@ export default function CinematicWorld({
     ]);
     setRecords({ director, vault, dominion, sensory, invitation, ritual, club });
     setRuns(history);
+    setSharedCheckIns(await loadExperienceRunCheckIns(history.map((run) => run.id), userId));
     setExperienceInvites(invites);
   }
 
@@ -280,6 +281,7 @@ export default function CinematicWorld({
     setError("");
     setRecords(EMPTY_RECORDS);
     setRuns([]);
+    setSharedCheckIns([]);
     setExperienceInvites([]);
     setInviteLink("");
     setSelectedInviteRunId("");
@@ -335,6 +337,7 @@ export default function CinematicWorld({
         if (!active) return;
         setRecords({ director, vault, dominion, sensory, invitation, ritual, club });
         setRuns(history);
+        setSharedCheckIns(await loadExperienceRunCheckIns(history.map((run) => run.id), remoteProfileId));
         setExperienceInvites(invites);
       } catch (cause) {
         if (active) setError(cause instanceof Error ? cause.message : t("Privégegevens konden niet worden geladen.", "Private data could not be loaded."));
@@ -355,7 +358,8 @@ export default function CinematicWorld({
       refreshing = true;
       try {
         const latestRuns = await loadExperienceRuns(remoteProfileId);
-        if (active) setRuns(latestRuns);
+        const latestCheckIns = await loadExperienceRunCheckIns(latestRuns.map((run) => run.id), remoteProfileId);
+        if (active) { setRuns(latestRuns); setSharedCheckIns(latestCheckIns); }
       } catch {
         // Keep the last confirmed state visible during temporary network interruptions.
       } finally {
