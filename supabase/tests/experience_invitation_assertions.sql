@@ -21,6 +21,16 @@ begin
     ) and not p.prosecdef) then
     raise exception 'Private invitation implementations must be SECURITY DEFINER';
   end if;
+  if not exists(select 1 from pg_trigger where tgname='afterhours_invitation_paused_run_guard' and not tgisinternal)
+     or not exists(select 1 from pg_trigger where tgname='afterhours_experience_run_activation_guard' and not tgisinternal) then
+    raise exception 'Invitation and run activation guards must be installed';
+  end if;
+  if not exists(select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace
+    where n.nspname='private' and p.proname='guard_afterhours_invitation_run_paused' and p.prosecdef)
+     or not exists(select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace
+    where n.nspname='private' and p.proname='guard_afterhours_experience_run_activation' and p.prosecdef) then
+    raise exception 'Private invitation trigger guards must be SECURITY DEFINER';
+  end if;
 end; $definition_tests$;
 
 set role authenticated;
@@ -114,6 +124,8 @@ begin
      or has_function_privilege('anon','private.accept_afterhours_experience_invitation_impl(text)','EXECUTE')
      or has_function_privilege('anon','private.preview_afterhours_experience_invitation_impl(text)','EXECUTE')
      or has_function_privilege('anon','private.withdraw_afterhours_experience_consent_impl(uuid)','EXECUTE')
+     or has_function_privilege('anon','private.guard_afterhours_invitation_run_paused()','EXECUTE')
+     or has_function_privilege('anon','private.guard_afterhours_experience_run_activation()','EXECUTE')
      or has_schema_privilege('anon','private','USAGE') then
     raise exception 'Anonymous role can execute or reach invitation RPCs';
   end if;
@@ -123,6 +135,8 @@ begin
      or not has_function_privilege('authenticated','private.accept_afterhours_experience_invitation_impl(text)','EXECUTE')
      or not has_function_privilege('authenticated','private.preview_afterhours_experience_invitation_impl(text)','EXECUTE')
      or not has_function_privilege('authenticated','private.withdraw_afterhours_experience_consent_impl(uuid)','EXECUTE')
+     or has_function_privilege('authenticated','private.guard_afterhours_invitation_run_paused()','EXECUTE')
+     or has_function_privilege('authenticated','private.guard_afterhours_experience_run_activation()','EXECUTE')
      or not has_schema_privilege('authenticated','private','USAGE') then
     raise exception 'Authenticated role cannot reach the approved invitation RPC path';
   end if;
