@@ -15,14 +15,14 @@ const prompts = [
 ];
 function newCode() {
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  const bytes = new Uint8Array(6);
+  const bytes = new Uint8Array(10);
   crypto.getRandomValues(bytes);
   return Array.from(bytes, value => alphabet[value % alphabet.length]).join("");
 }
 
 export default function CouplesPlay({ language, onBack }: { language: Language; onBack: () => void }) {
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
-  const initialCode = useMemo(() => new URLSearchParams(window.location.search).get("couple")?.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6) || "", []);
+  const initialCode = useMemo(() => new URLSearchParams(window.location.search).get("couple")?.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 10) || "", []);
   const [mode, setMode] = useState<Mode>(initialCode ? "remote" : "local");
   const [roomCode, setRoomCode] = useState(initialCode);
   const [participantId] = useState(() => crypto.randomUUID());
@@ -38,7 +38,7 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
   const channelRef = useRef<any>(null);
   const partnerPresent = participants.some(person => person.participantId !== participantId);
   const partnerConsented = participants.some(person => person.participantId !== participantId && person.consent === true);
-  const ready = mode === "local" ? myConsent && localPartnerConsent : connected && partnerPresent && myConsent && partnerConsented;
+  const ready = mode === "local" ? myConsent && localPartnerConsent : connected && participants.length === 2 && partnerPresent && myConsent && partnerConsented;
   const inviteUrl = useMemo(() => {
     const url = new URL(window.location.href);
     url.search = "";
@@ -115,7 +115,6 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
     setMyConsent(false);
     setLocalPartnerConsent(false);
     void publish(round, "stopped");
-    if (mode === "remote" && channelRef.current) void channelRef.current.send({ type: "broadcast", event: "reset-consent", payload: {} });
   };
 
   return <main className="couples-play-screen ah-editorial-screen">
@@ -148,7 +147,7 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
         {!roomCode ? <button type="button" className="couples-primary" onClick={createRoom}><Link2 size={16}/>{t("Maak een privékamer", "Create a private room")}</button> : <>
           <div className="couples-room-code"><small>{t("JULLIE KAMERCODE", "YOUR ROOM CODE")}</small><strong>{roomCode}</strong><button type="button" onClick={()=>void shareInvite()}><Copy size={15}/>{t("Deel uitnodiging", "Share invite")}</button></div>
           <div className="couples-connection" role="status">{connected ? <><Wifi size={17}/>{t("Verbonden met de privékamer", "Connected to private room")}</> : <><WifiOff size={17}/>{t("Verbinding maken…", "Connecting…")}</>}</div>
-          <label className="couples-join-code">{t("Kamercode invoeren", "Enter room code")}<input value={roomCode} onChange={e=>setRoomCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,6))} maxLength={6}/></label>
+          <label className="couples-join-code">{t("Kamercode invoeren", "Enter room code")}<input value={roomCode} onChange={e=>setRoomCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,10))} maxLength={10}/></label>
           <label className="couples-join-code">{t("Jouw naam", "Your name")}<input value={name} onChange={e=>setName(e.target.value)} maxLength={24} placeholder={t("Naam", "Name")}/></label>
           <div className="couples-presence"><Users size={17}/><strong>{participants.length} / 2</strong><span>{partnerPresent ? t("Partner is aanwezig", "Partner is here") : t("Wachten op je partner…", "Waiting for your partner…")}</span></div>
           <label className="couples-consent"><input type="checkbox" checked={myConsent} onChange={e=>{setMyConsent(e.target.checked);if(!e.target.checked){setStatus("lobby");void channelRef.current?.send({type:"broadcast",event:"reset-consent",payload:{}});}}}/><span>{t("Ik stem vrijwillig in met deze ervaring.", "I freely consent to this experience.")}</span></label>
