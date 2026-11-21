@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { appendMediaCaptureChunk, canRecoverInterruptedCapture, discardMediaCapture, MAX_MEDIA_CAPTURE_BYTES, missingCaptureTrack, stopMediaRecorder, stopMediaStreams, waitForVideoReady, watchMediaStreamInterruption } from "./mediaCapture";
+import { appendMediaCaptureChunk, canRecoverInterruptedCapture, discardMediaCapture, MAX_MEDIA_CAPTURE_BYTES, missingCaptureTrack, stopMediaRecorder, stopMediaStreams, selectMediaRecorderMimeType, waitForVideoReady, watchMediaStreamInterruption } from "./mediaCapture";
 
 describe("media capture cleanup", () => {
   it("stops every track across camera and composited streams", () => {
@@ -296,5 +296,26 @@ describe("interrupted capture recovery", () => {
     expect(canRecoverInterruptedCapture(-1)).toBe(false);
     expect(canRecoverInterruptedCapture(Number.NaN)).toBe(false);
     expect(canRecoverInterruptedCapture(1, Number.POSITIVE_INFINITY)).toBe(false);
+  });
+});
+
+
+describe("recording format selection", () => {
+  it("selects the first format supported by the current browser", () => {
+    const supported = vi.fn((type: string) => type === "video/webm");
+    expect(selectMediaRecorderMimeType(["video/mp4", "video/webm", "video/ogg"], supported)).toBe("video/webm");
+    expect(supported).toHaveBeenCalledTimes(2);
+  });
+
+  it("returns undefined when the browser should choose its default format", () => {
+    expect(selectMediaRecorderMimeType(["audio/mp4", "audio/webm"], () => false)).toBeUndefined();
+  });
+
+  it("continues checking formats when a browser capability query throws", () => {
+    const supported = vi.fn((type: string) => {
+      if (type === "audio/mp4") throw new Error("unsupported query");
+      return type === "audio/webm";
+    });
+    expect(selectMediaRecorderMimeType(["audio/mp4", "audio/webm"], supported)).toBe("audio/webm");
   });
 });
