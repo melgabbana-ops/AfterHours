@@ -31,8 +31,8 @@ export default function SessionSummary({
       </dl>
       <p className="session-summary-privacy">
         {t(
-          "De inhoud van je privénotitie wordt bewust niet in dit overzicht getoond. Dit overzicht blijft alleen zichtbaar op dit scherm en wordt niet apart opgeslagen.",
-          "Your private note content is deliberately not shown here. This summary is only visible on this screen and is not stored separately.",
+          "De getoonde tijd loopt vanaf de start tot afronding en omvat pauzes en aftercare. De inhoud van je privénotitie wordt bewust niet in dit overzicht getoond. Dit overzicht blijft alleen zichtbaar op dit scherm en wordt niet apart opgeslagen.",
+          "The displayed time runs from start to completion and includes pauses and aftercare. Your private note content is deliberately not shown here. This summary is only visible on this screen and is not stored separately.",
         )}
       </p>
     </section>
