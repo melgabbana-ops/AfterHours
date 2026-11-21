@@ -25,7 +25,7 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
   // Legacy public room-code links are deliberately ignored. Remote rooms return
   // only after the account-bound invitation backend has been deployed and verified.
-  const [mode, setMode] = useState<Mode>("local");
+  const [mode] = useState<Mode>("local");
   const [roomCode, setRoomCode] = useState("");
   const [joinCode, setJoinCode] = useState("");
   const [localParticipantId] = useState(() => crypto.randomUUID());
