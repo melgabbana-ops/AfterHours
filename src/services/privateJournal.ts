@@ -26,6 +26,25 @@ interface StoredVault {
 type JournalStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 const VERIFIER = "AFTER HOURS PRIVATE JOURNAL · VAULT CHECK · V1";
 
+/** Isolate each person's encrypted journal in the same browser profile. */
+export function privateJournalStorageForOwner(ownerId: string, backingStorage?: JournalStorage): JournalStorage {
+  const owner = ownerId.trim();
+  if (!owner) throw new Error("Een geldig profiel is nodig om het privéjournal te openen.");
+  const storageKey = `${PRIVATE_JOURNAL_STORAGE_KEY}:${encodeURIComponent(owner)}`;
+  const target = backingStorage ?? (() => {
+    try { return globalThis.localStorage; } catch { return undefined; }
+  })();
+  const requireTarget = (): JournalStorage => {
+    if (!target) throw new Error("Lokale opslag is niet beschikbaar.");
+    return target;
+  };
+  return {
+    getItem: () => requireTarget().getItem(storageKey),
+    setItem: (_key, value) => requireTarget().setItem(storageKey, value),
+    removeItem: () => requireTarget().removeItem(storageKey),
+  };
+}
+
 function storageTarget(storage?: JournalStorage): JournalStorage | undefined {
   if (storage) return storage;
   try { return globalThis.localStorage; } catch { return undefined; }
