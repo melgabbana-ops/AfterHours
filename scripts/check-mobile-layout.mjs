@@ -1,6 +1,6 @@
 import { readFile } from "node:fs/promises";
 
-const [html, baseStyles, cinematicStyles, meditationStyles, rankStyles, worldAtmosphereStyles, worldExperienceStyles, referenceHomeStyles, serviceWorker, onboarding, heroPoster] = await Promise.all([
+const [html, baseStyles, cinematicStyles, meditationStyles, rankStyles, worldAtmosphereStyles, worldExperienceStyles, referenceHomeStyles, tabletStyles, mainSource, serviceWorker, onboarding, heroPoster] = await Promise.all([
   readFile("index.html", "utf8"),
   readFile("src/styles.css", "utf8"),
   readFile("src/approved-cinematic.css", "utf8"),
@@ -9,11 +9,13 @@ const [html, baseStyles, cinematicStyles, meditationStyles, rankStyles, worldAtm
   readFile("src/cinematic-world.css", "utf8"),
   readFile("src/cinematic-experience.css", "utf8"),
   readFile("src/reference-home.css", "utf8"),
+  readFile("src/tablet-layout.css", "utf8"),
+  readFile("src/main.tsx", "utf8"),
   readFile("public/sw.js", "utf8"),
   readFile("src/Onboarding.tsx", "utf8"),
   readFile("public/visuals/reference-home.svg", "utf8"),
 ]);
-const styles = baseStyles + "\n" + cinematicStyles + "\n" + meditationStyles + "\n" + rankStyles + "\n" + worldAtmosphereStyles + "\n" + worldExperienceStyles + "\n" + referenceHomeStyles;
+const styles = baseStyles + "\n" + cinematicStyles + "\n" + meditationStyles + "\n" + rankStyles + "\n" + worldAtmosphereStyles + "\n" + worldExperienceStyles + "\n" + referenceHomeStyles + "\n" + tabletStyles;
 
 const checks = [
   ["viewport-fit for modern mobile safe areas", /name=["']viewport["'][^>]*viewport-fit=cover/i.test(html)],
@@ -34,6 +36,13 @@ const checks = [
   ["onboarding trailer poster points to the committed 4K black-and-gold intro artwork", /<svg\b[^>]*\bwidth="3840"[^>]*\bheight="2160"/s.test(heroPoster)],
   ["aftercare meditation skip control keeps a 48px touch target", meditationStyles.includes(".aftercare-meditation-skip") && /aftercare-meditation-actions button\{[^}]*min-height:48px/.test(meditationStyles)],
   ["short-landscape layout breakpoint", /@media[^{}]*orientation\s*:\s*landscape[^{}]*max-height/i.test(styles)],
+  ["tablet stylesheet is imported after the reference styles", mainSource.includes('import"./tablet-layout.css";')],
+  ["tablet and iPad breakpoint starts at 700 CSS pixels", tabletStyles.includes("@media (min-width: 700px)")],
+  ["large iPad landscape has a dedicated layout", tabletStyles.includes("@media (min-width: 1024px) and (orientation: landscape)")],
+  ["tablet Home shortcuts expand to four columns", tabletStyles.includes("grid-template-columns: repeat(4, minmax(0, 1fr)) !important;")],
+  ["tablet experience cards use a three-column layout", tabletStyles.includes("grid-template-columns: repeat(3, minmax(0, 1fr)) !important;")],
+  ["tablet navigation controls keep 56px touch targets", tabletStyles.includes("min-height: 56px !important;")],
+  ["tablet navigation respects iPad safe-area insets", tabletStyles.includes("env(safe-area-inset-bottom, 0px)") && tabletStyles.includes("env(safe-area-inset-left, 0px)")],
 ];
 
 const failed = checks.filter(([, passed]) => !passed);
