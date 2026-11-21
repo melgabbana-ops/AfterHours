@@ -60,3 +60,13 @@
 .ah-journal-backup-import input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
 .ah-journal-backup-export:disabled,.ah-journal-backup-import:has(input:disabled){opacity:.4;cursor:not-allowed}
 @media(max-width:520px){.ah-journal-backup{padding:12px}}
+
+.aftercare-history-note{grid-column:1/-1;margin-top:8px;padding-top:8px;border-top:1px solid rgba(211,174,112,.16)}
+.aftercare-history-note-toggle{min-height:34px;display:inline-flex;align-items:center;gap:7px;padding:0 9px;border:1px solid rgba(211,174,112,.28);border-radius:4px;background:rgba(12,10,7,.8);color:#d8bd8d;font-size:8px;letter-spacing:.06em}
+.aftercare-history-note-content{margin-top:9px;padding:11px;border:1px solid rgba(211,174,112,.2);border-radius:4px;background:rgba(5,5,4,.72)}
+.aftercare-history-note-content>div{margin-top:10px}
+.aftercare-history-note-content strong{display:block;color:#dfc99f;font-size:9px}
+.aftercare-history-note-content p{margin:5px 0 0;color:#c8bda9;font-size:10px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
+.aftercare-history-note-content small{display:block;margin-top:10px;color:#918571;font-size:8px}
+.aftercare-history-note-privacy{display:flex;align-items:flex-start;gap:6px;margin:0;color:#b7a27d;font-size:8px;line-height:1.5}
+.aftercare-history-note-privacy svg{flex:none;margin-top:1px}
