@@ -33,7 +33,7 @@ describe("secure account-bound Duo room API",()=>{
 
   it("accepts only a server-confirmed account-bound membership",async()=>{
     const client=makeClient({rpc:vi.fn().mockResolvedValue({data:{room_id:id,status:"accepted"},error:null})});
-    await expect(acceptSecureDuoInvitation(token,client)).resolves.toEqual({roomId:id,status:"lobby"});
+    await expect(acceptSecureDuoInvitation(token,client)).resolves.toEqual({roomId:id,accepted:true});
     expect(client.rpc.mock.calls[0][0]).toBe("accept_afterhours_duo_invitation");
   });
 
