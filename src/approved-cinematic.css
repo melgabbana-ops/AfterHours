@@ -1896,7 +1896,7 @@ body{color:var(--ah-ivory)!important}
 .insights:before{
  background-image:linear-gradient(180deg,rgba(0,0,0,.18),rgba(0,0,0,.9)),url("/AfterHours/visuals/ah-tarot-photo.svg")!important;
 }
-.insights.insights-astro:before{
+.insights[data-tab="astro"]:before{
  background-image:linear-gradient(180deg,rgba(0,0,0,.18),rgba(0,0,0,.9)),url("/AfterHours/visuals/ah-horoscope-photo.svg")!important;
 }
 .radio-room:before{
