@@ -65,7 +65,8 @@ export function getPendingStopTimestamp(
 ): string | null {
   if (sessionStatus !== "stopped" || consentStatus !== "revoked") return null;
   const timestamp = revokedAt ?? sessionUpdatedAt;
-  return timestamp.trim().length > 0 ? timestamp : null;
+  if (!timestamp.trim() || !Number.isFinite(Date.parse(timestamp))) return null;
+  return timestamp;
 }
 
 /** A Supabase-backed session waits for authenticated remote hydration before its local timer can run. */

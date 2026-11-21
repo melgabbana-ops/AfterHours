@@ -129,6 +129,11 @@ describe("offline STOP recovery", () => {
     expect(getPendingStopTimestamp("stopped", "revoked", null, "2026-11-19T20:00:01.000Z")).toBe("2026-11-19T20:00:01.000Z");
   });
 
+  it("ignores malformed timestamps instead of replaying an invalid remote STOP", () => {
+    expect(getPendingStopTimestamp("stopped", "revoked", "not-a-date", "2026-11-19T20:00:01.000Z")).toBeNull();
+    expect(getPendingStopTimestamp("stopped", "revoked", null, "   ")).toBeNull();
+  });
+
   it("persists the local STOP snapshot before starting remote revocation", () => {
     const start = mainSource.indexOf("const persistStoppedState=");
     const end = mainSource.indexOf("const stop=()=>", start);
