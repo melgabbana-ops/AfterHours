@@ -6,7 +6,7 @@ import { canResumeRemotePlay, canStartRemotePlay, shouldPauseRemotePlay } from "
 type Language = "nl" | "en";
 type Mode = "local" | "remote";
 type PlayStatus = "lobby" | "active" | "paused" | "stopped";
-type PresenceMeta = { participantId?: string; displayName?: string; consent?: boolean };
+type PresenceMeta = { [key: string]: unknown; participantId?: string; displayName?: string; consent?: boolean };
 const prompts = [
   { nl: "Wat heb je vandaag nodig om je op je gemak te voelen?", en: "What do you need today to feel comfortable?" },
   { nl: "Welk signaal gebruiken jullie voor een korte pauze?", en: "What signal will you use for a short pause?" },
