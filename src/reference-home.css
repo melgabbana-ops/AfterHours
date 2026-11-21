@@ -171,12 +171,12 @@
 
 /* Home hero photographic portrait replaces the vector placeholder. */
 /* Approved Home portrait is primary; bundled SVG remains a reliable offline fallback. */
-.ah-reference-home{--ah-cinematic-background:url("https://gcdn.picsart.com/editing-temp/bc8725cb-2e53-4c72-8cc0-e953ea8894ad.png"),url("/AfterHours/visuals/reference-home.svg")!important}
+.ah-reference-home{--ah-cinematic-background:url("/AfterHours/visuals/reference-home.svg")!important}
 .ah-reference-home .hero.home-hero{
  background-image:linear-gradient(180deg,rgba(5,4,3,.02) 0%,rgba(5,4,3,.05) 28%,rgba(5,4,3,.42) 58%,rgba(5,4,3,.96) 100%),var(--ah-cinematic-background)!important;
- background-position:center 24%,center 24%,center!important;
- background-size:cover,cover,cover!important;
- background-repeat:no-repeat!important;
+ background-position:center 24%,center!important;
+ background-size:cover,cover!important;
+ background-repeat:no-repeat,no-repeat!important;
 }
 
 /* Home shortcut grid follows the approved reference: four equal destinations. */
