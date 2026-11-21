@@ -26,6 +26,7 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
   const initialCode = useMemo(() => new URLSearchParams(window.location.search).get("couple")?.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 10) || "", []);
   const [mode, setMode] = useState<Mode>(initialCode ? "remote" : "local");
   const [roomCode, setRoomCode] = useState(initialCode);
+  const [joinCode, setJoinCode] = useState(initialCode);
   const [participantId] = useState(() => crypto.randomUUID());
   const [name, setName] = useState("");
   const [partnerName, setPartnerName] = useState("");
@@ -158,11 +159,15 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
     </section> : <section className="couples-lobby">
       <span className="eyebrow">REMOTE · PRIVATE ROOM</span><h3>{t("Verbind jullie apparaten", "Connect your devices")}</h3>
       {!supabaseConfigured ? <p role="alert">{t("Online koppelspel vereist een geconfigureerde realtime-verbinding. Lokaal spelen blijft beschikbaar.", "Online couple play requires a configured realtime connection. Local play remains available.")}</p> : <>
-        {!roomCode ? <button type="button" className="couples-primary" onClick={createRoom}><Link2 size={16}/>{t("Maak een privékamer", "Create a private room")}</button> : <>
+        {!roomCode ? <div className="couples-room-entry">
+          <label className="couples-join-code">{t("Kamercode invoeren", "Enter room code")}<input value={joinCode} onChange={e=>setJoinCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,10))} maxLength={10} autoComplete="off" placeholder={t("10 tekens", "10 characters")}/></label>
+          <button type="button" className="couples-primary" disabled={joinCode.length !== 10} onClick={()=>{setRoomCode(joinCode);setMyConsent(false);setStatus("lobby");setRound(0);}}><Link2 size={16}/>{t("Deelnemen aan privékamer", "Join private room")}</button>
+          <span className="couples-entry-divider">{t("of maak zelf een kamer aan", "or create your own room")}</span>
+          <button type="button" className="couples-secondary" onClick={createRoom}><Users size={16}/>{t("Maak een privékamer", "Create a private room")}</button>
+        </div> : <>
           <div className="couples-room-code"><small>{t("JULLIE KAMERCODE", "YOUR ROOM CODE")}</small><strong>{roomCode}</strong><button type="button" onClick={()=>void shareInvite()}><Copy size={15}/>{t("Deel uitnodiging", "Share invite")}</button></div>
           <div className="couples-connection" role="status">{connected ? <><Wifi size={17}/>{t("Verbonden met de privékamer", "Connected to private room")}</> : <><WifiOff size={17}/>{t("Verbinding maken…", "Connecting…")}</>}</div>
           <p className="couples-consent-note">{t("Deel de kamercode alleen met je partner. Iedereen met de code kan proberen deel te nemen.", "Only share the room code with your partner. Anyone with the code can attempt to join.")}</p>
-          <label className="couples-join-code">{t("Kamercode invoeren", "Enter room code")}<input value={roomCode} onChange={e=>setRoomCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,10))} maxLength={10}/></label>
           <label className="couples-join-code">{t("Jouw naam", "Your name")}<input value={name} onChange={e=>setName(e.target.value)} maxLength={24} placeholder={t("Naam", "Name")}/></label>
           <div className="couples-presence"><Users size={17}/><strong>{participants.length} / 2</strong><span>{partnerPresent ? t("Partner is aanwezig", "Partner is here") : t("Wachten op je partner…", "Waiting for your partner…")}</span></div>
           <label className="couples-consent"><input type="checkbox" checked={myConsent} onChange={e=>{setMyConsent(e.target.checked);if(!e.target.checked){setStatus("lobby");void channelRef.current?.send({type:"broadcast",event:"reset-consent",payload:{stopped:false}});}}}/><span>{t("Ik stem vrijwillig in met deze ervaring.", "I freely consent to this experience.")}</span></label>
