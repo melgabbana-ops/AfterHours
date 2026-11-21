@@ -108,7 +108,60 @@ export async function composeImageWithOverlay(file:File,style:OverlayFrameStyle)
     return new File([blob],basename+"-after-hours.jpg",{type:"image/jpeg",lastModified:Date.now()});
   } finally {URL.revokeObjectURL(objectUrl);}
 }
-export function drawCameraFrame(ctx:CanvasRenderingContext2D,video:HTMLVideoElement,width:number,height:number,style:OverlayFrameStyle) {
+
+export interface PhotoEditTransform {
+  rotation: 0 | 90 | 180 | 270;
+  zoom: number;
+  offsetX: number;
+  offsetY: number;
+}
+export const defaultPhotoEditTransform: PhotoEditTransform = { rotation: 0, zoom: 1, offsetX: 0, offsetY: 0 };
+export function normalizePhotoEditTransform(value: PhotoEditTransform): PhotoEditTransform {
+  const rotations = [0, 90, 180, 270] as const;
+  const rotation = rotations.includes(value.rotation) ? value.rotation : 0;
+  return {
+    rotation,
+    zoom: Math.min(2.5, Math.max(1, Number.isFinite(value.zoom) ? value.zoom : 1)),
+    offsetX: Math.min(1, Math.max(-1, Number.isFinite(value.offsetX) ? value.offsetX : 0)),
+    offsetY: Math.min(1, Math.max(-1, Number.isFinite(value.offsetY) ? value.offsetY : 0)),
+  };
+}
+export async function composeImageWithEdits(file: File, style: OverlayFrameStyle, edits: PhotoEditTransform): Promise<File> {
+  if (!file.type.startsWith("image/")) return file;
+  const transform = normalizePhotoEditTransform(edits);
+  const objectUrl = URL.createObjectURL(file);
+  try {
+    const image = new Image();
+    image.decoding = "async";
+    image.src = objectUrl;
+    await image.decode();
+    const sourceWidth = image.naturalWidth || image.width;
+    const sourceHeight = image.naturalHeight || image.height;
+    if (!sourceWidth || !sourceHeight) throw new Error("Could not read the selected image.");
+    const rotated = transform.rotation === 90 || transform.rotation === 270;
+    const logicalWidth = rotated ? sourceHeight : sourceWidth;
+    const logicalHeight = rotated ? sourceWidth : sourceHeight;
+    const scale = Math.min(1, 2560 / Math.max(logicalWidth, logicalHeight));
+    const width = Math.max(1, Math.round(logicalWidth * scale));
+    const height = Math.max(1, Math.round(logicalHeight * scale));
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("Photo editing is not supported in this browser.");
+    ctx.translate(width / 2, height / 2);
+    ctx.rotate((transform.rotation * Math.PI) / 180);
+    const baseScale = Math.max(width / sourceWidth, height / sourceHeight) * transform.zoom;
+    const drawWidth = sourceWidth * baseScale;
+    const drawHeight = sourceHeight * baseScale;
+    ctx.drawImage(image, -drawWidth / 2 + transform.offsetX * (drawWidth - width) / 2, -drawHeight / 2 + transform.offsetY * (drawHeight - height) / 2, drawWidth, drawHeight);
+    drawAfterHoursOverlay(ctx, width, height, style);
+    const blob = await new Promise<Blob>((resolve, reject) => canvas.toBlob(value => value ? resolve(value) : reject(new Error("Could not render the edited photo.")), "image/jpeg", .92));
+    const basename = file.name.replace(/\\.[^.]+$/, "").replace(/[^a-zA-Z0-9_-]+/g, "-").slice(0, 70) || "after-hours-photo";
+    return new File([blob], basename + "-after-hours.jpg", { type: "image/jpeg", lastModified: Date.now() });
+  } finally { URL.revokeObjectURL(objectUrl); }
+}
+\nexport function drawCameraFrame(ctx:CanvasRenderingContext2D,video:HTMLVideoElement,width:number,height:number,style:OverlayFrameStyle) {
   if(video.videoWidth<1||video.videoHeight<1)return;
   const sourceRatio=video.videoWidth/video.videoHeight;
   const targetRatio=width/height;
