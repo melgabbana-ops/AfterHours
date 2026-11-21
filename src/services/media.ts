@@ -72,8 +72,11 @@ export function safePrivateMediaFileName(value: string): string {
 }
 
 export function safeMediaSessionFolder(value: string): string {
-  const segment = safePrivateMediaFileName(value || "general");
-  return segment === "." || segment === ".." ? "general" : segment;
+  const segment = (value || "general").normalize("NFKD")
+    .replace(/[^a-zA-Z0-9._-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(-100);
+  return !segment || segment === "." || segment === ".." ? "general" : segment;
 }
 
 export function safeAssignmentPrefix(value?: string): string {
