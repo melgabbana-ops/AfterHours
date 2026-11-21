@@ -4,9 +4,9 @@ name: AFTER HOURS build
 on:
   workflow_dispatch:
   push:
-    branches: [main, 'feature/**']
+    branches: [main, 'feature/**', 'fix/**']
   pull_request:
-    branches: [main]
+    branches: [main, 'feature/**']
 
 permissions:
   contents: read
