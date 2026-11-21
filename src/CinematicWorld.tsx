@@ -6,11 +6,11 @@ import {
   UnlockKeyhole, Volume2, VolumeX
 } from "lucide-react";
 import {
-  acceptExperienceInvitation, createExperienceInvitation, createExperienceRun,
+  acceptExperienceInvitation, createExperienceInvitation, createExperienceRun, previewExperienceInvitation,
   deleteExperienceRun, deleteWorldRecord, loadExperienceInvitations,
   loadExperienceRuns, loadWorldRecords, resumeExperienceRun, revokeExperienceInvitation,
   saveWorldRecord, updateExperienceRun, withdrawExperienceConsent,
-  type ExperienceInvitation, type ExperienceRun, type WorldModule, type WorldRecord
+  type ExperienceInvitation, type ExperienceInvitationPreview, type ExperienceRun, type WorldModule, type WorldRecord
 } from "./services/worldRecords";
 import "./cinematic-experience.css";
 
@@ -160,6 +160,8 @@ export default function CinematicWorld({
   const [selectedInviteRunId, setSelectedInviteRunId] = useState("");
   const [inviteLink, setInviteLink] = useState("");
   const [incomingInviteToken, setIncomingInviteToken] = useState<string | null>(() => new URLSearchParams(window.location.search).get("invite"));
+  const [invitePreview, setInvitePreview] = useState<ExperienceInvitationPreview | null>(null);
+  const [invitePreviewLoading, setInvitePreviewLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -315,6 +317,33 @@ export default function CinematicWorld({
     void load();
     return () => { active = false; };
   }, [remoteProfileId, language]);
+
+  useEffect(() => {
+    let active = true;
+    if (!incomingInviteToken || !remoteProfileId) {
+      setInvitePreview(null);
+      setInvitePreviewLoading(false);
+      return () => { active = false; };
+    }
+    const loadPreview = async () => {
+      setInvitePreviewLoading(true);
+      setInvitePreview(null);
+      try {
+        if (!/^[a-f0-9]{64}$/i.test(incomingInviteToken)) throw new Error(t("Deze uitnodigingslink is ongeldig.", "This invitation link is invalid."));
+        const tokenBytes = new Uint8Array(incomingInviteToken.match(/.{1,2}/g)!.map((byte) => Number.parseInt(byte, 16)));
+        const digest = await crypto.subtle.digest("SHA-256", tokenBytes);
+        const tokenHash = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+        const preview = await previewExperienceInvitation(tokenHash, remoteProfileId);
+        if (active) setInvitePreview(preview);
+      } catch (cause) {
+        if (active) setError(cause instanceof Error ? cause.message : t("De uitnodiging kan niet worden bekeken.", "The invitation could not be previewed."));
+      } finally {
+        if (active) setInvitePreviewLoading(false);
+      }
+    };
+    void loadPreview();
+    return () => { active = false; };
+  }, [incomingInviteToken, remoteProfileId]);
 
   useEffect(() => {
     const profile = records.dominion.find((record) => record.record_key === "profile");
@@ -847,7 +876,7 @@ export default function CinematicWorld({
   }
 
   async function acceptIncomingInvitation() {
-    if (!remoteProfileId || !incomingInviteToken) return;
+    if (!remoteProfileId || !incomingInviteToken || !invitePreview) return;
     setBusy(true);
     setError("");
     try {
@@ -859,11 +888,12 @@ export default function CinematicWorld({
       const tokenHash = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
       const accepted = await acceptExperienceInvitation(tokenHash, remoteProfileId);
       setIncomingInviteToken(null);
+      setInvitePreview(null);
       const url = new URL(window.location.href);
       url.searchParams.delete("invite");
       window.history.replaceState({}, "", url.toString());
       await refreshData();
-      setMessage(t("Uitnodiging geaccepteerd. Je eigen toestemming is vastgelegd voor deze ervaring. De eigenaar beheert de sessie; je kunt op ieder moment je toestemming intrekken via je accountinstellingen.", "Invitation accepted. Your own consent has been recorded for this experience. The owner manages the session; you can withdraw consent at any time through your account settings."));
+      setMessage(t("Uitnodiging geaccepteerd. Je eigen toestemming is vastgelegd. Je kunt deze altijd intrekken via The Secret Invitation; de gedeelde ervaring stopt dan voor iedereen.", "Invitation accepted. Your own consent has been recorded. You can withdraw it at any time in The Secret Invitation; the shared experience will then stop for everyone."));
       setTab("invitation");
       void accepted;
     } catch (cause) {
@@ -1190,9 +1220,11 @@ export default function CinematicWorld({
             <div className="cw-form-panel cw-invite-accept">
               <span className="cw-kicker">{t("PERSOONLIJKE UITNODIGING", "PERSONAL INVITATION")}</span>
               <h3>{t("Je bent uitgenodigd", "You are invited")}</h3>
-              <p>{t("Bekijk eerst de afspraken met de organisator. Door te accepteren leg je alleen jouw eigen toestemming vast. Je kunt later altijd stoppen of je toestemming intrekken.", "Review the arrangements with the host first. Accepting records only your own consent. You can always stop later or withdraw consent.")}</p>
-              {!remoteProfileId ? <p>{t("Log in op je eigen AFTER HOURS-account om deze uitnodiging te accepteren.", "Sign in to your own AFTER HOURS account to accept this invitation.")}</p> : null}
-              <button type="button" className="cw-primary" disabled={busy || !remoteProfileId} onClick={() => void acceptIncomingInvitation()}><CheckCircle2 size={15} />{t("Ik accepteer en geef mijn eigen toestemming", "Accept and give my own consent")}</button>
+              <p>{t("Bekijk eerst de exacte inhoud. Door te accepteren leg je alleen jouw eigen toestemming vast. Je kunt later altijd stoppen of je toestemming intrekken.", "Review the exact contents first. Accepting records only your own consent. You can always stop later or withdraw consent.")}</p>
+              {!remoteProfileId ? <p>{t("Log in op je eigen AFTER HOURS-account om de scène te bekijken en eventueel te accepteren.", "Sign in to your own AFTER HOURS account to preview and optionally accept the scene.")}</p> : null}
+              {invitePreviewLoading && <p>{t("Scène veilig ophalen…", "Loading scene securely…")}</p>}
+              {invitePreview && <div className="cw-invite-preview"><strong>{invitePreview.title}</strong>{invitePreview.description && <p>{invitePreview.description}</p>}<ol>{invitePreview.steps.slice(0, 12).map((step, index) => <li key={index}>{step}</li>)}</ol><small>{t("Uitnodiging verloopt", "Invitation expires")} {new Date(invitePreview.expires_at).toLocaleString(language === "nl" ? "nl-NL" : "en-GB")}</small></div>}
+              <button type="button" className="cw-primary" disabled={busy || !remoteProfileId || !invitePreview || invitePreviewLoading} onClick={() => void acceptIncomingInvitation()}><CheckCircle2 size={15} />{t("Ik accepteer en geef mijn eigen toestemming", "Accept and give my own consent")}</button>
             </div>
           )}
           <div className="cw-form-panel">
