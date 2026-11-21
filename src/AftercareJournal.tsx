@@ -126,7 +126,7 @@ export default function AftercareJournal({profileId,language,onBack}:Props){
    setEntries(next);setMessage(t("Versleuteld opgeslagen voor dit profiel op dit apparaat.","Encrypted and saved for this profile on this device."));
    return true;
   }catch(error){
-   if(generation===lockGeneration.current)setMessage(getAftercareJournalErrorMessage(getAftercareJournalFailure(error,"storage"),language));
+   if(generation===lockGeneration.current)setMessage(getAftercareJournalErrorMessage(getAftercareJournalFailure(error),language));
    return false;
   }finally{
    if(generation===lockGeneration.current)setSaving(false);
