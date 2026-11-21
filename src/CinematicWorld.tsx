@@ -10,7 +10,7 @@ import {
   acceptExperienceInvitation, createExperienceInvitation, createExperienceRun, previewExperienceInvitation,
   deleteExperienceRun, deleteWorldRecord, loadExperienceInvitations,
   loadExperienceRuns, loadWorldRecords, resumeExperienceRun, revokeExperienceInvitation,
-  saveWorldRecord, updateExperienceRun, withdrawExperienceConsent, loadExperienceRunCheckIns, submitExperienceRunCheckIn,
+  saveWorldRecord, updateExperienceRun, withdrawExperienceConsent, loadExperienceRunCheckIns, submitExperienceRunCheckIn, loadOwnExperienceRunConsentIds, renewExperienceRunConsent,
   type ExperienceInvitation, type ExperienceInvitationPreview, type ExperienceRun, type ExperienceRunCheckIn, type ExperienceRunCheckInSignal, type WorldModule, type WorldRecord
 } from "./services/worldRecords";
 import "./cinematic-experience.css";
@@ -158,6 +158,7 @@ export default function CinematicWorld({
   const [records, setRecords] = useState<RecordMap>(EMPTY_RECORDS);
   const [runs, setRuns] = useState<ExperienceRun[]>([]);
   const [sharedCheckIns, setSharedCheckIns] = useState<ExperienceRunCheckIn[]>([]);
+  const [activeConsentRunIds, setActiveConsentRunIds] = useState<string[]>([]);
   const [experienceInvites, setExperienceInvites] = useState<ExperienceInvitation[]>([]);
   const [selectedInviteRunId, setSelectedInviteRunId] = useState("");
   const [inviteLink, setInviteLink] = useState("");
@@ -273,7 +274,12 @@ export default function CinematicWorld({
     ]);
     setRecords({ director, vault, dominion, sensory, invitation, ritual, club });
     setRuns(history);
-    setSharedCheckIns(await loadExperienceRunCheckIns(history.map((run) => run.id), userId));
+    const [checkIns, activeConsentIds] = await Promise.all([
+      loadExperienceRunCheckIns(history.map((run) => run.id), userId),
+      loadOwnExperienceRunConsentIds(history.map((run) => run.id), userId),
+    ]);
+    setSharedCheckIns(checkIns);
+    setActiveConsentRunIds(activeConsentIds);
     setExperienceInvites(invites);
   }
 
@@ -284,6 +290,7 @@ export default function CinematicWorld({
     setRecords(EMPTY_RECORDS);
     setRuns([]);
     setSharedCheckIns([]);
+    setActiveConsentRunIds([]);
     setExperienceInvites([]);
     setInviteLink("");
     setSelectedInviteRunId("");
@@ -339,7 +346,12 @@ export default function CinematicWorld({
         if (!active) return;
         setRecords({ director, vault, dominion, sensory, invitation, ritual, club });
         setRuns(history);
-        setSharedCheckIns(await loadExperienceRunCheckIns(history.map((run) => run.id), remoteProfileId));
+        const [checkIns, activeConsentIds] = await Promise.all([
+          loadExperienceRunCheckIns(history.map((run) => run.id), remoteProfileId),
+          loadOwnExperienceRunConsentIds(history.map((run) => run.id), remoteProfileId),
+        ]);
+        setSharedCheckIns(checkIns);
+        setActiveConsentRunIds(activeConsentIds);
         setExperienceInvites(invites);
       } catch (cause) {
         if (active) setError(cause instanceof Error ? cause.message : t("Privégegevens konden niet worden geladen.", "Private data could not be loaded."));
@@ -361,8 +373,11 @@ export default function CinematicWorld({
       refreshing = true;
       try {
         const latestRuns = await loadExperienceRuns(remoteProfileId);
-        const latestCheckIns = await loadExperienceRunCheckIns(latestRuns.map((run) => run.id), remoteProfileId);
-        if (active) { setRuns(latestRuns); setSharedCheckIns(latestCheckIns); }
+        const [latestCheckIns, activeConsentIds] = await Promise.all([
+          loadExperienceRunCheckIns(latestRuns.map((run) => run.id), remoteProfileId),
+          loadOwnExperienceRunConsentIds(latestRuns.map((run) => run.id), remoteProfileId),
+        ]);
+        if (active) { setRuns(latestRuns); setSharedCheckIns(latestCheckIns); setActiveConsentRunIds(activeConsentIds); }
       } catch {
         // Keep the last confirmed state visible during temporary network interruptions.
       } finally {
@@ -1006,6 +1021,28 @@ export default function CinematicWorld({
     }
   }
 
+  async function renewSharedRunConsent(run: ExperienceRun) {
+    if (!remoteProfileId || run.user_id === remoteProfileId || run.status !== "paused" || activeConsentRunIds.includes(run.id)) return;
+    if (!window.confirm(t(
+      "Geef je opnieuw vrijwillig toestemming om deze gepauzeerde ervaring eventueel te hervatten?",
+      "Do you freely consent again to potentially resuming this paused experience?"
+    ))) return;
+    setBusy(true);
+    setError("");
+    try {
+      await renewExperienceRunConsent(run.id, remoteProfileId);
+      await refreshData();
+      setMessage(t(
+        "Je nieuwe toestemming is vastgelegd. De host kan pas hervatten wanneer alle deelnemers opnieuw hebben ingestemd.",
+        "Your fresh consent is recorded. The host can resume only after every participant has consented again."
+      ));
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : t("Nieuwe toestemming kon niet worden vastgelegd.", "Could not record fresh consent."));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function sendSharedCheckIn(run: ExperienceRun, signal: ExperienceRunCheckInSignal) {
     if (!remoteProfileId || run.user_id === remoteProfileId || run.status !== "active") return;
     if (signal === "stop_requested" && !window.confirm(t("Je toestemming intrekken? De gedeelde ervaring wordt direct voor iedereen gestopt.", "Withdraw your consent? The shared experience will immediately stop for everyone."))) return;
@@ -1357,6 +1394,12 @@ export default function CinematicWorld({
               <div className="cw-remote-progress" role="progressbar" aria-label={t("Voortgang gezamenlijke ervaring", "Shared experience progress")} aria-valuemin={0} aria-valuemax={run.total_steps} aria-valuenow={run.status === "completed" ? run.total_steps : stepNumber}><span style={{ width: run.status === "completed" ? "100%" : `${progress}%` }} /></div>
               <small>{t("Stap", "Step")} {run.status === "completed" ? run.total_steps : stepNumber} / {run.total_steps}</small>
               {typeof stepText === "string" && (run.status === "active" || run.status === "paused") && <p className="cw-remote-step-text">{stepText}</p>}
+              {run.status === "paused" && <div className="cw-remote-checkin">
+                <strong>{t("Ervaring gepauzeerd", "Experience paused")}</strong>
+                {activeConsentRunIds.includes(run.id)
+                  ? <small>{t("Je nieuwe toestemming is bevestigd. De host kan hervatten zodra iedereen opnieuw heeft ingestemd.", "Your fresh consent is confirmed. The host can resume once everyone has consented again.")}</small>
+                  : <><small>{t("Pauzeren heeft alle toestemmingen ingetrokken. Lees de actuele scène opnieuw en stem alleen in als je echt wilt hervatten.", "Pausing revoked all consent. Review the current scene again and consent only if you genuinely want to resume.")}</small><button type="button" className="cw-primary" disabled={busy} onClick={() => void renewSharedRunConsent(run)}>{t("Ik stem opnieuw in", "I consent again")}</button></>}
+              </div>}
               {run.status === "active" && (() => {
                 const myCheckIn = sharedCheckIns.find((item) => item.run_id === run.id && item.user_id === remoteProfileId && item.step_index === run.current_step);
                 return <div className="cw-remote-checkin">
@@ -1369,7 +1412,7 @@ export default function CinematicWorld({
                   </div>
                 </div>;
               })()}
-              {(run.status === "active" || run.status === "paused") && <button type="button" className="cw-danger" disabled={busy} onClick={() => void withdrawSharedConsent(run.id)}>{t("Toestemming intrekken en stoppen", "Withdraw consent and stop")}</button>}
+              {run.status === "active" && <button type="button" className="cw-danger" disabled={busy} onClick={() => void withdrawSharedConsent(run.id)}>{t("Toestemming intrekken en stoppen", "Withdraw consent and stop")}</button>}
             </div>;
           })}</div>}
           {runs.filter((run) => run.user_id === remoteProfileId && (run.status === "active" || run.status === "paused")).map((run) => {
