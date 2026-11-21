@@ -67,3 +67,19 @@ describe("account-scoped achievements", () => {
     expect(values.has("afterhours.achievements.v1")).toBe(false);
   });
 });
+
+
+describe("Kink Profile achievements", () => {
+  it("awards the first-discovery and boundary badges once per account", () => {
+    const values = installStorage();
+    recordAchievement("kink_test_complete", { profileId: "alice" });
+    recordAchievement("kink_test_complete", { profileId: "alice" });
+    recordAchievement("kink_test_boundaries", { profileId: "alice" });
+    expect(JSON.parse(values.get("afterhours.achievements.v1.alice") ?? "[]"))
+      .toEqual([
+        expect.objectContaining({ id: "kink_self_knowing", eventKey: "kink-test:first" }),
+        expect.objectContaining({ id: "kink_boundary_architect", eventKey: "kink-test:boundaries" }),
+      ]);
+    expect(listEarnedBadges("bob")).toEqual([]);
+  });
+});
