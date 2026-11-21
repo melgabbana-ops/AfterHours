@@ -31,6 +31,8 @@ export default function SecureDuoLobby({ roomId, language, onBack }: Props) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  // Each browser keeps its own aftercare choices locally; nothing is written to Supabase.
+  const [aftercareChoices, setAftercareChoices] = useState<string[]>([]);
 
   const refresh = useCallback(async () => {
     try {
@@ -238,7 +240,45 @@ export default function SecureDuoLobby({ roomId, language, onBack }: Props) {
                 </button>
               </>
             )}
-            {isStopped && <p className="couples-safety">{nl ? "Deze kamer is definitief gestopt en kan niet opnieuw worden gestart." : "This room is permanently stopped and cannot be restarted."}</p>}
+            {isStopped && (
+              <>
+                <p className="couples-safety">{nl ? "Deze kamer is definitief gestopt en kan niet opnieuw worden gestart." : "This room is permanently stopped and cannot be restarted."}</p>
+                <section className="couples-aftercare" aria-labelledby="secure-duo-aftercare-title">
+                  <span className="eyebrow">AFTER THE EXPERIENCE</span>
+                  <h3 id="secure-duo-aftercare-title">{nl ? "Even rustig landen" : "Take a moment to settle"}</h3>
+                  <p>{nl
+                    ? "Kies voor jezelf wat nu prettig voelt. Dit lijstje blijft alleen in jouw browser en wordt niet gedeeld of opgeslagen."
+                    : "Choose what feels helpful for you right now. These choices stay in your browser and are not shared or saved."}</p>
+                  <div className="couples-aftercare-options">
+                    {[
+                      ["water", "Water of iets te drinken", "Water or a drink"],
+                      ["quiet", "Rust en stilte", "Quiet time"],
+                      ["hug", "Een knuffel, als ik dat wil", "A hug, if I want one"],
+                      ["talk", "Even napraten", "Talk things through"],
+                      ["space", "Een beetje eigen ruimte", "Some personal space"],
+                      ["comfort", "Een dekentje of iets comfortabels", "A blanket or something comfortable"],
+                    ].map(([id, labelNl, labelEn]) => (
+                      <label className="couples-consent" key={id}>
+                        <input
+                          type="checkbox"
+                          checked={aftercareChoices.includes(id)}
+                          onChange={event => setAftercareChoices(current =>
+                            event.target.checked ? [...current, id] : current.filter(choice => choice !== id)
+                          )}
+                        />
+                        <span>{nl ? labelNl : labelEn}</span>
+                      </label>
+                    ))}
+                  </div>
+                  <p className="couples-safety">{nl
+                    ? "Je hoeft niets te kiezen of uit te leggen. Neem de tijd en vraag zo nodig steun."
+                    : "You do not have to choose anything or explain. Take your time and ask for support if needed."}</p>
+                  <button type="button" className="couples-back-bottom" onClick={() => setAftercareChoices([])}>
+                    {nl ? "Keuzes wissen" : "Clear choices"}
+                  </button>
+                </section>
+              </>
+            )}
             {!bothConsented && !isStopped && (
               <p className="couples-safety">
                 {nl
