@@ -10,6 +10,10 @@ const client = readFileSync(
   fileURLToPath(new URL("./services/duoRooms.ts", import.meta.url)),
   "utf8",
 );
+const couplesUi = readFileSync(
+  fileURLToPath(new URL("./CouplesPlay.tsx", import.meta.url)),
+  "utf8",
+);
 
 describe("proposed secure Duo backend guardrails", () => {
   it("keeps room, member and invitation tables RLS-protected and denies direct client writes", () => {
@@ -35,6 +39,14 @@ describe("proposed secure Duo backend guardrails", () => {
     expect(proposal).toContain("if p_consent is null then");
   });
 
+
+
+  it("keeps the legacy public room-code UI unavailable until the backend is verified", () => {
+    expect(couplesUi).toContain("function secureDuoBackendAvailable(): boolean");
+    expect(couplesUi).toContain("return false;");
+    expect(couplesUi).toContain('disabled aria-describedby="couples-remote-unavailable"');
+    expect(couplesUi).toContain('client.channel("couples-" + roomCode');
+  });
 
   it("uses only a private UUID topic and server RPCs in the proposed browser adapter", () => {
     expect(client).toContain('private: true');
