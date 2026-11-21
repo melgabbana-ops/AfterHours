@@ -4,9 +4,9 @@ import { loadSavedPromptIds, saveSavedPromptIds } from "./promptBookmarks";
 import { pickRandomId, sessionModes, storyChapters, type SessionModeId } from "./sessionModes";
 import type { GuidedExperienceBlockReason } from "./experienceAccess";
 import { getNextStoryChapterId, loadCompletedStoryChapters, persistStoryChapterCompletion, saveCompletedStoryChapters } from "./storyProgress";
-import { BOSS_MODE_STEP_COUNT, isBossModeFullyCompleted, markBossStepCompleted } from "./bossProgress";
+import { BOSS_MODE_STEP_COUNT, isBossModeFullyCompleted, markBossStepCompleted, type BossModeAwardReceipt } from "./bossProgress";
 import { clearStoryCheckpoint, loadStoryCheckpoint, saveStoryCheckpointSafely, type StoryCheckpoint } from "./storyCheckpoint";
-import { completeRemoteStoryChapter, loadRemoteStoryProgress } from "./services/backend";
+import { completeRemoteBossModeStep, completeRemoteStoryChapter, loadRemoteStoryProgress } from "./services/backend";
 import { getVoiceSafetyIntent, isExplicitVoicePass } from "./voiceSafety";
 import { readSafetyPlan } from "./safetyPlanStorage";
 import { ArrowRight, Check, Copy, Heart, Shuffle, ShieldCheck } from "lucide-react";
@@ -272,7 +272,7 @@ const localizeGame = (game: ExperienceGame, language: "nl" | "en"): ExperienceGa
   return copy ? { ...game, description: copy.description, rounds: copy.rounds } : game;
 };
 
-export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment, onSafetyAction, experienceStartBlockedReason, onRequestConsent, playerId = "local-profile", remoteProfileId = null, language = "nl" }: { onBack: () => void; onComplete: (chapterId?: string) => void; onCaptureAssignment?: (assignment: { title: string; task: string }) => void; onSafetyAction?: (action: "pause" | "resume" | "stop") => boolean | void; experienceStartBlockedReason: GuidedExperienceBlockReason; onRequestConsent: () => void; playerId?: string; remoteProfileId?: string | null; language?: "nl" | "en" }) {
+export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment, onSafetyAction, onBossXpAward, experienceStartBlockedReason, onRequestConsent, playerId = "local-profile", remoteProfileId = null, sessionId = null, language = "nl" }: { onBack: () => void; onComplete: (chapterId?: string) => void; onCaptureAssignment?: (assignment: { title: string; task: string }) => void; onSafetyAction?: (action: "pause" | "resume" | "stop") => boolean | void; onBossXpAward?: (xpEarned: number, profileXp: number | null, profileLevel: number | null) => void; experienceStartBlockedReason: GuidedExperienceBlockReason; onRequestConsent: () => void; playerId?: string; remoteProfileId?: string | null; sessionId?: string | null; language?: "nl" | "en" }) {
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
   const speechLocale = language === "nl" ? "nl-NL" : "en-US";
   const getCurrentVoiceSafetyIntent = (spoken: string) => {
@@ -291,6 +291,14 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
   const [gameRound, setGameRound] = useState(0);
   const [completedBossSteps, setCompletedBossSteps] = useState<number[]>([]);
   const [bossStatusMessage, setBossStatusMessage] = useState("");
+  const [bossSaving, setBossSaving] = useState(false);
+  const bossAwardInFlight = React.useRef(false);
+  const gameRoundRef = React.useRef(gameRound);
+  gameRoundRef.current = gameRound;
+  const activeGameRef = React.useRef(activeGame);
+  activeGameRef.current = activeGame;
+  const accessBlockedRef = React.useRef(experienceStartBlockedReason);
+  accessBlockedRef.current = experienceStartBlockedReason;
   const [selectedPromptId, setSelectedPromptId] = useState<string | null>(null);
   const [seenPromptIds, setSeenPromptIds] = useState<string[]>(() => { try { return JSON.parse(localStorage.getItem(historyKey) || "[]").filter((id: unknown) => typeof id === "string"); } catch { return []; } });
   const [seenGameVariants, setSeenGameVariants] = useState<string[]>(() => { try { return JSON.parse(localStorage.getItem(gameHistoryKey) || "[]").filter((id: unknown) => typeof id === "string"); } catch { return []; } });
@@ -667,30 +675,75 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
     setActiveVariant(chosen);
     setSeenGameVariants((previous) => [...previous, chosen.key].slice(-1000));
   };
-  const finishBossMode = (nextCompletedSteps: number[]) => {
-    const fullyCompleted = isBossModeFullyCompleted(nextCompletedSteps);
-    setCompletedBossSteps(nextCompletedSteps);
+  const finishBossMode = (nextCompletedSteps: number[], receipt?: BossModeAwardReceipt | null) => {
+    const fullyCompleted = receipt?.fullCompletion ?? isBossModeFullyCompleted(nextCompletedSteps);
+    const finalSteps = fullyCompleted ? Array.from({ length: BOSS_MODE_STEP_COUNT }, (_, index) => index) : nextCompletedSteps;
+    const rewardNotice = receipt?.alreadyAwarded
+      ? t(" Er is geen dubbele XP toegekend.", " No duplicate XP was awarded.")
+      : receipt && receipt.xpEarned > 0
+        ? t(` Je hebt ${receipt.xpEarned} XP verdiend.`, ` You earned ${receipt.xpEarned} XP.`)
+        : !remoteProfileId
+          ? t(" XP wordt alleen toegekend bij een bevestigd account.", " XP is only awarded to a verified account.")
+          : "";
+    setCompletedBossSteps(finalSteps);
     setBossStatusMessage(fullyCompleted
-      ? t("BOSS MODE voltooid. Alle vijf stappen zijn bewust afgerond.", "BOSS MODE complete. All five steps were deliberately completed.")
-      : t(`BOSS MODE afgesloten. ${nextCompletedSteps.length} van de ${BOSS_MODE_STEP_COUNT} stappen zijn afgerond. PASS blijft zonder straf.`, `BOSS MODE closed. ${nextCompletedSteps.length} of ${BOSS_MODE_STEP_COUNT} steps were completed. PASS carries no penalty.`));
+      ? t("BOSS MODE voltooid. Alle vijf stappen zijn bewust afgerond.", "BOSS MODE complete. All five steps were deliberately completed.") + rewardNotice
+      : t(`BOSS MODE afgesloten. ${finalSteps.length} van de ${BOSS_MODE_STEP_COUNT} stappen zijn afgerond. PASS blijft zonder straf.`, `BOSS MODE closed. ${finalSteps.length} of the ${BOSS_MODE_STEP_COUNT} steps were completed. PASS carries no penalty.`) + rewardNotice);
     setActiveGame(null);
     setGameRound(0);
     setActiveVariant(null);
     setVoicePaused(false);
   };
 
-  const completeBossStep = () => {
-    if (experienceStartBlockedReason || voicePaused || activeGame !== "boss-mode") return;
-    const nextCompletedSteps = markBossStepCompleted(completedBossSteps, gameRound);
-    if (gameRound >= BOSS_MODE_STEP_COUNT - 1) {
-      finishBossMode(nextCompletedSteps);
-      return;
+  const completeBossStep = async () => {
+    if (experienceStartBlockedReason || voicePaused || activeGame !== "boss-mode" || bossAwardInFlight.current) return;
+    const stepIndex = gameRound;
+    bossAwardInFlight.current = true;
+    setBossSaving(true);
+    try {
+      let receipt: BossModeAwardReceipt | null = null;
+      if (remoteProfileId) {
+        if (!sessionId) {
+          setBossStatusMessage(t("Server-sessie ontbreekt. De stap is niet afgerond en er is geen XP toegekend.", "Server session is missing. The step was not completed and no XP was awarded."));
+          return;
+        }
+        const award = await completeRemoteBossModeStep(sessionId, stepIndex, remoteProfileId);
+        if (award.error || !award.receipt) {
+          if (!accessBlockedRef.current) setBossStatusMessage(t("Stap niet afgerond; serverbevestiging ontbreekt: ", "Step not completed; server confirmation is missing: ") + (award.error ?? ""));
+          return;
+        }
+        receipt = award.receipt;
+        if (receipt.xpEarned > 0) onBossXpAward?.(receipt.xpEarned, receipt.profileXp, receipt.profileLevel);
+      }
+
+      if (accessBlockedRef.current || activeGameRef.current !== "boss-mode") return;
+      const nextCompletedSteps = markBossStepCompleted(completedBossSteps, stepIndex);
+      const finalSteps = receipt?.fullCompletion ? Array.from({ length: BOSS_MODE_STEP_COUNT }, (_, index) => index) : nextCompletedSteps;
+      setCompletedBossSteps(finalSteps);
+      if (gameRoundRef.current !== stepIndex) return;
+
+      if (stepIndex >= BOSS_MODE_STEP_COUNT - 1) {
+        finishBossMode(finalSteps, receipt);
+        return;
+      }
+
+      const rewardNotice = receipt?.alreadyAwarded
+        ? t(" Deze stap was al geregistreerd; geen dubbele XP.", " This step was already recorded; no duplicate XP was awarded.")
+        : receipt && receipt.xpEarned > 0
+          ? t(` +${receipt.xpEarned} XP.`, ` +${receipt.xpEarned} XP.`)
+          : !remoteProfileId
+            ? t(" XP wordt alleen toegekend bij een bevestigd account.", " XP is only awarded to a verified account.")
+            : "";
+      setBossStatusMessage(t(`Stap ${stepIndex + 1} afgerond.`, `Step ${stepIndex + 1} completed.`) + rewardNotice);
+      const nextRound = stepIndex + 1;
+      setGameRound(nextRound);
+      chooseGameVariant("boss-mode", nextRound);
+    } catch {
+      if (!accessBlockedRef.current) setBossStatusMessage(t("Serververbinding mislukt. De stap is niet bevestigd en er is geen XP toegekend.", "Server connection failed. The step was not confirmed and no XP was awarded."));
+    } finally {
+      bossAwardInFlight.current = false;
+      setBossSaving(false);
     }
-    setCompletedBossSteps(nextCompletedSteps);
-    setBossStatusMessage(t(`Stap ${gameRound + 1} afgerond. Je kunt de volgende stap bekijken of later passen.`, `Step ${gameRound + 1} completed. You can continue to the next step or pass later.`));
-    const nextRound = gameRound + 1;
-    setGameRound(nextRound);
-    chooseGameVariant("boss-mode", nextRound);
   };
 
   const passBossStep = () => {
@@ -736,7 +789,7 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
       {bossStatusMessage && <p className="story-sync-status" role="status" aria-live="polite">{bossStatusMessage}</p>}
       {!activeGame ? <><section className="session-mode-section" aria-label={t("Kies een spelmodus","Choose a game mode")}><div className="session-mode-section-heading"><span className="eyebrow">FIVE WAYS INTO AFTER HOURS</span><h3>{t("Kies jouw spelmodus","Choose your game mode")}</h3><p>{t("Elke modus is een andere route. Jij houdt altijd de regie: aanpassen, passen of stoppen blijft mogelijk.","Each mode offers a different route. You stay in control: adapting, passing, or stopping is always allowed.")}</p></div><div className="session-mode-grid">{sessionModes.map((item) => <button type="button" className={sessionMode === item.id ? "session-mode-card selected" : "session-mode-card"} key={item.id} onClick={() => chooseSessionMode(item.id)} aria-pressed={sessionMode === item.id}><span className="session-mode-index">{String(sessionModes.findIndex((modeItem) => modeItem.id === item.id) + 1).padStart(2,"0")}</span><strong>{language === "en" ? item.titleEN : item.title}</strong><span>{language === "en" ? item.descriptionEN : item.descriptionNL}</span><small>{language === "en" ? item.hintEN : item.hintNL}</small></button>)}</div>{sessionMode === "story" && <div className="story-chapters"><div className="session-mode-section-heading"><span className="eyebrow">STORY MODE · 7 CHAPTERS</span><h3>{t("Jouw verhaal begint hier","Your story starts here")}</h3>{storyCheckpointWarning && <p className="story-sync-status" role="status" aria-live="polite">{storyCheckpointWarning}</p>}{remoteProfileId && <div className="story-sync-status" role="status" aria-live="polite">{storySyncState === "syncing" ? t("Voortgang synchroniseren…","Syncing progress…") : storySyncState === "synced" ? t("Voortgang veilig gekoppeld aan je account","Progress linked to your account") : storySyncState === "error" ? <><span>{t("Account-sync mislukt: ","Account sync failed: ")}{storySyncError}</span><button type="button" className="read-assignment" onClick={() => setStorySyncRetry((value) => value + 1)}>{t("Opnieuw proberen","Try again")}</button></> : null}</div>}</div>{visibleStoryCheckpoint && storyCheckpointChapter && <div className="story-resume-card"><div className="story-resume-copy"><span className="eyebrow">{t("HERVAT JE HOOFDSTUK","RESUME YOUR CHAPTER")}</span><strong>{storyCheckpointChapter.title}</strong><p>{t(`Je was bij ronde ${visibleStoryCheckpoint.roundIndex + 1} van ${storyCheckpointRoundCount}. Hervatten gebeurt pas wanneer je zelf kiest.`,`You left at round ${visibleStoryCheckpoint.roundIndex + 1} of ${storyCheckpointRoundCount}. It resumes only when you choose.`)}</p></div><button type="button" className="story-resume-action" disabled={Boolean(experienceStartBlockedReason)} onClick={resumeStoryChapter}>{t("Hervatten","Resume")} <ArrowRight/></button></div>}{completedStoryChapters.length > 0 && (nextStoryChapterIndex >= 0 ? <div className="story-resume-card"><div className="story-resume-copy"><span className="eyebrow">{t("VERDER MET JE VERHAAL","CONTINUE YOUR STORY")}</span><strong>{storyChapters[nextStoryChapterIndex].title}</strong><p>{t("Je volgende open hoofdstuk staat klaar. Het start pas wanneer je zelf kiest.","Your next open chapter is ready. It starts only when you choose.")}</p></div><button type="button" className="story-resume-action" disabled={Boolean(experienceStartBlockedReason)} onClick={() => startStoryChapter(nextStoryChapterIndex)}>{t("Verdergaan","Continue")} <ArrowRight/></button></div> : <p className="story-complete-status" role="status">{t("Alle zeven hoofdstukken zijn voltooid. Je kunt elk hoofdstuk hieronder opnieuw openen.","All seven chapters are complete. You can replay any chapter below.")}</p>)}<div className="story-chapter-grid">{storyChapters.map((chapter,index) => <button type="button" key={chapter.id} className={`story-chapter-card${activeStoryChapter === index ? " selected" : ""}${completedStoryChapters.includes(chapter.id) ? " completed" : ""}`} disabled={Boolean(experienceStartBlockedReason)} onClick={() => startStoryChapter(index)}><span className="story-chapter-number">0{chapter.index}</span><strong>{chapter.title}</strong><p>{language === "en" ? chapter.descriptionEN : chapter.descriptionNL}</p><small>{completedStoryChapters.includes(chapter.id) ? t("VOLTOOID · Opnieuw spelen","COMPLETED · Replay") : t("Start hoofdstuk","Start chapter")} <ArrowRight/></small></button>)}</div></div>}</section><div className="experience-intro"><span className="eyebrow">THE EXPERIENCE COLLECTION</span><h3>{t("Kies je game.","Choose your game.")}</h3><p>{t("Volledige, begeleide scenario's met drie rondes, concrete opdrachten en een bewuste afsluiting. Alle deelnemers zijn 18+, stemmen vrij in en mogen op ieder moment passen of stoppen.","Complete guided scenarios with three rounds, clear tasks and a thoughtful closing. All participants are 18+, give free consent, and may pass or stop at any time.")}</p></div>
         <div className="experience-grid">{experienceGames.map((sourceGame) => { const game = localizeGame(sourceGame, language); return <article className="prompt-card experience-card" key={game.id}><div className="prompt-card-top"><span className="eyebrow">{game.subtitle}</span><span className="prompt-intensity">{game.duration}</span></div><div className="prompt-glyph" aria-hidden="true">✦</div><h3>{game.title}</h3><p>{game.description}</p><div className="prompt-consent"><ShieldCheck/><span>{game.rounds.length} rounds · Consent-first · {game.level}</span></div><button className="gold" disabled={Boolean(experienceStartBlockedReason)} onClick={() => startGame(game.id)}><ArrowRight/> Start experience</button></article>; })}</div>
-      </> : (() => { const game = localizeGame(experienceGames.find((item) => item.id === activeGame)!, language); const round = game.rounds[gameRound]; return <article className="prompt-card experience-play"><div className="prompt-card-top"><span className="eyebrow">{sessionMode === "story" && activeStoryChapter !== null ? `STORY MODE · ${storyChapters[activeStoryChapter].title}` : sessionMode === "boss" ? "BOSS MODE · THE FIVE TRIALS" : sessionMode === "surprise" ? `SURPRISE MODE · ${game.title}` : game.title}</span><span className="prompt-intensity">ROUND {gameRound + 1} / {game.rounds.length}</span></div>{storyCheckpointWarning && sessionMode === "story" && <p className="story-sync-status" role="status" aria-live="polite">{storyCheckpointWarning}</p>}<div className="prompt-glyph" aria-hidden="true">✦</div><h3>{round.title}</h3>{sessionMode === "story" && activeStoryChapter !== null && gameRound === 0 && <p className="story-opening">{language === "en" ? storyChapters[activeStoryChapter].openingEN : storyChapters[activeStoryChapter].openingNL}</p>}<p><strong>{t("ZET DE SCÈNE","SET THE SCENE")}</strong><br/>{round.setup}</p><p className="dom-voice"><strong>{domTitle.toUpperCase()} · {t("JOUW DOM","YOUR DOM")}</strong><br/>{domVoice}</p><p className="assignment-captions"><strong>{t("JOUW OPDRACHT · ONDERTITELING","YOUR ASSIGNMENT · CAPTIONS")}</strong><br/>{language === "en" ? round.task : (activeVariant?.text ?? round.task)}</p><button type="button" className="read-assignment" onClick={() => readAssignment(`${round.title}. ${t("Opdracht","Assignment")}: ${language === "en" ? round.task : (activeVariant?.text ?? round.task)}. ${round.debrief}`)} aria-label="Lees opdracht en afsluiting hardop voor">{t("🔊 Lees opdracht hardop voor","🔊 Read assignment aloud")}</button>{onCaptureAssignment&&<button type="button" className="read-assignment" disabled={voicePaused} onClick={()=>onCaptureAssignment({title:round.title,task:language==="en"?round.task:(activeVariant?.text??round.task)})}>◉ {t("Maak foto/video voor deze opdracht","Capture photo/video for this assignment")}</button>}<p><strong>{t("CHECK-IN & NABESPREKING","CHECK-IN & DEBRIEF")}</strong><br/>{round.debrief}</p><div className="prompt-consent"><ShieldCheck/><span>{t("Stopwoord en non-verbaal signaal blijven actief. Geel = pauze en afstemmen. Rood = direct stoppen.","Your safeword and non-verbal signal remain active. Yellow = pause and check in. Red = stop immediately.")}</span></div>{storySyncError && sessionMode === "story" && <p className="story-sync-status" role="alert" aria-live="assertive">{storySyncError}</p>}<div className="prompt-actions"><button onClick={() => {if (sessionMode === "boss") { setCompletedBossSteps([]); setBossStatusMessage(t("BOSS MODE verlaten. Er is geen voltooiing geregistreerd.", "BOSS MODE exited. No completion was recorded.")); } setActiveGame(null);setGameRound(0);setActiveVariant(null);setActiveStoryChapter(null)}}>{t("Spel verlaten","Exit game")}</button>{sessionMode === "boss" ? <><button disabled={voicePaused || Boolean(experienceStartBlockedReason)} onClick={passBossStep}><ArrowRight/> {gameRound < game.rounds.length - 1 ? t("PASS · Volgende stap","PASS · Next step") : t("PASS · Afsluiten","PASS · Finish")}</button><button className="gold" disabled={voicePaused || Boolean(experienceStartBlockedReason)} onClick={completeBossStep}><Check/> {gameRound < game.rounds.length - 1 ? t("Ronde afronden","Complete step") : t("Laatste stap afronden","Complete final step")}</button></> : gameRound < game.rounds.length - 1 ? <button className="gold" disabled={voicePaused} onClick={() => { const nextRound = gameRound + 1; setGameRound(nextRound); if (sessionMode === "story" && activeStoryChapter !== null) { const chapterId = storyChapters[activeStoryChapter]?.id; if (chapterId) persistStoryCheckpoint(chapterId, nextRound); } chooseGameVariant(game.id, nextRound); }}><ArrowRight/> {t("PASS · Volgende ronde","PASS · Next round")}</button> : <button className="gold" disabled={voicePaused || (activeStoryChapter !== null && storySyncState === "syncing")} onClick={async () => {const chapterId = await completeActiveStoryChapter();if (sessionMode === "story" && activeStoryChapter !== null && !chapterId) return;setActiveGame(null);setGameRound(0);setActiveVariant(null);onComplete(chapterId ?? undefined)}}><Check/> {activeStoryChapter !== null && storySyncState === "syncing" ? t("Hoofdstuk veilig opslaan…","Saving chapter safely…") : t("Hoofdstuk afronden","Complete chapter")}</button>}</div></article>; })()}
+      </> : (() => { const game = localizeGame(experienceGames.find((item) => item.id === activeGame)!, language); const round = game.rounds[gameRound]; return <article className="prompt-card experience-play"><div className="prompt-card-top"><span className="eyebrow">{sessionMode === "story" && activeStoryChapter !== null ? `STORY MODE · ${storyChapters[activeStoryChapter].title}` : sessionMode === "boss" ? "BOSS MODE · THE FIVE TRIALS" : sessionMode === "surprise" ? `SURPRISE MODE · ${game.title}` : game.title}</span><span className="prompt-intensity">ROUND {gameRound + 1} / {game.rounds.length}</span></div>{storyCheckpointWarning && sessionMode === "story" && <p className="story-sync-status" role="status" aria-live="polite">{storyCheckpointWarning}</p>}<div className="prompt-glyph" aria-hidden="true">✦</div><h3>{round.title}</h3>{sessionMode === "story" && activeStoryChapter !== null && gameRound === 0 && <p className="story-opening">{language === "en" ? storyChapters[activeStoryChapter].openingEN : storyChapters[activeStoryChapter].openingNL}</p>}<p><strong>{t("ZET DE SCÈNE","SET THE SCENE")}</strong><br/>{round.setup}</p><p className="dom-voice"><strong>{domTitle.toUpperCase()} · {t("JOUW DOM","YOUR DOM")}</strong><br/>{domVoice}</p><p className="assignment-captions"><strong>{t("JOUW OPDRACHT · ONDERTITELING","YOUR ASSIGNMENT · CAPTIONS")}</strong><br/>{language === "en" ? round.task : (activeVariant?.text ?? round.task)}</p><button type="button" className="read-assignment" onClick={() => readAssignment(`${round.title}. ${t("Opdracht","Assignment")}: ${language === "en" ? round.task : (activeVariant?.text ?? round.task)}. ${round.debrief}`)} aria-label="Lees opdracht en afsluiting hardop voor">{t("🔊 Lees opdracht hardop voor","🔊 Read assignment aloud")}</button>{onCaptureAssignment&&<button type="button" className="read-assignment" disabled={voicePaused} onClick={()=>onCaptureAssignment({title:round.title,task:language==="en"?round.task:(activeVariant?.text??round.task)})}>◉ {t("Maak foto/video voor deze opdracht","Capture photo/video for this assignment")}</button>}<p><strong>{t("CHECK-IN & NABESPREKING","CHECK-IN & DEBRIEF")}</strong><br/>{round.debrief}</p><div className="prompt-consent"><ShieldCheck/><span>{t("Stopwoord en non-verbaal signaal blijven actief. Geel = pauze en afstemmen. Rood = direct stoppen.","Your safeword and non-verbal signal remain active. Yellow = pause and check in. Red = stop immediately.")}</span></div>{storySyncError && sessionMode === "story" && <p className="story-sync-status" role="alert" aria-live="assertive">{storySyncError}</p>}<div className="prompt-actions"><button onClick={() => {if (sessionMode === "boss") { setCompletedBossSteps([]); setBossStatusMessage(t("BOSS MODE verlaten. Er is geen voltooiing geregistreerd.", "BOSS MODE exited. No completion was recorded.")); } setActiveGame(null);setGameRound(0);setActiveVariant(null);setActiveStoryChapter(null)}}>{t("Spel verlaten","Exit game")}</button>{sessionMode === "boss" ? <><button disabled={voicePaused || Boolean(experienceStartBlockedReason)} onClick={passBossStep}><ArrowRight/> {gameRound < game.rounds.length - 1 ? t("PASS · Volgende stap","PASS · Next step") : t("PASS · Afsluiten","PASS · Finish")}</button><button className="gold" disabled={voicePaused || Boolean(experienceStartBlockedReason) || bossSaving} onClick={completeBossStep}><Check/> {bossSaving ? t("XP veilig bevestigen…","Confirming XP safely…") : gameRound < game.rounds.length - 1 ? t("Ronde afronden","Complete step") : t("Laatste stap afronden","Complete final step")}</button></> : gameRound < game.rounds.length - 1 ? <button className="gold" disabled={voicePaused} onClick={() => { const nextRound = gameRound + 1; setGameRound(nextRound); if (sessionMode === "story" && activeStoryChapter !== null) { const chapterId = storyChapters[activeStoryChapter]?.id; if (chapterId) persistStoryCheckpoint(chapterId, nextRound); } chooseGameVariant(game.id, nextRound); }}><ArrowRight/> {t("PASS · Volgende ronde","PASS · Next round")}</button> : <button className="gold" disabled={voicePaused || (activeStoryChapter !== null && storySyncState === "syncing")} onClick={async () => {const chapterId = await completeActiveStoryChapter();if (sessionMode === "story" && activeStoryChapter !== null && !chapterId) return;setActiveGame(null);setGameRound(0);setActiveVariant(null);onComplete(chapterId ?? undefined)}}><Check/> {activeStoryChapter !== null && storySyncState === "syncing" ? t("Hoofdstuk veilig opslaan…","Saving chapter safely…") : t("Hoofdstuk afronden","Complete chapter")}</button>}</div></article>; })()}
     </section> : <>
     <section className="prompt-card">
       <div className="prompt-card-top"><span className="eyebrow">{current.kind.toUpperCase()}</span><span className="prompt-intensity">{displayIntensity(current.intensity)}</span></div>

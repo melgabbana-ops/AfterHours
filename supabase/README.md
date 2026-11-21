@@ -4,7 +4,7 @@ AFTER HOURS uses Supabase/PostgreSQL for account-scoped progress, session safety
 
 ## Migration history
 
-The version prefix in each file under `supabase/migrations/` must match the version recorded in the connected production project's Supabase migration ledger. The current production ledger has 28 entries. The file names below have been aligned to that ledger without changing SQL contents or applying any database change.
+The version prefix in each file under `supabase/migrations/` must match the version recorded in the connected production project's Supabase migration ledger. The current production ledger has 28 applied entries. The separate pending list below is reviewed source code only and has not been applied to any Supabase environment.
 
 | Production ledger version | Migration file |
 |---|---|
@@ -36,6 +36,14 @@ The version prefix in each file under `supabase/migrations/` must match the vers
 | `20261121000345` | `20261121000345_afterhours_experience_invitation_preview.sql` |
 | `20261121000429` | `20261121000429_afterhours_invite_requires_paused_run.sql` |
 | `20261121001151` | `20261121001151_afterhours_consent_rls_recursion_guard.sql` |
+
+## Reviewed but not applied
+
+| Migration | Status |
+|---|---|
+| `20261121032837_boss_mode_xp_rewards.sql` | Pending; not applied to Supabase and not part of the 28-entry production ledger. |
+
+The Boss Mode migration is exercised by a disposable PostgreSQL integration test in GitHub Actions with a minimal mocked `auth.uid()` function. That test is not a live Supabase test. Do not run `supabase db push` or apply this migration to production without an authorized non-production Supabase validation and explicit release approval.
 
 Run `npm run check:migrations` to verify that the checked-in file list still matches this deployed baseline. When adding a migration, use the version that was actually recorded by the reviewed migration workflow, then update the guard and this table in the same change. Never rename or replay an already-applied production migration casually.
 
