@@ -14,6 +14,7 @@ export interface SecureDuoRoomSnapshot {
   status: "lobby" | "active" | "paused" | "stopped";
   expiresAt: string;
   members: Array<{ role: "host" | "guest"; isSelf: boolean; consented: boolean }>;
+  session: { step: number; revision: number; updatedBySelf: boolean };
 }
 
 /** Fetch the authoritative, member-scoped lobby state from the database. */
@@ -29,10 +30,11 @@ export async function getSecureDuoRoomState(roomId: string): Promise<SecureDuoRo
     status?: unknown;
     expires_at?: unknown;
     members?: unknown;
+    session?: unknown;
   } | null;
   if (!value || typeof value.room_id !== "string" || typeof value.expires_at !== "string"
     || !["lobby", "active", "paused", "stopped"].includes(String(value.status))
-    || !Array.isArray(value.members)) {
+    || !Array.isArray(value.members) || !value.session || typeof value.session !== "object") {
     throw new Error("The Duo server returned an invalid room snapshot.");
   }
   const members = value.members.map((member: unknown) => {
@@ -46,11 +48,18 @@ export async function getSecureDuoRoomState(roomId: string): Promise<SecureDuoRo
   if (members.length > 2 || members.filter(member => member.isSelf).length !== 1) {
     throw new Error("The Duo server returned an unexpected participant count.");
   }
+  const session = value.session as { current_step?: unknown; revision?: unknown; updated_by_self?: unknown };
+  if (!Number.isInteger(session.current_step) || Number(session.current_step) < 0 || Number(session.current_step) > 4
+    || !Number.isSafeInteger(session.revision) || Number(session.revision) < 0
+    || typeof session.updated_by_self !== "boolean") {
+    throw new Error("The Duo server returned invalid shared session progress.");
+  }
   return {
     roomId: requireRoomId(value.room_id),
     status: value.status as SecureDuoRoomSnapshot["status"],
     expiresAt: value.expires_at,
     members,
+    session: { step: Number(session.current_step), revision: Number(session.revision), updatedBySelf: session.updated_by_self },
   };
 }
 
@@ -121,6 +130,32 @@ export async function acceptSecureDuoInvitation(token: string): Promise<string> 
   const value = data as { room_id?: unknown } | null;
   if (!value || typeof value.room_id !== "string") throw new Error("The Duo server returned an invalid acceptance response.");
   return requireRoomId(value.room_id);
+}
+
+/** Move the shared prompt cursor. A revision conflict requires a fresh server snapshot. */
+export async function advanceSecureDuoSession(
+  roomId: string,
+  direction: "next" | "previous",
+  expectedRevision: number,
+): Promise<{ step: number; revision: number }> {
+  if (!Number.isSafeInteger(expectedRevision) || expectedRevision < 0) {
+    throw new Error("The Duo session revision is invalid.");
+  }
+  const client = requireClient();
+  await requireUserId();
+  const { data, error } = await client.rpc("advance_afterhours_duo_session", {
+    p_room_id: requireRoomId(roomId),
+    p_direction: direction,
+    p_expected_revision: expectedRevision,
+  });
+  if (error) throw error;
+  const value = data as { current_step?: unknown; revision?: unknown } | null;
+  if (!value || !Number.isInteger(value.current_step) || Number(value.current_step) < 0
+    || Number(value.current_step) > 4 || !Number.isSafeInteger(value.revision)
+    || Number(value.revision) < 1) {
+    throw new Error("The Duo server returned invalid shared session progress.");
+  }
+  return { step: Number(value.current_step), revision: Number(value.revision) };
 }
 
 export async function setSecureDuoConsent(roomId: string, consent: boolean): Promise<void> {
