@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { appendMediaCaptureChunk, discardMediaCapture, MAX_MEDIA_CAPTURE_BYTES, stopMediaStreams, waitForVideoReady, watchMediaStreamInterruption } from "./mediaCapture";
+import { appendMediaCaptureChunk, discardMediaCapture, MAX_MEDIA_CAPTURE_BYTES, stopMediaRecorder, stopMediaStreams, waitForVideoReady, watchMediaStreamInterruption } from "./mediaCapture";
 
 describe("media capture cleanup", () => {
   it("stops every track across camera and composited streams", () => {
@@ -230,5 +230,30 @@ describe("media stream interruption", () => {
 
     expect(onInterrupted).toHaveBeenCalledOnce();
     cleanup();
+  });
+});
+
+
+describe("safe recorder stop", () => {
+  it("stops an active recorder once", () => {
+    const stop = vi.fn();
+    expect(stopMediaRecorder({ state: "recording", stop })).toBe(true);
+    expect(stop).toHaveBeenCalledOnce();
+  });
+
+  it("does not stop an inactive recorder", () => {
+    const stop = vi.fn();
+    expect(stopMediaRecorder({ state: "inactive", stop })).toBe(false);
+    expect(stop).not.toHaveBeenCalled();
+  });
+
+  it("contains a state race when the browser deactivates the recorder before stop", () => {
+    const stop = vi.fn(() => { throw new DOMException("Recorder is inactive", "InvalidStateError"); });
+    expect(stopMediaRecorder({ state: "recording", stop })).toBe(false);
+    expect(stop).toHaveBeenCalledOnce();
+  });
+
+  it("accepts a missing recorder during asynchronous startup", () => {
+    expect(stopMediaRecorder(null)).toBe(false);
   });
 });
