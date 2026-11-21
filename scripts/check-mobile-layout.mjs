@@ -31,6 +31,7 @@ const checks = [
   ["Home hero background layers have matching positions and sizes", referenceHomeStyles.includes("background-position:center 24%,center!important;") && referenceHomeStyles.includes("background-size:cover,cover!important;") && referenceHomeStyles.includes("background-repeat:no-repeat,no-repeat!important;")],
   ["onboarding trailer poster uses the configured Pages base path", onboarding.includes('poster={`${import.meta.env.BASE_URL}visuals/reference-home.svg`}')],
   ["onboarding trailer poster points to the committed 4K black-and-gold intro artwork", /<svg\b[^>]*\bwidth="3840"[^>]*\bheight="2160"/s.test(heroPoster)],
+  ["aftercare meditation skip control keeps a 48px touch target", meditationStyles.includes(".aftercare-meditation-skip") && /aftercare-meditation-actions button\{[^}]*min-height:48px/.test(meditationStyles)],
   ["short-landscape layout breakpoint", /@media[^{}]*orientation\s*:\s*landscape[^{}]*max-height/i.test(styles)],
 ];
 
