@@ -75,7 +75,8 @@ describe("proposed secure Duo backend guardrails", () => {
       "advance_afterhours_duo_session",
     ];
     for (const name of privilegedFunctions) {
-      const start = proposal.indexOf(\`create or replace function public.\${name}(\`);
+      const functionStart = "create or replace function public." + name + "(";
+      const start = proposal.indexOf(functionStart);
       expect(start).toBeGreaterThanOrEqual(0);
       const next = proposal.indexOf("\ncreate or replace function public.", start + 1);
       const declaration = proposal.slice(start, next < 0 ? proposal.length : next);
