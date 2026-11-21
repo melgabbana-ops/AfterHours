@@ -76,6 +76,71 @@ begin
   return jsonb_build_object('run_id',p_run_id,'status','stopped','revoked_at',v_now);
 end; $$;
 
+-- Enforce paused-only invitation creation at the database boundary.
+create or replace function private.guard_afterhours_invitation_run_paused()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $
+declare
+  v_run_status text;
+begin
+  select status into v_run_status
+  from public.afterhours_experience_runs
+  where id = new.run_id
+  for update;
+  if not found then raise exception 'The experience could not be found.' using errcode='P0002'; end if;
+  if v_run_status <> 'paused' then
+    raise exception 'Invitations can only be created while the host experience is paused.' using errcode='42501';
+  end if;
+  return new;
+end;
+$;
+revoke all on function private.guard_afterhours_invitation_run_paused() from public, anon, authenticated;
+drop trigger if exists afterhours_invitation_paused_run_guard on public.afterhours_experience_invitations;
+create trigger afterhours_invitation_paused_run_guard
+before insert or update of run_id on public.afterhours_experience_invitations
+for each row execute function private.guard_afterhours_invitation_run_paused();
+
+-- Do not let the host resume while any invitation is still pending or an
+-- accepted participant has withdrawn consent.
+create or replace function private.guard_afterhours_experience_run_activation()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $
+begin
+  if new.status = 'active' and old.status is distinct from 'active' then
+    if exists (
+      select 1 from public.afterhours_experience_invitations i
+      where i.run_id = new.id and i.status = 'pending' and i.expires_at > now()
+    ) then
+      raise exception 'Resolve or revoke pending invitations before resuming this experience.' using errcode='42501';
+    end if;
+    if not exists (
+      select 1 from public.afterhours_experience_run_consents c
+      where c.run_id = new.id and c.user_id = new.user_id and c.revoked_at is null
+    ) then
+      raise exception 'Fresh owner consent is required before this experience can be active.' using errcode='42501';
+    end if;
+    if exists (
+      select 1 from public.afterhours_experience_invitations i
+      where i.run_id = new.id and i.status = 'accepted' and i.accepted_user_id is not null
+        and not exists (
+          select 1 from public.afterhours_experience_run_consents c
+          where c.run_id = i.run_id and c.user_id = i.accepted_user_id and c.revoked_at is null
+        )
+    ) then
+      raise exception 'A participant has withdrawn consent. Create a new invitation and obtain fresh consent before restarting.' using errcode='42501';
+    end if;
+  end if;
+  return new;
+end;
+$;
+revoke all on function private.guard_afterhours_experience_run_activation() from public, anon, authenticated;
+
 create or replace function public.preview_afterhours_experience_invitation(p_token_hash text)
 returns jsonb language sql security invoker set search_path = '' as $$ select private.preview_afterhours_experience_invitation_impl(p_token_hash); $$;
 create or replace function public.accept_afterhours_experience_invitation(p_token_hash text)
