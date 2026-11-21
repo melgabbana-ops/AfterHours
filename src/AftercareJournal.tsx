@@ -98,7 +98,7 @@ export default function AftercareJournal({profileId,language,onBack}:Props){
   try{
    const raw=readJournalStorage(storageKey);
    let loaded:Entry[];
-   if(raw)loaded=await decryptEntries(raw,pass);
+   if(raw!==null)loaded=await decryptEntries(raw,pass);
    else{
     const encrypted=await encryptEntries([],pass);
     if(generation!==lockGeneration.current||document.visibilityState!=="visible")return;
