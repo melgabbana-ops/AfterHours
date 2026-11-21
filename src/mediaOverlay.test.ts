@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { appendPhotoEditHistory, applyPhotoEditPreset, drawAfterHoursOverlay, getPhotoEditHistoryEntry, mediaOverlayFrames, normalizePhotoEditTransform, defaultPhotoEditTransform, photoEditPresets, type OverlayFrameStyle } from "./mediaOverlay";
+import { appendPhotoEditHistory, applyPhotoEditPreset, drawAfterHoursOverlay, getPhotoEditHistoryEntry, getPhotoEditHistoryShortcut, mediaOverlayFrames, normalizePhotoEditTransform, defaultPhotoEditTransform, photoEditPresets, type OverlayFrameStyle } from "./mediaOverlay";
 
 describe("AFTER HOURS camera overlay presets", () => {
   it("exposes the three approved overlay styles in the approved order", () => {
@@ -79,5 +79,23 @@ describe("photo edit history", () => {
     expect(getPhotoEditHistoryEntry(history, 0, -1)).toBeNull();
     expect(getPhotoEditHistoryEntry(history, 0, 1)?.entry.style).toBe("cinematic");
     expect(getPhotoEditHistoryEntry(history, 1, 1)).toBeNull();
+  });
+});
+
+describe("photo editor keyboard history shortcuts", () => {
+  const shortcut = (key: string, options: Partial<{ ctrlKey: boolean; metaKey: boolean; shiftKey: boolean; altKey: boolean }> = {}) =>
+    getPhotoEditHistoryShortcut({ key, ctrlKey: false, metaKey: false, shiftKey: false, altKey: false, ...options });
+  it("supports undo and redo on Windows, Mac and hardware keyboards", () => {
+    expect(shortcut("z", { ctrlKey: true })).toBe(-1);
+    expect(shortcut("z", { metaKey: true })).toBe(-1);
+    expect(shortcut("Z", { ctrlKey: true, shiftKey: true })).toBe(1);
+    expect(shortcut("y", { ctrlKey: true })).toBe(1);
+    expect(shortcut("z", { metaKey: true, shiftKey: true })).toBe(1);
+  });
+  it("does not claim unrelated or modified shortcuts", () => {
+    expect(shortcut("z")).toBeNull();
+    expect(shortcut("z", { ctrlKey: true, altKey: true })).toBeNull();
+    expect(shortcut("y", { ctrlKey: true, shiftKey: true })).toBeNull();
+    expect(shortcut("s", { metaKey: true })).toBeNull();
   });
 });
