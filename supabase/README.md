@@ -41,6 +41,14 @@ Run `npm run check:migrations` to verify that the checked-in file list still mat
 
 For a new Supabase project, review and apply migrations in version order before enabling remote persistence. If a database was originally created by manually applying SQL, inspect its live schema and migration registry and reconcile/baseline history deliberately before using `supabase db push`. Do not blindly replay a base schema against an existing database.
 
+## Pending migration review
+
+| Version | Migration file | Status |
+|---|---|---|
+| `20261121001230` | `supabase/proposals/20261121001230_afterhours_shared_run_checkins.sql` | Pending review and rollout; not present in the live production ledger |
+
+The shared-run check-in proposal adds participant check-ins, enforces one invited participant per host-owned run (two accounts maximum), and adds an explicit re-consent flow after a host pause. An isolated PostgreSQL 17 integration workflow exercises the RLS boundaries, paused-run re-consent, immutable check-in identity, and two-account limit. It is tracked for code review and CI validation only. It has **not** been applied to production. Apply it only after SQL/RLS review and two-account validation through the authorized migration workflow.
+
 ## Story Mode account sync
 
 `20261118205045_story_chapter_account_sync.sql` is recorded in the connected production migration ledger and has been applied successfully. Chapter completion is account-owned, authenticated through `auth.uid()`, limited to the seven approved chapter IDs, and idempotent. Local progress remains available when no account is signed in.
