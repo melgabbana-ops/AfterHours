@@ -132,12 +132,12 @@ export async function submitExperienceRunCheckIn(args: {
   }
   const { error } = await supabase!
     .from("afterhours_experience_run_checkins")
-    .insert({
+    .upsert({
       run_id: args.runId,
       user_id: user.id,
       step_index: args.stepIndex,
       signal: args.signal,
-    });
+    }, { onConflict: "run_id,user_id,step_index" });
   if (error) {
     if (error.code === "23505") throw new Error("Je hebt voor deze stap al een check-in verstuurd.");
     throw new Error(error.message);
