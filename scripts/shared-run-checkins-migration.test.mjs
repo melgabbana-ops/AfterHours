@@ -15,7 +15,7 @@ describe("shared experience check-in migration", () => {
   });
 
   it("allows reads only to the participant or the owner of the related run", () => {
-    expect(migration).toMatch(/create policy afterhours_run_checkins_read_owner_or_participant[\\s\\S]*?for select to authenticated[\\s\\S]*?using \\([\\s\\S]*?user_id = \\(select auth\\.uid\\(\\)\\)[\\s\\S]*?or exists \\([\\s\\S]*?r\\.user_id = \\(select auth\\.uid\\(\\)\\)/i);
+    expect(migration).toMatch(/create policy afterhours_run_checkins_read_owner_or_participant[\s\S]*?for select to authenticated[\s\S]*?using \([\s\S]*?user_id = \(select auth\.uid\(\)\)[\s\S]*?or exists \([\s\S]*?r\.user_id = \(select auth\.uid\(\)\)/i);
   });
 
   it("limits inserts to the signed-in, consented participant on the current active or paused step", () => {
