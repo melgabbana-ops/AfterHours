@@ -10,8 +10,8 @@ import {
   acceptExperienceInvitation, createExperienceInvitation, createExperienceRun, previewExperienceInvitation,
   deleteExperienceRun, deleteWorldRecord, loadExperienceInvitations,
   loadExperienceRuns, loadWorldRecords, resumeExperienceRun, revokeExperienceInvitation,
-  saveWorldRecord, updateExperienceRun, withdrawExperienceConsent, loadExperienceRunCheckIns, submitExperienceRunCheckIn, loadOwnExperienceRunConsentIds, renewExperienceRunConsent,
-  type ExperienceInvitation, type ExperienceInvitationPreview, type ExperienceRun, type ExperienceRunCheckIn, type ExperienceRunCheckInSignal, type WorldModule, type WorldRecord
+  saveWorldRecord, updateExperienceRun, withdrawExperienceConsent, loadExperienceRunCheckIns, submitExperienceRunCheckIn, loadOwnExperienceRunConsentIds, loadExperienceRunConsentStatus, renewExperienceRunConsent,
+  type ExperienceInvitation, type ExperienceInvitationPreview, type ExperienceRun, type ExperienceRunCheckIn, type ExperienceRunCheckInSignal, type ExperienceRunConsentStatus, type WorldModule, type WorldRecord
 } from "./services/worldRecords";
 import "./cinematic-experience.css";
 
@@ -159,6 +159,7 @@ export default function CinematicWorld({
   const [runs, setRuns] = useState<ExperienceRun[]>([]);
   const [sharedCheckIns, setSharedCheckIns] = useState<ExperienceRunCheckIn[]>([]);
   const [activeConsentRunIds, setActiveConsentRunIds] = useState<string[]>([]);
+  const [runConsentStatuses, setRunConsentStatuses] = useState<Record<string, ExperienceRunConsentStatus>>({});
   const [experienceInvites, setExperienceInvites] = useState<ExperienceInvitation[]>([]);
   const [selectedInviteRunId, setSelectedInviteRunId] = useState("");
   const [inviteLink, setInviteLink] = useState("");
@@ -280,6 +281,10 @@ export default function CinematicWorld({
     ]);
     setSharedCheckIns(checkIns);
     setActiveConsentRunIds(activeConsentIds);
+    const ownRunStatuses = await Promise.all(history
+      .filter((run) => run.user_id === userId && (run.status === "active" || run.status === "paused"))
+      .map(async (run) => [run.id, await loadExperienceRunConsentStatus(run.id, userId)] as const));
+    setRunConsentStatuses(Object.fromEntries(ownRunStatuses));
     setExperienceInvites(invites);
   }
 
@@ -291,6 +296,7 @@ export default function CinematicWorld({
     setRuns([]);
     setSharedCheckIns([]);
     setActiveConsentRunIds([]);
+    setRunConsentStatuses({});
     setExperienceInvites([]);
     setInviteLink("");
     setSelectedInviteRunId("");
@@ -352,6 +358,10 @@ export default function CinematicWorld({
         ]);
         setSharedCheckIns(checkIns);
         setActiveConsentRunIds(activeConsentIds);
+        const ownRunStatuses = await Promise.all(history
+          .filter((run) => run.user_id === remoteProfileId && (run.status === "active" || run.status === "paused"))
+          .map(async (run) => [run.id, await loadExperienceRunConsentStatus(run.id, remoteProfileId)] as const));
+        setRunConsentStatuses(Object.fromEntries(ownRunStatuses));
         setExperienceInvites(invites);
       } catch (cause) {
         if (active) setError(cause instanceof Error ? cause.message : t("Privégegevens konden niet worden geladen.", "Private data could not be loaded."));
@@ -377,7 +387,15 @@ export default function CinematicWorld({
           loadExperienceRunCheckIns(latestRuns.map((run) => run.id), remoteProfileId),
           loadOwnExperienceRunConsentIds(latestRuns.map((run) => run.id), remoteProfileId),
         ]);
-        if (active) { setRuns(latestRuns); setSharedCheckIns(latestCheckIns); setActiveConsentRunIds(activeConsentIds); }
+        const ownRunStatuses = await Promise.all(latestRuns
+          .filter((run) => run.user_id === remoteProfileId && (run.status === "active" || run.status === "paused"))
+          .map(async (run) => [run.id, await loadExperienceRunConsentStatus(run.id, remoteProfileId)] as const));
+        if (active) {
+          setRuns(latestRuns);
+          setSharedCheckIns(latestCheckIns);
+          setActiveConsentRunIds(activeConsentIds);
+          setRunConsentStatuses(Object.fromEntries(ownRunStatuses));
+        }
       } catch {
         // Keep the last confirmed state visible during temporary network interruptions.
       } finally {
@@ -542,6 +560,11 @@ export default function CinematicWorld({
     }
     setBusy(true);
     try {
+      const consentStatus = await loadExperienceRunConsentStatus(run.id, remoteProfileId!);
+      if (!consentStatus.allConsented) {
+        setError(t("Je partner moet eerst opnieuw toestemming geven voordat je kunt hervatten.", "Your partner must renew consent before you can resume."));
+        return;
+      }
       await resumeExperienceRun({ runId: run.id, expectedUserId: remoteProfileId!, currentStep: run.current_step });
       setActiveScene({
         key: typeof snapshot.sceneKey === "string" ? snapshot.sceneKey : run.scene_key,
@@ -1384,6 +1407,17 @@ export default function CinematicWorld({
             <button type="button" className="cw-primary" disabled={busy || !remoteProfileId || !selectedInviteRunId} onClick={() => void createRunInvitation(selectedInviteRunId)}><Share2 size={15} />{t("Maak veilige uitnodigingslink", "Create secure invitation link")}</button>
             {inviteLink && <div className="cw-invite-link"><label>{t("Jouw eenmalige uitnodigingslink", "Your one-time invitation link")}<input readOnly value={inviteLink} /></label><button type="button" onClick={() => { void navigator.clipboard?.writeText(inviteLink); setMessage(t("Uitnodigingslink gekopieerd.", "Invitation link copied.")); }}><Copy size={15} />{t("Kopieer link", "Copy link")}</button></div>}
           </div>
+          {invitableRuns.filter((run) => experienceInvites.some((invite) => invite.run_id === run.id && invite.status === "accepted")).map((run) => {
+            const status = runConsentStatuses[run.id];
+            return <div className="cw-remote-checkin cw-host-checkins" key={run.id}>
+              <strong>{t("Toestemming partner", "Partner consent")} · {String(run.scene_snapshot.title ?? run.scene_key)}</strong>
+              {status
+                ? <small>{status.allConsented
+                    ? t("Je partner heeft opnieuw ingestemd. De ervaring kan worden hervat.", "Your partner has consented again. The experience can be resumed.")
+                    : t("Wachten op nieuwe toestemming van je partner.", "Waiting for your partner's fresh consent.")} · {status.consentedCount}/{status.participantCount}</small>
+                : <small>{t("Toestemmingsstatus wordt geladen…", "Loading consent status…")}</small>}
+            </div>;
+          })}
           {joinedRuns.length > 0 && <div className="cw-saved-list"><h3>{t("Ervaringen waarvoor jij toestemming gaf", "Experiences you consented to")} <span>{joinedRuns.length}</span></h3>{hasLiveJoinedRuns && <p className="cw-remote-sync-note">{t("Voortgang wordt automatisch bijgewerkt zolang deze pagina open is.", "Progress refreshes automatically while this page is open.")}</p>}{joinedRuns.map((run) => {
             const steps = Array.isArray(run.scene_snapshot.steps) ? run.scene_snapshot.steps : [];
             const stepNumber = Math.min(run.total_steps, Math.max(1, run.current_step + 1));
