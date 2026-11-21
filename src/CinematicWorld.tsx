@@ -1440,11 +1440,11 @@ export default function CinematicWorld({
                 const myCheckIn = sharedCheckIns.find((item) => item.run_id === run.id && item.user_id === remoteProfileId && item.step_index === run.current_step);
                 return <div className="cw-remote-checkin">
                   <strong>{t("Jouw check-in voor deze stap", "Your check-in for this step")}</strong>
-                  {myCheckIn && <small>{myCheckIn.signal === "ready" ? t("Je huidige signaal: ik ben klaar.", "Your current signal: I'm ready.") : myCheckIn.signal === "pause_requested" ? t("Je huidige signaal: ik vraag om pauze.", "Your current signal: I request a pause.") : t("Je huidige signaal: ik wil stoppen.", "Your current signal: I want to stop.")} {t("Je kunt dit op ieder moment wijzigen.", "You can change this at any time.")}</small>}
-                  <div>
-                    <button type="button" disabled={busy || myCheckIn?.signal === "ready"} onClick={() => void sendSharedCheckIn(run, "ready")}>{t("Ik ben klaar", "I'm ready")}</button>
-                    <button type="button" disabled={busy || myCheckIn?.signal === "pause_requested"} onClick={() => void sendSharedCheckIn(run, "pause_requested")}>{t("Vraag pauze", "Request pause")}</button>
-                    <button type="button" className="cw-danger" disabled={busy} onClick={() => void sendSharedCheckIn(run, "stop_requested")}>{t("Stop en trek consent in", "Stop and withdraw consent")}</button>
+                  {myCheckIn && <small role="status" aria-live="polite">{myCheckIn.signal === "ready" ? t("Je huidige signaal: ik ben klaar.", "Your current signal: I'm ready.") : myCheckIn.signal === "pause_requested" ? t("Je huidige signaal: ik vraag om pauze.", "Your current signal: I request a pause.") : t("Je huidige signaal: ik wil stoppen.", "Your current signal: I want to stop.")} {t("Je kunt dit op ieder moment wijzigen.", "You can change this at any time.")}</small>}
+                  <div role="group" aria-label={t("Jouw check-in signaal", "Your check-in signal")}>
+                    <button type="button" aria-pressed={myCheckIn?.signal === "ready"} disabled={busy || myCheckIn?.signal === "ready"} onClick={() => void sendSharedCheckIn(run, "ready")}>{t("Ik ben klaar", "I'm ready")}</button>
+                    <button type="button" aria-pressed={myCheckIn?.signal === "pause_requested"} disabled={busy || myCheckIn?.signal === "pause_requested"} onClick={() => void sendSharedCheckIn(run, "pause_requested")}>{t("Vraag pauze", "Request pause")}</button>
+                    <button type="button" className="cw-danger" aria-pressed={myCheckIn?.signal === "stop_requested"} disabled={busy} onClick={() => void sendSharedCheckIn(run, "stop_requested")}>{t("Stop en trek consent in", "Stop and withdraw consent")}</button>
                   </div>
                 </div>;
               })()}
