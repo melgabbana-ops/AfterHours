@@ -218,8 +218,27 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
         await video.play();
         if(!mountedRef.current)return;
         if(video.videoWidth===0) await new Promise<void>((resolve,reject)=>{
-          const timeout=window.setTimeout(()=>reject(new Error(t("De camera startte niet op tijd.","The camera did not start in time."))),5000);
-          video.addEventListener("loadedmetadata",()=>{window.clearTimeout(timeout);resolve()},{once:true});
+          let settled=false;
+          const cleanup=()=>{
+            window.clearTimeout(timeout);
+            video.removeEventListener("loadedmetadata",onReady);
+            video.removeEventListener("loadeddata",onReady);
+            video.removeEventListener("error",onError);
+          };
+          const finish=(error?:Error)=>{
+            if(settled)return;
+            settled=true;
+            cleanup();
+            if(error)reject(error);else resolve();
+          };
+          const onReady=()=>{if(video.videoWidth>0&&video.videoHeight>0)finish();};
+          const onError=()=>finish(new Error(t("De camera kon geen beeld leveren.","The camera could not provide a video frame.")));
+          const timeout=window.setTimeout(()=>finish(new Error(t("De camera startte niet op tijd.","The camera did not start in time."))),5000);
+          video.addEventListener("loadedmetadata",onReady);
+          video.addEventListener("loadeddata",onReady);
+          video.addEventListener("error",onError);
+          // Recheck after listeners are attached to close the metadata-event race.
+          onReady();
         });
         if(!mountedRef.current)return;
         canvas.width=Math.min(1920,video.videoWidth);
