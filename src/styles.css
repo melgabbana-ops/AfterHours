@@ -4812,3 +4812,10 @@ button,[role="button"],nav a{touch-action:manipulation}
   .media-vault { width: 100%; max-width: 1080px; margin-inline: auto; }
   .media-live-frame { max-width: 900px; margin-inline: auto; }
 }
+
+
+@media (min-width:901px) and (max-width:1280px) and (orientation:portrait) {
+  .media-live-frame { max-width: 760px; margin-inline: auto; }
+  .media-live-preview,
+  .media-live-frame .media-live-composite { max-height: min(58dvh, 720px); }
+}
