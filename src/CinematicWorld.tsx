@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeft, ArrowRight, BookOpen, CheckCircle2, Clapperboard, Copy,
   Download, Eye, EyeOff, Flame, LockKeyhole, Mail, Music2, Pause,
@@ -187,6 +187,57 @@ export default function CinematicWorld({
   const [vaultDraft, setVaultDraft] = useState("");
   const [vaultPlain, setVaultPlain] = useState<{ title: string; content: string } | null>(null);
   const [vaultMessage, setVaultMessage] = useState("");
+  const vaultSensitiveRef = useRef(false);
+  const vaultSensitive = Boolean(vaultPassphrase || vaultPlain || vaultTitle || vaultDraft);
+  vaultSensitiveRef.current = vaultSensitive;
+  const lockVault = useCallback((message?: string) => {
+    setVaultPassphrase("");
+    setVaultPlain(null);
+    setVaultTitle("");
+    setVaultDraft("");
+    if (message) setVaultMessage(message);
+  }, []);
+
+  useEffect(() => {
+    const lockIfSensitive = () => {
+      if (vaultSensitiveRef.current) {
+        lockVault(language === "nl" ? "Kluis automatisch vergrendeld." : "Vault automatically locked.");
+      }
+    };
+    const onVisibilityChange = () => {
+      if (document.visibilityState !== "visible") lockIfSensitive();
+    };
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    window.addEventListener("pagehide", lockIfSensitive);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      window.removeEventListener("pagehide", lockIfSensitive);
+    };
+  }, [language, lockVault]);
+
+  useEffect(() => {
+    if (tab === "vault" || !vaultSensitive) return;
+    lockVault(language === "nl" ? "Kluis vergrendeld bij verlaten van de kluis." : "Vault locked when leaving the vault.");
+  }, [tab, vaultSensitive, language, lockVault]);
+
+  useEffect(() => {
+    if (!vaultSensitive) return;
+    let timeout = window.setTimeout(() => {
+      lockVault(language === "nl" ? "Kluis automatisch vergrendeld na inactiviteit." : "Vault automatically locked after inactivity.");
+    }, 5 * 60 * 1000);
+    const resetIdleTimer = () => {
+      window.clearTimeout(timeout);
+      timeout = window.setTimeout(() => {
+        lockVault(language === "nl" ? "Kluis automatisch vergrendeld na inactiviteit." : "Vault automatically locked after inactivity.");
+      }, 5 * 60 * 1000);
+    };
+    const activityEvents = ["pointerdown", "keydown", "touchstart"] as const;
+    activityEvents.forEach((eventName) => window.addEventListener(eventName, resetIdleTimer, { passive: true }));
+    return () => {
+      window.clearTimeout(timeout);
+      activityEvents.forEach((eventName) => window.removeEventListener(eventName, resetIdleTimer));
+    };
+  }, [vaultSensitive, language, lockVault]);
   const [domRole, setDomRole] = useState("");
   const [domAddress, setDomAddress] = useState("");
   const [domHardLimits, setDomHardLimits] = useState("");
@@ -712,6 +763,7 @@ export default function CinematicWorld({
     } catch (cause) {
       setVaultMessage(cause instanceof Error ? cause.message : t("Versleutelen of opslaan is niet gelukt.", "Encryption or saving failed."));
     } finally {
+      setVaultPassphrase("");
       setBusy(false);
     }
   }
@@ -734,6 +786,8 @@ export default function CinematicWorld({
     } catch {
       setVaultPlain(null);
       setVaultMessage(t("Ontgrendelen mislukt. Controleer je wachtzin.", "Could not unlock. Check your passphrase."));
+    } finally {
+      setVaultPassphrase("");
     }
   }
 
@@ -742,8 +796,7 @@ export default function CinematicWorld({
     try {
       await deleteWorldRecord("vault", key, remoteProfileId);
       setRecords((current) => ({ ...current, vault: current.vault.filter((record) => record.record_key !== key) }));
-      setVaultPlain(null);
-      setVaultMessage(t("Versleutelde notitie verwijderd.", "Encrypted note deleted."));
+      lockVault(t("Versleutelde notitie verwijderd en kluis vergrendeld.", "Encrypted note deleted and vault locked."));
     } catch (cause) {
       setVaultMessage(cause instanceof Error ? cause.message : t("Verwijderen is niet gelukt.", "Could not delete note."));
     }
@@ -1196,7 +1249,7 @@ export default function CinematicWorld({
           <div className="cw-saved-list"><h3>{t("Versleutelde notities", "Encrypted notes")} <span>{vaultRecords.length}</span></h3>
             {vaultRecords.map((record) => <div className="cw-saved-row" key={record.record_key}><div><strong>{t("Privénotitie", "Private note")}</strong><small>{new Date(record.updated_at).toLocaleString(language === "nl" ? "nl-NL" : "en-GB")}</small></div><button type="button" onClick={() => void unlockVault(record)}><UnlockKeyhole size={14} />{t("Open", "Unlock")}</button><button type="button" onClick={() => void deleteVaultNote(record.record_key)} aria-label={t("Verwijderen", "Delete")}><Trash2 size={14} /></button></div>)}
           </div>
-          {vaultPlain && <div className="cw-decrypted"><div><Eye size={15} /><strong>{vaultPlain.title}</strong><button type="button" onClick={() => setVaultPlain(null)}><EyeOff size={14} />{t("Vergrendelen", "Lock")}</button></div><p>{vaultPlain.content}</p></div>}
+          {vaultPlain && <div className="cw-decrypted"><div><Eye size={15} /><strong>{vaultPlain.title}</strong><button type="button" onClick={() => lockVault(t("Kluis vergrendeld.", "Vault locked."))}><EyeOff size={14} />{t("Vergrendelen", "Lock")}</button></div><p>{vaultPlain.content}</p></div>}
           <p className="cw-privacy-note">{t("Belangrijk: zonder je wachtzin is ontsleutelen niet mogelijk. Bewaar een eigen back-up op een vertrouwde plek.", "Important: without your passphrase, decryption is impossible. Keep your own backup in a trusted place.")}</p>
         </section>
       )}
