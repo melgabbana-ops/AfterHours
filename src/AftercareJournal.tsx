@@ -38,6 +38,7 @@ async function decryptEntries(raw:string,passphrase:string):Promise<Entry[]>{
   try{envelope=JSON.parse(raw);}catch{throw new AftercareJournalError("invalidEnvelope");}
   if(!envelope||typeof envelope!=="object")throw new AftercareJournalError("invalidEnvelope");
   const candidate=envelope as Record<string,unknown>;
+  if(typeof candidate.version!=="number")throw new AftercareJournalError("invalidEnvelope");
   if(candidate.version!==1)throw new AftercareJournalError("unsupportedVersion");
   if(typeof candidate.salt!=="string"||typeof candidate.iv!=="string"||typeof candidate.cipher!=="string")throw new AftercareJournalError("invalidEnvelope");
   let salt:Uint8Array,iv:Uint8Array,cipher:Uint8Array;
