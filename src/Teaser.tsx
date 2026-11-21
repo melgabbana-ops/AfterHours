@@ -2,6 +2,7 @@ import React from "react";
 
 const INTRO_VIDEO = "https://gcdn.picsart.com/editing-temp/a18ef45a-9ae8-4ce4-93b4-68e40401defc.mp4";
 import { ArrowUpRight, LockKeyhole, Sparkles, ChevronRight, Gamepad2, Layers3, MoonStar, Target, UsersRound, ShoppingBag, Volume2, VolumeX } from "lucide-react";
+import { getTeaserVideoMotionSettings, subscribeToReducedMotionPreference, TEASER_REDUCED_MOTION_QUERY } from "./teaserMotion";
 
 export default function Teaser() {
   const [language, setLanguage] = React.useState<"nl"|"en">(() => { try { return localStorage.getItem("afterhours.language") === "en" ? "en" : "nl"; } catch { return "nl"; } });
@@ -11,6 +12,31 @@ export default function Teaser() {
   const [introVideoReady, setIntroVideoReady] = React.useState(false);
   const [introMuted, setIntroMuted] = React.useState(true);
   const introVideoRef = React.useRef<HTMLVideoElement>(null);
+  const [prefersReducedMotion, setPrefersReducedMotion] = React.useState(() => {
+    try {
+      return typeof window !== "undefined" && typeof window.matchMedia === "function"
+        ? window.matchMedia(TEASER_REDUCED_MOTION_QUERY).matches
+        : false;
+    } catch {
+      return false;
+    }
+  });
+  const videoMotion = getTeaserVideoMotionSettings(prefersReducedMotion);
+  React.useEffect(() => {
+    if (typeof window.matchMedia !== "function") return;
+    const mediaQuery = window.matchMedia(TEASER_REDUCED_MOTION_QUERY);
+    setPrefersReducedMotion(mediaQuery.matches);
+    return subscribeToReducedMotionPreference(mediaQuery, setPrefersReducedMotion);
+  }, []);
+  React.useEffect(() => {
+    const video = introVideoRef.current;
+    if (!video) return;
+    if (prefersReducedMotion) {
+      video.pause();
+      return;
+    }
+    if (!introVideoUnavailable) void video.play().catch(() => undefined);
+  }, [prefersReducedMotion, introVideoUnavailable]);
   const toggleIntroAudio = () => {
     const video = introVideoRef.current;
     const nextMuted = !introMuted;
@@ -33,7 +59,7 @@ export default function Teaser() {
     <div className="teaser-top"><img className="teaser-logo" src={`${import.meta.env.BASE_URL}after-hours-brand-logo-transparent.svg`} alt="AFTER HOURS" /><div className="teaser-top-actions"><span className="teaser-private">18+ · {t("PRIVÉWERELD","PRIVATE EXPERIENCE")}</span><button className="language-toggle teaser-language-toggle" type="button" aria-label={t("Taal wijzigen","Change language")} onClick={() => setLanguage(language === "nl" ? "en" : "nl")}><span className={language === "nl" ? "language-active" : ""}>NL</span><span className="language-divider">/</span><span className={language === "en" ? "language-active" : ""}>EN</span></button></div></div>
     <section className="teaser-film teaser-film-motion" aria-label={t("AFTER HOURS-intro","AFTER HOURS intro")}>
       <div className="teaser-atmosphere" aria-hidden="true"><span/><span/><span/><i/><i/></div>
-      {introVideoUnavailable ? <div className="teaser-film-fallback" role="img" aria-label={t("Cinematische AFTER HOURS-achtergrond","Cinematic AFTER HOURS background")}/> : <video ref={introVideoRef} className="teaser-film-video" src={INTRO_VIDEO} autoPlay muted={introMuted} loop playsInline preload="metadata" poster={`${import.meta.env.BASE_URL}visuals/reference-home.svg`} aria-label={t("AFTER HOURS officiële introvideo","AFTER HOURS official intro video")} onLoadedData={() => setIntroVideoReady(true)} onError={() => setIntroVideoUnavailable(true)}/>}
+      {introVideoUnavailable ? <div className="teaser-film-fallback" role="img" aria-label={t("Cinematische AFTER HOURS-achtergrond","Cinematic AFTER HOURS background")}/> : <video ref={introVideoRef} className="teaser-film-video" src={INTRO_VIDEO} autoPlay={videoMotion.autoPlay} muted={introMuted} loop={videoMotion.loop} controls={videoMotion.controls} playsInline preload={videoMotion.preload} poster={`${import.meta.env.BASE_URL}visuals/reference-home.svg`} aria-label={prefersReducedMotion ? t("AFTER HOURS-introvideo. Automatisch afspelen is uitgeschakeld vanwege de voorkeur voor minder beweging. Gebruik de videobediening om zelf af te spelen.","AFTER HOURS intro video. Autoplay is disabled because reduced motion is enabled. Use the video controls to play it when you choose.") : t("AFTER HOURS officiële introvideo","AFTER HOURS official intro video")} onLoadedData={() => setIntroVideoReady(true)} onError={() => setIntroVideoUnavailable(true)}/>}
       {!introVideoUnavailable && introVideoReady && <button className="teaser-audio-toggle" type="button" onClick={toggleIntroAudio} aria-label={introMuted ? t("Geluid aanzetten","Turn sound on") : t("Geluid dempen","Mute sound")} aria-pressed={!introMuted}>{introMuted ? <VolumeX size={16}/> : <Volume2 size={16}/>}<span>{introMuted ? t("GELUID AAN","SOUND ON") : t("GELUID UIT","MUTE SOUND")}</span></button>}
       <div className="teaser-film-brand">
         <img src={`${import.meta.env.BASE_URL}after-hours-brand-logo-transparent.svg`} alt="AFTER HOURS"/>
