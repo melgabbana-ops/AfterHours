@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   acceptSecureDuoInvitation, createSecureDuoRoom, previewSecureDuoInvitation,
-  revokeSecureDuoInvitation, setSecureDuoConsent, setSecureDuoRoomState,\n  isSecureDuoLiveState, joinSecureDuoRealtime,
+  revokeSecureDuoInvitation, setSecureDuoConsent, setSecureDuoRoomState,
+  isSecureDuoLiveState, joinSecureDuoRealtime,
 } from "./secureDuoRoomApi";
 
 const id="123e4567-e89b-42d3-a456-426614174000";
