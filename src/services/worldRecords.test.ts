@@ -19,7 +19,7 @@ vi.mock("./supabase", () => ({
   supabase: { auth: { getUser: mocks.getUser }, from: mocks.from, rpc: mocks.rpc },
 }));
 
-import { loadExperienceRunCheckIns, loadExperienceRuns, loadOwnExperienceRunConsentIds, loadWorldRecords, renewExperienceRunConsent, saveWorldRecord, submitExperienceRunCheckIn } from "./worldRecords";
+import { loadExperienceRunCheckIns, loadExperienceRuns, loadOwnExperienceRunConsentIds, loadExperienceRunConsentStatus, loadWorldRecords, renewExperienceRunConsent, saveWorldRecord, submitExperienceRunCheckIn } from "./worldRecords";
 
 const chain = {
   select: mocks.select,
