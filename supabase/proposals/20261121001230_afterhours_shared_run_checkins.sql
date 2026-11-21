@@ -15,6 +15,11 @@ create table if not exists public.afterhours_experience_run_checkins (
 create index if not exists afterhours_run_checkins_run_step
   on public.afterhours_experience_run_checkins (run_id, step_index, created_at desc);
 
+-- One owner plus at most one accepted invitee: this is a couples experience, not a group room.
+create unique index if not exists afterhours_experience_invitations_one_accepted_participant_per_run
+  on public.afterhours_experience_invitations (run_id)
+  where status = 'accepted' and accepted_user_id is not null;
+
 alter table public.afterhours_experience_run_checkins enable row level security;
 revoke all on public.afterhours_experience_run_checkins from public, anon, authenticated;
 grant select, insert on public.afterhours_experience_run_checkins to authenticated;
@@ -42,6 +47,7 @@ drop trigger if exists afterhours_run_checkins_identity_guard on public.afterhou
 create trigger afterhours_run_checkins_identity_guard
   before update on public.afterhours_experience_run_checkins
   for each row execute function public.afterhours_guard_run_checkin_identity();
+revoke all on function public.afterhours_guard_run_checkin_identity() from public, anon, authenticated;
 
 create policy afterhours_run_checkins_read_owner_or_participant
   on public.afterhours_experience_run_checkins
