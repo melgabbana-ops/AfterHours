@@ -6,6 +6,7 @@ import {
   getAftercareMeditationPhase,
   getAftercareMeditationProgressPercent,
   getAftercareMeditationRemainingSeconds,
+  skipAftercareMeditationPhase,
 } from "./aftercareMeditation";
 
 describe("30-minute aftercare meditation", () => {
@@ -24,6 +25,21 @@ describe("30-minute aftercare meditation", () => {
     expect(getAftercareMeditationPhase(1200).id).toBe("kindness");
     expect(getAftercareMeditationPhase(1500).id).toBe("return");
     expect(getAftercareMeditationPhase(1800).id).toBe("return");
+  });
+
+  it("skips only the remainder of the current optional stage", () => {
+    expect(skipAftercareMeditationPhase(0)).toBe(300);
+    expect(skipAftercareMeditationPhase(125)).toBe(300);
+    expect(skipAftercareMeditationPhase(299)).toBe(300);
+    expect(skipAftercareMeditationPhase(300)).toBe(600);
+    expect(skipAftercareMeditationPhase(1799)).toBe(1800);
+    expect(skipAftercareMeditationPhase(1800)).toBe(1800);
+  });
+
+  it("normalizes invalid elapsed values before choosing the next stage", () => {
+    expect(skipAftercareMeditationPhase(-10)).toBe(300);
+    expect(skipAftercareMeditationPhase(Number.NaN)).toBe(300);
+    expect(skipAftercareMeditationPhase(Number.POSITIVE_INFINITY)).toBe(300);
   });
 
   it("clamps remaining time to the supported duration", () => {

@@ -62,6 +62,12 @@ export function getAftercareMeditationPhase(elapsedSeconds: number) {
     ?? AFTERCARE_MEDITATION_PHASES[AFTERCARE_MEDITATION_PHASES.length - 1];
 }
 
+/** Move to the next phase boundary without rewinding elapsed time. */
+export function skipAftercareMeditationPhase(elapsedSeconds: number): number {
+  const elapsed = normalizeElapsedSeconds(elapsedSeconds);
+  return Math.max(elapsed, getAftercareMeditationPhase(elapsed).endSeconds);
+}
+
 export function getAftercareMeditationRemainingSeconds(elapsedSeconds: number): number {
   return AFTERCARE_MEDITATION_DURATION_SECONDS - normalizeElapsedSeconds(elapsedSeconds);
 }
