@@ -1006,18 +1006,22 @@ export default function CinematicWorld({
 
   async function sendSharedCheckIn(run: ExperienceRun, signal: ExperienceRunCheckInSignal) {
     if (!remoteProfileId || run.user_id === remoteProfileId || run.status !== "active") return;
+    if (signal === "stop_requested" && !window.confirm(t("Je toestemming intrekken? De gedeelde ervaring wordt direct voor iedereen gestopt.", "Withdraw your consent? The shared experience will immediately stop for everyone."))) return;
     setBusy(true);
     setError("");
     try {
+      if (signal === "stop_requested") {
+        await withdrawExperienceConsent(run.id, remoteProfileId);
+        await refreshData();
+        setMessage(t("Je toestemming is ingetrokken. De gedeelde ervaring is gestopt.", "Your consent has been withdrawn. The shared experience has stopped."));
+        onSafetyStop();
+        return;
+      }
       await submitExperienceRunCheckIn({ runId: run.id, stepIndex: run.current_step, signal, expectedUserId: remoteProfileId });
       await refreshData();
-      if (signal === "stop_requested") {
-        await withdrawSharedConsent(run.id);
-      } else {
-        setMessage(signal === "pause_requested"
-          ? t("Pauzeverzoek verstuurd. De host ziet dit direct bij de gedeelde ervaring.", "Pause request sent. The host will see it on the shared experience.")
-          : t("Je check-in is verstuurd.", "Your check-in has been sent."));
-      }
+      setMessage(signal === "pause_requested"
+        ? t("Pauzeverzoek verstuurd. De host ziet dit direct bij de gedeelde ervaring.", "Pause request sent. The host will see it on the shared experience.")
+        : t("Je check-in is verstuurd.", "Your check-in has been sent."));
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : t("Check-in versturen is niet gelukt.", "Could not send check-in."));
     } finally {
