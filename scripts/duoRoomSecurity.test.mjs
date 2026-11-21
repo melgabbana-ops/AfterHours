@@ -57,7 +57,18 @@ describe("proposed secure Duo backend guardrails", () => {
     expect(client).toContain('set_afterhours_duo_consent');
     expect(client).toContain('set_afterhours_duo_room_state');
     expect(client).toContain('revoke_afterhours_duo_invitation');
+    expect(client).toContain('get_afterhours_duo_room_state');
   });
+
+  it("returns only a member-scoped authoritative lobby snapshot", () => {
+    const declaration = proposal.slice(proposal.indexOf("function public.get_afterhours_duo_room_state("));
+    expect(declaration).toContain("m.user_id = v_user_id and m.removed_at is null");
+    expect(declaration).toContain("'is_self', m.user_id = v_user_id");
+    expect(declaration).toContain("'consented', m.consented_at is not null");
+    expect(declaration).toContain("set search_path = ''");
+    expect(declaration).toContain("revoke all on function public.get_afterhours_duo_room_state(uuid)");
+    expect(declaration).toContain("grant execute on function public.get_afterhours_duo_room_state(uuid)");
+  });;
 
   it("keeps every privileged RPC behind an authenticated SECURITY DEFINER boundary", () => {
     const privilegedFunctions = [
@@ -67,6 +78,7 @@ describe("proposed secure Duo backend guardrails", () => {
       "set_afterhours_duo_consent",
       "set_afterhours_duo_room_state",
       "revoke_afterhours_duo_invitation",
+      "get_afterhours_duo_room_state",
     ];
     for (const name of privilegedFunctions) {
       const declaration = proposal.slice(proposal.indexOf(`function public.${name}(`));
