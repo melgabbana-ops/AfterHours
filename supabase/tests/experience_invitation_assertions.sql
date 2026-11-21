@@ -33,6 +33,9 @@ begin
   end if;
 end; $definition_tests$;
 
+-- Explicitly grant the fixture's authenticated role the table operations exercised below.
+grant select,insert,update on public.afterhours_experience_runs,public.afterhours_experience_run_consents,public.afterhours_experience_invitations to authenticated;
+
 set role authenticated;
 do $tests$
 declare v_result jsonb; v_status text; v_revoked timestamptz; v_new_run_id uuid;
