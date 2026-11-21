@@ -211,7 +211,7 @@ export default function AftercareJournal({ language, onClose }: { language: Lang
       if (generation === lockGeneration.current) setBusy(false);
     }
   };
-  return <section className="ah-private-journal" aria-labelledby="ah-private-journal-title">
+  return <section className="ah-private-journal" aria-labelledby="ah-private-journal-title" aria-busy={busy}>
     <header className="ah-private-journal-head">
       <div className="ah-private-journal-brand"><LockKeyhole aria-hidden="true"/><span className="eyebrow">AFTER HOURS · PRIVATE JOURNAL</span></div>
       <button type="button" className="ah-journal-close" onClick={onClose}><ArrowLeft size={15}/>{t("Terug","Back")}</button>
@@ -238,7 +238,7 @@ export default function AftercareJournal({ language, onClose }: { language: Lang
         <label htmlFor="ah-journal-body">{t("JOUW REFLECTIE","YOUR REFLECTION")}</label>
         <textarea id="ah-journal-body" value={body} maxLength={PRIVATE_JOURNAL_ENTRY_LIMIT} rows={8} onChange={event=>setBody(event.target.value)} placeholder={t("Schrijf vrijuit. Je woorden worden versleuteld voordat ze worden opgeslagen.", "Write freely. Your words are encrypted before they are stored.")}/>
         <small className="ah-journal-count">{body.length.toLocaleString(language==="en"?"en-GB":"nl-NL")} / {PRIVATE_JOURNAL_ENTRY_LIMIT}</small>
-        <div className="ah-journal-actions"><button type="button" className="ah-journal-primary" onClick={()=>void save()} disabled={busy||(!title.trim()&&!body.trim())}><Save size={15}/>{t("Versleuteld opslaan","Save encrypted")}</button>{activeId&&<button type="button" className="ah-journal-delete" onClick={remove}><Trash2 size={15}/>{t("Verwijderen","Delete")}</button>}</div>
+        <div className="ah-journal-actions"><button type="button" className="ah-journal-primary" onClick={()=>void save()} disabled={busy||(!title.trim()&&!body.trim())}><Save size={15}/>{t("Versleuteld opslaan","Save encrypted")}</button>{activeId&&<button type="button" className="ah-journal-delete" onClick={()=>void remove()} disabled={busy}><Trash2 size={15}/>{t("Verwijderen","Delete")}</button>}</div>
       </div>
       <div className="ah-journal-backup">
         <span className="eyebrow">{t("VERSLEUTELDE BACK-UP","ENCRYPTED BACKUP")}</span>
