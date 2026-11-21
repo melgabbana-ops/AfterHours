@@ -50,7 +50,7 @@ function inspectClassExpression(file, expression) {
       const operator = node.operatorToken.kind;
       if (operator === ts.SyntaxKind.PlusToken) {
         if (ts.isStringLiteral(node.left) && !ts.isStringLiteral(node.right) && !ts.isNoSubstitutionTemplateLiteral(node.right)) {
-          const match = node.left.text.match(/(?:^|\\s)([A-Za-z_][\\w-]*-)$/);
+          const match = node.left.text.match(/(?:^|\s)([A-Za-z_][\w-]*-)$/);
           if (match) {
             literalParts.push(node.left.text.slice(0, node.left.text.length - match[1].length));
             dynamicPrefixes.push(match[1]);
@@ -64,7 +64,7 @@ function inspectClassExpression(file, expression) {
     }
     if (ts.isTemplateExpression(node)) {
       const head = node.head.text;
-      const match = head.match(/(?:^|\\s)([A-Za-z_][\\w-]*-)$/);
+      const match = head.match(/(?:^|\s)([A-Za-z_][\w-]*-)$/);
       if (match) {
         literalParts.push(head.slice(0, head.length - match[1].length));
         dynamicPrefixes.push(match[1]);
