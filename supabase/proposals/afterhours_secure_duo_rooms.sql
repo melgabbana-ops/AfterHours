@@ -60,6 +60,13 @@ create table if not exists public.afterhours_duo_session_state (
 alter table public.afterhours_duo_session_state enable row level security;
 revoke all on public.afterhours_duo_session_state from public, anon, authenticated;
 
+-- Preserve compatibility when reviewing this proposal against a database that
+-- already contains rooms created by an earlier test deployment.
+insert into public.afterhours_duo_session_state (room_id)
+select id from public.afterhours_duo_rooms
+on conflict (room_id) do nothing;
+
+
 
 alter table public.afterhours_duo_rooms enable row level security;
 alter table public.afterhours_duo_room_members enable row level security;
