@@ -41,7 +41,7 @@ export async function getSecureDuoRoomState(roomId: string): Promise<SecureDuoRo
       || typeof item.is_self !== "boolean" || typeof item.consented !== "boolean") {
       throw new Error("The Duo server returned invalid participant status.");
     }
-    return { role: item.role, isSelf: item.is_self, consented: item.consented };
+    return { role: item.role as "host" | "guest", isSelf: item.is_self, consented: item.consented };
   });
   if (members.length > 2 || members.filter(member => member.isSelf).length !== 1) {
     throw new Error("The Duo server returned an unexpected participant count.");
