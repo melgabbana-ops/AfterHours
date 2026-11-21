@@ -12,15 +12,15 @@ async function collect(directory) {
     const fullPath = path.join(directory, entry.name);
     if (entry.isDirectory()) { await collect(fullPath); continue; }
     if (!entry.isFile()) continue;
-    if (/\\.tsx?$/.test(entry.name)) sourceFiles.push(fullPath);
-    if (/\\.css$/i.test(entry.name)) stylesheetFiles.push(fullPath);
+    if (/\.tsx?$/.test(entry.name)) sourceFiles.push(fullPath);
+    if (/\.css$/i.test(entry.name)) stylesheetFiles.push(fullPath);
   }
 }
 
 await collect(sourceRoot);
 if (stylesheetFiles.length === 0) throw new Error("No CSS files found under src/");
-const styles = (await Promise.all(stylesheetFiles.map((file) => readFile(file, "utf8")))).join("\\n");
-const cssClasses = new Set([...styles.matchAll(/\\.([_a-zA-Z][\\w-]*)/g)].map((match) => match[1]));
+const styles = (await Promise.all(stylesheetFiles.map((file) => readFile(file, "utf8")))).join("\n");
+const cssClasses = new Set([...styles.matchAll(/\.([_a-zA-Z][\w-]*)/g)].map((match) => match[1]));
 const missing = new Map();
 
 function reportMissing(file, className) {
@@ -72,7 +72,7 @@ function inspectClassExpression(file, expression) {
   collect(expression);
 
   for (const part of literalParts) {
-    for (const className of part.split(/[\\s,]+/).filter(Boolean)) {
+    for (const className of part.split(/[\s,]+/).filter(Boolean)) {
       if (!cssClasses.has(className)) reportMissing(file, className);
     }
   }
