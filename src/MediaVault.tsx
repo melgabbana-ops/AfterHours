@@ -268,6 +268,21 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
     if(restored)setPhotoHistoryIndex(target.index);
   };
 
+  useEffect(()=>{
+    if(!pendingOriginalFile)return;
+    const handlePhotoHistoryShortcut=(event:KeyboardEvent)=>{
+      const direction=getPhotoEditHistoryShortcut(event);
+      if(direction===null)return;
+      const target=event.target;
+      if(target instanceof HTMLElement&&(target.isContentEditable||
+        (/^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName)&&!(target instanceof HTMLInputElement&&target.type==="range"))))return;
+      event.preventDefault();
+      void movePhotoHistory(direction);
+    };
+    window.addEventListener("keydown",handlePhotoHistoryShortcut);
+    return ()=>window.removeEventListener("keydown",handlePhotoHistoryShortcut);
+  },[pendingOriginalFile,photoHistoryIndex,photoHistory.length,busy,isSavingCapture]);
+
   const startCapture=async()=>{
     if(!captureConsent){
       setMessage(t("Bevestig eerst dat iedereen op de opname expliciet akkoord is met opnemen én privé opslaan.","First confirm that everyone recorded explicitly agrees to recording and private storage."));
