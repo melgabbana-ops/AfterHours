@@ -299,6 +299,8 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
   activeGameRef.current = activeGame;
   const accessBlockedRef = React.useRef(experienceStartBlockedReason);
   accessBlockedRef.current = experienceStartBlockedReason;
+  const remoteProfileIdRef = React.useRef(remoteProfileId);
+  remoteProfileIdRef.current = remoteProfileId;
   const [selectedPromptId, setSelectedPromptId] = useState<string | null>(null);
   const [seenPromptIds, setSeenPromptIds] = useState<string[]>(() => { try { return JSON.parse(localStorage.getItem(historyKey) || "[]").filter((id: unknown) => typeof id === "string"); } catch { return []; } });
   const [seenGameVariants, setSeenGameVariants] = useState<string[]>(() => { try { return JSON.parse(localStorage.getItem(gameHistoryKey) || "[]").filter((id: unknown) => typeof id === "string"); } catch { return []; } });
@@ -690,7 +692,7 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
     setCompletedBossSteps(finalSteps);
     setBossStatusMessage(fullyCompleted
       ? t("BOSS MODE voltooid. Alle vijf stappen zijn bewust afgerond.", "BOSS MODE complete. All five steps were deliberately completed.") + rewardNotice
-      : t(`BOSS MODE afgesloten. ${finalSteps.length} van de ${BOSS_MODE_STEP_COUNT} stappen zijn afgerond. PASS blijft zonder straf.`, `BOSS MODE closed. ${finalSteps.length} of the BOSS_MODE_STEP_COUNT steps were completed. PASS carries no penalty.`) + rewardNotice);
+      : t(`BOSS MODE afgesloten. ${finalSteps.length} van de ${BOSS_MODE_STEP_COUNT} stappen zijn afgerond. PASS blijft zonder straf.`, `BOSS MODE closed. ${finalSteps.length} of ${BOSS_MODE_STEP_COUNT} steps were completed. PASS carries no penalty.`) + rewardNotice);
     setActiveGame(null);
     setGameRound(0);
     setActiveVariant(null);
@@ -714,6 +716,7 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
           if (!accessBlockedRef.current) setBossStatusMessage(t("Stap niet afgerond; serverbevestiging ontbreekt: ", "Step not completed; server confirmation is missing: ") + (award.error ?? ""));
           return;
         }
+        if (remoteProfileIdRef.current !== remoteProfileId) return;
         receipt = award.receipt;
         if (receipt.xpEarned > 0) onBossXpAward?.(receipt.xpEarned, receipt.profileXp, receipt.profileLevel);
       }
