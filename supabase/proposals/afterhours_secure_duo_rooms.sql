@@ -378,7 +378,7 @@ begin
     'members', v_members
   );
 end;
-$;
+$$;
 
 create or replace function public.revoke_afterhours_duo_invitation(p_room_id uuid)
 returns jsonb
