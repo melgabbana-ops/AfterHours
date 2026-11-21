@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { LockKeyhole, Save, Trash2, SkipForward } from "lucide-react";
+import { LockKeyhole, Save, Trash2, SkipForward, BookOpen } from "lucide-react";
+import AftercareJournal from "./AftercareJournal";
 import {
   deletePrivateSessionNote,
   loadPrivateSessionNote,
@@ -29,6 +30,7 @@ export default function AftercareNote({ ownerId, sessionId, language, onStatusCh
   const [draft, setDraft] = useState<PrivateSessionNoteDraft>({ ...EMPTY_DRAFT });
   const [status, setStatus] = useState<PrivateNoteStatus>("pending");
   const [message, setMessage] = useState("");
+  const [journalOpen, setJournalOpen] = useState(false);
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
   const hasText = Object.values(draft).some((value) => value.trim().length > 0);
   const dirty = !sameDraft(draft, noteDraft(saved));
@@ -99,8 +101,12 @@ export default function AftercareNote({ ownerId, sessionId, language, onStatusCh
         <h3 id="aftercare-private-note-title">{t("Wil je iets onthouden van deze ervaring?", "Would you like to remember something from this experience?")}</h3>
       </div>
     </div>
+    <button type="button" className="ah-open-journal" aria-expanded={journalOpen} onClick={() => setJournalOpen(value => !value)}>
+      <BookOpen size={16}/>{journalOpen ? t("Privéjournal sluiten", "Close private journal") : t("Open versleuteld privéjournal", "Open encrypted private journal")}
+    </button>
+    {journalOpen && <AftercareJournal key={ownerId} ownerId={ownerId} language={language} onClose={() => setJournalOpen(false)}/>}
     <p className="aftercare-private-note-privacy">
-      {t("Alleen lokaal opgeslagen in deze browser op dit apparaat. De notitie wordt niet naar je account of de server geüpload en is niet versleuteld. Gebruik een apparaat dat je zelf vertrouwt.", "Stored only in this browser on this device. The note is not uploaded to your account or the server and is not encrypted. Use a device you trust.")}
+      {t("Deze sessienotitie wordt alleen lokaal in deze browser opgeslagen en is niet versleuteld. Voor persoonlijke reflecties kun je het aparte versleutelde privéjournal openen.", "This session note is stored only in this browser and is not encrypted. For personal reflections, open the separate encrypted private journal.")}
     </p>
     <div className="aftercare-private-note-fields">
       <label htmlFor="aftercare-note-how-felt">{t("Hoe voelde de sessie?", "How did the session feel?")}</label>
