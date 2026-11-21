@@ -16,7 +16,7 @@ create index if not exists afterhours_run_checkins_run_step
   on public.afterhours_experience_run_checkins (run_id, step_index, created_at desc);
 
 -- One owner plus at most one accepted invitee: this is a couples experience, not a group room.
-create unique index if not exists afterhours_experience_invitations_one_accepted_participant_per_run
+create unique index if not exists afterhours_invites_one_accepted_per_run
   on public.afterhours_experience_invitations (run_id)
   where status = 'accepted' and accepted_user_id is not null;
 
@@ -32,7 +32,7 @@ create or replace function public.afterhours_guard_run_checkin_identity()
 returns trigger
 language plpgsql
 set search_path = pg_catalog
-as $
+as $function$
 begin
   if new.run_id is distinct from old.run_id
     or new.user_id is distinct from old.user_id
@@ -41,7 +41,7 @@ begin
   end if;
   return new;
 end;
-$;
+$function$;
 
 drop trigger if exists afterhours_run_checkins_identity_guard on public.afterhours_experience_run_checkins;
 create trigger afterhours_run_checkins_identity_guard
