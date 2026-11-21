@@ -22,6 +22,27 @@ grant select, insert on public.afterhours_experience_run_checkins to authenticat
 -- existing row and proposed row to the signed-in participant's consented run.
 grant update (run_id, user_id, step_index, signal) on public.afterhours_experience_run_checkins to authenticated;
 
+-- Upsert needs column-level UPDATE privileges, but identity must remain immutable.
+create or replace function public.afterhours_guard_run_checkin_identity()
+returns trigger
+language plpgsql
+set search_path = pg_catalog
+as $
+begin
+  if new.run_id is distinct from old.run_id
+    or new.user_id is distinct from old.user_id
+    or new.step_index is distinct from old.step_index then
+    raise exception 'Check-in identity fields are immutable.';
+  end if;
+  return new;
+end;
+$;
+
+drop trigger if exists afterhours_run_checkins_identity_guard on public.afterhours_experience_run_checkins;
+create trigger afterhours_run_checkins_identity_guard
+  before update on public.afterhours_experience_run_checkins
+  for each row execute function public.afterhours_guard_run_checkin_identity();
+
 create policy afterhours_run_checkins_read_owner_or_participant
   on public.afterhours_experience_run_checkins
   for select to authenticated
