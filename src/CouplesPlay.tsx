@@ -56,7 +56,8 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
       return;
     }
     let alive = true;
-    const channel = supabase.channel("couples-" + roomCode, { config: { presence: { key: participantId }, broadcast: { self: false } } });
+    const client = supabase;
+    const channel = client.channel("couples-" + roomCode, { config: { presence: { key: participantId }, broadcast: { self: false } } });
     channelRef.current = channel;
     channel.on("presence", { event: "sync" }, () => {
       if (alive) setParticipants(Object.values(channel.presenceState<PresenceMeta>()).flat());
@@ -83,7 +84,7 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
     return () => {
       alive = false;
       channelRef.current = null;
-      if (supabase) void supabase.removeChannel(channel);
+      void client.removeChannel(channel);
     };
   }, [mode, roomCode, participantId]);
 
