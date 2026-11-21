@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Pause, Play, RotateCcw, Timer } from "lucide-react";
+import { Pause, Play, RotateCcw, SkipForward, Timer } from "lucide-react";
 import {
   AFTERCARE_MEDITATION_DURATION_SECONDS,
   AFTERCARE_MEDITATION_PHASES,
@@ -7,6 +7,7 @@ import {
   getAftercareMeditationPhase,
   getAftercareMeditationProgressPercent,
   getAftercareMeditationRemainingSeconds,
+  skipAftercareMeditationPhase,
 } from "./aftercareMeditation";
 import "./AftercareMeditation.css";
 
@@ -63,6 +64,24 @@ export default function AftercareMeditation({ language }: { language: Language }
     setStartedAt(null);
   };
 
+  const skipCurrentPhase = () => {
+    const currentElapsed = running && startedAt !== null
+      ? Math.min(
+        AFTERCARE_MEDITATION_DURATION_SECONDS,
+        Math.max(0, Math.floor((Date.now() - startedAt) / 1000)),
+      )
+      : elapsedSeconds;
+    const nextElapsed = skipAftercareMeditationPhase(currentElapsed);
+    const shouldRemainRunning = running && nextElapsed < AFTERCARE_MEDITATION_DURATION_SECONDS;
+    setElapsedSeconds(nextElapsed);
+    setRunning(shouldRemainRunning);
+    setStartedAt(shouldRemainRunning ? Date.now() - nextElapsed * 1000 : null);
+    setMessage(t(
+      "Deze stap is overgeslagen. Je kunt op je eigen tempo verdergaan.",
+      "This stage was skipped. Continue at your own pace.",
+    ));
+  };
+
   const end = () => {
     setRunning(false);
     setStartedAt(null);
@@ -79,8 +98,8 @@ export default function AftercareMeditation({ language }: { language: Language }
         <Timer aria-hidden="true" />
         <div>
           <span className="eyebrow">AFTER HOURS · OPTIONAL PRACTICE</span>
-          <h3 id="aftercare-meditation-title">{t("Begeleide meditatie · 30 minuten", "Guided meditation · 30 minutes")}</h3>
-          <p>{t("Zes rustige stappen van vijf minuten. Je bepaalt zelf het tempo.", "Six gentle five-minute stages. You choose your own pace.")}</p>
+          <h3 id="aftercare-meditation-title">{t("Begeleide meditatie · maximaal 30 minuten", "Guided meditation · up to 30 minutes")}</h3>
+          <p>{t("Zes optionele stappen van maximaal vijf minuten. Je bepaalt zelf het tempo.", "Six optional stages of up to five minutes. You choose your own pace.")}</p>
         </div>
       </div>
 
@@ -108,7 +127,7 @@ export default function AftercareMeditation({ language }: { language: Language }
         <h4>{completed ? t("Goed geland", "Gently completed") : phaseTitle}</h4>
         <p role="status" aria-live="polite">
           {completed
-            ? t("De 30 minuten zijn voorbij. Neem rustig de tijd om terug te keren en kies wat je nu nodig hebt.", "The 30 minutes are complete. Take your time returning and choose what you need next.")
+            ? t("De oefening is afgerond. Neem rustig de tijd om terug te keren en kies wat je nu nodig hebt.", "The practice is complete. Take your time returning and choose what you need next.")
             : phaseInstruction}
         </p>
       </div>
@@ -123,6 +142,12 @@ export default function AftercareMeditation({ language }: { language: Language }
         {running && (
           <button type="button" className="gold" onClick={pause}>
             <Pause aria-hidden="true" />{t("Pauzeren", "Pause")}
+          </button>
+        )}
+        {!completed && (
+          <button type="button" className="aftercare-meditation-skip" onClick={skipCurrentPhase}>
+            <SkipForward aria-hidden="true" />
+            {t("Sla deze stap over", "Skip this stage")}
           </button>
         )}
         {(running || elapsedSeconds > 0) && (
