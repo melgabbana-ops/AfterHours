@@ -156,7 +156,8 @@ export default function CinematicWorld({
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
   const [tab, setTab] = useState<Tab>(() => new URLSearchParams(window.location.search).has("invite") ? "invitation" : "experience");
   const [records, setRecords] = useState<RecordMap>(EMPTY_RECORDS);
-  const [runs, setRuns] = useState<ExperienceRun[]>([]);\n  const [sharedCheckIns, setSharedCheckIns] = useState<ExperienceRunCheckIn[]>([]);
+  const [runs, setRuns] = useState<ExperienceRun[]>([]);
+  const [sharedCheckIns, setSharedCheckIns] = useState<ExperienceRunCheckIn[]>([]);
   const [experienceInvites, setExperienceInvites] = useState<ExperienceInvitation[]>([]);
   const [selectedInviteRunId, setSelectedInviteRunId] = useState("");
   const [inviteLink, setInviteLink] = useState("");
