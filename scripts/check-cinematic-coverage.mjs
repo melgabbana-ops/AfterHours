@@ -32,16 +32,44 @@ function reportMissing(file, className) {
 function inspectClassExpression(file, expression) {
   const literalParts = [];
   const dynamicPrefixes = [];
-  function visit(node) {
+  function collect(node) {
     if (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) {
       literalParts.push(node.text);
-    } else if (ts.isTemplateHead(node) || ts.isTemplateMiddle(node) || ts.isTemplateTail(node)) {
-      literalParts.push(node.text);
-      if (node.text.endsWith("-")) dynamicPrefixes.push(node.text);
+      return;
     }
-    ts.forEachChild(node, visit);
+    if (ts.isParenthesizedExpression(node) || ts.isAsExpression(node) || ts.isTypeAssertionExpression(node)) {
+      collect(node.expression);
+      return;
+    }
+    if (ts.isConditionalExpression(node)) {
+      collect(node.whenTrue);
+      collect(node.whenFalse);
+      return;
+    }
+    if (ts.isBinaryExpression(node)) {
+      const operator = node.operatorToken.kind;
+      if (operator === ts.SyntaxKind.PlusToken) {
+        collect(node.left);
+        collect(node.right);
+      } else if (operator === ts.SyntaxKind.AmpersandAmpersandToken || operator === ts.SyntaxKind.BarBarToken || operator === ts.SyntaxKind.QuestionQuestionToken) {
+        collect(node.right);
+      }
+      return;
+    }
+    if (ts.isTemplateExpression(node)) {
+      literalParts.push(node.head.text);
+      if (node.head.text.endsWith("-")) dynamicPrefixes.push(node.head.text);
+      for (const span of node.templateSpans) {
+        literalParts.push(span.literal.text);
+        if (span.literal.text.endsWith("-")) dynamicPrefixes.push(span.literal.text);
+      }
+      return;
+    }
+    if (ts.isCallExpression(node)) {
+      for (const argument of node.arguments) collect(argument);
+    }
   }
-  visit(expression);
+  collect(expression);
 
   for (const part of literalParts) {
     for (const className of part.split(/[\\s,]+/).filter(Boolean)) {
