@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, Copy, Link2, MonitorSmartphone, Pause, Play, ShieldCheck, Users, Wifi, WifiOff } from "lucide-react";
 import { supabase, supabaseConfigured } from "./services/supabase";
-import { canResumeRemotePlay, canStartRemotePlay, shouldPauseRemotePlay } from "./couplesPlayState";
+import { canResumeRemotePlay, canStartRemotePlay, shouldPauseRemotePlay, normalizeRoomCode, ROOM_CODE_LENGTH } from "./couplesPlayState";
 
 type Language = "nl" | "en";
 type Mode = "local" | "remote";
@@ -16,14 +16,14 @@ const prompts = [
 ];
 function newCode() {
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  const bytes = new Uint8Array(10);
+  const bytes = new Uint8Array(ROOM_CODE_LENGTH);
   crypto.getRandomValues(bytes);
   return Array.from(bytes, value => alphabet[value % alphabet.length]).join("");
 }
 
 export default function CouplesPlay({ language, onBack }: { language: Language; onBack: () => void }) {
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
-  const initialCode = useMemo(() => { const code = new URLSearchParams(window.location.search).get("couple")?.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 10) || ""; return code.length === 10 ? code : ""; }, []);
+  const initialCode = useMemo(() => normalizeRoomCode(new URLSearchParams(window.location.search).get("couple")), []);
   const [mode, setMode] = useState<Mode>(initialCode ? "remote" : "local");
   const [roomCode, setRoomCode] = useState(initialCode);
   const [joinCode, setJoinCode] = useState(initialCode);
@@ -235,8 +235,8 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
       <span className="eyebrow">REMOTE · ROOM CODE</span><h3>{t("Verbind jullie apparaten", "Connect your devices")}</h3>
       {!supabaseConfigured ? <p role="alert">{t("Online koppelspel vereist een geconfigureerde realtime-verbinding. Lokaal spelen blijft beschikbaar.", "Online couple play requires a configured realtime connection. Local play remains available.")}</p> : <>
         {!roomCode ? <div className="couples-room-entry">
-          <label className="couples-join-code">{t("Kamercode invoeren", "Enter room code")}<input value={joinCode} onChange={e=>setJoinCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,10))} maxLength={10} autoComplete="off" placeholder={t("10 tekens", "10 characters")}/></label>
-          <button type="button" className="couples-primary" disabled={joinCode.length !== 10} onClick={()=>{setRoomCode(joinCode);setMyConsent(false);setStatus("lobby");setRound(0);}}><Link2 size={16}/>{t("Deelnemen aan kamer met code", "Join room with a code")}</button>
+          <label className="couples-join-code">{t("Kamercode invoeren", "Enter room code")}<input value={joinCode} onChange={e=>setJoinCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,ROOM_CODE_LENGTH))} maxLength={ROOM_CODE_LENGTH} autoComplete="off" placeholder={t("16 tekens", "16 characters")}/></label>
+          <button type="button" className="couples-primary" disabled={normalizeRoomCode(joinCode) === ""} onClick={()=>{setRoomCode(joinCode);setMyConsent(false);setStatus("lobby");setRound(0);}}><Link2 size={16}/>{t("Deelnemen aan kamer met code", "Join room with a code")}</button>
           <span className="couples-entry-divider">{t("of maak zelf een kamer aan", "or create your own room")}</span>
           <button type="button" className="couples-secondary" onClick={createRoom}><Users size={16}/>{t("Maak een kamer met code", "Create a room with a code")}</button>
         </div> : <>
