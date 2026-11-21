@@ -17,11 +17,12 @@ async function collect(directory) {
 
 await collect(sourceRoot);
 const missing = new Map();
-const classPattern = /className=["']([^"']+)["']/g;
+const classPattern = /className=(?:"([^"]+)"|'([^']+)'|{`([^`]+)`})/g;
 for (const file of sourceFiles) {
   const source = await readFile(file, "utf8");
   for (const match of source.matchAll(classPattern)) {
-    for (const className of match[1].split(/\s+/).filter(Boolean)) {
+    const classValue = (match[1] ?? match[2] ?? match[3] ?? "").replace(/\$\{[^}]*\}/g, " ");
+    for (const className of classValue.split(/\s+/).filter(Boolean)) {
       const escaped = className.replace(/[.*+?^\${}()|[\]\\]/g, "\\$&");
       const selector = new RegExp("\\." + escaped + "(?![\\w-])");
       if (!selector.test(styles)) {
@@ -38,4 +39,4 @@ if (missing.size) {
   console.error("Cinematic style coverage failed. Add styles or remove obsolete class names.");
   process.exit(1);
 }
-console.log("Cinematic style coverage passed: every static JSX class has a stylesheet rule.");
+console.log("Cinematic style coverage passed: every statically declared JSX class, including template-literal classes, has a stylesheet rule.");
