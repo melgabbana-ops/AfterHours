@@ -46,7 +46,7 @@ import{levelFromXp,rankFromXp,rankIndexFromXp,rankNames,rankThresholds}from"./pr
 import{notificationEvents}from"./services/notifications";
 import{canStartSessionWithVerifiedState,getPendingStopTimestamp,getSessionSafetyAnnouncement,getTaskChoiceFeedback,isTaskPassed,PASS_TASK_SELECTION,shouldResumeSession,shouldResumeSessionBeforeHydration}from"./services/sessionSafety";
 import {getMaintenanceStatus,formatMaintenanceDate,type MaintenanceConfig} from "./maintenance";
-import { getGuidedExperienceBlockReason } from "./experienceAccess";
+import { getGuidedExperienceBlockReason } from "./experienceAccess";\nimport { awardKinkTestCompletion } from "./services/kinkTestRewards";\nimport { awardLocalKinkTestXp } from "./kinkTest";
 const PromptLibrary = React.lazy(() => import("./PromptLibrary"));
 const Insights = React.lazy(async () => ({ default: (await import("./Insights")).Insights }));
 const RadioRoom = React.lazy(async () => ({ default: (await import("./RadioRoom")).RadioRoom }));
@@ -63,7 +63,7 @@ const MoodHistory = React.lazy(() => import("./MoodHistory"));
 const LovenseControl = React.lazy(() => import("./LovenseControl"));
 const DailyAfterHours = React.lazy(() => import("./DailyAfterHours"));
 const CinematicWorld = React.lazy(() => import("./CinematicWorld"));
-const CouplesPlay = React.lazy(() => import("./CouplesPlay"));
+const CouplesPlay = React.lazy(() => import("./CouplesPlay"));\nconst KinkTest = React.lazy(() => import("./KinkTest"));
 
 class AppErrorBoundary extends React.Component<React.PropsWithChildren, {hasError:boolean}>{
  state={hasError:false};
@@ -369,7 +369,7 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
  const testNotificationSound=async()=>{setSoundTestFeedback("");primeNotificationAudio();const played=await playNotificationSound("message");setSoundTestFeedback(played?t("AFTER HOURS-geluid afgespeeld. Hoor je niets? Controleer het volume en de stille modus van je iPhone.","AFTER HOURS sound scheduled. If you hear nothing, check your phone volume and silent mode."):t("Audio is door je browser geblokkeerd. Tik nogmaals op Test eigen geluid en controleer je browserinstellingen.","Your browser blocked audio. Tap Test signature sound again and check your browser settings."));};
  useEffect(()=>{if(screen==="home"||screen==="legal")return;if(!state.ageConfirmed){setScreen("home");return}if(screen==="game"&&state.consent.status!=="active"){setScreen("home")}},[screen,state.ageConfirmed,state.consent.status]);
  useEffect(()=>{if(state.ageConfirmed&&screen==="home"&&new URLSearchParams(window.location.search).has("couple"))setScreen("couples")},[state.ageConfirmed,screen]);
- const xp=state.profile.xp;
+ const awardKinkTestXp = async () => {\n  if (supabaseConfigured) {\n   const result = await awardKinkTestCompletion();\n   if (result.totalXp !== null) setState(current => ({ ...current, profile: { ...current.profile, xp: result.totalXp!, level: levelFromXp(result.totalXp!) } }));\n   return { ...result, source: "account" as const };\n  }\n  const result = awardLocalKinkTestXp(state.profile.id);\n  if (result.xpEarned > 0) setState(current => { const nextXp = current.profile.xp + result.xpEarned; return { ...current, profile: { ...current.profile, xp: nextXp, level: levelFromXp(nextXp) } }; });\n  return { ...result, totalXp: null, source: "device" as const };\n };\n const xp=state.profile.xp;
  const currentLevel=Math.max(1,state.profile.level);
  const levelFloor=(currentLevel-1)*200;
  const nextLevelFloor=currentLevel*200;
@@ -576,14 +576,14 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
    <button className="tile" onClick={()=>setScreen("gameSelect")}><Play/><span>{t("Games","Games")}</span></button>
    <button className="tile" onClick={()=>{setInsightsInitialTab("tarot");setScreen("insights")}}><Sparkles/><span>Tarot</span></button>
    <button className="tile" onClick={()=>setScreen("radio")}><Headphones/><span>Radio</span></button>
-   <button className="tile" onClick={()=>setScreen("profile")}><User/><span>{t("Profiel","Profile")}</span></button>
+   <button className="tile" onClick={()=>setScreen("profile")}><User/><span>{t("Profiel","Profile")}</span></button>\n   <button className="tile" onClick={()=>setScreen("kinktest")}><Sparkles/><span>Kink Profile</span></button>
   </section>
   <details className="home-more">
    <summary>{t("Meer ontdekken","Explore more")}</summary>
    <div className="home-more-grid">
     <button onClick={()=>{setInsightsInitialTab("astro");setScreen("insights")}}>{t("Horoscoop","Horoscope")}</button>
     <button onClick={()=>setScreen("prompts")}>{t("Het Deck","The Deck")}</button>
-    <button onClick={()=>setScreen("missions")}>{t("Missies","Missions")}</button>
+    <button onClick={()=>setScreen("missions")}>{t("Missies","Missions")}</button>\n    <button onClick={()=>setScreen("kinktest")}>Kink Profile</button>
     <button onClick={()=>setScreen("daily")}>{t("Dagelijks ritueel","Daily ritual")}</button>
     <button onClick={()=>setScreen("store")}>{t("Collecties & prijzen","Collections & pricing")}</button>
     <button onClick={()=>setScreen("social")}>{t("Social studio","Social studio")}</button>
@@ -620,7 +620,7 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
  <React.Suspense fallback={<main className="feature-loading" role="status"><p>{t("Scherm wordt geladen…","Loading screen…")}</p></main>}>
  {screen==="capture"&&<main className="aftercare-screen"><section className="aftercare-card"><span className="eyebrow">AFTER HOURS · ASSIGNMENT CAPTURE</span><h2>{t("Opdracht vastleggen","Capture this assignment")}</h2>{captureAssignment&&<div className="assignment-captions"><strong>{captureAssignment.title}</strong><p>{captureAssignment.task}</p></div>}<p>{t("De opname is optioneel. Vraag opnieuw expliciete toestemming aan iedereen die herkenbaar in beeld of geluid komt. Je ziet eerst een voorbeeld; opslaan gebeurt pas na jouw keuze.","Recording is optional. Renew explicit consent from everyone identifiable in image or audio. You will see a preview first; saving happens only if you choose it.")}</p><MediaVault sessionId={state.session.id} language={language} assignmentTitle={captureAssignment?.title} assignmentTask={captureAssignment?.task}/><button className="back" onClick={()=>setScreen("prompts")}>← {t("Terug naar opdracht","Back to assignment")}</button></section></main>}
  {screen==="prompts"&&<PromptLibrary playerId={state.profile.id} remoteProfileId={syncUserId} language={language} experienceStartBlockedReason={experienceStartBlockedReason} onRequestConsent={()=>{if(!consent)setScreen("consent");else if(!syncUserId)setScreen("admin");else window.location.reload();}} onBack={()=>setScreen("home")} onComplete={(chapterId)=>{recordAchievement("prompt_complete",{profileId:syncUserId});if(chapterId)recordAchievement("story_chapter_complete",{profileId:syncUserId,chapterId});}} onSafetyAction={(action)=>{if(action==="stop"){handleCheckIn("stop");return true;}if(action==="pause"){if(state.session.status==="active")handleCheckIn("pause");return true;}if(state.session.status==="paused"){const allowed=canStartSessionWithVerifiedState(supabaseConfigured,Boolean(syncUserId),remoteStateVerified)&&consent;startRound();return allowed;}return true;}} onCaptureAssignment={(assignment)=>{setCaptureAssignment(assignment);setScreen("capture")}}/>}
- {screen==="missions"&&<Missions language={language} onBack={()=>setScreen("home")} onExplore={(destination)=>setScreen((destination==="aftercare"?"aftercare":destination==="safety"?"safety":destination==="insights"?"insights":destination==="prompts"?"prompts":"home"))}/> }
+ {screen==="kinktest"&&<KinkTest profileId={syncUserId??state.profile.id} language={language} onBack={()=>setScreen("home")} onReward={awardKinkTestXp}/>}\n {screen==="missions"&&<Missions language={language} onBack={()=>setScreen("home")} onExplore={(destination)=>setScreen((destination==="aftercare"?"aftercare":destination==="safety"?"safety":destination==="insights"?"insights":destination==="prompts"?"prompts":"home"))}/> }
  {screen==="cinematic"&&<CinematicWorld language={language} remoteProfileId={syncUserId} consentActive={consent} canStartExperience={!experienceStartBlockedReason} onBack={()=>setScreen("home")} onRequestConsent={()=>{if(!consent)setScreen("consent");else if(!syncUserId)setScreen("admin");else window.location.reload();}} onSafetyPause={()=>{if(state.session.status==="active")handleCheckIn("pause")}} onSafetyResume={()=>{if(state.session.status==="paused")startRound()}} onSafetyStop={()=>{if(state.session.status==="active"||state.session.status==="paused")handleCheckIn("stop");setScreen("home")}} onOpenGameLibrary={()=>setScreen("prompts")} onOpenAftercare={()=>setScreen("aftercare")} onOpenSafetyPlan={()=>setScreen("safety")}/>}
  {screen==="daily"&&<DailyAfterHours profileId={state.profile.id} language={language} onBack={()=>setScreen("home")} onOpenMissions={()=>setScreen("missions")} onOpenInsights={()=>setScreen("insights")}/>}
  {screen==="social"&&<SocialStudio language={language} onBack={()=>setScreen("home")}/>}
