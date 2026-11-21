@@ -107,6 +107,21 @@ async function assertVaultKey(key: CryptoKey, vault: StoredVault): Promise<void>
     throw new Error("De journal-kluis is vergrendeld of de sleutel hoort niet bij deze kluis.");
   }
 }
+async function decryptVaultEntries(key: CryptoKey, vault: StoredVault): Promise<PrivateJournalEntry[]> {
+  await assertVaultKey(key, vault);
+  const entries = await Promise.all(vault.entries.map(async (row) => {
+    const parsed: unknown = JSON.parse(await decryptText(key, row));
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("Ongeldige journalnotitie.");
+    const entry = parsed as Record<string, unknown>;
+    if (entry.id !== row.id || typeof entry.title !== "string" || typeof entry.body !== "string"
+      || entry.title.length > 120 || entry.body.length > PRIVATE_JOURNAL_ENTRY_LIMIT
+      || entry.createdAt !== row.createdAt || entry.updatedAt !== row.updatedAt) {
+      throw new Error("Een journalnotitie kon niet veilig worden gelezen.");
+    }
+    return entry as unknown as PrivateJournalEntry;
+  }));
+  return entries.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+}
 function persistVault(target: JournalStorage, vault: StoredVault): void {
   const serialized = JSON.stringify(vault);
   target.setItem(PRIVATE_JOURNAL_STORAGE_KEY, serialized);
@@ -164,19 +179,7 @@ export async function loadPrivateJournalEntries(
   if (!target) throw new Error("Lokale opslag is niet beschikbaar.");
   const vault = parseVault(target.getItem(PRIVATE_JOURNAL_STORAGE_KEY));
   if (!vault) throw new Error("De journal-kluis ontbreekt of is beschadigd.");
-  await assertVaultKey(key, vault);
-  const entries = await Promise.all(vault.entries.map(async (row) => {
-    const parsed: unknown = JSON.parse(await decryptText(key, row));
-    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("Ongeldige journalnotitie.");
-    const entry = parsed as Record<string, unknown>;
-    if (entry.id !== row.id || typeof entry.title !== "string" || typeof entry.body !== "string"
-      || entry.title.length > 120 || entry.body.length > PRIVATE_JOURNAL_ENTRY_LIMIT
-      || entry.createdAt !== row.createdAt || entry.updatedAt !== row.updatedAt) {
-      throw new Error("Een journalnotitie kon niet veilig worden gelezen.");
-    }
-    return entry as unknown as PrivateJournalEntry;
-  }));
-  return entries.sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  return decryptVaultEntries(key, vault);
 }
 
 export async function savePrivateJournalEntry(
@@ -214,6 +217,52 @@ export async function savePrivateJournalEntry(
     : [row, ...vault.entries];
   persistVault(target, { ...vault, entries });
   return entry;
+}
+
+export async function exportPrivateJournalBackup(key: CryptoKey, storage?: JournalStorage): Promise<string> {
+  const target = storageTarget(storage);
+  if (!target) throw new Error("Lokale opslag is niet beschikbaar.");
+  const vault = parseVault(target.getItem(PRIVATE_JOURNAL_STORAGE_KEY));
+  if (!vault) throw new Error("De journal-kluis ontbreekt of is beschadigd.");
+  await decryptVaultEntries(key, vault);
+  return JSON.stringify({ format: "afterhours-private-journal", ...vault });
+}
+
+export async function importPrivateJournalBackup(
+  currentKey: CryptoKey,
+  backupText: string,
+  backupPassphrase: string,
+  storage?: JournalStorage,
+): Promise<number> {
+  if (backupText.length > 5_000_000) throw new Error("Dit back-upbestand is te groot.");
+  let parsed: unknown;
+  try { parsed = JSON.parse(backupText); } catch { throw new Error("Dit is geen geldig journal-back-upbestand."); }
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)
+    || (parsed as Record<string, unknown>).format !== "afterhours-private-journal") {
+    throw new Error("Dit bestand is geen AFTER HOURS journal-back-up.");
+  }
+  const backupVault = parseVault(JSON.stringify(parsed));
+  if (!backupVault) throw new Error("De back-up is beschadigd of heeft een onbekend formaat.");
+  const backupKey = await deriveKey(backupPassphrase, fromBase64(backupVault.salt));
+  const backupEntries = await decryptVaultEntries(backupKey, backupVault);
+  const target = storageTarget(storage);
+  if (!target) throw new Error("Lokale opslag is niet beschikbaar.");
+  const currentVault = parseVault(target.getItem(PRIVATE_JOURNAL_STORAGE_KEY));
+  if (!currentVault) throw new Error("De huidige journal-kluis ontbreekt of is beschadigd.");
+  const currentEntries = await decryptVaultEntries(currentKey, currentVault);
+  const merged = new Map<string, PrivateJournalEntry>();
+  for (const entry of [...currentEntries, ...backupEntries]) {
+    const previous = merged.get(entry.id);
+    if (!previous || entry.updatedAt > previous.updatedAt) merged.set(entry.id, entry);
+  }
+  const encryptedRows = await Promise.all([...merged.values()].map(async (entry) => ({
+    id: entry.id,
+    createdAt: entry.createdAt,
+    updatedAt: entry.updatedAt,
+    ...(await encryptText(currentKey, JSON.stringify(entry))),
+  })));
+  persistVault(target, { ...currentVault, entries: encryptedRows });
+  return backupEntries.length;
 }
 
 export function deletePrivateJournalEntry(entryId: string, storage?: JournalStorage): boolean {
