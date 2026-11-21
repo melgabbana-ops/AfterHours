@@ -161,7 +161,8 @@ export async function composeImageWithEdits(file: File, style: OverlayFrameStyle
     return new File([blob], basename + "-after-hours.jpg", { type: "image/jpeg", lastModified: Date.now() });
   } finally { URL.revokeObjectURL(objectUrl); }
 }
-\nexport function drawCameraFrame(ctx:CanvasRenderingContext2D,video:HTMLVideoElement,width:number,height:number,style:OverlayFrameStyle) {
+
+export function drawCameraFrame(ctx:CanvasRenderingContext2D,video:HTMLVideoElement,width:number,height:number,style:OverlayFrameStyle) {
   if(video.videoWidth<1||video.videoHeight<1)return;
   const sourceRatio=video.videoWidth/video.videoHeight;
   const targetRatio=width/height;
