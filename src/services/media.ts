@@ -61,6 +61,7 @@ function safeFileName(value: string): string {
 }
 
 export function safeMediaSessionFolder(value: string): string {
+  if (value === "." || value === "..") return "general";
   const segment = safeFileName(value || "general");
   return segment === "." || segment === ".." ? "general" : segment;
 }
