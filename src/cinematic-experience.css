@@ -83,15 +83,15 @@
 .cw-checkin{margin-top:14px;padding:13px;border:1px solid rgba(207,174,121,.2);background:rgba(0,0,0,.22)}
 .cw-checkin>strong{display:block;margin-bottom:10px;color:#e6d5b9;font-size:10px}
 .cw-checkin>div{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
-.cw-checkin button{min-height:42px;padding:8px 5px;border:1px solid rgba(207,174,121,.22);font-size:9px;color:#d9c9ae}
+.cw-checkin button{min-height:48px;padding:8px 5px;border:1px solid rgba(207,174,121,.22);font-size:9px;color:#d9c9ae}
 .cw-checkin button.green{border-color:rgba(103,151,109,.55);color:#b6d4b5}
 .cw-checkin button.yellow{border-color:rgba(190,151,71,.55);color:#e5c982}
 .cw-checkin button.red{border-color:rgba(177,92,70,.65);color:#e8a89b}
 .cw-checkin button.selected{background:rgba(201,159,93,.14);box-shadow:inset 0 0 0 1px currentColor}
 .cw-checkin small{display:block;margin-top:9px;color:#9f927e;font-size:8px;line-height:1.5}
 .cw-run-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
-.cw-run-actions>button:not(.cw-primary){display:inline-flex;align-items:center;gap:7px;min-height:44px;padding:10px 13px;border:1px solid rgba(207,174,121,.34);color:#dfceb1;font-size:9px}
-.cw-run-actions .cw-stop,.cw-danger{display:inline-flex;align-items:center;gap:7px;min-height:44px;padding:10px 13px;border:1px solid rgba(161,79,65,.65);color:#e4a69b;font-size:9px}
+.cw-run-actions>button:not(.cw-primary){display:inline-flex;align-items:center;gap:7px;min-height:48px;padding:10px 13px;border:1px solid rgba(207,174,121,.34);color:#dfceb1;font-size:9px}
+.cw-run-actions .cw-stop,.cw-danger{display:inline-flex;align-items:center;gap:7px;min-height:48px;padding:10px 13px;border:1px solid rgba(161,79,65,.65);color:#e4a69b;font-size:9px}
 .cw-aftercare{padding:18px;border:1px solid rgba(207,174,121,.3);background:rgba(5,5,4,.75);text-align:center}
 .cw-aftercare>svg{width:30px;height:30px;color:#d4b47f}
 .cw-aftercare h3{color:#f0dfc0;font:500 24px Cinzel,Georgia,serif}
@@ -138,7 +138,7 @@
 .cw-badges strong{color:#e8d6b8;font-size:10px}
 .cw-badges small{color:#a99b86;font-size:8px}
 .cw-badges em{color:#c5a36e;font-size:7px;font-style:normal;letter-spacing:.08em}
-.cw-primary:focus-visible,.cw-run-actions button:focus-visible,.cw-card-actions button:focus-visible,.cw-tabs button:focus-visible,.cw-saved-row button:focus-visible{outline:2px solid #e3c38c;outline-offset:3px}
+.cw-primary:focus-visible,.cw-run-actions button:focus-visible,.cw-checkin button:focus-visible,.cw-card-actions button:focus-visible,.cw-tabs button:focus-visible,.cw-saved-row button:focus-visible{outline:2px solid #e3c38c;outline-offset:3px}
 @media(max-width:600px){
  .cw-scene-grid{grid-template-columns:1fr}
  .cw-resume-card,.cw-selected-scene-gate{grid-template-columns:1fr}
