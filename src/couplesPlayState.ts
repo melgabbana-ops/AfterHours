@@ -36,3 +36,7 @@ export function canResumeRemotePlay(state: {
 }): boolean {
   return state.connected && state.serverAuthorized && state.participantCount === 2 && state.partnerPresent && state.ownConsent && state.partnerConsent;
 }
+
+export function canStartLocalPlay(state: { ownConsent: boolean; partnerConsent: boolean; ownName: string; partnerName: string }): boolean {
+  return state.ownConsent && state.partnerConsent && state.ownName.trim().length > 0 && state.partnerName.trim().length > 0;
+}
