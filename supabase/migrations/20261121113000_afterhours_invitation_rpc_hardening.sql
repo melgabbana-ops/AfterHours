@@ -82,7 +82,7 @@ returns trigger
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $guard$
 declare
   v_run_status text;
 begin
@@ -96,8 +96,7 @@ begin
   end if;
   return new;
 end;
-$;
-revoke all on function private.guard_afterhours_invitation_run_paused() from public, anon, authenticated;
+$guard$; from public, anon, authenticated;
 drop trigger if exists afterhours_invitation_paused_run_guard on public.afterhours_experience_invitations;
 create trigger afterhours_invitation_paused_run_guard
 before insert or update of run_id on public.afterhours_experience_invitations
@@ -110,7 +109,7 @@ returns trigger
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $activation$
 begin
   if new.status = 'active' and old.status is distinct from 'active' then
     if exists (
@@ -138,8 +137,7 @@ begin
   end if;
   return new;
 end;
-$;
-revoke all on function private.guard_afterhours_experience_run_activation() from public, anon, authenticated;
+$activation$; from public, anon, authenticated;
 drop trigger if exists afterhours_experience_run_activation_guard on public.afterhours_experience_runs;
 create trigger afterhours_experience_run_activation_guard before update of status on public.afterhours_experience_runs
 for each row execute function private.guard_afterhours_experience_run_activation();
