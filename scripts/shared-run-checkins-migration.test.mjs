@@ -56,6 +56,14 @@ describe("shared experience check-in migration", () => {
     expect(migration).toMatch(/grant execute on function public\.renew_afterhours_experience_consent\(uuid\) to authenticated/i);
   });
 
+  it("exposes aggregate consent status only to the run owner", () => {
+    expect(migration).toMatch(/private\\.get_afterhours_shared_run_consent_status_impl/);
+    expect(migration).toMatch(/v_run_owner is distinct from v_user_id/i);
+    expect(migration).toMatch(/participant_count'[\\s\\S]*?consented_count'[\\s\\S]*?all_consented'/i);
+    expect(migration).toMatch(/public\\.get_afterhours_shared_run_consent_status[\\s\\S]*?security invoker/i);
+    expect(migration).toMatch(/grant execute on function public\\.get_afterhours_shared_run_consent_status\\(uuid\\) to authenticated/i);
+  });
+
   it("rejects invalid step indexes and unsupported signals", () => {
     expect(migration).toMatch(/step_index >= 0 and step_index < 40/i);
     expect(migration).toMatch(/signal in \('ready', 'pause_requested', 'stop_requested'\)/i);
@@ -71,7 +79,7 @@ describe("shared experience check-in migration", () => {
     expect(migration).toMatch(/revoke all on function public\.renew_afterhours_experience_consent\(uuid\) from public, anon/i);
   });
   it("uses matching tagged dollar quotes for every SQL function", () => {
-    expect(migration.match(/\bas \$function\$/gi) ?? []).toHaveLength(4);
+    expect(migration.match(/\bas \$function\$/gi) ?? []).toHaveLength(6);
     expect(migration.match(/\$function\$;/g) ?? []).toHaveLength(4);
     expect(migration).not.toMatch(/\bas \$\s/i);
   });
