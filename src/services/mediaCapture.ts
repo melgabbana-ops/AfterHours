@@ -145,3 +145,9 @@ export function missingCaptureTrack(
   if (needsAudio && !stream.getAudioTracks().some(track => track.readyState === "live")) return "audio";
   return null;
 }
+
+
+/** An interrupted capture may be previewed locally only when it contains usable, bounded data. */
+export function canRecoverInterruptedCapture(blobSize: number, maxBytes = MAX_MEDIA_CAPTURE_BYTES): boolean {
+  return Number.isFinite(blobSize) && Number.isFinite(maxBytes) && blobSize > 0 && maxBytes >= 0 && blobSize <= maxBytes;
+}
