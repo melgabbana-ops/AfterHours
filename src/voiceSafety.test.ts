@@ -104,6 +104,13 @@ describe("voice recognition profile isolation", () => {
     expect(isVoiceRecognitionCurrent("profile-a", "profile-a", replacementRecognition, originalRecognition)).toBe(false);
   });
 
+  it("rejects callbacks when either profile identity is missing or blank", () => {
+    const recognition = {};
+    expect(isVoiceRecognitionCurrent("", "", recognition, recognition)).toBe(false);
+    expect(isVoiceRecognitionCurrent("   ", "profile-a", recognition, recognition)).toBe(false);
+    expect(isVoiceRecognitionCurrent("profile-a", "  ", recognition, recognition)).toBe(false);
+  });
+
   it("detaches every browser callback before stopping recognition", () => {
     const recognition: {
       stop: () => void;
