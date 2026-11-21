@@ -112,7 +112,7 @@ security definer
 set search_path = ''
 as $activation$
 begin
-  if new.status = 'active' and old.status is distinct from 'active' then
+  if new.status = 'active' and (tg_op = 'INSERT' or old.status is distinct from 'active') then
     if exists (
       select 1 from public.afterhours_experience_invitations i
       where i.run_id = new.id and i.status = 'pending' and i.expires_at > now()
@@ -141,7 +141,7 @@ end;
 $activation$;
 revoke all on function private.guard_afterhours_experience_run_activation() from public, anon, authenticated;
 drop trigger if exists afterhours_experience_run_activation_guard on public.afterhours_experience_runs;
-create trigger afterhours_experience_run_activation_guard before update of status on public.afterhours_experience_runs
+create trigger afterhours_experience_run_activation_guard before insert or update of status on public.afterhours_experience_runs
 for each row execute function private.guard_afterhours_experience_run_activation();
 
 create or replace function public.preview_afterhours_experience_invitation(p_token_hash text)
