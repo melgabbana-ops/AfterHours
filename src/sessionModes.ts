@@ -45,3 +45,10 @@ export function pickRandomId<T extends { id: string }>(items: readonly T[], rand
   const safeValue = Number.isFinite(value) ? Math.min(0.999999999, Math.max(0, value)) : 0;
   return items[Math.floor(safeValue * items.length)]?.id ?? items[0].id;
 }
+
+
+export type LocalCouplesSignal = "unset" | "green" | "yellow" | "red";
+
+export function bothLocalParticipantsReady(signals: readonly LocalCouplesSignal[]): boolean {
+  return signals.length === 2 && signals.every((signal) => signal === "green");
+}
