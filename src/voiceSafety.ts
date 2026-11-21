@@ -72,3 +72,37 @@ export function isExplicitVoicePass(spoken: string, language: "nl" | "en"): bool
 
   return explicitPass.test(normalized);
 }
+
+
+/** Minimal browser SpeechRecognition surface needed for deterministic cleanup. */
+export interface VoiceRecognitionHandle {
+  stop: () => void;
+  onstart?: unknown;
+  onend?: unknown;
+  onerror?: unknown;
+  onresult?: unknown;
+}
+
+/** Detach callbacks before stopping so a late browser event cannot act on a new profile. */
+export function stopVoiceRecognition(recognition: VoiceRecognitionHandle | null | undefined): void {
+  if (!recognition) return;
+  recognition.onstart = null;
+  recognition.onend = null;
+  recognition.onerror = null;
+  recognition.onresult = null;
+  try {
+    recognition.stop();
+  } catch {
+    // Recognition may already have stopped or lost its microphone permission.
+  }
+}
+
+/** Accept an event only from the recognizer that was started for the active profile. */
+export function isVoiceRecognitionCurrent<T>(
+  activeProfileId: string,
+  startedProfileId: string,
+  activeRecognition: T | null | undefined,
+  startedRecognition: T,
+): boolean {
+  return activeProfileId === startedProfileId && activeRecognition === startedRecognition;
+}
