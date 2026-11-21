@@ -43,11 +43,11 @@ export function drawAfterHoursOverlay(ctx:CanvasRenderingContext2D,width:number,
     ctx.strokeStyle="rgba(215,168,79,.92)";ctx.lineWidth=fine*1.35;
     goldCorner(ctx,pad,pad,1,1,short*.1);goldCorner(ctx,width-pad,pad,-1,1,short*.1);
     goldCorner(ctx,pad,height-pad,1,-1,short*.1);goldCorner(ctx,width-pad,height-pad,-1,-1,short*.1);
-    ctx.fillStyle="rgba(7,5,9,.55)";ctx.fillRect(pad,pad,short*.42,short*.095);
+    ctx.fillStyle="rgba(5,5,5,.72)";ctx.fillRect(pad,pad,short*.42,short*.095);
     ctx.fillStyle=gold;ctx.font=`500 ${Math.max(10,short*.021)}px Georgia,serif`;
     trackedText(ctx,"AFTER HOURS",pad*1.6,pad+short*.055,short*.003);
     ctx.fillStyle=ivory;ctx.font=`500 ${Math.max(8,short*.012)}px Arial,sans-serif`;
-    trackedText(ctx,"18+  ·  YOUR RULES",width-pad-short*.22,height-pad*.38,short*.0015);
+    trackedText(ctx,"18+  ·  YOUR RULES",width-pad-short*.22,height-pad-short*.38,short*.0015);
   } else if(style==="after-hours") {
     const border=pad*.48;
     ctx.strokeStyle="rgba(215,168,79,.94)";ctx.lineWidth=fine;
@@ -56,10 +56,10 @@ export function drawAfterHoursOverlay(ctx:CanvasRenderingContext2D,width:number,
     ctx.strokeRect(pad+border,pad+border,width-2*(pad+border),height-2*(pad+border));
     const band=short*.14;
     const top=ctx.createLinearGradient(0,0,0,band);
-    top.addColorStop(0,"rgba(7,5,9,.88)");top.addColorStop(1,"rgba(7,5,9,0)");
+    top.addColorStop(0,"rgba(5,5,5,.92)");top.addColorStop(1,"rgba(5,5,5,0)");
     ctx.fillStyle=top;ctx.fillRect(0,0,width,band);
     const bottom=ctx.createLinearGradient(0,height-band,0,height);
-    bottom.addColorStop(0,"rgba(7,5,9,0)");bottom.addColorStop(1,"rgba(7,5,9,.92)");
+    bottom.addColorStop(0,"rgba(5,5,5,0)");bottom.addColorStop(1,"rgba(5,5,5,.94)");
     ctx.fillStyle=bottom;ctx.fillRect(0,height-band,width,band);
     moon(ctx,pad+short*.045,pad+short*.04,short*.018,gold);
     ctx.fillStyle=gold;ctx.font=`500 ${Math.max(12,short*.026)}px Georgia,serif`;
@@ -70,7 +70,7 @@ export function drawAfterHoursOverlay(ctx:CanvasRenderingContext2D,width:number,
     ctx.beginPath();ctx.moveTo(width-pad-short*.11,height-pad-short*.043);ctx.lineTo(width-pad,height-pad-short*.043);ctx.stroke();
   } else {
     const bar=short*.105;
-    ctx.fillStyle="rgba(5,4,7,.94)";ctx.fillRect(0,0,width,bar);ctx.fillRect(0,height-bar,width,bar);
+    ctx.fillStyle="rgba(5,5,5,.96)";ctx.fillRect(0,0,width,bar);ctx.fillRect(0,height-bar,width,bar);
     ctx.strokeStyle="rgba(215,168,79,.9)";ctx.lineWidth=fine;
     ctx.beginPath();ctx.moveTo(pad,bar*.77);ctx.lineTo(width-pad,bar*.77);ctx.moveTo(pad,height-bar*.77);ctx.lineTo(width-pad,height-bar*.77);ctx.stroke();
     moon(ctx,pad+short*.028,bar*.43,short*.014,gold);
