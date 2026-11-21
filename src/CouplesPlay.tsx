@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, Copy, Link2, MonitorSmartphone, Pause, Play, ShieldCheck, Users, Wifi, WifiOff } from "lucide-react";
 import { supabase, supabaseConfigured } from "./services/supabase";
-import { canResumeRemotePlay, canStartRemotePlay, canStartLocalPlay, shouldPauseRemotePlay, normalizeRoomCode, ROOM_CODE_LENGTH } from "./couplesPlayState";
+import { canResumeRemotePlay, canStartRemotePlay, canStartLocalPlay, shouldPauseRemotePlay, normalizeRoomCode, ROOM_CODE_LENGTH, saveLocalRoundAnswer, nextLocalPlayer, type LocalPlayer, type LocalRoundAnswers } from "./couplesPlayState";
 import { acceptDuoInvitation, previewDuoInvitation, type DuoInvitationPreview } from "./services/duoRoomApi";
 
 type Language = "nl" | "en";
@@ -41,7 +41,7 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
   const [name, setName] = useState("");
   const [partnerName, setPartnerName] = useState("");
   const [myConsent, setMyConsent] = useState(false);
-  const [localPartnerConsent, setLocalPartnerConsent] = useState(false);
+  const [localPartnerConsent, setLocalPartnerConsent] = useState(false);\n  const [localTurn, setLocalTurn] = useState<LocalPlayer>("player1");\n  const [localAnswer, setLocalAnswer] = useState("");\n  const [localAnswers, setLocalAnswers] = useState<Record<number, LocalRoundAnswers>>({});
   const [connected, setConnected] = useState(false);
   const [participants, setParticipants] = useState<PresenceMeta[]>([]);
   const [round, setRound] = useState(0);
@@ -53,7 +53,7 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
   consentRef.current = myConsent;
   connectedRef.current = connected;
   const partnerPresent = participants.some(person => person.participantId !== participantId);
-  const partnerConsented = participants.some(person => person.participantId !== participantId && person.consent === true);
+  const partnerConsented = participants.some(person => person.participantId !== participantId && person.consent === true);\n  const roundAnswers = localAnswers[round] ?? {};\n  const saveCurrentLocalAnswer = () => {\n    const nextAnswers = saveLocalRoundAnswer(roundAnswers, localTurn, localAnswer);\n    if (nextAnswers === roundAnswers) return;\n    setLocalAnswers(previous => ({ ...previous, [round]: nextAnswers }));\n    setLocalAnswer("");\n    setLocalTurn(nextLocalPlayer(localTurn));\n  };
   const ready = mode === "local" ? canStartLocalPlay({ ownConsent: myConsent, partnerConsent: localPartnerConsent, ownName: name, partnerName }) : canStartRemotePlay({ connected, serverAuthorized: false, participantCount: participants.length, partnerPresent, ownConsent: myConsent, partnerConsent: partnerConsented });
   const inviteUrl = useMemo(() => {
     const url = new URL(window.location.href);
@@ -334,7 +334,7 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
       </div>
       <label className="couples-consent"><input type="checkbox" checked={myConsent} onChange={e=>setMyConsent(e.target.checked)}/><span>{t("Speler 1 stemt vrijwillig in.", "Player 1 freely consents.")}</span></label>
       <label className="couples-consent"><input type="checkbox" checked={localPartnerConsent} onChange={e=>setLocalPartnerConsent(e.target.checked)}/><span>{t("Speler 2 stemt vrijwillig in.", "Player 2 freely consents.")}</span></label>
-      <button type="button" className="couples-primary" disabled={!ready} onClick={()=>void publish(0, "active")}><Play size={16}/>{t("Start samen", "Start together")}</button>
+      <button type="button" className="couples-primary" disabled={!ready} onClick={()=>{setLocalAnswers({});setLocalTurn("player1");setLocalAnswer("");void publish(0, "active");}}><Play size={16}/>{t("Start samen", "Start together")}</button>
     </section> : <section className="couples-lobby">
       <span className="eyebrow">REMOTE · ROOM CODE</span><h3>{t("Verbind jullie apparaten", "Connect your devices")}</h3>
       {!supabaseConfigured ? <p role="alert">{t("Online koppelspel vereist een geconfigureerde realtime-verbinding. Lokaal spelen blijft beschikbaar.", "Online couple play requires a configured realtime connection. Local play remains available.")}</p> : <>
@@ -360,6 +360,28 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
       <div className="couples-progress"><span style={{width:((round+1)/prompts.length*100)+"%"}}/></div>
       <h3>{t("Samen afstemmen", "Check in together")}</h3>
       <div className="couples-question"><small>{t("PRAAT SAMEN", "TALK TOGETHER")}</small><strong>{language==="nl"?prompts[round].nl:prompts[round].en}</strong></div>
+      {mode === "local" && <section className="couples-local-answer" aria-label={t("Antwoorden van beide spelers", "Both players' answers")}>
+        <div className="couples-local-turn">
+          <span className="eyebrow">{t("BEURT AAN", "TURN FOR")}</span>
+          <strong>{localTurn === "player1" ? (name.trim() || t("Speler 1", "Player 1")) : (partnerName.trim() || t("Speler 2", "Player 2"))}</strong>
+        </div>
+        <label className="couples-local-answer-field">
+          {t("Jullie antwoord", "Your answer")}
+          <textarea value={localAnswer} onChange={event => setLocalAnswer(event.target.value)} maxLength={1000} rows={3} disabled={status !== "active"} placeholder={t("Typ hier jullie antwoord…", "Write your answer here…")} />
+        </label>
+        <button type="button" className="couples-secondary" onClick={saveCurrentLocalAnswer} disabled={status !== "active" || !localAnswer.trim()}>
+          {t("Bewaar antwoord en wissel beurt", "Save answer and switch turn")}
+        </button>
+        <div className="couples-local-answer-status" aria-live="polite">
+          <span>{roundAnswers.player1 ? "✓ " : "○ "}{name.trim() || t("Speler 1", "Player 1")}</span>
+          <span>{roundAnswers.player2 ? "✓ " : "○ "}{partnerName.trim() || t("Speler 2", "Player 2")}</span>
+        </div>
+        {roundAnswers.player1 && roundAnswers.player2 && <div className="couples-local-reveal">
+          <article><strong>{name.trim() || t("Speler 1", "Player 1")}</strong><p>{roundAnswers.player1}</p></article>
+          <article><strong>{partnerName.trim() || t("Speler 2", "Player 2")}</strong><p>{roundAnswers.player2}</p></article>
+        </div>}
+        <p className="couples-consent-note">{t("Antwoorden blijven alleen tijdelijk op dit apparaat en worden niet naar de online kamer of een server verstuurd.", "Answers stay temporarily on this device and are not sent to the online room or a server.")}</p>
+      </section>}
       <div className="couples-round-actions">
         <button type="button" onClick={()=>void publish(Math.max(0,round-1),"active")} disabled={round===0||status!=="active"}>{t("Vorige", "Previous")}</button>
         <button type="button" onClick={()=>void publish(round,status==="paused"?"active":"paused")} disabled={status==="stopped"||(status==="paused"&&mode==="remote"&&!canResumeRemotePlay({connected,serverAuthorized:false,participantCount:participants.length,partnerPresent,ownConsent:myConsent,partnerConsent:partnerConsented}))}><Pause size={15}/>{status==="paused"?t("Hervat","Resume"):t("Pauze","Pause")}</button>
