@@ -615,7 +615,7 @@ export default function CinematicWorld({
         }
 
         if (serverConfirmed) {
-          setRuns((current) => current.map((run) => run.id === runId ? { ...run, status: "stopped" } : run));
+          setRuns((current) => current.map((run) => run.id === runId ? { ...run, status: "stopped" as const } : run));
         }
         try {
           await refreshData(userId);
