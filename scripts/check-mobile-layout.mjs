@@ -1,6 +1,6 @@
-import { readFile } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
 
-const [html, baseStyles, cinematicStyles, meditationStyles, rankStyles, worldAtmosphereStyles, worldExperienceStyles, referenceHomeStyles, serviceWorker, onboarding, heroPoster] = await Promise.all([
+const [html, baseStyles, cinematicStyles, meditationStyles, rankStyles, worldAtmosphereStyles, worldExperienceStyles, referenceHomeStyles, referencePagesStyles, serviceWorker, onboarding, heroPoster] = await Promise.all([
   readFile("index.html", "utf8"),
   readFile("src/styles.css", "utf8"),
   readFile("src/approved-cinematic.css", "utf8"),
@@ -9,11 +9,18 @@ const [html, baseStyles, cinematicStyles, meditationStyles, rankStyles, worldAtm
   readFile("src/cinematic-world.css", "utf8"),
   readFile("src/cinematic-experience.css", "utf8"),
   readFile("src/reference-home.css", "utf8"),
+  readFile("src/reference-pages.css", "utf8"),
   readFile("public/sw.js", "utf8"),
   readFile("src/Onboarding.tsx", "utf8"),
   readFile("public/visuals/reference-home.svg", "utf8"),
 ]);
-const styles = baseStyles + "\n" + cinematicStyles + "\n" + meditationStyles + "\n" + rankStyles + "\n" + worldAtmosphereStyles + "\n" + worldExperienceStyles + "\n" + referenceHomeStyles;
+const styles = baseStyles + "\n" + cinematicStyles + "\n" + meditationStyles + "\n" + rankStyles + "\n" + worldAtmosphereStyles + "\n" + worldExperienceStyles + "\n" + referenceHomeStyles + "\n" + referencePagesStyles;
+
+const localVisualPaths = [...new Set([...styles.matchAll(/url\([^)]*\/visuals\/([^)'"]+)/g)]
+  .map((match) => "public/visuals/" + match[1].split(/[?#]/)[0]))];
+const missingLocalVisuals = (await Promise.all(localVisualPaths.map(async (path) => {
+  try { await access(path); return null; } catch { return path; }
+}))).filter(Boolean);
 
 const checks = [
   ["viewport-fit for modern mobile safe areas", /name=["']viewport["'][^>]*viewport-fit=cover/i.test(html)],
@@ -26,6 +33,7 @@ const checks = [
   ["horizontal overflow protection", /(?:body|html,body,#root)\s*\{[^}]*overflow-x\s*:\s*(?:hidden|clip)/i.test(styles)],
   ["border-box sizing", /\*\s*\{\s*box-sizing\s*:\s*border-box/i.test(styles)],
   ["GitHub Pages-safe visual asset paths", !/url\(\s*["']?\/(?:visuals|assets)\//i.test(styles)],
+  ["all referenced reference-screen visual assets exist", missingLocalVisuals.length === 0],
   ["Home hero uses only the bundled 4K local artwork", /--ah-cinematic-background:\s*url\(["']?\/AfterHours\/visuals\/reference-home\.svg["']?\)/i.test(referenceHomeStyles)],
   ["Home hero has no external image dependency", !/url\(\s*["']?https?:\/\//i.test(referenceHomeStyles)],
   ["Home hero artwork is included in the offline app shell", serviceWorker.includes('asset("visuals/reference-home.svg")')],
@@ -40,6 +48,7 @@ const failed = checks.filter(([, passed]) => !passed);
 for (const [label, passed] of checks) {
   console.log((passed ? "PASS " : "FAIL ") + label);
 }
+if (missingLocalVisuals.length) console.error("Missing referenced visual assets:", missingLocalVisuals.join(", "));
 if (failed.length) {
   console.error(`Mobile layout guard failed: ${failed.length} of ${checks.length} checks.`);
   process.exit(1);
