@@ -1238,3 +1238,13 @@ html,body,#root,.app{background:#050505!important;color:#f4e7d2!important}
   outline:2px solid var(--ah-champagne-light,#f0dfb4)!important;
   outline-offset:3px!important;
 }
+
+
+/* Live progress for consent acknowledgements: visible, quiet and screen-reader friendly. */
+.consent-checks-progress{
+ margin:0!important;
+ color:var(--ref-gold-bright)!important;
+ font-size:9px!important;
+ line-height:1.45!important;
+ font-variant-numeric:tabular-nums;
+}
