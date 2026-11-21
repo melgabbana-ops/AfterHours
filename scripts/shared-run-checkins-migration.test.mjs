@@ -14,6 +14,10 @@ describe("shared experience check-in migration", () => {
     expect(migration).toMatch(/grant update \(run_id, user_id, step_index, signal\) on public\.afterhours_experience_run_checkins to authenticated/i);
   });
 
+  it("allows reads only to the participant or the owner of the related run", () => {
+    expect(migration).toMatch(/create policy afterhours_run_checkins_read_owner_or_participant[\\s\\S]*?for select to authenticated[\\s\\S]*?using \\([\\s\\S]*?user_id = \\(select auth\\.uid\\(\\)\\)[\\s\\S]*?or exists \\([\\s\\S]*?r\\.user_id = \\(select auth\\.uid\\(\\)\\)/i);
+  });
+
   it("limits inserts to the signed-in, consented participant on the current active or paused step", () => {
     expect(migration).toMatch(/user_id = \(select auth\.uid\(\)\)/);
     expect(migration).toMatch(/c\.user_id = \(select auth\.uid\(\)\)/);
