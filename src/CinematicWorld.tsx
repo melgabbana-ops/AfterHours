@@ -10,8 +10,8 @@ import {
   acceptExperienceInvitation, createExperienceInvitation, createExperienceRun, previewExperienceInvitation,
   deleteExperienceRun, deleteWorldRecord, loadExperienceInvitations,
   loadExperienceRuns, loadWorldRecords, resumeExperienceRun, revokeExperienceInvitation,
-  saveWorldRecord, updateExperienceRun, withdrawExperienceConsent,
-  type ExperienceInvitation, type ExperienceInvitationPreview, type ExperienceRun, type WorldModule, type WorldRecord
+  saveWorldRecord, updateExperienceRun, withdrawExperienceConsent, loadExperienceRunCheckIns, submitExperienceRunCheckIn,
+  type ExperienceInvitation, type ExperienceInvitationPreview, type ExperienceRun, type ExperienceRunCheckIn, type ExperienceRunCheckInSignal, type WorldModule, type WorldRecord
 } from "./services/worldRecords";
 import "./cinematic-experience.css";
 
@@ -157,6 +157,7 @@ export default function CinematicWorld({
   const [tab, setTab] = useState<Tab>(() => new URLSearchParams(window.location.search).has("invite") ? "invitation" : "experience");
   const [records, setRecords] = useState<RecordMap>(EMPTY_RECORDS);
   const [runs, setRuns] = useState<ExperienceRun[]>([]);
+  const [sharedCheckIns, setSharedCheckIns] = useState<ExperienceRunCheckIn[]>([]);
   const [experienceInvites, setExperienceInvites] = useState<ExperienceInvitation[]>([]);
   const [selectedInviteRunId, setSelectedInviteRunId] = useState("");
   const [inviteLink, setInviteLink] = useState("");
@@ -252,7 +253,9 @@ export default function CinematicWorld({
     .filter((card) => card.title && card.text);
   const recoverableRun = runs.find((run) => run.user_id === remoteProfileId && (run.status === "active" || run.status === "paused")) ?? null;
   const invitableRuns = runs.filter((run) => run.user_id === remoteProfileId && run.status === "paused");
-  const joinedRuns = runs.filter((run) => run.user_id !== remoteProfileId && (run.status === "active" || run.status === "paused"));
+  const joinedRuns = runs.filter((run) => run.user_id !== remoteProfileId && ["active", "paused", "completed", "stopped"].includes(run.status));
+  const hasLiveJoinedRuns = joinedRuns.some((run) => run.status === "active" || run.status === "paused");
+  const hasLiveSharedRuns = hasLiveJoinedRuns || runs.some((run) => run.user_id === remoteProfileId && (run.status === "active" || run.status === "paused") && experienceInvites.some((invite) => invite.run_id === run.id && invite.status === "accepted"));
   const selectedScene = scenes.find((scene) => scene.key === selectedSceneKey) ?? null;
 
   async function refreshData(userId = remoteProfileId) {
@@ -270,6 +273,7 @@ export default function CinematicWorld({
     ]);
     setRecords({ director, vault, dominion, sensory, invitation, ritual, club });
     setRuns(history);
+    setSharedCheckIns(await loadExperienceRunCheckIns(history.map((run) => run.id), userId));
     setExperienceInvites(invites);
   }
 
@@ -279,6 +283,7 @@ export default function CinematicWorld({
     setError("");
     setRecords(EMPTY_RECORDS);
     setRuns([]);
+    setSharedCheckIns([]);
     setExperienceInvites([]);
     setInviteLink("");
     setSelectedInviteRunId("");
@@ -334,6 +339,7 @@ export default function CinematicWorld({
         if (!active) return;
         setRecords({ director, vault, dominion, sensory, invitation, ritual, club });
         setRuns(history);
+        setSharedCheckIns(await loadExperienceRunCheckIns(history.map((run) => run.id), remoteProfileId));
         setExperienceInvites(invites);
       } catch (cause) {
         if (active) setError(cause instanceof Error ? cause.message : t("Privégegevens konden niet worden geladen.", "Private data could not be loaded."));
@@ -344,6 +350,36 @@ export default function CinematicWorld({
     void load();
     return () => { active = false; };
   }, [remoteProfileId, language]);
+
+
+  useEffect(() => {
+    if (!remoteProfileId || tab !== "invitation" || !hasLiveSharedRuns) return;
+    let active = true;
+    let refreshing = false;
+    const refreshSharedRuns = async () => {
+      if (!active || document.visibilityState !== "visible" || refreshing) return;
+      refreshing = true;
+      try {
+        const latestRuns = await loadExperienceRuns(remoteProfileId);
+        const latestCheckIns = await loadExperienceRunCheckIns(latestRuns.map((run) => run.id), remoteProfileId);
+        if (active) { setRuns(latestRuns); setSharedCheckIns(latestCheckIns); }
+      } catch {
+        // Keep the last confirmed state visible during temporary network interruptions.
+      } finally {
+        refreshing = false;
+      }
+    };
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") void refreshSharedRuns();
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    const timer = window.setInterval(() => { void refreshSharedRuns(); }, 4000);
+    return () => {
+      active = false;
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.clearInterval(timer);
+    };
+  }, [remoteProfileId, tab, hasLiveSharedRuns]);
 
   useEffect(() => {
     let active = true;
@@ -949,6 +985,52 @@ export default function CinematicWorld({
     }
   }
 
+
+  async function pauseSharedRunFromRequest(run: ExperienceRun) {
+    if (!remoteProfileId || run.user_id !== remoteProfileId || run.status !== "active") return;
+    setBusy(true);
+    setError("");
+    try {
+      await updateExperienceRun({
+        runId: run.id,
+        expectedUserId: remoteProfileId,
+        status: "paused",
+        currentStep: run.current_step,
+      });
+      await refreshData();
+      setMessage(t("De gedeelde ervaring is gepauzeerd. Hervatten vereist opnieuw bevestigde toestemming van iedere deelnemer.", "The shared experience is paused. Resuming requires fresh confirmed consent from every participant."));
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : t("De gedeelde ervaring kon niet worden gepauzeerd.", "The shared experience could not be paused."));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function sendSharedCheckIn(run: ExperienceRun, signal: ExperienceRunCheckInSignal) {
+    if (!remoteProfileId || run.user_id === remoteProfileId || run.status !== "active") return;
+    if (signal === "stop_requested" && !window.confirm(t("Je toestemming intrekken? De gedeelde ervaring wordt direct voor iedereen gestopt.", "Withdraw your consent? The shared experience will immediately stop for everyone."))) return;
+    setBusy(true);
+    setError("");
+    try {
+      if (signal === "stop_requested") {
+        await withdrawExperienceConsent(run.id, remoteProfileId);
+        await refreshData();
+        setMessage(t("Je toestemming is ingetrokken. De gedeelde ervaring is gestopt.", "Your consent has been withdrawn. The shared experience has stopped."));
+        onSafetyStop();
+        return;
+      }
+      await submitExperienceRunCheckIn({ runId: run.id, stepIndex: run.current_step, signal, expectedUserId: remoteProfileId });
+      await refreshData();
+      setMessage(signal === "pause_requested"
+        ? t("Pauzeverzoek verstuurd. De host ziet dit direct bij de gedeelde ervaring.", "Pause request sent. The host will see it on the shared experience.")
+        : t("Je check-in is verstuurd.", "Your check-in has been sent."));
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : t("Check-in versturen is niet gelukt.", "Could not send check-in."));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function revokeInvite(invite: ExperienceInvitation) {
     if (!remoteProfileId || invite.status !== "pending") return;
     if (!window.confirm(t("Deze uitnodigingslink direct ongeldig maken?", "Revoke this invitation link immediately?"))) return;
@@ -1264,7 +1346,40 @@ export default function CinematicWorld({
             <button type="button" className="cw-primary" disabled={busy || !remoteProfileId || !selectedInviteRunId} onClick={() => void createRunInvitation(selectedInviteRunId)}><Share2 size={15} />{t("Maak veilige uitnodigingslink", "Create secure invitation link")}</button>
             {inviteLink && <div className="cw-invite-link"><label>{t("Jouw eenmalige uitnodigingslink", "Your one-time invitation link")}<input readOnly value={inviteLink} /></label><button type="button" onClick={() => { void navigator.clipboard?.writeText(inviteLink); setMessage(t("Uitnodigingslink gekopieerd.", "Invitation link copied.")); }}><Copy size={15} />{t("Kopieer link", "Copy link")}</button></div>}
           </div>
-          {joinedRuns.length > 0 && <div className="cw-saved-list"><h3>{t("Ervaringen waarvoor jij toestemming gaf", "Experiences you consented to")} <span>{joinedRuns.length}</span></h3>{joinedRuns.map((run) => <div className="cw-saved-row" key={run.id}><div><strong>{String(run.scene_snapshot.title ?? run.scene_key)}</strong><small>{t("Je neemt deel als gast ·", "You are a participant ·")} {run.status === "active" ? t("Actief", "Active") : t("Gepauzeerd", "Paused")}</small></div><button type="button" className="cw-danger" disabled={busy} onClick={() => void withdrawSharedConsent(run.id)}>{t("Toestemming intrekken en stoppen", "Withdraw consent and stop")}</button></div>)}</div>}
+          {joinedRuns.length > 0 && <div className="cw-saved-list"><h3>{t("Ervaringen waarvoor jij toestemming gaf", "Experiences you consented to")} <span>{joinedRuns.length}</span></h3>{hasLiveJoinedRuns && <p className="cw-remote-sync-note">{t("Voortgang wordt automatisch bijgewerkt zolang deze pagina open is.", "Progress refreshes automatically while this page is open.")}</p>}{joinedRuns.map((run) => {
+            const steps = Array.isArray(run.scene_snapshot.steps) ? run.scene_snapshot.steps : [];
+            const stepNumber = Math.min(run.total_steps, Math.max(1, run.current_step + 1));
+            const progress = Math.min(100, Math.max(0, Math.round((stepNumber / Math.max(1, run.total_steps)) * 100)));
+            const stepText = steps[run.current_step];
+            const statusLabel = run.status === "active" ? t("Actief", "Active") : run.status === "paused" ? t("Gepauzeerd", "Paused") : run.status === "completed" ? t("Afgerond", "Completed") : t("Beëindigd", "Stopped");
+            return <div className="cw-remote-run-card" key={run.id}>
+              <div className="cw-remote-run-heading"><strong>{String(run.scene_snapshot.title ?? run.scene_key)}</strong><span className={run.status === "active" ? "is-active" : ""}>{statusLabel}</span></div>
+              <div className="cw-remote-progress" role="progressbar" aria-label={t("Voortgang gezamenlijke ervaring", "Shared experience progress")} aria-valuemin={0} aria-valuemax={run.total_steps} aria-valuenow={run.status === "completed" ? run.total_steps : stepNumber}><span style={{ width: run.status === "completed" ? "100%" : `${progress}%` }} /></div>
+              <small>{t("Stap", "Step")} {run.status === "completed" ? run.total_steps : stepNumber} / {run.total_steps}</small>
+              {typeof stepText === "string" && (run.status === "active" || run.status === "paused") && <p className="cw-remote-step-text">{stepText}</p>}
+              {run.status === "active" && (() => {
+                const myCheckIn = sharedCheckIns.find((item) => item.run_id === run.id && item.user_id === remoteProfileId && item.step_index === run.current_step);
+                return <div className="cw-remote-checkin">
+                  <strong>{t("Jouw check-in voor deze stap", "Your check-in for this step")}</strong>
+                  {myCheckIn && <small>{myCheckIn.signal === "ready" ? t("Je huidige signaal: ik ben klaar.", "Your current signal: I'm ready.") : myCheckIn.signal === "pause_requested" ? t("Je huidige signaal: ik vraag om pauze.", "Your current signal: I request a pause.") : t("Je huidige signaal: ik wil stoppen.", "Your current signal: I want to stop.")} {t("Je kunt dit op ieder moment wijzigen.", "You can change this at any time.")}</small>}
+                  <div>
+                    <button type="button" disabled={busy || myCheckIn?.signal === "ready"} onClick={() => void sendSharedCheckIn(run, "ready")}>{t("Ik ben klaar", "I'm ready")}</button>
+                    <button type="button" disabled={busy || myCheckIn?.signal === "pause_requested"} onClick={() => void sendSharedCheckIn(run, "pause_requested")}>{t("Vraag pauze", "Request pause")}</button>
+                    <button type="button" className="cw-danger" disabled={busy} onClick={() => void sendSharedCheckIn(run, "stop_requested")}>{t("Stop en trek consent in", "Stop and withdraw consent")}</button>
+                  </div>
+                </div>;
+              })()}
+              {(run.status === "active" || run.status === "paused") && <button type="button" className="cw-danger" disabled={busy} onClick={() => void withdrawSharedConsent(run.id)}>{t("Toestemming intrekken en stoppen", "Withdraw consent and stop")}</button>}
+            </div>;
+          })}</div>}
+          {runs.filter((run) => run.user_id === remoteProfileId && (run.status === "active" || run.status === "paused")).map((run) => {
+            const signals = sharedCheckIns.filter((item) => item.run_id === run.id && item.step_index === run.current_step);
+            return signals.length ? <div className="cw-remote-checkin cw-host-checkins" key={run.id}>
+              <strong>{t("Deelnemerscheck-in", "Participant check-in")} · {String(run.scene_snapshot.title ?? run.scene_key)}</strong>
+              {signals.map((signal) => <small key={signal.id}>{signal.signal === "ready" ? t("Deelnemer is klaar", "Participant is ready") : signal.signal === "pause_requested" ? t("Deelnemer vraagt om pauze", "Participant requests a pause") : t("Deelnemer vraagt om te stoppen", "Participant requests to stop")} · {new Date(signal.created_at).toLocaleTimeString(language === "nl" ? "nl-NL" : "en-GB", { hour: "2-digit", minute: "2-digit" })}</small>)}
+              {signals.some((signal) => signal.signal === "pause_requested") && <><small>{t("De deelnemer vraagt om pauze. Pauzeren trekt alle run-toestemmingen in; iedereen moet opnieuw instemmen voordat er hervat kan worden.", "The participant requests a pause. Pausing revokes run consent; everyone must consent again before resuming.")}</small>{run.status === "active" && <button type="button" disabled={busy} onClick={() => void pauseSharedRunFromRequest(run)}>{t("Pauzeer gedeelde ervaring", "Pause shared experience")}</button>}</>}
+            </div> : null;
+          })}
           <div className="cw-saved-list"><h3>{t("Uitnodigingen en toestemmingen", "Invitations and consent")} <span>{experienceInvites.length}</span></h3>{experienceInvites.map((invite) => <div className="cw-saved-row" key={invite.id}><div><strong>{invite.status === "accepted" ? t("Toestemming ontvangen", "Consent received") : invite.status === "pending" && new Date(invite.expires_at).getTime() <= Date.now() ? t("Verlopen", "Expired") : t(invite.status === "revoked" ? "Ingetrokken" : "Wacht op acceptatie", invite.status === "revoked" ? "Revoked" : "Awaiting acceptance")}</strong><small>{t("Geldig tot", "Expires")} {new Date(invite.expires_at).toLocaleString(language === "nl" ? "nl-NL" : "en-GB")}{invite.accepted_at ? " · " + t("Geaccepteerd", "Accepted") + " " + new Date(invite.accepted_at).toLocaleString(language === "nl" ? "nl-NL" : "en-GB") : ""}</small></div>{invite.status === "pending" && new Date(invite.expires_at).getTime() > Date.now() ? <button type="button" disabled={busy} onClick={() => void revokeInvite(invite)}>{t("Intrekken", "Revoke")}</button> : null}</div>)}</div>
           <div className="cw-saved-list"><h3>{t("Eerdere uitnodigingsconcepten", "Previous invitation drafts")} <span>{records.invitation.length}</span></h3>{records.invitation.map((record) => <div className="cw-saved-row" key={record.record_key}><div><strong>{String(record.payload.title ?? t("Uitnodiging", "Invitation"))}</strong><small>{record.payload.shareStatus === "shared" ? t("Gedeeld", "Shared") : t("Concept", "Draft")} · {new Date(record.updated_at).toLocaleDateString(language === "nl" ? "nl-NL" : "en-GB")}</small></div><button type="button" onClick={() => { setInviteTitle(String(record.payload.title ?? "")); setInviteMessage(String(record.payload.message ?? "")); }}>{t("Open", "Open")}</button></div>)}</div>
         </section>
