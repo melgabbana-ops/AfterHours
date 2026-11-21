@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, Copy, Link2, MonitorSmartphone, Pause, Play, ShieldCheck, Users, Wifi, WifiOff } from "lucide-react";
 import { supabase, supabaseConfigured } from "./services/supabase";
+import { canResumeRemotePlay, canStartRemotePlay, shouldPauseRemotePlay } from "./couplesPlayState";
 
 type Language = "nl" | "en";
 type Mode = "local" | "remote";
@@ -38,7 +39,7 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
   const channelRef = useRef<any>(null);
   const partnerPresent = participants.some(person => person.participantId !== participantId);
   const partnerConsented = participants.some(person => person.participantId !== participantId && person.consent === true);
-  const ready = mode === "local" ? myConsent && localPartnerConsent : connected && participants.length === 2 && partnerPresent && myConsent && partnerConsented;
+  const ready = mode === "local" ? myConsent && localPartnerConsent : canStartRemotePlay({ connected, participantCount: participants.length, partnerPresent, ownConsent: myConsent, partnerConsent: partnerConsented });
   const inviteUrl = useMemo(() => {
     const url = new URL(window.location.href);
     url.search = "";
@@ -91,7 +92,7 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
     }
   }, [myConsent, name, connected, mode, participantId]);
   useEffect(() => {
-    if (mode === "remote" && connected && status === "active" && !partnerPresent) {
+    if (mode === "remote" && shouldPauseRemotePlay({ connected, active: status === "active", partnerPresent })) {
       setStatus("paused");
       setMessage(t("Je partner heeft de kamer verlaten. De ervaring is automatisch gepauzeerd.", "Your partner left the room. The experience paused automatically."));
     }
@@ -176,7 +177,7 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
       <div className="couples-question"><small>{t("PRAAT SAMEN", "TALK TOGETHER")}</small><strong>{language==="nl"?prompts[round].nl:prompts[round].en}</strong></div>
       <div className="couples-round-actions">
         <button type="button" onClick={()=>void publish(Math.max(0,round-1),"active")} disabled={round===0||status==="stopped"}>{t("Vorige", "Previous")}</button>
-        <button type="button" onClick={()=>void publish(round,status==="paused"?"active":"paused")} disabled={status==="stopped"||(status==="paused"&&mode==="remote"&&(!partnerPresent||!partnerConsented))}><Pause size={15}/>{status==="paused"?t("Hervat","Resume"):t("Pauze","Pause")}</button>
+        <button type="button" onClick={()=>void publish(round,status==="paused"?"active":"paused")} disabled={status==="stopped"||(status==="paused"&&mode==="remote"&&!canResumeRemotePlay({partnerPresent,partnerConsent:partnerConsented}))}><Pause size={15}/>{status==="paused"?t("Hervat","Resume"):t("Pauze","Pause")}</button>
         <button type="button" className="couples-primary" onClick={()=>void publish(Math.min(prompts.length-1,round+1),"active")} disabled={round===prompts.length-1||status!=="active"}>{t("Volgende", "Next")}</button>
       </div>
       <button type="button" className="couples-stop" onClick={()=>void stop()}><ShieldCheck size={16}/>{t("Stop de ervaring", "Stop experience")}</button>{status === "stopped" && <button type="button" className="couples-primary" onClick={() => void publish(0, "lobby")}>{t("Terug naar de lobby", "Return to lobby")}</button>}
