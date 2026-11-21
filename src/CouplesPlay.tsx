@@ -102,6 +102,15 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
 
   const publish = async (nextRound: number, nextStatus: PlayStatus) => {
     if (mode === "remote") {
+      if (nextStatus === "active" && status !== "active") {
+        const consentReady = status === "paused"
+          ? canResumeRemotePlay({ connected, participantCount: participants.length, partnerPresent, ownConsent: myConsent, partnerConsent: partnerConsented })
+          : canStartRemotePlay({ connected, participantCount: participants.length, partnerPresent, ownConsent: myConsent, partnerConsent: partnerConsented });
+        if (!consentReady) {
+          setMessage(t("Hervatten kan pas als precies twee deelnemers verbonden zijn en beiden opnieuw instemmen.", "Resume requires exactly two connected participants and fresh consent from both."));
+          return false;
+        }
+      }
       const channel = channelRef.current;
       if (!connected || !channel) {
         if (nextStatus === "paused" || nextStatus === "stopped") {
@@ -205,7 +214,7 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
       <div className="couples-question"><small>{t("PRAAT SAMEN", "TALK TOGETHER")}</small><strong>{language==="nl"?prompts[round].nl:prompts[round].en}</strong></div>
       <div className="couples-round-actions">
         <button type="button" onClick={()=>void publish(Math.max(0,round-1),"active")} disabled={round===0||status!=="active"}>{t("Vorige", "Previous")}</button>
-        <button type="button" onClick={()=>void publish(round,status==="paused"?"active":"paused")} disabled={status==="stopped"||(status==="paused"&&mode==="remote"&&!canResumeRemotePlay({connected,partnerPresent,ownConsent:myConsent,partnerConsent:partnerConsented}))}><Pause size={15}/>{status==="paused"?t("Hervat","Resume"):t("Pauze","Pause")}</button>
+        <button type="button" onClick={()=>void publish(round,status==="paused"?"active":"paused")} disabled={status==="stopped"||(status==="paused"&&mode==="remote"&&!canResumeRemotePlay({connected,participantCount:participants.length,partnerPresent,ownConsent:myConsent,partnerConsent:partnerConsented}))}><Pause size={15}/>{status==="paused"?t("Hervat","Resume"):t("Pauze","Pause")}</button>
         <button type="button" className="couples-primary" onClick={()=>void publish(Math.min(prompts.length-1,round+1),"active")} disabled={round===prompts.length-1||status!=="active"}>{t("Volgende", "Next")}</button>
       </div>
       <button type="button" className="couples-stop" onClick={()=>void stop()}><ShieldCheck size={16}/>{t("Stop de ervaring", "Stop experience")}</button>{status === "stopped" && <button type="button" className="couples-primary" onClick={() => void publish(0, "lobby")}>{t("Terug naar de lobby", "Return to lobby")}</button>}
