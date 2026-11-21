@@ -7,6 +7,7 @@ export function normalizeRoomCode(value: string | null | undefined): string {
 
 export interface RemotePlayReadiness {
   connected: boolean;
+  serverAuthorized: boolean;
   participantCount: number;
   partnerPresent: boolean;
   ownConsent: boolean;
@@ -14,7 +15,7 @@ export interface RemotePlayReadiness {
 }
 
 export function canStartRemotePlay(state: RemotePlayReadiness): boolean {
-  return state.connected && state.participantCount === 2 && state.partnerPresent && state.ownConsent && state.partnerConsent;
+  return state.connected && state.serverAuthorized && state.participantCount === 2 && state.partnerPresent && state.ownConsent && state.partnerConsent;
 }
 
 export function shouldPauseRemotePlay(state: {
@@ -27,10 +28,11 @@ export function shouldPauseRemotePlay(state: {
 
 export function canResumeRemotePlay(state: {
   connected: boolean;
+  serverAuthorized: boolean;
   participantCount: number;
   partnerPresent: boolean;
   ownConsent: boolean;
   partnerConsent: boolean;
 }): boolean {
-  return state.connected && state.participantCount === 2 && state.partnerPresent && state.ownConsent && state.partnerConsent;
+  return state.connected && state.serverAuthorized && state.participantCount === 2 && state.partnerPresent && state.ownConsent && state.partnerConsent;
 }
