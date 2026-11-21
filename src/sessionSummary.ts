@@ -6,6 +6,7 @@ export type SessionNoteStatus = "saved" | "skipped";
 
 export interface SessionCompletionSummary {
   completedAt: string;
+  startedAt: string | null;
   rounds: number;
   earned: number;
   level: number;
@@ -63,6 +64,25 @@ const aftercareLabels: Record<SessionAftercareChoice, readonly [string, string]>
   meditation: ["Meditatie", "Meditation"],
 };
 
+
+function getElapsedSessionSeconds(startedAt: string | null, completedAt: string): number | null {
+  if (!startedAt) return null;
+  const start = Date.parse(startedAt);
+  const end = Date.parse(completedAt);
+  if (!Number.isFinite(start) || !Number.isFinite(end) || end < start) return null;
+  return Math.floor((end - start) / 1000);
+}
+
+function formatElapsedDuration(seconds: number, language: SessionSummaryLanguage): string {
+  const totalMinutes = Math.floor(seconds / 60);
+  if (totalMinutes < 1) return language === "nl" ? "Minder dan 1 minuut" : "Less than 1 minute";
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  if (hours === 0) return `${totalMinutes} min`;
+  const hourUnit = language === "nl" ? "uur" : "hr";
+  return minutes === 0 ? `${hours} ${hourUnit}` : `${hours} ${hourUnit} ${minutes} min`;
+}
+
 /** Build a summary only from fields the current session flow actually records. */
 export function buildSessionSummaryRows(
   summary: SessionCompletionSummary,
@@ -92,6 +112,15 @@ export function buildSessionSummaryRows(
       value: String(summary.rounds),
     },
   ];
+
+  const elapsedSeconds = getElapsedSessionSeconds(summary.startedAt, summary.completedAt);
+  if (elapsedSeconds !== null) {
+    rows.push({
+      id: "elapsedTime",
+      label: language === "nl" ? "Verstreken tijd" : "Elapsed time",
+      value: formatElapsedDuration(elapsedSeconds, language),
+    });
+  }
 
   const moodRows: Array<[MoodPhase, MoodCode | null]> = [
     ["before", summary.moodBefore],
