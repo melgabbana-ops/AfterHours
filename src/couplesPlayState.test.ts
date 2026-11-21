@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canStartRemotePlay, canResumeRemotePlay, shouldPauseRemotePlay } from "./couplesPlayState";
+import { canStartRemotePlay, canResumeRemotePlay, shouldPauseRemotePlay, normalizeRoomCode, ROOM_CODE_LENGTH } from "./couplesPlayState";
 
 describe("remote couple play safety", () => {
   const ready = { connected: true, participantCount: 2, partnerPresent: true, ownConsent: true, partnerConsent: true };
@@ -24,5 +24,15 @@ describe("remote couple play safety", () => {
     expect(canResumeRemotePlay({ connected: true, participantCount: 2, partnerPresent: true, ownConsent: false, partnerConsent: true })).toBe(false);
     expect(canResumeRemotePlay({ connected: true, participantCount: 2, partnerPresent: true, ownConsent: true, partnerConsent: false })).toBe(false);
     expect(canResumeRemotePlay({ connected: false, participantCount: 2, partnerPresent: true, ownConsent: true, partnerConsent: true })).toBe(false);
+  });
+});
+
+
+describe("remote room code validation", () => {
+  it("accepts only complete 16-character codes and normalizes case and separators", () => {
+    expect(ROOM_CODE_LENGTH).toBe(16);
+    expect(normalizeRoomCode("ab-cd efgh ijkl mn23")).toBe("ABCDEFGHIJKLMNOP".slice(0, 16));
+    expect(normalizeRoomCode("123456789012345" )).toBe("");
+    expect(normalizeRoomCode(null)).toBe("");
   });
 });
