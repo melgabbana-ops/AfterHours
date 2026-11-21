@@ -100,6 +100,28 @@ describe("AFTER HOURS private world storage", () => {
       .rejects.toThrow("Auth unavailable");
     expect(mocks.from).not.toHaveBeenCalled();
   }); 
+  it("returns an empty check-in list without querying Supabase when there are no runs", async () => {
+    await expect(loadExperienceRunCheckIns([], "user-a")).resolves.toEqual([]);
+    expect(mocks.from).not.toHaveBeenCalled();
+  });
+
+  it("refuses to load check-ins when the authenticated account changed", async () => {
+    mocks.getUser.mockResolvedValue({ data: { user: { id: "user-b" } }, error: null });
+
+    await expect(loadExperienceRunCheckIns(["run-1"], "user-a"))
+      .rejects.toThrow("The signed-in account changed.");
+    expect(mocks.from).not.toHaveBeenCalled();
+  });
+
+  it("caps check-in reads to fifty run identifiers", async () => {
+    mocks.limit.mockResolvedValue({ data: [], error: null });
+    const runIds = Array.from({ length: 75 }, (_, index) => `run-${index}`);
+
+    await expect(loadExperienceRunCheckIns(runIds, "user-a")).resolves.toEqual([]);
+    expect(mocks.in).toHaveBeenCalledWith("run_id", runIds.slice(0, 50));
+    expect(mocks.limit).toHaveBeenCalledWith(200);
+  });
+
   it("loads check-ins only for the requested shared runs after verifying the account", async () => {
     const rows = [{ id: "checkin-1", run_id: "run-1", user_id: "user-a", step_index: 0, signal: "pause_requested", created_at: "2026-11-21T00:00:00Z" }];
     mocks.limit.mockResolvedValue({ data: rows, error: null });
