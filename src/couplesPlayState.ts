@@ -21,7 +21,8 @@ export function shouldPauseRemotePlay(state: {
 export function canResumeRemotePlay(state: {
   connected: boolean;
   partnerPresent: boolean;
+  ownConsent: boolean;
   partnerConsent: boolean;
 }): boolean {
-  return state.connected && state.partnerPresent && state.partnerConsent;
+  return state.connected && state.partnerPresent && state.ownConsent && state.partnerConsent;
 }
