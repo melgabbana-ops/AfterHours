@@ -23,14 +23,22 @@ describe("AFTER HOURS camera overlay presets", () => {
 
 describe("local photo editor transforms", () => {
   it("starts with a neutral, non-destructive transform", () => {
-    expect(defaultPhotoEditTransform).toEqual({ rotation: 0, zoom: 1, offsetX: 0, offsetY: 0 });
+    expect(defaultPhotoEditTransform).toEqual({ rotation: 0, zoom: 1, offsetX: 0, offsetY: 0, brightness: 1, contrast: 1, saturation: 1, warmth: 0 });
   });
   it("clamps zoom and image position to supported bounds", () => {
-    expect(normalizePhotoEditTransform({ rotation: 90, zoom: 9, offsetX: -4, offsetY: 3 })).toEqual({
-      rotation: 90, zoom: 2.5, offsetX: -1, offsetY: 1,
+    expect(normalizePhotoEditTransform({ rotation: 90, zoom: 9, offsetX: -4, offsetY: 3, brightness: 9, contrast: 9, saturation: 9, warmth: 9 })).toEqual({
+      rotation: 90, zoom: 2.5, offsetX: -1, offsetY: 1, brightness: 1.35, contrast: 1.4, saturation: 1.8, warmth: 1,
     });
   });
   it("rejects unsupported rotation values and non-finite controls", () => {
-    expect(normalizePhotoEditTransform({ rotation: 45 as 0, zoom: Number.NaN, offsetX: Number.POSITIVE_INFINITY, offsetY: Number.NaN })).toEqual(defaultPhotoEditTransform);
+    expect(normalizePhotoEditTransform({ rotation: 45 as 0, zoom: Number.NaN, offsetX: Number.POSITIVE_INFINITY, offsetY: Number.NaN, brightness: Number.NaN, contrast: Number.NaN, saturation: Number.NaN, warmth: Number.NaN })).toEqual(defaultPhotoEditTransform);
+  });
+});
+
+describe("photo color grading bounds", () => {
+  it("keeps color controls within safe, predictable ranges", () => {
+    expect(normalizePhotoEditTransform({ ...defaultPhotoEditTransform, brightness: 0, contrast: 9, saturation: -2, warmth: -8 })).toMatchObject({
+      brightness: 0.65, contrast: 1.4, saturation: 0, warmth: -1,
+    });
   });
 });

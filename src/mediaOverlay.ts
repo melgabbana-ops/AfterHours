@@ -114,8 +114,12 @@ export interface PhotoEditTransform {
   zoom: number;
   offsetX: number;
   offsetY: number;
+  brightness: number;
+  contrast: number;
+  saturation: number;
+  warmth: number;
 }
-export const defaultPhotoEditTransform: PhotoEditTransform = { rotation: 0, zoom: 1, offsetX: 0, offsetY: 0 };
+export const defaultPhotoEditTransform: PhotoEditTransform = { rotation: 0, zoom: 1, offsetX: 0, offsetY: 0, brightness: 1, contrast: 1, saturation: 1, warmth: 0 };
 export function normalizePhotoEditTransform(value: PhotoEditTransform): PhotoEditTransform {
   const rotations = [0, 90, 180, 270] as const;
   const rotation = rotations.includes(value.rotation) ? value.rotation : 0;
@@ -124,6 +128,10 @@ export function normalizePhotoEditTransform(value: PhotoEditTransform): PhotoEdi
     zoom: Math.min(2.5, Math.max(1, Number.isFinite(value.zoom) ? value.zoom : 1)),
     offsetX: Math.min(1, Math.max(-1, Number.isFinite(value.offsetX) ? value.offsetX : 0)),
     offsetY: Math.min(1, Math.max(-1, Number.isFinite(value.offsetY) ? value.offsetY : 0)),
+    brightness: Math.min(1.35, Math.max(0.65, Number.isFinite(value.brightness) ? value.brightness : 1)),
+    contrast: Math.min(1.4, Math.max(0.7, Number.isFinite(value.contrast) ? value.contrast : 1)),
+    saturation: Math.min(1.8, Math.max(0, Number.isFinite(value.saturation) ? value.saturation : 1)),
+    warmth: Math.min(1, Math.max(-1, Number.isFinite(value.warmth) ? value.warmth : 0)),
   };
 }
 export async function composeImageWithEdits(file: File, style: OverlayFrameStyle, edits: PhotoEditTransform): Promise<File> {
@@ -154,7 +162,11 @@ export async function composeImageWithEdits(file: File, style: OverlayFrameStyle
     const drawHeight = sourceHeight * baseScale;
     ctx.translate(width / 2 + transform.offsetX * (logicalWidth * baseScale - width) / 2, height / 2 + transform.offsetY * (logicalHeight * baseScale - height) / 2);
     ctx.rotate((transform.rotation * Math.PI) / 180);
+    const sepia = Math.max(0, transform.warmth) * 0.32;
+    const coolShift = Math.max(0, -transform.warmth) * 8;
+    ctx.filter = `brightness(${transform.brightness}) contrast(${transform.contrast}) saturate(${transform.saturation}) sepia(${sepia}) hue-rotate(${coolShift}deg)`;
     ctx.drawImage(image, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
+    ctx.filter = "none";
     drawAfterHoursOverlay(ctx, width, height, style);
     const blob = await new Promise<Blob>((resolve, reject) => canvas.toBlob(value => value ? resolve(value) : reject(new Error("Could not render the edited photo.")), "image/jpeg", .92));
     const basename = file.name.replace(/\\.[^.]+$/, "").replace(/[^a-zA-Z0-9_-]+/g, "-").slice(0, 70) || "after-hours-photo";
