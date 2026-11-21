@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { appendMediaCaptureChunk, discardMediaCapture, MAX_MEDIA_CAPTURE_BYTES, stopMediaStreams, waitForVideoReady } from "./mediaCapture";
+import { appendMediaCaptureChunk, discardMediaCapture, MAX_MEDIA_CAPTURE_BYTES, stopMediaStreams, waitForVideoReady, watchMediaStreamInterruption } from "./mediaCapture";
 
 describe("media capture cleanup", () => {
   it("stops every track across camera and composited streams", () => {
@@ -165,5 +165,70 @@ describe("camera video readiness", () => {
     const video = fakeVideo();
     Object.defineProperty(video, "error", { value: { code: 4 } });
     await expect(waitForVideoReady(video, 5000, "timeout", "early error")).rejects.toThrow("early error");
+  });
+});
+
+
+describe("media stream interruption", () => {
+  function fakeTrack(readyState: MediaStreamTrackState = "live") {
+    return Object.assign(new EventTarget(), { readyState }) as unknown as MediaStreamTrack;
+  }
+
+  it("reports the first ended camera or microphone track only once", () => {
+    const camera = fakeTrack();
+    const microphone = fakeTrack();
+    const onInterrupted = vi.fn();
+    const cleanup = watchMediaStreamInterruption(
+      { getTracks: () => [camera, microphone] },
+      onInterrupted,
+    );
+
+    camera.dispatchEvent(new Event("ended"));
+    microphone.dispatchEvent(new Event("ended"));
+    cleanup();
+
+    expect(onInterrupted).toHaveBeenCalledOnce();
+  });
+
+  it("removes all track listeners after the first interruption", () => {
+    const camera = fakeTrack();
+    const microphone = fakeTrack();
+    const cameraRemove = vi.spyOn(camera, "removeEventListener");
+    const microphoneRemove = vi.spyOn(microphone, "removeEventListener");
+    const cleanup = watchMediaStreamInterruption(
+      { getTracks: () => [camera, microphone] },
+      vi.fn(),
+    );
+
+    camera.dispatchEvent(new Event("ended"));
+
+    expect(cameraRemove).toHaveBeenCalledWith("ended", expect.any(Function));
+    expect(microphoneRemove).toHaveBeenCalledWith("ended", expect.any(Function));
+    cleanup();
+  });
+
+  it("does not notify after the watcher has been cleaned up", () => {
+    const camera = fakeTrack();
+    const onInterrupted = vi.fn();
+    const cleanup = watchMediaStreamInterruption({ getTracks: () => [camera] }, onInterrupted);
+
+    cleanup();
+    camera.dispatchEvent(new Event("ended"));
+
+    expect(onInterrupted).not.toHaveBeenCalled();
+  });
+
+  it("detects a track that ended before listener registration", () => {
+    const ended = fakeTrack("ended");
+    const live = fakeTrack();
+    const onInterrupted = vi.fn();
+
+    const cleanup = watchMediaStreamInterruption(
+      { getTracks: () => [ended, live] },
+      onInterrupted,
+    );
+
+    expect(onInterrupted).toHaveBeenCalledOnce();
+    cleanup();
   });
 });
