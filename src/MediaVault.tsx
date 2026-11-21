@@ -9,7 +9,7 @@ import {
   type PrivateMediaItem,
 } from "./services/media";
 import { supabase, supabaseConfigured } from "./services/supabase";
-import { appendPhotoEditHistory, applyPhotoEditPreset, composeImageWithOverlay, composeImageWithEdits, defaultPhotoEditTransform, drawCameraFrame, getPhotoEditHistoryEntry, mediaOverlayFrames, photoEditPresets, type OverlayFrameStyle, type PhotoEditHistoryEntry, type PhotoEditPresetId, type PhotoEditTransform } from "./mediaOverlay";
+import { appendPhotoEditHistory, applyPhotoEditPreset, composeImageWithOverlay, composeImageWithEdits, defaultPhotoEditTransform, drawCameraFrame, getPhotoEditHistoryEntry, getPhotoEditHistoryShortcut, mediaOverlayFrames, photoEditPresets, type OverlayFrameStyle, type PhotoEditHistoryEntry, type PhotoEditPresetId, type PhotoEditTransform } from "./mediaOverlay";
 import { appendMediaCaptureChunk, canRecoverInterruptedCapture, discardMediaCapture, MAX_MEDIA_CAPTURE_BYTES, missingCaptureTrack, requestMediaStream, stopMediaRecorder, stopMediaStreams, selectMediaRecorderMimeType, waitForVideoReady, watchMediaStreamInterruption } from "./services/mediaCapture";
 
 interface MediaVaultProps {
@@ -267,6 +267,21 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
     const restored=await updatePendingImageEdit(target.entry.style,target.entry.edits,false);
     if(restored)setPhotoHistoryIndex(target.index);
   };
+
+  useEffect(()=>{
+    if(!pendingOriginalFile)return;
+    const handlePhotoHistoryShortcut=(event:KeyboardEvent)=>{
+      const direction=getPhotoEditHistoryShortcut(event);
+      if(direction===null)return;
+      const target=event.target;
+      if(target instanceof HTMLElement&&(target.isContentEditable||
+        (/^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName)&&!(target instanceof HTMLInputElement&&target.type==="range"))))return;
+      event.preventDefault();
+      void movePhotoHistory(direction);
+    };
+    window.addEventListener("keydown",handlePhotoHistoryShortcut);
+    return ()=>window.removeEventListener("keydown",handlePhotoHistoryShortcut);
+  },[pendingOriginalFile,photoHistoryIndex,photoHistory.length,busy,isSavingCapture]);
 
   const startCapture=async()=>{
     if(!captureConsent){
