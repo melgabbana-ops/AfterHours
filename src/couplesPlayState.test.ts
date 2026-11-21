@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canStartRemotePlay, canResumeRemotePlay, shouldPauseRemotePlay, normalizeRoomCode, ROOM_CODE_LENGTH } from "./couplesPlayState";
+import { canStartRemotePlay, canResumeRemotePlay, shouldPauseRemotePlay, normalizeRoomCode, ROOM_CODE_LENGTH, canStartLocalPlay } from "./couplesPlayState";
 
 describe("remote couple play safety", () => {
   const ready = { connected: true, serverAuthorized: true, participantCount: 2, partnerPresent: true, ownConsent: true, partnerConsent: true };
@@ -36,5 +36,18 @@ describe("remote room code validation", () => {
     expect(normalizeRoomCode("ab-cd efgh ijkl mn23")).toBe("ABCDEFGHIJKLMN23");
     expect(normalizeRoomCode("123456789012345" )).toBe("");
     expect(normalizeRoomCode(null)).toBe("");
+  });
+});
+
+
+describe("local couple play readiness", () => {
+  const ready = { ownConsent: true, partnerConsent: true, ownName: "Alex", partnerName: "Sam" };
+
+  it("requires two explicit consents and both participant names", () => {
+    expect(canStartLocalPlay(ready)).toBe(true);
+    expect(canStartLocalPlay({ ...ready, ownConsent: false })).toBe(false);
+    expect(canStartLocalPlay({ ...ready, partnerConsent: false })).toBe(false);
+    expect(canStartLocalPlay({ ...ready, ownName: "   " })).toBe(false);
+    expect(canStartLocalPlay({ ...ready, partnerName: "" })).toBe(false);
   });
 });
