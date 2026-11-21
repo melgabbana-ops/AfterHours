@@ -267,12 +267,19 @@ export async function importPrivateJournalBackup(
   return backupEntries.length;
 }
 
-export function deletePrivateJournalEntry(entryId: string, storage?: JournalStorage): boolean {
+export async function deletePrivateJournalEntry(
+  entryId: string,
+  key: CryptoKey,
+  storage?: JournalStorage,
+  canCommit: () => boolean = () => true,
+): Promise<boolean> {
   const target = storageTarget(storage);
   if (!target || !entryId) return false;
-  const vault = parseVault(target.getItem(PRIVATE_JOURNAL_STORAGE_KEY));
-  if (!vault || !vault.entries.some((row) => row.id === entryId)) return false;
   try {
+    const vault = parseVault(target.getItem(PRIVATE_JOURNAL_STORAGE_KEY));
+    if (!vault || !vault.entries.some((row) => row.id === entryId)) return false;
+    await assertVaultKey(key, vault);
+    if (!canCommit()) return false;
     persistVault(target, { ...vault, entries: vault.entries.filter((row) => row.id !== entryId) });
     return true;
   } catch { return false; }
