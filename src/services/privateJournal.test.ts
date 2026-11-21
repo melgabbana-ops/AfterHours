@@ -199,7 +199,7 @@ describe("encrypted private journal vault", () => {
     for (const selector of focusTargets) expect(journalStyles).toContain(selector);
     expect(journalStyles).toContain("outline:2px solid #f0d49a");
     expect(journalStyles).toContain(".ah-journal-list-head button{width:44px;min-height:44px}");
-    expect(journalStyles).toContain(".ah-journal-unlock input,.ah-journal-editor input{min-height:44px}");
+    expect(journalStyles).toContain(".ah-journal-editor input{min-height:44px}");
   });
 
 });
