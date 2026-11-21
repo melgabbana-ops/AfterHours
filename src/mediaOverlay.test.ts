@@ -26,7 +26,7 @@ describe("local photo editor transforms", () => {
     expect(defaultPhotoEditTransform).toEqual({ rotation: 0, zoom: 1, offsetX: 0, offsetY: 0, brightness: 1, contrast: 1, saturation: 1, warmth: 0 });
   });
   it("clamps zoom and image position to supported bounds", () => {
-    expect(normalizePhotoEditTransform({ rotation: 90, zoom: 9, offsetX: -4, offsetY: 3 })).toEqual({
+    expect(normalizePhotoEditTransform({ rotation: 90, zoom: 9, offsetX: -4, offsetY: 3, brightness: 9, contrast: 9, saturation: 9, warmth: 9 })).toEqual({
       rotation: 90, zoom: 2.5, offsetX: -1, offsetY: 1, brightness: 1.35, contrast: 1.4, saturation: 1.8, warmth: 1,
     });
   });
