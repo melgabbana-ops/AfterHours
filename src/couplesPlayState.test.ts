@@ -25,6 +25,7 @@ describe("remote couple play safety", () => {
     expect(canResumeRemotePlay({ connected: true, serverAuthorized: true, participantCount: 2, partnerPresent: true, ownConsent: false, partnerConsent: true })).toBe(false);
     expect(canResumeRemotePlay({ connected: true, serverAuthorized: true, participantCount: 2, partnerPresent: true, ownConsent: true, partnerConsent: false })).toBe(false);
     expect(canResumeRemotePlay({ connected: false, serverAuthorized: true, participantCount: 2, partnerPresent: true, ownConsent: true, partnerConsent: true })).toBe(false);
+    expect(canResumeRemotePlay({ connected: true, serverAuthorized: false, participantCount: 2, partnerPresent: true, ownConsent: true, partnerConsent: true })).toBe(false);
   });
 });
 
