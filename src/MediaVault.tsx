@@ -595,6 +595,21 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
               <label>{t("Verticale positie","Vertical position")}
                 <input type="range" min="-1" max="1" step="0.05" value={photoEdits.offsetY} disabled={busy} onChange={event=>void updatePendingImageEdit(frameStyle,{...photoEdits,offsetY:Number(event.target.value)})}/>
               </label>
+              <div className="media-photo-editor-grade">
+                <strong>{t("KLEUR & LICHT","COLOR & LIGHT")}</strong>
+                <label>{t("Helderheid","Brightness")} · {Math.round(photoEdits.brightness*100)}%
+                  <input type="range" min="0.65" max="1.35" step="0.01" value={photoEdits.brightness} disabled={busy} onChange={event=>void updatePendingImageEdit(frameStyle,{...photoEdits,brightness:Number(event.target.value)})}/>
+                </label>
+                <label>{t("Contrast","Contrast")} · {Math.round(photoEdits.contrast*100)}%
+                  <input type="range" min="0.7" max="1.4" step="0.01" value={photoEdits.contrast} disabled={busy} onChange={event=>void updatePendingImageEdit(frameStyle,{...photoEdits,contrast:Number(event.target.value)})}/>
+                </label>
+                <label>{t("Verzadiging","Saturation")} · {Math.round(photoEdits.saturation*100)}%
+                  <input type="range" min="0" max="1.8" step="0.01" value={photoEdits.saturation} disabled={busy} onChange={event=>void updatePendingImageEdit(frameStyle,{...photoEdits,saturation:Number(event.target.value)})}/>
+                </label>
+                <label>{t("Kleurtemperatuur","Color temperature")} · {photoEdits.warmth>0?"+":""}{Math.round(photoEdits.warmth*100)}
+                  <input type="range" min="-1" max="1" step="0.02" value={photoEdits.warmth} disabled={busy} onChange={event=>void updatePendingImageEdit(frameStyle,{...photoEdits,warmth:Number(event.target.value)})}/>
+                </label>
+              </div>
               <small>{t("Origineel blijft behouden tot je de bewerkte foto opslaat. Alle aanpassingen worden lokaal verwerkt.","The original is preserved until you save the edited photo. All adjustments are processed locally.")}</small>
             </div>}
             {pendingCapture&&pendingUrl&&<div className="media-pending-preview">
