@@ -40,6 +40,9 @@ export function createDuoInvitationUrl(baseUrl: string, token: string): string {
   const normalized = normalizeDuoInvitationToken(token);
   if (!normalized) throw new Error("This Duo invitation link is invalid.");
   const url = new URL(baseUrl);
+  if ((url.protocol !== "https:" && url.protocol !== "http:") || url.username || url.password) {
+    throw new Error("Duo invitation links must use a safe web address.");
+  }
   url.hash = new URLSearchParams({ "duo-invite": normalized }).toString();
   return url.toString();
 }
