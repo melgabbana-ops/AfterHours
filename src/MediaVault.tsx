@@ -9,7 +9,7 @@ import {
 } from "./services/media";
 import { supabase, supabaseConfigured } from "./services/supabase";
 import { composeImageWithOverlay, drawCameraFrame, mediaOverlayFrames, type OverlayFrameStyle } from "./mediaOverlay";
-import { appendMediaCaptureChunk, discardMediaCapture, MAX_MEDIA_CAPTURE_BYTES, stopMediaRecorder, stopMediaStreams, waitForVideoReady, watchMediaStreamInterruption } from "./services/mediaCapture";
+import { appendMediaCaptureChunk, discardMediaCapture, MAX_MEDIA_CAPTURE_BYTES, missingCaptureTrack, stopMediaRecorder, stopMediaStreams, waitForVideoReady, watchMediaStreamInterruption } from "./services/mediaCapture";
 
 interface MediaVaultProps {
   sessionId: string;
@@ -218,6 +218,13 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
           ? {video:{facingMode:{ideal:cameraFacing},width:{ideal:1280},height:{ideal:720}},audio:true}
           : {video:false,audio:true});
       if(!mountedRef.current){stopMediaStreams([stream]);return;}
+      const missingTrack=missingCaptureTrack(stream,captureKind!=="voice",captureKind!=="photo");
+      if(missingTrack){
+        stopMediaStreams([stream]);
+        throw new Error(missingTrack==="video"
+          ? t("De camera heeft geen actief videosignaal geleverd. Controleer de cameratoestemming en probeer opnieuw.","The camera did not provide an active video track. Check camera permission and try again.")
+          : t("De microfoon heeft geen actief audiosignaal geleverd. Controleer de microfoontoestemming en probeer opnieuw.","The microphone did not provide an active audio track. Check microphone permission and try again."));
+      }
       streamRef.current=stream;
       streamInterruptionCleanupRef.current=watchMediaStreamInterruption(stream,()=>{
         if(!mountedRef.current)return;
