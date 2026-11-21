@@ -23,7 +23,10 @@ const expected = [
   "20261015114512_restore_atomic_completion_consent.sql",
   "20261118205045_story_chapter_account_sync.sql",
   "20261120234051_afterhours_world_modules.sql",
-  "20261120234949_afterhours_experience_interaction_log.sql"
+  "20261120234949_afterhours_experience_interaction_log.sql",
+  "20261120235944_afterhours_shared_experience_invitations.sql",
+  "20261121000055_afterhours_participant_consent_withdrawal.sql",
+  "20261121000106_afterhours_shared_run_consent_guard.sql"
 ];
 const actual = readdirSync(directory).filter((name) => name.endsWith(".sql")).sort();
 const baseline = [...expected].sort();
