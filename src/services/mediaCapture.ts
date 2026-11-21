@@ -1,4 +1,41 @@
 export const MAX_MEDIA_CAPTURE_BYTES = 20 * 1024 * 1024;
+/** Wait for real video dimensions without missing an already-fired metadata event. */
+export function waitForVideoReady(
+  video: HTMLVideoElement,
+  timeoutMs = 5000,
+  timeoutMessage = "The camera did not start in time.",
+  mediaErrorMessage = "The camera could not provide a video frame.",
+): Promise<void> {
+  if (video.videoWidth > 0 && video.videoHeight > 0) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    let settled = false;
+    const cleanup = () => {
+      clearTimeout(timeout);
+      video.removeEventListener("loadedmetadata", onReady);
+      video.removeEventListener("loadeddata", onReady);
+      video.removeEventListener("error", onError);
+    };
+    const finish = (error?: Error) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      if (error) reject(error);
+      else resolve();
+    };
+    const onReady = () => {
+      if (video.videoWidth > 0 && video.videoHeight > 0) finish();
+    };
+    const onError = () => finish(new Error(mediaErrorMessage));
+    const timeout = setTimeout(() => finish(new Error(timeoutMessage)), timeoutMs);
+    video.addEventListener("loadedmetadata", onReady);
+    video.addEventListener("loadeddata", onReady);
+    video.addEventListener("error", onError);
+    // A ready event can arrive between the first dimension check and listener setup.
+    if (video.error) onError();
+    else onReady();
+  });
+}
+
 
 type CaptureStream = Pick<MediaStream, "getTracks">;
 
