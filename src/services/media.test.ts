@@ -31,7 +31,20 @@ describe("private media upload validation", () => {
     expect(() => validatePrivateMediaFile({ type: "image/jpeg", size: 1024 })).not.toThrow();
   });
 
-  it("accepts iPhone HEIC and HEIF photos and QuickTime MOV videos", () => {\n    expect(() => validatePrivateMediaFile({ type: "image/heic", size: 1024 })).not.toThrow();\n    expect(() => validatePrivateMediaFile({ type: "image/heif", size: 1024 })).not.toThrow();\n    expect(() => validatePrivateMediaFile({ type: "video/quicktime", size: 1024 })).not.toThrow();\n  });\n\n  it("does not send HEIC/HEIF images through canvas overlay composition", () => {\n    expect(canApplyMediaOverlay("image/jpeg")).toBe(true);\n    expect(canApplyMediaOverlay("image/heic")).toBe(false);\n    expect(canApplyMediaOverlay("image/heif")).toBe(false);\n    expect(canApplyMediaOverlay("image/heic; codecs=foo")).toBe(false);\n  });\n\n  it("accepts a non-empty video file under the 20 MB limit", () => {
+  it("accepts iPhone HEIC and HEIF photos and QuickTime MOV videos", () => {
+    expect(() => validatePrivateMediaFile({ type: "image/heic", size: 1024 })).not.toThrow();
+    expect(() => validatePrivateMediaFile({ type: "image/heif", size: 1024 })).not.toThrow();
+    expect(() => validatePrivateMediaFile({ type: "video/quicktime", size: 1024 })).not.toThrow();
+  });
+
+  it("does not send HEIC/HEIF images through canvas overlay composition", () => {
+    expect(canApplyMediaOverlay("image/jpeg")).toBe(true);
+    expect(canApplyMediaOverlay("image/heic")).toBe(false);
+    expect(canApplyMediaOverlay("image/heif")).toBe(false);
+    expect(canApplyMediaOverlay("image/heic; codecs=foo")).toBe(false);
+  });
+
+  it("accepts a non-empty video file under the 20 MB limit", () => {
     expect(() => validatePrivateMediaFile({ type: "video/webm", size: 1024 })).not.toThrow();
   });
 
