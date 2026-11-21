@@ -16,7 +16,7 @@ type Props = {
 /**
  * Account-bound invitation review. Keep this screen dormant until the secure
  * Duo SQL proposal is deployed and verified with two real accounts.
- * Accepting is an explicit action and records the invitee's consent server-side.
+ * Accepting only joins the lobby. Participation consent is a separate action there.
  */
 export default function SecureDuoInvitation({
   token,
@@ -116,8 +116,8 @@ export default function SecureDuoInvitation({
             </p>
             <p className="couples-consent-note">
               {nl
-                ? "Door te accepteren bevestig je vrijwillig dat je aan deze kamer wilt deelnemen. Je kunt je toestemming later altijd intrekken."
-                : "By accepting, you freely confirm that you want to join this room. You can withdraw your consent at any time."}
+                ? "Accepteren brengt je alleen naar de wachtkamer. Het is nog geen toestemming om te spelen. Je geeft daar apart toestemming en kunt die altijd intrekken."
+                : "Accepting only takes you to the lobby. It is not consent to play. You will give consent separately there and can withdraw it at any time."}
             </p>
             <button type="button" className="couples-primary" onClick={() => void accept()} disabled={accepting}>
               {accepting
