@@ -355,6 +355,8 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
             const extension=interruptedType.includes("mp4")?".mp4":interruptedType.includes("ogg")?".ogg":".webm";
             const partialFile=new File([interruptedBlob],`after-hours-${captureKind}-recovered-${Date.now()}${extension}`,{type:interruptedType});
             setPendingCapture(partialFile);
+            // Release any previous local preview URL before replacing it.
+            if(pendingUrl)URL.revokeObjectURL(pendingUrl);
             setPendingUrl(URL.createObjectURL(interruptedBlob));
             setMessage(t("Opname onderbroken. Er is een lokaal gedeeltelijk voorbeeld hersteld. Controleer het bestand en bevestig opnieuw toestemming voordat je het privé opslaat.","Recording interrupted. A local partial preview was recovered. Review it and reconfirm consent before saving it privately."));
           }else{
