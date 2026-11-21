@@ -1,4 +1,5 @@
-import React, { useMemo, useState } from "react";\nimport "./kink-test.css";
+import React, { useMemo, useState } from "react";
+import "./kink-test.css";
 import { ArrowLeft, ArrowRight, Award, Check, ChevronRight, Eye, Lock, RotateCcw, ShieldCheck, Sparkles, Trash2 } from "lucide-react";
 import {
   calculateKinkProfile, kinkCategories, kinkQuestions, loadKinkProfileResult,
