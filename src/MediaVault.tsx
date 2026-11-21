@@ -551,11 +551,11 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
             </button>
           </div>
           {loading ? <small>{t("Privébestanden laden…", "Loading private files…")}</small> : items.length === 0 ? (
-            <small>{t("Nog geen bestanden gevonden. Je bestanden zijn alleen zichtbaar na veilig inloggen.", "No files yet. Your files are only visible after you sign in securely.")}</small>
+            <small role="status" aria-live="polite">{t("Nog geen bestanden gevonden. Je bestanden zijn alleen zichtbaar na veilig inloggen.", "No files yet. Your files are only visible after you sign in securely.")}</small>
           ) : (
-            <div className="media-list">
+            <div className="media-list" role="list" aria-label={t("Bestanden in je privékluis", "Files in your private vault")}>
               {items.map(item => (
-                <div className="media-item" key={item.path}>
+                <div className="media-item" key={item.path} role="listitem">
                   <div className="media-item-copy">
                     <strong>{displayName(item.name)}</strong>
                     <small>{item.contentType ?? t("Privébestand", "Private file")} · {formatSize(item.size)}</small>
