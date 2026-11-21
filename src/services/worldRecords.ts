@@ -10,6 +10,7 @@ export type WorldRecord<T = Record<string, unknown>> = {
 };
 export type ExperienceRunStatus = "ready" | "active" | "paused" | "completed" | "stopped";
 export type ExperienceRunCheckInSignal = "ready" | "pause_requested" | "stop_requested";
+export type ExperienceRunConsentStatus = { participantCount: number; consentedCount: number; allConsented: boolean };
 export type ExperienceRunCheckIn = {
   id: string;
   run_id: string;
@@ -132,6 +133,25 @@ export async function loadOwnExperienceRunConsentIds(runIds: string[], expectedU
     .limit(50);
   if (error) throw new Error(error.message);
   return (data ?? []).map((row: { run_id: string }) => row.run_id);
+}
+
+export async function loadExperienceRunConsentStatus(runId: string, expectedUserId: string): Promise<ExperienceRunConsentStatus> {
+  await assertWorldAccount(expectedUserId);
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(runId)) {
+    throw new Error("Invalid experience run.");
+  }
+  const { data, error } = await supabase!.rpc("get_afterhours_shared_run_consent_status", { p_run_id: runId });
+  if (error) throw new Error(error.message);
+  if (!data || typeof data !== "object" || Array.isArray(data)) throw new Error("Invalid shared-run consent status.");
+  const row = data as Record<string, unknown>;
+  if (!Number.isInteger(row.participant_count) || !Number.isInteger(row.consented_count) || typeof row.all_consented !== "boolean") {
+    throw new Error("Invalid shared-run consent status.");
+  }
+  return {
+    participantCount: row.participant_count as number,
+    consentedCount: row.consented_count as number,
+    allConsented: row.all_consented,
+  };
 }
 
 export async function renewExperienceRunConsent(runId: string, expectedUserId: string): Promise<void> {
