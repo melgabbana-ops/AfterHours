@@ -1,16 +1,26 @@
 -- Verify the run-first lock order and public/private privilege boundary.
 do $definition_tests$
-declare v_definition text; v_public_definer boolean; v_private_definer boolean;
+declare v_definition text; v_run_lock integer; v_invite_lock integer;
 begin
   select pg_get_functiondef('private.accept_afterhours_experience_invitation_impl(text)'::regprocedure) into v_definition;
-  if position('where id = v_locked_run_id' in lower(v_definition))=0 and position('where id=v_locked_run_id' in lower(v_definition))=0 then
+  v_run_lock:=position('where id=v_locked_run_id' in lower(v_definition));
+  v_invite_lock:=position('where id=v_invitation.id' in lower(v_definition));
+  if v_run_lock=0 or v_invite_lock=0 or v_run_lock>v_invite_lock then
     raise exception 'Accept RPC must lock the run before locking the invitation';
   end if;
-  if position('v_locked_run_id' in v_definition)=0 then raise exception 'Accept RPC is missing the locked run identity guard'; end if;
-  select prosecdef into v_public_definer from pg_proc where oid='public.accept_afterhours_experience_invitation(text)'::regprocedure;
-  select prosecdef into v_private_definer from pg_proc where oid='private.accept_afterhours_experience_invitation_impl(text)'::regprocedure;
-  if v_public_definer then raise exception 'Public accept wrapper must be SECURITY INVOKER'; end if;
-  if not v_private_definer then raise exception 'Private accept implementation must be SECURITY DEFINER'; end if;
+  if position('for update' in lower(v_definition))=0 then raise exception 'Accept RPC must lock its rows'; end if;
+  if exists(select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace
+    where n.nspname='public' and p.proname in (
+      'preview_afterhours_experience_invitation','accept_afterhours_experience_invitation','withdraw_afterhours_experience_consent'
+    ) and p.prosecdef) then
+    raise exception 'Public invitation RPC wrappers must be SECURITY INVOKER';
+  end if;
+  if exists(select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace
+    where n.nspname='private' and p.proname in (
+      'preview_afterhours_experience_invitation_impl','accept_afterhours_experience_invitation_impl','withdraw_afterhours_experience_consent_impl'
+    ) and not p.prosecdef) then
+    raise exception 'Private invitation implementations must be SECURITY DEFINER';
+  end if;
 end; $definition_tests$;
 
 set role authenticated;
