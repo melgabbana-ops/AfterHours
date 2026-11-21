@@ -42,6 +42,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
   const [frameStyle,setFrameStyle] = useState<OverlayFrameStyle>("after-hours");
   const [captureConsent,setCaptureConsent] = useState(false);
   const [isRecording,setIsRecording] = useState(false);
+  const [recordingSeconds,setRecordingSeconds] = useState(0);
   const [isPhotoCameraOpen,setIsPhotoCameraOpen] = useState(false);
   const [liveStream,setLiveStream] = useState<MediaStream|null>(null);
   const [pendingCapture,setPendingCapture] = useState<File|null>(null);
@@ -70,6 +71,15 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
     if(livePreviewRef.current) livePreviewRef.current.srcObject=liveStream;
   },[liveStream]);
   useEffect(()=>{frameStyleRef.current=frameStyle},[frameStyle]);
+  useEffect(()=>{
+    if(!isRecording){setRecordingSeconds(0);return;}
+    const startedAt=Date.now();
+    setRecordingSeconds(0);
+    const interval=window.setInterval(()=>{
+      setRecordingSeconds(Math.min(60,Math.floor((Date.now()-startedAt)/1000)));
+    },1000);
+    return ()=>window.clearInterval(interval);
+  },[isRecording]);
   useEffect(()=>{
     mountedRef.current=true;
     return ()=>{
@@ -423,6 +433,8 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
     }catch(error){if(mountedRef.current)setMessage(error instanceof Error?error.message:t("De foto kon niet worden gemaakt.","Could not capture the photo."));}
   };
 
+  const recordingRemainingSeconds=Math.max(0,60-recordingSeconds);
+
   const stopCapture=()=>{
     const recorder=recorderRef.current;
     stopMediaRecorder(recorder);
@@ -536,7 +548,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
               {!isRecording&&!isPhotoCameraOpen&&!pendingCapture&&<button type="button" onClick={()=>void startCapture()} disabled={busy||!captureConsent}>{captureKind==="photo"?t("Open camera met live overlay","Open camera with live overlay"):t("Start opname · max. 60 sec.","Start recording · max 60 sec")}</button>}{isPhotoCameraOpen&&<div className="media-capture-controls"><button type="button" className="gold" onClick={()=>void takePhoto()} disabled={busy}>{t("Maak foto","Take photo")}</button><button type="button" onClick={()=>{stopCaptureTracks();setCaptureConsent(false);setMessage(t("Camera gesloten. Er is niets opgeslagen.","Camera closed. Nothing was saved."))}}>{t("Annuleren","Cancel")}</button></div>}
               {isRecording&&<button type="button" className="media-stop-recording" onClick={stopCapture}>{t("Stop opname","Stop recording")}</button>}
             </div>
-            {isRecording&&<div className="media-recording-status" role="status"><span/> {t("Opname actief. Je kunt op elk moment stoppen.","Recording is active. You can stop at any time.")}</div>}
+            {isRecording&&<div className="media-recording-status" role="status"><span/> {t("Opname actief. Je kunt op elk moment stoppen.","Recording is active. You can stop at any time.")}<strong className="media-recording-clock" aria-label={t("Resterende opnametijd","Recording time remaining")}>00:{String(recordingRemainingSeconds).padStart(2,"0")}</strong><div className="media-recording-progress" role="progressbar" aria-valuemin={0} aria-valuemax={60} aria-valuenow={recordingSeconds} aria-label={t("Opnameduur van maximaal 60 seconden","Recording duration, maximum 60 seconds")}><span style={{width:`${(recordingSeconds/60)*100}%`}}/></div></div>}
             {liveStream&&(captureKind==="video"||captureKind==="photo")&&<div className="media-live-frame"><video className="media-live-source" ref={livePreviewRef} autoPlay muted playsInline aria-hidden="true"/><canvas className="media-live-preview media-live-composite" ref={liveCanvasRef} aria-label={t("Live cameravoorbeeld met AFTER HOURS-overlay","Live camera preview with AFTER HOURS overlay")}/><span className="media-live-watermark">AFTER HOURS <i>◐</i></span></div>}
             {pendingCapture&&pendingUrl&&<div className="media-pending-preview">
               <strong>{t("Lokale preview","Local preview")} · {formatSize(pendingCapture.size)}</strong>
