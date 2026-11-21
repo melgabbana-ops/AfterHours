@@ -46,7 +46,8 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
   const [isPhotoCameraOpen,setIsPhotoCameraOpen] = useState(false);
   const [liveStream,setLiveStream] = useState<MediaStream|null>(null);
   const [pendingCapture,setPendingCapture] = useState<File|null>(null);
-  const [pendingOriginalFile,setPendingOriginalFile] = useState<File|null>(null);\n  const [photoEdits,setPhotoEdits] = useState<PhotoEditTransform>(defaultPhotoEditTransform);
+  const [pendingOriginalFile,setPendingOriginalFile] = useState<File|null>(null);
+  const [photoEdits,setPhotoEdits] = useState<PhotoEditTransform>(defaultPhotoEditTransform);
   const [pendingUrl,setPendingUrl] = useState("");
   const [isSavingCapture,setIsSavingCapture] = useState(false);
   const mountedRef = useRef(false);
