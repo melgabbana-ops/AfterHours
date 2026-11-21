@@ -19,4 +19,12 @@ describe("aftercare meditation stage controls", () => {
     expect(componentSource).toContain('<button type="button" className="aftercare-meditation-skip" onClick={skipCurrentPhase}>');
     expect(componentSource).toContain("{!completed && (");
   });
+
+  it("provides a localized, machine-readable countdown without a noisy live announcement", () => {
+    expect(componentSource).toContain("getAftercareMeditationAccessibleTime(remainingSeconds, language)");
+    expect(componentSource).toContain("dateTime={`PT${remainingSeconds}S`}");
+    expect(componentSource).toContain("aria-label={getAftercareMeditationAccessibleTime");
+    const clockMarkup = componentSource.split('className="aftercare-meditation-clock"')[1]?.split("</div>")[0] ?? "";
+    expect(clockMarkup).not.toContain("aria-live");
+  });
 });
