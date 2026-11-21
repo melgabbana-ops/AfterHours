@@ -151,3 +151,19 @@ export function missingCaptureTrack(
 export function canRecoverInterruptedCapture(blobSize: number, maxBytes = MAX_MEDIA_CAPTURE_BYTES): boolean {
   return Number.isFinite(blobSize) && Number.isFinite(maxBytes) && blobSize > 0 && maxBytes >= 0 && blobSize <= maxBytes;
 }
+
+
+/** Pick the first browser-supported recording format, or let MediaRecorder choose its default. */
+export function selectMediaRecorderMimeType(
+  candidates: readonly string[],
+  isTypeSupported: (mimeType: string) => boolean,
+): string | undefined {
+  for (const candidate of candidates) {
+    try {
+      if (isTypeSupported(candidate)) return candidate;
+    } catch {
+      // A browser may expose MediaRecorder but fail a format capability query.
+    }
+  }
+  return undefined;
+}
