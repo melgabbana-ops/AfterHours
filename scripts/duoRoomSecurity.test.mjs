@@ -56,6 +56,20 @@ describe("proposed secure Duo backend guardrails", () => {
 
 
 
+  it("closes the room snapshot SQL body and includes a non-persistent bilingual aftercare step", () => {
+    const snapshot = proposal.slice(
+      proposal.indexOf("function public.get_afterhours_duo_room_state("),
+      proposal.indexOf("function public.revoke_afterhours_duo_invitation("),
+    );
+    expect(snapshot).toContain("\\nend;\\n$;");
+    expect(snapshot).not.toContain("\\nend;\\n$;");
+    expect(couplesUi).toContain("couples-aftercare");
+    expect(couplesUi).toContain("setAftercareChoices");
+    expect(couplesUi).toContain("not saved");
+    expect(couplesUi).toContain("niet opgeslagen");
+    expect(couplesUi).toContain("Finish + aftercare");
+  });
+
   it("keeps the legacy public room-code UI unavailable until the backend is verified", () => {
     expect(couplesUi).toContain("function secureDuoBackendAvailable(): boolean");
     expect(couplesUi).toContain("return false;");
