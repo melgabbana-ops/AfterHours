@@ -37,6 +37,20 @@ describe("encrypted private journal vault", () => {
     expect(journalSource).toContain('aria-busy={busy}');
     expect(journalSource).toContain('className="ah-journal-delete" onClick={()=>void remove()} disabled={busy}');
   });
+  it("keeps profile A and profile B independent even when each has an unlocked key", async () => {
+    const backingStorage = memoryStorage();
+    const profileA = privateJournalStorageForOwner("profile-a", backingStorage);
+    const profileB = privateJournalStorageForOwner("profile-b", backingStorage);
+    const keyA = await createPrivateJournalVault("wachtzin profiel A 2026", profileA);
+    const keyB = await createPrivateJournalVault("wachtzin profiel B 2026", profileB);
+    await savePrivateJournalEntry(keyA, { title: "A privé", body: "Alleen profiel A." }, undefined, profileA);
+    await savePrivateJournalEntry(keyB, { title: "B privé", body: "Alleen profiel B." }, undefined, profileB);
+
+    expect((await loadPrivateJournalEntries(keyA, profileA)).map(entry => entry.title)).toEqual(["A privé"]);
+    expect((await loadPrivateJournalEntries(keyB, profileB)).map(entry => entry.title)).toEqual(["B privé"]);
+    expect(backingStorage.getItem(PRIVATE_JOURNAL_STORAGE_KEY)).toBeNull();
+  });
+
   it("isolates journal vaults by owner within the same browser storage", async () => {
     const backingStorage = memoryStorage();
     const aliceStorage = privateJournalStorageForOwner("account-alice", backingStorage);
