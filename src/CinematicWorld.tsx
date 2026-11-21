@@ -224,7 +224,7 @@ export default function CinematicWorld({
     .map((record) => ({ id: record.record_key, title: String(record.payload.title ?? ""), text: String(record.payload.text ?? "") }))
     .filter((card) => card.title && card.text);
   const recoverableRun = runs.find((run) => run.user_id === remoteProfileId && (run.status === "active" || run.status === "paused")) ?? null;
-  const invitableRuns = runs.filter((run) => run.user_id === remoteProfileId && (run.status === "active" || run.status === "paused"));
+  const invitableRuns = runs.filter((run) => run.user_id === remoteProfileId && run.status === "paused");
   const joinedRuns = runs.filter((run) => run.user_id !== remoteProfileId && (run.status === "active" || run.status === "paused"));
   const selectedScene = scenes.find((scene) => scene.key === selectedSceneKey) ?? null;
 
@@ -836,8 +836,8 @@ export default function CinematicWorld({
   async function createRunInvitation(runId: string) {
     if (!remoteProfileId) return;
     const run = runs.find((item) => item.id === runId && item.user_id === remoteProfileId);
-    if (!run || !["active", "paused"].includes(run.status)) {
-      setError(t("Kies een eigen actieve of gepauzeerde ervaring.", "Choose your own active or paused experience."));
+    if (!run || run.status !== "paused") {
+      setError(t("Pauzeer eerst je eigen ervaring. De scène blijft gepauzeerd totdat iedereen de uitnodiging heeft bekeken en geaccepteerd.", "Pause your own experience first. The scene must remain paused until everyone has reviewed and accepted the invitation."));
       return;
     }
     setBusy(true);
@@ -893,7 +893,7 @@ export default function CinematicWorld({
       url.searchParams.delete("invite");
       window.history.replaceState({}, "", url.toString());
       await refreshData();
-      setMessage(t("Uitnodiging geaccepteerd. Je eigen toestemming is vastgelegd. Je kunt deze altijd intrekken via The Secret Invitation; de gedeelde ervaring stopt dan voor iedereen.", "Invitation accepted. Your own consent has been recorded. You can withdraw it at any time in The Secret Invitation; the shared experience will then stop for everyone."));
+      setMessage(t("Uitnodiging geaccepteerd. Je eigen toestemming is vastgelegd. De eigenaar kan de ervaring nu hervatten; als jij later je toestemming intrekt, stopt de ervaring voor iedereen.", "Invitation accepted. Your own consent has been recorded. The host can now resume; if you later withdraw consent, the experience stops for everyone."));
       setTab("invitation");
       void accepted;
     } catch (cause) {
@@ -1215,7 +1215,7 @@ export default function CinematicWorld({
 
       {tab === "invitation" && (
         <section className="cw-section">
-          <div className="cw-section-heading"><span className="cw-kicker">05 · A MOMENT TO REMEMBER</span><h2><Mail /> The Secret Invitation</h2><p>{t("Deel een beveiligde, eenmalige uitnodigingslink voor een lopende ervaring. De ontvanger moet inloggen en geeft zelf expliciet toestemming. Een uitnodiging is nooit automatisch akkoord.", "Share a secure, single-use invitation link for an ongoing experience. The recipient must sign in and explicitly consent. An invitation is never automatic agreement.")}</p></div>
+          <div className="cw-section-heading"><span className="cw-kicker">05 · A MOMENT TO REMEMBER</span><h2><Mail /> The Secret Invitation</h2><p>{t("Pauzeer eerst je ervaring. Deel daarna een beveiligde uitnodigingslink. De ontvanger bekijkt de volledige scène en geeft zelf expliciet toestemming voordat jij hervat.", "Pause your experience first. Then share a secure invitation link. The recipient reviews the full scene and explicitly consents before you resume.")}</p></div>
           {incomingInviteToken && (
             <div className="cw-form-panel cw-invite-accept">
               <span className="cw-kicker">{t("PERSOONLIJKE UITNODIGING", "PERSONAL INVITATION")}</span>
@@ -1229,8 +1229,8 @@ export default function CinematicWorld({
           )}
           <div className="cw-form-panel">
             <h3>{t("Deel een ervaring", "Invite someone to an experience")}</h3>
-            <p>{t("Kies een eigen actieve of gepauzeerde ervaring. De link is maximaal zeven dagen geldig, kan één keer worden geaccepteerd en bevat geen wachtwoord of persoonsgegevens.", "Choose your own active or paused experience. The link is valid for up to seven days, can be accepted once and contains no password or personal data.")}</p>
-            <label>{t("Ervaring", "Experience")}<select value={selectedInviteRunId} onChange={(event) => setSelectedInviteRunId(event.target.value)}><option value="">{t("Kies een ervaring", "Choose an experience")}</option>{invitableRuns.map((run) => <option key={run.id} value={run.id}>{String(run.scene_snapshot.title ?? run.scene_key)} · {run.status === "active" ? t("Actief", "Active") : t("Gepauzeerd", "Paused")}</option>)}</select></label>
+            <p>{t("Alleen gepauzeerde ervaringen kunnen worden uitgenodigd. De link is maximaal zeven dagen geldig, kan één keer worden geaccepteerd en bevat geen wachtwoord of persoonsgegevens.", "Only paused experiences can be invited. The link is valid for up to seven days, can be accepted once and contains no password or personal data.")}</p>
+            <label>{t("Ervaring", "Experience")}<select value={selectedInviteRunId} onChange={(event) => setSelectedInviteRunId(event.target.value)}><option value="">{t("Kies een gepauzeerde ervaring", "Choose a paused experience")}</option>{invitableRuns.map((run) => <option key={run.id} value={run.id}>{String(run.scene_snapshot.title ?? run.scene_key)} · {t("Gepauzeerd", "Paused")}</option>)}</select></label>
             <button type="button" className="cw-primary" disabled={busy || !remoteProfileId || !selectedInviteRunId} onClick={() => void createRunInvitation(selectedInviteRunId)}><Share2 size={15} />{t("Maak veilige uitnodigingslink", "Create secure invitation link")}</button>
             {inviteLink && <div className="cw-invite-link"><label>{t("Jouw eenmalige uitnodigingslink", "Your one-time invitation link")}<input readOnly value={inviteLink} /></label><button type="button" onClick={() => { void navigator.clipboard?.writeText(inviteLink); setMessage(t("Uitnodigingslink gekopieerd.", "Invitation link copied.")); }}><Copy size={15} />{t("Kopieer link", "Copy link")}</button></div>}
           </div>
