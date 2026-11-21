@@ -83,7 +83,7 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
     return () => {
       alive = false;
       channelRef.current = null;
-      void supabase.removeChannel(channel);
+      if (supabase) void supabase.removeChannel(channel);
     };
   }, [mode, roomCode, participantId]);
 
