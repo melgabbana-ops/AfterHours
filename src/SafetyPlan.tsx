@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Check, LockKeyhole, Pause, Play, Save, Square, Trash2 } from "lucide-react";
+import { Check, Eye, EyeOff, LockKeyhole, Pause, Play, Save, Square, Trash2 } from "lucide-react";
 interface SafetyPlanProps {
   profileId: string;
   language?: "nl" | "en";
@@ -32,6 +32,8 @@ export default function SafetyPlan({
   const [legacyPlanDetected, setLegacyPlanDetected] = useState(() => hasUnscopedSafetyPlan());
   const [saved, setSaved] = useState(false);
   const [message, setMessage] = useState("");
+  const [showSafeword, setShowSafeword] = useState(false);
+  const [showAmberSignal, setShowAmberSignal] = useState(false);
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
   const isSessionActive = sessionStatus === "active" || sessionStatus === "paused";
   const readinessCount = Object.values(plan.readiness).filter(Boolean).length;
@@ -77,6 +79,8 @@ export default function SafetyPlan({
       setPlan(nextPlan);
       setSaved(true);
       setLegacyPlanDetected(false);
+      setShowSafeword(false);
+      setShowAmberSignal(false);
       setMessage(t("Veiligheidsafspraken opgeslagen voor dit profiel op dit apparaat.", "Safety agreements saved for this profile on this device."));
     } else {
       setSaved(false);
@@ -88,6 +92,8 @@ export default function SafetyPlan({
     if (clearSafetyPlan(profileId)) {
       setPlan(createEmptySafetyPlan());
       setSaved(false);
+      setShowSafeword(false);
+      setShowAmberSignal(false);
       setMessage(t("Lokale veiligheidsafspraken verwijderd.", "Local safety agreements deleted."));
     } else {
       setMessage(t("Verwijderen is niet gelukt. Probeer het opnieuw via je browserinstellingen.", "Could not delete the plan. Try again through your browser settings."));
@@ -139,10 +145,20 @@ export default function SafetyPlan({
     </section>
 
     <label htmlFor="ah-safeword">{t("Stopwoord", "Safeword")} <span>{t("Volledig stoppen", "Stop completely")}</span></label>
-    <input id="ah-safeword" maxLength={80} value={plan.safeword} onChange={(event) => update("safeword", event.target.value)} placeholder={t("Bijvoorbeeld: ROOD", "For example: RED")}/>
+    <div className="safety-signal-field">
+      <input id="ah-safeword" type={showSafeword ? "text" : "password"} autoComplete="off" autoCapitalize="none" spellCheck={false} aria-describedby="safety-signals-help" maxLength={80} value={plan.safeword} onChange={(event) => update("safeword", event.target.value)} placeholder={t("Bijvoorbeeld: ROOD", "For example: RED")}/>
+      <button type="button" className="safety-signal-visibility" aria-label={showSafeword ? t("Verberg stopwoord", "Hide safeword") : t("Toon stopwoord", "Show safeword")} aria-pressed={showSafeword} onClick={() => setShowSafeword((visible) => !visible)}>
+        {showSafeword ? <EyeOff aria-hidden="true"/> : <Eye aria-hidden="true"/>}
+      </button>
+    </div>
     <label htmlFor="ah-amber-signal">{t("Pauze- of bijstuurwoord", "Pause or slow-down signal")} <span>{t("Even vertragen en afstemmen", "Slow down and check in")}</span></label>
-    <input id="ah-amber-signal" maxLength={80} value={plan.amberSignal} onChange={(event) => update("amberSignal", event.target.value)} placeholder={t("Bijvoorbeeld: ORANJE", "For example: AMBER")}/>
-    <p className="safety-plan-footnote">{t("Wanneer je vrijwillig spraakbediening start, worden deze lokale signalen gebruikt voor STOP en PAUZE. Ze worden niet naar de server gestuurd.", "When you voluntarily start voice control, these local signals are used for STOP and PAUSE. They are not sent to the server.")}</p>
+    <div className="safety-signal-field">
+      <input id="ah-amber-signal" type={showAmberSignal ? "text" : "password"} autoComplete="off" autoCapitalize="none" spellCheck={false} aria-describedby="safety-signals-help" maxLength={80} value={plan.amberSignal} onChange={(event) => update("amberSignal", event.target.value)} placeholder={t("Bijvoorbeeld: ORANJE", "For example: AMBER")}/>
+      <button type="button" className="safety-signal-visibility" aria-label={showAmberSignal ? t("Verberg pauzesignaal", "Hide pause signal") : t("Toon pauzesignaal", "Show pause signal")} aria-pressed={showAmberSignal} onClick={() => setShowAmberSignal((visible) => !visible)}>
+        {showAmberSignal ? <EyeOff aria-hidden="true"/> : <Eye aria-hidden="true"/>}
+      </button>
+    </div>
+    <p className="safety-plan-footnote" id="safety-signals-help">{t("De signalen zijn standaard verborgen op het scherm. Toon ze alleen wanneer je privacy hebt. Wanneer je vrijwillig spraakbediening start, worden deze lokale signalen gebruikt voor STOP en PAUZE. Ze worden niet naar de server gestuurd.", "Signals are hidden on screen by default. Reveal them only when you have privacy. When you voluntarily start voice control, these local signals are used for STOP and PAUSE. They are not sent to the server.")}</p>
     <label htmlFor="ah-boundaries">{t("Grenzen en afspraken", "Boundaries and agreements")} <span>{t("Bewaar alleen wat veilig voelt op dit apparaat.", "Only save what feels safe to keep on this device.")}</span></label>
     <textarea id="ah-boundaries" maxLength={1000} rows={3} value={plan.boundaries} onChange={(event) => update("boundaries", event.target.value)} placeholder={t("Wat is niet welkom? Wat vraagt eerst een check-in? Wat helpt bij aftercare?", "What is not welcome? What needs a check-in first? What helps with aftercare?")}/>
     <div className="safety-plan-actions"><button className="gold" type="button" onClick={save}><Save/>{saved ? " " + t("Opgeslagen", "Saved") : " " + t("Afspraken opslaan", "Save agreements")}</button><button type="button" onClick={clear}><Trash2/> {t("Wissen", "Clear")}</button></div>
