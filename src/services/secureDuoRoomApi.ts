@@ -124,3 +124,87 @@ export async function revokeSecureDuoInvitation(roomId: string, client?: DuoClie
   const payload = objectPayload(data, "De server bevestigde het intrekken van de Duo-uitnodiging niet.");
   if (payload.room_id !== roomId || payload.status !== "stopped") throw new Error("De server gaf geen geldige intrekkingsbevestiging terug.");
 }
+
+
+export interface SecureDuoLiveState {
+  round: number;
+  status: RoomStatus;
+  updatedAt: string;
+}
+export interface SecureDuoRealtimeHandlers {
+  onState?: (state: SecureDuoLiveState) => void;
+  onPresence?: (presence: Record<string, unknown[]>) => void;
+}
+
+/** Reject arbitrary payloads: private Realtime carries no answers, media or profile details. */
+export function isSecureDuoLiveState(value: unknown): value is SecureDuoLiveState {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const payload = value as Record<string, unknown>;
+  const keys = Object.keys(payload).sort();
+  return keys.length === 3
+    && keys[0] === "round" && keys[1] === "status" && keys[2] === "updatedAt"
+    && Number.isInteger(payload.round) && Number(payload.round) >= 0 && Number(payload.round) <= 4
+    && ["lobby", "active", "paused", "stopped"].includes(String(payload.status))
+    && typeof payload.updatedAt === "string"
+    && Number.isFinite(Date.parse(payload.updatedAt));
+}
+
+/**
+ * Join only the UUID-derived private topic. State changes go through the
+ * authorization RPC first; Broadcast is a UI synchronization hint, not authority.
+ */
+export async function joinSecureDuoRealtime(
+  roomId: string,
+  handlers: SecureDuoRealtimeHandlers = {},
+  client?: DuoClient | null,
+): Promise<{
+  presence: () => Record<string, unknown[]>;
+  setRoomState: (status: "active" | "paused" | "stopped", round: number) => Promise<void>;
+  leave: () => Promise<void>;
+}> {
+  const activeClient = getClient(client);
+  const safeRoomId = requireUuid(roomId);
+  const userId = await requireUser(activeClient);
+  const channel = activeClient.channel("afterhours-duo:" + safeRoomId, {
+    config: { private: true, presence: { key: userId }, broadcast: { self: false, ack: true } },
+  });
+
+  channel.on("broadcast", { event: "duo-state" }, ({ payload }) => {
+    if (isSecureDuoLiveState(payload)) handlers.onState?.(payload);
+  });
+  channel.on("presence", { event: "sync" }, () => {
+    handlers.onPresence?.(channel.presenceState() as Record<string, unknown[]>);
+  });
+
+  await new Promise<void>((resolve, reject) => {
+    channel.subscribe((status, error) => {
+      if (status === "SUBSCRIBED") resolve();
+      else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") {
+        reject(new Error(error?.message || "De beveiligde Duo-verbinding kon niet worden geopend."));
+      }
+    });
+  });
+
+  const tracked = await channel.track({ online: true, seenAt: new Date().toISOString() });
+  if (tracked !== "ok") {
+    await activeClient.removeChannel(channel);
+    throw new Error("Je aanwezigheid kon niet veilig in de Duo-kamer worden bevestigd.");
+  }
+
+  return {
+    presence: () => channel.presenceState() as Record<string, unknown[]>,
+    setRoomState: async (status, round) => {
+      if (!Number.isInteger(round) || round < 0 || round > 4) throw new Error("Ongeldige Duo-ronde.");
+      // The server checks membership, host permissions and both live consents.
+      await setSecureDuoRoomState(safeRoomId, status, activeClient);
+      const state: SecureDuoLiveState = { status, round, updatedAt: new Date().toISOString() };
+      if (!isSecureDuoLiveState(state)) throw new Error("Ongeldige Duo-status.");
+      const response = await channel.send({ type: "broadcast", event: "duo-state", payload: state });
+      if (response !== "ok") throw new Error("De Duo-status is opgeslagen, maar kon niet live worden gedeeld.");
+    },
+    leave: async () => {
+      await channel.untrack();
+      await activeClient.removeChannel(channel);
+    },
+  };
+}
