@@ -1,0 +1,51 @@
+.ah-private-journal{width:100%;margin:18px 0;padding:18px;border:1px solid rgba(211,174,112,.38);border-radius:9px;background:linear-gradient(145deg,rgba(25,19,12,.97),rgba(5,5,4,.98));color:#f1e4ce;box-shadow:0 16px 40px rgba(0,0,0,.32)}
+.ah-private-journal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 20px;padding:0 0 12px;border-bottom:1px solid rgba(211,174,112,.2)}
+.ah-private-journal-brand{display:flex;align-items:center;gap:9px;color:#d7b77f}
+.ah-private-journal-brand svg{width:17px;height:17px}
+.ah-private-journal-brand .eyebrow{margin:0;font-size:8px;letter-spacing:.18em}
+.ah-journal-close{display:flex;align-items:center;gap:6px;min-height:40px;padding:0 10px;border:1px solid rgba(211,174,112,.3);border-radius:5px;color:#d8c6a6;font-size:9px}
+.ah-private-journal-intro{text-align:center;padding:4px 8px 20px}
+.ah-journal-mark{width:44px;height:44px;margin:0 auto 12px;display:grid;place-items:center;border:1px solid rgba(211,174,112,.5);border-radius:50%;color:#e0c18a;background:rgba(211,174,112,.07)}
+.ah-journal-mark svg{width:19px;height:19px}
+.ah-private-journal-intro h3{margin:0;color:#f1dfbf;font:clamp(21px,5vw,27px)/1.2 "Cinzel",Georgia,serif}
+.ah-private-journal-intro p{max-width:390px;margin:9px auto 0;color:#bdb09b;font-size:10px;line-height:1.6}
+.ah-journal-unlock{max-width:420px;margin:0 auto 18px;padding:17px;border:1px solid rgba(211,174,112,.22);border-radius:6px;background:#080706}
+.ah-journal-unlock>.eyebrow{display:block;margin:0 0 15px}
+.ah-journal-unlock label,.ah-journal-editor label{display:block;margin:12px 0 7px;color:#d8bd8d;font-size:8px;letter-spacing:.15em}
+.ah-journal-unlock input,.ah-journal-editor input,.ah-journal-editor textarea{width:100%;min-width:0;border:1px solid rgba(211,174,112,.3);border-radius:5px;background:#050505;color:#f0dfc0;padding:12px;font:inherit;font-size:12px;outline:none}
+.ah-journal-unlock input:focus,.ah-journal-editor input:focus,.ah-journal-editor textarea:focus{border-color:#d7b77f;box-shadow:0 0 0 2px rgba(211,174,112,.1)}
+.ah-journal-unlock>small{display:block;margin:9px 0;color:#aaa08e;font-size:9px;line-height:1.5}
+.ah-journal-primary{min-height:44px;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:0 15px;border:1px solid #d7b77f;border-radius:5px;background:linear-gradient(180deg,#e8c88f,#bd8c50);color:#171008;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.ah-journal-unlock .ah-journal-primary{width:100%;margin-top:14px}
+.ah-journal-primary:disabled{opacity:.45;cursor:not-allowed}
+.ah-journal-workspace{display:grid;grid-template-columns:minmax(125px,.75fr) minmax(0,1.5fr);gap:14px}
+.ah-journal-list{min-width:0;padding:11px;border:1px solid rgba(211,174,112,.2);border-radius:5px;background:#080706}
+.ah-journal-list-head{display:flex;align-items:center;justify-content:space-between;gap:6px;padding-bottom:9px;border-bottom:1px solid rgba(211,174,112,.16)}
+.ah-journal-list-head .eyebrow{margin:0;font-size:8px}
+.ah-journal-list-head button{width:34px;min-height:34px;display:grid;place-items:center;border:1px solid rgba(211,174,112,.4);border-radius:4px;color:#e0c18a}
+.ah-journal-list>button{width:100%;min-height:52px;display:block;margin-top:7px;padding:9px;text-align:left;border:1px solid transparent;border-radius:4px;background:#100d09}
+.ah-journal-list>button.active{border-color:#a8834d;background:#171108}
+.ah-journal-list>button strong,.ah-journal-list>button small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ah-journal-list>button strong{color:#e9d7b7;font-size:9px}
+.ah-journal-list>button small{margin-top:5px;color:#9f927c;font-size:8px}
+.ah-journal-empty{color:#9f927c;font-size:9px;line-height:1.6}
+.ah-journal-editor{min-width:0}
+.ah-journal-editor label:first-child{margin-top:0}
+.ah-journal-editor textarea{resize:vertical;min-height:180px;line-height:1.65}
+.ah-journal-count{display:block;margin-top:6px;text-align:right;color:#928875;font-size:8px;font-variant-numeric:tabular-nums}
+.ah-journal-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:13px}
+.ah-journal-delete{min-height:44px;display:inline-flex;align-items:center;gap:7px;padding:0 12px;border:1px solid rgba(193,104,94,.5);border-radius:5px;color:#d99a90;font-size:9px}
+.ah-journal-lock-row{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:12px;border-top:1px solid rgba(211,174,112,.16)}
+.ah-journal-lock-row span{display:flex;align-items:center;gap:7px;color:#b9a98d;font-size:8px}
+.ah-journal-lock-row button{min-height:40px;padding:0 12px;border:1px solid rgba(211,174,112,.3);border-radius:4px;color:#d8bd8d;font-size:9px}
+.ah-journal-privacy{display:flex;align-items:flex-start;gap:9px;margin-top:18px;padding:11px;border:1px solid rgba(211,174,112,.18);border-radius:5px;background:rgba(0,0,0,.28)}
+.ah-journal-privacy svg{flex:none;color:#d1b17a}
+.ah-journal-privacy p{margin:0;color:#a99d89;font-size:8px;line-height:1.6}
+.ah-journal-error,.ah-journal-message{margin:12px 0 0;padding:10px;border-radius:4px;font-size:9px;line-height:1.5}
+.ah-journal-error{border:1px solid rgba(193,104,94,.5);color:#e2a29a;background:rgba(70,24,20,.22)}
+.ah-journal-message{border:1px solid rgba(211,174,112,.25);color:#e2c58f;background:rgba(83,61,28,.15)}
+@media(max-width:520px){.ah-private-journal{padding:14px}.ah-journal-workspace{grid-template-columns:1fr}.ah-journal-list{max-height:180px;overflow:auto}.ah-journal-list>button{display:inline-block;width:calc(50% - 5px);margin-right:5px;vertical-align:top}.ah-journal-editor textarea{min-height:155px}.ah-journal-lock-row{align-items:flex-start}.ah-journal-privacy{margin-top:14px}}
+@media(prefers-reduced-motion:reduce){.ah-private-journal *{scroll-behavior:auto!important;transition:none!important}}
+
+.ah-open-journal{width:100%;min-height:46px;margin:12px 0 8px;display:flex;align-items:center;justify-content:center;gap:9px;border:1px solid rgba(211,174,112,.48);border-radius:5px;background:linear-gradient(145deg,rgba(39,29,16,.85),rgba(8,7,6,.95));color:#e7c991;font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase}
+.ah-open-journal:focus-visible,.ah-journal-close:focus-visible,.ah-journal-primary:focus-visible,.ah-journal-delete:focus-visible,.ah-journal-lock-row button:focus-visible{outline:2px solid #f0d49a;outline-offset:3px}
