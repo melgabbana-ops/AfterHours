@@ -65,6 +65,18 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
     channel.on("broadcast", { event: "play-state" }, ({ payload }) => {
       if (!alive || !payload || typeof payload !== "object") return;
       const next = payload as { round?: number; status?: PlayStatus };
+      const liveParticipants = Object.values(channel.presenceState<PresenceMeta>()).flat();
+      if (next.status === "active" && !canStartRemotePlay({
+        connected,
+        participantCount: liveParticipants.length,
+        partnerPresent: liveParticipants.some(person => person.participantId !== participantId),
+        ownConsent: myConsent,
+        partnerConsent: liveParticipants.some(person => person.participantId !== participantId && person.consent === true)
+      })) {
+        setStatus("paused");
+        setMessage(t("Een start- of hervatverzoek is geweigerd: beide deelnemers moeten aanwezig zijn en instemmen.", "A start or resume request was rejected: both participants must be present and consenting."));
+        return;
+      }
       if (Number.isInteger(next.round) && next.round! >= 0 && next.round! < prompts.length) setRound(next.round!);
       if (["lobby", "active", "paused", "stopped"].includes(next.status || "")) setStatus(next.status!);
     });
