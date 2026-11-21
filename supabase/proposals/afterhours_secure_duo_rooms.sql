@@ -39,7 +39,10 @@ create table if not exists public.afterhours_duo_invitations (
   accepted_at timestamptz,
   expires_at timestamptz not null default (now() + interval '24 hours'),
   created_at timestamptz not null default now(),
-  check ((status = 'accepted') = (accepted_user_id is not null and accepted_at is not null))
+  check (
+    (status = 'accepted' and accepted_user_id is not null and accepted_at is not null)
+    or (status <> 'accepted' and accepted_user_id is null and accepted_at is null)
+  )
 );
 create index if not exists afterhours_duo_invitations_expiry
   on public.afterhours_duo_invitations (expires_at)
