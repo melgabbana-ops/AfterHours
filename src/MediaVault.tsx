@@ -9,7 +9,7 @@ import {
   type PrivateMediaItem,
 } from "./services/media";
 import { supabase, supabaseConfigured } from "./services/supabase";
-import { composeImageWithOverlay, composeImageWithEdits, defaultPhotoEditTransform, drawCameraFrame, mediaOverlayFrames, type OverlayFrameStyle, type PhotoEditTransform } from "./mediaOverlay";
+import { applyPhotoEditPreset, composeImageWithOverlay, composeImageWithEdits, defaultPhotoEditTransform, drawCameraFrame, mediaOverlayFrames, photoEditPresets, type OverlayFrameStyle, type PhotoEditPresetId, type PhotoEditTransform } from "./mediaOverlay";
 import { appendMediaCaptureChunk, canRecoverInterruptedCapture, discardMediaCapture, MAX_MEDIA_CAPTURE_BYTES, missingCaptureTrack, requestMediaStream, stopMediaRecorder, stopMediaStreams, selectMediaRecorderMimeType, waitForVideoReady, watchMediaStreamInterruption } from "./services/mediaCapture";
 
 interface MediaVaultProps {
@@ -47,6 +47,8 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
   const [liveStream,setLiveStream] = useState<MediaStream|null>(null);
   const [pendingCapture,setPendingCapture] = useState<File|null>(null);
   const [pendingOriginalFile,setPendingOriginalFile] = useState<File|null>(null);
+  const [originalPreviewUrl,setOriginalPreviewUrl] = useState("");
+  const [showOriginalPhoto,setShowOriginalPhoto] = useState(false);
   const [photoEdits,setPhotoEdits] = useState<PhotoEditTransform>(defaultPhotoEditTransform);
   const [pendingUrl,setPendingUrl] = useState("");
   const [isSavingCapture,setIsSavingCapture] = useState(false);
@@ -109,6 +111,14 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
     const currentUrl=pendingUrl;
     return ()=>{if(currentUrl)URL.revokeObjectURL(currentUrl);};
   },[pendingUrl]);
+  useEffect(()=>{
+    if(!pendingOriginalFile){setOriginalPreviewUrl("");setShowOriginalPhoto(false);return;}
+    const url=URL.createObjectURL(pendingOriginalFile);
+    setOriginalPreviewUrl(url);
+    setShowOriginalPhoto(false);
+    return ()=>URL.revokeObjectURL(url);
+  },[pendingOriginalFile]);
+
 
   const refresh = useCallback(async (isActive: () => boolean = () => mountedRef.current): Promise<boolean> => {
     if (isActive()) {
@@ -596,6 +606,10 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
               <label>{t("Verticale positie","Vertical position")}
                 <input type="range" min="-1" max="1" step="0.05" value={photoEdits.offsetY} disabled={busy} onChange={event=>void updatePendingImageEdit(frameStyle,{...photoEdits,offsetY:Number(event.target.value)})}/>
               </label>
+              <div className="media-photo-editor-presets" role="group" aria-label={t("Kleurpresets","Color presets")}>
+                <strong>{t("SNELLE PRESETS","QUICK PRESETS")}</strong>
+                <div>{photoEditPresets.map(preset=><button key={preset.id} type="button" className="media-photo-preset" onClick={()=>void updatePendingImageEdit(frameStyle,applyPhotoEditPreset(photoEdits,preset.id))} disabled={busy}>{language==="nl"?preset.titleNL:preset.titleEN}</button>)}</div>
+              </div>
               <div className="media-photo-editor-grade">
                 <strong>{t("KLEUR & LICHT","COLOR & LIGHT")}</strong>
                 <label>{t("Helderheid","Brightness")} · {Math.round(photoEdits.brightness*100)}%
@@ -615,7 +629,8 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
             </div>}
             {pendingCapture&&pendingUrl&&<div className="media-pending-preview">
               <strong>{t("Lokale preview","Local preview")} · {formatSize(pendingCapture.size)}</strong>
-              {pendingCapture.type.startsWith("image/")?<img src={pendingUrl} alt={t("Lokale voorbeeldweergave van geselecteerde afbeelding","Local preview of selected image")}/>:pendingCapture.type.startsWith("video/")?<video src={pendingUrl} controls playsInline/>:<audio src={pendingUrl} controls/>}
+              {pendingOriginalFile&&originalPreviewUrl&&<div className="media-photo-compare"><button type="button" onClick={()=>setShowOriginalPhoto(value=>!value)} aria-pressed={showOriginalPhoto} disabled={busy}>{showOriginalPhoto?t("Toon bewerkte versie","Show edited version"):t("Vergelijk met origineel","Compare with original")}</button><small>{showOriginalPhoto?t("Origineel, nog niet opgeslagen","Original, not saved yet"):t("Bewerkte preview","Edited preview")}</small></div>}
+              {pendingCapture.type.startsWith("image/")?<img src={showOriginalPhoto&&originalPreviewUrl?originalPreviewUrl:pendingUrl} alt={showOriginalPhoto?t("Originele, onbewerkte foto","Original unedited photo"):t("Lokale voorbeeldweergave van geselecteerde afbeelding","Local preview of selected image")}/>:pendingCapture.type.startsWith("video/")?<video src={pendingUrl} controls playsInline/>:<audio src={pendingUrl} controls/>}
               <div className="media-item-actions"><button type="button" onClick={()=>void saveCapture()} disabled={busy||isSavingCapture}>{isSavingCapture?t("Opslaan…","Saving…"):t("Opslaan in privékluis","Save to private vault")}</button><button type="button" onClick={discardCapture} disabled={busy||isSavingCapture}>{t("Weggooien","Discard")}</button></div>
             </div>}
           </section>
