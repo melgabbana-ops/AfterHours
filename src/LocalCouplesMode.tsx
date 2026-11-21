@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CheckCircle2, Play, ShieldCheck, Square, Users } from "lucide-react";
 import { bothLocalParticipantsReady, type LocalCouplesSignal } from "./sessionModes";
 
@@ -84,6 +84,14 @@ export default function LocalCouplesMode({ language, consentActive, onSafetyPaus
   const description = language === "nl" ? scene.description : scene.descriptionEn;
   const steps = language === "nl" ? scene.steps : scene.stepsEn;
   const ready = consentActive && consents.every(Boolean);
+
+  useEffect(() => {
+    if (consentActive || (stage !== "active" && stage !== "paused")) return;
+    setStage("stopped");
+    setSignals(["red", "red"]);
+    setNotice(t("Toestemming is ingetrokken. De gezamenlijke route is direct beëindigd.", "Consent was withdrawn. The shared path has ended immediately."));
+    onSafetyStop();
+  }, [consentActive, stage, onSafetyStop]);
   function setSignal(index: 0 | 1, value: LocalCouplesSignal) {
     const next: [LocalCouplesSignal, LocalCouplesSignal] = [...signals];
     next[index] = value;
