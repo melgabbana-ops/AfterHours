@@ -7,11 +7,15 @@ describe("initialScreenFromSearch", () => {
     const screens = [
       "game", "gameSelect", "complete", "profile", "admin", "insights", "radio",
       "aftercare", "prompts", "safety", "store", "onboarding", "controlroom",
-      "missions", "legal", "social", "lovense", "daily", "capture", "cinematic",
+      "missions", "legal", "social", "lovense", "daily", "capture", "cinematic", "couples",
     ];
     for (const screen of screens) {
       expect(initialScreenFromSearch(`?screen=${screen}`)).toBe(screen);
     }
+  });
+
+  it("opens private couple-room invitations directly in duo play", () => {
+    expect(initialScreenFromSearch("?couple=ABCD2345XY")).toBe("couples");
   });
 
   it("falls back safely for missing or unknown screens", () => {
