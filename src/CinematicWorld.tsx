@@ -9,7 +9,7 @@ import {
   acceptExperienceInvitation, createExperienceInvitation, createExperienceRun,
   deleteExperienceRun, deleteWorldRecord, loadExperienceInvitations,
   loadExperienceRuns, loadWorldRecords, resumeExperienceRun, revokeExperienceInvitation,
-  saveWorldRecord, updateExperienceRun,
+  saveWorldRecord, updateExperienceRun, withdrawExperienceConsent,
   type ExperienceInvitation, type ExperienceRun, type WorldModule, type WorldRecord
 } from "./services/worldRecords";
 import "./cinematic-experience.css";
@@ -223,6 +223,7 @@ export default function CinematicWorld({
     .filter((card) => card.title && card.text);
   const recoverableRun = runs.find((run) => run.user_id === remoteProfileId && (run.status === "active" || run.status === "paused")) ?? null;
   const invitableRuns = runs.filter((run) => run.user_id === remoteProfileId && (run.status === "active" || run.status === "paused"));
+  const joinedRuns = runs.filter((run) => run.user_id !== remoteProfileId && (run.status === "active" || run.status === "paused"));
   const selectedScene = scenes.find((scene) => scene.key === selectedSceneKey) ?? null;
 
   async function refreshData(userId = remoteProfileId) {
@@ -842,7 +843,7 @@ export default function CinematicWorld({
     setError("");
     try {
       const tokenBytes = new Uint8Array(incomingInviteToken.match(/.{1,2}/g)?.map((byte) => Number.parseInt(byte, 16)) ?? []);
-      if (tokenBytes.length !== 32 || Array.from(tokenBytes).some((byte) => !Number.isFinite(byte))) {
+      if (!/^[a-f0-9]{64}$/i.test(incomingInviteToken) || tokenBytes.length !== 32) {
         throw new Error(t("Deze uitnodigingslink is ongeldig.", "This invitation link is invalid."));
       }
       const digest = await crypto.subtle.digest("SHA-256", tokenBytes);
@@ -858,6 +859,22 @@ export default function CinematicWorld({
       void accepted;
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : t("Uitnodiging accepteren is niet gelukt.", "Could not accept invitation."));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function withdrawSharedConsent(runId: string) {
+    if (!remoteProfileId) return;
+    if (!window.confirm(t("Je toestemming intrekken? De gedeelde ervaring wordt direct voor iedereen gestopt.", "Withdraw your consent? The shared experience will immediately stop for everyone."))) return;
+    setBusy(true);
+    try {
+      await withdrawExperienceConsent(runId, remoteProfileId);
+      await refreshData();
+      setMessage(t("Je toestemming is ingetrokken. De gedeelde ervaring is gestopt.", "Your consent has been withdrawn. The shared experience has stopped."));
+      onSafetyStop();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : t("Toestemming intrekken is niet gelukt.", "Could not withdraw consent."));
     } finally {
       setBusy(false);
     }
@@ -1176,6 +1193,7 @@ export default function CinematicWorld({
             <button type="button" className="cw-primary" disabled={busy || !remoteProfileId || !selectedInviteRunId} onClick={() => void createRunInvitation(selectedInviteRunId)}><Share2 size={15} />{t("Maak veilige uitnodigingslink", "Create secure invitation link")}</button>
             {inviteLink && <div className="cw-invite-link"><label>{t("Jouw eenmalige uitnodigingslink", "Your one-time invitation link")}<input readOnly value={inviteLink} /></label><button type="button" onClick={() => { void navigator.clipboard?.writeText(inviteLink); setMessage(t("Uitnodigingslink gekopieerd.", "Invitation link copied.")); }}><Copy size={15} />{t("Kopieer link", "Copy link")}</button></div>}
           </div>
+          {joinedRuns.length > 0 && <div className="cw-saved-list"><h3>{t("Ervaringen waarvoor jij toestemming gaf", "Experiences you consented to")} <span>{joinedRuns.length}</span></h3>{joinedRuns.map((run) => <div className="cw-saved-row" key={run.id}><div><strong>{String(run.scene_snapshot.title ?? run.scene_key)}</strong><small>{t("Je neemt deel als gast ·", "You are a participant ·")} {run.status === "active" ? t("Actief", "Active") : t("Gepauzeerd", "Paused")}</small></div><button type="button" className="cw-danger" disabled={busy} onClick={() => void withdrawSharedConsent(run.id)}>{t("Toestemming intrekken en stoppen", "Withdraw consent and stop")}</button></div>)}</div>}
           <div className="cw-saved-list"><h3>{t("Uitnodigingen en toestemmingen", "Invitations and consent")} <span>{experienceInvites.length}</span></h3>{experienceInvites.map((invite) => <div className="cw-saved-row" key={invite.id}><div><strong>{invite.status === "accepted" ? t("Toestemming ontvangen", "Consent received") : invite.status === "pending" && new Date(invite.expires_at).getTime() <= Date.now() ? t("Verlopen", "Expired") : t(invite.status === "revoked" ? "Ingetrokken" : "Wacht op acceptatie", invite.status === "revoked" ? "Revoked" : "Awaiting acceptance")}</strong><small>{t("Geldig tot", "Expires")} {new Date(invite.expires_at).toLocaleString(language === "nl" ? "nl-NL" : "en-GB")}{invite.accepted_at ? " · " + t("Geaccepteerd", "Accepted") + " " + new Date(invite.accepted_at).toLocaleString(language === "nl" ? "nl-NL" : "en-GB") : ""}</small></div>{invite.status === "pending" && new Date(invite.expires_at).getTime() > Date.now() ? <button type="button" disabled={busy} onClick={() => void revokeInvite(invite)}>{t("Intrekken", "Revoke")}</button> : null}</div>)}</div>
           <div className="cw-saved-list"><h3>{t("Eerdere uitnodigingsconcepten", "Previous invitation drafts")} <span>{records.invitation.length}</span></h3>{records.invitation.map((record) => <div className="cw-saved-row" key={record.record_key}><div><strong>{String(record.payload.title ?? t("Uitnodiging", "Invitation"))}</strong><small>{record.payload.shareStatus === "shared" ? t("Gedeeld", "Shared") : t("Concept", "Draft")} · {new Date(record.updated_at).toLocaleDateString(language === "nl" ? "nl-NL" : "en-GB")}</small></div><button type="button" onClick={() => { setInviteTitle(String(record.payload.title ?? "")); setInviteMessage(String(record.payload.message ?? "")); }}>{t("Open", "Open")}</button></div>)}</div>
         </section>
