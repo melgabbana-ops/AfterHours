@@ -72,8 +72,10 @@ export function safePrivateMediaFileName(value: string): string {
 }
 
 export function safeMediaSessionFolder(value: string): string {
-  const segment = safePrivateMediaFileName(value || "general");
-  return segment === "." || segment === ".." ? "general" : segment;
+  const raw = value.trim();
+  // Check dot-only path segments before filename normalization replaces them.
+  if (!raw || raw === "." || raw === "..") return "general";
+  return safePrivateMediaFileName(raw);
 }
 
 export function safeAssignmentPrefix(value?: string): string {
