@@ -14,10 +14,11 @@ describe("shared experience check-in migration", () => {
     expect(migration).toMatch(/grant update \(run_id, user_id, step_index, signal\) on public\.afterhours_experience_run_checkins to authenticated/i);
     expect(migration).toMatch(/create or replace function public\.afterhours_guard_run_checkin_identity\(\)[\s\S]*?new\.run_id is distinct from old\.run_id[\s\S]*?new\.user_id is distinct from old\.user_id[\s\S]*?new\.step_index is distinct from old\.step_index/i);
     expect(migration).toMatch(/create trigger afterhours_run_checkins_identity_guard[\s\S]*?before update on public\.afterhours_experience_run_checkins/i);
+    expect(migration).toMatch(/revoke all on function public\.afterhours_guard_run_checkin_identity\(\) from public, anon, authenticated/i);
   });
 
   it("limits each experience to one accepted invitee plus its owner", () => {
-    expect(migration).toMatch(/create unique index if not exists afterhours_experience_invitations_one_accepted_participant_per_run[\\s\\S]*?on public\\.afterhours_experience_invitations \\(run_id\\)[\\s\\S]*?where status = 'accepted' and accepted_user_id is not null/i);
+    expect(migration).toMatch(/create unique index if not exists afterhours_experience_invitations_one_accepted_participant_per_run[\s\S]*?on public\.afterhours_experience_invitations \(run_id\)[\s\S]*?where status = 'accepted' and accepted_user_id is not null/i);
   });
 
   it("allows reads only to the participant or the owner of the related run", () => {
