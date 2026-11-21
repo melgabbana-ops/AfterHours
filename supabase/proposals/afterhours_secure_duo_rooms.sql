@@ -398,6 +398,10 @@ create policy afterhours_duo_member_send_private
       where m.user_id = (select auth.uid())
         and m.removed_at is null
         and ('afterhours-duo:' || m.room_id::text) = (select realtime.topic())
+        and exists (
+          select 1 from public.afterhours_duo_rooms r
+          where r.id = m.room_id and r.status <> 'stopped' and r.expires_at > now()
+        )
     )
   );
 
