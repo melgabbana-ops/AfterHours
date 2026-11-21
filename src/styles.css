@@ -4688,3 +4688,12 @@ button,[role="button"],nav a{touch-action:manipulation}
 .story-resume-action:focus-visible{outline:2px solid #f0d79f;outline-offset:3px}
 .story-complete-status{margin:0 0 14px;padding:13px 15px;border:1px solid #6f552b;border-radius:9px;background:rgba(201,164,92,.06);color:#e2c57d;font-size:11px;line-height:1.6}
 @media(max-width:560px){.story-resume-card{align-items:stretch;flex-direction:column}.story-resume-action{width:100%;min-height:48px}}
+
+
+/* Private safeword fields: masked by default, with an accessible reveal control. */
+.safety-signal-field{position:relative;display:flex;align-items:center;min-width:0}
+.safety-signal-field input{padding-right:58px}
+.safety-signal-visibility{position:absolute;right:7px;top:50%;transform:translateY(-50%);display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;min-width:44px;min-height:44px;border:1px solid #4b3b25;border-radius:8px;background:#100e0b;color:#d8b56e;cursor:pointer}
+.safety-signal-visibility:hover{border-color:#c89445;color:#f3c96b}
+.safety-signal-visibility:focus-visible{outline:2px solid #f3c96b;outline-offset:2px}
+.safety-signal-visibility svg{width:18px;height:18px}
