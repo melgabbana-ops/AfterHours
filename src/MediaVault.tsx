@@ -66,6 +66,16 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
     if(livePreviewRef.current) livePreviewRef.current.srcObject=liveStream;
   },[liveStream]);
   useEffect(()=>{frameStyleRef.current=frameStyle},[frameStyle]);
+  // Signed storage links expire after 60 seconds. Remove the stale action from the
+  // interface at the same boundary so users cannot mistake an expired URL for a live one.
+  useEffect(()=>{
+    if(!signedUrl)return;
+    const timeout=window.setTimeout(()=>{
+      setSignedUrl("");
+      setMessage(t("De tijdelijke link is verlopen. Open het bestand opnieuw voor een nieuwe link.","This temporary link has expired. Open the file again to create a fresh link."));
+    },60_000);
+    return ()=>window.clearTimeout(timeout);
+  },[signedUrl,language]);
   useEffect(()=>{
     mountedRef.current=true;
     return ()=>{
