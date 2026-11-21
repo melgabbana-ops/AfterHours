@@ -731,7 +731,7 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
       setCompletedBossSteps(finalSteps);
       if (gameRoundRef.current !== stepIndex) return;
 
-      if (stepIndex >= BOSS_MODE_STEP_COUNT - 1) {
+      if (receipt?.fullCompletion || stepIndex >= BOSS_MODE_STEP_COUNT - 1) {
         finishBossMode(finalSteps, receipt);
         return;
       }
