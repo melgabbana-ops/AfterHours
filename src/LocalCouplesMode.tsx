@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { CheckCircle2, Heart, Pause, Play, ShieldCheck, Square, Users } from "lucide-react";
+import { CheckCircle2, Play, ShieldCheck, Square, Users } from "lucide-react";
+import { bothLocalParticipantsReady, type LocalCouplesSignal } from "./sessionModes";
 
 type Language = "nl" | "en";
 type Stage = "setup" | "active" | "paused" | "complete" | "stopped";
-type Signal = "unset" | "green" | "yellow" | "red";
 
 type Props = {
   language: Language;
@@ -75,19 +75,16 @@ export default function LocalCouplesMode({ language, consentActive, onSafetyPaus
   const [sceneKey, setSceneKey] = useState<keyof typeof SCENES>("connection");
   const [names, setNames] = useState([t("Deelnemer 1", "Participant 1"), t("Deelnemer 2", "Participant 2")]);
   const [consents, setConsents] = useState([false, false]);
-  const [stopWord, setStopWord] = useState("STOP");
-  const [pauseWord, setPauseWord] = useState(language === "nl" ? "PAUZE" : "PAUSE");
   const [stage, setStage] = useState<Stage>("setup");
   const [step, setStep] = useState(0);
-  const [signals, setSignals] = useState<[Signal, Signal]>(["unset", "unset"]);
+  const [signals, setSignals] = useState<[LocalCouplesSignal, LocalCouplesSignal]>(["unset", "unset"]);
   const [notice, setNotice] = useState("");
   const scene = SCENES[sceneKey];
   const title = language === "nl" ? scene.title : scene.titleEn;
   const description = language === "nl" ? scene.description : scene.descriptionEn;
   const steps = language === "nl" ? scene.steps : scene.stepsEn;
-  const ready = consentActive && consents.every(Boolean) && stopWord.trim().length >= 2 &&
-    pauseWord.trim().length >= 2 && stopWord.trim().toLowerCase() !== pauseWord.trim().toLowerCase();
-  function setSignal(index: 0 | 1, value: Signal) {
+  const ready = consentActive && consents.every(Boolean);
+  function setSignal(index: 0 | 1, value: LocalCouplesSignal) {
     const next: [Signal, Signal] = [...signals];
     next[index] = value;
     setSignals(next);
@@ -113,7 +110,7 @@ export default function LocalCouplesMode({ language, consentActive, onSafetyPaus
   }
 
   function advance() {
-    if (signals.some((signal) => signal !== "green")) return;
+    if (!bothLocalParticipantsReady(signals)) return;
     if (step + 1 >= steps.length) {
       setStage("complete");
       setNotice(t("De gezamenlijke route is afgerond. Neem rustig de tijd voor aftercare.", "Your shared path is complete. Take your time for aftercare."));
@@ -126,6 +123,7 @@ export default function LocalCouplesMode({ language, consentActive, onSafetyPaus
   }
 
   function passStep() {
+    if (stage !== "active" || !bothLocalParticipantsReady(signals)) return;
     if (step + 1 >= steps.length) {
       setStage("complete");
       setNotice(t("Jullie hebben de laatste stap overgeslagen en de route afgerond.", "You skipped the final step and completed the route."));
@@ -185,10 +183,6 @@ export default function LocalCouplesMode({ language, consentActive, onSafetyPaus
                 </label>
               ))}
             </div>
-            <div className="cw-local-signals">
-              <label><span>{t("Afgesproken stopwoord", "Agreed stop word")}</span><input value={stopWord} maxLength={24} onChange={(event) => setStopWord(event.target.value)} /></label>
-              <label><span>{t("Afgesproken pauzewoord", "Agreed pause word")}</span><input value={pauseWord} maxLength={24} onChange={(event) => setPauseWord(event.target.value)} /></label>
-            </div>
             {!consentActive && <p className="cw-local-warning">{t("Bevestig eerst de algemene AFTER HOURS-consent voordat je start.", "Confirm general AFTER HOURS consent before starting.")}</p>}
             <button type="button" className="cw-primary" disabled={!ready} onClick={() => { setStage("active"); setStep(0); setSignals(["unset", "unset"]); setNotice(""); }}>
               <Play size={15} />{t("Start gezamenlijke route", "Start shared path")}
@@ -217,8 +211,8 @@ export default function LocalCouplesMode({ language, consentActive, onSafetyPaus
               {notice && <p className="cw-local-status" role="status" aria-live="polite">{notice}</p>}
               {stage === "paused" && <p className="cw-local-warning">{t("De route staat stil. Hervatten kan pas als beide deelnemers opnieuw groen kiezen.", "The path is paused. Resume only after both participants choose green again.")}</p>}
               <div className="cw-local-actions">
-                <button type="button" className="cw-primary" disabled={!signals.every((signal) => signal === "green")} onClick={advance}><CheckCircle2 size={15} />{t("Verder", "Continue")}</button>
-                <button type="button" onClick={passStep} disabled={stage !== "active"}>{t("Sla deze stap over", "Pass this step")}</button>
+                <button type="button" className="cw-primary" disabled={!bothLocalParticipantsReady(signals)} onClick={advance}><CheckCircle2 size={15} />{t("Verder", "Continue")}</button>
+                <button type="button" onClick={passStep} disabled={stage !== "active" || !bothLocalParticipantsReady(signals)}>{t("Sla deze stap over", "Pass this step")}</button>
                 <button type="button" className="cw-danger" onClick={stop}><Square size={14} />{t("Beëindig direct", "Stop now")}</button>
               </div>
             </>
