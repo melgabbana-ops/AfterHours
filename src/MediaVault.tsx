@@ -302,7 +302,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
       const recorder=mimeType?new MediaRecorder(recorderStream,{mimeType}):new MediaRecorder(recorderStream);
       recorderRef.current=recorder;
       recorder.ondataavailable=event=>{
-        if(!mountedRef.current||captureSizeExceededRef.current||event.data.size===0)return;
+        if(!mountedRef.current||captureInterruptedRef.current||captureSizeExceededRef.current||event.data.size===0)return;
         const nextBytes=appendMediaCaptureChunk(chunksRef.current,captureBytesRef.current,event.data);
         if(nextBytes===null){
           captureSizeExceededRef.current=true;
@@ -314,6 +314,11 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
         captureBytesRef.current=nextBytes;
       };
       recorder.onerror=()=>{
+        // A recorder error must never let a later dataavailable/stop event publish a partial preview.
+        captureInterruptedRef.current=true;
+        chunksRef.current=[];
+        captureBytesRef.current=0;
+        captureSizeExceededRef.current=false;
         stopCaptureTracks();
         if(mountedRef.current)setMessage(t("De opname is onderbroken. Controleer de cameratoestemming en probeer opnieuw.","Recording was interrupted. Check camera permissions and try again."));
       };
