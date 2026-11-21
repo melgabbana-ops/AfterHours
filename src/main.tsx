@@ -11,6 +11,7 @@ import"./approved-cinematic.css";
 import"./reference-home.css";
 import"./reference-pages.css";
 import"./cinematic-world.css";
+import"./tablet-layout.css";
 import ConsentScreen from "./ConsentScreen";
 
 
