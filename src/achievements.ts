@@ -22,7 +22,9 @@ export const badgeCatalog = [
   { id: "story_challenge", title: "Creative Edge", description: "Je hebt THE CHALLENGE afgerond.", icon: "✧", event: "story_chapter_complete", xp: 0 },
   { id: "story_boundary", title: "Boundary Keeper", description: "Je hebt THE BOUNDARY afgerond.", icon: "⬡", event: "story_chapter_complete", xp: 0 },
   { id: "story_night", title: "Night Director", description: "Je hebt THE NIGHT afgerond.", icon: "☾", event: "story_chapter_complete", xp: 0 },
-  { id: "story_after-hours", title: "After Hours", description: "Je hebt AFTER HOURS afgerond.", icon: "♛", event: "story_chapter_complete", xp: 0 },\n  { id: "kink_self_knowing", title: "The Self-Knowing", description: "Je hebt je eerste AFTER HOURS Kink Profile afgerond.", icon: "✦", event: "kink_test_complete", xp: 0 },\n  { id: "kink_boundary_architect", title: "Boundary Architect", description: "Je hebt bewust je grenzen benoemd in Kink Profile.", icon: "◇", event: "kink_test_boundaries", xp: 0 },
+  { id: "story_after-hours", title: "After Hours", description: "Je hebt AFTER HOURS afgerond.", icon: "♛", event: "story_chapter_complete", xp: 0 },
+  { id: "kink_self_knowing", title: "The Self-Knowing", description: "Je hebt je eerste AFTER HOURS Kink Profile afgerond.", icon: "✦", event: "kink_test_complete", xp: 0 },
+  { id: "kink_boundary_architect", title: "Boundary Architect", description: "Je hebt bewust je grenzen benoemd in Kink Profile.", icon: "◇", event: "kink_test_boundaries", xp: 0 },
 ] as const;
 
 const STORAGE_KEY = "afterhours.achievements.v1";
@@ -83,7 +85,9 @@ export function recordAchievement(event: AchievementEvent, options: { date?: str
     add("first_session", "session:first");
     if ((options.completedSessions ?? 0) >= 3) add("three_sessions", "session:three");
   }
-  if (event === "prompt_complete") add("first_prompt", "prompt:first");\n  if (event === "kink_test_complete") add("kink_self_knowing", "kink-test:first");\n  if (event === "kink_test_boundaries") add("kink_boundary_architect", "kink-test:boundaries");
+  if (event === "prompt_complete") add("first_prompt", "prompt:first");
+  if (event === "kink_test_complete") add("kink_self_knowing", "kink-test:first");
+  if (event === "kink_test_boundaries") add("kink_boundary_architect", "kink-test:boundaries");
   if (event === "story_chapter_complete" && typeof options.chapterId === "string") {
     const chapterId = options.chapterId;
     if (["arrival", "test", "control", "challenge", "boundary", "night", "after-hours"].includes(chapterId)) {
