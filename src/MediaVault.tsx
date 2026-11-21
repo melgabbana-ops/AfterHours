@@ -9,7 +9,7 @@ import {
 } from "./services/media";
 import { supabase, supabaseConfigured } from "./services/supabase";
 import { composeImageWithOverlay, drawCameraFrame, mediaOverlayFrames, type OverlayFrameStyle } from "./mediaOverlay";
-import { discardMediaCapture, stopMediaStreams } from "./services/mediaCapture";
+import { appendMediaCaptureChunk, discardMediaCapture, MAX_MEDIA_CAPTURE_BYTES, stopMediaStreams } from "./services/mediaCapture";
 
 interface MediaVaultProps {
   sessionId: string;
@@ -53,6 +53,8 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
   const recorderRef = useRef<MediaRecorder|null>(null);
   const streamRef = useRef<MediaStream|null>(null);
   const chunksRef = useRef<BlobPart[]>([]);
+  const captureBytesRef = useRef(0);
+  const captureSizeExceededRef = useRef(false);
   const captureTimeoutRef = useRef<number|undefined>(undefined);
 
 
@@ -73,6 +75,8 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
       streamRef.current=null;
       compositionStreamRef.current=null;
       chunksRef.current=[];
+      captureBytesRef.current=0;
+      captureSizeExceededRef.current=false;
       if(livePreviewRef.current)livePreviewRef.current.srcObject=null;
     };
   },[]);
@@ -147,6 +151,8 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
     compositionStreamRef.current=null;
     streamRef.current=null;
     recorderRef.current=null;
+    chunksRef.current=[];
+    captureBytesRef.current=0;
     if(livePreviewRef.current)livePreviewRef.current.srcObject=null;
     if(mountedRef.current){
       setLiveStream(null);
@@ -199,6 +205,8 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
       streamRef.current=stream;
       setLiveStream(stream);
       chunksRef.current=[];
+      captureBytesRef.current=0;
+      captureSizeExceededRef.current=false;
       if(captureKind==="photo"){
         await new Promise<void>(resolve=>window.requestAnimationFrame(()=>window.requestAnimationFrame(()=>resolve())));
         if(!mountedRef.current)return;
@@ -263,19 +271,38 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
       const mimeType=candidates.find(type=>MediaRecorder.isTypeSupported(type));
       const recorder=mimeType?new MediaRecorder(recorderStream,{mimeType}):new MediaRecorder(recorderStream);
       recorderRef.current=recorder;
-      recorder.ondataavailable=event=>{if(mountedRef.current&&event.data.size>0)chunksRef.current.push(event.data);};
+      recorder.ondataavailable=event=>{
+        if(!mountedRef.current||captureSizeExceededRef.current||event.data.size===0)return;
+        const nextBytes=appendMediaCaptureChunk(chunksRef.current,captureBytesRef.current,event.data);
+        if(nextBytes===null){
+          captureSizeExceededRef.current=true;
+          chunksRef.current=[];
+          captureBytesRef.current=0;
+          if(recorder.state==="recording")recorder.stop();
+          return;
+        }
+        captureBytesRef.current=nextBytes;
+      };
       recorder.onerror=()=>{
         stopCaptureTracks();
         if(mountedRef.current)setMessage(t("De opname is onderbroken. Controleer de cameratoestemming en probeer opnieuw.","Recording was interrupted. Check camera permissions and try again."));
       };
       recorder.onstop=()=>{
         if(!mountedRef.current){chunksRef.current=[];return;}
+        const sizeExceeded=captureSizeExceededRef.current;
         const type=recorder.mimeType|| (captureKind==="video"?"video/webm":"audio/webm");
         const blob=new Blob(chunksRef.current,{type});
         chunksRef.current=[];
+        captureBytesRef.current=0;
+        captureSizeExceededRef.current=false;
         stopCaptureTracks();
+        if(sizeExceeded){
+          setCaptureConsent(false);
+          setMessage(t("Opname automatisch gestopt bij 20 MB. Er is niets opgeslagen. Maak een kortere opname of kies een lagere kwaliteit.","Recording stopped automatically at 20 MB. Nothing was saved. Make a shorter recording or choose a lower quality."));
+          return;
+        }
         if(blob.size===0){setCaptureConsent(false);setMessage(t("Er is geen opname gemaakt.","No recording was created."));return;}
-        if(blob.size>20*1024*1024){setCaptureConsent(false);setMessage(t("De opname is groter dan 20 MB en is niet opgeslagen. Maak een kortere opname.","The recording exceeded 20 MB and was not saved. Make a shorter recording."));return;}
+        if(blob.size>MAX_MEDIA_CAPTURE_BYTES){setCaptureConsent(false);setMessage(t("De opname is groter dan 20 MB en is niet opgeslagen. Maak een kortere opname.","The recording exceeded 20 MB and was not saved. Make a shorter recording."));return;}
         const extension=type.includes("mp4")?".mp4":type.includes("ogg")?".ogg":".webm";
         const file=new File([blob],`after-hours-${captureKind}-${Date.now()}${extension}`,{type});
         if(pendingUrl)URL.revokeObjectURL(pendingUrl);
