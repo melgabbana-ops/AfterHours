@@ -15,7 +15,7 @@ export default function BadgeShowcase({ profileId }: { profileId?: string | null
     consent_first: {description: "You confirmed the consent check."},
     first_session: {description: "You completed your first session."},
     three_sessions: {description: "You completed three sessions."},
-    first_prompt: {description: "You marked your first prompt as done."}
+    first_prompt: {description: "You marked your first prompt as done."},\n    kink_self_knowing: {description: "You completed your first AFTER HOURS Kink Profile."},\n    kink_boundary_architect: {description: "You consciously identified your boundaries in Kink Profile."}
   };
   useEffect(() => {
     const refresh = () => setEarned(listEarnedBadges(profileId));
