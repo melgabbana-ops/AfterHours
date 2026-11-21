@@ -132,15 +132,28 @@ export default function AftercareJournal({ language, onClose }: { language: Lang
       if (generation === lockGeneration.current) setBusy(false);
     }
   };
-  const remove = () => {
-    if (!activeId || !window.confirm(t("Deze journalnotitie definitief verwijderen?", "Permanently delete this journal entry?"))) return;
-    if (!deletePrivateJournalEntry(activeId)) {
-      setError(t("Verwijderen is niet gelukt.", "Could not delete the entry."));
-      return;
+  const remove = async () => {
+    if (!activeId || !key || !window.confirm(t("Deze journalnotitie definitief verwijderen?", "Permanently delete this journal entry?"))) return;
+    const generation = lockGeneration.current;
+    setBusy(true);
+    try {
+      const deleted = await deletePrivateJournalEntry(
+        activeId,
+        key,
+        undefined,
+        () => generation === lockGeneration.current && document.visibilityState === "visible",
+      );
+      if (generation !== lockGeneration.current) return;
+      if (!deleted) {
+        setError(t("Verwijderen is niet gelukt. De kluis blijft ongewijzigd.", "Could not delete the entry. The vault remains unchanged."));
+        return;
+      }
+      setEntries(current => current.filter(entry => entry.id !== activeId));
+      startNew();
+      setMessage(t("Notitie verwijderd.", "Entry deleted."));
+    } finally {
+      if (generation === lockGeneration.current) setBusy(false);
     }
-    setEntries(current => current.filter(entry => entry.id !== activeId));
-    startNew();
-    setMessage(t("Notitie verwijderd.", "Entry deleted."));
   };
 
   const exportBackup = async () => {
