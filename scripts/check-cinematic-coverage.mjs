@@ -22,24 +22,23 @@ for (const file of sourceFiles) {
   const source = await readFile(file, "utf8");
   for (const match of source.matchAll(classPattern)) {
     const rawClassValue = match[1] ?? match[2] ?? match[3] ?? "";
-    const dynamicPrefixes = [...rawClassValue.matchAll(/([A-Za-z_][\\w-]*-)\\$\\{/g)].map((item) => item[1]);
-    const classValue = rawClassValue.replace(/\\$\\{[^}]*\\}/g, " ");
-    const declaredClasses = classValue.split(/\\s+/).filter(Boolean);
-    const hasSelector = (className) => {
-      const escaped = className.replace(/[.*+?^\\${}()|[\\]\\\\]/g, "\\\\$&");
-      return new RegExp("\\\\." + escaped + "(?![\\\\w-])").test(styles);
-    };
-    const hasDynamicSelector = (prefix) => {
-      const escaped = prefix.replace(/[.*+?^\\${}()|[\\]\\\\]/g, "\\\\$&");
-      return new RegExp("\\\\." + escaped + "[\\\\w-]+(?![\\\\w-])").test(styles);
-    };
-    const missingClasses = declaredClasses.filter((className) => !hasSelector(className));
-    const missingPrefixes = dynamicPrefixes.filter((prefix) => !hasDynamicSelector(prefix));
-    if (missingClasses.length || missingPrefixes.length) {
-      const relative = path.relative(root, file);
-      if (!missing.has(relative)) missing.set(relative, new Set());
-      for (const className of missingClasses) missing.get(relative).add(className);
-      for (const prefix of missingPrefixes) missing.get(relative).add(prefix + "<dynamic>");
+    const dynamicPrefixes = [...rawClassValue.matchAll(/([A-Za-z_][a-zA-Z0-9_-]*-)\$\{/g)].map((item) => item[1]);
+    const classValue = rawClassValue.replace(/\$\{[^}]*\}/g, " ");
+    for (const className of classValue.split(/\s+/).filter(Boolean)) {
+      const escaped = className.replace(/[.*+?^\${}()|[\]\\]/g, "\\$&");
+      const selector = new RegExp("\\." + escaped + "(?![\\w-])");
+      if (!selector.test(styles)) {
+        const relative = path.relative(root, file);
+        if (!missing.has(relative)) missing.set(relative, new Set());
+        missing.get(relative).add(className);
+      }
+    }
+    for (const prefix of dynamicPrefixes) {
+      if (!styles.includes("." + prefix)) {
+        const relative = path.relative(root, file);
+        if (!missing.has(relative)) missing.set(relative, new Set());
+        missing.get(relative).add(prefix + "<dynamic>");
+      }
     }
   }
 }
