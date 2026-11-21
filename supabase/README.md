@@ -45,9 +45,9 @@ For a new Supabase project, review and apply migrations in version order before 
 
 | Version | Migration file | Status |
 |---|---|---|
-| `20261121001230` | `20261121001230_afterhours_shared_run_checkins.sql` | Pending review and rollout; not present in the live production ledger |
+| `20261121001230` | `supabase/proposals/20261121001230_afterhours_shared_run_checkins.sql` | Pending review and rollout; not present in the live production ledger |
 
-The shared-run check-in migration is tracked for code review and CI validation only. It has **not** been applied to production. Apply it only after SQL/RLS review and two-account validation through the authorized migration workflow.
+The shared-run check-in proposal adds participant check-ins and an explicit re-consent flow after a host pause. It is tracked for code review and CI validation only. It has **not** been applied to production. Apply it only after SQL/RLS review and two-account validation through the authorized migration workflow.
 
 ## Story Mode account sync
 
