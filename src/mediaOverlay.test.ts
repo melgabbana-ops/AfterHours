@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { mediaOverlayFrames, type OverlayFrameStyle } from "./mediaOverlay";
+import { drawAfterHoursOverlay, mediaOverlayFrames, type OverlayFrameStyle } from "./mediaOverlay";
 
 describe("AFTER HOURS camera overlay presets", () => {
   it("exposes the three approved overlay styles in the approved order", () => {
@@ -13,5 +13,10 @@ describe("AFTER HOURS camera overlay presets", () => {
     const styles: OverlayFrameStyle[] = mediaOverlayFrames.map((frame) => frame.id);
     expect(styles.includes("after-hours")).toBe(true);
     expect(styles.every((style) => ["clean", "after-hours", "cinematic"].includes(style))).toBe(true);
+  });
+  it("uses neutral black rather than purple-tinted shadows in every overlay preset", () => {
+    const source = drawAfterHoursOverlay.toString();
+    expect(source).not.toMatch(/rgba\(7,\s*5,\s*9|rgba\(5,\s*4,\s*7/);
+    expect(source).toContain("rgba(5,5,5");
   });
 });
