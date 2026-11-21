@@ -139,6 +139,14 @@ describe("proposed secure Duo backend guardrails", () => {
     expect(proposal).toContain("where room_id = p_room_id and removed_at is null and consent_revoked_at is null");
   });
 
+  it("renders the server-backed shared prompt cursor in the dormant secure lobby", () => {
+    expect(lobbyFile.content).toContain("advanceSecureDuoSession");
+    expect(lobbyFile.content).toContain("snapshot.session.revision");
+    expect(lobbyFile.content).toContain("Gedeelde stap");
+    expect(lobbyFile.content).toContain("Shared step");
+    expect(lobbyFile.content).toContain("De server synchroniseert deze stap");
+  });
+
   it("backfills a zeroed shared cursor for rooms that already exist", () => {
     expect(proposal).toContain("insert into public.afterhours_duo_session_state (room_id)");
     expect(proposal).toContain("select id from public.afterhours_duo_rooms");
