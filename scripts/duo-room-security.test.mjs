@@ -58,7 +58,7 @@ describe("proposed secure Duo backend guardrails", () => {
     expect(accept).toContain("v_invitation.inviter_user_id = v_user_id");
     expect(accept).toContain("v_member_count <> 1");
     expect(accept).toContain("v_invitation.status <> 'pending'");
-    expect(accept).toContain("values (v_room.id, v_user_id, 'guest', clock_timestamp())");
+    expect(accept).toMatch(/values\s*\(\s*v_room\.id,\s*v_user_id,\s*'guest',\s*clock_timestamp\(\)\s*\)/);
     expect(accept).toContain("set status = 'accepted', accepted_user_id = v_user_id");
   });
 
