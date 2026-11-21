@@ -15,12 +15,13 @@ export function shouldPauseRemotePlay(state: {
   active: boolean;
   partnerPresent: boolean;
 }): boolean {
-  return state.connected && state.active && !state.partnerPresent;
+  return state.active && (!state.connected || !state.partnerPresent);
 }
 
 export function canResumeRemotePlay(state: {
+  connected: boolean;
   partnerPresent: boolean;
   partnerConsent: boolean;
 }): boolean {
-  return state.partnerPresent && state.partnerConsent;
+  return state.connected && state.partnerPresent && state.partnerConsent;
 }
