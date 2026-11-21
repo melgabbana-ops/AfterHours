@@ -96,7 +96,8 @@ begin
   end if;
   return new;
 end;
-$guard$; from public, anon, authenticated;
+$guard$;
+revoke all on function private.guard_afterhours_invitation_run_paused() from public, anon, authenticated;
 drop trigger if exists afterhours_invitation_paused_run_guard on public.afterhours_experience_invitations;
 create trigger afterhours_invitation_paused_run_guard
 before insert or update of run_id on public.afterhours_experience_invitations
@@ -137,7 +138,8 @@ begin
   end if;
   return new;
 end;
-$activation$; from public, anon, authenticated;
+$activation$;
+revoke all on function private.guard_afterhours_experience_run_activation() from public, anon, authenticated;
 drop trigger if exists afterhours_experience_run_activation_guard on public.afterhours_experience_runs;
 create trigger afterhours_experience_run_activation_guard before update of status on public.afterhours_experience_runs
 for each row execute function private.guard_afterhours_experience_run_activation();
