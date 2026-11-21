@@ -24,7 +24,7 @@ const checks = [
   ["44px minimum touch target", /button\s*\{[^}]*min-height\s*:\s*44px/i.test(styles)],
   ["horizontal overflow protection", /(?:body|html,body,#root)\s*\{[^}]*overflow-x\s*:\s*(?:hidden|clip)/i.test(styles)],
   ["border-box sizing", /\*\s*\{\s*box-sizing\s*:\s*border-box/i.test(styles)],
-  ["GitHub Pages-safe visual asset paths", !/url\\(\\s*["']?\\/(?:visuals|assets)\\//i.test(styles)],
+  ["GitHub Pages-safe visual asset paths", !/url\(\s*["']?\/(?:visuals|assets)\//i.test(styles)],
   ["Home hero uses only the bundled 4K local artwork", /--ah-cinematic-background:\s*url\(["']?\/AfterHours\/visuals\/reference-home\.svg["']?\)/i.test(referenceHomeStyles)],
   ["Home hero has no external image dependency", !/url\(\s*["']?https?:\/\//i.test(referenceHomeStyles)],
   ["Home hero artwork is included in the offline app shell", serviceWorker.includes('asset("visuals/reference-home.svg")')],
