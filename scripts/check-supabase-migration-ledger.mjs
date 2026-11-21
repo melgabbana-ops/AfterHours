@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
 const directory = join(dirname(fileURLToPath(import.meta.url)), "..", "supabase", "migrations");
-const expected = [
+const expectedApplied = [
   "20261013005814_production_schema_base.sql",
   "20261013005819_profile_update_privilege_hardening.sql",
   "20261013005821_allow_renewed_consent.sql",
@@ -33,6 +33,10 @@ const expected = [
   "20261121000429_afterhours_invite_requires_paused_run.sql",
   "20261121001151_afterhours_consent_rls_recursion_guard.sql"
 ];
+const expectedPending = [
+  "20261121113000_afterhours_invitation_rpc_hardening.sql"
+];
+const expected = [...expectedApplied, ...expectedPending];
 const actual = readdirSync(directory).filter((name) => name.endsWith(".sql")).sort();
 const baseline = [...expected].sort();
 const missing = baseline.filter((name) => !actual.includes(name));
@@ -50,4 +54,4 @@ if (missing.length || unexpected.length || duplicates.length || versions.length 
   process.exit(1);
 }
 
-console.log(`Supabase migration filenames match the production ledger baseline (${actual.length} migrations).`);
+console.log(`Supabase migration filenames match the reviewed baseline (${expectedApplied.length} applied + ${expectedPending.length} pending).`);
