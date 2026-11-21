@@ -349,18 +349,27 @@ export default function CinematicWorld({
   useEffect(() => {
     if (!remoteProfileId || tab !== "invitation" || !hasLiveJoinedRuns) return;
     let active = true;
+    let refreshing = false;
     const refreshSharedRuns = async () => {
-      if (document.visibilityState !== "visible") return;
+      if (!active || document.visibilityState !== "visible" || refreshing) return;
+      refreshing = true;
       try {
         const latestRuns = await loadExperienceRuns(remoteProfileId);
         if (active) setRuns(latestRuns);
       } catch {
         // Keep the last confirmed state visible during temporary network interruptions.
+      } finally {
+        refreshing = false;
       }
     };
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") void refreshSharedRuns();
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
     const timer = window.setInterval(() => { void refreshSharedRuns(); }, 4000);
     return () => {
       active = false;
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       window.clearInterval(timer);
     };
   }, [remoteProfileId, tab, hasLiveJoinedRuns]);
