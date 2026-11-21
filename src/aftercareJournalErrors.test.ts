@@ -16,7 +16,8 @@ describe("Aftercare Journal unlock and storage errors", () => {
   });
 
   it("does not overwrite an existing vault when decryption fails", () => {
-    expect(journalSource).toContain("if(raw)loaded=await decryptEntries(raw,pass);");
+    expect(journalSource).toContain("if(raw!==null)loaded=await decryptEntries(raw,pass);");
+    expect(journalSource).not.toContain("if(raw)loaded=await decryptEntries(raw,pass);");
     expect(journalSource).toContain("else{\n    const encrypted=await encryptEntries([],pass);");
     expect(journalSource).toContain('throw new AftercareJournalError("authentication")');
     expect(journalSource).toContain('throw new AftercareJournalError("invalidEnvelope")');
