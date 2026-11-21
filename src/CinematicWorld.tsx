@@ -984,6 +984,26 @@ export default function CinematicWorld({
     }
   }
 
+  async function pauseSharedRunFromRequest(run: ExperienceRun) {
+    if (!remoteProfileId || run.user_id !== remoteProfileId || run.status !== "active") return;
+    setBusy(true);
+    setError("");
+    try {
+      await updateExperienceRun({
+        runId: run.id,
+        expectedUserId: remoteProfileId,
+        status: "paused",
+        currentStep: run.current_step,
+      });
+      await refreshData();
+      setMessage(t("De gedeelde ervaring is gepauzeerd. Hervatten vereist opnieuw bevestigde toestemming van iedere deelnemer.", "The shared experience is paused. Resuming requires fresh confirmed consent from every participant."));
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : t("De gedeelde ervaring kon niet worden gepauzeerd.", "The shared experience could not be paused."));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function sendSharedCheckIn(run: ExperienceRun, signal: ExperienceRunCheckInSignal) {
     if (!remoteProfileId || run.user_id === remoteProfileId || run.status !== "active") return;
     setBusy(true);
@@ -1351,7 +1371,7 @@ export default function CinematicWorld({
             return signals.length ? <div className="cw-remote-checkin cw-host-checkins" key={run.id}>
               <strong>{t("Deelnemerscheck-in", "Participant check-in")} · {String(run.scene_snapshot.title ?? run.scene_key)}</strong>
               {signals.map((signal) => <small key={signal.id}>{signal.signal === "ready" ? t("Deelnemer is klaar", "Participant is ready") : signal.signal === "pause_requested" ? t("Deelnemer vraagt om pauze", "Participant requests a pause") : t("Deelnemer vraagt om te stoppen", "Participant requests to stop")} · {new Date(signal.created_at).toLocaleTimeString(language === "nl" ? "nl-NL" : "en-GB", { hour: "2-digit", minute: "2-digit" })}</small>)}
-              {signals.some((signal) => signal.signal === "pause_requested") && <small>{t("Pauzeer de ervaring via de bedieningsknoppen. Er wordt nooit automatisch hervat.", "Pause the experience using the controls. It never resumes automatically.")}</small>}
+              {signals.some((signal) => signal.signal === "pause_requested") && <><small>{t("De deelnemer vraagt om pauze. Pauzeren trekt alle run-toestemmingen in; iedereen moet opnieuw instemmen voordat er hervat kan worden.", "The participant requests a pause. Pausing revokes run consent; everyone must consent again before resuming.")}</small>{run.status === "active" && <button type="button" disabled={busy} onClick={() => void pauseSharedRunFromRequest(run)}>{t("Pauzeer gedeelde ervaring", "Pause shared experience")}</button>}</>}
             </div> : null;
           })}
           <div className="cw-saved-list"><h3>{t("Uitnodigingen en toestemmingen", "Invitations and consent")} <span>{experienceInvites.length}</span></h3>{experienceInvites.map((invite) => <div className="cw-saved-row" key={invite.id}><div><strong>{invite.status === "accepted" ? t("Toestemming ontvangen", "Consent received") : invite.status === "pending" && new Date(invite.expires_at).getTime() <= Date.now() ? t("Verlopen", "Expired") : t(invite.status === "revoked" ? "Ingetrokken" : "Wacht op acceptatie", invite.status === "revoked" ? "Revoked" : "Awaiting acceptance")}</strong><small>{t("Geldig tot", "Expires")} {new Date(invite.expires_at).toLocaleString(language === "nl" ? "nl-NL" : "en-GB")}{invite.accepted_at ? " · " + t("Geaccepteerd", "Accepted") + " " + new Date(invite.accepted_at).toLocaleString(language === "nl" ? "nl-NL" : "en-GB") : ""}</small></div>{invite.status === "pending" && new Date(invite.expires_at).getTime() > Date.now() ? <button type="button" disabled={busy} onClick={() => void revokeInvite(invite)}>{t("Intrekken", "Revoke")}</button> : null}</div>)}</div>
