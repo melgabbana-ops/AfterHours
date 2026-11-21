@@ -4778,3 +4778,7 @@ button,[role="button"],nav a{touch-action:manipulation}
 .couples-secondary{display:inline-flex;justify-content:center;align-items:center;gap:9px;min-height:46px;padding:11px 16px;border:1px solid #6b5738;border-radius:8px;background:#11100e;color:#e8d7b7;font-weight:700}
 .couples-entry-divider{display:flex;align-items:center;gap:12px;color:#8f8779;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
 .couples-entry-divider:before,.couples-entry-divider:after{content:"";height:1px;flex:1;background:#3b3429}
+
+/* Duo experience card uses the same restrained black-and-champagne visual system. */
+.experience-choice.couple-choice{border-color:rgba(212,175,55,.48)!important;background:radial-gradient(ellipse at 90% 0%,rgba(107,79,31,.3),transparent 48%),linear-gradient(145deg,#21190d,#080706 80%)!important}
+.experience-choice.couple-choice .choice-symbol{border-color:rgba(212,175,55,.62);color:#f0d58f}
