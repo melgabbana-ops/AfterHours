@@ -4713,3 +4713,15 @@ button,[role="button"],nav a{touch-action:manipulation}
   .media-capture-controls>button,.media-pending-preview .media-item-actions button{min-height:48px}
   .media-live-preview,.media-live-frame .media-live-composite{max-height:min(62svh,620px)}
 }
+
+/* Tablet camera controls: comfortable two-column preset selection and touch targets */
+@media (min-width:521px) and (max-width:900px){
+  .media-frame-picker>div{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .media-frame-picker button{min-height:96px;padding:14px 13px;gap:9px}
+  .media-frame-picker button strong{font-size:10px}
+  .media-frame-picker button small{font-size:10px;line-height:1.55}
+  .media-capture{padding:18px;gap:14px}
+  .media-capture-controls{gap:14px}
+  .media-capture-controls>button,.media-pending-preview .media-item-actions button{min-height:48px}
+  .media-live-preview,.media-live-frame .media-live-composite{max-height:min(62svh,620px)}
+}
