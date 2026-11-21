@@ -22,6 +22,7 @@ const checks = [
   ["safe-area top inset", /env\(\s*safe-area-inset-top/i.test(styles)],
   ["safe-area bottom inset", /env\(\s*safe-area-inset-bottom/i.test(styles)],
   ["44px minimum touch target", /button\s*\{[^}]*min-height\s*:\s*44px/i.test(styles)],
+  ["private safeword reveal controls keep a 44px touch target", /\.safety-signal-visibility\s*\{[^}]*min-height\s*:\s*44px/i.test(baseStyles)],
   ["horizontal overflow protection", /(?:body|html,body,#root)\s*\{[^}]*overflow-x\s*:\s*(?:hidden|clip)/i.test(styles)],
   ["border-box sizing", /\*\s*\{\s*box-sizing\s*:\s*border-box/i.test(styles)],
   ["GitHub Pages-safe visual asset paths", !/url\(\s*["']?\/(?:visuals|assets)\//i.test(styles)],
