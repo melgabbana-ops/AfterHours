@@ -4819,3 +4819,47 @@ button,[role="button"],nav a{touch-action:manipulation}
   .media-live-preview,
   .media-live-frame .media-live-composite { max-height: min(58dvh, 720px); }
 }
+
+
+/* AFTER HOURS local photo editor */
+.media-photo-editor {
+  display: grid;
+  gap: .85rem;
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 1px solid rgba(215, 168, 79, .42);
+  border-radius: 14px;
+  background: linear-gradient(145deg, rgba(28, 27, 25, .96), rgba(8, 8, 8, .98));
+}
+.media-photo-editor > strong {
+  color: #D7A84F;
+  font-size: .72rem;
+  letter-spacing: .18em;
+}
+.media-photo-editor label {
+  display: grid;
+  gap: .45rem;
+  color: #F4EBDD;
+  font-size: .84rem;
+}
+.media-photo-editor input[type="range"] {
+  width: 100%;
+  accent-color: #D7A84F;
+  min-height: 28px;
+}
+.media-photo-editor .media-item-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+.media-photo-editor .media-item-actions button {
+  flex: 1 1 8rem;
+}
+.media-photo-editor small {
+  color: rgba(244, 235, 221, .72);
+  line-height: 1.5;
+}
+@media (max-width: 520px) {
+  .media-photo-editor { padding: .8rem; }
+  .media-photo-editor .media-item-actions button { flex-basis: 100%; }
+}
