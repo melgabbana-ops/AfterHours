@@ -55,6 +55,13 @@ describe("Experience Engine immediate STOP", () => {
     expect(source).toContain("|| stopPending || !canStartExperience");
   });
 
+  it("keeps new sessions fail-closed if the server cannot confirm STOP", () => {
+    expect(stopHandler).toContain("setStopPending(!serverConfirmed)");
+    expect(stopHandler).toContain("await withdrawExperienceConsent(runId, userId)");
+    expect(stopHandler).toContain("server could not confirm");
+    expect(source).toContain("if (stopPendingRef.current || stopPending) return;");
+  });
+
   it("provides 48px touch targets and visible keyboard focus for safety controls", () => {
     expect(styles).toMatch(/\.cw-checkin button\{[^}]*min-height:48px/);
     expect(styles).toMatch(/\.cw-run-actions>button:not\(\.cw-primary\)\{[^}]*min-height:48px/);
