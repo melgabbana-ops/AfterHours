@@ -9,8 +9,11 @@ const ALLOWED_TYPES = new Set([
   "image/webp",
   "image/gif",
   "image/avif",
+  "image/heic",
+  "image/heif",
   "video/webm",
   "video/mp4",
+  "video/quicktime",
   "audio/mpeg",
   "audio/mp4",
   "audio/aac",
@@ -49,6 +52,13 @@ export function validatePrivateMediaPath(path: string, userId: string): boolean 
 
 export function normalizePrivateMediaMimeType(type: string): string {
   return type.toLowerCase().split(";")[0].trim();
+}
+
+const OVERLAY_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"]);
+
+/** HEIC/HEIF decoding is not consistently available to canvas across browsers. */
+export function canApplyMediaOverlay(type: string): boolean {
+  return OVERLAY_IMAGE_TYPES.has(normalizePrivateMediaMimeType(type));
 }
 
 export function validatePrivateMediaFile(file: Pick<File, "type" | "size">): void {
