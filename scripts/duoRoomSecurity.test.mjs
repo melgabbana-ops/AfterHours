@@ -14,6 +14,10 @@ const couplesUi = readFileSync(
   fileURLToPath(new URL("../src/CouplesPlay.tsx", import.meta.url)),
   "utf8",
 );
+const invitationUi = readFileSync(
+  fileURLToPath(new URL("../src/SecureDuoInvitation.tsx", import.meta.url)),
+  "utf8",
+);
 
 describe("proposed secure Duo backend guardrails", () => {
   it("keeps room, member and invitation tables RLS-protected and denies direct client writes", () => {
@@ -30,6 +34,12 @@ describe("proposed secure Duo backend guardrails", () => {
     expect(proposal).toContain("for update");
     expect(proposal).toContain("if v_member_count <> 1 then");
     expect(proposal).toContain("status = 'accepted', accepted_user_id = v_user_id");
+  });
+
+  it("explains in both languages that joining the lobby is not consent to play", () => {
+    expect(invitationUi).toContain("Accepteren brengt je alleen naar de wachtkamer.");
+    expect(invitationUi).toContain("It is not consent to play.");
+    expect(invitationUi).toContain("You will give consent separately there");
   });
 
   it("does not treat invitation acceptance as consent to participate", () => {
