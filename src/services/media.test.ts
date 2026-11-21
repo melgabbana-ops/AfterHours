@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizePrivateMediaMimeType, safeAssignmentPrefix, safeMediaSessionFolder, validatePrivateMediaFile, validatePrivateMediaPath } from "./media";
+import { collectStoragePages, normalizePrivateMediaMimeType, safeAssignmentPrefix, safeMediaSessionFolder, validatePrivateMediaFile, validatePrivateMediaPath } from "./media";
 
 describe("private media session folder safety", () => {
   it("uses a general folder for dot path segments", () => {
