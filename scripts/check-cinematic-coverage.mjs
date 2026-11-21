@@ -18,7 +18,7 @@ async function collect(directory) {
 await collect(sourceRoot);
 const styles = (await Promise.all(stylesheetFiles.map((file) => readFile(file, "utf8")))).join("\n");
 const missing = new Map();
-const classPattern = /className=(?:"([^"]+)"|'([^']+)'|{`([^`]+)`})/g;
+const classPattern = /className=(?:"([^"]+)"|\'([^\']+)\'|{`([^`]+)`})/g;
 
 function reportMissing(file, className) {
   const relative = path.relative(root, file);
@@ -33,13 +33,12 @@ for (const file of sourceFiles) {
     const dynamicPrefixes = [...rawClassValue.matchAll(/([A-Za-z_][a-zA-Z0-9_-]*-)\$\{/g)].map((item) => item[1]);
     const classValue = rawClassValue.replace(/\$\{[^}]*\}/g, " ");
     for (const className of classValue.split(/\s+/).filter(Boolean)) {
-      const escaped = className.replace(/[.*+?^\$\{\}()|[\]\\]/g, "\\$&");
+      const escaped = className.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       const selector = new RegExp("\\." + escaped + "(?![\\w-])");
       if (!selector.test(styles)) reportMissing(file, className);
     }
     for (const prefix of dynamicPrefixes) {
-      const selectorFamily = new RegExp("\\." + prefix.replace(/[.*+?^\$\{\}()|[\]\\]/g, "\\$&") + "[\\w-]*");
-      if (!selectorFamily.test(styles)) reportMissing(file, prefix + "<dynamic>");
+      if (!styles.includes("." + prefix)) reportMissing(file, prefix + "<dynamic>");
     }
   }
 }
