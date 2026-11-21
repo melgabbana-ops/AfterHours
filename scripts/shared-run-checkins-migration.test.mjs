@@ -16,6 +16,10 @@ describe("shared experience check-in migration", () => {
     expect(migration).toMatch(/create trigger afterhours_run_checkins_identity_guard[\s\S]*?before update on public\.afterhours_experience_run_checkins/i);
   });
 
+  it("limits each experience to one accepted invitee plus its owner", () => {
+    expect(migration).toMatch(/create unique index if not exists afterhours_experience_invitations_one_accepted_participant_per_run[\\s\\S]*?on public\\.afterhours_experience_invitations \\(run_id\\)[\\s\\S]*?where status = 'accepted' and accepted_user_id is not null/i);
+  });
+
   it("allows reads only to the participant or the owner of the related run", () => {
     expect(migration).toMatch(/create policy afterhours_run_checkins_read_owner_or_participant[\s\S]*?for select to authenticated[\s\S]*?using \([\s\S]*?user_id = \(select auth\.uid\(\)\)[\s\S]*?or exists \([\s\S]*?r\.user_id = \(select auth\.uid\(\)\)/i);
   });
