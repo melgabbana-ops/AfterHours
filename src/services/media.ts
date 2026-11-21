@@ -56,13 +56,13 @@ export function validatePrivateMediaFile(file: Pick<File, "type" | "size">): voi
   if (file.size <= 0 || file.size > MAX_FILE_BYTES) throw new Error("Bestanden moeten kleiner zijn dan 20 MB.");
 }
 
-function safeFileName(value: string): string {
+export function safePrivateMediaFileName(value: string): string {
   const normalized = value.normalize("NFKD").replace(/[^a-zA-Z0-9._-]+/g, "-").replace(/^-+|-+$/g, "").slice(-100);
-  return normalized || "bestand";
+  return !normalized || normalized === "." || normalized === ".." ? "bestand" : normalized;
 }
 
 export function safeMediaSessionFolder(value: string): string {
-  const segment = safeFileName(value || "general");
+  const segment = safePrivateMediaFileName(value || "general");
   return segment === "." || segment === ".." ? "general" : segment;
 }
 
@@ -125,7 +125,7 @@ export async function uploadPrivateMedia(file: File, sessionId: string, assignme
   const userId = await currentUserId();
   const safeSessionId = safeMediaSessionFolder(sessionId);
   const safeAssignment = safeAssignmentPrefix(assignmentTitle);
-  const path = `${userId}/${safeSessionId}/${safeAssignment}${crypto.randomUUID()}-${safeFileName(file.name)}`;
+  const path = `${userId}/${safeSessionId}/${safeAssignment}${crypto.randomUUID()}-${safePrivateMediaFileName(file.name)}`;
   const { error } = await supabase!.storage.from(BUCKET).upload(path, file, {
     cacheControl: "3600",
     contentType: normalizePrivateMediaMimeType(file.type),
