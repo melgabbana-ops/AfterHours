@@ -24,7 +24,7 @@ function newCode() {
 export default function CouplesPlay({ language, onBack, onSecureDuo }: { language: Language; onBack: () => void; onSecureDuo?: () => void }) {
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
   const initialCode = useMemo(() => normalizeRoomCode(new URLSearchParams(window.location.search).get("couple")), []);
-  const [mode, setMode] = useState<Mode>(initialCode ? "remote" : "local");
+  const [mode, setMode] = useState<Mode>("local");
   const [roomCode, setRoomCode] = useState(initialCode);
   const [joinCode, setJoinCode] = useState(initialCode);
   const [localParticipantId] = useState(() => crypto.randomUUID());
@@ -85,6 +85,17 @@ export default function CouplesPlay({ language, onBack, onSecureDuo }: { languag
       return;
     }
     if (!authChecked) return;
+    // The legacy room-code topic is public and must never be used for remote sessions.
+    // Only the account-bound private invitation flow may return after its schema is deployed.
+    if (mode === "remote") {
+      setConnected(false);
+      setParticipants([]);
+      setMessage(t(
+        "Online Duo is tijdelijk uitgeschakeld terwijl de privé-uitnodigingen en serverbeveiliging worden afgerond. Gebruik voorlopig Lokaal samen.",
+        "Online Duo is temporarily unavailable while private invitations and server-side access controls are completed. Use Together locally for now."
+      ));
+      return;
+    }
     if (!authenticatedUserId) {
       setConnected(false);
       setParticipants([]);
