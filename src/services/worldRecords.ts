@@ -230,6 +230,8 @@ export async function resumeExperienceRun(args: {
     .eq("user_id", args.expectedUserId)
     // A fresh consent record must never revive a completed or stopped run.
     .eq("status", "paused")
+    // A paused run can resume only before its persisted terminal cursor.
+    .gt("total_steps", args.currentStep)
     .select("id")
     .maybeSingle();
   if (error || !data) {
