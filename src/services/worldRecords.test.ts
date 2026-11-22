@@ -114,11 +114,15 @@ describe("AFTER HOURS private world storage", () => {
       status: "ready",
       current_step: 0,
     }));
+    expect(mocks.insert.mock.calls[0][0]).not.toHaveProperty("started_at");
     expect(mocks.insert).toHaveBeenNthCalledWith(2, expect.objectContaining({
       run_id: "run-1",
       user_id: "user-a",
     }));
-    expect(mocks.update).toHaveBeenCalledWith(expect.objectContaining({ status: "active" }));
+    expect(mocks.update).toHaveBeenCalledWith(expect.objectContaining({
+      status: "active",
+      started_at: expect.any(String),
+    }));
     expect(mocks.eq).toHaveBeenCalledWith("status", "ready");
     expect(mocks.insert.mock.invocationCallOrder[1]).toBeLessThan(mocks.update.mock.invocationCallOrder[0]);
   });
