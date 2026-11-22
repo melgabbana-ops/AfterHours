@@ -149,6 +149,19 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
       ));
       return;
     }
+
+    // SECURITY HOLD: the legacy room-code topic is public and is not bound to
+    // verified room membership. Do not subscribe, track presence or expose
+    // participant metadata until the private-room SQL migration is active and
+    // this component is wired to joinSecureDuoRealtime().
+    setConnected(false);
+    setParticipants([]);
+    setMessage(t(
+      "Online Duo-lobby is tijdelijk uitgeschakeld tijdens de overstap naar beveiligde kamers. Lokaal samen spelen werkt wel.",
+      "The online Duo lobby is temporarily disabled while secure rooms are being enabled. Local play is available."
+    ));
+    return;
+
     let alive = true;
     const client = supabase;
     const channel = client.channel("couples-" + roomCode, { config: { presence: { key: participantId }, broadcast: { self: false } } });
