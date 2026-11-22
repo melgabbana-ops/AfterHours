@@ -7,6 +7,9 @@ import {
   getAftercareMeditationPhase,
   getAftercareMeditationProgressPercent,
   getAftercareMeditationRemainingSeconds,
+  loadAftercareMeditationProgress,
+  saveAftercareMeditationProgress,
+  clearAftercareMeditationProgress,
   skipAftercareMeditationPhase,
 } from "./aftercareMeditation";
 
@@ -80,4 +83,45 @@ describe("30-minute aftercare meditation", () => {
     expect(getAftercareMeditationAccessibleTime(-10, "en")).toBe("0 seconds remaining");
     expect(getAftercareMeditationAccessibleTime(Number.NaN, "nl")).toBe("0 seconden resterend");
   });
+  it("restores only a valid, clamped tab-scoped elapsed time", () => {
+    const values = new Map<string, string>([["afterhours:aftercare-meditation-progress:v1", "725"]]);
+    const storage = {
+      getItem: (key: string) => values.get(key) ?? null,
+      setItem: (key: string, value: string) => values.set(key, value),
+      removeItem: (key: string) => values.delete(key),
+    };
+    expect(loadAftercareMeditationProgress(storage)).toBe(725);
+    values.set("afterhours:aftercare-meditation-progress:v1", "9999");
+    expect(loadAftercareMeditationProgress(storage)).toBe(1800);
+    values.set("afterhours:aftercare-meditation-progress:v1", "-10");
+    expect(loadAftercareMeditationProgress(storage)).toBe(0);
+    values.set("afterhours:aftercare-meditation-progress:v1", "not-a-time");
+    expect(loadAftercareMeditationProgress(storage)).toBe(0);
+  });
+
+  it("saves a bounded elapsed value and clears it when the user ends meditation", () => {
+    const values = new Map<string, string>();
+    const storage = {
+      getItem: (key: string) => values.get(key) ?? null,
+      setItem: (key: string, value: string) => values.set(key, value),
+      removeItem: (key: string) => values.delete(key),
+    };
+    expect(saveAftercareMeditationProgress(storage, 615.8)).toBe(true);
+    expect(values.get("afterhours:aftercare-meditation-progress:v1")).toBe("615");
+    expect(clearAftercareMeditationProgress(storage)).toBe(true);
+    expect(values.has("afterhours:aftercare-meditation-progress:v1")).toBe(false);
+  });
+
+  it("fails safely when browser storage is blocked or unavailable", () => {
+    const blocked = {
+      getItem: () => { throw new Error("blocked"); },
+      setItem: () => { throw new Error("blocked"); },
+      removeItem: () => { throw new Error("blocked"); },
+    };
+    expect(loadAftercareMeditationProgress(blocked)).toBe(0);
+    expect(saveAftercareMeditationProgress(blocked, 120)).toBe(false);
+    expect(clearAftercareMeditationProgress(blocked)).toBe(false);
+    expect(loadAftercareMeditationProgress(null)).toBe(0);
+  });
+
 });
