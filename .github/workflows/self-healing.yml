@@ -4,6 +4,7 @@ on:
   workflow_run:
     workflows: ["AFTER HOURS build"]
     types: [completed]
+    branches: [main]
 
 permissions:
   contents: write
