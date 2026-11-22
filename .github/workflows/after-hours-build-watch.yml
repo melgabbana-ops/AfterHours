@@ -54,7 +54,7 @@ jobs:
             const existing = issues.find(issue =>
               !issue.pull_request &&
               issue.title === title &&
-              (issue.body || '').split(/\\r?\\n/).some(line => line.trim() === branchLine)
+              (issue.body || '').split(/\r?\n/).some(line => line.trim() === branchLine)
             );
             if (!existing) {
               core.info('No open build alert exists for ' + context.ref + '.');
@@ -73,7 +73,7 @@ jobs:
                 '- Successful workflow: ' + runUrl,
                 '',
                 'Closing this branch-specific alert. Other branch alerts are left unchanged.'
-              ].join('\\n')
+              ].join('\n')
             });
             await github.rest.issues.update({
               owner: context.repo.owner,
@@ -102,7 +102,7 @@ jobs:
               '- Workflow run: ' + runUrl,
               '',
               'Review the failing step, fix the issue, and rerun the workflow. This issue is an alert; it does not mean a deployment succeeded.'
-            ].join('\\n');
+            ].join('\n');
             const { data: issues } = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
