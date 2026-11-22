@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bothLocalParticipantsReady, pickRandomId, sessionModes, storyChapters } from "./sessionModes";
+import { bothLocalParticipantsReady, localCheckInPressedState, pickRandomId, sessionModes, storyChapters } from "./sessionModes";
 
 describe("approved session modes", () => {
   it("defines exactly the five approved modes", () => {
@@ -42,5 +42,12 @@ describe("local couples check-in gate", () => {
     expect(bothLocalParticipantsReady([])).toBe(false);
     expect(bothLocalParticipantsReady(["green"])).toBe(false);
     expect(bothLocalParticipantsReady(["green", "green", "green"])).toBe(false);
+  });
+
+  it("exposes exactly the selected check-in state to assistive technology", () => {
+    expect(localCheckInPressedState("unset")).toEqual({ green: false, yellow: false, red: false });
+    expect(localCheckInPressedState("green")).toEqual({ green: true, yellow: false, red: false });
+    expect(localCheckInPressedState("yellow")).toEqual({ green: false, yellow: true, red: false });
+    expect(localCheckInPressedState("red")).toEqual({ green: false, yellow: false, red: true });
   });
 });
