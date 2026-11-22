@@ -7,6 +7,7 @@ const workflow = readFileSync(
   "utf8",
 );
 const recoveryJob = workflow.split("  resolve-failure-alert:\n")[1]?.split("\n  report-failure:")[0] ?? "";
+const failureJob = workflow.split("  report-failure:\n")[1] ?? "";
 
 describe("AFTER HOURS build-watch alert recovery", () => {
   it("runs recovery only after a successful non-pull-request verification", () => {
@@ -30,8 +31,15 @@ describe("AFTER HOURS build-watch alert recovery", () => {
   });
 
   it("keeps failure reporting limited to failed non-pull-request runs", () => {
-    const failureJob = workflow.split("  report-failure:\n")[1] ?? "";
     expect(failureJob).toContain("if: failure() && github.event_name != 'pull_request'");
     expect(failureJob).toContain("AFTER HOURS build watch: verification failed");
+  });
+
+  it("creates or updates a failure alert only for the exact failing branch", () => {
+    expect(failureJob).toContain("const branchLine = '- Branch: ' + context.ref;");
+    expect(failureJob).toContain("(issue.body || '').split(/\\r?\\n/).some(line => line.trim() === branchLine)");
+    expect(failureJob).toContain("const existing = issues.find(issue =>");
+    expect(failureJob).toContain("await github.rest.issues.create({");
+    expect(failureJob).not.toContain("issues.find(issue => issue.title === title && !issue.pull_request)");
   });
 });
