@@ -27,4 +27,13 @@ describe("aftercare meditation stage controls", () => {
     const clockMarkup = componentSource.split('className="aftercare-meditation-clock"')[1]?.split("</div>")[0] ?? "";
     expect(clockMarkup).not.toContain("aria-live");
   });
+  it("restores the timer after a tab reload without auto-starting it", () => {
+    expect(componentSource).toContain("loadAftercareMeditationProgress(window.sessionStorage)");
+    expect(componentSource).toContain("saveAftercareMeditationProgress(window.sessionStorage, elapsedSeconds)");
+    expect(componentSource).toContain("clearAftercareMeditationProgress(window.sessionStorage)");
+    expect(componentSource).toContain("Bij het sluiten van de tab kan de voortgang verdwijnen.");
+    expect(componentSource).toContain("Closing the tab may clear that progress.");
+    expect(componentSource).toContain("const [running, setRunning] = useState(false)");
+  });
+
 });
