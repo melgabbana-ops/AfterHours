@@ -194,7 +194,7 @@ export default function LocalCouplesMode({ language, consentActive, onSafetyPaus
                     <label htmlFor={`cw-local-name-${participantNumber}`}>{t("Naam", "Name")} · {participantNumber}</label>
                     <input id={`cw-local-name-${participantNumber}`} value={names[index]} maxLength={24} autoComplete="off" onChange={(event) => setNames((current) => current.map((name, i) => i === index ? event.target.value : name))} />
                     <label className="cw-local-consent" htmlFor={`cw-local-consent-${participantNumber}`}>
-                      <input id={`cw-local-consent-${participantNumber}`} type="checkbox" checked={consents[index]} onChange={(event) => setConsents((current) => current.map((value, i) => i === index ? event.target.checked : value))} />
+                      <input id={`cw-local-consent-${participantNumber}`} type="checkbox" checked={consents[index]} disabled={!consentActive} onChange={(event) => { if (!consentActive) return; setConsents((current) => current.map((value, i) => i === index ? event.target.checked : value)); }} />
                       <span>{t("Ik geef vrijwillig toestemming voor deze gezamenlijke route en kan op elk moment stoppen.", "I freely consent to this shared path and can stop at any time.")}</span>
                     </label>
                   </div>
