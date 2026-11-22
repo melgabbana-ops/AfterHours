@@ -143,19 +143,43 @@ export async function updateExperienceRun(args: {
   completed?: boolean;
   interactionLog?: Array<{ stepIndex: number; choice: string; at: string }>;
 }): Promise<void> {
+  const allowedStatuses: readonly ExperienceRunStatus[] = ["active", "paused", "completed", "stopped"];
+  if (!allowedStatuses.includes(args.status)) throw new Error("Invalid experience run status.");
+
+  const isStop = args.status === "stopped";
+  if (!isStop) {
+    const isCompletion = args.status === "completed";
+    const minimumStep = isCompletion ? 1 : 0;
+    const maximumStep = isCompletion ? 40 : 39;
+    if (!Number.isInteger(args.currentStep) || args.currentStep < minimumStep || args.currentStep > maximumStep) {
+      throw new Error("Invalid experience step.");
+    }
+  }
+
   await assertWorldAccount(args.expectedUserId);
   const now = new Date().toISOString();
   let updateQuery = supabase!
     .from("afterhours_experience_runs")
     .update({
       status: args.status,
-      current_step: args.currentStep,
+      // STOP must never be blocked by a stale or malformed local progress cursor.
+      // Preserve the server's last known step instead of trusting the client.
+      ...(!isStop ? { current_step: args.currentStep } : {}),
       updated_at: now,
       ...(args.completed ? { completed_at: now } : {}),
       ...(args.interactionLog ? { interaction_log: args.interactionLog } : {}),
     })
     .eq("id", args.runId)
     .eq("user_id", args.expectedUserId);
+
+  // Enforce the persisted run's actual step count in the same conditional UPDATE.
+  // Completion uses the terminal cursor (total_steps); ordinary progress stays below it.
+  if (!isStop) {
+    updateQuery = args.status === "completed"
+      ? updateQuery.eq("total_steps", args.currentStep)
+      : updateQuery.gt("total_steps", args.currentStep);
+  }
+
   // Only an active run may advance, pause, or complete. STOP is allowed
   // from active or paused so it can still win after a check-in pause, but a
   // completed or already-stopped run can never be overwritten by a stale tab.
