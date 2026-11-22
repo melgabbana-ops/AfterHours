@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { acceptSecureDuoInvitation, previewSecureDuoInvitation } from "./services/duoRooms";
+import { acceptSecureDuoInvitation, previewSecureDuoInvitation, SECURE_DUO_BACKEND_ENABLED } from "./services/duoRooms";
 
 type Language = "nl" | "en";
 type Preview = Awaited<ReturnType<typeof previewSecureDuoInvitation>>;
@@ -37,7 +37,7 @@ export default function SecureDuoInvitation({
     setPreview(null);
     setError("");
 
-    if (!authenticated || !token) return () => { alive = false; };
+    if (!SECURE_DUO_BACKEND_ENABLED || !authenticated || !token) return () => { alive = false; };
 
     setLoading(true);
     void previewSecureDuoInvitation(token)
@@ -87,7 +87,11 @@ export default function SecureDuoInvitation({
       <section className="couples-lobby" aria-labelledby="secure-duo-invite-title">
         <span className="eyebrow">AFTER HOURS · PRIVATE DUO</span>
         <h2 id="secure-duo-invite-title">{nl ? "Privé-uitnodiging" : "Private invitation"}</h2>
-        {!authenticated ? (
+        {!SECURE_DUO_BACKEND_ENABLED ? (
+          <p role="status">{nl
+            ? "Deze privé-uitnodiging is nog niet actief. De beveiligde serveronderdelen worden eerst getest met twee accounts."
+            : "This private invitation is not active yet. The secure server components are being verified with two accounts first."}</p>
+        ) : !authenticated ? (
           <>
             <p>{nl
               ? "Log in met je eigen AFTER HOURS-account om de uitnodiging veilig te bekijken."
