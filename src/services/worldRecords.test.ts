@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const activationMigration = readFileSync(
-  fileURLToPath(new URL("../../supabase/migrations/20261122070200_afterhours_experience_run_insert_consent_guard.sql", import.meta.url)),
+  fileURLToPath(new URL("../../supabase/proposals/20261122_afterhours_experience_run_insert_consent_guard.sql", import.meta.url)),
   "utf8",
 );
 
