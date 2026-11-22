@@ -171,6 +171,7 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
  const[isBusinessAdmin,setIsBusinessAdmin]=useState(false);
  useEffect(()=>{let active=true;const checkAdmin=async()=>{if(!syncUserId||!supabaseConfigured||!supabase){setIsBusinessAdmin(false);return;}try{const{data,error}=await supabase.from("app_admins").select("user_id").eq("user_id",syncUserId).maybeSingle();if(active)setIsBusinessAdmin(!error&&Boolean(data));}catch{if(active)setIsBusinessAdmin(false);}};void checkAdmin();return()=>{active=false}},[syncUserId]);
  useEffect(()=>{if(syncUserId)recordAchievement("login",{profileId:syncUserId})},[syncUserId]);
+ useEffect(()=>{if(syncUserId&&secureDuoRoute)setScreen("couples")},[syncUserId,secureDuoRoute]);
  const[checkIn,setCheckIn]=useState<"clear"|"pause"|"stop">("clear");
  const[moodBefore,setMoodBefore]=useState<MoodCode|null>(null);
  const[moodDuring,setMoodDuring]=useState<MoodCode|null>(null);
