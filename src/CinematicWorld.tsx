@@ -953,6 +953,15 @@ export default function CinematicWorld({
   }
 
   async function createRunInvitation(runId: string) {
+    // A failed STOP confirmation leaves the UI fail-closed. Do not create a
+    // fresh invitation from a stale paused snapshot while STOP is unresolved.
+    if (stopPendingRef.current || stopPending) {
+      setError(t(
+        "STOP wordt nog door de server bevestigd. Maak pas een nieuwe uitnodiging nadat de status is gecontroleerd.",
+        "STOP is still awaiting server confirmation. Create a new invitation only after the state has been checked."
+      ));
+      return;
+    }
     if (!remoteProfileId) return;
     const run = runs.find((item) => item.id === runId && item.user_id === remoteProfileId);
     if (!run || run.status !== "paused") {
@@ -967,6 +976,15 @@ export default function CinematicWorld({
       const token = Array.from(tokenBytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
       const digest = await crypto.subtle.digest("SHA-256", tokenBytes);
       const tokenHash = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+      // STOP may begin while the browser is hashing the one-time invitation token.
+      // Recheck immediately before the write so the stale UI cannot enqueue it.
+      if (stopPendingRef.current || stopPending) {
+        setError(t(
+          "STOP wordt nog door de server bevestigd. De uitnodiging is niet aangemaakt.",
+          "STOP is still awaiting server confirmation. The invitation was not created."
+        ));
+        return;
+      }
       await createExperienceInvitation({ runId, tokenHash, expectedUserId: remoteProfileId });
       const url = new URL(window.location.href);
       url.searchParams.set("screen", "cinematic");
@@ -1370,7 +1388,7 @@ export default function CinematicWorld({
             <h3>{t("Deel een ervaring", "Invite someone to an experience")}</h3>
             <p>{t("Alleen gepauzeerde ervaringen kunnen worden uitgenodigd. De link is maximaal zeven dagen geldig, kan één keer worden geaccepteerd en bevat geen wachtwoord of persoonsgegevens.", "Only paused experiences can be invited. The link is valid for up to seven days, can be accepted once and contains no password or personal data.")}</p>
             <label>{t("Ervaring", "Experience")}<select value={selectedInviteRunId} onChange={(event) => setSelectedInviteRunId(event.target.value)}><option value="">{t("Kies een gepauzeerde ervaring", "Choose a paused experience")}</option>{invitableRuns.map((run) => <option key={run.id} value={run.id}>{String(run.scene_snapshot.title ?? run.scene_key)} · {t("Gepauzeerd", "Paused")}</option>)}</select></label>
-            <button type="button" className="cw-primary" disabled={busy || !remoteProfileId || !selectedInviteRunId} onClick={() => void createRunInvitation(selectedInviteRunId)}><Share2 size={15} />{t("Maak veilige uitnodigingslink", "Create secure invitation link")}</button>
+            <button type="button" className="cw-primary" disabled={busy || stopPending || !remoteProfileId || !selectedInviteRunId} onClick={() => void createRunInvitation(selectedInviteRunId)}><Share2 size={15} />{t("Maak veilige uitnodigingslink", "Create secure invitation link")}</button>
             {inviteLink && <div className="cw-invite-link"><label>{t("Jouw eenmalige uitnodigingslink", "Your one-time invitation link")}<input readOnly value={inviteLink} /></label><button type="button" onClick={() => { void navigator.clipboard?.writeText(inviteLink); setMessage(t("Uitnodigingslink gekopieerd.", "Invitation link copied.")); }}><Copy size={15} />{t("Kopieer link", "Copy link")}</button></div>}
           </div>
           {joinedRuns.length > 0 && <div className="cw-saved-list"><h3>{t("Ervaringen waarvoor jij toestemming gaf", "Experiences you consented to")} <span>{joinedRuns.length}</span></h3>{joinedRuns.map((run) => <div className="cw-saved-row" key={run.id}><div><strong>{String(run.scene_snapshot.title ?? run.scene_key)}</strong><small>{t("Je neemt deel als gast ·", "You are a participant ·")} {run.status === "active" ? t("Actief", "Active") : t("Gepauzeerd", "Paused")}</small></div><button type="button" className="cw-danger" disabled={busy} onClick={() => void withdrawSharedConsent(run.id)}>{t("Toestemming intrekken en stoppen", "Withdraw consent and stop")}</button></div>)}</div>}
