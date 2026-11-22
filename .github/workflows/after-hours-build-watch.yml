@@ -88,16 +88,17 @@ jobs:
     needs: verify
     if: failure() && github.event_name != 'pull_request'
     steps:
-      - name: Open or update a build-alert issue
+      - name: Open or update a branch-specific build alert
         uses: actions/github-script@v9
         with:
           script: |
             const title = 'AFTER HOURS build watch: verification failed';
+            const branchLine = '- Branch: ' + context.ref;
             const runUrl = 'https://github.com/' + context.repo.owner + '/' + context.repo.repo + '/actions/runs/' + context.runId;
             const body = [
               'The automated AFTER HOURS test/build workflow failed.',
               '',
-              '- Branch: ' + context.ref,
+              branchLine,
               '- Commit: ' + context.sha,
               '- Workflow run: ' + runUrl,
               '',
@@ -109,7 +110,11 @@ jobs:
               state: 'open',
               per_page: 100
             });
-            const existing = issues.find(issue => issue.title === title && !issue.pull_request);
+            const existing = issues.find(issue =>
+              !issue.pull_request &&
+              issue.title === title &&
+              (issue.body || '').split(/\r?\n/).some(line => line.trim() === branchLine)
+            );
             if (existing) {
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
