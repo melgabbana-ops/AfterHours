@@ -18,6 +18,10 @@ const invitationUi = readFileSync(
   fileURLToPath(new URL("../src/SecureDuoInvitation.tsx", import.meta.url)),
   "utf8",
 );
+const supabaseReadme = readFileSync(
+  fileURLToPath(new URL("../supabase/README.md", import.meta.url)),
+  "utf8",
+);
 const secureLobby = readFileSync(
   fileURLToPath(new URL("../src/SecureDuoLobby.tsx", import.meta.url)),
   "utf8",
@@ -116,6 +120,13 @@ describe("proposed secure Duo backend guardrails", () => {
     expect(couplesUi).toContain("Only the account-bound private invitation flow may return");
     expect(couplesUi).toContain('disabled aria-describedby="couples-remote-unavailable"');
     expect(couplesUi).toContain('client.channel("couples-" + roomCode');
+  });
+
+  it("documents the global Realtime private-channel prerequisite without changing project settings", () => {
+    expect(supabaseReadme).toContain("Allow public access");
+    expect(supabaseReadme).toContain("inventory every other Realtime consumer first");
+    expect(supabaseReadme).toContain("do not change it as part of this Duo migration");
+    expect(client).toContain("SECURE_DUO_BACKEND_ENABLED = false");
   });
 
   it("uses only a private UUID topic and server RPCs in the proposed browser adapter", () => {
