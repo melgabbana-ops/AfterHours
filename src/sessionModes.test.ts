@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { pickRandomId, sessionModes, storyChapters } from "./sessionModes";
+import { bothLocalParticipantsReady, pickRandomId, sessionModes, storyChapters } from "./sessionModes";
 
 describe("approved session modes", () => {
   it("defines exactly the five approved modes", () => {
@@ -26,5 +26,21 @@ describe("approved session modes", () => {
     expect(pickRandomId([{ id: "a" }, { id: "b" }], () => 0.9999999)).toBe("b");
     expect(pickRandomId([{ id: "a" }], () => -100)).toBe("a");
     expect(pickRandomId([], () => 0.5)).toBeNull();
+  });
+});
+
+
+describe("local couples check-in gate", () => {
+  it("allows continue or pass only after both participants choose green", () => {
+    expect(bothLocalParticipantsReady(["green", "green"])).toBe(true);
+    expect(bothLocalParticipantsReady(["green", "unset"])).toBe(false);
+    expect(bothLocalParticipantsReady(["green", "yellow"])).toBe(false);
+    expect(bothLocalParticipantsReady(["green", "red"])).toBe(false);
+    expect(bothLocalParticipantsReady(["unset", "unset"])).toBe(false);
+  });
+  it("rejects incomplete or malformed participant signal lists", () => {
+    expect(bothLocalParticipantsReady([])).toBe(false);
+    expect(bothLocalParticipantsReady(["green"])).toBe(false);
+    expect(bothLocalParticipantsReady(["green", "green", "green"])).toBe(false);
   });
 });
