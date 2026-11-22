@@ -5,6 +5,8 @@ const mocks = vi.hoisted(() => ({
   from: vi.fn(),
   select: vi.fn(),
   eq: vi.fn(),
+  in: vi.fn(),
+  is: vi.fn(),
   order: vi.fn(),
   limit: vi.fn(),
   upsert: vi.fn(),
@@ -23,6 +25,8 @@ import { loadExperienceRuns, loadWorldRecords, resumeExperienceRun, saveWorldRec
 const chain = {
   select: mocks.select,
   eq: mocks.eq,
+  in: mocks.in,
+  is: mocks.is,
   order: mocks.order,
   limit: mocks.limit,
   upsert: mocks.upsert,
@@ -38,6 +42,8 @@ describe("AFTER HOURS private world storage", () => {
     mocks.from.mockReturnValue(chain);
     mocks.select.mockReturnValue(chain);
     mocks.eq.mockReturnValue(chain);
+    mocks.in.mockReturnValue(chain);
+    mocks.is.mockResolvedValue({ error: null });
     mocks.order.mockReturnValue(chain);
     mocks.upsert.mockReturnValue(chain);
     mocks.update.mockReturnValue(chain);
@@ -141,6 +147,54 @@ describe("AFTER HOURS private world storage", () => {
     expect(mocks.eq).toHaveBeenCalledWith("status", "paused");
     expect(mocks.update).toHaveBeenNthCalledWith(3, expect.objectContaining({ revoked_at: expect.any(String) }));
   });
+
+  it.each([
+    ["active", ["active"]],
+    ["paused", ["active"]],
+    ["completed", ["active"]],
+    ["stopped", ["active", "paused"]],
+  ] as const)(
+    "allows %s updates only from the expected non-terminal state",
+    async (status, allowedPreviousStates) => {
+      mocks.maybeSingle.mockResolvedValue({ data: { id: "run-1" }, error: null });
+
+      await expect(updateExperienceRun({
+        runId: "run-1",
+        expectedUserId: "user-a",
+        status,
+        currentStep: 1,
+      })).resolves.toBeUndefined();
+
+      if (allowedPreviousStates.length === 1) {
+        expect(mocks.eq).toHaveBeenCalledWith("status", "active");
+        expect(mocks.in).not.toHaveBeenCalled();
+      } else {
+        expect(mocks.in).toHaveBeenCalledWith("status", ["active", "paused"]);
+      }
+      if (status === "active") {
+        expect(mocks.is).not.toHaveBeenCalled();
+      } else {
+        expect(mocks.is).toHaveBeenCalledWith("revoked_at", null);
+      }
+    },
+  );
+
+  it.each(["paused", "completed"] as const)(
+    "does not let a stale %s update overwrite a terminal run",
+    async status => {
+      mocks.maybeSingle.mockResolvedValue({ data: null, error: null });
+
+      await expect(updateExperienceRun({
+        runId: "run-1",
+        expectedUserId: "user-a",
+        status,
+        currentStep: 1,
+      })).rejects.toThrow("This experience run changed state");
+
+      expect(mocks.from).toHaveBeenCalledTimes(1);
+      expect(mocks.is).not.toHaveBeenCalled();
+    },
+  );
 
   it("does not write if authentication cannot be verified", async () => {
     mocks.getUser.mockResolvedValue({ data: { user: null }, error: { message: "Auth unavailable" } });
