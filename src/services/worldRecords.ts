@@ -138,7 +138,7 @@ export async function createExperienceRun(args: {
 export async function updateExperienceRun(args: {
   runId: string;
   expectedUserId: string;
-  status: ExperienceRunStatus;
+  status: Exclude<ExperienceRunStatus, "ready">;
   currentStep: number;
   completed?: boolean;
   interactionLog?: Array<{ stepIndex: number; choice: string; at: string }>;
@@ -156,10 +156,18 @@ export async function updateExperienceRun(args: {
     })
     .eq("id", args.runId)
     .eq("user_id", args.expectedUserId);
-  if (args.status === "active") updateQuery = updateQuery.eq("status", "active");
+  // Only an active run may advance, pause, or complete. STOP is allowed
+  // from active or paused so it can still win after a check-in pause, but a
+  // completed or already-stopped run can never be overwritten by a stale tab.
+  if (args.status === "stopped") {
+    updateQuery = updateQuery.in("status", ["active", "paused"]);
+  } else {
+    if (args.status === "ready") throw new Error("Invalid experience run transition.");
+    updateQuery = updateQuery.eq("status", "active");
+  }
   const { data, error } = await updateQuery.select("id").maybeSingle();
   if (error) throw new Error(error.message);
-  if (!data) throw new Error("This experience run no longer belongs to the signed-in account.");
+  if (!data) throw new Error("This experience run changed state or no longer belongs to the signed-in account.");
   if (args.status !== "active") {
     const { error: consentError } = await supabase!
       .from("afterhours_experience_run_consents")
