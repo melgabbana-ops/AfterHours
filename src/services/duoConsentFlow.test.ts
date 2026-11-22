@@ -47,9 +47,21 @@ describe("secure Duo consent flow", () => {
     expect(invitationScreen).toContain("It is not consent to play.");
   });
 
+  it("wires the secure invitation creator and lobby into the couple-play entry point", () => {
+    expect(appEntry).toContain('import("./SecureDuoCreate")');
+    expect(appEntry).toContain('import("./SecureDuoInvitation")');
+    expect(appEntry).toContain('import("./SecureDuoLobby")');
+    expect(appEntry).toContain("onCreated={(roomId)");
+  });
+
   it("routes private invitation tokens from the URL fragment, not the query string", () => {
     expect(appEntry).toContain("window.location.hash.slice(1)");
     expect(appEntry).toContain('get("duo-invite")');
+  });
+
+  it("offers a handoff to the host lobby after the invitation link is shared", () => {
+    expect(createScreen).toContain("onCreated?: (roomId: string) => void");
+    expect(createScreen).toContain("onCreated(roomId)");
   });
 
   it("keeps participant consent as a separate action inside the secure lobby", () => {
