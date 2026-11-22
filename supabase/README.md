@@ -65,6 +65,12 @@ The Supabase adapter is wired into the client. Local storage remains available f
 
 Consent is session-scoped and auditable. Revocation must stop an active or paused session in the same database transaction. Session completion must revoke consent atomically with the XP award and completion state. Regression checks and live migration state must be reviewed before release.
 
+## Experience-run activation and owner consent
+
+New experience runs must be inserted as `ready` drafts at step zero. The owner consent record is persisted before the guarded `ready` → `active` transition, and `started_at` is written only when that activation succeeds. If consent persistence or activation fails, the client attempts to remove the inactive draft and reports when that cleanup cannot be confirmed.
+
+The matching database insert trigger and RLS restriction are documented in `supabase/proposals/20261123_afterhours_experience_run_insert_consent_guard.sql`. This is a proposal only, not a production migration. Until it is reviewed and applied through the approved migration workflow, a direct authenticated API insert could still bypass the client sequence; keep the rollout gated and do not claim the server-side insert restriction is live.
+
 ## Private media storage
 
 The `after-hours-private-media` bucket must remain private. Object paths use `<auth.uid()>/<session-id>/<filename>`; storage policies must scope access to the first folder and enforce upload limits. Use authenticated storage operations or short-lived signed URLs. Never make this bucket public.
