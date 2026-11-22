@@ -2,12 +2,18 @@ self.addEventListener("message", (event) => {
   if (event.data && event.data.type === "SKIP_WAITING") self.skipWaiting();
 });
 
-const CACHE_NAME = "after-hours-v21";
+const CACHE_NAME = "after-hours-v22";
 const BASE_PATH = new URL(".", self.location.href).pathname;
 const asset = (path) => `${BASE_PATH}${path}`;
+
+// Keep the runtime cache policy in a separately tested classic worker script.
+importScripts(asset("sw-cache-policy.js"));
+const { shouldCacheRequest, shouldCacheResponse } = self.AFTER_HOURS_SW_CACHE_POLICY;
+
 const APP_SHELL = [
   asset(""),
   asset("manifest.webmanifest"),
+  asset("sw-cache-policy.js"),
   asset("after-hours-brand-logo.svg"),
   asset("after-hours-brand-logo-transparent.svg"),
   asset("visuals/ah-grand-candlelit-chamber.svg"),
@@ -56,57 +62,32 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-// The Cache API does not automatically enforce HTTP cache directives.
-// The worker must not retain responses that require revalidation or belong to an
-// authenticated request, because the offline fallback cannot re-check ownership.
-function shouldCacheRequest(request) {
-  if (!request || request.method !== "GET") return false;
-  if (request.headers.get("Authorization")) return false;
-
-  const cacheControl = request.headers.get("Cache-Control") || "";
-  const pragma = request.headers.get("Pragma") || "";
-  if (/(?:^|,)\s*(?:no-store|no-cache)\b/i.test(cacheControl)) return false;
-  if (/\bno-cache\b/i.test(pragma)) return false;
-  if (["no-store", "no-cache", "reload"].includes(request.cache)) return false;
-  return true;
-}
-
-function shouldCacheResponse(response) {
-  if (!response || !response.ok) return false;
-  const cacheControl = response.headers.get("Cache-Control") || "";
-  const directives = cacheControl.split(",").map((directive) => directive.trim().toLowerCase());
-  const neverCache = new Set(["no-store", "private", "no-cache", "must-revalidate", "proxy-revalidate"]);
-  if (directives.some((directive) => neverCache.has(directive.split("=", 1)[0].trim()))) return false;
-  if (directives.some((directive) => /^max-age\s*=\s*"?0"?$/i.test(directive))) return false;
-  if ((response.headers.get("Vary") || "").trim() === "*") return false;
-  return true;
-}
-
- self.addEventListener("fetch", (event) => {
+// Only app navigations and immutable Vite bundle files enter the runtime cache.
+// Programmatic fetches (including JSON/API calls), query-bearing invite links and
+// arbitrary same-origin endpoints bypass Cache API even if headers are misconfigured.
+self.addEventListener("fetch", (event) => {
   const request = event.request;
   if (request.method !== "GET") return;
   const url = new URL(request.url);
   if (url.origin !== self.location.origin || !url.pathname.startsWith(BASE_PATH)) return;
 
-  const cacheableRequest = shouldCacheRequest(request);
+  if (!shouldCacheRequest(request, url, BASE_PATH, self.location.origin)) {
+    // Remove any older copy before letting the browser handle the request normally.
+    event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.delete(request)));
+    return;
+  }
 
   event.respondWith((async () => {
     const cache = await caches.open(CACHE_NAME);
     try {
       const response = await fetch(request);
-      if (cacheableRequest && shouldCacheResponse(response)) {
+      if (shouldCacheResponse(response)) {
         event.waitUntil(cache.put(request, response.clone()));
       } else {
-        // A denied, authenticated, revalidation-only or otherwise non-cacheable
-        // response must invalidate any older copy before offline fallback.
         event.waitUntil(cache.delete(request));
       }
       return response;
     } catch {
-      if (!cacheableRequest) {
-        await cache.delete(request);
-        return Response.error();
-      }
       const cached = await cache.match(request);
       if (cached) return cached;
       if (request.mode === "navigate") return (await cache.match(asset(""))) || Response.error();
