@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { CheckCircle2, Play, ShieldCheck, Square, Users } from "lucide-react";
-import { bothLocalParticipantsReady, type LocalCouplesSignal } from "./sessionModes";
+import { bothLocalParticipantsReady, localCheckInPressedState, type LocalCouplesSignal } from "./sessionModes";
 
 type Language = "nl" | "en";
 type Stage = "setup" | "active" | "paused" | "complete" | "stopped";
@@ -179,17 +179,20 @@ export default function LocalCouplesMode({ language, consentActive, onSafetyPaus
                 </button>
               ))}
             </div>
-            <div className="cw-local-participants">
-              {[0, 1].map((index) => (
-                <label key={index}>
-                  <span>{t("Naam", "Name")} · {index + 1}</span>
-                  <input value={names[index]} maxLength={24} onChange={(event) => setNames((current) => current.map((name, i) => i === index ? event.target.value : name))} />
-                  <span className="cw-local-consent">
-                    <input type="checkbox" checked={consents[index]} onChange={(event) => setConsents((current) => current.map((value, i) => i === index ? event.target.checked : value))} />
-                    {t("Ik geef vrijwillig toestemming voor deze gezamenlijke route en kan op elk moment stoppen.", "I freely consent to this shared path and can stop at any time.")}
-                  </span>
-                </label>
-              ))}
+            <div className="cw-local-participants" role="group" aria-label={t("Deelnemers en afzonderlijke toestemming", "Participants and separate consent")}>
+              {[0, 1].map((index) => {
+                const participantNumber = index + 1;
+                return (
+                  <div className="cw-local-participant" key={index}>
+                    <label htmlFor={`cw-local-name-${participantNumber}`}>{t("Naam", "Name")} · {participantNumber}</label>
+                    <input id={`cw-local-name-${participantNumber}`} value={names[index]} maxLength={24} autoComplete="off" onChange={(event) => setNames((current) => current.map((name, i) => i === index ? event.target.value : name))} />
+                    <label className="cw-local-consent" htmlFor={`cw-local-consent-${participantNumber}`}>
+                      <input id={`cw-local-consent-${participantNumber}`} type="checkbox" checked={consents[index]} onChange={(event) => setConsents((current) => current.map((value, i) => i === index ? event.target.checked : value))} />
+                      <span>{t("Ik geef vrijwillig toestemming voor deze gezamenlijke route en kan op elk moment stoppen.", "I freely consent to this shared path and can stop at any time.")}</span>
+                    </label>
+                  </div>
+                );
+              })}
             </div>
             {!consentActive && <p className="cw-local-warning">{t("Bevestig eerst de algemene AFTER HOURS-consent voordat je start.", "Confirm general AFTER HOURS consent before starting.")}</p>}
             <button type="button" className="cw-primary" disabled={!ready} onClick={() => { setStage("active"); setStep(0); setSignals(["unset", "unset"]); setNotice(""); }}>
@@ -205,16 +208,22 @@ export default function LocalCouplesMode({ language, consentActive, onSafetyPaus
               <div className="cw-local-step"><span className="cw-kicker">{t("SAMEN", "TOGETHER")}</span><p>{steps[step]}</p></div>
               <p className="cw-local-prompt">{t("Check allebei in voordat jullie verdergaan.", "Both participants check in before you continue.")}</p>
               <div className="cw-local-checkins">
-                {[0, 1].map((index) => (
-                  <div className="cw-local-checkin" key={index}>
-                    <strong>{names[index].trim() || t("Deelnemer", "Participant")} · {t("jouw check-in", "your check-in")}</strong>
-                    <div>
-                      <button type="button" className={signals[index] === "green" ? "chosen green" : ""} onClick={() => setSignal(index as 0 | 1, "green")} disabled={stage === "paused" && signals.some((signal) => signal === "red")}>{t("Groen", "Green")}</button>
-                      <button type="button" className={signals[index] === "yellow" ? "chosen yellow" : ""} onClick={() => setSignal(index as 0 | 1, "yellow")}>{t("Pauze", "Pause")}</button>
-                      <button type="button" className={signals[index] === "red" ? "chosen red" : ""} onClick={() => setSignal(index as 0 | 1, "red")}>{t("STOP", "STOP")}</button>
+                {[0, 1].map((index) => {
+                  const participantNumber = index + 1;
+                  const participantName = names[index].trim() || t("Deelnemer", "Participant");
+                  const pressed = localCheckInPressedState(signals[index]);
+                  const labelId = `cw-local-checkin-label-${participantNumber}`;
+                  return (
+                    <div className="cw-local-checkin" key={index} role="group" aria-labelledby={labelId}>
+                      <strong id={labelId}>{participantName} · {t("jouw check-in", "your check-in")}</strong>
+                      <div>
+                        <button type="button" className={pressed.green ? "chosen green" : ""} aria-label={t(`${participantName}: Groen`, `${participantName}: Green`)} aria-pressed={pressed.green} onClick={() => setSignal(index as 0 | 1, "green")}>{t("Groen", "Green")}</button>
+                        <button type="button" className={pressed.yellow ? "chosen yellow" : ""} aria-label={t(`${participantName}: Pauze`, `${participantName}: Pause`)} aria-pressed={pressed.yellow} onClick={() => setSignal(index as 0 | 1, "yellow")}>{t("Pauze", "Pause")}</button>
+                        <button type="button" className={pressed.red ? "chosen red" : ""} aria-label={t(`${participantName}: STOP`, `${participantName}: STOP`)} aria-pressed={pressed.red} onClick={() => setSignal(index as 0 | 1, "red")}>{t("STOP", "STOP")}</button>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
               {notice && <p className="cw-local-status" role="status" aria-live="polite">{notice}</p>}
               {stage === "paused" && <p className="cw-local-warning">{t("De route staat stil. Hervatten kan pas als beide deelnemers opnieuw groen kiezen.", "The path is paused. Resume only after both participants choose green again.")}</p>}
