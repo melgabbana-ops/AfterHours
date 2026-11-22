@@ -105,33 +105,71 @@ export async function createExperienceRun(args: {
   expectedUserId: string;
 }): Promise<string> {
   const user = await assertWorldAccount(args.expectedUserId);
-  if (!args.sceneKey.trim() || args.totalSteps < 1 || args.totalSteps > 40) throw new Error("Invalid experience scene.");
+  if (!args.sceneKey.trim() || !Number.isInteger(args.totalSteps) || args.totalSteps < 1 || args.totalSteps > 40) {
+    throw new Error("Invalid experience scene.");
+  }
   const now = new Date().toISOString();
+  // Never create an active run before its owner consent exists. The database
+  // activation guard checks consent on the later ready -> active transition.
   const { data: run, error } = await supabase!
     .from("afterhours_experience_runs")
     .insert({
       user_id: user.id,
       scene_key: args.sceneKey,
       scene_snapshot: args.sceneSnapshot,
-      status: "active",
+      status: "ready",
       current_step: 0,
       total_steps: args.totalSteps,
       interaction_log: [],
       consent_version: "1.0",
-      started_at: now,
       updated_at: now,
     })
     .select("id")
     .single();
   if (error) throw new Error(error.message);
 
-  const { error: consentError } = await supabase!
+  const discardUnstartedRun = async () => {
+    const { error: cleanupError } = await supabase!
+      .from("afterhours_experience_runs")
+      .delete()
+      .eq("id", run.id)
+      .eq("user_id", user.id)
+      .select("id")
+      .maybeSingle();
+    return cleanupError;
+  };
+
+  const { data: consent, error: consentError } = await supabase!
     .from("afterhours_experience_run_consents")
-    .insert({ run_id: run.id, user_id: user.id, consent_version: "1.0", consented_at: now });
-  if (consentError) {
-    await supabase!.from("afterhours_experience_runs").delete().eq("id", run.id).eq("user_id", user.id);
-    throw new Error("The consent record could not be saved. The scene was not started. " + consentError.message);
+    .insert({ run_id: run.id, user_id: user.id, consent_version: "1.0", consented_at: now })
+    .select("id")
+    .single();
+  if (consentError || !consent) {
+    const cleanupError = await discardUnstartedRun();
+    throw new Error(
+      "The consent record could not be saved. The scene was not started. " +
+      (consentError?.message ?? "No consent record was returned.") +
+      (cleanupError ? " The inactive draft could not be removed." : "")
+    );
   }
+
+  const { data: activatedRun, error: activationError } = await supabase!
+    .from("afterhours_experience_runs")
+    .update({ status: "active", started_at: now, updated_at: now })
+    .eq("id", run.id)
+    .eq("user_id", user.id)
+    .eq("status", "ready")
+    .select("id")
+    .maybeSingle();
+  if (activationError || !activatedRun) {
+    const cleanupError = await discardUnstartedRun();
+    throw new Error(
+      "Consent was saved, but the experience could not be activated. The scene remains inactive. " +
+      (activationError?.message ?? "The run was no longer in the expected ready state.") +
+      (cleanupError ? " The inactive draft could not be removed." : "")
+    );
+  }
+
   return run.id as string;
 }
 
