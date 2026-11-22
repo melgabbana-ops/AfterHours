@@ -9,6 +9,8 @@ const mocks = vi.hoisted(() => ({
   limit: vi.fn(),
   upsert: vi.fn(),
   single: vi.fn(),
+  update: vi.fn(),
+  maybeSingle: vi.fn(),
 }));
 
 vi.mock("./supabase", () => ({
@@ -16,7 +18,7 @@ vi.mock("./supabase", () => ({
   supabase: { auth: { getUser: mocks.getUser }, from: mocks.from },
 }));
 
-import { loadExperienceRuns, loadWorldRecords, saveWorldRecord } from "./worldRecords";
+import { loadExperienceRuns, loadWorldRecords, resumeExperienceRun, saveWorldRecord } from "./worldRecords";
 
 const chain = {
   select: mocks.select,
@@ -25,6 +27,8 @@ const chain = {
   limit: mocks.limit,
   upsert: mocks.upsert,
   single: mocks.single,
+  update: mocks.update,
+  maybeSingle: mocks.maybeSingle,
 };
 
 describe("AFTER HOURS private world storage", () => {
@@ -36,6 +40,7 @@ describe("AFTER HOURS private world storage", () => {
     mocks.eq.mockReturnValue(chain);
     mocks.order.mockReturnValue(chain);
     mocks.upsert.mockReturnValue(chain);
+    mocks.update.mockReturnValue(chain);
   });
 
   it("refuses to read another account's records before making a database query", async () => {
@@ -88,6 +93,39 @@ describe("AFTER HOURS private world storage", () => {
       expect.objectContaining({ user_id: "user-a", module: "dominion", record_key: "profile" }),
       { onConflict: "user_id,module,record_key" }
     );
+  });
+
+
+  it("resumes only a paused run after fresh consent is confirmed", async () => {
+    mocks.maybeSingle
+      .mockResolvedValueOnce({ data: { id: "consent-1" }, error: null })
+      .mockResolvedValueOnce({ data: { id: "run-1" }, error: null });
+
+    await expect(resumeExperienceRun({
+      runId: "run-1",
+      expectedUserId: "user-a",
+      currentStep: 2,
+    })).resolves.toBeUndefined();
+
+    expect(mocks.from).toHaveBeenNthCalledWith(1, "afterhours_experience_run_consents");
+    expect(mocks.from).toHaveBeenNthCalledWith(2, "afterhours_experience_runs");
+    expect(mocks.eq).toHaveBeenCalledWith("status", "paused");
+    expect(mocks.update).toHaveBeenNthCalledWith(2, expect.objectContaining({ status: "active", current_step: 2 }));
+  });
+
+  it("does not reactivate a run that is no longer paused and revokes the temporary consent renewal", async () => {
+    mocks.maybeSingle
+      .mockResolvedValueOnce({ data: { id: "consent-1" }, error: null })
+      .mockResolvedValueOnce({ data: null, error: null });
+
+    await expect(resumeExperienceRun({
+      runId: "run-1",
+      expectedUserId: "user-a",
+      currentStep: 2,
+    })).rejects.toThrow("This experience run could not be resumed.");
+
+    expect(mocks.eq).toHaveBeenCalledWith("status", "paused");
+    expect(mocks.update).toHaveBeenNthCalledWith(3, expect.objectContaining({ revoked_at: expect.any(String) }));
   });
 
   it("does not write if authentication cannot be verified", async () => {
