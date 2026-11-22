@@ -21,7 +21,7 @@ function newCode() {
   return Array.from(bytes, value => alphabet[value % alphabet.length]).join("");
 }
 
-export default function CouplesPlay({ language, onBack }: { language: Language; onBack: () => void }) {
+export default function CouplesPlay({ language, onBack, onSecureDuo }: { language: Language; onBack: () => void; onSecureDuo?: () => void }) {
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
   const initialCode = useMemo(() => normalizeRoomCode(new URLSearchParams(window.location.search).get("couple")), []);
   const [mode, setMode] = useState<Mode>(initialCode ? "remote" : "local");
@@ -269,6 +269,7 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
         <Wifi/><strong>{t("Op afstand", "Long distance")}</strong><span>{t("Verbind twee apparaten met een kamer met code.", "Connect two devices through a room with a code.")}</span>
       </button>
     </div>
+    {onSecureDuo && <button type="button" className="couples-secondary" onClick={onSecureDuo}>{t("Maak een beveiligde privé-uitnodiging", "Create a secure private invitation")}</button>}
     {mode === "local" ? <section className="couples-lobby">
       <span className="eyebrow">LOCAL · SHARED DEVICE</span><h3>{t("Jullie namen", "Your names")}</h3>
       <div className="couples-name-fields">
