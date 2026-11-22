@@ -4901,3 +4901,11 @@ button,[role="button"],nav a{touch-action:manipulation}
 .couples-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:14px}
 .couples-actions>button{flex:1 1 140px}
 @media(max-width:520px){.couples-actions{display:grid;grid-template-columns:1fr}.couples-actions>button{width:100%}}
+
+
+/* Clearly communicate that legacy room-code play is intentionally unavailable. */
+.couples-mode-card:disabled{cursor:not-allowed;opacity:.72;border-style:dashed;background:linear-gradient(145deg,#15130f,#0d0c0a)}
+.couples-mode-card:disabled strong{color:#d7bd86}
+.couples-mode-card:disabled span{color:#c2b49e}
+.couples-mode-card:focus-visible,.couples-actions>button:focus-visible{outline:2px solid #e3c17a;outline-offset:3px}
+@media(max-width:560px){.couples-mode-grid{grid-template-columns:1fr}.couples-mode-card{min-height:112px}}
