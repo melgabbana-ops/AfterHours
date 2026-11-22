@@ -4791,3 +4791,11 @@ button,[role="button"],nav a{touch-action:manipulation}
 .couples-local-reveal article{padding:12px;border-left:2px solid #c49b52;background:#0b0a08}
 .couples-local-reveal strong{color:#f1d59a;font-size:13px}
 .couples-local-reveal p{margin:7px 0 0;color:#e5dac8;font-size:13px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}
+
+
+/* Secure Duo remote-mode holding state: cinematic, clear and deliberately unavailable. */
+.couples-remote-preview{position:relative;overflow:hidden;isolation:isolate;border-color:rgba(194,158,99,.32);background:radial-gradient(ellipse at 82% 0%,rgba(111,70,92,.2),transparent 48%),linear-gradient(145deg,#191316 0%,#100e10 58%,#0b0a0b 100%);box-shadow:inset 0 1px 0 rgba(255,235,205,.035),0 18px 48px rgba(0,0,0,.2)}
+.couples-remote-preview:before{content:"";position:absolute;inset:0 auto 0 0;width:2px;background:linear-gradient(180deg,transparent,#c7a36b 35%,#79556e 70%,transparent);opacity:.8}
+.couples-remote-preview .eyebrow{letter-spacing:.2em;color:#c6a978}
+.couples-remote-preview>p{max-width:62ch}
+.couples-remote-preview .couples-connection{width:fit-content;max-width:100%;padding:10px 13px;border:1px solid rgba(194,158,99,.24);border-radius:999px;background:rgba(9,8,10,.48);color:#e2cda9}
