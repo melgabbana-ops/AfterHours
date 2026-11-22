@@ -10,6 +10,10 @@ const invitationScreen = readFileSync(
   fileURLToPath(new URL("../SecureDuoInvitation.tsx", import.meta.url)),
   "utf8",
 );
+const appEntry = readFileSync(
+  fileURLToPath(new URL("../main.tsx", import.meta.url)),
+  "utf8",
+);
 const lobbyScreen = readFileSync(
   fileURLToPath(new URL("../SecureDuoLobby.tsx", import.meta.url)),
   "utf8",
@@ -41,6 +45,11 @@ describe("secure Duo consent flow", () => {
     expect(accept).toContain("onAccepted(roomId)");
     expect(accept).not.toContain("setSecureDuoConsent");
     expect(invitationScreen).toContain("It is not consent to play.");
+  });
+
+  it("routes private invitation tokens from the URL fragment, not the query string", () => {
+    expect(appEntry).toContain("window.location.hash.slice(1)");
+    expect(appEntry).toContain('get("duo-invite")');
   });
 
   it("keeps participant consent as a separate action inside the secure lobby", () => {
