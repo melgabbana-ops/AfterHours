@@ -52,3 +52,15 @@ export type LocalCouplesSignal = "unset" | "green" | "yellow" | "red";
 export function bothLocalParticipantsReady(signals: readonly LocalCouplesSignal[]): boolean {
   return signals.length === 2 && signals.every((signal) => signal === "green");
 }
+
+export function localCheckInPressedState(signal: LocalCouplesSignal): {
+  green: boolean;
+  yellow: boolean;
+  red: boolean;
+} {
+  return {
+    green: signal === "green",
+    yellow: signal === "yellow",
+    red: signal === "red",
+  };
+}
