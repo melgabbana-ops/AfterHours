@@ -119,8 +119,9 @@ describe("AFTER HOURS private world storage", () => {
     },
   );
 
-  it("resumes only a paused run after fresh consent is confirmed", async () => {
+  it("resumes only a paused run within its persisted length after fresh consent", async () => {
     mocks.maybeSingle
+      .mockResolvedValueOnce({ data: { id: "run-1", total_steps: 3 }, error: null })
       .mockResolvedValueOnce({ data: { id: "consent-1" }, error: null })
       .mockResolvedValueOnce({ data: { id: "run-1" }, error: null });
 
@@ -130,14 +131,44 @@ describe("AFTER HOURS private world storage", () => {
       currentStep: 2,
     })).resolves.toBeUndefined();
 
-    expect(mocks.from).toHaveBeenNthCalledWith(1, "afterhours_experience_run_consents");
-    expect(mocks.from).toHaveBeenNthCalledWith(2, "afterhours_experience_runs");
+    expect(mocks.from).toHaveBeenNthCalledWith(1, "afterhours_experience_runs");
+    expect(mocks.from).toHaveBeenNthCalledWith(2, "afterhours_experience_run_consents");
+    expect(mocks.from).toHaveBeenNthCalledWith(3, "afterhours_experience_runs");
     expect(mocks.eq).toHaveBeenCalledWith("status", "paused");
+    expect(mocks.gt).toHaveBeenCalledWith("total_steps", 2);
     expect(mocks.update).toHaveBeenNthCalledWith(2, expect.objectContaining({ status: "active", current_step: 2 }));
   });
 
-  it("does not reactivate a run that is no longer paused and revokes the temporary consent renewal", async () => {
+  it("does not renew consent when the persisted run is no longer paused", async () => {
+    mocks.maybeSingle.mockResolvedValueOnce({ data: null, error: null });
+
+    await expect(resumeExperienceRun({
+      runId: "run-1",
+      expectedUserId: "user-a",
+      currentStep: 2,
+    })).rejects.toThrow("This experience run could not be resumed.");
+
+    expect(mocks.from).toHaveBeenCalledTimes(1);
+    expect(mocks.update).not.toHaveBeenCalled();
+  });
+
+  it("rejects a resume cursor at the persisted terminal step before renewing consent", async () => {
+    mocks.maybeSingle.mockResolvedValueOnce({ data: { id: "run-1", total_steps: 2 }, error: null });
+
+    await expect(resumeExperienceRun({
+      runId: "run-1",
+      expectedUserId: "user-a",
+      currentStep: 2,
+    })).rejects.toThrow("Invalid experience step.");
+
+    expect(mocks.from).toHaveBeenCalledTimes(1);
+    expect(mocks.update).not.toHaveBeenCalled();
+    expect(mocks.gt).not.toHaveBeenCalled();
+  });
+
+  it("revokes temporary consent if the paused state changes after the preflight read", async () => {
     mocks.maybeSingle
+      .mockResolvedValueOnce({ data: { id: "run-1", total_steps: 3 }, error: null })
       .mockResolvedValueOnce({ data: { id: "consent-1" }, error: null })
       .mockResolvedValueOnce({ data: null, error: null });
 
@@ -147,7 +178,7 @@ describe("AFTER HOURS private world storage", () => {
       currentStep: 2,
     })).rejects.toThrow("This experience run could not be resumed.");
 
-    expect(mocks.eq).toHaveBeenCalledWith("status", "paused");
+    expect(mocks.gt).toHaveBeenCalledWith("total_steps", 2);
     expect(mocks.update).toHaveBeenNthCalledWith(3, expect.objectContaining({ revoked_at: expect.any(String) }));
   });
 

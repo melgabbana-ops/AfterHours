@@ -213,6 +213,22 @@ export async function resumeExperienceRun(args: {
     throw new Error("Invalid experience step.");
   }
   await assertWorldAccount(args.expectedUserId);
+
+  // Preflight the persisted run length before temporarily renewing consent.
+  // The final UPDATE repeats these predicates to protect against a concurrent state change.
+  const { data: pausedRun, error: runError } = await supabase!
+    .from("afterhours_experience_runs")
+    .select("id,total_steps")
+    .eq("id", args.runId)
+    .eq("user_id", args.expectedUserId)
+    .eq("status", "paused")
+    .maybeSingle();
+  if (runError) throw new Error(runError.message);
+  if (!pausedRun) throw new Error("This experience run could not be resumed.");
+  if (!Number.isInteger(pausedRun.total_steps) || args.currentStep >= pausedRun.total_steps) {
+    throw new Error("Invalid experience step.");
+  }
+
   const now = new Date().toISOString();
   const { data: consent, error: consentError } = await supabase!
     .from("afterhours_experience_run_consents")
@@ -230,6 +246,8 @@ export async function resumeExperienceRun(args: {
     .eq("user_id", args.expectedUserId)
     // A fresh consent record must never revive a completed or stopped run.
     .eq("status", "paused")
+    // Recheck the persisted length atomically in case the row changed after preflight.
+    .gt("total_steps", args.currentStep)
     .select("id")
     .maybeSingle();
   if (error || !data) {
