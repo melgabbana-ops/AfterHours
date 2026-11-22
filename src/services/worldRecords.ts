@@ -192,6 +192,8 @@ export async function resumeExperienceRun(args: {
     .update({ status: "active", current_step: args.currentStep, updated_at: now })
     .eq("id", args.runId)
     .eq("user_id", args.expectedUserId)
+    // A fresh consent record must never revive a completed or stopped run.
+    .eq("status", "paused")
     .select("id")
     .maybeSingle();
   if (error || !data) {
