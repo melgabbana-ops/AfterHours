@@ -18,8 +18,8 @@ const lobbyScreen = readFileSync(
 describe("secure Duo consent flow", () => {
   it("requires the host's explicit opt-in before creating an invitation", () => {
     expect(createScreen).toContain("if (!authenticated || !consent || creating) return;");
-    expect(createScreen).toContain('checked={consent}');
-    expect(createScreen).toContain('onChange={(event) => setConsent(event.target.checked)}');
+    expect(createScreen).toContain("checked={consent}");
+    expect(createScreen).toContain("onChange={(event) => setConsent(event.target.checked)}");
     expect(createScreen).toContain("await setSecureDuoConsent(room.roomId, true)");
   });
 
@@ -46,6 +46,8 @@ describe("secure Duo consent flow", () => {
   it("keeps participant consent as a separate action inside the secure lobby", () => {
     expect(lobbyScreen).toContain("setSecureDuoConsent(roomId, true)");
     expect(lobbyScreen).toContain("setSecureDuoConsent(roomId, false)");
-    expect(lobbyScreen).toContain("Both participants must consent");
+    expect(lobbyScreen).toContain("const bothConsented = snapshot?.members.length === 2");
+    expect(lobbyScreen).toContain("snapshot.members.every(member => member.consented)");
+    expect(lobbyScreen).toContain("const canStart = isHost && bothConsented");
   });
 });
