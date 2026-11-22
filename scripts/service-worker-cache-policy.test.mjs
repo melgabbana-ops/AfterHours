@@ -8,7 +8,7 @@ const cachePolicySource = readFileSync(new URL("../public/sw-cache-policy.js", i
 function runWorker(context) {
   // importScripts is represented by preloading the same classic policy in this VM.
   runInNewContext(cachePolicySource, { self: context.self });
-  runWorker({ ...context, importScripts: vi.fn() });
+  runInNewContext(workerSource, { ...context, importScripts: vi.fn() });
 }
 
 function startWorker(response, requestOptions = {}, fetchFails = false) {
@@ -51,7 +51,7 @@ function startWorker(response, requestOptions = {}, fetchFails = false) {
     keys: vi.fn(async () => []),
     delete: vi.fn(async () => true),
   };
-  runInNewContext(workerSource, {
+  runWorker({
     self,
     caches,
     fetch: fetchMock,
@@ -201,7 +201,7 @@ function startPushWorker(payload) {
     clients: { claim: vi.fn(), matchAll: vi.fn(async () => []), openWindow: vi.fn() },
     skipWaiting: vi.fn(),
   };
-  runInNewContext(workerSource, { self, URL });
+  runWorker({ self, URL });
   let completion;
   handlers.get("push")({
     data: { json: () => payload },
@@ -313,7 +313,7 @@ function startNotificationClickWorker(url, windows = []) {
     clients,
     skipWaiting: vi.fn(),
   };
-  runInNewContext(workerSource, { self, URL });
+  runWorker({ self, URL });
 
   let completion;
   handlers.get("notificationclick")({
