@@ -181,19 +181,25 @@ export async function joinSecureDuoRealtime(
     handlers.onPresence?.(channel.presenceState() as Record<string, unknown[]>);
   });
 
-  await new Promise<void>((resolve, reject) => {
-    channel.subscribe((status, error) => {
-      if (status === "SUBSCRIBED") resolve();
-      else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") {
-        reject(new Error(error?.message || "De beveiligde Duo-verbinding kon niet worden geopend."));
-      }
+  try {
+    await new Promise<void>((resolve, reject) => {
+      channel.subscribe((status, error) => {
+        if (status === "SUBSCRIBED") resolve();
+        else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") {
+          reject(new Error(error?.message || "De beveiligde Duo-verbinding kon niet worden geopend."));
+        }
+      });
     });
-  });
 
-  const tracked = await channel.track({ online: true, seenAt: new Date().toISOString() });
-  if (tracked !== "ok") {
-    await activeClient.removeChannel(channel);
-    throw new Error("Je aanwezigheid kon niet veilig in de Duo-kamer worden bevestigd.");
+    const tracked = await channel.track({ online: true, seenAt: new Date().toISOString() });
+    if (tracked !== "ok") {
+      throw new Error("Je aanwezigheid kon niet veilig in de Duo-kamer worden bevestigd.");
+    }
+  } catch (error) {
+    // A failed private-channel handshake must not leave a ghost subscription
+    // or presence record behind. Preserve the original connection error.
+    try { await activeClient.removeChannel(channel); } catch { /* best-effort cleanup */ }
+    throw error;
   }
 
   return {
