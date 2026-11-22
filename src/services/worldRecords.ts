@@ -179,8 +179,10 @@ export async function updateExperienceRun(args: {
       // Preserve the server's last known step instead of trusting the client.
       ...(!isStop ? { current_step: args.currentStep } : {}),
       updated_at: now,
-      ...(args.completed ? { completed_at: now } : {}),
-      ...(args.interactionLog ? { interaction_log: args.interactionLog } : {}),
+      // STOP must preserve all server-known progress metadata. A stale client
+      // must not attach a completion timestamp or replace the interaction log.
+      ...(!isStop && args.status === "completed" && args.completed ? { completed_at: now } : {}),
+      ...(!isStop && args.interactionLog ? { interaction_log: args.interactionLog } : {}),
     })
     .eq("id", args.runId)
     .eq("user_id", args.expectedUserId);
