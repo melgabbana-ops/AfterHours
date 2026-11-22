@@ -10,6 +10,10 @@ const invitationScreen = readFileSync(
   fileURLToPath(new URL("../SecureDuoInvitation.tsx", import.meta.url)),
   "utf8",
 );
+const couplesPlay = readFileSync(
+  fileURLToPath(new URL("../CouplesPlay.tsx", import.meta.url)),
+  "utf8",
+);
 const appEntry = readFileSync(
   fileURLToPath(new URL("../main.tsx", import.meta.url)),
   "utf8",
@@ -52,6 +56,13 @@ describe("secure Duo consent flow", () => {
     expect(appEntry).toContain('import("./SecureDuoInvitation")');
     expect(appEntry).toContain('import("./SecureDuoLobby")');
     expect(appEntry).toContain("onCreated={(roomId)");
+  });
+
+  it("keeps legacy public room-code realtime disabled", () => {
+    expect(couplesPlay).toContain('const [mode, setMode] = useState<Mode>("local")');
+    expect(couplesPlay).toContain("if (mode === \"remote\")");
+    expect(couplesPlay).toContain("Only the account-bound private invitation flow");
+    expect(couplesPlay).toContain("disabled aria-describedby=\"couples-remote-unavailable\"");
   });
 
   it("routes private invitation tokens from the URL fragment, not the query string", () => {
