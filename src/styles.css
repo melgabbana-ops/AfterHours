@@ -4909,3 +4909,6 @@ button,[role="button"],nav a{touch-action:manipulation}
 .couples-mode-card:disabled span{color:#c2b49e}
 .couples-mode-card:focus-visible,.couples-actions>button:focus-visible{outline:2px solid #e3c17a;outline-offset:3px}
 @media(max-width:560px){.couples-mode-grid{grid-template-columns:1fr}.couples-mode-card{min-height:112px}}
+
+.couples-secondary:disabled{cursor:not-allowed;opacity:.58;border-style:dashed}
+#couples-private-duo-unavailable{margin:.65rem 0;color:#c8bda9;font-size:.82rem;line-height:1.55}
