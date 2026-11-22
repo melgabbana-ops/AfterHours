@@ -21,12 +21,18 @@ function newCode() {
   return Array.from(bytes, value => alphabet[value % alphabet.length]).join("");
 }
 
+// Flip only after the secure Duo migration is applied and two-account tests pass.
+function secureDuoBackendAvailable(): boolean {
+  return false;
+}
+
 export default function CouplesPlay({ language, onBack }: { language: Language; onBack: () => void }) {
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
-  const initialCode = useMemo(() => normalizeRoomCode(new URLSearchParams(window.location.search).get("couple")), []);
-  const [mode, setMode] = useState<Mode>(initialCode ? "remote" : "local");
-  const [roomCode, setRoomCode] = useState(initialCode);
-  const [joinCode, setJoinCode] = useState(initialCode);
+  // Legacy public room-code links are deliberately ignored. Remote rooms return
+  // only after the account-bound invitation backend has been deployed and verified.
+  const [mode] = useState<Mode>("local");
+  const [roomCode, setRoomCode] = useState("");
+  const [joinCode, setJoinCode] = useState("");
   const [localParticipantId] = useState(() => crypto.randomUUID());
   const [authenticatedUserId, setAuthenticatedUserId] = useState<string | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
@@ -39,6 +45,7 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
   const [connected, setConnected] = useState(false);
   const [participants, setParticipants] = useState<PresenceMeta[]>([]);
   const [round, setRound] = useState(0);
+  const [aftercareChoices, setAftercareChoices] = useState<string[]>([]);
   const [status, setStatus] = useState<PlayStatus>("lobby");
   const [message, setMessage] = useState("");
   const channelRef = useRef<any>(null);
@@ -85,6 +92,17 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
       return;
     }
     if (!authChecked) return;
+    // Never connect to the legacy public room-code topic. The new private-room
+    // adapter remains disabled until its reviewed schema is deployed and tested.
+    if (mode === "remote" && !secureDuoBackendAvailable()) {
+      setConnected(false);
+      setParticipants([]);
+      setMessage(t(
+        "Online Duo is tijdelijk uitgeschakeld terwijl de privé-uitnodigingen en serverbeveiliging worden afgerond. Gebruik voorlopig Lokaal samen.",
+        "Online Duo is temporarily unavailable while private invitations and server-side access controls are completed. Use Together locally for now."
+      ));
+      return;
+    }
     if (!authenticatedUserId) {
       setConnected(false);
       setParticipants([]);
@@ -262,11 +280,11 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
       <p>{t("Kies samen op één apparaat of speel ieder vanaf je eigen locatie.", "Play together on one device or each from your own location.")}</p>
     </header>
     <div className="couples-mode-grid">
-      <button type="button" className={mode === "local" ? "couples-mode-card selected" : "couples-mode-card"} onClick={() => { setMode("local"); setMyConsent(false); setLocalPartnerConsent(false); setStatus("lobby"); setRound(0); }} disabled={status === "active" || status === "paused"}>
+      <button type="button" className={mode === "local" ? "couples-mode-card selected" : "couples-mode-card"} onClick={() => { setMyConsent(false); setLocalPartnerConsent(false); setStatus("lobby"); setRound(0); }} disabled={status === "active" || status === "paused"}>
         <MonitorSmartphone/><strong>{t("Lokaal samen", "Together locally")}</strong><span>{t("Eén telefoon, tablet of iPad. Om de beurt antwoorden.", "One phone, tablet or iPad. Take turns answering.")}</span>
       </button>
-      <button type="button" className={mode === "remote" ? "couples-mode-card selected" : "couples-mode-card"} onClick={() => { setMode("remote"); setMyConsent(false); setStatus("lobby"); }} disabled={status === "active" || status === "paused"}>
-        <Wifi/><strong>{t("Op afstand", "Long distance")}</strong><span>{t("Verbind twee apparaten met een kamer met code.", "Connect two devices through a room with a code.")}</span>
+      <button type="button" className="couples-mode-card" disabled aria-describedby="couples-remote-unavailable">
+        <Wifi/><strong>{t("Op afstand · binnenkort", "Long distance · coming soon")}</strong><span id="couples-remote-unavailable">{t("Wordt opnieuw opgebouwd met privé-uitnodigingen en accountbeveiliging.", "Being rebuilt with private invitations and account-level access controls.")}</span>
       </button>
     </div>
     {mode === "local" ? <section className="couples-lobby">
@@ -306,9 +324,29 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
       <div className="couples-round-actions">
         <button type="button" onClick={()=>void publish(Math.max(0,round-1),"active")} disabled={round===0||status!=="active"}>{t("Vorige", "Previous")}</button>
         <button type="button" onClick={()=>void publish(round,status==="paused"?"active":"paused")} disabled={status==="stopped"||(status==="paused"&&mode==="remote"&&!canResumeRemotePlay({connected,serverAuthorized:false,participantCount:participants.length,partnerPresent,ownConsent:myConsent,partnerConsent:partnerConsented}))}><Pause size={15}/>{status==="paused"?t("Hervat","Resume"):t("Pauze","Pause")}</button>
-        <button type="button" className="couples-primary" onClick={()=>void publish(Math.min(prompts.length-1,round+1),"active")} disabled={round===prompts.length-1||status!=="active"}>{t("Volgende", "Next")}</button>
+        {round === prompts.length - 1 ? <button type="button" className="couples-primary" onClick={()=>void stop()} disabled={status!=="active"}>{t("Afronden + aftercare", "Finish + aftercare")}</button> : <button type="button" className="couples-primary" onClick={()=>void publish(round+1,"active")} disabled={status!=="active"}>{t("Volgende", "Next")}</button>}
       </div>
-      <button type="button" className="couples-stop" onClick={()=>void stop()}><ShieldCheck size={16}/>{t("Stop de ervaring", "Stop experience")}</button>{status === "stopped" && <button type="button" className="couples-primary" onClick={() => void publish(0, "lobby")}>{t("Terug naar de lobby", "Return to lobby")}</button>}
+      <button type="button" className="couples-stop" onClick={()=>void stop()}><ShieldCheck size={16}/>{t("Stop de ervaring", "Stop experience")}</button>
+    </section>}
+    {status === "stopped" && <section className="couples-lobby couples-aftercare" aria-labelledby="couples-aftercare-title">
+      <span className="eyebrow">AFTER THE EXPERIENCE</span>
+      <h3 id="couples-aftercare-title">{t("Even samen landen", "Take a moment together")}</h3>
+      <p>{t("Er is geen goed of fout antwoord. Kies wat nu prettig voelt. Jullie keuzes blijven alleen op dit apparaat en worden niet opgeslagen.", "There are no right or wrong answers. Choose what feels helpful now. Your choices stay on this device and are not saved.")}</p>
+      <div className="couples-aftercare-options">
+        {[
+          ["water", "Water of iets te drinken", "Water or a drink"],
+          ["quiet", "Rust en stilte", "Quiet time"],
+          ["hug", "Een knuffel, als we dat allebei willen", "A hug, if we both want one"],
+          ["talk", "Even napraten", "Talk things through"],
+          ["space", "Een beetje eigen ruimte", "Some personal space"],
+          ["comfort", "Een dekentje of iets comfortabels", "A blanket or something comfortable"],
+        ].map(([id, nl, en]) => <label className="couples-consent" key={id}>
+          <input type="checkbox" checked={aftercareChoices.includes(id)} onChange={event=>setAftercareChoices(current=>event.target.checked?[...current,id]:current.filter(choice=>choice!==id))}/>
+          <span>{t(nl,en)}</span>
+        </label>)}
+      </div>
+      <p className="couples-consent-note">{t("Check bij elkaar in: voelen jullie je allebei oké, gehoord en vrij om aan te geven wat jullie nodig hebben?", "Check in with each other: do you both feel okay, heard, and free to say what you need?")}</p>
+      <button type="button" className="couples-primary" onClick={()=>{setAftercareChoices([]);setRound(0);setStatus("lobby");setMyConsent(false);setLocalPartnerConsent(false);}}>{t("Terug naar de lobby", "Return to lobby")}</button>
     </section>}
     <aside className="couples-safety"><ShieldCheck size={18}/><p>{t("Consent kan altijd worden ingetrokken. Pauze en stop hebben direct voorrang. De kamercode is geen vervanging voor privacy of persoonlijke afspraken.", "Consent can always be withdrawn. Pause and stop always take priority. A room code is not a substitute for privacy or personal boundaries.")}</p></aside>
     {message && <p className="couples-message" role="status">{message}</p>}
