@@ -2,12 +2,25 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
+const couplesPlay = readFileSync(
+  fileURLToPath(new URL("../src/CouplesPlay.tsx", import.meta.url)),
+  "utf8",
+);
+
 const proposal = readFileSync(
   fileURLToPath(new URL("../supabase/proposals/afterhours_secure_duo_rooms.sql", import.meta.url)),
   "utf8",
 );
 
 describe("proposed secure Duo backend guardrails", () => {
+  it("keeps the retired public room-code lobby disconnected and clearly labels remote play as unavailable", () => {
+    expect(couplesPlay).not.toContain('client.channel("couples-"');
+    expect(couplesPlay).not.toContain('channel.subscribe(');
+    expect(couplesPlay).toContain("REMOTE · PRIVATE DUO");
+    expect(couplesPlay).toContain("Public room codes have been intentionally disabled");
+    expect(couplesPlay).toContain("Privéverbinding nog niet geactiveerd");
+  });
+
   it("keeps room, member and invitation tables RLS-protected and denies direct client writes", () => {
     expect(proposal).toContain("alter table public.afterhours_duo_rooms enable row level security");
     expect(proposal).toContain("alter table public.afterhours_duo_room_members enable row level security");
