@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 const duoService = readFileSync(
-  fileURLToPath(new URL("./duoRooms.ts", import.meta.url)),
+  fileURLToPath(new URL("../src/services/duoRooms.ts", import.meta.url)),
   "utf8",
 );
 const createScreen = readFileSync(
