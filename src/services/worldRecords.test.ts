@@ -308,7 +308,7 @@ describe("AFTER HOURS private world storage", () => {
     expect(mocks.from).not.toHaveBeenCalled();
   });
 
-  it("keeps STOP available with a malformed stale cursor and preserves the server progress", async () => {
+  it("keeps STOP independent of stale progress, completion, and interaction data", async () => {
     mocks.maybeSingle.mockResolvedValueOnce({ data: { id: "run-1" }, error: null });
 
     await expect(updateExperienceRun({
@@ -316,10 +316,15 @@ describe("AFTER HOURS private world storage", () => {
       expectedUserId: "user-a",
       status: "stopped",
       currentStep: Number.NaN,
+      completed: true,
+      interactionLog: [{ stepIndex: 99, choice: "stale-client-value", at: "2026-11-22T00:00:00.000Z" }],
     })).resolves.toBeUndefined();
 
-    expect(mocks.update.mock.calls[0][0]).toEqual(expect.objectContaining({ status: "stopped" }));
-    expect(mocks.update.mock.calls[0][0]).not.toHaveProperty("current_step");
+    const stopUpdate = mocks.update.mock.calls[0][0];
+    expect(stopUpdate).toEqual(expect.objectContaining({ status: "stopped" }));
+    expect(stopUpdate).not.toHaveProperty("current_step");
+    expect(stopUpdate).not.toHaveProperty("completed_at");
+    expect(stopUpdate).not.toHaveProperty("interaction_log");
     expect(mocks.in).toHaveBeenCalledWith("status", ["active", "paused"]);
     expect(mocks.is).toHaveBeenCalledWith("revoked_at", null);
   });
