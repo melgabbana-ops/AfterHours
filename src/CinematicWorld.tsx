@@ -576,9 +576,11 @@ export default function CinematicWorld({
     const currentStep = stepIndex;
     let serverConfirmed = !runId || !userId;
 
-    // STOP is local and immediate. Network confirmation happens only after
-    // any already-started run mutation has settled, so a late pause/update
-    // cannot overwrite the final stop request.
+    // STOP is local and immediate. Dispatch the atomic withdrawal RPC without
+    // waiting for an in-flight mutation. The database row lock serializes STOP
+    // with progress/pause writes, and those writes require status = 'active':
+    // if STOP wins the lock, stale writes fail; if a write wins, STOP follows
+    // it and remains the final state.
     setRunStatus(null);
     setActiveRunId(null);
     setActiveScene(null);
@@ -595,9 +597,6 @@ export default function CinematicWorld({
 
     try {
       if (runId && userId) {
-        const pendingMutation = runMutationRef.current;
-        if (pendingMutation) await pendingMutation.catch(() => undefined);
-
         try {
           // The existing RPC locks the run and revokes consent in the same
           // transaction as stopping it.
