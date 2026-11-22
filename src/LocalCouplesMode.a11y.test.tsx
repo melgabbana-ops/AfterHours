@@ -15,12 +15,12 @@ describe("Local Couples Mode accessibility", () => {
 
     expect(markup).toContain('role="group" aria-label="Deelnemers en afzonderlijke toestemming"');
     for (const participant of [1, 2]) {
-      expect(markup).toContain(`for="cw-local-name-${participant}"`);
-      expect(markup).toContain(`id="cw-local-name-${participant}"`);
-      expect(markup).toContain(`for="cw-local-consent-${participant}"`);
-      expect(markup).toContain(`id="cw-local-consent-${participant}"`);
+      expect(markup).toContain('for="cw-local-name-' + participant + '"');
+      expect(markup).toContain('id="cw-local-name-' + participant + '"');
+      expect(markup).toContain('for="cw-local-consent-' + participant + '"');
+      expect(markup).toContain('id="cw-local-consent-' + participant + '"');
     }
-    expect(markup.match(/<label\\b/g) ?? []).toHaveLength(4);
-    expect(markup).not.toMatch(/<label\\b[^>]*>(?:(?!<\\/label>)[\\s\\S])*<label\\b/);
+    expect(markup.match(/<label\b/g) ?? []).toHaveLength(4);
+    expect(markup).not.toMatch(/<label\b[^>]*>(?:(?!<\/label>)[\s\S])*<label\b/);
   });
 });
