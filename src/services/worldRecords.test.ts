@@ -152,11 +152,12 @@ describe("AFTER HOURS private world storage", () => {
   });
 
   it("rejects invalid step indexes and participant signals before writing", async () => {
+    const runId = "11111111-1111-4111-8111-111111111111";
     await expect(submitExperienceRunCheckIn({
-      runId: "run-1", stepIndex: 40, signal: "ready", expectedUserId: "user-a",
+      runId, stepIndex: 40, signal: "ready", expectedUserId: "user-a",
     })).rejects.toThrow("Invalid experience step.");
     await expect(submitExperienceRunCheckIn({
-      runId: "run-1", stepIndex: 0, signal: "unexpected" as never, expectedUserId: "user-a",
+      runId, stepIndex: 0, signal: "unexpected" as never, expectedUserId: "user-a",
     })).rejects.toThrow("Invalid participant signal.");
     expect(mocks.from).not.toHaveBeenCalled();
   });
