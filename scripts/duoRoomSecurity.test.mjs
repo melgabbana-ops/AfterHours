@@ -166,6 +166,20 @@ describe("proposed secure Duo backend guardrails", () => {
     expect(proposal).toContain("where room_id = p_room_id and removed_at is null and consent_revoked_at is null");
   });
 
+  it("serializes all lobby refresh triggers and prevents stale overlapping snapshots", () => {
+    expect(secureLobby).toContain("const refreshInFlight = useRef(false)");
+    expect(secureLobby).toContain("if (refreshInFlight.current || !mounted.current) return");
+    expect(secureLobby).toContain("const interval = window.setInterval(() => void refresh(), 5000)");
+    expect(secureLobby).not.toContain("let inFlight = false");
+  });
+
+  it("prevents rapid duplicate actions and guards the lobby's online state", () => {
+    expect(secureLobby).toContain("const actionInFlight = useRef(false)");
+    expect(secureLobby).toContain("if (actionInFlight.current || !isOnline) return");
+    expect(secureLobby).toContain("actionInFlight.current = false");
+    expect(secureLobby).toContain('typeof navigator === "undefined" || navigator.onLine');
+  });
+
   it("blocks shared state mutations while the participant device is offline", () => {
     expect(secureLobby).toContain('window.addEventListener("offline", handleOffline)');
     expect(secureLobby).toContain('setIsOnline(false)');
