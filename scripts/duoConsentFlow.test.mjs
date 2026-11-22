@@ -81,6 +81,10 @@ describe("secure Duo consent flow", () => {
     expect(couplesPlay).toContain("disabled aria-describedby=\"couples-remote-unavailable\"");
   });
 
+  it("returns to the secure Duo route after account authentication", () => {
+    expect(appEntry).toContain('if(syncUserId&&secureDuoRoute)setScreen("couples")');
+  });
+
   it("routes private invitation tokens from the URL fragment, not the query string", () => {
     expect(appEntry).toContain("window.location.hash.slice(1)");
     expect(appEntry).toContain('get("duo-invite")');
