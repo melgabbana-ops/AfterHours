@@ -65,6 +65,13 @@ The Supabase adapter is wired into the client. Local storage remains available f
 
 Consent is session-scoped and auditable. Revocation must stop an active or paused session in the same database transaction. Session completion must revoke consent atomically with the XP award and completion state. Regression checks and live migration state must be reviewed before release.
 
+
+## Pending consent-activation hardening (not applied)
+
+The proposal at `supabase/proposals/20261122_afterhours_experience_run_insert_consent_guard.sql` closes a direct-insert gap: new experience runs must be inserted as a `ready` draft at step zero, and the existing activation guard then checks the owner's active consent before the run can become `active`. The client service follows the same order: create draft, save consent, activate.
+
+This SQL is intentionally kept under `supabase/proposals/`, not `supabase/migrations/`. The connected production migration ledger was inspected read-only and still contains 28 recorded versions; no new version has been recorded for this proposal. Do not apply it or add it to the migration ledger until the approved database migration workflow assigns and records its version. No production database change was made in this code change.
+
 ## Private media storage
 
 The `after-hours-private-media` bucket must remain private. Object paths use `<auth.uid()>/<session-id>/<filename>`; storage policies must scope access to the first folder and enforce upload limits. Use authenticated storage operations or short-lived signed URLs. Never make this bucket public.
