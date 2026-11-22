@@ -6,8 +6,18 @@ const source = (path) => readFileSync(fileURLToPath(new URL(path, import.meta.ur
 const createScreen = source("../src/SecureDuoCreate.tsx");
 const invitationScreen = source("../src/SecureDuoInvitation.tsx");
 const lobbyScreen = source("../src/SecureDuoLobby.tsx");
+const appShell = source("../src/main.tsx");
 
 describe("secure Duo consent flow", () => {
+  it("routes fragment invitations through sign-in and into the private lobby", () => {
+    expect(appShell).toContain("readDuoInvitationToken(window.location.href)");
+    expect(appShell).toContain('setScreen("secureDuoInvite")');
+    expect(appShell).toContain("authenticated={Boolean(syncUserId)}");
+    expect(appShell).toContain("onAccepted={(roomId)=>{setSecureDuoRoomId(roomId)");
+    expect(appShell).toContain('setScreen("secureDuoLobby")');
+    expect(appShell).toContain("[state.ageConfirmed,syncUserId]");
+  });
+
   it("requires the host's explicit opt-in before creating an invitation", () => {
     expect(createScreen).toContain("if (!authenticated || !consent || creating) return;");
     expect(createScreen).toContain("checked={consent}");
