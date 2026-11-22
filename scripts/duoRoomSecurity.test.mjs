@@ -180,6 +180,14 @@ describe("proposed secure Duo backend guardrails", () => {
     expect(secureLobby).toContain('typeof navigator === "undefined" || navigator.onLine');
   });
 
+  it("blocks shared actions whenever the authoritative lobby snapshot is stale", () => {
+    expect(secureLobby).toContain("const [snapshotFresh, setSnapshotFresh] = useState(false)");
+    expect(secureLobby).toContain("setSnapshotFresh(true)");
+    expect(secureLobby).toContain("setSnapshotFresh(false)");
+    expect(secureLobby).toContain("disabled={busy || !isOnline || !snapshotFresh");
+    expect(secureLobby).toContain("Refresh the status before performing a shared action.");
+  });
+
   it("blocks shared state mutations while the participant device is offline", () => {
     expect(secureLobby).toContain('window.addEventListener("offline", handleOffline)');
     expect(secureLobby).toContain('setIsOnline(false)');
