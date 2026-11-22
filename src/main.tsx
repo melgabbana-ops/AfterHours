@@ -1,4 +1,5 @@
 import React,{useEffect,useMemo,useRef,useState}from"react";
+import { readDuoInvitationToken } from "./services/duoRoomInvitations";
 import UnderConstruction from "./UnderConstruction";
 import Teaser from "./Teaser";
 
@@ -66,7 +67,6 @@ const CinematicWorld = React.lazy(() => import("./CinematicWorld"));
 const CouplesPlay = React.lazy(() => import("./CouplesPlay"));
 const SecureDuoInvitation = React.lazy(() => import("./SecureDuoInvitation"));
 const SecureDuoLobby = React.lazy(() => import("./SecureDuoLobby"));
-import { readDuoInvitationToken } from "./services/duoRoomInvitations";
 
 class AppErrorBoundary extends React.Component<React.PropsWithChildren, {hasError:boolean}>{
  state={hasError:false};
