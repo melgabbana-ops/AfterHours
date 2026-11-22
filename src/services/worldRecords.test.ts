@@ -48,6 +48,7 @@ describe("AFTER HOURS private world storage", () => {
     mocks.gt.mockReturnValue(chain);
     mocks.is.mockResolvedValue({ error: null });
     mocks.order.mockReturnValue(chain);
+    mocks.limit.mockReturnValue(chain);
     mocks.upsert.mockReturnValue(chain);
     mocks.update.mockReturnValue(chain);
   });
