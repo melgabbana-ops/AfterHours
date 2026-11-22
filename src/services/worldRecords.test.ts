@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
   select: vi.fn(),
   eq: vi.fn(),
   in: vi.fn(),
+  gt: vi.fn(),
   is: vi.fn(),
   order: vi.fn(),
   limit: vi.fn(),
@@ -26,6 +27,7 @@ const chain = {
   select: mocks.select,
   eq: mocks.eq,
   in: mocks.in,
+  gt: mocks.gt,
   is: mocks.is,
   order: mocks.order,
   limit: mocks.limit,
@@ -43,6 +45,7 @@ describe("AFTER HOURS private world storage", () => {
     mocks.select.mockReturnValue(chain);
     mocks.eq.mockReturnValue(chain);
     mocks.in.mockReturnValue(chain);
+    mocks.gt.mockReturnValue(chain);
     mocks.is.mockResolvedValue({ error: null });
     mocks.order.mockReturnValue(chain);
     mocks.upsert.mockReturnValue(chain);
@@ -171,6 +174,15 @@ describe("AFTER HOURS private world storage", () => {
       } else {
         expect(mocks.in).toHaveBeenCalledWith("status", ["active", "paused"]);
       }
+      if (status === "stopped") {
+        expect(mocks.update.mock.calls[0][0]).not.toHaveProperty("current_step");
+        expect(mocks.gt).not.toHaveBeenCalled();
+      } else if (status === "completed") {
+        expect(mocks.eq).toHaveBeenCalledWith("total_steps", 1);
+        expect(mocks.gt).not.toHaveBeenCalled();
+      } else {
+        expect(mocks.gt).toHaveBeenCalledWith("total_steps", 1);
+      }
       if (status === "active") {
         expect(mocks.is).not.toHaveBeenCalled();
       } else {
@@ -195,6 +207,78 @@ describe("AFTER HOURS private world storage", () => {
       expect(mocks.is).not.toHaveBeenCalled();
     },
   );
+
+  it.each([-1, 1.5, 40, Number.NaN, Number.POSITIVE_INFINITY])(
+    "rejects invalid progress cursor %s before authentication or database writes",
+    async currentStep => {
+      await expect(updateExperienceRun({
+        runId: "run-1",
+        expectedUserId: "user-a",
+        status: "active",
+        currentStep,
+      })).rejects.toThrow("Invalid experience step.");
+
+      expect(mocks.getUser).not.toHaveBeenCalled();
+      expect(mocks.from).not.toHaveBeenCalled();
+    },
+  );
+
+  it.each([-1, 0, 1.5, 41, Number.NaN, Number.POSITIVE_INFINITY])(
+    "rejects invalid completion cursor %s before authentication or database writes",
+    async currentStep => {
+      await expect(updateExperienceRun({
+        runId: "run-1",
+        expectedUserId: "user-a",
+        status: "completed",
+        currentStep,
+        completed: true,
+      })).rejects.toThrow("Invalid experience step.");
+
+      expect(mocks.getUser).not.toHaveBeenCalled();
+      expect(mocks.from).not.toHaveBeenCalled();
+    },
+  );
+
+  it("rejects unsupported runtime statuses before authentication or database writes", async () => {
+    await expect(updateExperienceRun({
+      runId: "run-1",
+      expectedUserId: "user-a",
+      status: "ready" as never,
+      currentStep: 0,
+    })).rejects.toThrow("Invalid experience run status.");
+
+    expect(mocks.getUser).not.toHaveBeenCalled();
+    expect(mocks.from).not.toHaveBeenCalled();
+  });
+
+  it("keeps STOP available with a malformed stale cursor and preserves the server progress", async () => {
+    mocks.maybeSingle.mockResolvedValueOnce({ data: { id: "run-1" }, error: null });
+
+    await expect(updateExperienceRun({
+      runId: "run-1",
+      expectedUserId: "user-a",
+      status: "stopped",
+      currentStep: Number.NaN,
+    })).resolves.toBeUndefined();
+
+    expect(mocks.update.mock.calls[0][0]).toEqual(expect.objectContaining({ status: "stopped" }));
+    expect(mocks.update.mock.calls[0][0]).not.toHaveProperty("current_step");
+    expect(mocks.in).toHaveBeenCalledWith("status", ["active", "paused"]);
+    expect(mocks.is).toHaveBeenCalledWith("revoked_at", null);
+  });
+
+  it("uses the persisted total step count to reject an out-of-range progress cursor atomically", async () => {
+    mocks.maybeSingle.mockResolvedValueOnce({ data: null, error: null });
+
+    await expect(updateExperienceRun({
+      runId: "run-1",
+      expectedUserId: "user-a",
+      status: "active",
+      currentStep: 3,
+    })).rejects.toThrow("This experience run changed state");
+
+    expect(mocks.gt).toHaveBeenCalledWith("total_steps", 3);
+  });
 
   it("does not write if authentication cannot be verified", async () => {
     mocks.getUser.mockResolvedValue({ data: { user: null }, error: { message: "Auth unavailable" } });
