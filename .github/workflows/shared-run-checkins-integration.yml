@@ -1,0 +1,44 @@
+name: AFTER HOURS shared-run database integration
+
+on:
+  pull_request:
+    paths:
+      - "supabase/proposals/20261121001230_afterhours_shared_run_checkins.sql"
+      - "scripts/shared-run-checkins.integration.sql"
+      - ".github/workflows/shared-run-checkins-integration.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  postgres-integration:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: afterhours_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d afterhours_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install PostgreSQL client
+        run: |
+          if ! command -v psql >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y postgresql-client
+          fi
+      - name: Apply proposal to an isolated PostgreSQL database and test RLS
+        env:
+          PGPASSWORD: postgres
+        run: |
+          psql "postgresql://postgres:postgres@127.0.0.1:5432/afterhours_test" \
+            -v ON_ERROR_STOP=1 \
+            -f scripts/shared-run-checkins.integration.sql

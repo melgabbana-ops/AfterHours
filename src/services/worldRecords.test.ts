@@ -7,22 +7,27 @@ const mocks = vi.hoisted(() => ({
   eq: vi.fn(),
   order: vi.fn(),
   limit: vi.fn(),
+  in: vi.fn(),
+  is: vi.fn(),
+  rpc: vi.fn(),
   upsert: vi.fn(),
   single: vi.fn(),
 }));
 
 vi.mock("./supabase", () => ({
   supabaseConfigured: true,
-  supabase: { auth: { getUser: mocks.getUser }, from: mocks.from },
+  supabase: { auth: { getUser: mocks.getUser }, from: mocks.from, rpc: mocks.rpc },
 }));
 
-import { loadExperienceRuns, loadWorldRecords, saveWorldRecord } from "./worldRecords";
+import { loadExperienceRunCheckIns, loadExperienceRuns, loadOwnExperienceRunConsentIds, loadExperienceRunConsentStatus, loadWorldRecords, renewExperienceRunConsent, saveWorldRecord, submitExperienceRunCheckIn } from "./worldRecords";
 
 const chain = {
   select: mocks.select,
   eq: mocks.eq,
   order: mocks.order,
   limit: mocks.limit,
+  in: mocks.in,
+  is: mocks.is,
   upsert: mocks.upsert,
   single: mocks.single,
 };
@@ -35,6 +40,8 @@ describe("AFTER HOURS private world storage", () => {
     mocks.select.mockReturnValue(chain);
     mocks.eq.mockReturnValue(chain);
     mocks.order.mockReturnValue(chain);
+    mocks.in.mockReturnValue(chain);
+    mocks.is.mockReturnValue(chain);
     mocks.upsert.mockReturnValue(chain);
   });
 
@@ -97,4 +104,121 @@ describe("AFTER HOURS private world storage", () => {
       .rejects.toThrow("Auth unavailable");
     expect(mocks.from).not.toHaveBeenCalled();
   });
+
+  it("returns an empty check-in list without querying Supabase when there are no runs", async () => {
+    await expect(loadExperienceRunCheckIns([], "user-a")).resolves.toEqual([]);
+    expect(mocks.from).not.toHaveBeenCalled();
+  });
+
+  it("refuses to load check-ins when the authenticated account changed", async () => {
+    mocks.getUser.mockResolvedValue({ data: { user: { id: "user-b" } }, error: null });
+    await expect(loadExperienceRunCheckIns(["run-1"], "user-a"))
+      .rejects.toThrow("The signed-in account changed.");
+    expect(mocks.from).not.toHaveBeenCalled();
+  });
+
+  it("caps check-in reads to fifty run identifiers and 200 rows", async () => {
+    mocks.limit.mockResolvedValue({ data: [], error: null });
+    const runIds = Array.from({ length: 75 }, (_, index) => `run-${index}`);
+    await expect(loadExperienceRunCheckIns(runIds, "user-a")).resolves.toEqual([]);
+    expect(mocks.in).toHaveBeenCalledWith("run_id", runIds.slice(0, 50));
+    expect(mocks.limit).toHaveBeenCalledWith(200);
+  });
+
+  it("loads only the requested run check-ins after verifying the account", async () => {
+    const rows = [{ id: "checkin-1", run_id: "run-1", user_id: "user-a", step_index: 0, signal: "pause_requested", created_at: "2026-11-21T00:00:00Z" }];
+    mocks.limit.mockResolvedValue({ data: rows, error: null });
+    await expect(loadExperienceRunCheckIns(["run-1"], "user-a")).resolves.toEqual(rows);
+    expect(mocks.from).toHaveBeenCalledWith("afterhours_experience_run_checkins");
+    expect(mocks.in).toHaveBeenCalledWith("run_id", ["run-1"]);
+  });
+
+  it("upserts only the signed-in participant's current-step signal", async () => {
+    mocks.upsert.mockResolvedValue({ error: null });
+    await expect(submitExperienceRunCheckIn({
+      runId: "11111111-1111-4111-8111-111111111111", stepIndex: 2, signal: "pause_requested", expectedUserId: "user-a",
+    })).resolves.toBeUndefined();
+    expect(mocks.from).toHaveBeenCalledWith("afterhours_experience_run_checkins");
+    expect(mocks.upsert).toHaveBeenCalledWith({
+      run_id: "11111111-1111-4111-8111-111111111111", user_id: "user-a", step_index: 2, signal: "pause_requested",
+    }, { onConflict: "run_id,user_id,step_index" });
+  });
+
+  it("rejects malformed shared run IDs before writing a check-in", async () => {
+    await expect(submitExperienceRunCheckIn({
+      runId: "not-a-uuid", stepIndex: 0, signal: "ready", expectedUserId: "user-a",
+    })).rejects.toThrow("Invalid experience run.");
+    expect(mocks.from).not.toHaveBeenCalled();
+  });
+
+  it("rejects invalid step indexes and participant signals before writing", async () => {
+    const runId = "11111111-1111-4111-8111-111111111111";
+    await expect(submitExperienceRunCheckIn({
+      runId, stepIndex: 40, signal: "ready", expectedUserId: "user-a",
+    })).rejects.toThrow("Invalid experience step.");
+    await expect(submitExperienceRunCheckIn({
+      runId, stepIndex: 0, signal: "unexpected" as never, expectedUserId: "user-a",
+    })).rejects.toThrow("Invalid participant signal.");
+    expect(mocks.from).not.toHaveBeenCalled();
+  });
+
+  it("refuses to submit a check-in for a different authenticated account", async () => {
+    mocks.getUser.mockResolvedValue({ data: { user: { id: "user-b" } }, error: null });
+    await expect(submitExperienceRunCheckIn({
+      runId: "run-1", stepIndex: 0, signal: "ready", expectedUserId: "user-a",
+    })).rejects.toThrow("The signed-in account changed.");
+    expect(mocks.from).not.toHaveBeenCalled();
+  });
+
+  it("loads only this account's active run consents", async () => {
+    mocks.limit.mockResolvedValue({ data: [{ run_id: "run-1" }], error: null });
+    await expect(loadOwnExperienceRunConsentIds(["run-1"], "user-a")).resolves.toEqual(["run-1"]);
+    expect(mocks.from).toHaveBeenCalledWith("afterhours_experience_run_consents");
+    expect(mocks.eq).toHaveBeenCalledWith("user_id", "user-a");
+    expect(mocks.is).toHaveBeenCalledWith("revoked_at", null);
+  });
+
+  it("does not query active consent rows for an empty run list", async () => {
+    await expect(loadOwnExperienceRunConsentIds([], "user-a")).resolves.toEqual([]);
+    expect(mocks.from).not.toHaveBeenCalled();
+  });
+
+  it("renews consent only through the authenticated server RPC", async () => {
+    mocks.rpc.mockResolvedValue({ error: null });
+    await expect(renewExperienceRunConsent("11111111-1111-4111-8111-111111111111", "user-a")).resolves.toBeUndefined();
+    expect(mocks.rpc).toHaveBeenCalledWith("renew_afterhours_experience_consent", { p_run_id: "11111111-1111-4111-8111-111111111111" });
+  });
+
+  it("rejects consent renewal for invalid run IDs before calling the server", async () => {
+    await expect(renewExperienceRunConsent("not-a-uuid", "user-a")).rejects.toThrow("Invalid experience run.");
+    expect(mocks.rpc).not.toHaveBeenCalled();
+  });
+
+  it("does not renew consent after the authenticated account changes", async () => {
+    mocks.getUser.mockResolvedValue({ data: { user: { id: "user-b" } }, error: null });
+    await expect(renewExperienceRunConsent("11111111-1111-4111-8111-111111111111", "user-a"))
+      .rejects.toThrow("The signed-in account changed.");
+    expect(mocks.rpc).not.toHaveBeenCalled();
+  });
+
+  it("loads owner-only consent status from the server RPC", async () => {
+    mocks.rpc.mockResolvedValue({ data: { participant_count: 1, consented_count: 1, all_consented: true }, error: null });
+    await expect(loadExperienceRunConsentStatus("11111111-1111-4111-8111-111111111111", "user-a"))
+      .resolves.toEqual({ participantCount: 1, consentedCount: 1, allConsented: true });
+    expect(mocks.rpc).toHaveBeenCalledWith("get_afterhours_shared_run_consent_status", { p_run_id: "11111111-1111-4111-8111-111111111111" });
+  });
+
+  it("rejects malformed consent status payloads", async () => {
+    mocks.rpc.mockResolvedValue({ data: { participant_count: "1", consented_count: 0, all_consented: false }, error: null });
+    await expect(loadExperienceRunConsentStatus("11111111-1111-4111-8111-111111111111", "user-a"))
+      .rejects.toThrow("Invalid shared-run consent status.");
+  });
+
+  it("does not load consent status after the authenticated account changes", async () => {
+    mocks.getUser.mockResolvedValue({ data: { user: { id: "user-b" } }, error: null });
+    await expect(loadExperienceRunConsentStatus("11111111-1111-4111-8111-111111111111", "user-a"))
+      .rejects.toThrow("The signed-in account changed.");
+    expect(mocks.rpc).not.toHaveBeenCalled();
+  });
+
 });
