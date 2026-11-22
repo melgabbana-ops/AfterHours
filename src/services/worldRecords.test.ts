@@ -23,7 +23,7 @@ vi.mock("./supabase", () => ({
   supabase: { auth: { getUser: mocks.getUser }, from: mocks.from },
 }));
 
-import { hasActiveExperienceRuns, loadExperienceRuns, loadWorldRecords, resumeExperienceRun, saveWorldRecord, updateExperienceRun } from "./worldRecords";
+import { createExperienceRun, hasActiveExperienceRuns, loadExperienceRuns, loadWorldRecords, resumeExperienceRun, saveWorldRecord, updateExperienceRun } from "./worldRecords";
 
 const chain = {
   select: mocks.select,
