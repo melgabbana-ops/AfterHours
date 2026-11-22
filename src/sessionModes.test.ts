@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bothLocalParticipantsReady, localCheckInPressedState, pickRandomId, sessionModes, storyChapters } from "./sessionModes";
+import { bothLocalParticipantsReady, localCheckInPressedState, localCouplesConsentReset, pickRandomId, sessionModes, storyChapters } from "./sessionModes";
 
 describe("approved session modes", () => {
   it("defines exactly the five approved modes", () => {
@@ -49,5 +49,16 @@ describe("local couples check-in gate", () => {
     expect(localCheckInPressedState("green")).toEqual({ green: true, yellow: false, red: false });
     expect(localCheckInPressedState("yellow")).toEqual({ green: false, yellow: true, red: false });
     expect(localCheckInPressedState("red")).toEqual({ green: false, yellow: false, red: true });
+  });
+});
+
+
+describe("local couples consent reset", () => {
+  it("clears both participants' local consent when app-wide consent is withdrawn", () => {
+    expect(localCouplesConsentReset(false)).toEqual([false, false]);
+  });
+
+  it("does not reset participant consent while app-wide consent remains active", () => {
+    expect(localCouplesConsentReset(true)).toBeNull();
   });
 });
