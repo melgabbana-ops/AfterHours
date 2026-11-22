@@ -58,6 +58,12 @@ describe("secure Duo consent flow", () => {
     expect(appEntry).toContain("onCreated={(roomId)");
   });
 
+  it("offers local aftercare choices without persisting intimate selections", () => {
+    expect(couplesPlay).toContain('status === "stopped" && <section className="couples-lobby couples-aftercare"');
+    expect(couplesPlay).toContain("Your choices stay on this device and are not saved.");
+    expect(couplesPlay).toContain("setAftercareChoices");
+  });
+
   it("keeps legacy public room-code realtime disabled", () => {
     expect(couplesPlay).toContain('const [mode, setMode] = useState<Mode>("local")');
     expect(couplesPlay).toContain("if (mode === \"remote\")");
