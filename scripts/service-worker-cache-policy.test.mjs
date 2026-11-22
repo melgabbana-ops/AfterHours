@@ -3,6 +3,13 @@ import { runInNewContext } from "node:vm";
 import { describe, expect, it, vi } from "vitest";
 
 const workerSource = readFileSync(new URL("../public/sw.js", import.meta.url), "utf8");
+const cachePolicySource = readFileSync(new URL("../public/sw-cache-policy.js", import.meta.url), "utf8");
+
+function runWorker(context) {
+  // importScripts is represented by preloading the same classic policy in this VM.
+  runInNewContext(cachePolicySource, { self: context.self });
+  runInNewContext(workerSource, { ...context, importScripts: vi.fn() });
+}
 
 function startWorker(response, requestOptions = {}, fetchFails = false) {
   const handlers = new Map();
@@ -14,7 +21,8 @@ function startWorker(response, requestOptions = {}, fetchFails = false) {
     method: "GET",
     mode: "cors",
     cache: "default",
-    url: "https://app.example/AfterHours/private-resource",
+    url: "https://app.example/AfterHours/assets/app.js",
+    destination: "script",
     headers: { get: (name) => requestHeaders.get(name.toLowerCase()) ?? null },
     ...requestOverrides,
   };
@@ -43,7 +51,7 @@ function startWorker(response, requestOptions = {}, fetchFails = false) {
     keys: vi.fn(async () => []),
     delete: vi.fn(async () => true),
   };
-  runInNewContext(workerSource, {
+  runWorker({
     self,
     caches,
     fetch: fetchMock,
@@ -63,7 +71,7 @@ function startWorker(response, requestOptions = {}, fetchFails = false) {
     responseError,
     fetchMock,
     complete: async () => {
-      const result = await responsePromise;
+      const result = responsePromise ? await responsePromise : undefined;
       await Promise.all(waits);
       return result;
     },
@@ -160,7 +168,8 @@ describe("AFTER HOURS service-worker cache privacy", () => {
 
     const response = await worker.complete();
 
-    expect(response).toBe(worker.responseError);
+    expect(response).toBeUndefined();
+    expect(worker.fetchMock).not.toHaveBeenCalled();
     expect(worker.cache.match).not.toHaveBeenCalled();
     expect(worker.cache.delete).toHaveBeenCalledWith(worker.request);
   });
@@ -192,7 +201,7 @@ function startPushWorker(payload) {
     clients: { claim: vi.fn(), matchAll: vi.fn(async () => []), openWindow: vi.fn() },
     skipWaiting: vi.fn(),
   };
-  runInNewContext(workerSource, { self, URL });
+  runWorker({ self, URL });
   let completion;
   handlers.get("push")({
     data: { json: () => payload },
@@ -263,7 +272,7 @@ describe("AFTER HOURS push notification navigation safety", () => {
 
 describe("AFTER HOURS offline intro shell", () => {
   it("pre-caches the transparent teaser logo and local cinematic backgrounds", () => {
-    expect(workerSource).toContain('const CACHE_NAME = "after-hours-v21"');
+    expect(workerSource).toContain('const CACHE_NAME = "after-hours-v22"');
     expect(workerSource).toContain('asset("after-hours-brand-logo-transparent.svg")');
     expect(workerSource).toContain('asset("visuals/ah-grand-candlelit-chamber.svg")');
     expect(workerSource).toContain('asset("visuals/ah-cinematic-background.svg")');
@@ -304,7 +313,7 @@ function startNotificationClickWorker(url, windows = []) {
     clients,
     skipWaiting: vi.fn(),
   };
-  runInNewContext(workerSource, { self, URL });
+  runWorker({ self, URL });
 
   let completion;
   handlers.get("notificationclick")({

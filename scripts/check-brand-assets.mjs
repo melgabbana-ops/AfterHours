@@ -68,8 +68,13 @@ if (!manifest.icons?.some((icon) => icon.sizes === "192x192" && icon.src.endsWit
   process.exit(1);
 }
 
-if (!serviceWorker.includes('const CACHE_NAME = "after-hours-v21"')) {
-  console.error("Service worker cache must match the current v21 app shell.");
+if (!/const CACHE_NAME = "after-hours-v\d+"/.test(serviceWorker)) {
+  console.error("Service worker must declare a versioned app-shell cache.");
+  process.exit(1);
+}
+if (!serviceWorker.includes('importScripts(asset("sw-cache-policy.js"))')
+  || !serviceWorker.includes('asset("sw-cache-policy.js")')) {
+  console.error("Service worker must load and precache its runtime cache privacy policy.");
   process.exit(1);
 }
 
