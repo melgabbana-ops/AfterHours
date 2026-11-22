@@ -2,6 +2,10 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
+const duoService = readFileSync(
+  fileURLToPath(new URL("./duoRooms.ts", import.meta.url)),
+  "utf8",
+);
 const createScreen = readFileSync(
   fileURLToPath(new URL("../SecureDuoCreate.tsx", import.meta.url)),
   "utf8",
@@ -49,6 +53,12 @@ describe("secure Duo consent flow", () => {
     expect(accept).toContain("onAccepted(roomId)");
     expect(accept).not.toContain("setSecureDuoConsent");
     expect(invitationScreen).toContain("It is not consent to play.");
+  });
+
+  it("keeps private Duo RPCs disabled until the backend rollout is verified", () => {
+    expect(duoService).toContain("SECURE_DUO_BACKEND_ENABLED = false");
+    expect(duoService).toContain("if (!SECURE_DUO_BACKEND_ENABLED) throw new Error");
+    expect(couplesPlay).toContain("disabled={!SECURE_DUO_BACKEND_ENABLED}");
   });
 
   it("wires the secure invitation creator and lobby into the couple-play entry point", () => {
