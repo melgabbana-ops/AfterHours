@@ -149,9 +149,9 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
  useEffect(()=>{let active=true;const refreshRounds=async()=>{if(!supabaseConfigured){setRounds(language==="en"?fallbackRoundsEnglish:fallbackRounds);return;}try{const remote=await loadRemoteRounds(language);if(!active)return;setRounds(remote.length===3?remote.map(item=>({title:item.title,text:item.body,time:item.durationSeconds})):(language==="en"?fallbackRoundsEnglish:fallbackRounds));}catch{if(active)setRounds(language==="en"?fallbackRoundsEnglish:fallbackRounds);}};void refreshRounds();return()=>{active=false}},[language]);
  const initialScreen=initialScreenFromSearch(window.location.search);
  const[screen,setScreen]=useState<Screen>(initialScreen);
- const[secureDuoRoute,setSecureDuoRoute]=useState<"create"|"invite"|"lobby"|null>(()=>new URLSearchParams(window.location.search).has("duo-invite")?"invite":null);
+ const[secureDuoRoute,setSecureDuoRoute]=useState<"create"|"invite"|"lobby"|null>(()=>new URLSearchParams(window.location.hash.slice(1)).has("duo-invite")?"invite":null);
  const[secureDuoRoomId,setSecureDuoRoomId]=useState("");
- const[secureDuoToken]=useState(()=>new URLSearchParams(window.location.search).get("duo-invite")??"");
+ const[secureDuoToken]=useState(()=>new URLSearchParams(window.location.hash.slice(1)).get("duo-invite")??"");
  const[completionSummary,setCompletionSummary]=useState<SessionCompletionSummary|null>(null);
  const[insightsInitialTab,setInsightsInitialTab]=useState<"tarot"|"oracle"|"astro">("tarot");
  const [captureAssignment,setCaptureAssignment]=useState<{title:string;task:string}|null>(null);
@@ -374,7 +374,7 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
  const markAllNotificationsRead=()=>setState(s=>({...s,notifications:s.notifications.map(item=>({...item,read:true}))}));
  const testNotificationSound=async()=>{setSoundTestFeedback("");primeNotificationAudio();const played=await playNotificationSound("message");setSoundTestFeedback(played?t("AFTER HOURS-geluid afgespeeld. Hoor je niets? Controleer het volume en de stille modus van je iPhone.","AFTER HOURS sound scheduled. If you hear nothing, check your phone volume and silent mode."):t("Audio is door je browser geblokkeerd. Tik nogmaals op Test eigen geluid en controleer je browserinstellingen.","Your browser blocked audio. Tap Test signature sound again and check your browser settings."));};
  useEffect(()=>{if(screen==="home"||screen==="legal")return;if(!state.ageConfirmed){setScreen("home");return}if(screen==="game"&&state.consent.status!=="active"){setScreen("home")}},[screen,state.ageConfirmed,state.consent.status]);
- useEffect(()=>{if(state.ageConfirmed&&screen==="home"&&(new URLSearchParams(window.location.search).has("couple")||new URLSearchParams(window.location.search).has("duo-invite")))setScreen("couples")},[state.ageConfirmed,screen]);
+ useEffect(()=>{if(state.ageConfirmed&&screen==="home"&&(new URLSearchParams(window.location.search).has("couple")||new URLSearchParams(window.location.hash.slice(1)).has("duo-invite")))setScreen("couples")},[state.ageConfirmed,screen]);
  const xp=state.profile.xp;
  const currentLevel=Math.max(1,state.profile.level);
  const levelFloor=(currentLevel-1)*200;
