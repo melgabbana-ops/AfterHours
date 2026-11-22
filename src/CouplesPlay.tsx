@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, Copy, Link2, MonitorSmartphone, Pause, Play, ShieldCheck, Users, Wifi, WifiOff } from "lucide-react";
 import { supabase, supabaseConfigured } from "./services/supabase";
+import { SECURE_DUO_BACKEND_ENABLED } from "./services/duoRooms";
 import { canResumeRemotePlay, canStartRemotePlay, shouldPauseRemotePlay, normalizeRoomCode, ROOM_CODE_LENGTH } from "./couplesPlayState";
 
 type Language = "nl" | "en";
@@ -281,7 +282,7 @@ export default function CouplesPlay({ language, onBack, onSecureDuo }: { languag
         <Wifi/><strong>{t("Op afstand · binnenkort", "Long distance · coming soon")}</strong><span id="couples-remote-unavailable">{t("Wordt opnieuw opgebouwd met privé-uitnodigingen en accountbeveiliging.", "Being rebuilt with private invitations and account-level access controls.")}</span>
       </button>
     </div>
-    {onSecureDuo && <button type="button" className="couples-secondary" onClick={onSecureDuo}>{t("Maak een beveiligde privé-uitnodiging", "Create a secure private invitation")}</button>}
+    {onSecureDuo && <><button type="button" className="couples-secondary" onClick={onSecureDuo} disabled={!SECURE_DUO_BACKEND_ENABLED} aria-describedby="couples-private-duo-unavailable">{t("Maak een beveiligde privé-uitnodiging", "Create a secure private invitation")}</button>{!SECURE_DUO_BACKEND_ENABLED && <p id="couples-private-duo-unavailable" className="couples-consent-note" role="status">{t("Privé-Duo wordt ingeschakeld zodra de databasebeveiliging is uitgerold en met twee accounts is getest.", "Private Duo will unlock after the database security is deployed and verified with two accounts.")}</p>}</>}
     {mode === "local" ? <section className="couples-lobby">
       <span className="eyebrow">LOCAL · SHARED DEVICE</span><h3>{t("Jullie namen", "Your names")}</h3>
       <div className="couples-name-fields">
