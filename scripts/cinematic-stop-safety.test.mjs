@@ -14,7 +14,7 @@ const stopEnd = source.indexOf("async function completeScene(", stopStart);
 const stopHandler = source.slice(stopStart, stopEnd);
 
 describe("Experience Engine immediate STOP", () => {
-  it("applies local stop and safety state before waiting for network confirmation", () => {
+  it("applies local stop and safety state before dispatching server confirmation", () => {
     const localReset = stopHandler.indexOf("setActiveScene(null)");
     const safetyStop = stopHandler.indexOf("onSafetyStop()");
     const consentRpc = stopHandler.indexOf("await withdrawExperienceConsent");
