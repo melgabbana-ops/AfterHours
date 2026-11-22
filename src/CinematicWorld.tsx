@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import {
   acceptExperienceInvitation, createExperienceInvitation, createExperienceRun, previewExperienceInvitation,
-  deleteExperienceRun, deleteWorldRecord, loadExperienceInvitations,
+  deleteExperienceRun, deleteWorldRecord, hasActiveExperienceRuns, loadExperienceInvitations,
   loadExperienceRuns, loadWorldRecords, resumeExperienceRun, revokeExperienceInvitation,
   saveWorldRecord, updateExperienceRun, withdrawExperienceConsent,
   type ExperienceInvitation, type ExperienceInvitationPreview, type ExperienceRun, type WorldModule, type WorldRecord
@@ -1165,6 +1165,15 @@ export default function CinematicWorld({
     const wasRunning = runStatus === "active" || runStatus === "paused";
     setBusy(true);
     try {
+      // Check persisted owner-owned runs before deleting any private records.
+      // This prevents a known live run from causing a partial bulk deletion.
+      if (await hasActiveExperienceRuns(remoteProfileId)) {
+        setError(t(
+          "Stop eerst alle actieve of gepauzeerde ervaringen. Er is niets verwijderd.",
+          "Stop all active or paused experiences first. Nothing has been deleted."
+        ));
+        return;
+      }
       for (const module of MODULES) {
         for (const record of records[module]) await deleteWorldRecord(module, record.record_key, remoteProfileId);
       }

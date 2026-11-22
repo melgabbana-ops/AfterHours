@@ -21,7 +21,7 @@ vi.mock("./supabase", () => ({
   supabase: { auth: { getUser: mocks.getUser }, from: mocks.from },
 }));
 
-import { loadExperienceRuns, loadWorldRecords, resumeExperienceRun, saveWorldRecord, updateExperienceRun } from "./worldRecords";
+import { hasActiveExperienceRuns, loadExperienceRuns, loadWorldRecords, resumeExperienceRun, saveWorldRecord, updateExperienceRun } from "./worldRecords";
 
 const chain = {
   select: mocks.select,
@@ -48,6 +48,7 @@ describe("AFTER HOURS private world storage", () => {
     mocks.gt.mockReturnValue(chain);
     mocks.is.mockResolvedValue({ error: null });
     mocks.order.mockReturnValue(chain);
+    mocks.limit.mockReturnValue(chain);
     mocks.upsert.mockReturnValue(chain);
     mocks.update.mockReturnValue(chain);
   });
@@ -91,6 +92,31 @@ describe("AFTER HOURS private world storage", () => {
     expect(mocks.from).toHaveBeenCalledWith("afterhours_experience_runs");
     expect(mocks.select).toHaveBeenCalledWith("id,user_id,scene_key,scene_snapshot,status,current_step,total_steps,created_at,updated_at,started_at,completed_at,interaction_log");
     expect(mocks.eq).not.toHaveBeenCalled();
+  });
+
+  it("detects persisted active or paused runs for the signed-in owner", async () => {
+    mocks.maybeSingle.mockResolvedValueOnce({ data: { id: "run-live" }, error: null });
+
+    await expect(hasActiveExperienceRuns("user-a")).resolves.toBe(true);
+    expect(mocks.from).toHaveBeenCalledWith("afterhours_experience_runs");
+    expect(mocks.select).toHaveBeenCalledWith("id");
+    expect(mocks.eq).toHaveBeenCalledWith("user_id", "user-a");
+    expect(mocks.in).toHaveBeenCalledWith("status", ["active", "paused"]);
+    expect(mocks.limit).toHaveBeenCalledWith(1);
+  });
+
+  it("allows bulk deletion preflight only when no owned run is active or paused", async () => {
+    mocks.maybeSingle.mockResolvedValueOnce({ data: null, error: null });
+
+    await expect(hasActiveExperienceRuns("user-a")).resolves.toBe(false);
+    expect(mocks.eq).toHaveBeenCalledWith("user_id", "user-a");
+    expect(mocks.in).toHaveBeenCalledWith("status", ["active", "paused"]);
+  });
+
+  it("fails closed when the live-run deletion preflight cannot be verified", async () => {
+    mocks.maybeSingle.mockResolvedValueOnce({ data: null, error: { message: "Read failed" } });
+
+    await expect(hasActiveExperienceRuns("user-a")).rejects.toThrow("Read failed");
   });
 
   it("upserts records only after verifying the same authenticated account", async () => {

@@ -98,6 +98,19 @@ export async function loadExperienceRuns(expectedUserId: string): Promise<Experi
   return (data ?? []) as ExperienceRun[];
 }
 
+export async function hasActiveExperienceRuns(expectedUserId: string): Promise<boolean> {
+  await assertWorldAccount(expectedUserId);
+  const { data, error } = await supabase!
+    .from("afterhours_experience_runs")
+    .select("id")
+    .eq("user_id", expectedUserId)
+    .in("status", ["active", "paused"])
+    .limit(1)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  return Boolean(data);
+}
+
 export async function createExperienceRun(args: {
   sceneKey: string;
   sceneSnapshot: Record<string, unknown>;
