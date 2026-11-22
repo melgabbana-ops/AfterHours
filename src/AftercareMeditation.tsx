@@ -37,7 +37,11 @@ export default function AftercareMeditation({ language }: { language: Language }
 
   useEffect(() => {
     try {
-      saveAftercareMeditationProgress(window.sessionStorage, elapsedSeconds);
+      if (elapsedSeconds <= 0) {
+        clearAftercareMeditationProgress(window.sessionStorage);
+      } else {
+        saveAftercareMeditationProgress(window.sessionStorage, elapsedSeconds);
+      }
     } catch {
       // Storage can be unavailable in private browsing; the in-memory timer still works.
     }
