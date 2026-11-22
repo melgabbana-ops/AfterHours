@@ -64,3 +64,12 @@ export function localCheckInPressedState(signal: LocalCouplesSignal): {
     red: signal === "red",
   };
 }
+
+
+/**
+ * Local participant consent is valid only while the app-wide consent gate remains active.
+ * Returning null means there is no withdrawal to process.
+ */
+export function localCouplesConsentReset(consentActive: boolean): [false, false] | null {
+  return consentActive ? null : [false, false];
+}

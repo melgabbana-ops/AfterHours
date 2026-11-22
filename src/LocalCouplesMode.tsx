@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { CheckCircle2, Play, ShieldCheck, Square, Users } from "lucide-react";
-import { bothLocalParticipantsReady, localCheckInPressedState, type LocalCouplesSignal } from "./sessionModes";
+import { bothLocalParticipantsReady, localCheckInPressedState, localCouplesConsentReset, type LocalCouplesSignal } from "./sessionModes";
 
 type Language = "nl" | "en";
 type Stage = "setup" | "active" | "paused" | "complete" | "stopped";
@@ -86,7 +86,14 @@ export default function LocalCouplesMode({ language, consentActive, onSafetyPaus
   const ready = consentActive && consents.every(Boolean);
 
   useEffect(() => {
-    if (consentActive || (stage !== "active" && stage !== "paused")) return;
+    const resetConsents = localCouplesConsentReset(consentActive);
+    if (!resetConsents) return;
+
+    // Revoke both local confirmations whenever the app-wide consent gate closes,
+    // including while the participants are still on the setup screen.
+    setConsents(resetConsents);
+
+    if (stage !== "active" && stage !== "paused") return;
     setStage("stopped");
     setSignals(["red", "red"]);
     setNotice(t("Toestemming is ingetrokken. De gezamenlijke route is direct beëindigd.", "Consent was withdrawn. The shared path has ended immediately."));
