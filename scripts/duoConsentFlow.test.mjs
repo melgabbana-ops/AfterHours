@@ -61,6 +61,13 @@ describe("secure Duo consent flow", () => {
     expect(couplesPlay).toContain("disabled={!SECURE_DUO_BACKEND_ENABLED}");
   });
 
+  it("keeps the invitation creator and guest preview visibly dormant until backend rollout", () => {
+    expect(createScreen).toContain("!SECURE_DUO_BACKEND_ENABLED || !authenticated || !consent || creating");
+    expect(createScreen).toContain("database security is deployed and tested with two accounts");
+    expect(invitationScreen).toContain("!SECURE_DUO_BACKEND_ENABLED || !authenticated || !token");
+    expect(invitationScreen).toContain("This private invitation is not active yet.");
+  });
+
   it("wires the secure invitation creator and lobby into the couple-play entry point", () => {
     expect(appEntry).toContain('import("./SecureDuoCreate")');
     expect(appEntry).toContain('import("./SecureDuoInvitation")');
