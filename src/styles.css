@@ -4887,3 +4887,17 @@ button,[role="button"],nav a{touch-action:manipulation}
 .media-photo-compare button{flex:0 1 auto}
 .media-photo-compare small{color:#d7bd86;font-size:.78rem}
 @media(max-width:520px){.media-photo-editor-presets>div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.media-photo-compare{align-items:stretch;flex-direction:column}.media-photo-compare button{width:100%}}
+
+
+/* Local Duo aftercare: private, temporary selections on the shared device. */
+.couples-aftercare{margin-top:18px;border-color:#80653b;background:linear-gradient(145deg,#1b1710,#0d0c0a)}
+.couples-aftercare>p{margin:0;color:#c8bda9;font-size:13px;line-height:1.65}
+.couples-aftercare-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.couples-aftercare-options .couples-consent{min-height:54px;align-items:center;padding:12px;border:1px solid #40372b;border-radius:9px;background:#100f0c}
+@media(max-width:560px){.couples-aftercare-options{grid-template-columns:1fr}}
+
+
+/* Secure Duo shared-step controls: responsive paired actions. */
+.couples-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:14px}
+.couples-actions>button{flex:1 1 140px}
+@media(max-width:520px){.couples-actions{display:grid;grid-template-columns:1fr}.couples-actions>button{width:100%}}
