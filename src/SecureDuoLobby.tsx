@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   advanceSecureDuoSession,
   getSecureDuoRoomState,
@@ -28,52 +28,47 @@ export default function SecureDuoLobby({ roomId, language, onBack }: Props) {
   const nl = language === "nl";
   const [snapshot, setSnapshot] = useState<SecureDuoRoomSnapshot | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isOnline, setIsOnline] = useState(() => navigator.onLine);
+  const [isOnline, setIsOnline] = useState(() => typeof navigator === "undefined" || navigator.onLine);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   // Each browser keeps its own aftercare choices locally; nothing is written to Supabase.
   const [aftercareChoices, setAftercareChoices] = useState<string[]>([]);
+  const refreshInFlight = useRef(false);
+  const actionInFlight = useRef(false);
+  const mounted = useRef(true);
 
+  useEffect(() => {
+    mounted.current = true;
+    return () => { mounted.current = false; };
+  }, []);
+
+  // All refresh sources share one in-flight request so polling, reconnect and
+  // manual refresh cannot race and let an older snapshot overwrite a newer one.
   const refresh = useCallback(async () => {
+    if (refreshInFlight.current || !mounted.current) return;
+    refreshInFlight.current = true;
     try {
       const next = await getSecureDuoRoomState(roomId);
-      setSnapshot(next);
-      setError("");
+      if (mounted.current) {
+        setSnapshot(next);
+        setError("");
+      }
     } catch (reason) {
-      setError(reason instanceof Error
+      if (mounted.current) setError(reason instanceof Error
         ? reason.message
         : (nl ? "De kamerstatus kon niet worden opgehaald." : "The room status could not be loaded."));
     } finally {
-      setLoading(false);
+      refreshInFlight.current = false;
+      if (mounted.current) setLoading(false);
     }
   }, [roomId, nl]);
 
   useEffect(() => {
-    let alive = true;
-    let inFlight = false;
-    const load = async () => {
-      if (inFlight) return;
-      inFlight = true;
-      try {
-        const next = await getSecureDuoRoomState(roomId);
-        if (alive) {
-          setSnapshot(next);
-          setError("");
-        }
-      } catch (reason) {
-        if (alive) setError(reason instanceof Error
-          ? reason.message
-          : (nl ? "De kamerstatus kon niet worden opgehaald." : "The room status could not be loaded."));
-      } finally {
-        inFlight = false;
-        if (alive) setLoading(false);
-      }
-    };
-    void load();
-    const interval = window.setInterval(() => void load(), 5000);
-    return () => { alive = false; window.clearInterval(interval); };
-  }, [roomId, nl]);
+    void refresh();
+    const interval = window.setInterval(() => void refresh(), 5000);
+    return () => window.clearInterval(interval);
+  }, [refresh]);
 
   // Refresh promptly when a participant returns to the app or reconnects.
   useEffect(() => {
@@ -93,7 +88,8 @@ export default function SecureDuoLobby({ roomId, language, onBack }: Props) {
   }, [refresh]);
 
   const act = async (action: () => Promise<void>, success: string, failure: string) => {
-    if (busy) return;
+    if (actionInFlight.current || !isOnline) return;
+    actionInFlight.current = true;
     setBusy(true);
     setError("");
     setNotice("");
@@ -104,7 +100,8 @@ export default function SecureDuoLobby({ roomId, language, onBack }: Props) {
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : failure);
     } finally {
-      setBusy(false);
+      actionInFlight.current = false;
+      if (mounted.current) setBusy(false);
     }
   };
 
