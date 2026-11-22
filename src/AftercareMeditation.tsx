@@ -8,6 +8,9 @@ import {
   getAftercareMeditationPhase,
   getAftercareMeditationProgressPercent,
   getAftercareMeditationRemainingSeconds,
+  loadAftercareMeditationProgress,
+  saveAftercareMeditationProgress,
+  clearAftercareMeditationProgress,
   skipAftercareMeditationPhase,
 } from "./aftercareMeditation";
 import "./AftercareMeditation.css";
@@ -15,7 +18,13 @@ import "./AftercareMeditation.css";
 type Language = "nl" | "en";
 
 export default function AftercareMeditation({ language }: { language: Language }) {
-  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [elapsedSeconds, setElapsedSeconds] = useState(() => {
+    try {
+      return loadAftercareMeditationProgress(window.sessionStorage);
+    } catch {
+      return 0;
+    }
+  });
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const [running, setRunning] = useState(false);
   const [message, setMessage] = useState("");
@@ -25,6 +34,14 @@ export default function AftercareMeditation({ language }: { language: Language }
   const progress = getAftercareMeditationProgressPercent(elapsedSeconds);
   const phase = getAftercareMeditationPhase(elapsedSeconds);
   const phaseNumber = AFTERCARE_MEDITATION_PHASES.findIndex((item) => item.id === phase.id) + 1;
+
+  useEffect(() => {
+    try {
+      saveAftercareMeditationProgress(window.sessionStorage, elapsedSeconds);
+    } catch {
+      // Storage can be unavailable in private browsing; the in-memory timer still works.
+    }
+  }, [elapsedSeconds]);
 
   useEffect(() => {
     if (!running || startedAt === null) return;
@@ -87,6 +104,11 @@ export default function AftercareMeditation({ language }: { language: Language }
     setRunning(false);
     setStartedAt(null);
     setElapsedSeconds(0);
+    try {
+      clearAftercareMeditationProgress(window.sessionStorage);
+    } catch {
+      // Ending the exercise must remain available when browser storage is blocked.
+    }
     setMessage(t("Meditatie beëindigd. Je kunt rustig verdergaan.", "Meditation ended. You can continue at your own pace."));
   };
 
@@ -165,8 +187,8 @@ export default function AftercareMeditation({ language }: { language: Language }
 
       <p className="aftercare-meditation-disclaimer">
         {t(
-          "Optioneel en geen therapie. Forceer of houd je adem niet vast. Als een onderdeel niet prettig voelt, sla het over, pauzeer of beëindig de oefening. De timer telt door als je browser op de achtergrond staat, maar wordt niet bewaard na vernieuwen of sluiten.",
-          "Optional and not therapy. Do not force or hold your breath. If any part feels uncomfortable, skip it, pause or end the practice. The timer continues while your browser is in the background, but is not saved after reload or closing.",
+          "Optioneel en geen therapie. Forceer of houd je adem niet vast. Als een onderdeel niet prettig voelt, sla het over, pauzeer of beëindig de oefening. De timer telt door als je browser op de achtergrond staat. Je voortgang wordt in deze browsertab bewaard; na vernieuwen kun je handmatig verdergaan. Bij het sluiten van de tab kan de voortgang verdwijnen.",
+          "Optional and not therapy. Do not force or hold your breath. If any part feels uncomfortable, skip it, pause or end the practice. The timer continues while your browser is in the background. Progress is saved in this browser tab, so you can resume manually after a reload. Closing the tab may clear that progress.",
         )}
       </p>
       {message && <p className="aftercare-meditation-message" role="status">{message}</p>}
