@@ -277,8 +277,8 @@ export default function CouplesPlay({ language, onBack, onSecureDuo }: { languag
       <button type="button" className={mode === "local" ? "couples-mode-card selected" : "couples-mode-card"} onClick={() => { setMode("local"); setMyConsent(false); setLocalPartnerConsent(false); setStatus("lobby"); setRound(0); }} disabled={status === "active" || status === "paused"}>
         <MonitorSmartphone/><strong>{t("Lokaal samen", "Together locally")}</strong><span>{t("Eén telefoon, tablet of iPad. Om de beurt antwoorden.", "One phone, tablet or iPad. Take turns answering.")}</span>
       </button>
-      <button type="button" className={mode === "remote" ? "couples-mode-card selected" : "couples-mode-card"} onClick={() => { setMode("remote"); setMyConsent(false); setStatus("lobby"); }} disabled={status === "active" || status === "paused"}>
-        <Wifi/><strong>{t("Op afstand", "Long distance")}</strong><span>{t("Verbind twee apparaten met een kamer met code.", "Connect two devices through a room with a code.")}</span>
+      <button type="button" className="couples-mode-card" disabled aria-describedby="couples-remote-unavailable">
+        <Wifi/><strong>{t("Op afstand · binnenkort", "Long distance · coming soon")}</strong><span id="couples-remote-unavailable">{t("Wordt opnieuw opgebouwd met privé-uitnodigingen en accountbeveiliging.", "Being rebuilt with private invitations and account-level access controls.")}</span>
       </button>
     </div>
     {onSecureDuo && <button type="button" className="couples-secondary" onClick={onSecureDuo}>{t("Maak een beveiligde privé-uitnodiging", "Create a secure private invitation")}</button>}
