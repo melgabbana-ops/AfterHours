@@ -144,6 +144,7 @@ describe("proposed secure Duo backend guardrails", () => {
   it("returns only a member-scoped authoritative lobby snapshot", () => {
     const declaration = proposal.slice(proposal.indexOf("function public.get_afterhours_duo_room_state("));
     expect(declaration).toContain("m.user_id = v_user_id and m.removed_at is null");
+    expect(declaration).toContain("The Duo session state is unavailable.");
     expect(declaration).toContain("'is_self', m.user_id = v_user_id");
     expect(declaration).toContain("'consented', m.consented_at is not null");
     expect(declaration).toContain("set search_path = ''");
