@@ -106,12 +106,14 @@ describe("proposed secure Duo backend guardrails", () => {
     expect(couplesUi).toContain("setAftercareChoices");
     expect(couplesUi).toContain("not saved");
     expect(couplesUi).toContain("niet opgeslagen");
-    expect(couplesUi).toContain("Finish + aftercare");
+    expect(couplesUi).toContain("Take a moment together");
+    expect(couplesUi).toContain('status === "stopped" && <section className="couples-lobby couples-aftercare"');
   });
 
   it("keeps the legacy public room-code UI unavailable until the backend is verified", () => {
-    expect(couplesUi).toContain("function secureDuoBackendAvailable(): boolean");
-    expect(couplesUi).toContain("return false;");
+    expect(couplesUi).toContain('const [mode, setMode] = useState<Mode>("local")');
+    expect(couplesUi).toContain('if (mode === "remote")');
+    expect(couplesUi).toContain("Only the account-bound private invitation flow may return");
     expect(couplesUi).toContain('disabled aria-describedby="couples-remote-unavailable"');
     expect(couplesUi).toContain('client.channel("couples-" + roomCode');
   });
