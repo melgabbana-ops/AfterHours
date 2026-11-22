@@ -133,6 +133,7 @@ describe("AFTER HOURS private world storage", () => {
     expect(mocks.from).toHaveBeenNthCalledWith(1, "afterhours_experience_run_consents");
     expect(mocks.from).toHaveBeenNthCalledWith(2, "afterhours_experience_runs");
     expect(mocks.eq).toHaveBeenCalledWith("status", "paused");
+    expect(mocks.gt).toHaveBeenCalledWith("total_steps", 2);
     expect(mocks.update).toHaveBeenNthCalledWith(2, expect.objectContaining({ status: "active", current_step: 2 }));
   });
 
@@ -148,6 +149,22 @@ describe("AFTER HOURS private world storage", () => {
     })).rejects.toThrow("This experience run could not be resumed.");
 
     expect(mocks.eq).toHaveBeenCalledWith("status", "paused");
+    expect(mocks.update).toHaveBeenNthCalledWith(3, expect.objectContaining({ revoked_at: expect.any(String) }));
+  });
+
+  it("does not resume beyond the persisted run length and revokes the temporary consent renewal", async () => {
+    mocks.maybeSingle
+      .mockResolvedValueOnce({ data: { id: "consent-1" }, error: null })
+      .mockResolvedValueOnce({ data: null, error: null });
+
+    await expect(resumeExperienceRun({
+      runId: "run-1",
+      expectedUserId: "user-a",
+      currentStep: 2,
+    })).rejects.toThrow("This experience run could not be resumed.");
+
+    expect(mocks.eq).toHaveBeenCalledWith("status", "paused");
+    expect(mocks.gt).toHaveBeenCalledWith("total_steps", 2);
     expect(mocks.update).toHaveBeenNthCalledWith(3, expect.objectContaining({ revoked_at: expect.any(String) }));
   });
 
