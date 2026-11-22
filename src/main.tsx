@@ -373,7 +373,7 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
  const testNotificationSound=async()=>{setSoundTestFeedback("");primeNotificationAudio();const played=await playNotificationSound("message");setSoundTestFeedback(played?t("AFTER HOURS-geluid afgespeeld. Hoor je niets? Controleer het volume en de stille modus van je iPhone.","AFTER HOURS sound scheduled. If you hear nothing, check your phone volume and silent mode."):t("Audio is door je browser geblokkeerd. Tik nogmaals op Test eigen geluid en controleer je browserinstellingen.","Your browser blocked audio. Tap Test signature sound again and check your browser settings."));};
  useEffect(()=>{if(screen==="home"||screen==="legal")return;if(!state.ageConfirmed){setScreen("home");return}if(screen==="game"&&state.consent.status!=="active"){setScreen("home")}},[screen,state.ageConfirmed,state.consent.status]);
  useEffect(()=>{if(state.ageConfirmed&&screen==="home"&&new URLSearchParams(window.location.search).has("couple"))setScreen("couples")},[state.ageConfirmed,screen]);
- useEffect(()=>{if(!state.ageConfirmed)return;const token=readDuoInvitationToken(window.location.href);if(token)setScreen("secureDuoInvite")},[state.ageConfirmed]);
+ useEffect(()=>{if(!state.ageConfirmed)return;const token=readDuoInvitationToken(window.location.href);if(token)setScreen("secureDuoInvite")},[state.ageConfirmed,syncUserId]);
  const xp=state.profile.xp;
  const currentLevel=Math.max(1,state.profile.level);
  const levelFloor=(currentLevel-1)*200;
