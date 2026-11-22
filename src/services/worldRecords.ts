@@ -170,6 +170,9 @@ export async function submitExperienceRunCheckIn(args: {
   expectedUserId: string;
 }): Promise<void> {
   const user = await assertWorldAccount(args.expectedUserId);
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(args.runId)) {
+    throw new Error("Invalid experience run.");
+  }
   if (!Number.isInteger(args.stepIndex) || args.stepIndex < 0 || args.stepIndex >= 40) {
     throw new Error("Invalid experience step.");
   }
