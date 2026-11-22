@@ -513,6 +513,15 @@ begin
   if v_user_id is null then
     raise exception 'Sign in to revoke this Duo invitation.' using errcode = '28000';
   end if;
+  -- Keep the same invitation -> room lock order as acceptance. Lock every
+  -- pending invitation in a stable order before locking the room so a
+  -- concurrent accept/revoke cannot deadlock on the two shared rows.
+  perform 1
+  from public.afterhours_duo_invitations
+  where room_id = p_room_id and status = 'pending'
+  order by id
+  for update;
+
   select * into v_room
   from public.afterhours_duo_rooms
   where id = p_room_id
