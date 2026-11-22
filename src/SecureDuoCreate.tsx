@@ -13,6 +13,7 @@ type Props = {
   language: Language;
   onLogin: () => void;
   onBack: () => void;
+  onCreated?: (roomId: string) => void;
 };
 
 /**
@@ -20,7 +21,7 @@ type Props = {
  * Keep dormant until the secure Duo SQL proposal is deployed and verified
  * with two real accounts. The creator must explicitly opt in before sharing.
  */
-export default function SecureDuoCreate({ authenticated, language, onLogin, onBack }: Props) {
+export default function SecureDuoCreate({ authenticated, language, onLogin, onBack, onCreated }: Props) {
   const nl = language === "nl";
   const [consent, setConsent] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -161,6 +162,9 @@ export default function SecureDuoCreate({ authenticated, language, onLogin, onBa
             <button type="button" className="couples-primary" onClick={() => void shareLink()}>
               {nl ? "Delen" : "Share"}
             </button>
+            {onCreated && <button type="button" className="couples-secondary" onClick={() => onCreated(roomId)}>
+              {nl ? "Open de Duo-wachtkamer" : "Open Duo lobby"}
+            </button>}
             <button type="button" className="couples-primary" onClick={() => void copyLink()}>
               {nl ? "Link kopiëren" : "Copy link"}
             </button>
