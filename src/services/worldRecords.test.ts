@@ -96,6 +96,20 @@ describe("AFTER HOURS private world storage", () => {
   });
 
 
+  it.each([-1, 1.5, 40, Number.NaN, Number.POSITIVE_INFINITY])(
+    "rejects invalid resume step index %s before authentication or database writes",
+    async currentStep => {
+      await expect(resumeExperienceRun({
+        runId: "run-1",
+        expectedUserId: "user-a",
+        currentStep,
+      })).rejects.toThrow("Invalid experience step.");
+
+      expect(mocks.getUser).not.toHaveBeenCalled();
+      expect(mocks.from).not.toHaveBeenCalled();
+    },
+  );
+
   it("resumes only a paused run after fresh consent is confirmed", async () => {
     mocks.maybeSingle
       .mockResolvedValueOnce({ data: { id: "consent-1" }, error: null })

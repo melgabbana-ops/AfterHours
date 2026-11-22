@@ -176,6 +176,11 @@ export async function resumeExperienceRun(args: {
   expectedUserId: string;
   currentStep: number;
 }): Promise<void> {
+  // Experience steps are zero-based and scenes are capped at 40 steps.
+  // Reject malformed indexes before renewing consent or making any database write.
+  if (!Number.isInteger(args.currentStep) || args.currentStep < 0 || args.currentStep >= 40) {
+    throw new Error("Invalid experience step.");
+  }
   await assertWorldAccount(args.expectedUserId);
   const now = new Date().toISOString();
   const { data: consent, error: consentError } = await supabase!
