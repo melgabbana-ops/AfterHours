@@ -61,6 +61,29 @@ describe("Experience Engine immediate STOP", () => {
     expect(source).toContain("if (stopPendingRef.current || stopPending) return;");
   });
 
+  it("blocks invitation creation while STOP is awaiting server confirmation", () => {
+    const inviteStart = source.indexOf("async function createRunInvitation(");
+    const inviteEnd = source.indexOf("\n  async function ", inviteStart + 1);
+    const inviteHandler = source.slice(inviteStart, inviteEnd);
+    const firstStopGuard = inviteHandler.indexOf("if (stopPendingRef.current || stopPending)");
+    const tokenGeneration = inviteHandler.indexOf("crypto.getRandomValues");
+    const invitationWrite = inviteHandler.indexOf("await createExperienceInvitation");
+    const secondStopGuard = inviteHandler.lastIndexOf("if (stopPendingRef.current || stopPending)", invitationWrite);
+
+    expect(inviteStart).toBeGreaterThanOrEqual(0);
+    expect(inviteEnd).toBeGreaterThan(inviteStart);
+    expect(firstStopGuard).toBeGreaterThanOrEqual(0);
+    expect(firstStopGuard).toBeLessThan(tokenGeneration);
+    expect(secondStopGuard).toBeGreaterThan(tokenGeneration);
+    expect(secondStopGuard).toBeLessThan(invitationWrite);
+  });
+
+  it("disables the invitation control while STOP is pending", () => {
+    const button = source.match(/<button type="button" className="cw-primary"[^>]*onClick=\{\(\) => void createRunInvitation\(selectedInviteRunId\)\}[^>]*>/)?.[0] ?? "";
+
+    expect(button).toContain("disabled={busy || stopPending || !remoteProfileId || !selectedInviteRunId}");
+  });
+
   it("provides 48px touch targets and visible keyboard focus for safety controls", () => {
     expect(styles).toMatch(/\.cw-checkin button\{[^}]*min-height:48px/);
     expect(styles).toMatch(/\.cw-run-actions>button:not\(\.cw-primary\)\{[^}]*min-height:48px/);
