@@ -252,4 +252,25 @@ describe("proposed secure Duo backend guardrails", () => {
     expect(proposal).toContain("r.status <> 'stopped' and r.expires_at > now()");
     expect(proposal.toLowerCase()).not.toContain("alter table realtime.messages enable row level security");
   });
+  it("locks invitation rows before the room in both acceptance and revocation paths", () => {
+    const acceptStart = proposal.indexOf("create or replace function public.accept_afterhours_duo_invitation(");
+    const acceptEnd = proposal.indexOf("\ncreate or replace function public.", acceptStart + 1);
+    const accept = proposal.slice(acceptStart, acceptEnd);
+    const acceptInvitation = accept.indexOf("from public.afterhours_duo_invitations");
+    const acceptRoom = accept.indexOf("from public.afterhours_duo_rooms");
+    expect(acceptInvitation).toBeGreaterThanOrEqual(0);
+    expect(acceptRoom).toBeGreaterThan(acceptInvitation);
+    expect(accept.indexOf("for update", acceptInvitation)).toBeLessThan(accept.indexOf("for update", acceptRoom));
+
+    const revokeStart = proposal.indexOf("create or replace function public.revoke_afterhours_duo_invitation(");
+    const revokeEnd = proposal.indexOf("\nrevoke all on function public.advance_afterhours_duo_session", revokeStart);
+    const revoke = proposal.slice(revokeStart, revokeEnd);
+    const revokeInvitation = revoke.indexOf("perform 1\n  from public.afterhours_duo_invitations");
+    const revokeRoom = revoke.indexOf("from public.afterhours_duo_rooms");
+    expect(revokeInvitation).toBeGreaterThanOrEqual(0);
+    expect(revokeRoom).toBeGreaterThan(revokeInvitation);
+    expect(revoke).toContain("order by id\n  for update;");
+    expect(revoke.indexOf("for update", revokeInvitation)).toBeLessThan(revoke.indexOf("for update", revokeRoom));
+  });
+
 });
