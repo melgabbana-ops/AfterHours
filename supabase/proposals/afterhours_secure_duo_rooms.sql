@@ -472,6 +472,10 @@ begin
   from public.afterhours_duo_session_state
   where room_id = p_room_id;
 
+  if not found then
+    raise exception 'The Duo session state is unavailable.' using errcode = 'P0002';
+  end if;
+
   select coalesce(
     jsonb_agg(
       jsonb_build_object(
