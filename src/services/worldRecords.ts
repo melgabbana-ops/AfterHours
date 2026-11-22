@@ -122,7 +122,6 @@ export async function createExperienceRun(args: {
       total_steps: args.totalSteps,
       interaction_log: [],
       consent_version: "1.0",
-      started_at: now,
       updated_at: now,
     })
     .select("id")
@@ -156,7 +155,7 @@ export async function createExperienceRun(args: {
 
   const { data: activatedRun, error: activationError } = await supabase!
     .from("afterhours_experience_runs")
-    .update({ status: "active", updated_at: now })
+    .update({ status: "active", started_at: now, updated_at: now })
     .eq("id", run.id)
     .eq("user_id", user.id)
     .eq("status", "ready")
