@@ -17,28 +17,27 @@ describe("Experience Engine immediate STOP", () => {
   it("applies local stop and safety state before waiting for network confirmation", () => {
     const localReset = stopHandler.indexOf("setActiveScene(null)");
     const safetyStop = stopHandler.indexOf("onSafetyStop()");
-    const networkWait = stopHandler.indexOf("await pendingMutation");
     const consentRpc = stopHandler.indexOf("await withdrawExperienceConsent");
 
     expect(stopStart).toBeGreaterThanOrEqual(0);
     expect(stopEnd).toBeGreaterThan(stopStart);
     expect(localReset).toBeGreaterThanOrEqual(0);
     expect(safetyStop).toBeGreaterThanOrEqual(0);
-    expect(networkWait).toBeGreaterThanOrEqual(0);
-    expect(consentRpc).toBeGreaterThan(networkWait);
-    expect(localReset).toBeLessThan(networkWait);
-    expect(safetyStop).toBeLessThan(networkWait);
+    expect(consentRpc).toBeGreaterThanOrEqual(0);
+    expect(localReset).toBeLessThan(consentRpc);
+    expect(safetyStop).toBeLessThan(consentRpc);
   });
 
-  it("waits for an in-flight run mutation before issuing the final stop", () => {
+  it("dispatches atomic STOP without waiting for an in-flight run mutation", () => {
     const pendingWait = stopHandler.indexOf("await pendingMutation.catch");
     const consentRpc = stopHandler.indexOf("await withdrawExperienceConsent");
     const fallback = stopHandler.indexOf("await updateExperienceRun");
 
-    expect(pendingWait).toBeGreaterThanOrEqual(0);
-    expect(consentRpc).toBeGreaterThan(pendingWait);
+    expect(pendingWait).toBe(-1);
+    expect(consentRpc).toBeGreaterThanOrEqual(0);
     expect(fallback).toBeGreaterThan(consentRpc);
     expect(stopHandler).toContain("stopPendingRef.current");
+    expect(stopHandler).toContain("The existing RPC locks the run and revokes consent in the same");
   });
 
   it("keeps the dedicated STOP control available while other requests are busy", () => {
