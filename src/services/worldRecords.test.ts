@@ -13,6 +13,7 @@ const mocks = vi.hoisted(() => ({
   upsert: vi.fn(),
   single: vi.fn(),
   update: vi.fn(),
+  delete: vi.fn(),
   maybeSingle: vi.fn(),
 }));
 
@@ -21,7 +22,7 @@ vi.mock("./supabase", () => ({
   supabase: { auth: { getUser: mocks.getUser }, from: mocks.from },
 }));
 
-import { loadExperienceRuns, loadWorldRecords, resumeExperienceRun, saveWorldRecord, updateExperienceRun } from "./worldRecords";
+import { deleteExperienceRun, loadExperienceRuns, loadWorldRecords, resumeExperienceRun, saveWorldRecord, updateExperienceRun } from "./worldRecords";
 
 const chain = {
   select: mocks.select,
@@ -34,6 +35,7 @@ const chain = {
   upsert: mocks.upsert,
   single: mocks.single,
   update: mocks.update,
+  delete: mocks.delete,
   maybeSingle: mocks.maybeSingle,
 };
 
@@ -50,6 +52,7 @@ describe("AFTER HOURS private world storage", () => {
     mocks.order.mockReturnValue(chain);
     mocks.upsert.mockReturnValue(chain);
     mocks.update.mockReturnValue(chain);
+    mocks.delete.mockReturnValue(chain);
   });
 
   it("refuses to read another account's records before making a database query", async () => {
@@ -309,6 +312,30 @@ describe("AFTER HOURS private world storage", () => {
     })).rejects.toThrow("This experience run changed state");
 
     expect(mocks.gt).toHaveBeenCalledWith("total_steps", 3);
+  });
+
+  it("refuses to delete active or paused runs so STOP remains available", async () => {
+    mocks.maybeSingle.mockResolvedValueOnce({ data: null, error: null });
+
+    await expect(deleteExperienceRun("run-1", "user-a"))
+      .rejects.toThrow("This experience cannot be deleted in its current state.");
+
+    expect(mocks.from).toHaveBeenCalledWith("afterhours_experience_runs");
+    expect(mocks.delete).toHaveBeenCalledOnce();
+    expect(mocks.eq).toHaveBeenNthCalledWith(1, "id", "run-1");
+    expect(mocks.eq).toHaveBeenNthCalledWith(2, "user_id", "user-a");
+    expect(mocks.in).toHaveBeenCalledWith("status", ["ready", "completed", "stopped"]);
+    expect(mocks.select).toHaveBeenCalledWith("id");
+  });
+
+  it("deletes a terminal run only for the verified account", async () => {
+    mocks.maybeSingle.mockResolvedValueOnce({ data: { id: "run-1" }, error: null });
+
+    await expect(deleteExperienceRun("run-1", "user-a")).resolves.toBeUndefined();
+
+    expect(mocks.eq).toHaveBeenNthCalledWith(1, "id", "run-1");
+    expect(mocks.eq).toHaveBeenNthCalledWith(2, "user_id", "user-a");
+    expect(mocks.in).toHaveBeenCalledWith("status", ["ready", "completed", "stopped"]);
   });
 
   it("does not write if authentication cannot be verified", async () => {
