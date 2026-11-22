@@ -254,7 +254,8 @@
 .cw-remote-checkin>strong{color:#e5cfaa;font-size:9px;letter-spacing:.1em;text-transform:uppercase}
 .cw-remote-checkin>small{color:#c6b596;font-size:9px;line-height:1.5}
 .cw-remote-checkin>div{display:flex;flex-wrap:wrap;gap:7px}
-.cw-remote-checkin button{min-height:40px;padding:9px 12px;border:1px solid rgba(207,174,121,.38);background:rgba(35,27,17,.92);color:#e4d1ad;font-size:9px}
+.cw-remote-checkin button{min-height:44px;padding:10px 12px;border:1px solid rgba(207,174,121,.38);background:rgba(35,27,17,.92);color:#e4d1ad;font-size:9px}
+.cw-remote-checkin button:focus-visible{outline:2px solid #f0d39c;outline-offset:3px;box-shadow:0 0 0 4px rgba(240,211,156,.16)}
 .cw-remote-checkin button.cw-danger{border-color:rgba(177,92,70,.6);color:#f0b7a8}
 .cw-host-checkins{margin:12px 0}
 @media(max-width:520px){.cw-remote-checkin>div{display:grid;grid-template-columns:1fr}.cw-remote-checkin button{width:100%}}
