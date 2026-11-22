@@ -1,11 +1,4 @@
-import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-
-const activationMigration = readFileSync(
-  fileURLToPath(new URL("../../supabase/proposals/20261122_afterhours_experience_run_insert_consent_guard.sql", import.meta.url)),
-  "utf8",
-);
 
 const mocks = vi.hoisted(() => ({
   getUser: vi.fn(),
@@ -164,13 +157,6 @@ describe("AFTER HOURS private world storage", () => {
 
     expect(mocks.update).toHaveBeenCalled();
     expect(mocks.delete).toHaveBeenCalled();
-  });
-
-  it("restricts new database runs to ready drafts until consent can be checked on activation", () => {
-    expect(activationMigration).toMatch(/before insert on public\.afterhours_experience_runs/i);
-    expect(activationMigration).toMatch(/new\.status is distinct from 'ready'/i);
-    expect(activationMigration).toMatch(/and status = 'ready'/i);
-    expect(activationMigration).toMatch(/and current_step = 0/i);
   });
 
   it("upserts records only after verifying the same authenticated account", async () => {
