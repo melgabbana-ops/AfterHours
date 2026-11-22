@@ -27,7 +27,7 @@ describe("secure Duo consent flow", () => {
   it("requires the host's explicit opt-in before creating an invitation", () => {
     expect(createScreen).toContain("if (!authenticated || !consent || creating) return;");
     expect(createScreen).toContain("checked={consent}");
-    expect(createScreen).toContain("onChange={(event) => setConsent(event.target.checked)}");
+    expect(createScreen).toContain("onChange={(event) => setConsent(event.currentTarget.checked)}");
     expect(createScreen).toContain("await setSecureDuoConsent(room.roomId, true)");
   });
 
