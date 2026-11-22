@@ -113,4 +113,33 @@ describe("private Duo Realtime transport",()=>{
     await expect(joinSecureDuoRealtime("bad-id",{},client)).rejects.toThrow("ongeldig");
     expect(client.channel).not.toHaveBeenCalled();
   });
+
+  it("removes a private channel when its authorization handshake fails",async()=>{
+    const channel:any={
+      on:vi.fn().mockReturnThis(),
+      subscribe:vi.fn((callback:any)=>{callback("CHANNEL_ERROR",new Error("not authorized"));return channel;}),
+      track:vi.fn(),
+    };
+    const client=makeClient({
+      channel:vi.fn().mockReturnValue(channel),
+      removeChannel:vi.fn().mockResolvedValue("ok"),
+    });
+    await expect(joinSecureDuoRealtime(id,{},client)).rejects.toThrow("not authorized");
+    expect(channel.track).not.toHaveBeenCalled();
+    expect(client.removeChannel).toHaveBeenCalledWith(channel);
+  });
+
+  it("removes a private channel when presence tracking is rejected",async()=>{
+    const channel:any={
+      on:vi.fn().mockReturnThis(),
+      subscribe:vi.fn((callback:any)=>{callback("SUBSCRIBED");return channel;}),
+      track:vi.fn().mockResolvedValue("error"),
+    };
+    const client=makeClient({
+      channel:vi.fn().mockReturnValue(channel),
+      removeChannel:vi.fn().mockResolvedValue("ok"),
+    });
+    await expect(joinSecureDuoRealtime(id,{},client)).rejects.toThrow("aanwezigheid");
+    expect(client.removeChannel).toHaveBeenCalledWith(channel);
+  });
 });
