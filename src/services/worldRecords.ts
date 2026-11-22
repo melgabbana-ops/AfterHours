@@ -162,7 +162,6 @@ export async function updateExperienceRun(args: {
   if (args.status === "stopped") {
     updateQuery = updateQuery.in("status", ["active", "paused"]);
   } else {
-    if (args.status === "ready") throw new Error("Invalid experience run transition.");
     updateQuery = updateQuery.eq("status", "active");
   }
   const { data, error } = await updateQuery.select("id").maybeSingle();
