@@ -103,3 +103,44 @@ export function getAftercareMeditationAccessibleTime(seconds: number, language: 
   if (remainder === 0) return minutes + " " + minuteLabel + " remaining";
   return minutes + " " + minuteLabel + " and " + remainder + " " + secondLabel + " remaining";
 }
+
+type AftercareMeditationStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
+const AFTERCARE_MEDITATION_PROGRESS_KEY = "afterhours:aftercare-meditation-progress:v1";
+
+/** Read tab-scoped progress safely; malformed or unavailable storage starts at zero. */
+export function loadAftercareMeditationProgress(storage: AftercareMeditationStorage | null): number {
+  if (!storage) return 0;
+  try {
+    const raw = storage.getItem(AFTERCARE_MEDITATION_PROGRESS_KEY);
+    if (raw === null || raw.trim() === "") return 0;
+    const parsed = Number(raw);
+    return normalizeElapsedSeconds(parsed);
+  } catch {
+    return 0;
+  }
+}
+
+/** Save only elapsed seconds, never journal text, mood data or session content. */
+export function saveAftercareMeditationProgress(
+  storage: AftercareMeditationStorage | null,
+  elapsedSeconds: number,
+): boolean {
+  if (!storage) return false;
+  try {
+    storage.setItem(AFTERCARE_MEDITATION_PROGRESS_KEY, String(normalizeElapsedSeconds(elapsedSeconds)));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Explicitly clear the saved timer when the user ends the exercise. */
+export function clearAftercareMeditationProgress(storage: AftercareMeditationStorage | null): boolean {
+  if (!storage) return false;
+  try {
+    storage.removeItem(AFTERCARE_MEDITATION_PROGRESS_KEY);
+    return true;
+  } catch {
+    return false;
+  }
+}
