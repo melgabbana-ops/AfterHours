@@ -136,12 +136,19 @@ describe("AFTER HOURS private world storage", () => {
   it("upserts only the signed-in participant's current-step signal", async () => {
     mocks.upsert.mockResolvedValue({ error: null });
     await expect(submitExperienceRunCheckIn({
-      runId: "run-1", stepIndex: 2, signal: "pause_requested", expectedUserId: "user-a",
+      runId: "11111111-1111-4111-8111-111111111111", stepIndex: 2, signal: "pause_requested", expectedUserId: "user-a",
     })).resolves.toBeUndefined();
     expect(mocks.from).toHaveBeenCalledWith("afterhours_experience_run_checkins");
     expect(mocks.upsert).toHaveBeenCalledWith({
-      run_id: "run-1", user_id: "user-a", step_index: 2, signal: "pause_requested",
+      run_id: "11111111-1111-4111-8111-111111111111", user_id: "user-a", step_index: 2, signal: "pause_requested",
     }, { onConflict: "run_id,user_id,step_index" });
+  });
+
+  it("rejects malformed shared run IDs before writing a check-in", async () => {
+    await expect(submitExperienceRunCheckIn({
+      runId: "not-a-uuid", stepIndex: 0, signal: "ready", expectedUserId: "user-a",
+    })).rejects.toThrow("Invalid experience run.");
+    expect(mocks.from).not.toHaveBeenCalled();
   });
 
   it("rejects invalid step indexes and participant signals before writing", async () => {
