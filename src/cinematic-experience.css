@@ -241,6 +241,7 @@
 
 
 /* Local Couples Mode · two participants, one device, no remote persistence */
+.cw-local-couples{display:grid;gap:12px;min-width:0}
 .cw-local-note{display:flex;align-items:flex-start;gap:11px;margin:14px 0;padding:13px 15px;border:1px solid rgba(207,174,121,.3);background:rgba(18,14,9,.85);color:#d8c8ac;font-size:11px;line-height:1.65}
 .cw-local-note svg{flex:none;color:#d8b56e}
 .cw-local-panel{display:grid;gap:16px}
