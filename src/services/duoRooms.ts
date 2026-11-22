@@ -2,6 +2,8 @@ import type { RealtimeChannel } from "@supabase/supabase-js";
 import { supabase, supabaseConfigured } from "./supabase";
 import { createDuoInvitationToken, hashDuoInvitationToken } from "./duoRoomInvitations";
 
+export const SECURE_DUO_BACKEND_ENABLED = false; // Enable only after the proposal is deployed and two-account checks pass.
+
 const ROOM_ID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export interface SecureDuoRoom {
@@ -64,6 +66,7 @@ export async function getSecureDuoRoomState(roomId: string): Promise<SecureDuoRo
 }
 
 function requireClient() {
+  if (!SECURE_DUO_BACKEND_ENABLED) throw new Error("Online Duo is not enabled yet. Private invitations are waiting for the reviewed database rollout.");
   if (!supabaseConfigured || !supabase) throw new Error("Online Duo is not configured yet.");
   return supabase;
 }
