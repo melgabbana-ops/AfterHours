@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { createDuoInvitationUrl } from "./services/duoRoomInvitations";
 import {
+  SECURE_DUO_BACKEND_ENABLED,
   createSecureDuoRoom,
   revokeSecureDuoInvitation,
   setSecureDuoConsent,
@@ -33,7 +34,7 @@ export default function SecureDuoCreate({ authenticated, language, onLogin, onBa
   const [error, setError] = useState("");
 
   const createInvitation = async () => {
-    if (!authenticated || !consent || creating) return;
+    if (!SECURE_DUO_BACKEND_ENABLED || !authenticated || !consent || creating) return;
     setCreating(true);
     setError("");
     setMessage("");
@@ -195,11 +196,12 @@ export default function SecureDuoCreate({ authenticated, language, onLogin, onBa
                 ? "Ik wil vrijwillig deelnemen aan deze Duo-kamer. Ik kan mijn toestemming altijd intrekken."
                 : "I freely choose to participate in this Duo room. I can withdraw my consent at any time."}
             </label>
+            {!SECURE_DUO_BACKEND_ENABLED && <p className="couples-consent-note" role="status">{nl ? "Privé-Duo wordt beschikbaar zodra de databasebeveiliging is uitgerold en met twee accounts is getest." : "Private Duo will become available after the database security is deployed and tested with two accounts."}</p>}
             <button
               type="button"
               className="couples-primary"
               onClick={() => void createInvitation()}
-              disabled={!consent || creating}
+              disabled={!SECURE_DUO_BACKEND_ENABLED || !consent || creating}
             >
               {creating
                 ? (nl ? "Privé-kamer maken…" : "Creating private room…")
