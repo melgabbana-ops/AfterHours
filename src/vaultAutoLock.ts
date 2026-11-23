@@ -50,7 +50,15 @@ export function bindVaultAutoLock(
   activityEvents.forEach((eventName) => {
     windowTarget.addEventListener(eventName, resetIdleTimer, { passive: true });
   });
-  resetIdleTimer();
+
+  // The effect can mount after the document has already become hidden
+  // (for example, between an async unlock check and React's next commit).
+  // Do not wait for another visibilitychange event that may never arrive.
+  if (documentTarget.visibilityState !== "visible") {
+    lockIfSensitive("background");
+  } else {
+    resetIdleTimer();
+  }
 
   return () => {
     clearIdleTimeout();
