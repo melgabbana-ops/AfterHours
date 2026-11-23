@@ -1193,7 +1193,10 @@ export default function CinematicWorld({
       }
       // Delete runs first. If a run became active or paused after the preflight,
       // its status guard stops the operation before private world records are removed.
-      for (const run of runs) await deleteExperienceRun(run.id, remoteProfileId);
+      for (const run of runs) {
+        // Shared participant runs are visible through consent-based RLS but are not owned by this account.
+        if (run.user_id === remoteProfileId) await deleteExperienceRun(run.id, remoteProfileId);
+      }
       for (const module of MODULES) {
         for (const record of records[module]) await deleteWorldRecord(module, record.record_key, remoteProfileId);
       }
