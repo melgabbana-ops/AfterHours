@@ -18,6 +18,9 @@ export default function ConsentScreen({language="nl",onConfirm,onBack}:{language
   if(!note)return;
   const prefersReducedMotion=window.matchMedia?.("(prefers-reduced-motion: reduce)").matches??false;
   scrollIntoViewRespectingMotion(note,prefersReducedMotion);
+  // Scrolling alone does not announce the destination to keyboard or screen-reader users.
+  // Move programmatic focus to the note without triggering a second, animated scroll.
+  note.focus({preventScroll:true});
  };
  return <main className="consent-screen ah-editorial-screen">
   <section className="consent-visual">
@@ -36,7 +39,7 @@ export default function ConsentScreen({language="nl",onConfirm,onBack}:{language
     </label>)}
    </fieldset>
    <button className="consent-boundaries" type="button" onClick={revealSafetyNote}><Shield/><span>{t("Bekijk grenzen en veiligheidsafspraken","Review boundaries and safety agreements")}</span><ChevronRight/></button>
-   <div className="consent-safety-note" id="consent-safety-note"><Lock/><span>{t("STOP betekent direct stoppen. PAUZE betekent vertragen en opnieuw afstemmen. Toestemming kan altijd worden ingetrokken.","STOP means stop immediately. PAUSE means slow down and check in again. Consent can always be withdrawn.")}</span></div>
+   <div className="consent-safety-note" id="consent-safety-note" tabIndex={-1} aria-label={t("Belangrijke veiligheidsafspraken","Important safety agreements")}><Lock/><span>{t("STOP betekent direct stoppen. PAUZE betekent vertragen en opnieuw afstemmen. Toestemming kan altijd worden ingetrokken.","STOP means stop immediately. PAUSE means slow down and check in again. Consent can always be withdrawn.")}</span></div>
    <button className="gold consent-submit" type="button" disabled={!ready} onClick={onConfirm}>{t("IK GEEF TOESTEMMING","I CONSENT")} <ChevronRight/></button>
    <button className="back" type="button" onClick={onBack}>← {t("Terug naar home","Back home")}</button>
   </section>
