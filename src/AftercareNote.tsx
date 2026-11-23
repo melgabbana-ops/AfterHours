@@ -31,6 +31,7 @@ export default function AftercareNote({ ownerId, sessionId, language, onStatusCh
   const [status, setStatus] = useState<PrivateNoteStatus>("pending");
   const [message, setMessage] = useState("");
   const [journalOpen, setJournalOpen] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
   const hasText = Object.values(draft).some((value) => value.trim().length > 0);
   const dirty = !sameDraft(draft, noteDraft(saved));
@@ -50,6 +51,7 @@ export default function AftercareNote({ ownerId, sessionId, language, onStatusCh
   const updateField = (field: keyof PrivateSessionNoteDraft, value: string) => {
     const next = { ...draft, [field]: value };
     setDraft(next);
+    setConfirmDelete(false);
     const nextStatus: PrivateNoteStatus = sameDraft(next, noteDraft(saved))
       ? saved ? "saved" : "skipped"
       : "pending";
@@ -66,12 +68,14 @@ export default function AftercareNote({ ownerId, sessionId, language, onStatusCh
     }
     setSaved(note);
     setDraft(noteDraft(note));
+    setConfirmDelete(false);
     setStatus("saved");
     onStatusChange("saved");
     setMessage(t("Notitie lokaal opgeslagen op dit apparaat.", "Note saved locally on this device."));
   };
 
   const skip = () => {
+    setConfirmDelete(false);
     setDraft(noteDraft(saved));
     const nextStatus: PrivateNoteStatus = saved ? "saved" : "skipped";
     setStatus(nextStatus);
@@ -81,11 +85,18 @@ export default function AftercareNote({ ownerId, sessionId, language, onStatusCh
       : t("Notitie overgeslagen. Je hoeft niets te delen.", "Note skipped. You do not have to share anything."));
   };
 
+  const requestRemove = () => {
+    setConfirmDelete(true);
+    setMessage(t("De notitie is nog niet verwijderd. Bevestig hieronder als je deze definitief wilt verwijderen.", "The note has not been deleted. Confirm below to permanently delete it."));
+  };
+
   const remove = () => {
+    if (!confirmDelete || !saved) return;
     if (!deletePrivateSessionNote(ownerId, sessionId)) {
       setMessage(t("Verwijderen is niet gelukt. De lokale notitie is niet bevestigd verwijderd.", "Deletion failed. The local note could not be confirmed as removed."));
       return;
     }
+    setConfirmDelete(false);
     setSaved(null);
     setDraft({ ...EMPTY_DRAFT });
     setStatus("skipped");
@@ -119,9 +130,12 @@ export default function AftercareNote({ ownerId, sessionId, language, onStatusCh
     <div className="aftercare-private-note-actions">
       <button type="button" className="gold" onClick={save} disabled={!hasText || !dirty}><Save size={16} />{t("Notitie opslaan", "Save note")}</button>
       <button type="button" onClick={skip}><SkipForward size={16} />{t("Overslaan", "Skip")}</button>
-      {saved && <button type="button" className="aftercare-private-note-delete" onClick={remove}><Trash2 size={16} />{t("Verwijder notitie", "Delete note")}</button>}
+      {saved && (confirmDelete ? <>
+        <button type="button" className="aftercare-private-note-delete" onClick={remove}><Trash2 size={16} />{t("Definitief verwijderen", "Delete permanently")}</button>
+        <button type="button" onClick={() => { setConfirmDelete(false); setMessage(t("Verwijderen geannuleerd. Je notitie is behouden.", "Deletion cancelled. Your note was kept.")); }}>{t("Annuleren", "Cancel")}</button>
+      </> : <button type="button" className="aftercare-private-note-delete" onClick={requestRemove}><Trash2 size={16} />{t("Verwijder notitie", "Delete note")}</button>)}
     </div>
-    {message && <p className="aftercare-private-note-message" role="status">{message}</p>}
+    {message && <p className="aftercare-private-note-message" role="status" aria-live="polite" aria-atomic="true">{message}</p>}
     <span className="sr-only" aria-live="polite">{status === "pending" ? t("Niet-opgeslagen wijzigingen", "Unsaved changes") : status === "saved" ? t("Notitie opgeslagen", "Note saved") : t("Notitie overgeslagen", "Note skipped")}</span>
   </section>;
 }
