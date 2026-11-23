@@ -302,7 +302,6 @@ export async function deleteExperienceRun(runId: string, expectedUserId: string)
 export type ExperienceInvitation = {
   id: string;
   run_id: string;
-  token_hash: string;
   status: "pending" | "accepted" | "revoked" | "expired";
   accepted_at: string | null;
   expires_at: string;
@@ -313,7 +312,7 @@ export async function loadExperienceInvitations(expectedUserId: string): Promise
   await assertWorldAccount(expectedUserId);
   const { data, error } = await supabase!
     .from("afterhours_experience_invitations")
-    .select("id,run_id,token_hash,status,accepted_at,expires_at,created_at")
+    .select("id,run_id,status,accepted_at,expires_at,created_at")
     .eq("inviter_user_id", expectedUserId)
     .order("created_at", { ascending: false })
     .limit(50);
@@ -337,7 +336,7 @@ export async function createExperienceInvitation(args: {
       // Use PostgreSQL's now() + 7 days default so client clock skew or tampering
       // cannot shorten or extend the invitation lifetime.
     })
-    .select("id,run_id,token_hash,status,accepted_at,expires_at,created_at")
+    .select("id,run_id,status,accepted_at,expires_at,created_at")
     .single();
   if (error) throw new Error(error.message);
   return data as ExperienceInvitation;
