@@ -5,7 +5,7 @@
 
 begin;
 
-create or replace function public.delete_session_mood_event(p_event_id uuid)
+create function public.delete_session_mood_event(p_event_id uuid)
 returns boolean
 language plpgsql
 security definer
