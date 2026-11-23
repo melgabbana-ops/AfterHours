@@ -6,6 +6,10 @@ const proposal = readFileSync(
   fileURLToPath(new URL("../supabase/proposals/20261123_afterhours_experience_run_terminal_delete_guard.sql", import.meta.url)),
   "utf8",
 );
+const cinematicWorld = readFileSync(
+  fileURLToPath(new URL("../src/CinematicWorld.tsx", import.meta.url)),
+  "utf8",
+);
 
 describe("experience-run deletion safety proposal", () => {
   it("keeps deletion owner-scoped and limited to drafts or terminal runs", () => {
@@ -14,6 +18,10 @@ describe("experience-run deletion safety proposal", () => {
     expect(proposal).toMatch(/user_id = \(select auth\.uid\(\)\)/i);
     expect(proposal).toMatch(/status in \('ready', 'completed', 'stopped'\)/i);
     expect(proposal).not.toMatch(/status in \([^)]*'active'|status in \([^)]*'paused'/i);
+  });
+
+  it("does not attempt to delete consent-visible runs owned by another account", () => {
+    expect(cinematicWorld).toMatch(/if \(run\.user_id === remoteProfileId\) await deleteExperienceRun\(run\.id, remoteProfileId\)/);
   });
 
   it("does not add elevated grants or a privileged function", () => {
