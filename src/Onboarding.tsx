@@ -25,15 +25,15 @@ export default function Onboarding({ language = "nl", onComplete }: { language?:
       <img src={`${import.meta.env.BASE_URL}after-hours-brand-logo-transparent.svg`} alt="AFTER HOURS"/>
       <span className="eyebrow">PRIVATE EXPERIENCE · 18+</span>
     </header>
-    <div className="onboarding-stepper" aria-label={t("Stap","Step") + " " + (step + 1) + " / 4"}>
-      {[0,1,2,3].map((index) => <span key={index} className={index === step ? "current" : index < step ? "done" : ""}/>)}
+    <div className="onboarding-stepper" role="list" aria-label={t("Voortgang introductie", "Introduction progress")}>
+      {[0,1,2,3].map((index) => <span key={index} role="listitem" aria-label={t(`Stap ${index + 1} van 4`, `Step ${index + 1} of 4`)} aria-current={index === step ? "step" : undefined} className={index === step ? "current" : index < step ? "done" : ""}/>)}
     </div>
     <section className="onboarding-panel">
       <span className="eyebrow">{t("EEN PERSOONLIJKE INTRODUCTIE","YOUR PRIVATE INTRODUCTION")} · 0{step + 1}</span>
       <h1>{titles[step]}</h1>
       {step === 0 && <div className="onboarding-welcome">
         <Sparkles size={28}/>
-        <p>{t("Ontdek een wereld van interactieve opdrachten, persoonlijke progressie en bewust gekozen spanning. Jij bepaalt wat past, waar je grens ligt en wanneer je stopt.", "Explore a world of interactive prompts, personal progression and deliberately chosen tension. You decide what fits, where your boundaries are and when to stop.")}</p>
+        <p>{t("Ontdek een wereld van interactieve opdrachten, persoonlijke progressie en bewust gekozen spanning. Jij bepaalt wat past, waar je grens ligt en wanneer je stopt.", "Explore a world of interactive prompts, personal progression and deliberately chosen tension. You decide what fits, where your boundaries are and when you stop.")}</p>
         <div className="onboarding-promise"><ShieldCheck/><span>{t("Jouw grenzen staan altijd boven de game.", "Your boundaries always come before the game.")}</span></div>
       </div>}
       {step === 1 && <div className="onboarding-features">
@@ -47,8 +47,11 @@ export default function Onboarding({ language = "nl", onComplete }: { language?:
       </div>}
       {step === 2 && <div className="onboarding-install">
         <p>{t("Je kunt AFTER HOURS op je beginscherm zetten, zodat het meer als een app aanvoelt.", "Add AFTER HOURS to your home screen for a more app-like experience.")}</p>
-        <div className="onboarding-tabs"><button className={platform === "iphone" ? "selected" : ""} onClick={() => setPlatform("iphone")}>iPhone</button><button className={platform === "android" ? "selected" : ""} onClick={() => setPlatform("android")}>Android</button></div>
-        {platform === "iphone" ? <ol><li>{t("Open AFTER HOURS in Safari.", "Open AFTER HOURS in Safari.")}</li><li>{t("Tik op de Deel-knop.", "Tap the Share button.")}</li><li>{t("Kies ‘Zet op beginscherm’.", "Choose ‘Add to Home Screen’.")}</li><li>{t("Tik op ‘Voeg toe’.", "Tap ‘Add’.")}</li></ol> : <ol><li>{t("Open AFTER HOURS in Chrome.", "Open AFTER HOURS in Chrome.")}</li><li>{t("Open het menu ⋮.", "Open the ⋮ menu.")}</li><li>{t("Kies ‘App installeren’ of ‘Toevoegen aan startscherm’.", "Choose ‘Install app’ or ‘Add to Home Screen’.")}</li><li>{t("Bevestig met ‘Installeren’.", "Confirm with ‘Install’.")}</li></ol>}
+        <div className="onboarding-tabs" role="group" aria-label={t("Kies je apparaat", "Choose your device")}>
+          <button type="button" className={platform === "iphone" ? "selected" : ""} aria-pressed={platform === "iphone"} onClick={() => setPlatform("iphone")}>iPhone</button>
+          <button type="button" className={platform === "android" ? "selected" : ""} aria-pressed={platform === "android"} onClick={() => setPlatform("android")}>Android</button>
+        </div>
+        {platform === "iphone" ? <ol><li>{t("Open AFTER HOURS in Safari.", "Open AFTER HOURS in Safari.")}</li><li>{t("Tik op de Deel-knop.", "Tap the Share button.")}</li><li>{t("Kies ‘Zet op beginscherm’.", "Choose ‘Add to Home Screen’.’")}</li><li>{t("Tik op ‘Voeg toe’.", "Tap ‘Add’.")}</li></ol> : <ol><li>{t("Open AFTER HOURS in Chrome.", "Open AFTER HOURS in Chrome.")}</li><li>{t("Open het menu ⋮.", "Open the ⋮ menu.")}</li><li>{t("Kies ‘App installeren’ of ‘Toevoegen aan startscherm’.", "Choose ‘Install app’ or ‘Add to Home Screen’.")}</li><li>{t("Bevestig met ‘Installeren’.", "Confirm with ‘Install’.")}</li></ol>}
         <div className="onboarding-install-tip"><Download size={16}/>{t("Je kunt dit ook later doen via het browsermenu.", "You can also do this later from your browser menu.")}</div>
       </div>}
       {step === 3 && <div className="onboarding-trailer">
@@ -57,9 +60,9 @@ export default function Onboarding({ language = "nl", onComplete }: { language?:
       </div>}
     </section>
     <footer className="onboarding-actions">
-      <button className="onboarding-later" onClick={finish}>{t("Later","Later")}</button>
-      <div>{step > 0 && <button className="onboarding-back" onClick={() => setStep((value) => Math.max(0, value - 1))} aria-label={t("Vorige stap","Previous step")}><ArrowLeft size={16}/></button>}
-        {step < 3 ? <button className="onboarding-next" onClick={() => setStep((value) => Math.min(3, value + 1))}>{t("Verder","Continue")} <ArrowRight size={16}/></button> : <button className="onboarding-next" onClick={finish}>{t("Naar AFTER HOURS","Enter AFTER HOURS")} <ArrowRight size={16}/></button>}
+      <button type="button" className="onboarding-later" onClick={finish}>{t("Later","Later")}</button>
+      <div>{step > 0 && <button type="button" className="onboarding-back" onClick={() => setStep((value) => Math.max(0, value - 1))} aria-label={t("Vorige stap","Previous step")}><ArrowLeft size={16}/></button>}
+        {step < 3 ? <button type="button" className="onboarding-next" onClick={() => setStep((value) => Math.min(3, value + 1))}>{t("Verder","Continue")} <ArrowRight size={16}/></button> : <button type="button" className="onboarding-next" onClick={finish}>{t("Naar AFTER HOURS","Enter AFTER HOURS")} <ArrowRight size={16}/></button>}
       </div>
     </footer>
   </main>;
