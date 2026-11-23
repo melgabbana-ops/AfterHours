@@ -1,6 +1,6 @@
 # AFTER HOURS product direction
 
-**Locked on 24 November 2026.** This document is the current source of truth for design and product acceptance. It supersedes earlier palette instructions in old prompts, archived briefs, branches and pull requests.
+**Locked on 24 November 2026.** This document is the current source of truth for design and product acceptance. It supersedes earlier palette instructions in old prompts, archived briefs, branches and pull requests. The approved palette is black, charcoal, champagne-gold, white and warm grey only.
 
 ## Brand and visual system
 
