@@ -14,6 +14,8 @@ describe("private mood-history deletion proposal", () => {
     expect(normalized).toContain("get diagnostics v_deleted = row_count");
     expect(normalized).toContain("return v_deleted = 1");
     expect(normalized).toContain("returns boolean");
+    expect(normalized).toContain("create function public.delete_session_mood_event(p_event_id uuid)");
+    expect(normalized).not.toContain("create or replace function public.delete_session_mood_event");
   });
 
   it("grants the RPC only to authenticated users without table-wide delete access", () => {
