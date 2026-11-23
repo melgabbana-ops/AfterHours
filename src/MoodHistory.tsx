@@ -1,9 +1,10 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Download, History, RefreshCw, Trash2 } from "lucide-react";
 import { loadMoodHistoryRemote, type MoodCode, type MoodEvent, type MoodPhase } from "./services/moods";
 import { supabaseConfigured } from "./services/supabase";
 import { buildMoodHistoryCsv, filterMoodHistoryEvents, readLocalMoodHistoryEvents, removeLocalMoodHistoryEvent, type MoodHistoryFilter } from "./moodHistory";
 import "./MoodHistory.css";
+import { createMoodHistoryRequestGuard } from "./moodHistoryRequest";
 
 type MoodHistorySource = "local" | "remote";
 const label: Record<MoodCode, [string, string]> = {
@@ -14,7 +15,7 @@ const label: Record<MoodCode, [string, string]> = {
 const phaseLabel: Record<MoodPhase, [string, string]> = { before: ["Vooraf", "Before"], during: ["Tijdens", "During"], after: ["Achteraf", "Aftercare"] };
 
 
-export default function MoodHistory({ profileId, language }: { profileId: string; language: "nl" | "en" }) {
+export default function MoodHistory({ profileId, accountId, language }: { profileId: string; accountId: string | null; language: "nl" | "en" }) {
   const [events, setEvents] = useState<MoodEvent[]>([]);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
@@ -24,22 +25,43 @@ export default function MoodHistory({ profileId, language }: { profileId: string
   const [pendingDelete, setPendingDelete] = useState<string | null>(null);
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
 
+  const requestGuardRef = useRef<ReturnType<typeof createMoodHistoryRequestGuard> | null>(null);
+  if (requestGuardRef.current === null) requestGuardRef.current = createMoodHistoryRequestGuard();
+
   const refresh = useCallback(async () => {
-    setLoading(true); setVisibleCount(10); setMessage(""); setPendingDelete(null);
+    const requestGuard = requestGuardRef.current;
+    if (!requestGuard) return;
+    const requestId = requestGuard.begin();
+    const isCurrent = () => requestGuard.isCurrent(requestId);
+
+    // Never leave the previous account's private entries visible while a new
+    // account history request is loading.
+    setLoading(true); setEvents([]); setSource("local"); setVisibleCount(10); setMessage(""); setPendingDelete(null);
     if (!supabaseConfigured) {
-      setSource("local"); setEvents(readLocalMoodHistoryEvents(profileId)); setMessage(t("Alleen lokaal op dit apparaat opgeslagen.", "Stored locally on this device only.")); setLoading(false); return;
+      if (!isCurrent()) return;
+      setSource("local"); setEvents(readLocalMoodHistoryEvents(profileId)); setMessage(t("Alleen lokaal op dit apparaat opgeslagen.", "Stored locally on this device only."));
+      setLoading(false);
+      return;
     }
     try {
       const remote = await loadMoodHistoryRemote(40);
+      if (!isCurrent()) return;
       if (remote) { setSource("remote"); setEvents(remote); setMessage(t("Privé opgeslagen bij je account.", "Privately stored with your account.")); }
       else { setSource("local"); setEvents(readLocalMoodHistoryEvents(profileId)); setMessage(t("Alleen lokaal op dit apparaat opgeslagen.", "Stored locally on this device only.")); }
     } catch {
+      if (!isCurrent()) return;
       setSource("local"); setEvents(readLocalMoodHistoryEvents(profileId));
       setMessage(t("Serverhistorie niet beschikbaar. Dit toont alleen lokale vermeldingen.", "Server history unavailable. Showing local entries only."));
-    } finally { setLoading(false); }
-  }, [profileId, language]);
+    } finally {
+      if (isCurrent()) setLoading(false);
+    }
+  // The authenticated owner can change while the device-local profile id stays the same.
+  }, [profileId, accountId, language]);
 
-  useEffect(() => { void refresh(); }, [refresh]);
+  useEffect(() => {
+    void refresh();
+    return () => { requestGuardRef.current?.invalidate(); };
+  }, [refresh]);
 
   const filteredEvents = filterMoodHistoryEvents(events, filter);
   const visibleEvents = filteredEvents.slice(0, visibleCount);
