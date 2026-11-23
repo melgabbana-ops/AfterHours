@@ -157,6 +157,9 @@ describe("AFTER HOURS private world storage", () => {
       status: "active",
       started_at: expect.any(String),
     }));
+    const consentWrite = mocks.insert.mock.calls[1][0];
+    const activationWrite = mocks.update.mock.calls[0][0];
+    expect(Date.parse(activationWrite.started_at)).toBeGreaterThan(Date.parse(consentWrite.consented_at));
     expect(mocks.eq).toHaveBeenCalledWith("status", "ready");
     expect(mocks.insert.mock.invocationCallOrder[1]).toBeLessThan(mocks.update.mock.invocationCallOrder[0]);
   });

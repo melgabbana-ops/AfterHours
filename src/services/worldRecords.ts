@@ -121,7 +121,7 @@ export async function createExperienceRun(args: {
   if (!args.sceneKey.trim() || !Number.isInteger(args.totalSteps) || args.totalSteps < 1 || args.totalSteps > 40) {
     throw new Error("Invalid experience scene.");
   }
-  const now = new Date().toISOString();
+  const draftCreatedAt = new Date().toISOString();
   // A run stays an inactive draft until the owner's consent row is persisted.
   // The database proposal also rejects direct active inserts.
   const { data: run, error } = await supabase!
@@ -135,7 +135,7 @@ export async function createExperienceRun(args: {
       total_steps: args.totalSteps,
       interaction_log: [],
       consent_version: "1.0",
-      updated_at: now,
+      updated_at: draftCreatedAt,
     })
     .select("id")
     .single();
@@ -154,9 +154,12 @@ export async function createExperienceRun(args: {
     return !cleanupError && Boolean(data);
   };
 
+  // Timestamp consent immediately before its insert, then timestamp activation only
+  // after the database confirms that the consent row has been persisted.
+  const consentedAt = new Date().toISOString();
   const { data: consent, error: consentError } = await supabase!
     .from("afterhours_experience_run_consents")
-    .insert({ run_id: run.id, user_id: user.id, consent_version: "1.0", consented_at: now })
+    .insert({ run_id: run.id, user_id: user.id, consent_version: "1.0", consented_at: consentedAt })
     .select("id")
     .single();
   if (consentError || !consent) {
@@ -168,9 +171,12 @@ export async function createExperienceRun(args: {
     );
   }
 
+  // Use a fresh timestamp after the consent insert has succeeded. Keep it
+  // strictly later than the persisted consent timestamp even within one clock tick.
+  const startedAt = new Date(Math.max(Date.now(), Date.parse(consentedAt) + 1)).toISOString();
   const { data: activatedRun, error: activationError } = await supabase!
     .from("afterhours_experience_runs")
-    .update({ status: "active", started_at: now, updated_at: now })
+    .update({ status: "active", started_at: startedAt, updated_at: startedAt })
     .eq("id", run.id)
     .eq("user_id", user.id)
     .eq("status", "ready")
