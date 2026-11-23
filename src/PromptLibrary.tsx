@@ -417,12 +417,19 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
   const recognitionProfileIdRef = React.useRef<string | null>(null);
   const voiceProfileIdRef = React.useRef(playerId);
   voiceProfileIdRef.current = playerId;
+  const cancelCurrentVoiceRecognition = () => {
+    const recognition = recognitionRef.current;
+    recognitionRef.current = null;
+    recognitionProfileIdRef.current = null;
+    stopVoiceRecognition(recognition);
+  };
+
   React.useEffect(() => {
     if (!experienceStartBlockedReason || !activeGame) return;
     removeStoryCheckpoint();
+    cancelCurrentVoiceRecognition();
     try {
       window.speechSynthesis?.cancel();
-      recognitionRef.current?.stop();
     } catch { /* Losing access must stop the guided game even if speech APIs fail. */ }
     setVoiceListening(false);
     setVoicePaused(true);
@@ -491,13 +498,6 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
     }
     setActiveVariant(null);
     return true;
-  };
-
-  const cancelCurrentVoiceRecognition = () => {
-    const recognition = recognitionRef.current;
-    recognitionRef.current = null;
-    recognitionProfileIdRef.current = null;
-    stopVoiceRecognition(recognition);
   };
 
   const createDomReply = (spoken: string, safetyIntent = getCurrentVoiceSafetyIntent(spoken)) => {

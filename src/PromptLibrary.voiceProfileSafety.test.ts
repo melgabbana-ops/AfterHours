@@ -17,6 +17,17 @@ describe("Prompt Library voice profile lifecycle", () => {
     expect(promptLibrarySource).toContain("setVoiceTranscript(\"\");");
     expect(promptLibrarySource).toContain("setDomReply(\"\");");
   });
+  it("invalidates pending speech callbacks when consent or account access blocks an active game", () => {
+    const start = promptLibrarySource.indexOf("if (!experienceStartBlockedReason || !activeGame) return;");
+    const end = promptLibrarySource.indexOf("}, [experienceStartBlockedReason, activeGame, sessionMode]);", start);
+    const effect = promptLibrarySource.slice(start, end);
+    expect(effect).toContain("cancelCurrentVoiceRecognition();");
+    expect(effect.indexOf("cancelCurrentVoiceRecognition();")).toBeLessThan(effect.indexOf("window.speechSynthesis?.cancel();"));
+    expect(effect).not.toContain("recognitionRef.current?.stop()");
+    expect(effect).toContain("setVoiceListening(false);");
+    expect(effect).toContain("setVoicePaused(true);");
+  });
+
   it("detaches pending browser callbacks when the user manually stops voice input", () => {
     const start = promptLibrarySource.indexOf("const stopVoiceReply =");
     const end = promptLibrarySource.indexOf("const resumeVoiceExperience", start);
