@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { bindVaultAutoLock, type VaultAutoLockReason } from "./vaultAutoLock";
+import { canContinuePrivateJournalUnlock } from "./privateJournalUnlock";
 import { ArrowLeft, BookOpen, LockKeyhole, LockOpen, Plus, Save, Trash2 } from "lucide-react";
 import {
   createPrivateJournalVault,
@@ -61,9 +62,9 @@ export default function AftercareJournal({ ownerId, language, onClose }: { owner
   useEffect(() => bindVaultAutoLock(
     window,
     document,
-    () => key !== null,
+    () => key !== null || busy,
     (reason) => lock(reason),
-  ), [key, lock]);
+  ), [key, busy, lock]);
 
   useEffect(() => () => {
     // Invalidate pending crypto/storage work when the journal is closed or unmounted.
@@ -73,6 +74,11 @@ export default function AftercareJournal({ ownerId, language, onClose }: { owner
   const openVault = async (event: React.FormEvent) => {
     event.preventDefault();
     const generation = lockGeneration.current;
+    const canContinueUnlock = () => canContinuePrivateJournalUnlock(
+      generation,
+      lockGeneration.current,
+      document.visibilityState,
+    );
     setBusy(true);
     setError("");
     setMessage("");
@@ -85,8 +91,11 @@ export default function AftercareJournal({ ownerId, language, onClose }: { owner
         unlocked = await createPrivateJournalVault(passphrase, journalStorage, () => generation === lockGeneration.current && document.visibilityState === "visible");
         setVaultExists(true);
       }
+      // Do not decrypt/load private entries if the unlock was cancelled by
+      // backgrounding or unmounting while passphrase verification was pending.
+      if (!canContinueUnlock()) return;
       const loaded = await loadPrivateJournalEntries(unlocked, journalStorage);
-      if (generation !== lockGeneration.current || document.visibilityState !== "visible") return;
+      if (!canContinueUnlock()) return;
       setKey(unlocked);
       setEntries(loaded);
       setActiveId(null);
