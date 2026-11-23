@@ -17,6 +17,24 @@ describe("Prompt Library voice profile lifecycle", () => {
     expect(promptLibrarySource).toContain("setVoiceTranscript(\"\");");
     expect(promptLibrarySource).toContain("setDomReply(\"\");");
   });
+  it("detaches pending browser callbacks when the user manually stops voice input", () => {
+    const start = promptLibrarySource.indexOf("const stopVoiceReply =");
+    const end = promptLibrarySource.indexOf("const resumeVoiceExperience", start);
+    const handler = promptLibrarySource.slice(start, end);
+    expect(handler).toContain("cancelCurrentVoiceRecognition();");
+    expect(handler).toContain("setVoiceListening(false);");
+    expect(handler).not.toContain("recognitionRef.current?.stop()");
+  });
+
+  it("detaches the recognizer before applying a spoken STOP or PAUSE action", () => {
+    const start = promptLibrarySource.indexOf("const createDomReply =");
+    const end = promptLibrarySource.indexOf("const domTitle", start);
+    const handler = promptLibrarySource.slice(start, end);
+    expect(handler).toContain("cancelCurrentVoiceRecognition();");
+    expect(handler.indexOf("cancelCurrentVoiceRecognition();")).toBeLessThan(handler.indexOf('onSafetyAction?.("stop")'));
+    expect(handler.indexOf("cancelCurrentVoiceRecognition();")).toBeLessThan(handler.indexOf('onSafetyAction?.("pause")'));
+  });
+
   it("keeps voice input to one reply per tap and warns that it is not continuous safeword monitoring", () => {
     expect(promptLibrarySource).toContain("recognition.continuous = false;");
     expect(promptLibrarySource).toContain('aria-describedby="voice-mode-safety-note"');
