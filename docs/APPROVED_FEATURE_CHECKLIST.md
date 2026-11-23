@@ -9,6 +9,8 @@
 - Current application repository, especially `src/`, `public/`, Supabase migrations and PR #1.
 - This list distinguishes approved scope from proof of implementation. A written requirement or a passing build does not prove the feature works end-to-end.
 
+> **Current product-direction lock (24 November 2026):** `docs/PRODUCT_DIRECTION.md` is authoritative and supersedes every earlier palette or visual-direction instruction in this checklist. Use only black, charcoal, champagne-gold, white and warm grey. No purple, aubergine, plum, violet, lilac, purple smoke, purple glow or purple gradients. The functional and safety requirements below remain in scope unless they conflict with this lock.
+
 ## Status vocabulary
 - [ ] **Not verified / to do:** no current end-to-end evidence yet.
 - [~] **Partial:** screen or core code exists, but behavior, persistence, security, integration or testing is incomplete.
@@ -22,11 +24,11 @@
 - [ ] One unified visual world across app icon, splash, onboarding, installation, trailer, character selection, home, gameplay, XP, ranks, avatars, music, mood checks, aftercare, private notes, media, notifications, social assets and admin.
 - [ ] Preserve the official supplied AFTER HOURS AH monogram/logo, including crescent moon and hanging ornamental detail. Never invent an alternate logo, redraw it with AI or replace it with plain text.
 - [ ] Place approved identity consistently on splash/loading, favicon, app icon, navigation, rank frames, badges/achievements, profile and social templates.
-- [ ] **Design-first override palette (latest visual source):** #070509, #100712, #180A20, #291033, #6D168F, #8E24B7, #C89445, #D7A84F, #F3C96B, #F4EBDD. Black/deep purple are structural, violet is atmospheric, champagne/metallic gold is for key actions, borders, icons, ranks and ornaments. STOP/danger uses a clearly recognizable danger treatment.
-- [ ] The earlier master palette (#09050D, #110914, #160D1C, #1D1023, #291333, #DDB85B, #F0D58A, #8D6A2D, #7B2CBF, #B13CC7, #F5EFF7, #B7A9BC, #796C80, #E54858) is a historical reference, not permission to introduce arbitrary colors. Reconcile any implementation tokens with the later override.
+- [x] **Current locked palette (24 November 2026):** obsidian #050505, warm black #090807, raised charcoal #100D0A / #17120C, champagne #C89445, gold #D7A84F, warm highlight #F3D49A, ivory #F4EBDD, warm copy #E5D8C4 and muted text #B9AD9D. STOP remains a clearly recognizable semantic danger treatment. No purple-family colors are approved.
+- [x] All earlier purple/aubergine/violet palettes are rejected historical references. Do not reuse their color values or translate them into gradients, image overlays, glows, borders, rank effects or media frames.
 - [ ] Luxury high-contrast serif for logo, principal headings and ranks; clean modern sans-serif for controls and body; intentional tracking on uppercase micro-labels.
-- [ ] Use dark glass cards, roughly 22px corner radius, fine gold/purple borders, soft shadow and inner glow; gold/champagne primary buttons; transparent dark secondary controls with gold outline; restrained purple glow for selected states.
-- [ ] Cinematic art direction: black velvet, deep-purple fabric, candlelight, purple smoke, warm gold reflections, deep shadows, restrained bokeh and ornaments. Reserve photographic/cinematic imagery for major screens, with dark overlays; do not put photography behind every small component.
+- [ ] Use dark glass cards, roughly 22px corner radius, fine champagne-gold borders, restrained warm-gold highlights and shadows; champagne primary buttons; transparent dark secondary controls with gold outline.
+- [ ] Cinematic art direction: black velvet, charcoal textures, candlelight, warm bronze and champagne reflections, deep shadows, restrained amber bokeh and fine ornaments. Reserve photography for major screens with dark overlays; do not put photography behind every small component.
 - [ ] Premium luxury after-dark club, cinematic and adult. Never generic SaaS/dashboard, dating-app/social-clone styling, white corporate screens, childish arcade visuals, cartoon characters, excessive neon, random icons, cheap stock photography, generic Bootstrap/Material appearance or inconsistent default controls.
 - [ ] The same character universe, card/button/border/icon system, typography, logo, rank frames and visual language across every screen; redesign any outlier before release.
 - [ ] Character artwork must be tasteful, cinematic, non-explicit and non-sexualized. The app remains adult-only and consent-first.
@@ -35,7 +37,7 @@
 ## B. App icon, PWA shell, splash, onboarding, age gate and trailer
 - [~] Square AH-style PNG icon assets at 192×192 and 512×512, Apple touch PNG reference and favicon are present; verify exact official logo match and iOS/Android device rendering.
 - [ ] Web app manifest: name and short name AFTER HOURS, display `standalone`, theme/background colors from the locked design system.
-- [ ] Cinematic splash: dark background, official AH logo, purple glow, gold loading indicator and smooth transition into the app.
+- [ ] Cinematic splash: dark background, official AH logo, subtle warm-gold highlight, gold loading indicator and smooth transition into the app.
 - [ ] First-open onboarding sequence, with completion state persisted so it does not repeat automatically.
 - [ ] Onboarding screen 1: AFTER HOURS and approved line “MEER DAN EEN GAME. EEN ERVARING.”
 - [ ] Onboarding screen 2: “DIT KUN JE VERWACHTEN”, explaining commands, XP/ranks, avatars/unlocks, mood checks, music/SFX, photo/video/voice, private media, aftercare, surprise events and boss rounds.
@@ -53,7 +55,7 @@
 - [ ] Persist chosen character and appearance across sessions/devices wherever account sync is supported.
 - [ ] The same chosen character identity evolves visually with rank. Do not replace the person with a random unrelated avatar after ranking up.
 - [ ] Rank-driven cosmetics: outfit, accessories, lighting, frame, badge, aura and premium styling.
-- [ ] Suggested visual rank progression from master spec: Level 1 subtle violet/dark frame; Level 2 silver/purple; Level 3 black/gold ornamental; Level 4 geometric gold; Level 5 purple/gold ornament; Level 6 black/champagne-gold; Level 7 signature AFTER HOURS black glass, gold edge, purple glow and ornamental corners.
+- [ ] Suggested visual rank progression: Level 1 restrained charcoal frame; Level 2 brushed bronze; Level 3 black/gold ornamental; Level 4 geometric champagne; Level 5 layered gold ornament; Level 6 black/champagne-gold; Level 7 signature AFTER HOURS black glass, fine gold edge and ornamental corners. Rank cosmetics never change permissions or safety state.
 - [ ] Premium profile/settings: display name, unique AFTER HOURS username/AH-ID, character/identity, rank, level, XP bar, progress to next level, session statistics, recent session history and Achievements & Collection.
 - [ ] Avatar choices, frames, accessories and unlockables should be driven by persistent user state rather than decorative-only buttons.
 - [ ] Preserve approved profile naming and username validation rules and show useful errors when save/network operations fail.
@@ -63,7 +65,7 @@
 - [ ] Existing approved threshold sequence: 0, 250, 600, 1200, 2000, 3500, 5000 XP.
 - [ ] Localized Dutch descriptions may be used without replacing the fixed English rank labels. The master prompt associated the ranks with “De Nieuwsgierige”, “De Ingewijde”, “De Toegewijde”, “De Gedisciplineerde”, “De Gefascineerde”, “De Gebondene”, “De Nachteling”.
 - [ ] Rank/progression screen with ornate frame, avatar, level, XP, next unlock and clear ladder.
-- [ ] Level-up reveal when crossing a rank threshold: briefly pause progression, show “NEW RANK UNLOCKED”, character/avatar, new frame, rank name, XP and unlocks; restrained gold particles/purple aura and short cinematic sound, never childish confetti.
+- [ ] Level-up reveal when crossing a rank threshold: briefly pause progression, show “NEW RANK UNLOCKED”, character/avatar, new frame, rank name, XP and unlocks; restrained warm-gold particles and short cinematic sound, never childish confetti.
 - [ ] XP event history stores user_id, session_id, command_id, event_type, base_xp, multiplier, final_xp and created_at.
 - [ ] Example base XP table in the master prompt, subject to product rules and no-safety-penalty constraints: Easy +10; Medium +15; Hard +20; Boss step +25; Voice +15; Photo +15; Video +20; Choice +15; boss round completion +75; daily command +20; surprise experience +25; first game +50; new category mastered +50; game completion 15 min +50, 30 min +100, 60 min +150.
 - [ ] XP award rules must be centralized, explainable, persistent and idempotent. No double awards from reloads, retries, repeated webhooks or repeated UI clicks.
@@ -99,7 +101,7 @@
 ## G. Session lifecycle, HUD, timer, pause/pass/stop and recovery
 - [ ] Full master flow to implement and test: AGE GATE → LOGIN → NICKNAME → CHARACTER → LIMITS → MOOD → GAME MODE → GAME START → COMMAND → XP → COMBO → NEXT → RANDOM EVENT → COMMAND → BOSS ROUND (when selected/triggered) → FINAL COMMAND → FINAL MOOD → AFTERCARE → PRIVATE NOTE → SESSION SUMMARY → GAME XP BONUS → LEVEL CHECK → LEVEL UP (if applicable) → RANK AVATAR → ACHIEVEMENT (if applicable) → COMPLETE.
 - [ ] Cinematic active-experience HUD: logo/name, nickname, rank avatar, level, rank, XP, game progress and combo at top; category, command title/instruction, timer and reward in center; persistent PAUSE, PASS and STOP controls at bottom.
-- [ ] Gold timer ring, purple atmospheric glow and minimal distractions; always-visible path to STOP.
+- [ ] Champagne-gold timer ring, restrained warm-gold highlight and minimal distractions; always-visible path to STOP.
 - [ ] Command reveal has fast cinematic fade/slide/glow. Respect reduced-motion settings.
 - [ ] Timer must survive refresh/reopen according to the saved timestamp; no timer duplication, negative time or background-tab drift.
 - [ ] Pause/resume, pass, stop-now, next command and session reset have deterministic state transitions and robust persistence failure messages.
@@ -128,7 +130,7 @@
 ## I. Aftercare, private notes and mood history
 - [ ] Aftercare starts with “De ervaring is voorbij.” and gentle guidance such as drink water, breathe calmly and take time for yourself.
 - [ ] Standalone 30-minute Aftercare Meditation remains accessible in free access without premium purchase.
-- [ ] Aftercare uses a softer, warmer light while retaining the same black/purple/gold identity.
+- [ ] Aftercare uses softer amber and champagne highlights while retaining the same black/charcoal/gold identity.
 - [~] Post-session order: FINAL MOOD → PRIVATE NOTE → SESSION SUMMARY. The completion screen now presents a bilingual, transient summary of recorded moods, completed rounds, aftercare choice, note status and completion time. Persistent summary history and full duration / command / PASS / media / combo metrics remain outstanding.
 - [~] Optional private note prompt: “Wil je iets onthouden van deze ervaring?” with fields for how the session felt, what was liked and what the user would like to change next time; save or skip is implemented in Dutch and English.
 - [~] Notes are currently scoped by owner and session in browser-local storage with created/updated timestamps and a delete action. They are not encrypted, uploaded or synchronized across devices; server-side account storage, RLS and admin isolation remain outstanding.
@@ -139,7 +141,7 @@
 
 ## J. Camera, photo, video, voice, and private media vault
 - [ ] Reusable AfterHoursCameraFrame with CLEAN, AFTER HOURS and CINEMATIC modes.
-- [ ] AFTER HOURS frame uses dark purple, gold border, subtle official logo, command title, optional nickname and optional timer; never cover the face.
+- [ ] AFTER HOURS frame uses deep black/charcoal, fine gold border, subtle official logo, command title, optional nickname and optional timer; never cover the face.
 - [ ] Capture controls, where browser/device capability permits: FLIP CAMERA, START, STOP, RETAKE, SAVE PRIVATELY and DELETE.
 - [ ] Support photo, video and voice-recording flows where browser permission and platform APIs allow; gracefully handle denial, unsupported APIs, interruption and storage errors.
 - [ ] Request camera/microphone permissions only in direct response to a clear user action and after any required consent/command permission.
