@@ -584,11 +584,19 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
       recognition.interimResults = false;
       recognition.maxAlternatives = 1;
       recognition.onstart = () => { if (isCurrentRecognition()) setVoiceListening(true); };
-      recognition.onend = () => { if (isCurrentRecognition()) setVoiceListening(false); };
-      recognition.onerror = (event: any) => {
+      recognition.onend = () => {
         if (!isCurrentRecognition()) return;
         setVoiceListening(false);
-        setVoiceError(event?.error === "not-allowed" ? t("Microfoontoegang is geblokkeerd. Geef AFTER HOURS toestemming in je browserinstellingen.", "Microphone access is blocked. Allow AFTER HOURS in your browser settings.") : t("Ik kon je niet goed verstaan. Probeer het opnieuw of controleer je microfoon.", "I couldn’t understand that. Please try again or check your microphone."));
+        cancelCurrentVoiceRecognition();
+      };
+      recognition.onerror = (event: any) => {
+        if (!isCurrentRecognition()) return;
+        const message = event?.error === "not-allowed"
+          ? t("Microfoontoegang is geblokkeerd. Geef AFTER HOURS toestemming in je browserinstellingen.", "Microphone access is blocked. Allow AFTER HOURS in your browser settings.")
+          : t("Ik kon je niet goed verstaan. Probeer het opnieuw of controleer je microfoon.", "I couldn’t understand that. Please try again or check your microphone.");
+        cancelCurrentVoiceRecognition();
+        setVoiceListening(false);
+        setVoiceError(message);
       };
       recognition.onresult = (event: any) => {
         if (!isCurrentRecognition()) return;
