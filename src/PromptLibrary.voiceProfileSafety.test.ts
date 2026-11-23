@@ -35,6 +35,24 @@ describe("Prompt Library voice profile lifecycle", () => {
     expect(handler.indexOf("cancelCurrentVoiceRecognition();")).toBeLessThan(handler.indexOf('onSafetyAction?.("pause")'));
   });
 
+  it("releases a completed one-shot recognizer after the browser ends it", () => {
+    const start = promptLibrarySource.indexOf("recognition.onend =");
+    const end = promptLibrarySource.indexOf("recognition.onerror =", start);
+    const handler = promptLibrarySource.slice(start, end);
+    expect(handler).toContain("if (!isCurrentRecognition()) return;");
+    expect(handler).toContain("setVoiceListening(false);");
+    expect(handler).toContain("cancelCurrentVoiceRecognition();");
+  });
+
+  it("detaches the recognizer before reporting a browser recognition error", () => {
+    const start = promptLibrarySource.indexOf("recognition.onerror =");
+    const end = promptLibrarySource.indexOf("recognition.onresult =", start);
+    const handler = promptLibrarySource.slice(start, end);
+    expect(handler).toContain("if (!isCurrentRecognition()) return;");
+    expect(handler.indexOf("cancelCurrentVoiceRecognition();")).toBeLessThan(handler.indexOf("setVoiceError(message);"));
+    expect(handler).toContain("setVoiceListening(false);");
+  });
+
   it("keeps voice input to one reply per tap and warns that it is not continuous safeword monitoring", () => {
     expect(promptLibrarySource).toContain("recognition.continuous = false;");
     expect(promptLibrarySource).toContain('aria-describedby="voice-mode-safety-note"');
@@ -42,7 +60,11 @@ describe("Prompt Library voice profile lifecycle", () => {
     expect(promptLibrarySource).toContain("Spraakherkenning verwerkt één antwoord per druk op de knop.");
     expect(promptLibrarySource).toContain("Speech recognition processes one response per button press.");
     expect(promptLibrarySource).toContain("Always agree on a non-verbal stop signal too");
-    expect(promptLibrarySource).toContain("recognition.onend = () => { if (isCurrentRecognition()) setVoiceListening(false); };");
+    expect(promptLibrarySource).toContain("recognition.onend = () => {");
+    const onEndStart = promptLibrarySource.indexOf("recognition.onend =");
+    const onErrorStart = promptLibrarySource.indexOf("recognition.onerror =", onEndStart);
+    const onEndHandler = promptLibrarySource.slice(onEndStart, onErrorStart);
+    expect(onEndHandler).toContain("cancelCurrentVoiceRecognition();");
   });
 
 });
