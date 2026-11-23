@@ -23,7 +23,7 @@ vi.mock("./supabase", () => ({
   supabase: { auth: { getUser: mocks.getUser }, from: mocks.from },
 }));
 
-import { createExperienceInvitation, loadExperienceInvitations, deleteExperienceRun, ExperienceRunDeletionBlockedError, hasActiveExperienceRuns, loadExperienceRuns, loadWorldRecords, resumeExperienceRun, saveWorldRecord, updateExperienceRun } from "./worldRecords";
+import { createExperienceInvitation, loadExperienceInvitations, deleteExperienceRun, ExperienceRunDeletionBlockedError, ExperienceRunResumeRollbackError, hasActiveExperienceRuns, loadExperienceRuns, loadWorldRecords, resumeExperienceRun, saveWorldRecord, updateExperienceRun } from "./worldRecords";
 
 const chain = {
   select: mocks.select,
@@ -50,7 +50,7 @@ describe("AFTER HOURS private world storage", () => {
     mocks.eq.mockReturnValue(chain);
     mocks.in.mockReturnValue(chain);
     mocks.gt.mockReturnValue(chain);
-    mocks.is.mockResolvedValue({ error: null });
+    mocks.is.mockReturnValue(chain);
     mocks.order.mockReturnValue(chain);
     mocks.limit.mockReturnValue(chain);
     mocks.upsert.mockReturnValue(chain);
@@ -247,7 +247,8 @@ describe("AFTER HOURS private world storage", () => {
     mocks.maybeSingle
       .mockResolvedValueOnce({ data: { id: "run-1", total_steps: 3 }, error: null })
       .mockResolvedValueOnce({ data: { id: "consent-1" }, error: null })
-      .mockResolvedValueOnce({ data: null, error: null });
+      .mockResolvedValueOnce({ data: null, error: null })
+      .mockResolvedValueOnce({ data: { id: "consent-1" }, error: null });
 
     await expect(resumeExperienceRun({
       runId: "run-1",
@@ -257,6 +258,28 @@ describe("AFTER HOURS private world storage", () => {
 
     expect(mocks.gt).toHaveBeenCalledWith("total_steps", 2);
     expect(mocks.update).toHaveBeenNthCalledWith(3, expect.objectContaining({ revoked_at: expect.any(String) }));
+    expect(mocks.select).toHaveBeenLastCalledWith("id");
+  });
+
+  it.each([
+    ["database error", { data: null, error: { message: "RLS denied" } }],
+    ["no confirmed row", { data: null, error: null }],
+  ])("fails closed when temporary consent revocation cannot be confirmed (%s)", async (_caseName, rollbackResult) => {
+    mocks.maybeSingle
+      .mockResolvedValueOnce({ data: { id: "run-1", total_steps: 3 }, error: null })
+      .mockResolvedValueOnce({ data: { id: "consent-1" }, error: null })
+      .mockResolvedValueOnce({ data: null, error: null })
+      .mockResolvedValueOnce(rollbackResult);
+
+    await expect(resumeExperienceRun({
+      runId: "run-1",
+      expectedUserId: "user-a",
+      currentStep: 2,
+    })).rejects.toBeInstanceOf(ExperienceRunResumeRollbackError);
+
+    expect(mocks.update).toHaveBeenNthCalledWith(3, { revoked_at: expect.any(String) });
+    expect(mocks.is).toHaveBeenCalledWith("revoked_at", null);
+    expect(mocks.select).toHaveBeenLastCalledWith("id");
   });
 
   it.each([
