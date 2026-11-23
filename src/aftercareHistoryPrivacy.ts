@@ -3,21 +3,23 @@ type PageLifecycleWindow = Pick<Window, "addEventListener" | "removeEventListene
 
 /**
  * Collapse private aftercare disclosures whenever the page is no longer visible.
- * The initial check also covers mounting while the document is already hidden.
+ * The initial check uses a normal state update; browser lifecycle events may use
+ * a synchronous callback so the disclosure closes before a background snapshot.
  */
 export function bindAftercareNoteAutoCollapse(
   windowTarget: PageLifecycleWindow,
   documentTarget: VisibilityDocument,
   collapse: () => void,
+  collapseSynchronously: () => void = collapse,
 ): () => void {
   const collapseWhenHidden = () => {
-    if (documentTarget.visibilityState !== "visible") collapse();
+    if (documentTarget.visibilityState !== "visible") collapseSynchronously();
   };
-  const collapseOnPageHide = () => collapse();
+  const collapseOnPageHide = () => collapseSynchronously();
 
   documentTarget.addEventListener("visibilitychange", collapseWhenHidden);
   windowTarget.addEventListener("pagehide", collapseOnPageHide);
-  collapseWhenHidden();
+  if (documentTarget.visibilityState !== "visible") collapse();
 
   return () => {
     documentTarget.removeEventListener("visibilitychange", collapseWhenHidden);
