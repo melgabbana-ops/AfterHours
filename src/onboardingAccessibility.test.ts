@@ -27,6 +27,7 @@ describe("onboarding accessibility", () => {
     expect(onboardingSource).toContain('Open AFTER HOURS in Safari.');
     expect(onboardingSource).toContain('Open AFTER HOURS in Chrome.');
     expect(onboardingSource).toContain('Kies ‘Zet op beginscherm’.');
+    expect(onboardingSource).toContain("Choose ‘Add to Home Screen’.");
     expect(onboardingSource).toContain('Kies ‘App installeren’ of ‘Toevoegen aan startscherm’.');
   });
 });
