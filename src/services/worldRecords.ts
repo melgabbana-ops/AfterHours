@@ -217,6 +217,13 @@ export async function updateExperienceRun(args: {
   }
 }
 
+export class ExperienceRunResumeRollbackError extends Error {
+  constructor() {
+    super("Temporary consent revocation could not be confirmed after a failed resume.");
+    this.name = "ExperienceRunResumeRollbackError";
+  }
+}
+
 export async function resumeExperienceRun(args: {
   runId: string;
   expectedUserId: string;
@@ -266,11 +273,17 @@ export async function resumeExperienceRun(args: {
     .select("id")
     .maybeSingle();
   if (error || !data) {
-    await supabase!
+    const { data: revokedConsent, error: revokeError } = await supabase!
       .from("afterhours_experience_run_consents")
       .update({ revoked_at: now })
       .eq("run_id", args.runId)
-      .eq("user_id", args.expectedUserId);
+      .eq("user_id", args.expectedUserId)
+      .is("revoked_at", null)
+      .select("id")
+      .maybeSingle();
+    if (revokeError || !revokedConsent) {
+      throw new ExperienceRunResumeRollbackError();
+    }
     throw new Error(error?.message ?? "This experience run could not be resumed.");
   }
 }
