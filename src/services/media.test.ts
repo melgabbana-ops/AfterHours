@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canApplyMediaOverlay, normalizePrivateMediaMimeType, safeAssignmentPrefix, safeMediaSessionFolder, safePrivateMediaFileName, validatePrivateMediaFile, validatePrivateMediaPath } from "./media";
+import { assertPrivateMediaDeletionConfirmed, canApplyMediaOverlay, normalizePrivateMediaMimeType, safeAssignmentPrefix, safeMediaSessionFolder, safePrivateMediaFileName, validatePrivateMediaFile, validatePrivateMediaPath } from "./media";
 
 describe("private media filename safety", () => {
   it("replaces empty and dot-only names with a safe filename", () => {
@@ -135,5 +135,23 @@ describe("private assignment media prefix", () => {
     const prefix = safeAssignmentPrefix("É".repeat(120));
     expect(prefix.length).toBeLessThanOrEqual(41);
     expect(prefix).toMatch(/^[a-zA-Z0-9._-]+$/);
+  });
+});
+
+describe("private media deletion confirmation", () => {
+  it("accepts exactly one confirmed deleted object", () => {
+    expect(() => assertPrivateMediaDeletionConfirmed([{ name: "private-photo.jpg" }])).not.toThrow();
+  });
+
+  it.each([
+    ["an empty response", []],
+    ["a null response", null],
+    ["a missing response", undefined],
+    ["a malformed response", [null]],
+    ["an unexpected multi-object response", [{ name: "first.jpg" }, { name: "second.jpg" }]],
+  ] as const)("rejects %s instead of reporting a successful deletion", (_label, response) => {
+    expect(() => assertPrivateMediaDeletionConfirmed(response)).toThrow(
+      "Verwijderen kon niet worden bevestigd. Het bestand staat mogelijk nog in je privékluis. Vernieuw de lijst en probeer opnieuw.",
+    );
   });
 });

@@ -154,9 +154,17 @@ export async function createPrivateMediaUrl(path: string): Promise<string> {
   return data.signedUrl;
 }
 
+/** Require Storage to confirm the single requested object was actually removed. */
+export function assertPrivateMediaDeletionConfirmed(data: readonly unknown[] | null | undefined): void {
+  if (!Array.isArray(data) || data.length !== 1 || data[0] === null || typeof data[0] !== "object") {
+    throw new Error("Verwijderen kon niet worden bevestigd. Het bestand staat mogelijk nog in je privékluis. Vernieuw de lijst en probeer opnieuw.");
+  }
+}
+
 export async function deletePrivateMedia(path: string): Promise<void> {
   const userId = await currentUserId();
   if (!validatePrivateMediaPath(path, userId)) throw new Error("Je hebt geen toegang tot dit bestand.");
-  const { error } = await supabase!.storage.from(BUCKET).remove([path]);
+  const { data, error } = await supabase!.storage.from(BUCKET).remove([path]);
   if (error) throw error;
+  assertPrivateMediaDeletionConfirmed(data);
 }
