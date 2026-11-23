@@ -43,6 +43,19 @@ export function isPrivateSessionNote(value: unknown, ownerId?: string, sessionId
     && validTimestamp(note.createdAt) && validTimestamp(note.updatedAt);
 }
 
+export function hasPrivateSessionNote(ownerId: string, sessionId: string, storage?: NoteStorage): boolean {
+  const target = resolveStorage(storage);
+  const key = storageKey(ownerId, sessionId);
+  if (!target || !key) return false;
+  try {
+    const raw = target.getItem(key);
+    if (!raw) return false;
+    return isPrivateSessionNote(JSON.parse(raw), ownerId.trim(), sessionId.trim());
+  } catch {
+    return false;
+  }
+}
+
 export function loadPrivateSessionNote(ownerId: string, sessionId: string, storage?: NoteStorage): PrivateSessionNote | null {
   const target = resolveStorage(storage);
   const key = storageKey(ownerId, sessionId);

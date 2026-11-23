@@ -108,10 +108,10 @@ describe("aftercare history privacy lock", () => {
     expect(collapseSynchronously).not.toHaveBeenCalled();
   });
 
-  it("flushes the disclosure closed on lifecycle events and resets it when the owner or session changes", () => {
+  it("uses the same disclosure cleanup for lifecycle events and profile/session changes", () => {
     expect(historyNoteSource).toContain("bindAftercareNoteAutoCollapse(\n    window,\n    document,");
-    expect(historyNoteSource).toContain("() => setExpandedFor(null),");
-    expect(historyNoteSource).toContain("() => flushSync(() => setExpandedFor(null)),");
-    expect(historyNoteSource).toContain("useEffect(() => {\n    setExpandedFor(null);\n  }, [ownerId, sessionId]);");
+    expect(historyNoteSource).toContain("const closeDisclosure = useCallback(() => setOpenNote(null), []);");
+    expect(historyNoteSource).toContain("closeDisclosure,\n    () => flushSync(closeDisclosure),");
+    expect(historyNoteSource).toContain("[ownerId, sessionId, closeDisclosure]");
   });
 });

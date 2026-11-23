@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import historyNoteSource from "../AftercareHistoryNote.tsx?raw";
 import {
   deletePrivateSessionNote,
+  hasPrivateSessionNote,
   isPrivateSessionNote,
   loadPrivateSessionNote,
   PRIVATE_NOTE_FIELD_LIMIT,
@@ -29,6 +30,24 @@ describe("browser-local aftercare notes", () => {
     expect(loadPrivateSessionNote("owner-a", "session-2", storage)).toBeNull();
   });
 
+  it("checks note availability without returning the private note payload", () => {
+    const storage = memoryStorage();
+    savePrivateSessionNote("owner-a", "session-1", draft, storage, "2026-11-19T12:00:00.000Z");
+
+    expect(hasPrivateSessionNote("owner-a", "session-1", storage)).toBe(true);
+    expect(hasPrivateSessionNote("owner-b", "session-1", storage)).toBe(false);
+    expect(hasPrivateSessionNote("owner-a", "session-2", storage)).toBe(false);
+  });
+
+  it("treats malformed or unavailable note records as absent", () => {
+    const storage = memoryStorage();
+    storage.setItem("afterhours.private-session-note.v1:owner-a:session-1", "{");
+    expect(hasPrivateSessionNote("owner-a", "session-1", storage)).toBe(false);
+
+    const broken = { getItem: () => { throw new Error("blocked"); }, setItem: () => undefined, removeItem: () => undefined };
+    expect(hasPrivateSessionNote("owner-a", "session-1", broken)).toBe(false);
+  });
+
   it("preserves createdAt while updating updatedAt", () => {
     const storage = memoryStorage();
     const first = savePrivateSessionNote("owner-a", "session-1", draft, storage, "2026-11-19T12:00:00.000Z");
@@ -54,6 +73,7 @@ describe("browser-local aftercare notes", () => {
     const storage = memoryStorage();
     storage.setItem("afterhours.private-session-note.v1:owner-a:session-1", JSON.stringify({ ...draft, ownerId: "owner-b", sessionId: "session-1", createdAt: "2026-11-19T12:00:00.000Z", updatedAt: "2026-11-19T12:00:00.000Z" }));
     expect(loadPrivateSessionNote("owner-a", "session-1", storage)).toBeNull();
+    expect(hasPrivateSessionNote("owner-a", "session-1", storage)).toBe(false);
     storage.setItem("afterhours.private-session-note.v1:owner-a:session-1", "{");
     expect(loadPrivateSessionNote("owner-a", "session-1", storage)).toBeNull();
   });
@@ -111,11 +131,22 @@ describe("browser-local aftercare notes", () => {
 
 
 describe("aftercare history disclosure", () => {
-  it("resolves notes against the current owner/session pair without an effect delay", () => {
-    expect(historyNoteSource).toContain("useMemo(");
-    expect(historyNoteSource).toContain("[ownerId, sessionId]");
-    expect(historyNoteSource).toContain("const disclosureKey = `${ownerId}:${sessionId}`;");
-    expect(historyNoteSource).toContain("const expanded = expandedFor === disclosureKey;");
+  it("loads note text only after an explicit, visible disclosure action", () => {
+    expect(historyNoteSource).toContain("const [openNote, setOpenNote] = useState");
+    expect(historyNoteSource).toContain("hasPrivateSessionNote(ownerId, sessionId)");
+    expect(historyNoteSource).toContain("if (document.visibilityState !== \"visible\") return;");
+    expect(historyNoteSource).toContain("const loaded = loadPrivateSessionNote(ownerId, sessionId);");
+    expect(historyNoteSource).toContain("setOpenNote({ key: disclosureKey, note: loaded });");
+    expect(historyNoteSource).not.toContain("useMemo(");
+    expect(historyNoteSource).not.toContain("loadPrivateSessionNote(ownerId, sessionId),");
+  });
+
+  it("clears the in-memory disclosure when the profile, session, or page visibility changes", () => {
+    expect(historyNoteSource).toContain("const closeDisclosure = useCallback(() => setOpenNote(null), []);");
+    expect(historyNoteSource).toContain("closeDisclosure();");
+    expect(historyNoteSource).toContain("() => flushSync(closeDisclosure),");
+    expect(historyNoteSource).toContain("[ownerId, sessionId, closeDisclosure]");
+    expect(historyNoteSource).toContain("{expanded && note && <div className=\"aftercare-history-note-content\">");
     expect(historyNoteSource).toContain("Deze sessienotitie is niet versleuteld.");
   });
 });

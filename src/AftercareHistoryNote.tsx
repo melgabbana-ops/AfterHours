@@ -1,8 +1,12 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { flushSync } from "react-dom";
 import { BookOpen, LockKeyhole } from "lucide-react";
 import { bindAftercareNoteAutoCollapse } from "./aftercareHistoryPrivacy";
-import { loadPrivateSessionNote, type PrivateSessionNote } from "./services/privateNotes";
+import {
+  hasPrivateSessionNote,
+  loadPrivateSessionNote,
+  type PrivateSessionNote,
+} from "./services/privateNotes";
 
 type Language = "nl" | "en";
 
@@ -12,45 +16,64 @@ export default function AftercareHistoryNote({ ownerId, sessionId, language }: {
   sessionId: string;
   language: Language;
 }) {
-  // Resolve the note synchronously for the current owner/session pair. This avoids
-  // briefly rendering the previous profile's note while an effect catches up.
-  const note: PrivateSessionNote | null = useMemo(
-    () => loadPrivateSessionNote(ownerId, sessionId),
-    [ownerId, sessionId],
-  );
-  const [expandedFor, setExpandedFor] = useState<string | null>(null);
+  const [hasNote, setHasNote] = useState(() => hasPrivateSessionNote(ownerId, sessionId));
+  const [openNote, setOpenNote] = useState<{ key: string; note: PrivateSessionNote } | null>(null);
   const disclosureKey = `${ownerId}:${sessionId}`;
-  const expanded = expandedFor === disclosureKey;
+  // A note from the previous owner/session is never rendered during the first
+  // render after props change, even before the cleanup effect runs.
+  const note = openNote?.key === disclosureKey ? openNote.note : null;
+  const expanded = note !== null;
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
 
-  // Never carry an expanded disclosure into another profile or session. The
-  // current key already renders collapsed on the first changed-props render.
-  useEffect(() => {
-    setExpandedFor(null);
-  }, [ownerId, sessionId]);
+  const closeDisclosure = useCallback(() => setOpenNote(null), []);
 
-  // Hide unencrypted local aftercare text before the browser backgrounds or
-  // snapshots the page. Keep flushSync out of effect setup itself.
+  // Refresh only the existence flag on profile/session changes. The note text
+  // itself is loaded only after an explicit user action.
+  useEffect(() => {
+    closeDisclosure();
+    setHasNote(hasPrivateSessionNote(ownerId, sessionId));
+  }, [ownerId, sessionId, closeDisclosure]);
+
+  // Do not retain unencrypted note text in component state while backgrounded.
   useEffect(() => bindAftercareNoteAutoCollapse(
     window,
     document,
-    () => setExpandedFor(null),
-    () => flushSync(() => setExpandedFor(null)),
-  ), []);
+    closeDisclosure,
+    () => flushSync(closeDisclosure),
+  ), [closeDisclosure]);
 
-  if (!note) return null;
-  const fields: Array<[string, string]> = [
+  const toggleDisclosure = () => {
+    if (expanded) {
+      closeDisclosure();
+      return;
+    }
+    if (document.visibilityState !== "visible") return;
+
+    const loaded = loadPrivateSessionNote(ownerId, sessionId);
+    if (document.visibilityState !== "visible") {
+      closeDisclosure();
+      return;
+    }
+    if (!loaded) {
+      setHasNote(false);
+      return;
+    }
+    setOpenNote({ key: disclosureKey, note: loaded });
+  };
+
+  if (!hasNote && !note) return null;
+  const fields: Array<[string, string]> = note ? [
     [t("Hoe voelde de sessie?", "How did the session feel?"), note.howFelt],
     [t("Wat was prettig?", "What felt good?"), note.whatLiked],
     [t("Wat mag anders?", "What could change?"), note.changeNextTime],
-  ];
+  ] : [];
 
   return <div className="aftercare-history-note">
-    <button type="button" className="aftercare-history-note-toggle" aria-expanded={expanded} onClick={() => setExpandedFor(expanded ? null : disclosureKey)}>
+    <button type="button" className="aftercare-history-note-toggle" aria-expanded={expanded} onClick={toggleDisclosure}>
       <BookOpen size={14} aria-hidden="true" />
       {expanded ? t("Notitie verbergen", "Hide note") : t("Bekijk sessienotitie", "View session note")}
     </button>
-    {expanded && <div className="aftercare-history-note-content">
+    {expanded && note && <div className="aftercare-history-note-content">
       <p className="aftercare-history-note-privacy"><LockKeyhole size={12} aria-hidden="true" />{t("Alleen lokaal opgeslagen. Deze sessienotitie is niet versleuteld.", "Stored locally only. This session note is not encrypted.")}</p>
       {fields.filter(([, value]) => value.trim()).map(([label, value]) => <div key={label}>
         <strong>{label}</strong>
