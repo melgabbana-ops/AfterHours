@@ -493,9 +493,17 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
     return true;
   };
 
+  const cancelCurrentVoiceRecognition = () => {
+    const recognition = recognitionRef.current;
+    recognitionRef.current = null;
+    recognitionProfileIdRef.current = null;
+    stopVoiceRecognition(recognition);
+  };
+
   const createDomReply = (spoken: string, safetyIntent = getCurrentVoiceSafetyIntent(spoken)) => {
     if (safetyIntent) {
-      try { window.speechSynthesis?.cancel(); recognitionRef.current?.stop(); } catch { /* Safety action must not depend on speech engine state. */ }
+      try { window.speechSynthesis?.cancel(); } catch { /* Safety action must not depend on speech engine state. */ }
+      cancelCurrentVoiceRecognition();
       setVoiceListening(false);
       if (safetyIntent === "stop") {
         removeStoryCheckpoint();
@@ -595,7 +603,10 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
       recognition.start();
     } catch { setVoiceListening(false); setVoiceError("De microfoon kon niet starten. Controleer de browserrechten en probeer opnieuw."); }
   };
-  const stopVoiceReply = () => { try { recognitionRef.current?.stop(); } catch { /* Already stopped. */ } setVoiceListening(false); };
+  const stopVoiceReply = () => {
+    cancelCurrentVoiceRecognition();
+    setVoiceListening(false);
+  };
   const resumeVoiceExperience = () => {
     const resumed = onSafetyAction?.("resume");
     if (resumed === false) {
