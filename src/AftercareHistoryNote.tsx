@@ -30,10 +30,13 @@ export default function AftercareHistoryNote({ ownerId, sessionId, language }: {
   }, [ownerId, sessionId]);
 
   // Hide unencrypted local aftercare text before the browser backgrounds or
-  // snapshots the page. flushSync makes the disclosure collapse immediately.
-  useEffect(() => bindAftercareNoteAutoCollapse(window, document, () => {
-    flushSync(() => setExpandedFor(null));
-  }), []);
+  // snapshots the page. Keep flushSync out of effect setup itself.
+  useEffect(() => bindAftercareNoteAutoCollapse(
+    window,
+    document,
+    () => setExpandedFor(null),
+    () => flushSync(() => setExpandedFor(null)),
+  ), []);
 
   if (!note) return null;
   const fields: Array<[string, string]> = [
