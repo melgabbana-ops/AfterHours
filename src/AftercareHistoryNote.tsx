@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useId, useState } from "react";
 import { flushSync } from "react-dom";
 import { BookOpen, LockKeyhole } from "lucide-react";
 import { bindAftercareNoteAutoCollapse } from "./aftercareHistoryPrivacy";
@@ -18,6 +18,9 @@ export default function AftercareHistoryNote({ ownerId, sessionId, language }: {
 }) {
   const [hasNote, setHasNote] = useState(() => hasPrivateSessionNote(ownerId, sessionId));
   const [openNote, setOpenNote] = useState<{ key: string; note: PrivateSessionNote } | null>(null);
+  const disclosureId = useId();
+  const toggleId = `${disclosureId}-toggle`;
+  const contentId = `${disclosureId}-content`;
   const disclosureKey = `${ownerId}:${sessionId}`;
   // A note from the previous owner/session is never rendered during the first
   // render after props change, even before the cleanup effect runs.
@@ -69,17 +72,31 @@ export default function AftercareHistoryNote({ ownerId, sessionId, language }: {
   ] : [];
 
   return <div className="aftercare-history-note">
-    <button type="button" className="aftercare-history-note-toggle" aria-expanded={expanded} onClick={toggleDisclosure}>
+    <button
+      id={toggleId}
+      type="button"
+      className="aftercare-history-note-toggle"
+      aria-expanded={expanded}
+      aria-controls={contentId}
+      onClick={toggleDisclosure}
+    >
       <BookOpen size={14} aria-hidden="true" />
       {expanded ? t("Notitie verbergen", "Hide note") : t("Bekijk sessienotitie", "View session note")}
     </button>
-    {expanded && note && <div className="aftercare-history-note-content">
-      <p className="aftercare-history-note-privacy"><LockKeyhole size={12} aria-hidden="true" />{t("Alleen lokaal opgeslagen. Deze sessienotitie is niet versleuteld.", "Stored locally only. This session note is not encrypted.")}</p>
-      {fields.filter(([, value]) => value.trim()).map(([label, value]) => <div key={label}>
-        <strong>{label}</strong>
-        <p>{value}</p>
-      </div>)}
-      <small>{t("Bijgewerkt op ", "Updated ") + new Date(note.updatedAt).toLocaleString(language === "nl" ? "nl-NL" : "en-GB")}</small>
-    </div>}
+    <div
+      id={contentId}
+      role="group"
+      aria-labelledby={toggleId}
+      hidden={!expanded}
+    >
+      {expanded && note && <div className="aftercare-history-note-content">
+        <p className="aftercare-history-note-privacy"><LockKeyhole size={12} aria-hidden="true" />{t("Alleen lokaal opgeslagen. Deze sessienotitie is niet versleuteld.", "Stored locally only. This session note is not encrypted.")}</p>
+        {fields.filter(([, value]) => value.trim()).map(([label, value]) => <div key={label}>
+          <strong>{label}</strong>
+          <p>{value}</p>
+        </div>)}
+        <small>{t("Bijgewerkt op ", "Updated ") + new Date(note.updatedAt).toLocaleString(language === "nl" ? "nl-NL" : "en-GB")}</small>
+      </div>}
+    </div>
   </div>;
 }
