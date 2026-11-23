@@ -155,7 +155,7 @@ export default function CinematicWorld({
   onOpenGameLibrary, onOpenAftercare, onOpenSafetyPlan
 }: Props) {
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
-  const [tab, setTab] = useState<Tab>(() => new URLSearchParams(window.location.search).has("invite") ? "invitation" : "experience");
+  const [tab, setTab] = useState<Tab>(() => consumeInvitationTokenFromUrl(window.location.href).hadInviteParameter ? "invitation" : "experience");
   const [records, setRecords] = useState<RecordMap>(EMPTY_RECORDS);
   const [runs, setRuns] = useState<ExperienceRun[]>([]);
   const [experienceInvites, setExperienceInvites] = useState<ExperienceInvitation[]>([]);
@@ -995,8 +995,9 @@ export default function CinematicWorld({
       await createExperienceInvitation({ runId, tokenHash, expectedUserId: remoteProfileId });
       const url = new URL(window.location.href);
       url.searchParams.set("screen", "cinematic");
-      url.searchParams.set("invite", token);
-      url.hash = "";
+      url.searchParams.delete("invite");
+      // Keep bearer tokens in the fragment: browsers do not send it to the server or in Referer headers.
+      url.hash = new URLSearchParams({ invite: token }).toString();
       setInviteLink(url.toString());
       await refreshData();
       try {
@@ -1041,9 +1042,8 @@ export default function CinematicWorld({
       const accepted = await acceptExperienceInvitation(tokenHash, remoteProfileId);
       setIncomingInviteToken(null);
       setInvitePreview(null);
-      const url = new URL(window.location.href);
-      url.searchParams.delete("invite");
-      window.history.replaceState({}, "", url.toString());
+      const sanitizedUrl = consumeInvitationTokenFromUrl(window.location.href).sanitizedUrl;
+      window.history.replaceState(window.history.state, "", sanitizedUrl);
       await refreshData();
       setMessage(t("Uitnodiging geaccepteerd. Je eigen toestemming is vastgelegd. De eigenaar kan de ervaring nu hervatten; als jij later je toestemming intrekt, stopt de ervaring voor iedereen.", "Invitation accepted. Your own consent has been recorded. The host can now resume; if you later withdraw consent, the experience stops for everyone."));
       setTab("invitation");
