@@ -95,11 +95,11 @@ for (const file of files) {
   }
   for (const match of withoutComments.matchAll(/rgba?\(\s*([^)]*)\)/gi)) {
     const color = rgbFunctionToHsl(match[1]);
-    if (color && isPurpleFamily(color)) failures.push(file + ": purple-family RGB color " + match[0]);
+    if (color && isPurpleFamily(color) && !controlledNightAccent) failures.push(file + ": purple-family RGB color " + match[0]);
   }
   for (const match of withoutComments.matchAll(/hsla?\(\s*([^)]*)\)/gi)) {
     const color = hslFunctionToHsl(match[1]);
-    if (color && isPurpleFamily(color)) failures.push(file + ": purple-family HSL color " + match[0]);
+    if (color && isPurpleFamily(color) && !controlledNightAccent) failures.push(file + ": purple-family HSL color " + match[0]);
   }
 }
 
@@ -114,7 +114,7 @@ if (failures.length) {
 }
 
 console.log(
-  "Black-and-gold palette passed: scanned " + sourceStyles.length +
+  "Black, champagne-gold and controlled aubergine palette passed: scanned " + sourceStyles.length +
   " stylesheets and " + visualAssets.length +
   " visual SVGs (hex, RGB, HSL and named colors).",
 );
