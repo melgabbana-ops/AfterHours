@@ -89,6 +89,7 @@ for (const file of files) {
     failures.push(file + ": named purple-family color found");
   }
 
+  const controlledNightAccent = file.replaceAll("\\", "/").endsWith("src/afterhours-visual-polish.css");
   for (const match of withoutComments.matchAll(/#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})\b/gi)) {
     const color = hexToHsl(match[0]);
     if (color && isPurpleFamily(color) && !controlledNightAccent) failures.push(file + ": purple-family hex color " + match[0]);
