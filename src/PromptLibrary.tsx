@@ -571,6 +571,8 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
         recognition,
       );
       recognition.lang = speechLocale;
+      // This control captures one reply per tap; it is not continuous safeword monitoring.
+      recognition.continuous = false;
       recognition.interimResults = false;
       recognition.maxAlternatives = 1;
       recognition.onstart = () => { if (isCurrentRecognition()) setVoiceListening(true); };
@@ -779,10 +781,11 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
 
     </>}
     {((mode === "games" && !!activeGame) || mode === "cards") && <section className="voice-dom-panel" aria-label={t("Praat met je Dom","Talk to your Dom")}>
-      <div className="voice-dom-heading"><span className="voice-dom-orb" aria-hidden="true">{selectedDom === "masculine" ? "♜" : "♛"}</span><div><span className="eyebrow">HANDS-FREE · VOICE MODE</span><h3>{t("Praat met","Talk to")} {domTitle}</h3><p>{t("Reageer hardop in het Nederlands. Je hoeft niets te typen.","Speak your response in English. No typing needed.")}</p></div></div>
-      <div className="voice-dom-controls">{voicePaused ? <button type="button" className="voice-listen" onClick={resumeVoiceExperience}>{t("▶ Hervat wanneer je er klaar voor bent","▶ Resume when you are ready")}</button> : <button type="button" className={voiceListening ? "voice-listen listening" : "voice-listen"} onClick={voiceListening ? stopVoiceReply : startVoiceReply} aria-pressed={voiceListening}>{voiceListening ? t("■ Stop luisteren","■ Stop listening") : t("🎙️ Spreek je antwoord in","🎙️ Speak your response")}</button>}<button type="button" className="voice-replay" disabled={!domReply || voicePaused} onClick={() => speakAsDom(domReply)}>{t("▶ Herhaal stem","▶ Replay voice")}</button></div>
+      <div className="voice-dom-heading"><span className="voice-dom-orb" aria-hidden="true">{selectedDom === "masculine" ? "♜" : "♛"}</span><div><span className="eyebrow">HANDS-FREE · VOICE MODE</span><h3>{t("Praat met","Talk to")} {domTitle}</h3><p>{t("Spreek één antwoord per keer in. Je hoeft niets te typen.","Speak one response at a time. No typing needed.")}</p></div></div>
+      <div className="voice-dom-controls">{voicePaused ? <button type="button" className="voice-listen" onClick={resumeVoiceExperience}>{t("▶ Hervat wanneer je er klaar voor bent","▶ Resume when you are ready")}</button> : <button type="button" className={voiceListening ? "voice-listen listening" : "voice-listen"} onClick={voiceListening ? stopVoiceReply : startVoiceReply} aria-pressed={voiceListening} aria-describedby="voice-mode-safety-note">{voiceListening ? t("■ Stop luisteren","■ Stop listening") : t("🎙️ Spreek je antwoord in","🎙️ Speak your response")}</button>}<button type="button" className="voice-replay" disabled={!domReply || voicePaused} onClick={() => speakAsDom(domReply)}>{t("▶ Herhaal stem","▶ Replay voice")}</button></div>
       {voicePaused && <p className="voice-status" role="status">{t("Gepauzeerd. De ervaring gaat pas verder na jouw bewuste keuze om te hervatten.", "Paused. The experience will continue only after you deliberately choose to resume.")}</p>}
       {voiceListening && <p className="voice-status" role="status">{t("Ik luister… spreek rustig en zeg duidelijk “geel” voor pauze of “rood” om te stoppen.","Listening… speak clearly and say “yellow” to pause or “red” to stop.")}</p>}
+      <p className="voice-safety-note" id="voice-mode-safety-note" role="note">{t("Spraakherkenning verwerkt één antwoord per druk op de knop. Ze luistert niet voortdurend en kan stopwoorden missen. Spreek altijd ook een non-verbaal stopsignaal af en gebruik de zichtbare PAUZE- en STOP-knoppen wanneer nodig.","Speech recognition processes one response per button press. It does not listen continuously and may miss safewords. Always agree on a non-verbal stop signal too, and use the visible PAUSE and STOP controls whenever needed.")}</p>
       {voiceTranscript && <div className="voice-transcript"><span className="eyebrow">{t("JOUW ANTWOORD","YOUR RESPONSE")}</span><p>{voiceTranscript}</p></div>}
       {domReply && <div className="voice-reply"><span className="eyebrow">{domTitle.toUpperCase()} {t("ANTWOORDT","REPLIES")}</span><p>{domReply}</p></div>}
       {voiceError && <p className="voice-error" role="alert">{voiceError}</p>}
