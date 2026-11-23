@@ -20,7 +20,7 @@
 - PAUSE and STOP remain immediately available. STOP is authoritative and must not wait for animation, media upload or a remote request. Safewords and pause signals are private, profile-scoped, never sent to analytics, and must remain distinct from each other.
 - Aftercare is supportive and non-judgmental. It never penalizes a pause, pass, stop or changed boundary.
 - Keep private notes, mood history, media and account data owner-scoped. Do not claim encryption, remote deletion, synchronization or server protection unless verified in the actual implementation and backend policies.
-- Use free, open-source and already available infrastructure. Prefer GitHub Actions and GitHub Pages. Do not add paid services, subscriptions, or new infrastructure without explicit approval.
+- Use free, open-source and already available infrastructure. **GitHub Actions and GitHub Pages are the only approved CI/deployment path. Vercel is explicitly prohibited: do not configure, invoke, depend on, or add Vercel integrations, checks, actions, secrets, projects or deployments.** Do not add paid services, subscriptions or new infrastructure.
 - Never modify production data, secrets, accounts or live database configuration as part of ordinary feature work.
 
 ## Reference-screen interpretation
