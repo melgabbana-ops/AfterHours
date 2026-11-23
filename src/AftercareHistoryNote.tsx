@@ -1,5 +1,7 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { flushSync } from "react-dom";
 import { BookOpen, LockKeyhole } from "lucide-react";
+import { bindAftercareNoteAutoCollapse } from "./aftercareHistoryPrivacy";
 import { loadPrivateSessionNote, type PrivateSessionNote } from "./services/privateNotes";
 
 type Language = "nl" | "en";
@@ -20,6 +22,18 @@ export default function AftercareHistoryNote({ ownerId, sessionId, language }: {
   const disclosureKey = `${ownerId}:${sessionId}`;
   const expanded = expandedFor === disclosureKey;
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
+
+  // Never carry an expanded disclosure into another profile or session. The
+  // current key already renders collapsed on the first changed-props render.
+  useEffect(() => {
+    setExpandedFor(null);
+  }, [ownerId, sessionId]);
+
+  // Hide unencrypted local aftercare text before the browser backgrounds or
+  // snapshots the page. flushSync makes the disclosure collapse immediately.
+  useEffect(() => bindAftercareNoteAutoCollapse(window, document, () => {
+    flushSync(() => setExpandedFor(null));
+  }), []);
 
   if (!note) return null;
   const fields: Array<[string, string]> = [
