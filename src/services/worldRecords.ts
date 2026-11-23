@@ -78,13 +78,18 @@ export async function deleteWorldRecord(
   expectedUserId: string,
 ): Promise<void> {
   await assertWorldAccount(expectedUserId);
-  const { error } = await supabase!
+  const { data, error } = await supabase!
     .from("afterhours_world_records")
     .delete()
     .eq("user_id", expectedUserId)
     .eq("module", module)
-    .eq("record_key", recordKey);
+    .eq("record_key", recordKey)
+    .select("id")
+    .maybeSingle();
   if (error) throw new Error(error.message);
+  // PostgREST can return no error when RLS filters a DELETE to zero rows.
+  // Never report a privacy deletion as successful without a returned row.
+  if (!data) throw new Error("Deletion could not be confirmed. Refresh and try again.");
 }
 
 export async function loadExperienceRuns(expectedUserId: string): Promise<ExperienceRun[]> {
