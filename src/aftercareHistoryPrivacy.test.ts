@@ -48,44 +48,52 @@ function createTargets(initialVisibility: DocumentVisibilityState = "visible") {
 }
 
 describe("aftercare history privacy lock", () => {
-  it("collapses the note when the document becomes hidden", () => {
+  it("uses the synchronous collapse callback when the document becomes hidden", () => {
     const targets = createTargets();
     const collapse = vi.fn();
-    bindAftercareNoteAutoCollapse(targets.windowTarget, targets.documentTarget, collapse);
+    const collapseSynchronously = vi.fn();
+    bindAftercareNoteAutoCollapse(targets.windowTarget, targets.documentTarget, collapse, collapseSynchronously);
 
     expect(collapse).not.toHaveBeenCalled();
+    expect(collapseSynchronously).not.toHaveBeenCalled();
     targets.setVisibility("hidden");
     targets.dispatchDocument("visibilitychange");
-    expect(collapse).toHaveBeenCalledTimes(1);
+    expect(collapse).not.toHaveBeenCalled();
+    expect(collapseSynchronously).toHaveBeenCalledTimes(1);
 
     targets.setVisibility("visible");
     targets.dispatchDocument("visibilitychange");
-    expect(collapse).toHaveBeenCalledTimes(1);
+    expect(collapseSynchronously).toHaveBeenCalledTimes(1);
   });
 
-  it("collapses immediately when mounted while the document is already hidden", () => {
+  it("uses a normal state update when mounted while the document is already hidden", () => {
     const targets = createTargets("hidden");
     const collapse = vi.fn();
+    const collapseSynchronously = vi.fn();
 
-    bindAftercareNoteAutoCollapse(targets.windowTarget, targets.documentTarget, collapse);
+    bindAftercareNoteAutoCollapse(targets.windowTarget, targets.documentTarget, collapse, collapseSynchronously);
 
     expect(collapse).toHaveBeenCalledTimes(1);
+    expect(collapseSynchronously).not.toHaveBeenCalled();
   });
 
-  it("collapses on pagehide even when visibility has not changed", () => {
+  it("uses the synchronous collapse callback on pagehide", () => {
     const targets = createTargets();
     const collapse = vi.fn();
-    bindAftercareNoteAutoCollapse(targets.windowTarget, targets.documentTarget, collapse);
+    const collapseSynchronously = vi.fn();
+    bindAftercareNoteAutoCollapse(targets.windowTarget, targets.documentTarget, collapse, collapseSynchronously);
 
     targets.dispatchWindow("pagehide");
 
-    expect(collapse).toHaveBeenCalledTimes(1);
+    expect(collapse).not.toHaveBeenCalled();
+    expect(collapseSynchronously).toHaveBeenCalledTimes(1);
   });
 
   it("removes both browser listeners when the disclosure unmounts", () => {
     const targets = createTargets();
     const collapse = vi.fn();
-    const cleanup = bindAftercareNoteAutoCollapse(targets.windowTarget, targets.documentTarget, collapse);
+    const collapseSynchronously = vi.fn();
+    const cleanup = bindAftercareNoteAutoCollapse(targets.windowTarget, targets.documentTarget, collapse, collapseSynchronously);
 
     expect(targets.documentListenerCount("visibilitychange")).toBe(1);
     expect(targets.windowListenerCount("pagehide")).toBe(1);
@@ -97,12 +105,13 @@ describe("aftercare history privacy lock", () => {
     targets.setVisibility("hidden");
     targets.dispatchDocument("visibilitychange");
     targets.dispatchWindow("pagehide");
-    expect(collapse).not.toHaveBeenCalled();
+    expect(collapseSynchronously).not.toHaveBeenCalled();
   });
 
-  it("flushes the disclosure closed and resets it when the owner or session changes", () => {
-    expect(historyNoteSource).toContain("bindAftercareNoteAutoCollapse(window, document");
-    expect(historyNoteSource).toContain("flushSync(() => setExpandedFor(null))");
+  it("flushes the disclosure closed on lifecycle events and resets it when the owner or session changes", () => {
+    expect(historyNoteSource).toContain("bindAftercareNoteAutoCollapse(\n    window,\n    document,");
+    expect(historyNoteSource).toContain("() => setExpandedFor(null),");
+    expect(historyNoteSource).toContain("() => flushSync(() => setExpandedFor(null)),");
     expect(historyNoteSource).toContain("useEffect(() => {\n    setExpandedFor(null);\n  }, [ownerId, sessionId]);");
   });
 });
