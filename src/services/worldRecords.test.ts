@@ -23,7 +23,7 @@ vi.mock("./supabase", () => ({
   supabase: { auth: { getUser: mocks.getUser }, from: mocks.from },
 }));
 
-import { createExperienceInvitation, loadExperienceInvitations, deleteExperienceRun, ExperienceRunDeletionBlockedError, ExperienceRunResumeRollbackError, hasActiveExperienceRuns, loadExperienceRuns, loadWorldRecords, resumeExperienceRun, saveWorldRecord, updateExperienceRun } from "./worldRecords";
+import { createExperienceInvitation, loadExperienceInvitations, deleteExperienceRun, deleteWorldRecord, ExperienceRunDeletionBlockedError, ExperienceRunResumeRollbackError, hasActiveExperienceRuns, loadExperienceRuns, loadWorldRecords, resumeExperienceRun, saveWorldRecord, updateExperienceRun } from "./worldRecords";
 
 const chain = {
   select: mocks.select,
@@ -75,6 +75,26 @@ describe("AFTER HOURS private world storage", () => {
     expect(mocks.from).toHaveBeenCalledWith("afterhours_world_records");
     expect(mocks.eq).toHaveBeenNthCalledWith(1, "user_id", "user-a");
     expect(mocks.eq).toHaveBeenNthCalledWith(2, "module", "director");
+  });
+
+  it("confirms a private world record deletion only after the database returns the deleted row", async () => {
+    mocks.maybeSingle.mockResolvedValueOnce({ data: { id: "record-1" }, error: null });
+
+    await expect(deleteWorldRecord("director", "scene:1", "user-a")).resolves.toBeUndefined();
+
+    expect(mocks.from).toHaveBeenCalledWith("afterhours_world_records");
+    expect(mocks.delete).toHaveBeenCalledOnce();
+    expect(mocks.eq).toHaveBeenNthCalledWith(1, "user_id", "user-a");
+    expect(mocks.eq).toHaveBeenNthCalledWith(2, "module", "director");
+    expect(mocks.eq).toHaveBeenNthCalledWith(3, "record_key", "scene:1");
+    expect(mocks.select).toHaveBeenCalledWith("id");
+  });
+
+  it("fails closed when RLS silently filters a private world-record deletion", async () => {
+    mocks.maybeSingle.mockResolvedValueOnce({ data: null, error: null });
+
+    await expect(deleteWorldRecord("vault", "vault:private-note", "user-a"))
+      .rejects.toThrow("Deletion could not be confirmed. Refresh and try again.");
   });
 
   it("loads only runs permitted by consent-based RLS without hiding shared participant runs", async () => {
