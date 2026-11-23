@@ -23,10 +23,15 @@ describe("Prompt Library guided-experience access integration", () => {
     expect(promptSource).toContain("Accountstatus niet bevestigd");
   });
 
-  it("exits an active guided game and stops speech recognition when access is lost", () => {
-    expect(promptSource).toContain("if (!experienceStartBlockedReason || !activeGame) return;");
-    expect(promptSource).toContain("recognitionRef.current?.stop();");
-    expect(promptSource).toContain("setActiveGame(null);");
+  it("exits an active guided game and invalidates speech callbacks when access is lost", () => {
+    const start = promptSource.indexOf("if (!experienceStartBlockedReason || !activeGame) return;");
+    const end = promptSource.indexOf("}, [experienceStartBlockedReason, activeGame, sessionMode]);", start);
+    const effect = promptSource.slice(start, end);
+    expect(effect).toContain("cancelCurrentVoiceRecognition();");
+    expect(effect.indexOf("cancelCurrentVoiceRecognition();")).toBeLessThan(effect.indexOf("window.speechSynthesis?.cancel();"));
+    expect(effect).not.toContain("recognitionRef.current?.stop();");
+    expect(effect).toContain("setActiveGame(null);");
+    expect(effect).toContain("setVoicePaused(true);");
   });
 
   it("receives the consent and verified-account gate from the app shell", () => {
