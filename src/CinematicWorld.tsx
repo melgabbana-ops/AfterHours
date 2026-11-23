@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import {
   acceptExperienceInvitation, createExperienceInvitation, createExperienceRun, previewExperienceInvitation,
-  deleteExperienceRun, deleteWorldRecord, ExperienceRunDeletionBlockedError, hasActiveExperienceRuns, loadExperienceInvitations,
+  deleteExperienceRun, deleteWorldRecord, ExperienceRunDeletionBlockedError, ExperienceRunResumeRollbackError, hasActiveExperienceRuns, loadExperienceInvitations,
   loadExperienceRuns, loadWorldRecords, resumeExperienceRun, revokeExperienceInvitation,
   saveWorldRecord, updateExperienceRun, withdrawExperienceConsent,
   type ExperienceInvitation, type ExperienceInvitationPreview, type ExperienceRun, type WorldModule, type WorldRecord
@@ -527,7 +527,14 @@ export default function CinematicWorld({
       onSafetyResume();
       setMessage(t("De scène is hervat na een nieuwe consentbevestiging.", "The scene resumed after fresh consent confirmation."));
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : t("Hervatten is niet gelukt.", "Could not resume the scene."));
+      if (cause instanceof ExperienceRunResumeRollbackError) {
+        setError(t(
+          "De scène blijft gepauzeerd, maar het intrekken van de tijdelijk vernieuwde toestemming kon niet worden bevestigd. Start niet opnieuw; controleer je verbinding en gebruik STOP indien nodig.",
+          "The scene remains paused, but revoking the temporarily renewed consent could not be confirmed. Do not restart; check your connection and use STOP if needed."
+        ));
+      } else {
+        setError(cause instanceof Error ? cause.message : t("Hervatten is niet gelukt.", "Could not resume the scene."));
+      }
     } finally {
       setBusy(false);
     }
