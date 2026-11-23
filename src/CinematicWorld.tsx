@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { bindVaultAutoLock } from "./vaultAutoLock";
+import { isExperienceStartAttemptCurrent } from "./experienceStartAttempt";
 import { consumeInvitationTokenFromUrl } from "./invitationUrl";
 import {
   ArrowLeft, ArrowRight, BookOpen, CheckCircle2, Clapperboard, Copy,
@@ -168,6 +169,9 @@ export default function CinematicWorld({
   const [busy, setBusy] = useState(false);
   const [stopPending, setStopPending] = useState(false);
   const stopPendingRef = useRef(false);
+  const startAttemptRef = useRef(0);
+  const startContextRef = useRef({ remoteProfileId, consentActive, canStartExperience });
+  startContextRef.current = { remoteProfileId, consentActive, canStartExperience };
   const runMutationRef = useRef<Promise<unknown> | null>(null);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
@@ -403,7 +407,11 @@ export default function CinematicWorld({
   }, [records.sensory]);
 
   useEffect(() => {
-    if (!consentActive && runStatus === "active" && activeRunId) void stopScene(true);
+    if (!consentActive) {
+      // Invalidate a start that is still waiting for its server response.
+      startAttemptRef.current += 1;
+      if (runStatus === "active" && activeRunId) void stopScene(true);
+    }
   }, [consentActive, runStatus, activeRunId]);
 
   useEffect(() => () => {
@@ -457,6 +465,7 @@ export default function CinematicWorld({
     setMessage("");
     if (!requestStartAccess()) return;
     if (!remoteProfileId) { onRequestConsent(); return; }
+    const attempt = { id: ++startAttemptRef.current, ownerId: remoteProfileId };
     setBusy(true);
     try {
       const snapshot = { sceneKey: scene.key, title: scene.title, description: scene.description, steps: scene.steps };
@@ -464,8 +473,50 @@ export default function CinematicWorld({
         sceneKey: scene.key,
         sceneSnapshot: snapshot,
         totalSteps: scene.steps.length,
-        expectedUserId: remoteProfileId
+        expectedUserId: attempt.ownerId
       });
+
+      // Consent, account state, navigation or STOP may change while the
+      // database request is in flight. Never resurrect a cancelled scene.
+      if (!isExperienceStartAttemptCurrent(attempt, {
+        currentAttemptId: startAttemptRef.current,
+        currentOwnerId: startContextRef.current.remoteProfileId,
+        consentActive: startContextRef.current.consentActive,
+        canStartExperience: startContextRef.current.canStartExperience,
+        stopPending: stopPendingRef.current
+      })) {
+        try {
+          await withdrawExperienceConsent(runId, attempt.ownerId);
+        } catch {
+          // Keep a fallback for installations where the withdrawal RPC is
+          // temporarily unavailable. updateExperienceRun also confirms the
+          // stopped row and revokes the owner's consent.
+          try {
+            await updateExperienceRun({
+              runId,
+              expectedUserId: attempt.ownerId,
+              status: "stopped",
+              currentStep: 0
+            });
+          } catch {
+            // Fail closed: do not allow another start until the server state
+            // can be checked again by the original account.
+            stopPendingRef.current = true;
+            setStopPending(true);
+            setError(t(
+              "De start is geannuleerd, maar de server kon de stop niet bevestigen. Blijf gestopt en meld je opnieuw aan bij het oorspronkelijke account om de status te controleren.",
+              "The start was cancelled, but the server could not confirm the stop. Stay stopped and sign back in to the original account to verify its state."
+            ));
+            return;
+          }
+        }
+        setMessage(t(
+          "De start is geannuleerd omdat toestemming, account of STOP-status veranderde. De serverstop is bevestigd.",
+          "The start was cancelled because consent, account, or STOP state changed. The server stop is confirmed."
+        ));
+        return;
+      }
+
       setActiveScene(scene);
       setActiveRunId(runId);
       setStepIndex(0);
@@ -574,6 +625,7 @@ export default function CinematicWorld({
 
   async function stopScene(fromConsentChange = false) {
     if (stopPendingRef.current) return;
+    startAttemptRef.current += 1;
     stopPendingRef.current = true;
     setStopPending(true);
     setError("");
@@ -742,6 +794,8 @@ export default function CinematicWorld({
   }
 
   async function handleBack() {
+    // Leaving while a start request is pending must cancel its eventual UI commit.
+    startAttemptRef.current += 1;
     if (runStatus === "active") await pauseScene();
     setVaultPassphrase("");
     setVaultPlain(null);
