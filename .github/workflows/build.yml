@@ -1,6 +1,5 @@
 name: AFTER HOURS build
 # Reproducible installs and dependency audit
-
 on:
   workflow_dispatch:
   push:
@@ -18,8 +17,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
         with:
-          ref: ${{ github.head_ref || github.ref_name }}
           fetch-depth: 0
+      - name: Guard event-SHA checkout
+        run: node scripts/check-workflow-checkout.mjs
       - name: Setup Node
         uses: actions/setup-node@v7
         with:
