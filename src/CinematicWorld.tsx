@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import {
   acceptExperienceInvitation, createExperienceInvitation, createExperienceRun, previewExperienceInvitation,
-  deleteExperienceRun, deleteWorldRecord, hasActiveExperienceRuns, loadExperienceInvitations,
+  deleteExperienceRun, deleteWorldRecord, ExperienceRunDeletionBlockedError, hasActiveExperienceRuns, loadExperienceInvitations,
   loadExperienceRuns, loadWorldRecords, resumeExperienceRun, revokeExperienceInvitation,
   saveWorldRecord, updateExperienceRun, withdrawExperienceConsent,
   type ExperienceInvitation, type ExperienceInvitationPreview, type ExperienceRun, type WorldModule, type WorldRecord
@@ -1191,10 +1191,12 @@ export default function CinematicWorld({
         ));
         return;
       }
+      // Delete runs first. If a run became active or paused after the preflight,
+      // its status guard stops the operation before private world records are removed.
+      for (const run of runs) await deleteExperienceRun(run.id, remoteProfileId);
       for (const module of MODULES) {
         for (const record of records[module]) await deleteWorldRecord(module, record.record_key, remoteProfileId);
       }
-      for (const run of runs) await deleteExperienceRun(run.id, remoteProfileId);
       setRecords(EMPTY_RECORDS);
       setRuns([]);
       setVaultPlain(null);
@@ -1204,7 +1206,14 @@ export default function CinematicWorld({
       setMessage(t("Alle AFTER HOURS World-gegevens zijn verwijderd.", "All AFTER HOURS World data has been deleted."));
       if (wasRunning) onSafetyStop();
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : t("Niet alle gegevens konden worden verwijderd. Probeer opnieuw.", "Not all data could be deleted. Try again."));
+      if (cause instanceof ExperienceRunDeletionBlockedError) {
+        setError(t(
+          "Een ervaring is inmiddels actief of gepauzeerd. Stop deze eerst en controleer je resterende gegevens voordat je opnieuw verwijdert.",
+          "An experience is now active or paused. Stop it first and review the remaining data before trying again."
+        ));
+      } else {
+        setError(cause instanceof Error ? cause.message : t("Niet alle gegevens konden worden verwijderd. Probeer opnieuw.", "Not all data could be deleted. Try again."));
+      }
       await refreshData();
     } finally {
       setBusy(false);
