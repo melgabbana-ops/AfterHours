@@ -14,6 +14,7 @@ const mocks = vi.hoisted(() => ({
   insert: vi.fn(),
   single: vi.fn(),
   update: vi.fn(),
+  delete: vi.fn(),
   maybeSingle: vi.fn(),
 }));
 
@@ -22,7 +23,7 @@ vi.mock("./supabase", () => ({
   supabase: { auth: { getUser: mocks.getUser }, from: mocks.from },
 }));
 
-import { createExperienceInvitation, hasActiveExperienceRuns, loadExperienceRuns, loadWorldRecords, resumeExperienceRun, saveWorldRecord, updateExperienceRun } from "./worldRecords";
+import { createExperienceInvitation, deleteExperienceRun, ExperienceRunDeletionBlockedError, hasActiveExperienceRuns, loadExperienceRuns, loadWorldRecords, resumeExperienceRun, saveWorldRecord, updateExperienceRun } from "./worldRecords";
 
 const chain = {
   select: mocks.select,
@@ -36,6 +37,7 @@ const chain = {
   insert: mocks.insert,
   single: mocks.single,
   update: mocks.update,
+  delete: mocks.delete,
   maybeSingle: mocks.maybeSingle,
 };
 
@@ -54,6 +56,7 @@ describe("AFTER HOURS private world storage", () => {
     mocks.upsert.mockReturnValue(chain);
     mocks.insert.mockReturnValue(chain);
     mocks.update.mockReturnValue(chain);
+    mocks.delete.mockReturnValue(chain);
   });
 
   it("refuses to read another account's records before making a database query", async () => {
@@ -370,6 +373,37 @@ describe("AFTER HOURS private world storage", () => {
     })).rejects.toThrow("This experience run changed state");
 
     expect(mocks.gt).toHaveBeenCalledWith("total_steps", 3);
+  });
+
+
+  it("refuses to delete an active or paused run so the owner retains the STOP path", async () => {
+    mocks.maybeSingle.mockResolvedValueOnce({ data: null, error: null });
+
+    await expect(deleteExperienceRun("run-1", "user-a"))
+      .rejects.toBeInstanceOf(ExperienceRunDeletionBlockedError);
+
+    expect(mocks.from).toHaveBeenCalledWith("afterhours_experience_runs");
+    expect(mocks.eq).toHaveBeenNthCalledWith(1, "id", "run-1");
+    expect(mocks.eq).toHaveBeenNthCalledWith(2, "user_id", "user-a");
+    expect(mocks.in).toHaveBeenCalledWith("status", ["ready", "completed", "stopped"]);
+    expect(mocks.select).toHaveBeenCalledWith("id");
+  });
+
+  it("deletes an owned draft or terminal run and confirms the deleted row", async () => {
+    mocks.maybeSingle.mockResolvedValueOnce({ data: { id: "run-1" }, error: null });
+
+    await expect(deleteExperienceRun("run-1", "user-a")).resolves.toBeUndefined();
+
+    expect(mocks.delete).toHaveBeenCalledOnce();
+    expect(mocks.eq).toHaveBeenNthCalledWith(1, "id", "run-1");
+    expect(mocks.eq).toHaveBeenNthCalledWith(2, "user_id", "user-a");
+    expect(mocks.in).toHaveBeenCalledWith("status", ["ready", "completed", "stopped"]);
+  });
+
+  it("surfaces database errors when deleting an experience run", async () => {
+    mocks.maybeSingle.mockResolvedValueOnce({ data: null, error: { message: "Delete failed" } });
+
+    await expect(deleteExperienceRun("run-1", "user-a")).rejects.toThrow("Delete failed");
   });
 
   it("does not write if authentication cannot be verified", async () => {
