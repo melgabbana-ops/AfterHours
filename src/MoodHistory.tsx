@@ -15,7 +15,7 @@ const label: Record<MoodCode, [string, string]> = {
 const phaseLabel: Record<MoodPhase, [string, string]> = { before: ["Vooraf", "Before"], during: ["Tijdens", "During"], after: ["Achteraf", "Aftercare"] };
 
 
-export default function MoodHistory({ profileId, language }: { profileId: string; language: "nl" | "en" }) {
+export default function MoodHistory({ profileId, accountId, language }: { profileId: string; accountId: string | null; language: "nl" | "en" }) {
   const [events, setEvents] = useState<MoodEvent[]>([]);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
@@ -55,7 +55,8 @@ export default function MoodHistory({ profileId, language }: { profileId: string
     } finally {
       if (isCurrent()) setLoading(false);
     }
-  }, [profileId, language]);
+  // The authenticated owner can change while the device-local profile id stays the same.
+  }, [profileId, accountId, language]);
 
   useEffect(() => {
     void refresh();
