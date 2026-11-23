@@ -1,0 +1,60 @@
+/* AFTER HOURS visual polish: restrained aubergine haze layered under the champagne-gold identity. */
+:root{
+  --ah-night-haze:rgba(91,50,124,.18);
+  --ah-night-haze-soft:rgba(105,67,146,.12);
+  --ah-night-edge:rgba(151,106,191,.28);
+}
+.app{
+  background:
+    radial-gradient(ellipse at 8% 18%,var(--ah-night-haze-soft),transparent 34%),
+    radial-gradient(ellipse at 94% 52%,rgba(71,43,94,.12),transparent 30%),
+    radial-gradient(ellipse at 50% -18%,rgba(130,85,38,.19),transparent 42%),
+    #070605!important;
+}
+.ah-reference-home .hero.home-hero:before{
+  background:
+    radial-gradient(ellipse at 14% 24%,var(--ah-night-haze),transparent 34%),
+    radial-gradient(ellipse at 82% 18%,rgba(116,73,151,.19),transparent 31%),
+    radial-gradient(ellipse at 56% 72%,rgba(79,48,105,.15),transparent 39%),
+    radial-gradient(ellipse at 18% 26%,rgba(199,143,72,.18),transparent 30%),
+    radial-gradient(ellipse at 85% 22%,rgba(227,184,119,.13),transparent 28%),
+    linear-gradient(90deg,rgba(0,0,0,.24),transparent 65%);
+  background-size:140% 140%;
+  animation:ah-night-haze-drift 24s ease-in-out infinite alternate;
+}
+.ah-reference-home .hero.home-hero .home-wordmark{
+  filter:
+    drop-shadow(0 0 15px rgba(129,83,163,.25))
+    drop-shadow(0 3px 14px rgba(0,0,0,.9));
+}
+.ah-reference-home .hero.home-hero .home-start{
+  box-shadow:
+    0 5px 24px rgba(0,0,0,.42),
+    0 0 24px rgba(111,72,145,.13),
+    inset 0 1px rgba(255,255,255,.42)!important;
+}
+.ah-reference-home .home-shortcuts .tile{
+  background:
+    radial-gradient(ellipse at 50% 0%,rgba(94,59,120,.17),transparent 68%),
+    linear-gradient(145deg,rgba(31,22,14,.96),rgba(7,6,5,.98))!important;
+}
+.ah-reference-home .home-shortcuts .tile:focus-visible,
+.ah-reference-home .home-shortcuts .tile:hover{
+  border-color:var(--ah-night-edge)!important;
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.045),
+    0 5px 18px rgba(0,0,0,.25),
+    0 0 20px rgba(111,72,145,.12)!important;
+}
+.app>nav button.active:before{
+  box-shadow:
+    0 0 10px rgba(217,183,126,.58),
+    0 0 18px rgba(111,72,145,.22)!important;
+}
+@keyframes ah-night-haze-drift{
+  from{background-position:0% 0%}
+  to{background-position:100% 55%}
+}
+@media(prefers-reduced-motion:reduce){
+  .ah-reference-home .hero.home-hero:before{animation:none!important}
+}
