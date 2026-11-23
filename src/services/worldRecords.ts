@@ -321,7 +321,8 @@ export async function createExperienceInvitation(args: {
       run_id: args.runId,
       inviter_user_id: args.expectedUserId,
       token_hash: args.tokenHash,
-      expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+      // Use PostgreSQL's now() + 7 days default so client clock skew or tampering
+      // cannot shorten or extend the invitation lifetime.
     })
     .select("id,run_id,token_hash,status,accepted_at,expires_at,created_at")
     .single();

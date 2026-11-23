@@ -11,6 +11,7 @@ const mocks = vi.hoisted(() => ({
   order: vi.fn(),
   limit: vi.fn(),
   upsert: vi.fn(),
+  insert: vi.fn(),
   single: vi.fn(),
   update: vi.fn(),
   maybeSingle: vi.fn(),
@@ -21,7 +22,7 @@ vi.mock("./supabase", () => ({
   supabase: { auth: { getUser: mocks.getUser }, from: mocks.from },
 }));
 
-import { hasActiveExperienceRuns, loadExperienceRuns, loadWorldRecords, resumeExperienceRun, saveWorldRecord, updateExperienceRun } from "./worldRecords";
+import { createExperienceInvitation, hasActiveExperienceRuns, loadExperienceRuns, loadWorldRecords, resumeExperienceRun, saveWorldRecord, updateExperienceRun } from "./worldRecords";
 
 const chain = {
   select: mocks.select,
@@ -32,6 +33,7 @@ const chain = {
   order: mocks.order,
   limit: mocks.limit,
   upsert: mocks.upsert,
+  insert: mocks.insert,
   single: mocks.single,
   update: mocks.update,
   maybeSingle: mocks.maybeSingle,
@@ -50,6 +52,7 @@ describe("AFTER HOURS private world storage", () => {
     mocks.order.mockReturnValue(chain);
     mocks.limit.mockReturnValue(chain);
     mocks.upsert.mockReturnValue(chain);
+    mocks.insert.mockReturnValue(chain);
     mocks.update.mockReturnValue(chain);
   });
 
@@ -130,6 +133,33 @@ describe("AFTER HOURS private world storage", () => {
     );
   });
 
+
+  it("uses the database default for invitation expiry instead of the client clock", async () => {
+    const tokenHash = "a".repeat(64);
+    const invitation = {
+      id: "invitation-1",
+      run_id: "run-1",
+      token_hash: tokenHash,
+      status: "pending",
+      accepted_at: null,
+      expires_at: "2026-11-30T12:00:00.000Z",
+      created_at: "2026-11-23T12:00:00.000Z",
+    };
+    mocks.single.mockResolvedValue({ data: invitation, error: null });
+
+    await expect(createExperienceInvitation({
+      runId: "run-1",
+      tokenHash,
+      expectedUserId: "user-a",
+    })).resolves.toEqual(invitation);
+
+    expect(mocks.insert).toHaveBeenCalledWith({
+      run_id: "run-1",
+      inviter_user_id: "user-a",
+      token_hash: tokenHash,
+    });
+    expect(mocks.insert.mock.calls[0][0]).not.toHaveProperty("expires_at");
+  });
 
   it.each([-1, 1.5, 40, Number.NaN, Number.POSITIVE_INFINITY])(
     "rejects invalid resume step index %s before authentication or database writes",
