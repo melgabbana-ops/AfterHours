@@ -1,8 +1,10 @@
 # AFTER HOURS feature implementation matrix
 
-Last source audit: 12 October 2026  
-Branch: `feature/missions-updates-maintenance`  
+Last feature-status audit: 12 October 2026 (historical; re-verify before release).  
+Current product-direction reconciliation: 24 November 2026.  
 Purpose: distinguish real code, partial UI, unverified backend setup and missing scope. A file or green build is not proof of end-to-end functionality.
+
+> **Visual authority:** `docs/PRODUCT_DIRECTION.md` is the current source of truth. The former deep-plum palette mentioned in this matrix is rejected. AFTER HOURS uses black, charcoal, champagne-gold, white and warm grey only. No purple-family colors or effects.
 
 Status meanings:
 - **Implemented in code**: source exists for the named behavior; runtime/backend verification may still be pending.
@@ -15,7 +17,7 @@ Status meanings:
 
 | Approved feature | Current source evidence | Status | Remaining work / acceptance test |
 |---|---|---|---|
-| Official logo / black-gold brand | `public/after-hours-logo.svg`, `src/styles.css`, `src/Teaser.tsx` | Partial | Some styles still use near-black and legacy gold rather than the approved deep-plum palette. Verify the exact approved logo and consistent sizing on every screen. |
+| Official logo / black-gold brand | `public/after-hours-logo.svg`, `src/styles.css`, `src/Teaser.tsx` | Partial | The current CSS uses the locked black/charcoal/champagne palette. Verify the official logo and consistent sizing on every screen; do not reintroduce any purple-family accent. |
 | Cinematic teaser | `src/Teaser.tsx`, `public/under-construction.html` | Partial | Trailer is hosted on an external Picsart URL. Verify availability, mobile playback, fallback and final approved reveal text/video. |
 | 18+ gate | `src/main.tsx` | Partial | Currently a self-declaration, not age verification. Legal/product review needed before release. Consent is separately checked. |
 | Four-step onboarding | `src/Onboarding.tsx` | Implemented in code / Verify | Install guidance and trailer markup exist. Verify only-first-time behavior, Skip/Later, persisted completion, all languages and mobile media playback. |
