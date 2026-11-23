@@ -275,14 +275,27 @@ export async function resumeExperienceRun(args: {
   }
 }
 
+export class ExperienceRunDeletionBlockedError extends Error {
+  constructor() {
+    super("Experience run is not eligible for deletion.");
+    this.name = "ExperienceRunDeletionBlockedError";
+  }
+}
+
 export async function deleteExperienceRun(runId: string, expectedUserId: string): Promise<void> {
   await assertWorldAccount(expectedUserId);
-  const { error } = await supabase!
+  // Keep an active or paused experience available for an explicit STOP action.
+  // Only drafts and terminal runs may be removed from the owner's history.
+  const { data, error } = await supabase!
     .from("afterhours_experience_runs")
     .delete()
     .eq("id", runId)
-    .eq("user_id", expectedUserId);
+    .eq("user_id", expectedUserId)
+    .in("status", ["ready", "completed", "stopped"])
+    .select("id")
+    .maybeSingle();
   if (error) throw new Error(error.message);
+  if (!data) throw new ExperienceRunDeletionBlockedError();
 }
 
 
