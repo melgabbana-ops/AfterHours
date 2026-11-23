@@ -132,7 +132,7 @@
 - [~] Post-session order: FINAL MOOD → PRIVATE NOTE → SESSION SUMMARY. The completion screen now presents a bilingual, transient summary of recorded moods, completed rounds, aftercare choice, note status and completion time. Persistent summary history and full duration / command / PASS / media / combo metrics remain outstanding.
 - [~] Optional private note prompt: “Wil je iets onthouden van deze ervaring?” with fields for how the session felt, what was liked and what the user would like to change next time; save or skip is implemented in Dutch and English.
 - [~] Notes are currently scoped by owner and session in browser-local storage with created/updated timestamps and a delete action. They are not encrypted, uploaded or synchronized across devices; server-side account storage, RLS and admin isolation remain outstanding.
-- [ ] Mood history shows before/during/after mood per session, is private to that user, and supports deletion.
+- [~] Mood history shows before/during/after mood per session and is owner-scoped. Browser-local entries can be deleted; remote account history is currently append-only. An owner-scoped deletion RPC is proposed in `supabase/proposals/20261123_afterhours_session_mood_event_owner_delete.sql` but is not applied, so remote deletion remains blocked pending database review and approval.
 - [ ] The session summary shows duration, commands completed, passed, XP earned, final mood, media count and combo.
 - [ ] Summary actions: VIEW MEDIA, PRIVATE NOTE, PLAY AGAIN and CLOSE.
 - [ ] Aftercare content must remain supportive, nonjudgmental and never be used as a penalty.
