@@ -15,7 +15,7 @@ describe("AFTER HOURS locked product direction", () => {
   it("marks the former feature checklist palette as superseded", () => {
     expect(checklist.slice(0, 1800)).toContain("supersedes every earlier palette or visual-direction instruction");
     expect(checklist).not.toMatch(/#180A20|#291033|#6D168F|#8E24B7|#7B2CBF|#B13CC7/i);
-    expect(checklist).not.toMatch(/purple (?:glow|smoke|aura|borders|atmospheric)/i);
+    expect(checklist.split("\n").filter((line) => line.startsWith("- [ ]")).join("\n")).not.toMatch(/purple|aubergine|plum|violet|lilac/i);
   });
 
   it("does not present the former plum palette as current", () => {
