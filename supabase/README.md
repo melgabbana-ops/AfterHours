@@ -65,6 +65,10 @@ The Supabase adapter is wired into the client. Local storage remains available f
 
 Consent is session-scoped and auditable. Revocation must stop an active or paused session in the same database transaction. Session completion must revoke consent atomically with the XP award and completion state. Regression checks and live migration state must be reviewed before release.
 
+## Experience-run deletion
+
+Active or paused experience runs must remain available for an explicit STOP action. The client delete operation is owner-scoped and limited to `ready`, `completed`, and `stopped` rows. A matching authenticated RLS restriction is proposed in `proposals/20261123_afterhours_experience_run_terminal_delete_guard.sql`; it is **not applied**. Until that proposal is reviewed against the deployed migration ledger and applied through the approved migration workflow, direct authenticated API requests may still bypass the client-side status filter. Do not describe the client check as a database security boundary.
+
 ## Private media storage
 
 The `after-hours-private-media` bucket must remain private. Object paths use `<auth.uid()>/<session-id>/<filename>`; storage policies must scope access to the first folder and enforce upload limits. Use authenticated storage operations or short-lived signed URLs. Never make this bucket public.
