@@ -23,7 +23,7 @@ vi.mock("./supabase", () => ({
   supabase: { auth: { getUser: mocks.getUser }, from: mocks.from },
 }));
 
-import { createExperienceInvitation, deleteExperienceRun, ExperienceRunDeletionBlockedError, hasActiveExperienceRuns, loadExperienceRuns, loadWorldRecords, resumeExperienceRun, saveWorldRecord, updateExperienceRun } from "./worldRecords";
+import { createExperienceInvitation, loadExperienceInvitations, deleteExperienceRun, ExperienceRunDeletionBlockedError, hasActiveExperienceRuns, loadExperienceRuns, loadWorldRecords, resumeExperienceRun, saveWorldRecord, updateExperienceRun } from "./worldRecords";
 
 const chain = {
   select: mocks.select,
@@ -137,12 +137,28 @@ describe("AFTER HOURS private world storage", () => {
   });
 
 
-  it("uses the database default for invitation expiry instead of the client clock", async () => {
+  it("does not expose invitation token hashes when loading invitation history", async () => {
+    const invitations = [{
+      id: "invitation-1",
+      run_id: "run-1",
+      status: "pending",
+      accepted_at: null,
+      expires_at: "2026-11-30T12:00:00.000Z",
+      created_at: "2026-11-23T12:00:00.000Z",
+    }];
+    mocks.limit.mockResolvedValue({ data: invitations, error: null });
+
+    await expect(loadExperienceInvitations("user-a")).resolves.toEqual(invitations);
+    expect(mocks.from).toHaveBeenCalledWith("afterhours_experience_invitations");
+    expect(mocks.select).toHaveBeenCalledWith("id,run_id,status,accepted_at,expires_at,created_at");
+    expect(mocks.select.mock.calls[0][0]).not.toContain("token_hash");
+  });
+
+  it("uses the database default for invitation expiry and keeps token hashes out of the response", async () => {
     const tokenHash = "a".repeat(64);
     const invitation = {
       id: "invitation-1",
       run_id: "run-1",
-      token_hash: tokenHash,
       status: "pending",
       accepted_at: null,
       expires_at: "2026-11-30T12:00:00.000Z",
@@ -161,6 +177,8 @@ describe("AFTER HOURS private world storage", () => {
       inviter_user_id: "user-a",
       token_hash: tokenHash,
     });
+    expect(mocks.select).toHaveBeenCalledWith("id,run_id,status,accepted_at,expires_at,created_at");
+    expect(mocks.select.mock.calls[0][0]).not.toContain("token_hash");
     expect(mocks.insert.mock.calls[0][0]).not.toHaveProperty("expires_at");
   });
 
