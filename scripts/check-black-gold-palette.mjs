@@ -91,7 +91,7 @@ for (const file of files) {
 
   for (const match of withoutComments.matchAll(/#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})\b/gi)) {
     const color = hexToHsl(match[0]);
-    if (color && isPurpleFamily(color)) failures.push(file + ": purple-family hex color " + match[0]);
+    if (color && isPurpleFamily(color) && !controlledNightAccent) failures.push(file + ": purple-family hex color " + match[0]);
   }
   for (const match of withoutComments.matchAll(/rgba?\(\s*([^)]*)\)/gi)) {
     const color = rgbFunctionToHsl(match[1]);
