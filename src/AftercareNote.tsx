@@ -121,7 +121,7 @@ export default function AftercareNote({ ownerId, sessionId, language, onStatusCh
         setJournalOpen(false);
         // Return keyboard and screen-reader focus to the disclosure that opened the journal.
         journalToggleRef.current?.focus();
-      }}/ >}
+      }}/>}
     </div>
     <p className="aftercare-private-note-privacy">
       {t("Deze sessienotitie wordt alleen lokaal in deze browser opgeslagen en is niet versleuteld. Voor persoonlijke reflecties kun je het aparte versleutelde privéjournal openen.", "This session note is stored only in this browser and is not encrypted. For personal reflections, open the separate encrypted private journal.")}
