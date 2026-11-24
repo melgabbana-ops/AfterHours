@@ -82,11 +82,11 @@ describe("consent revocation ordering", () => {
     const { syncRemoteState, revokeRemoteConsent } = await import("./backend");
     const state = activeSessionState();
 
-    const inFlightSync = syncRemoteState(state);
+    const inFlightSync = syncRemoteState(state, "user-123");
     await activeStarted.promise;
 
     // This older snapshot is waiting behind the in-flight sync when STOP occurs.
-    const queuedStaleSync = syncRemoteState(state);
+    const queuedStaleSync = syncRemoteState(state, "user-123");
     const revocation = revokeRemoteConsent(SESSION_ID, "2026-11-19T08:01:00.000Z");
 
     await Promise.resolve();
@@ -107,6 +107,21 @@ describe("consent revocation ordering", () => {
   });
 });
 
+
+
+  it("does not write a queued snapshot after the authenticated account changes", async () => {
+    mocks.getUser.mockResolvedValue({
+      data: { user: { id: "user-456" } },
+      error: null,
+    });
+
+    const { syncRemoteState } = await import("./backend");
+    const result = await syncRemoteState(activeSessionState(), "user-123");
+
+    expect(result).toContain("Het aangemelde account is gewijzigd");
+    expect(mocks.from).not.toHaveBeenCalled();
+    expect(mocks.rpc).not.toHaveBeenCalled();
+  });
 
 describe("offline STOP acknowledgement", () => {
   it("does not report a missing server session as a successful revocation", async () => {
