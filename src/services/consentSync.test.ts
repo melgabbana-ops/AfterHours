@@ -105,9 +105,6 @@ describe("consent revocation ordering", () => {
       { name: "set_consent_state", status: "revoked" },
     ]);
   });
-});
-
-
 
   it("does not write a queued snapshot after the authenticated account changes", async () => {
     mocks.getUser.mockResolvedValue({
@@ -122,6 +119,8 @@ describe("consent revocation ordering", () => {
     expect(mocks.from).not.toHaveBeenCalled();
     expect(mocks.rpc).not.toHaveBeenCalled();
   });
+});
+
 
 describe("offline STOP acknowledgement", () => {
   it("does not report a missing server session as a successful revocation", async () => {
