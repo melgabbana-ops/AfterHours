@@ -567,9 +567,11 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
     const speechWindow = window as any;
     const Recognition = speechWindow.SpeechRecognition || speechWindow.webkitSpeechRecognition;
     if (!Recognition) { setVoiceSupported(false); setVoiceError(t("Spraakherkenning wordt niet ondersteund in deze browser. Probeer Safari of Chrome en controleer de microfoonrechten.", "Speech recognition is not supported in this browser. Try Safari or Chrome and check microphone permissions.")); return; }
+    let startingRecognition: any = null;
     try {
       const recognitionProfileId = playerId;
       const recognition = new Recognition();
+      startingRecognition = recognition;
       recognitionRef.current = recognition;
       recognitionProfileIdRef.current = recognitionProfileId;
       const isCurrentRecognition = () => isVoiceRecognitionCurrent(
@@ -609,7 +611,16 @@ export default function PromptLibrary({ onBack, onComplete, onCaptureAssignment,
         if (safetyIntent !== "stop") speakAsDom(reply);
       };
       recognition.start();
-    } catch { setVoiceListening(false); setVoiceError("De microfoon kon niet starten. Controleer de browserrechten en probeer opnieuw."); }
+    } catch {
+      // start() can throw synchronously after the recognizer has been stored.
+      // Detach callbacks before stopping it so a late browser event cannot revive
+      // listening state or act on the current session after startup failed.
+      if (startingRecognition && recognitionRef.current === startingRecognition) {
+        cancelCurrentVoiceRecognition();
+      }
+      setVoiceListening(false);
+      setVoiceError("De microfoon kon niet starten. Controleer de browserrechten en probeer opnieuw.");
+    }
   };
   const stopVoiceReply = () => {
     cancelCurrentVoiceRecognition();
