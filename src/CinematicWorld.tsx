@@ -3,7 +3,7 @@ import { bindVaultAutoLock } from "./vaultAutoLock";
 import { isExperienceStartAttemptCurrent } from "./experienceStartAttempt";
 import { consumeInvitationTokenFromUrl } from "./invitationUrl";
 import {
-  ArrowLeft, ArrowRight, BookOpen, CheckCircle2, Clapperboard, Copy,
+  ArrowLeft, ArrowRight, BookOpen, CheckCircle2, Clapperboard, Copy, Users,
   Download, Eye, EyeOff, Flame, LockKeyhole, Mail, Music2, Pause,
   Play, Plus, Save, Share2, ShieldCheck, Sparkles, Square, Star, Trash2,
   UnlockKeyhole, Volume2, VolumeX
@@ -16,6 +16,7 @@ import {
   type ExperienceInvitation, type ExperienceInvitationPreview, type ExperienceRun, type WorldModule, type WorldRecord
 } from "./services/worldRecords";
 import "./cinematic-experience.css";
+import LocalCouplesMode from "./LocalCouplesMode";
 
 type Props = {
   language: "nl" | "en";
@@ -31,7 +32,7 @@ type Props = {
   onOpenAftercare: () => void;
   onOpenSafetyPlan: () => void;
 };
-type Tab = "experience" | "director" | "vault" | "sensory" | "invitation" | "dominion" | "deck" | "club";
+type Tab = "experience" | "local" | "director" | "vault" | "sensory" | "invitation" | "dominion" | "deck" | "club";
 type Scene = { key: string; title: string; description: string; steps: string[]; custom: boolean };
 type ScenePayload = { title: string; description: string; steps: string[]; language: "nl" | "en"; updatedAt: string };
 type RecordMap = Record<WorldModule, WorldRecord[]>;
@@ -1286,6 +1287,7 @@ export default function CinematicWorld({
 
   const tabItems: { id: Tab; label: string; icon: typeof Flame }[] = [
     { id: "experience", label: "Experience Engine", icon: Play },
+    { id: "local", label: "Local Couples", icon: Users },
     { id: "director", label: "Director's Room", icon: Clapperboard },
     { id: "vault", label: "Black Vault", icon: LockKeyhole },
     { id: "sensory", label: "Sensory Lab", icon: Music2 },
@@ -1335,6 +1337,16 @@ export default function CinematicWorld({
       {message && <div className="cw-feedback" role="status" aria-live="polite"><CheckCircle2 size={15} />{message}</div>}
       {loading && <div className="cw-loading">{t("Je privéwereld wordt veilig geladen…", "Loading your private world securely…")}</div>}
       {!remoteProfileId && <div className="cw-account-gate"><LockKeyhole /><div><strong>{t("Persoonlijke opslag vereist", "Personal storage required")}</strong><p>{t("Je kunt de wereld bekijken, maar opslaan, hervatten en privégegevens openen vereist een ingelogd AFTER HOURS-account.", "You can explore the world, but saving, resuming and opening private data requires a signed-in AFTER HOURS account.")}</p></div><button type="button" onClick={onRequestConsent}>{t("Account controleren", "Check account")}</button></div>}
+
+      {tab === "local" && (
+        <LocalCouplesMode
+          language={language}
+          consentActive={consentActive}
+          onSafetyPause={onSafetyPause}
+          onSafetyResume={onSafetyResume}
+          onSafetyStop={onSafetyStop}
+        />
+      )}
 
       {tab === "experience" && (
         <section className="cw-section">
