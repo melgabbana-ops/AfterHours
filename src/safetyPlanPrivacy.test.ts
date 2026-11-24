@@ -29,6 +29,15 @@ describe("safety signal privacy controls", () => {
     expect(safetyPlanSource.match(/setShowAmberSignal\(false\)/g)).toHaveLength(2);
   });
 
+
+  it("requires a second explicit action before permanently clearing the local safety plan", () => {
+    expect(safetyPlanSource).toContain("const [confirmClear, setConfirmClear] = useState(false);");
+    expect(safetyPlanSource).toContain("if (!confirmClear) {");
+    expect(safetyPlanSource).toContain('t("Definitief wissen", "Confirm deletion")');
+    expect(safetyPlanSource).toContain('t("Verwijderen geannuleerd. Je veiligheidsafspraken zijn behouden.", "Deletion cancelled. Your safety agreements were kept.")');
+    expect(safetyPlanSource).toContain("setConfirmClear(false);");
+  });
+
   it("explains that signals are hidden on screen but remain local to the device", () => {
     expect(safetyPlanSource).toContain("De signalen zijn standaard verborgen op het scherm.");
     expect(safetyPlanSource).toContain("Signals are hidden on screen by default.");
