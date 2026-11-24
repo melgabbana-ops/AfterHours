@@ -7,6 +7,7 @@ type Language = "nl" | "en";
 type Gender = "female" | "male";
 type TattooStyle = "ornamental" | "roses" | "script";
 type OutfitStyle = "harness" | "leather" | "corset";
+type DynamicRole = "dominant" | "sub" | "slave" | "switch";
 type CharacterLook = {
   gender: Gender;
   skin: string;
@@ -17,12 +18,13 @@ type CharacterLook = {
   tattoos: boolean;
   tattooStyle: TattooStyle;
   outfitStyle: OutfitStyle;
+  dynamicRole: DynamicRole;
   neckDetail: string;
   accessory: string;
 };
 const DEFAULT_LOOK: CharacterLook = {
   gender: "female", skin: "#B97855", hair: "#21151B", hairStyle: "waves",
-  outfit: "#100e0a", mask: false, tattoos: true, neckDetail: "collar", accessory: "crescent",
+  outfit: "#100e0a", mask: false, tattoos: true, tattooStyle: "ornamental", outfitStyle: "harness", dynamicRole: "sub", neckDetail: "collar", accessory: "crescent",
 };
 const SKINS = [
   { label: "Porcelain", color: "#F1D4C2" }, { label: "Warm", color: "#DCA889" },
@@ -57,6 +59,7 @@ export function normalizeCharacterLook(value: unknown): CharacterLook {
     tattoos: typeof candidate.tattoos === "boolean" ? candidate.tattoos : DEFAULT_LOOK.tattoos,
     tattooStyle: ["ornamental", "roses", "script"].includes(candidate.tattooStyle || "") ? candidate.tattooStyle! : DEFAULT_LOOK.tattooStyle,
     outfitStyle: ["harness", "leather", "corset"].includes(candidate.outfitStyle || "") ? candidate.outfitStyle! : DEFAULT_LOOK.outfitStyle,
+    dynamicRole: ["dominant", "sub", "slave", "switch"].includes(candidate.dynamicRole || "") ? candidate.dynamicRole! : DEFAULT_LOOK.dynamicRole,
     neckDetail: ["collar", "chain", "none"].includes(candidate.neckDetail || "") ? candidate.neckDetail! : DEFAULT_LOOK.neckDetail,
     accessory: ["crescent", "earring", "sigil"].includes(candidate.accessory || "") ? candidate.accessory! : DEFAULT_LOOK.accessory,
   };
@@ -182,7 +185,7 @@ export default function CharacterStudio({ profileId, language = "nl", xp = 0 }: 
           <AvatarArt look={look}/>
         </div>
         <div className="character-preview-details">
-          <div className="character-preview-caption"><span className="eyebrow">AFTER HOURS IDENTITY</span><strong>{look.gender === "female" ? t("The Femme", "The Femme") : t("The Sovereign", "The Sovereign")}</strong><small>{t("Cosmetische identiteit · altijd aanpasbaar", "Cosmetic identity · always customizable")}</small></div>
+          <div className="character-preview-caption"><span className="eyebrow">AFTER HOURS IDENTITY</span><strong>{look.gender === "female" ? t("The Femme", "The Femme") : t("The Sovereign", "The Sovereign")}</strong><small className="character-role-label">{({ dominant: t("Dominant", "Dominant"), sub: t("Sub", "Sub"), slave: t("Slaaf", "Slave"), switch: t("Switch", "Switch") })[look.dynamicRole]}</small><small>{t("Cosmetische identiteit · altijd aanpasbaar", "Cosmetic identity · always customizable")}</small></div>
           <div className="character-rank-panel">
             <div className="character-rank-heading">
               <span className="eyebrow">{t("RANG-EVOLUTIE", "RANK EVOLUTION")}</span>
@@ -200,6 +203,12 @@ export default function CharacterStudio({ profileId, language = "nl", xp = 0 }: 
           <button className={look.gender === "female" ? "selected" : ""} aria-pressed={look.gender === "female"} onClick={() => update({ gender: "female" })}>{t("Vrouwelijk", "Feminine")}{look.gender === "female" && <Check size={14}/>}</button>
           <button className={look.gender === "male" ? "selected" : ""} aria-pressed={look.gender === "male"} onClick={() => update({ gender: "male" })}>{t("Mannelijk", "Masculine")}{look.gender === "male" && <Check size={14}/>}</button>
         </div></div>
+        <div className="character-field"><span className="eyebrow">{t("BDSM-ROL", "BDSM ROLE")}</span><div className="character-segment wrap">
+          <button className={look.dynamicRole === "dominant" ? "selected" : ""} aria-pressed={look.dynamicRole === "dominant"} onClick={() => update({ dynamicRole: "dominant" })}>{t("Dominant", "Dominant")}</button>
+          <button className={look.dynamicRole === "sub" ? "selected" : ""} aria-pressed={look.dynamicRole === "sub"} onClick={() => update({ dynamicRole: "sub" })}>{t("Sub", "Sub")}</button>
+          <button className={look.dynamicRole === "slave" ? "selected" : ""} aria-pressed={look.dynamicRole === "slave"} onClick={() => update({ dynamicRole: "slave" })}>{t("Slaaf", "Slave")}</button>
+          <button className={look.dynamicRole === "switch" ? "selected" : ""} aria-pressed={look.dynamicRole === "switch"} onClick={() => update({ dynamicRole: "switch" })}>Switch</button>
+        </div><small>{t("Rol is zelfgekozen en staat los van gender of uiterlijk. Alle dynamieken zijn volwassen, vrijwillig en gebaseerd op duidelijke afspraken.", "Role is self-selected and independent of gender or appearance. All dynamics are adult, consensual and based on clear agreements.")}</small></div>
         <div className="character-field"><span className="eyebrow">{t("HUIDTINT", "SKIN TONE")}</span><div className="character-swatches">{SKINS.map((item) => <button key={item.color} className={look.skin === item.color ? "selected" : ""} aria-pressed={look.skin === item.color} onClick={() => update({ skin: item.color })} aria-label={item.label} title={item.label} style={{ background: item.color }}>{look.skin === item.color && <Check size={13}/>}</button>)}</div></div>
         <div className="character-field"><span className="eyebrow">{t("HAARKLEUR", "HAIR COLOUR")}</span><div className="character-swatches">{HAIRS.map((item) => <button key={item.color} className={look.hair === item.color ? "selected" : ""} aria-pressed={look.hair === item.color} onClick={() => update({ hair: item.color })} aria-label={item.label} title={item.label} style={{ background: item.color }}>{look.hair === item.color && <Check size={13}/>}</button>)}</div></div>
         <div className="character-field"><span className="eyebrow">{t("HAARSTIJL", "HAIR STYLE")}</span><div className="character-segment wrap">{HAIR_STYLES.map((item) => <button key={item.id} className={look.hairStyle === item.id ? "selected" : ""} aria-pressed={look.hairStyle === item.id} onClick={() => update({ hairStyle: item.id })}>{t(item.nl, item.en)}</button>)}</div></div>
