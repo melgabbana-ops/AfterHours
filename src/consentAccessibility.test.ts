@@ -40,4 +40,12 @@ describe("consent screen accessibility", () => {
     expect(consentSource).toContain("Toestemming kan altijd worden ingetrokken.");
   });
 
+  it("moves keyboard and screen-reader focus to the safety note after revealing it", () => {
+    expect(consentSource).toContain('id="consent-safety-note" tabIndex={-1}');
+    const revealStart = consentSource.indexOf("const revealSafetyNote=");
+    const revealEnd = consentSource.indexOf("};", revealStart);
+    const revealHandler = consentSource.slice(revealStart, revealEnd);
+    expect(revealHandler.indexOf("scrollIntoViewRespectingMotion(note,prefersReducedMotion)")).toBeGreaterThanOrEqual(0);
+    expect(revealHandler.indexOf("note.focus({preventScroll:true})")).toBeGreaterThan(revealHandler.indexOf("scrollIntoViewRespectingMotion(note,prefersReducedMotion)"));
+  });
 });
