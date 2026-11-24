@@ -35,7 +35,9 @@ export default function SecureDuoLobby({ roomId, language, onBack }: Props) {
   const [notice, setNotice] = useState("");
   // Each browser keeps its own aftercare choices locally; nothing is written to Supabase.
   const [aftercareChoices, setAftercareChoices] = useState<string[]>([]);
-  const refreshInFlight = useRef(false);
+  const refreshInFlight = useRef<string | null>(null);
+  const currentRoomId = useRef(roomId);
+  currentRoomId.current = roomId;
   const actionInFlight = useRef(false);
   const mounted = useRef(true);
 
@@ -44,28 +46,41 @@ export default function SecureDuoLobby({ roomId, language, onBack }: Props) {
     return () => { mounted.current = false; };
   }, []);
 
-  // All refresh sources share one in-flight request so polling, reconnect and
-  // manual refresh cannot race and let an older snapshot overwrite a newer one.
+  // Refreshes are deduplicated per room. A response from a room that is no
+  // longer open must never replace the currently displayed room snapshot.
   const refresh = useCallback(async () => {
-    if (refreshInFlight.current || !mounted.current) return;
-    refreshInFlight.current = true;
+    if (refreshInFlight.current === roomId || !mounted.current) return;
+    const requestedRoomId = roomId;
+    refreshInFlight.current = requestedRoomId;
     try {
-      const next = await getSecureDuoRoomState(roomId);
-      if (mounted.current) {
+      const next = await getSecureDuoRoomState(requestedRoomId);
+      if (mounted.current && currentRoomId.current === requestedRoomId) {
         setSnapshot(next);
         setSnapshotFresh(true);
         setError("");
       }
     } catch (reason) {
-      if (mounted.current) setSnapshotFresh(false);
-      if (mounted.current) setError(reason instanceof Error
-        ? reason.message
-        : (nl ? "De kamerstatus kon niet worden opgehaald." : "The room status could not be loaded."));
+      if (mounted.current && currentRoomId.current === requestedRoomId) {
+        setSnapshotFresh(false);
+        setError(reason instanceof Error
+          ? reason.message
+          : (nl ? "De kamerstatus kon niet worden opgehaald." : "The room status could not be loaded."));
+      }
     } finally {
-      refreshInFlight.current = false;
-      if (mounted.current) setLoading(false);
+      if (refreshInFlight.current === requestedRoomId) refreshInFlight.current = null;
+      if (mounted.current && currentRoomId.current === requestedRoomId) setLoading(false);
     }
   }, [roomId, nl]);
+
+  // Clear room-specific state immediately when navigating to another room.
+  useEffect(() => {
+    setSnapshot(null);
+    setSnapshotFresh(false);
+    setLoading(true);
+    setError("");
+    setNotice("");
+    setAftercareChoices([]);
+  }, [roomId]);
 
   useEffect(() => {
     void refresh();
