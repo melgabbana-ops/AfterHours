@@ -211,6 +211,29 @@ describe("local persistence", () => {
     expect(loadTimer("profile-a", 0, 60)).toBe(60);
   });
 
+
+  it("rejects invalid timer snapshots without overwriting the previous valid value", () => {
+    expect(saveTimer("profile-a", 0, 40, false)).toBe(true);
+    const key = "afterhours.timer.v1:profile-a";
+    const original = localStorageMock.getItem(key);
+    expect(saveTimer("profile-a", -1, 20)).toBe(false);
+    expect(saveTimer("profile-a", 3, 20)).toBe(false);
+    expect(saveTimer("profile-a", 0, -1)).toBe(false);
+    expect(saveTimer("profile-a", 0, 2.5)).toBe(false);
+    expect(saveTimer("   ", 0, 20)).toBe(false);
+    expect(saveTimer("profile-a", 0, 20, "yes" as unknown as boolean)).toBe(false);
+    expect(localStorageMock.getItem(key)).toBe(original);
+  });
+
+  it("does not report success when storage silently drops a timer snapshot", () => {
+    const silentStorage = {
+      getItem: () => null,
+      setItem: () => undefined,
+    };
+    vi.stubGlobal("localStorage", silentStorage);
+    expect(saveTimer("profile-a", 0, 30, true)).toBe(false);
+  });
+
   it("clears a saved timer", () => {
     saveTimer("profile-a", 0, 45, false);
 
