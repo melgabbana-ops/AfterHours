@@ -29,6 +29,15 @@ describe("safety signal privacy controls", () => {
     expect(safetyPlanSource.match(/setShowAmberSignal\(false\)/g)).toHaveLength(2);
   });
 
+  it("reloads the plan and clears revealed signals when the active profile changes", () => {
+    expect(safetyPlanSource).toContain("const [loadedProfileId, setLoadedProfileId] = useState(profileId);");
+    expect(safetyPlanSource).toContain("if (loadedProfileId === profileId) return;");
+    expect(safetyPlanSource).toContain("setPlan(readSafetyPlan(profileId));");
+    expect(safetyPlanSource).toContain("setShowSafeword(false);");
+    expect(safetyPlanSource).toContain("setShowAmberSignal(false);");
+    expect(safetyPlanSource).toContain("if (loadedProfileId !== profileId) return null;");
+  });
+
   it("explains that signals are hidden on screen but remain local to the device", () => {
     expect(safetyPlanSource).toContain("De signalen zijn standaard verborgen op het scherm.");
     expect(safetyPlanSource).toContain("Signals are hidden on screen by default.");
