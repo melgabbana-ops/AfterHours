@@ -34,7 +34,7 @@ export default function AftercareNote({ ownerId, sessionId, language, onStatusCh
   const [message, setMessage] = useState("");
   const [journalOpen, setJournalOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const [privacyLocked, setPrivacyLocked] = useState(false);
+  const [privacyLocked, setPrivacyLocked] = useState(() => typeof document !== "undefined" && document.visibilityState !== "visible");
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
   const hasText = Object.values(draft).some((value) => value.trim().length > 0);
   const dirty = !sameDraft(draft, noteDraft(saved));
