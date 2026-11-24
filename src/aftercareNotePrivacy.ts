@@ -27,8 +27,6 @@ export function bindAftercareEditorPrivacyLock(
   documentTarget.addEventListener("visibilitychange", syncVisibility);
   windowTarget.addEventListener("pagehide", lockOnPageHide);
   windowTarget.addEventListener("pageshow", syncOnPageShow);
-  syncVisibility();
-
   return () => {
     documentTarget.removeEventListener("visibilitychange", syncVisibility);
     windowTarget.removeEventListener("pagehide", lockOnPageHide);
