@@ -11,7 +11,7 @@ export function bindAftercareEditorPrivacyLock(
   lock: () => void,
   unlock: () => void,
 ): () => void {
-  let isLocked = false;
+  let isLocked = documentTarget.visibilityState !== "visible";
 
   const applyLock = (nextLocked: boolean) => {
     if (isLocked === nextLocked) return;
