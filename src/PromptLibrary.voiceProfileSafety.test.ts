@@ -85,10 +85,13 @@ describe("Prompt Library voice profile lifecycle", () => {
 
     expect(handler).toContain("let startingRecognition: any = null;");
     expect(handler).toContain("startingRecognition = recognition;");
-    expect(handler).toContain("if (startingRecognition && recognitionRef.current === startingRecognition)");
-    expect(handler).toContain("cancelCurrentVoiceRecognition();");
-    expect(handler.indexOf("cancelCurrentVoiceRecognition();")).toBeLessThan(
-      handler.indexOf('setVoiceError("De microfoon kon niet starten. Controleer de browserrechten en probeer opnieuw.")'),
+    const catchStart = handler.lastIndexOf("} catch {");
+    const catchHandler = handler.slice(catchStart);
+    expect(catchStart).toBeGreaterThan(-1);
+    expect(catchHandler).toContain("if (startingRecognition && recognitionRef.current === startingRecognition)");
+    expect(catchHandler).toContain("cancelCurrentVoiceRecognition();");
+    expect(catchHandler.indexOf("cancelCurrentVoiceRecognition();")).toBeLessThan(
+      catchHandler.indexOf('setVoiceError("De microfoon kon niet starten. Controleer de browserrechten en probeer opnieuw.")'),
     );
   });
 
