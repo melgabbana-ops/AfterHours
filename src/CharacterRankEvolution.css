@@ -41,3 +41,9 @@
 .character-role-card strong{display:block;color:#e7c98f;font-size:12px;letter-spacing:.07em;text-transform:uppercase;}
 .character-role-card p{margin:7px 0;color:#d1c7b7;font-size:12px;line-height:1.55;}
 .character-role-card small{display:block;color:#a99d8c;font-size:10px;line-height:1.5;}
+
+.character-role-label{display:inline-flex;align-items:center;width:max-content;max-width:100%;margin-top:7px;padding:4px 9px;border:1px solid rgba(215,181,111,.42);border-radius:999px;background:rgba(28,21,13,.82);color:#e4c58b;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;}
+.character-role-card{margin-top:10px;padding:12px 14px;border:1px solid rgba(198,148,69,.32);border-left:2px solid #b58a50;border-radius:9px;background:linear-gradient(120deg,rgba(37,28,17,.88),rgba(12,10,7,.94));}
+.character-role-card strong{display:block;color:#e7c98f;font-family:"Cinzel",Georgia,serif;font-size:12px;font-weight:600;letter-spacing:.07em;}
+.character-role-card p{margin:6px 0 0;color:#b8afa1;font-size:11px;line-height:1.55;}
+@media(max-width:560px){.character-role-card{padding:10px 11px}.character-role-card p{font-size:10px}.character-role-label{font-size:9px}}
