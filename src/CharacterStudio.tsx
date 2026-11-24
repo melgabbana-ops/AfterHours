@@ -5,6 +5,8 @@ import "./CharacterRankEvolution.css";
 
 type Language = "nl" | "en";
 type Gender = "female" | "male";
+type TattooStyle = "ornamental" | "roses" | "script";
+type OutfitStyle = "harness" | "leather" | "corset";
 type CharacterLook = {
   gender: Gender;
   skin: string;
@@ -13,6 +15,8 @@ type CharacterLook = {
   outfit: string;
   mask: boolean;
   tattoos: boolean;
+  tattooStyle: TattooStyle;
+  outfitStyle: OutfitStyle;
   neckDetail: string;
   accessory: string;
 };
@@ -51,6 +55,8 @@ export function normalizeCharacterLook(value: unknown): CharacterLook {
     outfit: OUTFITS.some((item) => item.color === candidate.outfit) ? candidate.outfit! : DEFAULT_LOOK.outfit,
     mask: typeof candidate.mask === "boolean" ? candidate.mask : DEFAULT_LOOK.mask,
     tattoos: typeof candidate.tattoos === "boolean" ? candidate.tattoos : DEFAULT_LOOK.tattoos,
+    tattooStyle: ["ornamental", "roses", "script"].includes(candidate.tattooStyle || "") ? candidate.tattooStyle! : DEFAULT_LOOK.tattooStyle,
+    outfitStyle: ["harness", "leather", "corset"].includes(candidate.outfitStyle || "") ? candidate.outfitStyle! : DEFAULT_LOOK.outfitStyle,
     neckDetail: ["collar", "chain", "none"].includes(candidate.neckDetail || "") ? candidate.neckDetail! : DEFAULT_LOOK.neckDetail,
     accessory: ["crescent", "earring", "sigil"].includes(candidate.accessory || "") ? candidate.accessory! : DEFAULT_LOOK.accessory,
   };
@@ -82,12 +88,25 @@ function AvatarArt({ look }: { look: CharacterLook }) {
     <rect width="240" height="300" rx="8" fill="url(#ahPortraitLight)"/>
     <path d="M18 300 C22 242 47 218 83 204 L104 188 L136 188 L157 204 C193 218 218 242 222 300Z" fill="url(#ahPortraitCloth)"/>
     <path d="M78 218 L103 194 L120 219 L137 194 L162 218 L151 300 L89 300Z" fill="#090806" stroke="url(#ahPortraitGold)" strokeOpacity=".5" strokeWidth="1"/>
-    <path d="M79 216 L105 197 L120 221 L135 197 L161 216" fill="none" stroke="#b58a50" strokeOpacity=".8" strokeWidth="2"/>
-    <path d="M92 207 L111 300 M148 207 L129 300" fill="none" stroke="#171411" strokeWidth="8"/>
-    <path d="M92 207 L111 300 M148 207 L129 300" fill="none" stroke="url(#ahPortraitGold)" strokeOpacity=".9" strokeWidth="1.5"/>
-    <path d="M88 229 Q120 244 152 229" fill="none" stroke="#b58a50" strokeWidth="2"/>
-    <rect x="114" y="238" width="12" height="10" rx="2" fill="#17120d" stroke="#d0ad72" strokeWidth="1"/>
-    <circle cx="120" cy="243" r="2" fill="#d0ad72"/>
+    {look.outfitStyle === "harness" && <>
+      <path d="M79 216 L105 197 L120 221 L135 197 L161 216" fill="none" stroke="#b58a50" strokeOpacity=".8" strokeWidth="2"/>
+      <path d="M92 207 L111 300 M148 207 L129 300" fill="none" stroke="#171411" strokeWidth="8"/>
+      <path d="M92 207 L111 300 M148 207 L129 300" fill="none" stroke="url(#ahPortraitGold)" strokeOpacity=".9" strokeWidth="1.5"/>
+      <path d="M88 229 Q120 244 152 229" fill="none" stroke="#b58a50" strokeWidth="2"/>
+      <rect x="114" y="238" width="12" height="10" rx="2" fill="#17120d" stroke="#d0ad72" strokeWidth="1"/>
+      <circle cx="120" cy="243" r="2" fill="#d0ad72"/>
+    </>}
+    {look.outfitStyle === "leather" && <>
+      <path d="M78 218 L103 194 L120 219 L137 194 L162 218 L151 300 L89 300Z" fill="#090806" stroke="url(#ahPortraitGold)" strokeOpacity=".55" strokeWidth="1"/>
+      <path d="M104 197 L120 219 L136 197 L129 300 L111 300Z" fill="#211b16" stroke="#8f6b42" strokeWidth="1"/>
+      <path d="M98 213 L112 228 M142 213 L128 228" stroke="#d0ad72" strokeWidth="1.2"/>
+      <path d="M92 248 L148 248" stroke="#8f6b42" strokeWidth="1"/>
+    </>}
+    {look.outfitStyle === "corset" && <>
+      <path d="M78 218 L103 194 L120 219 L137 194 L162 218 L151 300 L89 300Z" fill="#090806" stroke="url(#ahPortraitGold)" strokeOpacity=".55" strokeWidth="1"/>
+      <path d="M101 213 Q120 225 139 213 L132 300 L108 300Z" fill="#17110e" stroke="#b58a50" strokeWidth="1.2"/>
+      <path d="M110 228 L130 278 M130 228 L110 278 M109 246 L131 246 M108 264 L132 264" fill="none" stroke="#c19a62" strokeWidth="1"/>
+    </>}
     <path d={hairShape} fill={look.hair}/>
     {longHair && <path d={look.hairStyle==="curls"?"M62 80 C49 101 69 118 57 143 C48 165 64 185 60 211 M178 78 C193 99 173 119 185 145 C195 168 177 190 181 211":"M65 78 C52 107 70 129 61 160 C57 180 69 196 67 211 M175 78 C188 106 170 129 179 160 C183 180 171 196 173 211"} fill="none" stroke={look.hair} strokeWidth={look.hairStyle==="curls"?13:10} strokeLinecap="round"/>}
     <path d={masculine?"M82 76 C93 56 147 56 158 76 L157 140 C155 168 139 187 120 190 C101 187 85 168 83 140Z":"M82 77 C94 56 146 56 158 77 L158 141 C155 170 139 189 120 192 C101 189 85 170 82 141Z"} fill="url(#ahPortraitSkin)"/>
@@ -110,13 +129,24 @@ function AvatarArt({ look }: { look: CharacterLook }) {
       <path d="M89 173 l-4 4 5 2 M151 173 l4 4 -5 2"/>
       <path d="M106 190 C111 194 115 195 120 194 C125 195 129 194 134 190" strokeWidth="1"/>
       <path d="M117 174 l3 -3 3 3 -3 3Z" strokeWidth=".9"/>
-      {/* Fine-line rose and ornamental Chicano-inspired shoulder accents */}
-      <path d="M84 213 C77 207 79 198 87 196 C95 194 100 201 96 208 C93 213 87 216 84 213Z"/>
-      <path d="M87 197 C88 202 92 205 96 208 M82 205 C88 204 92 201 94 197 M86 213 C83 218 83 222 87 225"/>
-      <path d="M156 213 C163 207 161 198 153 196 C145 194 140 201 144 208 C147 213 153 216 156 213Z"/>
-      <path d="M153 197 C152 202 148 205 144 208 M158 205 C152 204 148 201 146 197 M154 213 C157 218 157 222 153 225"/>
-      <path d="M102 205 Q108 198 114 205 M126 205 Q132 198 138 205 M105 211 Q120 219 135 211" strokeWidth=".9"/>
-      <path d="M120 196 l3 5 -3 5 -3 -5Z M112 202 l-3 4 3 4 M128 202 l3 4 -3 4" strokeWidth=".9"/>
+      {look.tattooStyle === "ornamental" && <>
+        <path d="M84 213 C77 207 79 198 87 196 C95 194 100 201 96 208 C93 213 87 216 84 213Z"/>
+        <path d="M87 197 C88 202 92 205 96 208 M82 205 C88 204 92 201 94 197 M86 213 C83 218 83 222 87 225"/>
+        <path d="M156 213 C163 207 161 198 153 196 C145 194 140 201 144 208 C147 213 153 216 156 213Z"/>
+        <path d="M153 197 C152 202 148 205 144 208 M158 205 C152 204 148 201 146 197 M154 213 C157 218 157 222 153 225"/>
+        <path d="M102 205 Q108 198 114 205 M126 205 Q132 198 138 205 M105 211 Q120 219 135 211" strokeWidth=".9"/>
+        <path d="M120 196 l3 5 -3 5 -3 -5Z M112 202 l-3 4 3 4 M128 202 l3 4 -3 4" strokeWidth=".9"/>
+      </>}
+      {look.tattooStyle === "roses" && <>
+        <path d="M88 210 C78 204 81 192 90 193 C99 193 101 204 94 210 C91 213 89 215 88 219Z"/>
+        <path d="M88 195 C87 202 95 202 96 196 M83 202 Q89 205 96 207 M89 219 Q98 221 101 228"/>
+        <path d="M152 210 C162 204 159 192 150 193 C141 193 139 204 146 210 C149 213 151 215 152 219Z"/>
+        <path d="M152 195 C153 202 145 202 144 196 M157 202 Q151 205 144 207 M151 219 Q142 221 139 228"/>
+      </>}
+      {look.tattooStyle === "script" && <>
+        <path d="M84 205 Q91 196 98 205 Q91 214 84 205 M142 205 Q149 196 156 205 Q149 214 142 205"/>
+        <path d="M87 215 Q94 211 100 216 M140 216 Q146 211 153 215 M105 207 Q120 214 135 207" strokeWidth=".9"/>
+      </>}
     </g>}
     <path d="M101 188 L120 216 L139 188" fill="none" stroke="url(#ahPortraitGold)" strokeOpacity=".55" strokeWidth="1"/>
     {look.neckDetail==="collar"&&<><path d="M88 184 C105 201 135 201 152 184 L157 201 C137 219 103 219 83 201Z" fill="#090806" stroke="url(#ahPortraitGold)" strokeWidth="1.5"/><circle cx="120" cy="211" r="3" fill="#d8b477"/></>}
@@ -174,6 +204,16 @@ export default function CharacterStudio({ profileId, language = "nl", xp = 0 }: 
         <div className="character-field"><span className="eyebrow">{t("HAARKLEUR", "HAIR COLOUR")}</span><div className="character-swatches">{HAIRS.map((item) => <button key={item.color} className={look.hair === item.color ? "selected" : ""} aria-pressed={look.hair === item.color} onClick={() => update({ hair: item.color })} aria-label={item.label} title={item.label} style={{ background: item.color }}>{look.hair === item.color && <Check size={13}/>}</button>)}</div></div>
         <div className="character-field"><span className="eyebrow">{t("HAARSTIJL", "HAIR STYLE")}</span><div className="character-segment wrap">{HAIR_STYLES.map((item) => <button key={item.id} className={look.hairStyle === item.id ? "selected" : ""} aria-pressed={look.hairStyle === item.id} onClick={() => update({ hairStyle: item.id })}>{t(item.nl, item.en)}</button>)}</div></div>
         <div className="character-field"><span className="eyebrow">{t("OUTFIT", "OUTFIT")}</span><div className="character-swatches outfit-swatches">{OUTFITS.map((item) => <button key={item.color} className={look.outfit === item.color ? "selected" : ""} aria-pressed={look.outfit === item.color} onClick={() => update({ outfit: item.color })} aria-label={item.label} title={item.label} style={{ background: item.color }}>{look.outfit === item.color && <Check size={13}/>}</button>)}</div></div>
+        <div className="character-field"><span className="eyebrow">{t("TATTOOSTIJL", "TATTOO STYLE")}</span><div className="character-segment wrap">
+          <button className={look.tattooStyle === "ornamental" ? "selected" : ""} aria-pressed={look.tattooStyle === "ornamental"} onClick={() => update({ tattooStyle: "ornamental" })}>{t("Ornamentaal", "Ornamental")}</button>
+          <button className={look.tattooStyle === "roses" ? "selected" : ""} aria-pressed={look.tattooStyle === "roses"} onClick={() => update({ tattooStyle: "roses" })}>{t("Rozen", "Roses")}</button>
+          <button className={look.tattooStyle === "script" ? "selected" : ""} aria-pressed={look.tattooStyle === "script"} onClick={() => update({ tattooStyle: "script" })}>{t("Script", "Script")}</button>
+        </div></div>
+        <div className="character-field"><span className="eyebrow">{t("KLEDINGSTIJL", "CLOTHING STYLE")}</span><div className="character-segment wrap">
+          <button className={look.outfitStyle === "harness" ? "selected" : ""} aria-pressed={look.outfitStyle === "harness"} onClick={() => update({ outfitStyle: "harness" })}>{t("Harness", "Harness")}</button>
+          <button className={look.outfitStyle === "leather" ? "selected" : ""} aria-pressed={look.outfitStyle === "leather"} onClick={() => update({ outfitStyle: "leather" })}>{t("Leer", "Leather")}</button>
+          <button className={look.outfitStyle === "corset" ? "selected" : ""} aria-pressed={look.outfitStyle === "corset"} onClick={() => update({ outfitStyle: "corset" })}>{t("Korset", "Corset")}</button>
+        </div></div>
         <div className="character-field"><span className="eyebrow">{t("DETAILS", "DETAILS")}</span><div className="character-segment wrap">
           <button className={look.neckDetail === "collar" ? "selected" : ""} aria-pressed={look.neckDetail === "collar"} onClick={() => update({ neckDetail: "collar" })}>{t("Collar", "Collar")}</button>
           <button className={look.neckDetail === "chain" ? "selected" : ""} aria-pressed={look.neckDetail === "chain"} onClick={() => update({ neckDetail: "chain" })}>{t("Ketting", "Chain")}</button>
