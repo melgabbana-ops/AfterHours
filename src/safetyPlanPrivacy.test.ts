@@ -25,8 +25,8 @@ describe("safety signal privacy controls", () => {
   });
 
   it("re-hides both signals after a successful save or clear", () => {
-    expect(safetyPlanSource.match(/setShowSafeword\(false\)/g)).toHaveLength(2);
-    expect(safetyPlanSource.match(/setShowAmberSignal\(false\)/g)).toHaveLength(2);
+    expect(safetyPlanSource.match(/setShowSafeword\(false\)/g)).toHaveLength(3);
+    expect(safetyPlanSource.match(/setShowAmberSignal\(false\)/g)).toHaveLength(3);
   });
 
   it("reloads the plan and clears revealed signals when the active profile changes", () => {
