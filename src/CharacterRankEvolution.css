@@ -31,19 +31,31 @@
 .character-rank-meta small:last-child{flex:none;color:#d7b56f;font-variant-numeric:tabular-nums;}
 @media(max-width:560px){.character-rank-panel{margin-top:9px;padding:10px}.character-rank-heading strong{font-size:12px}.character-rank-meta small{font-size:8px}}
 
-/* Role identity details: restrained gold treatment keeps the existing AFTER HOURS visual language. */
-.character-role-label{display:inline-flex;align-items:center;width:max-content;margin-top:6px;padding:4px 9px;border:1px solid rgba(198,148,69,.48);border-radius:999px;background:rgba(24,18,11,.88);color:#e0c18a;font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;}
-.character-role-label.role-dominant{border-color:rgba(220,185,119,.72);color:#f0d9a5;}
-.character-role-label.role-sub{border-color:rgba(174,145,104,.55);color:#d7bd91;}
-.character-role-label.role-slave{border-style:double;border-width:3px;border-color:rgba(190,151,91,.72);color:#e7c98f;}
+/* Role identity details: distinct, accessible accents within the existing black-and-gold system. */
+.character-role-label{
+  display:inline-flex;align-items:center;width:max-content;max-width:100%;
+  margin-top:7px;padding:4px 9px;border:1px solid rgba(215,181,111,.42);
+  border-radius:999px;background:rgba(28,21,13,.82);color:#e4c58b;
+  font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+}
+.character-role-label.role-dominant{border-color:rgba(240,217,165,.78);color:#f0d9a5;box-shadow:inset 0 0 0 1px rgba(240,217,165,.16);}
+.character-role-label.role-sub{border-color:rgba(174,145,104,.62);color:#d7bd91;}
+.character-role-label.role-slave{border:3px double rgba(190,151,91,.76);padding:2px 8px;color:#e7c98f;}
 .character-role-label.role-switch{border-style:dashed;color:#d9c5a0;}
-.character-role-card{margin-top:10px;padding:12px;border:1px solid rgba(198,148,69,.34);border-radius:10px;background:linear-gradient(145deg,rgba(35,26,16,.88),rgba(12,10,7,.96));}
-.character-role-card strong{display:block;color:#e7c98f;font-size:12px;letter-spacing:.07em;text-transform:uppercase;}
-.character-role-card p{margin:7px 0;color:#d1c7b7;font-size:12px;line-height:1.55;}
-.character-role-card small{display:block;color:#a99d8c;font-size:10px;line-height:1.5;}
-
-.character-role-label{display:inline-flex;align-items:center;width:max-content;max-width:100%;margin-top:7px;padding:4px 9px;border:1px solid rgba(215,181,111,.42);border-radius:999px;background:rgba(28,21,13,.82);color:#e4c58b;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;}
-.character-role-card{margin-top:10px;padding:12px 14px;border:1px solid rgba(198,148,69,.32);border-left:2px solid #b58a50;border-radius:9px;background:linear-gradient(120deg,rgba(37,28,17,.88),rgba(12,10,7,.94));}
-.character-role-card strong{display:block;color:#e7c98f;font-family:"Cinzel",Georgia,serif;font-size:12px;font-weight:600;letter-spacing:.07em;}
+.character-role-card{
+  margin-top:10px;padding:12px 14px;border:1px solid rgba(198,148,69,.32);
+  border-left:2px solid #b58a50;border-radius:9px;
+  background:linear-gradient(120deg,rgba(37,28,17,.88),rgba(12,10,7,.94));
+}
+.character-role-card strong{
+  display:block;color:#e7c98f;font-family:"Cinzel",Georgia,serif;
+  font-size:12px;font-weight:600;letter-spacing:.07em;
+}
 .character-role-card p{margin:6px 0 0;color:#b8afa1;font-size:11px;line-height:1.55;}
-@media(max-width:560px){.character-role-card{padding:10px 11px}.character-role-card p{font-size:10px}.character-role-label{font-size:9px}}
+.character-role-card small{display:block;margin-top:7px;color:#a99d8c;font-size:10px;line-height:1.5;}
+.character-role-card:has(+ .character-field){margin-bottom:2px;}
+@media(max-width:560px){
+  .character-role-card{padding:10px 11px}
+  .character-role-card p{font-size:10px}
+  .character-role-label{font-size:9px}
+}
