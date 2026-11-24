@@ -34,6 +34,7 @@ export default function SafetyPlan({
   const [message, setMessage] = useState("");
   const [showSafeword, setShowSafeword] = useState(false);
   const [showAmberSignal, setShowAmberSignal] = useState(false);
+  const [confirmClear, setConfirmClear] = useState(false);
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
   const isSessionActive = sessionStatus === "active" || sessionStatus === "paused";
   const readinessCount = Object.values(plan.readiness).filter(Boolean).length;
@@ -89,15 +90,30 @@ export default function SafetyPlan({
   };
 
   const clear = () => {
+    if (!confirmClear) {
+      setConfirmClear(true);
+      setMessage(t(
+        "Je veiligheidsafspraken zijn nog niet verwijderd. Klik op Definitief wissen om alleen de afspraken van dit profiel op dit apparaat te verwijderen.",
+        "Your safety agreements have not been deleted. Select Confirm deletion to remove only this profile's agreements from this device.",
+      ));
+      return;
+    }
     if (clearSafetyPlan(profileId)) {
       setPlan(createEmptySafetyPlan());
       setSaved(false);
       setShowSafeword(false);
       setShowAmberSignal(false);
+      setConfirmClear(false);
       setMessage(t("Lokale veiligheidsafspraken verwijderd.", "Local safety agreements deleted."));
     } else {
+      setConfirmClear(false);
       setMessage(t("Verwijderen is niet gelukt. Probeer het opnieuw via je browserinstellingen.", "Could not delete the plan. Try again through your browser settings."));
     }
+  };
+
+  const cancelClear = () => {
+    setConfirmClear(false);
+    setMessage(t("Verwijderen geannuleerd. Je veiligheidsafspraken zijn behouden.", "Deletion cancelled. Your safety agreements were kept."));
   };
 
   return <section className="safety-plan" aria-labelledby="safety-plan-title">
@@ -161,7 +177,7 @@ export default function SafetyPlan({
     <p className="safety-plan-footnote" id="safety-signals-help">{t("De signalen zijn standaard verborgen op het scherm. Toon ze alleen wanneer je privacy hebt. Wanneer je vrijwillig spraakbediening start, worden deze lokale signalen gebruikt voor STOP en PAUZE. Ze worden niet naar de server gestuurd.", "Signals are hidden on screen by default. Reveal them only when you have privacy. When you voluntarily start voice control, these local signals are used for STOP and PAUSE. They are not sent to the server.")}</p>
     <label htmlFor="ah-boundaries">{t("Grenzen en afspraken", "Boundaries and agreements")} <span>{t("Bewaar alleen wat veilig voelt op dit apparaat.", "Only save what feels safe to keep on this device.")}</span></label>
     <textarea id="ah-boundaries" maxLength={1000} rows={3} value={plan.boundaries} onChange={(event) => update("boundaries", event.target.value)} placeholder={t("Wat is niet welkom? Wat vraagt eerst een check-in? Wat helpt bij aftercare?", "What is not welcome? What needs a check-in first? What helps with aftercare?")}/>
-    <div className="safety-plan-actions"><button className="gold" type="button" onClick={save}><Save/>{saved ? " " + t("Opgeslagen", "Saved") : " " + t("Afspraken opslaan", "Save agreements")}</button><button type="button" onClick={clear}><Trash2/> {t("Wissen", "Clear")}</button></div>
+    <div className="safety-plan-actions"><button className="gold" type="button" onClick={save}><Save/>{saved ? " " + t("Opgeslagen", "Saved") : " " + t("Afspraken opslaan", "Save agreements")}</button><button type="button" onClick={clear}><Trash2/> {confirmClear ? t("Definitief wissen", "Confirm deletion") : t("Wissen", "Clear")}</button>{confirmClear && <button type="button" onClick={cancelClear}>{t("Annuleren", "Cancel")}</button>}</div>
     {message && <p className="safety-plan-message" role="status" aria-live="polite">{saved && <Check/>}{message}</p>}
     <p className="safety-plan-footnote">{t("Een stopwoord vervangt geen communicatie. Je mag altijd stoppen, ook zonder het afgesproken woord te gebruiken.", "A safeword does not replace communication. You can always stop, even without using the agreed word.")}</p>
   </section>;
