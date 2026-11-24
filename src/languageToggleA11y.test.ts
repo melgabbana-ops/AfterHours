@@ -1,3 +1,4 @@
+// @ts-expect-error Node built-ins are available in Vitest, but @types/node is not a direct app dependency.
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
