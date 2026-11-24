@@ -55,8 +55,10 @@ The app supports Supabase Auth with magic links, email/password, Google and Appl
 
 The browser must only receive the public anon key. Never place a Supabase service-role key in Vite environment variables.
 
-## Deployment
+## Deployment: GitHub Pages only
 
-This is a Vite production build and is ready for a Git-connected deployment platform. Set the two Supabase variables in the deployment environment before enabling remote persistence.
+GitHub Actions is the build and deployment pipeline, and GitHub Pages is the only approved hosting target for AFTER HOURS. Do not add, configure, invoke or rely on Vercel or any other external deployment platform. Do not add paid hosting, build minutes, subscriptions or infrastructure.
+
+The Pages workflow builds the Vite application and publishes its artifact from the approved GitHub branch. Pull-request workflows may build and upload an artifact, but must not publish production. Configure the two Supabase public browser variables only through the repository's approved GitHub Actions environment when remote persistence is intentionally enabled. Never expose service-role keys.
 
 The PWA service worker is registered from the app shell and is safe to use without Supabase. Remote session state, consent, history, XP and authorization remain server-authoritative when Supabase is configured.
