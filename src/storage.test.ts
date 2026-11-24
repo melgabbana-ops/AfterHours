@@ -157,7 +157,7 @@ describe("local persistence", () => {
     expect(loadTimer("profile-a", 0, 60)).toBe(60);
   });
 
-  it("rejects corrupt timer values instead of restoring an invalid countdown", () => {
+  it("fails closed for corrupt timer values belonging to the active profile and round", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-10-09T12:00:00.000Z"));
     const key = "afterhours.timer.v1:profile-a";
@@ -170,8 +170,21 @@ describe("local persistence", () => {
 
     for (const snapshot of invalidSnapshots) {
       localStorageMock.setItem(key, JSON.stringify(snapshot));
-      expect(loadTimer("profile-a", 0, 60)).toBe(60);
+      expect(loadTimer("profile-a", 0, 60)).toBe(0);
     }
+  });
+
+  it("fails closed when the timer snapshot for the active profile cannot be parsed", () => {
+    localStorageMock.setItem("afterhours.timer.v1:profile-a", "{broken");
+    expect(loadTimer("profile-a", 0, 60)).toBe(0);
+  });
+
+  it("uses a fresh timer only when no snapshot exists or a valid snapshot belongs to another round", () => {
+    expect(loadTimer("profile-a", 0, 60)).toBe(60);
+    localStorageMock.setItem("afterhours.timer.v1:profile-a", JSON.stringify({
+      profileId: "profile-a", round: 1, seconds: 20, savedAt: Date.now(), running: false,
+    }));
+    expect(loadTimer("profile-a", 0, 60)).toBe(60);
   });
 
   it("fails closed when the device clock moves behind an active timer snapshot", () => {
