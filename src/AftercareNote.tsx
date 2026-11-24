@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { LockKeyhole, Save, Trash2, SkipForward, BookOpen } from "lucide-react";
 import AftercareJournal from "./AftercareJournal";
 import {
@@ -31,6 +31,7 @@ export default function AftercareNote({ ownerId, sessionId, language, onStatusCh
   const [status, setStatus] = useState<PrivateNoteStatus>("pending");
   const [message, setMessage] = useState("");
   const [journalOpen, setJournalOpen] = useState(false);
+  const journalToggleRef = useRef<HTMLButtonElement>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
   const hasText = Object.values(draft).some((value) => value.trim().length > 0);
@@ -112,10 +113,14 @@ export default function AftercareNote({ ownerId, sessionId, language, onStatusCh
         <h3 id="aftercare-private-note-title">{t("Wil je iets onthouden van deze ervaring?", "Would you like to remember something from this experience?")}</h3>
       </div>
     </div>
-    <button type="button" className="ah-open-journal" aria-expanded={journalOpen} onClick={() => setJournalOpen(value => !value)}>
+    <button ref={journalToggleRef} type="button" className="ah-open-journal" aria-expanded={journalOpen} onClick={() => setJournalOpen(value => !value)}>
       <BookOpen size={16}/>{journalOpen ? t("Privéjournal sluiten", "Close private journal") : t("Open versleuteld privéjournal", "Open encrypted private journal")}
     </button>
-    {journalOpen && <AftercareJournal key={ownerId} ownerId={ownerId} language={language} onClose={() => setJournalOpen(false)}/>}
+    {journalOpen && <AftercareJournal key={ownerId} ownerId={ownerId} language={language} onClose={() => {
+      setJournalOpen(false);
+      // Return keyboard and screen-reader focus to the disclosure that opened the journal.
+      journalToggleRef.current?.focus();
+    }}/>}
     <p className="aftercare-private-note-privacy">
       {t("Deze sessienotitie wordt alleen lokaal in deze browser opgeslagen en is niet versleuteld. Voor persoonlijke reflecties kun je het aparte versleutelde privéjournal openen.", "This session note is stored only in this browser and is not encrypted. For personal reflections, open the separate encrypted private journal.")}
     </p>
