@@ -67,7 +67,7 @@ Consent is session-scoped and auditable. Revocation must stop an active or pause
 
 ## Experience-run deletion
 
-Active or paused experience runs must remain available for an explicit STOP action. The client delete operation is owner-scoped and limited to `ready`, `completed`, and `stopped` rows. A matching authenticated RLS restriction is proposed in `proposals/20261123_afterhours_experience_run_terminal_delete_guard.sql`; it is **not applied**. Until that proposal is reviewed against the deployed migration ledger and applied through the approved migration workflow, direct authenticated API requests may still bypass the client-side status filter. Do not describe the client check as a database security boundary.
+Active or paused experience runs must remain available for an explicit STOP action. The client delete operation is owner-scoped and limited to `ready`, `completed`, and `stopped` rows. A matching authenticated RLS restriction is proposed in `proposals/20261123_afterhours_experience_run_terminal_delete_guard.sql`; it is **not applied**. The proposal uses a PostgreSQL **RESTRICTIVE** delete policy, so its owner-and-terminal-status condition is ANDed with every applicable permissive policy instead of relying on one policy name being the only delete path. Until that proposal is reviewed against the deployed migration ledger and applied through the approved migration workflow, direct authenticated API requests may still bypass the client-side status filter. Do not describe the client check as a database security boundary.
 
 ## Private media storage
 
