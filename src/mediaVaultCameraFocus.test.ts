@@ -7,8 +7,8 @@ describe("Media Vault camera focus return", () => {
     expect(mediaVaultSource).toContain("ref={captureStartButtonRef}");
   });
 
-  it("restores focus only after the camera has closed and the launcher is available", () => {
-    expect(mediaVaultSource).toContain("if(!isPhotoCameraOpen&&returnFocusToCaptureRef.current)");
+  it("restores focus only after the camera and capture review have closed", () => {
+    expect(mediaVaultSource).toContain("if(!isPhotoCameraOpen&&!pendingCapture&&returnFocusToCaptureRef.current)");
     expect(mediaVaultSource).toContain("returnFocusToCaptureRef.current=false;");
     expect(mediaVaultSource).toContain("captureStartButtonRef.current?.focus();");
   });
