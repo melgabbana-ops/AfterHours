@@ -73,7 +73,9 @@ describe("aftercare note deletion confirmation", () => {
 
 describe("aftercare editor background privacy", () => {
   it("removes the unencrypted note fields and open journal from the rendered tree while backgrounded", () => {
-    expect(aftercareNoteSource).toContain("const [privacyLocked, setPrivacyLocked] = useState(false);");
+    expect(aftercareNoteSource).toContain(
+      'useState(() => typeof document !== "undefined" && document.visibilityState !== "visible")',
+    );
     expect(aftercareNoteSource).toContain('{privacyLocked ? (');
     expect(aftercareNoteSource).toContain('role="status" aria-live="polite" aria-atomic="true"');
     expect(aftercareNoteSource).toContain("Private note hidden while the app is in the background.");
