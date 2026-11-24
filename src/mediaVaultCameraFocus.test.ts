@@ -1,7 +1,7 @@
-import compactMediaVaultSource from "./MediaVault.tsx?raw";
+import mediaVaultSource from "./MediaVault.tsx?raw";
 import { describe, expect, it } from "vitest";
 
-const compactMediaVaultSource = mediaVaultSource.replace(/\\s+/g, "");
+const compactMediaVaultSource = mediaVaultSource.replace(/\s+/g, "");
 
 describe("Media Vault camera focus return", () => {
   it("attaches a stable focus target to the camera launcher", () => {
