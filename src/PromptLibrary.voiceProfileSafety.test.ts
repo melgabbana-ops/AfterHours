@@ -78,4 +78,18 @@ describe("Prompt Library voice profile lifecycle", () => {
     expect(onEndHandler).toContain("cancelCurrentVoiceRecognition();");
   });
 
+  it("detaches a recognizer when browser start() throws synchronously", () => {
+    const start = promptLibrarySource.indexOf("const startVoiceReply =");
+    const end = promptLibrarySource.indexOf("const stopVoiceReply =", start);
+    const handler = promptLibrarySource.slice(start, end);
+
+    expect(handler).toContain("let startingRecognition: any = null;");
+    expect(handler).toContain("startingRecognition = recognition;");
+    expect(handler).toContain("if (startingRecognition && recognitionRef.current === startingRecognition)");
+    expect(handler).toContain("cancelCurrentVoiceRecognition();");
+    expect(handler.indexOf("cancelCurrentVoiceRecognition();")).toBeLessThan(
+      handler.indexOf('setVoiceError("De microfoon kon niet starten. Controleer de browserrechten en probeer opnieuw.")'),
+    );
+  });
+
 });
