@@ -112,12 +112,18 @@ describe("aftercare editor background privacy", () => {
     expect(unlock).toHaveBeenCalledTimes(1);
   });
 
-  it("starts locked when mounted in a background document", () => {
+  it("initializes the editor as locked when mounted in a background document", () => {
+    expect(aftercareNoteSource).toContain(
+      'useState(() => typeof document !== "undefined" && document.visibilityState !== "visible")',
+    );
+  });
+
+  it("does not invoke React state callbacks while the lifecycle effect is being installed", () => {
     const targets = createTargets("hidden");
     const lock = vi.fn();
     const unlock = vi.fn();
     bindAftercareEditorPrivacyLock(targets.windowTarget, targets.documentTarget, lock, unlock);
-    expect(lock).toHaveBeenCalledTimes(1);
+    expect(lock).not.toHaveBeenCalled();
     expect(unlock).not.toHaveBeenCalled();
   });
 
