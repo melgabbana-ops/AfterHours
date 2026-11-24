@@ -129,6 +129,19 @@ describe("aftercare editor background privacy", () => {
     expect(unlock).not.toHaveBeenCalled();
   });
 
+  it("unlocks correctly when a page mounted in the background becomes visible", () => {
+    const targets = createTargets("hidden");
+    const lock = vi.fn();
+    const unlock = vi.fn();
+    bindAftercareEditorPrivacyLock(targets.windowTarget, targets.documentTarget, lock, unlock);
+
+    targets.setVisibility("visible");
+    targets.dispatchDocument("visibilitychange");
+
+    expect(lock).not.toHaveBeenCalled();
+    expect(unlock).toHaveBeenCalledTimes(1);
+  });
+
   it("removes visibility and page lifecycle listeners on cleanup", () => {
     const targets = createTargets();
     const cleanup = bindAftercareEditorPrivacyLock(
