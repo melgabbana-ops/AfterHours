@@ -80,11 +80,11 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
   },[liveStream]);
   useEffect(()=>{frameStyleRef.current=frameStyle},[frameStyle]);
   useEffect(()=>{
-    if(!isPhotoCameraOpen&&returnFocusToCaptureRef.current){
+    if(!isPhotoCameraOpen&&!pendingCapture&&returnFocusToCaptureRef.current){
       returnFocusToCaptureRef.current=false;
       captureStartButtonRef.current?.focus();
     }
-  },[isPhotoCameraOpen]);
+  },[isPhotoCameraOpen,pendingCapture]);
   useEffect(()=>{
     if(!isRecording){setRecordingSeconds(0);return;}
     const startedAt=Date.now();
@@ -540,6 +540,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
     try{
       const saved=await upload(pendingCapture);
       if(!saved||!mountedRef.current)return;
+      returnFocusToCaptureRef.current=true;
       setPendingCapture(null);
       setPendingOriginalFile(null);
       if(pendingUrl){URL.revokeObjectURL(pendingUrl);setPendingUrl("");}
@@ -552,6 +553,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
 
   const discardCapture=()=>{
     if(saveInProgressRef.current)return;
+    returnFocusToCaptureRef.current=true;
     setPendingCapture(null);
     setPendingOriginalFile(null);
     if(pendingUrl){URL.revokeObjectURL(pendingUrl);setPendingUrl("");}
