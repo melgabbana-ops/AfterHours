@@ -1,0 +1,56 @@
+name: AFTER HOURS quality checks
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, feature/secure-duo-room-mainline]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: after-hours-quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-and-build:
+    name: Test, type-check and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Run unit and regression tests
+        run: npm test
+
+      - name: Type-check and build production assets
+        run: npm run build
+
+      - name: Validate migration ledger
+        run: npm run check:migrations
+
+      - name: Validate mobile layout
+        run: npm run check:mobile
+
+      - name: Validate brand and PWA assets
+        run: |
+          npm run check:brand
+          npm run check:pwa-shell
+
+      - name: Validate visual and cinematic coverage
+        run: |
+          npm run check:cinematic
+          npm run check:palette
+          npm run audit:visuals

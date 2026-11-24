@@ -1,0 +1,147 @@
+import { useEffect, useState } from "react";
+import { acceptSecureDuoInvitation, previewSecureDuoInvitation, SECURE_DUO_BACKEND_ENABLED } from "./services/duoRooms";
+
+type Language = "nl" | "en";
+type Preview = Awaited<ReturnType<typeof previewSecureDuoInvitation>>;
+
+type Props = {
+  token: string;
+  authenticated: boolean;
+  language: Language;
+  onLogin: () => void;
+  onAccepted: (roomId: string) => void;
+  onBack: () => void;
+};
+
+/**
+ * Account-bound invitation review. Keep this screen dormant until the secure
+ * Duo SQL proposal is deployed and verified with two real accounts.
+ * Accepting only joins the lobby. Participation consent is a separate action there.
+ */
+export default function SecureDuoInvitation({
+  token,
+  authenticated,
+  language,
+  onLogin,
+  onAccepted,
+  onBack,
+}: Props) {
+  const nl = language === "nl";
+  const [preview, setPreview] = useState<Preview | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [accepting, setAccepting] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let alive = true;
+    setPreview(null);
+    setError("");
+
+    if (!SECURE_DUO_BACKEND_ENABLED || !authenticated || !token) return () => { alive = false; };
+
+    setLoading(true);
+    void previewSecureDuoInvitation(token)
+      .then((result) => {
+        if (alive) setPreview(result);
+      })
+      .catch((reason: unknown) => {
+        if (!alive) return;
+        setError(reason instanceof Error
+          ? reason.message
+          : (nl ? "De uitnodiging kon niet worden gecontroleerd." : "The invitation could not be verified."));
+      })
+      .finally(() => {
+        if (alive) setLoading(false);
+      });
+
+    return () => { alive = false; };
+  }, [authenticated, token, nl]);
+
+  const accept = async () => {
+    if (!preview || !token || accepting) return;
+    setAccepting(true);
+    setError("");
+    try {
+      const roomId = await acceptSecureDuoInvitation(token);
+      onAccepted(roomId);
+    } catch (reason) {
+      setError(reason instanceof Error
+        ? reason.message
+        : (nl ? "De uitnodiging kon niet worden geaccepteerd." : "The invitation could not be accepted."));
+    } finally {
+      setAccepting(false);
+    }
+  };
+
+  const expiryDate = preview ? new Date(preview.expiresAt) : null;
+  const validExpiry = expiryDate !== null && Number.isFinite(expiryDate.getTime());
+  const expiresAt = validExpiry
+    ? new Intl.DateTimeFormat(nl ? "nl-NL" : "en-GB", {
+        dateStyle: "medium",
+        timeStyle: "short",
+      }).format(expiryDate)
+    : "";
+
+  return (
+    <main className="couples-play-screen ah-editorial-screen">
+      <section className="couples-lobby" aria-labelledby="secure-duo-invite-title">
+        <span className="eyebrow">AFTER HOURS · PRIVATE DUO</span>
+        <h2 id="secure-duo-invite-title">{nl ? "Privé-uitnodiging" : "Private invitation"}</h2>
+        {!SECURE_DUO_BACKEND_ENABLED ? (
+          <p role="status">{nl
+            ? "Deze privé-uitnodiging is nog niet actief. De beveiligde serveronderdelen worden eerst getest met twee accounts."
+            : "This private invitation is not active yet. The secure server components are being verified with two accounts first."}</p>
+        ) : !authenticated ? (
+          <>
+            <p>{nl
+              ? "Log in met je eigen AFTER HOURS-account om de uitnodiging veilig te bekijken."
+              : "Sign in with your own AFTER HOURS account to securely review this invitation."}</p>
+            <button type="button" className="couples-primary" onClick={onLogin}>
+              {nl ? "Inloggen" : "Sign in"}
+            </button>
+          </>
+        ) : !token ? (
+          <p role="alert">{nl ? "Deze uitnodigingslink is ongeldig of onvolledig." : "This invitation link is invalid or incomplete."}</p>
+        ) : loading ? (
+          <p role="status">{nl ? "Uitnodiging veilig controleren…" : "Securely checking invitation…"}</p>
+        ) : preview ? (
+          <>
+            <p>{nl
+              ? "Je bent uitgenodigd voor een Duo-ervaring. Bekijk de gegevens en kies zelf of je deelneemt."
+              : "You have been invited to a Duo experience. Review the details and decide whether to join."}</p>
+            <div className="couples-connection" role="status">
+              {nl ? "Status: " : "Status: "}
+              {preview.status === "paused"
+                ? (nl ? "gepauzeerd" : "paused")
+                : (nl ? "wachtkamer" : "lobby")}
+            </div>
+            <p className="couples-consent-note">
+              {nl ? "Uitnodiging geldig tot: " : "Invitation expires: "}{expiresAt || (nl ? "onbekend" : "unknown")}
+            </p>
+            <p className="couples-consent-note">
+              {nl
+                ? "Accepteren brengt je alleen naar de wachtkamer. Het is nog geen toestemming om te spelen. Je geeft daar apart toestemming en kunt die altijd intrekken."
+                : "Accepting only takes you to the lobby. It is not consent to play. You will give consent separately there and can withdraw it at any time."}
+            </p>
+            <button type="button" className="couples-primary" onClick={() => void accept()} disabled={accepting}>
+              {accepting
+                ? (nl ? "Uitnodiging accepteren…" : "Accepting invitation…")
+                : (nl ? "Accepteren en deelnemen" : "Accept and join")}
+            </button>
+          </>
+        ) : (
+          <p role="alert">{error || (nl ? "De uitnodiging is niet beschikbaar." : "The invitation is unavailable.")}</p>
+        )}
+        {error && preview && <p className="couples-message" role="alert">{error}</p>}
+        <button type="button" className="couples-back-bottom" onClick={onBack}>
+          {nl ? "Terug" : "Back"}
+        </button>
+        <p className="couples-safety">
+          {nl
+            ? "Deelname is vrijwillig. Pauzeren of stoppen blijft altijd mogelijk."
+            : "Participation is voluntary. Pausing or stopping is always available."}
+        </p>
+      </section>
+    </main>
+  );
+}

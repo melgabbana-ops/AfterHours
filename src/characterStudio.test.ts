@@ -18,6 +18,9 @@ describe("Character Studio appearance", () => {
       outfit: "#3b2a1b",
       mask: true,
       tattoos: true,
+      tattooStyle: "roses",
+      outfitStyle: "leather",
+      dynamicRole: "dominant",
       neckDetail: "chain",
       accessory: "sigil",
     })).toEqual({
@@ -28,6 +31,9 @@ describe("Character Studio appearance", () => {
       outfit: "#3b2a1b",
       mask: true,
       tattoos: true,
+      tattooStyle: "roses",
+      outfitStyle: "leather",
+      dynamicRole: "dominant",
       neckDetail: "chain",
       accessory: "sigil",
     });
@@ -41,6 +47,10 @@ describe("Character Studio appearance", () => {
       hairStyle: "unknown",
       outfit: "red",
       mask: "yes",
+      tattoos: "yes",
+      tattooStyle: "unknown",
+      outfitStyle: "unknown",
+      dynamicRole: "unknown",
       neckDetail: "unknown",
       accessory: "unknown",
     })).toEqual({
@@ -51,11 +61,14 @@ describe("Character Studio appearance", () => {
       outfit: "#100e0a",
       mask: false,
       tattoos: true,
+      tattooStyle: "ornamental",
+      outfitStyle: "harness",
+      dynamicRole: "sub",
       neckDetail: "collar",
       accessory: "crescent",
     });
   });
-  
+
   it("allows tattoos to be disabled without changing other appearance settings", () => {
     expect(normalizeCharacterLook({ tattoos: false }).tattoos).toBe(false);
   });
@@ -75,7 +88,8 @@ describe("Character Studio appearance", () => {
 
     expect(normalized).not.toHaveProperty("unexpected");
     expect(Object.keys(normalized).sort()).toEqual([
-      "accessory", "gender", "hair", "hairStyle", "mask", "neckDetail", "outfit", "skin", "tattoos",
+      "accessory", "dynamicRole", "gender", "hair", "hairStyle", "mask", "neckDetail",
+      "outfit", "outfitStyle", "skin", "tattooStyle", "tattoos",
     ]);
   });
 });

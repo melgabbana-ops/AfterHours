@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { appendPhotoEditHistory, applyPhotoEditPreset, drawAfterHoursOverlay, getPhotoEditHistoryEntry, getPhotoEditHistoryShortcut, mediaOverlayFrames, normalizePhotoEditTransform, defaultPhotoEditTransform, photoEditPresets, type OverlayFrameStyle } from "./mediaOverlay";
+import { describe, expect, it, vi } from "vitest";
+import { appendPhotoEditHistory, applyPhotoEditPreset, drawAfterHoursOverlay, drawCameraFrame, getPhotoEditHistoryEntry, getPhotoEditHistoryShortcut, mediaOverlayFrames, normalizePhotoEditTransform, defaultPhotoEditTransform, photoEditPresets, type OverlayFrameStyle } from "./mediaOverlay";
 
 describe("AFTER HOURS camera overlay presets", () => {
   it("exposes the three approved overlay styles in the approved order", () => {
@@ -97,5 +97,67 @@ describe("photo editor keyboard history shortcuts", () => {
     expect(shortcut("z", { ctrlKey: true, altKey: true })).toBeNull();
     expect(shortcut("y", { ctrlKey: true, shiftKey: true })).toBeNull();
     expect(shortcut("s", { metaKey: true })).toBeNull();
+  });
+});
+
+
+describe("live camera frame composition", () => {
+  it("does not draw a frame before the camera reports valid dimensions", () => {
+    const ctx = { drawImage: vi.fn() } as unknown as CanvasRenderingContext2D;
+    const video = { videoWidth: 0, videoHeight: 720 } as HTMLVideoElement;
+    drawCameraFrame(ctx, video, 1280, 720, "after-hours");
+    expect(ctx.drawImage).not.toHaveBeenCalled();
+  });
+
+  it("center-crops a portrait camera feed to a landscape preview before applying the overlay", () => {
+    const drawImage = vi.fn();
+    const ctx = {
+      drawImage,
+      save: vi.fn(),
+      restore: vi.fn(),
+      beginPath: vi.fn(),
+      arc: vi.fn(),
+      fill: vi.fn(),
+      stroke: vi.fn(),
+      strokeRect: vi.fn(),
+      fillRect: vi.fn(),
+      moveTo: vi.fn(),
+      lineTo: vi.fn(),
+      fillText: vi.fn(),
+      measureText: vi.fn(() => ({ width: 8 })),
+      createLinearGradient: vi.fn(() => ({ addColorStop: vi.fn() })),
+    } as unknown as CanvasRenderingContext2D;
+    const video = { videoWidth: 720, videoHeight: 1280 } as HTMLVideoElement;
+
+    drawCameraFrame(ctx, video, 1280, 720, "clean");
+
+    expect(drawImage).toHaveBeenCalledWith(video, 0, 437.5, 720, 405, 0, 0, 1280, 720);
+    expect(ctx.stroke).toHaveBeenCalled();
+  });
+
+  it("center-crops a wide camera feed to a portrait preview", () => {
+    const drawImage = vi.fn();
+    const ctx = {
+      drawImage,
+      save: vi.fn(),
+      restore: vi.fn(),
+      beginPath: vi.fn(),
+      arc: vi.fn(),
+      fill: vi.fn(),
+      stroke: vi.fn(),
+      strokeRect: vi.fn(),
+      fillRect: vi.fn(),
+      moveTo: vi.fn(),
+      lineTo: vi.fn(),
+      fillText: vi.fn(),
+      measureText: vi.fn(() => ({ width: 8 })),
+      createLinearGradient: vi.fn(() => ({ addColorStop: vi.fn() })),
+    } as unknown as CanvasRenderingContext2D;
+    const video = { videoWidth: 1920, videoHeight: 1080 } as HTMLVideoElement;
+
+    drawCameraFrame(ctx, video, 720, 1280, "cinematic");
+
+    expect(drawImage).toHaveBeenCalledWith(video, 656.25, 0, 607.5, 1080, 0, 0, 720, 1280);
+    expect(ctx.fillRect).toHaveBeenCalled();
   });
 });
