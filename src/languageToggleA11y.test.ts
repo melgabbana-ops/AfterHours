@@ -1,5 +1,7 @@
-import styles from "./styles.css?raw";
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+
+const styles = readFileSync(new URL("./styles.css", import.meta.url), "utf8");
 
 describe("persistent language toggle touch targets", () => {
   it("provides 44px controls in the default layout", () => {
@@ -7,7 +9,7 @@ describe("persistent language toggle touch targets", () => {
   });
 
   it("preserves 44px language controls on compact screens", () => {
-    const compactRules = styles.match(/@media\(max-width:520px\)\{[^}]*\.language-toggle button\{[^}]*\}/)?.[0] ?? "";
-    expect(compactRules).toContain("min-height:44px!important");
+    const compactRules = styles.slice(styles.indexOf("@media(max-width:520px)"));
+    expect(compactRules).toContain(".language-toggle button{min-height:44px!important");
   });
 });
