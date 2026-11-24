@@ -185,7 +185,7 @@ export default function CharacterStudio({ profileId, language = "nl", xp = 0 }: 
           <AvatarArt look={look}/>
         </div>
         <div className="character-preview-details">
-          <div className="character-preview-caption"><span className="eyebrow">AFTER HOURS IDENTITY</span><strong>{look.gender === "female" ? t("The Femme", "The Femme") : t("The Sovereign", "The Sovereign")}</strong><small className="character-role-label">{({ dominant: t("Dominant", "Dominant"), sub: t("Sub", "Sub"), slave: t("Slaaf", "Slave"), switch: t("Switch", "Switch") })[look.dynamicRole]}</small><small>{t("Cosmetische identiteit · altijd aanpasbaar", "Cosmetic identity · always customizable")}</small></div>
+          <div className="character-preview-caption"><span className="eyebrow">AFTER HOURS IDENTITY</span><strong>{look.gender === "female" ? t("The Femme", "The Femme") : t("The Sovereign", "The Sovereign")}</strong><small className={`character-role-label role-${look.dynamicRole}`}>{({ dominant: t("Dominant", "Dominant"), sub: t("Sub", "Sub"), slave: t("Slaaf", "Slave"), switch: t("Switch", "Switch") })[look.dynamicRole]}</small><small>{t("Cosmetische identiteit · altijd aanpasbaar", "Cosmetic identity · always customizable")}</small></div>
           <div className="character-rank-panel">
             <div className="character-rank-heading">
               <span className="eyebrow">{t("RANG-EVOLUTIE", "RANK EVOLUTION")}</span>
