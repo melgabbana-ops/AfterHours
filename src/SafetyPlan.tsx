@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Check, Eye, EyeOff, LockKeyhole, Pause, Play, Save, Square, Trash2 } from "lucide-react";
 interface SafetyPlanProps {
   profileId: string;
@@ -37,6 +37,16 @@ export default function SafetyPlan({
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
   const isSessionActive = sessionStatus === "active" || sessionStatus === "paused";
   const readinessCount = Object.values(plan.readiness).filter(Boolean).length;
+  useEffect(() => {
+    // Profile changes must never leave the previous profile's private safety notes on screen.
+    setPlan(readSafetyPlan(profileId));
+    setLegacyPlanDetected(hasUnscopedSafetyPlan());
+    setSaved(false);
+    setMessage("");
+    setShowSafeword(false);
+    setShowAmberSignal(false);
+  }, [profileId]);
+
   const statusLabel = ({
     ready: t("Gereed", "Ready"),
     active: t("Sessie loopt", "Session active"),
