@@ -658,7 +658,14 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
 const root=createRoot(document.getElementById("root")!);
 const entryParams=new URLSearchParams(window.location.search);
 const maintenancePreview=entryParams.get("maintenance")==="1";
-const teaserPreview=shouldShowTeaser(window.location.search);
+let activeSafetyStateAtLaunch=false;
+try{
+ const launchState=loadState();
+ activeSafetyStateAtLaunch=launchState.session.status==="active"||launchState.session.status==="paused"||launchState.session.status==="stopped"||launchState.consent.status==="revoked";
+}catch{
+ activeSafetyStateAtLaunch=false;
+}
+const teaserPreview=shouldShowTeaser(window.location.search,activeSafetyStateAtLaunch);
 if(teaserPreview){
  root.render(<Teaser/>);
 }else if(maintenancePreview){
