@@ -238,3 +238,45 @@
   display: block;
   opacity: 0.72;
 }
+
+
+/* Eight distinct module compositions, held together by the AFTER HOURS black/champagne system. */
+.cw-section-experience .cw-section-heading{padding:clamp(24px,5vw,46px);border:1px solid rgba(201,161,106,.38);background:radial-gradient(ellipse at 78% 0,rgba(201,161,106,.12),transparent 48%),linear-gradient(145deg,#17130d,#090806 72%);min-height:210px;display:flex;flex-direction:column;justify-content:flex-end}
+.cw-section-experience .cw-section-heading h2{font-size:clamp(30px,6vw,48px);max-width:680px}
+.cw-section-director .cw-section-heading{padding:18px 22px;border-left:3px solid var(--ah-gold,#dfbd83);background:linear-gradient(90deg,rgba(201,161,106,.10),transparent 75%)}
+.cw-section-director .cw-form-panel{border-radius:3px;border-style:dashed;background:linear-gradient(135deg,#14110c,#090806);position:relative}
+.cw-section-director .cw-form-panel:before{content:"SCENE BLUEPRINT";display:block;margin-bottom:18px;color:#c9a16a;font-size:9px;letter-spacing:.24em}
+.cw-section-vault .cw-section-heading{padding:28px 24px;text-align:center;border:1px double rgba(201,161,106,.55);outline:1px solid rgba(201,161,106,.15);outline-offset:5px;background:radial-gradient(circle at 50% 35%,rgba(201,161,106,.13),transparent 58%),#090806}
+.cw-section-vault .cw-section-heading h2{justify-content:center;letter-spacing:.08em}
+.cw-section-vault .cw-form-panel{max-width:720px;margin:26px auto;border:1px solid rgba(201,161,106,.48);box-shadow:inset 0 0 0 5px rgba(201,161,106,.035),0 18px 50px rgba(0,0,0,.25);padding:clamp(20px,4vw,34px)}
+.cw-section-sensory .cw-section-heading{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:10px 24px;padding:20px 0 24px;border-bottom:1px solid rgba(201,161,106,.35)}
+.cw-section-sensory .cw-section-heading .cw-kicker,.cw-section-sensory .cw-section-heading p{grid-column:1}
+.cw-section-sensory .cw-section-heading h2{grid-column:1;margin:0}
+.cw-section-sensory .cw-section-heading:after{content:"";grid-column:2;grid-row:1/4;width:clamp(62px,15vw,116px);height:70px;align-self:center;background:repeating-linear-gradient(90deg,transparent 0 5px,rgba(201,161,106,.8) 5px 7px,transparent 7px 11px);mask-image:linear-gradient(180deg,transparent,#000 18% 82%,transparent);opacity:.55}
+.cw-section-invitation .cw-section-heading{padding:clamp(24px,5vw,42px);border:1px solid rgba(201,161,106,.48);background:linear-gradient(115deg,rgba(201,161,106,.10),transparent 42%),#0c0a07;position:relative}
+.cw-section-invitation .cw-section-heading:after{content:"✧";position:absolute;right:22px;top:14px;color:#dfbd83;font-size:30px;opacity:.7}
+.cw-section-invitation .cw-invite-accept,.cw-section-invitation .cw-invite-preview{border-radius:2px;border:1px solid rgba(201,161,106,.45);background:linear-gradient(145deg,#17130d,#090806)}
+.cw-section-dominion .cw-section-heading{padding:18px 0 22px;border-bottom:1px solid rgba(201,161,106,.35)}
+.cw-section-dominion .cw-form-panel{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 22px;background:linear-gradient(145deg,#14110c,#090806);border-radius:4px}
+.cw-section-dominion .cw-form-panel>label:nth-last-of-type(1){grid-column:1/-1}
+.cw-section-dominion .cw-form-panel>button{grid-column:1/-1;justify-self:start}
+.cw-section-deck .cw-section-heading{text-align:center;max-width:700px;margin:0 auto 24px}
+.cw-section-deck .cw-section-heading h2{justify-content:center;font-size:clamp(32px,7vw,50px)}
+.cw-section-deck .cw-ritual-card{max-width:540px;min-height:280px;margin:0 auto 28px;padding:clamp(28px,6vw,52px);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;border:1px solid rgba(201,161,106,.58);outline:1px solid rgba(201,161,106,.16);outline-offset:7px;background:radial-gradient(circle at 50% 40%,rgba(201,161,106,.15),transparent 60%),linear-gradient(145deg,#18130c,#080706);box-shadow:0 22px 55px rgba(0,0,0,.32)}
+.cw-section-deck .cw-ritual-card>p{font-family:"Cinzel",Georgia,serif;font-size:clamp(22px,5vw,34px);line-height:1.3;color:#f0dfc5}
+.cw-section-club .cw-section-heading{padding:26px 24px;border-bottom:1px solid rgba(201,161,106,.38);background:linear-gradient(90deg,rgba(201,161,106,.10),transparent 70%)}
+.cw-section-club .cw-member-card{display:grid;grid-template-columns:1fr auto;align-items:center;gap:8px 20px;padding:24px;border:1px solid rgba(201,161,106,.45);background:radial-gradient(ellipse at 100% 0,rgba(201,161,106,.13),transparent 58%),#0c0a07}
+.cw-section-club .cw-member-card .cw-kicker,.cw-section-club .cw-member-card p{grid-column:1}
+.cw-section-club .cw-member-card strong{grid-column:2;grid-row:1/4;font:clamp(28px,6vw,48px) "Cinzel",Georgia,serif;color:#dfbd83;letter-spacing:.06em}
+.cw-section-club .cw-stats-grid{gap:1px;background:rgba(201,161,106,.18);border:1px solid rgba(201,161,106,.22)}
+.cw-section-club .cw-stats-grid>div{border:0;border-radius:0;background:#0d0b08}
+@media(max-width:600px){
+ .cw-section-dominion .cw-form-panel{grid-template-columns:1fr}
+ .cw-section-dominion .cw-form-panel>label:nth-last-of-type(1),.cw-section-dominion .cw-form-panel>button{grid-column:auto}
+ .cw-section-club .cw-member-card{grid-template-columns:1fr}
+ .cw-section-club .cw-member-card strong{grid-column:1;grid-row:auto}
+ .cw-section-sensory .cw-section-heading{grid-template-columns:minmax(0,1fr) 62px}
+}
+@media(prefers-reduced-motion:reduce){
+ .cw-section-experience .cw-section-heading,.cw-section-director .cw-form-panel,.cw-section-deck .cw-ritual-card{scroll-behavior:auto;transition:none}
+}
