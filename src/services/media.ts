@@ -93,9 +93,13 @@ export function canApplyMediaOverlay(type: string): boolean {
   return OVERLAY_IMAGE_TYPES.has(normalizePrivateMediaMimeType(type));
 }
 
-export function validatePrivateMediaFile(file: Pick<File, "type" | "size">): void {
-  if (!ALLOWED_TYPES.has(normalizePrivateMediaMimeType(file.type))) throw new Error("Kies een afbeelding, audio- of videobestand.");
-  if (!Number.isSafeInteger(file.size) || file.size <= 0 || file.size > MAX_FILE_BYTES) throw new Error("Bestanden moeten kleiner zijn dan 20 MB.");
+export function validatePrivateMediaFile(file: Pick<File, "type" | "size">, language: "nl" | "en" = "nl"): void {
+  if (!ALLOWED_TYPES.has(normalizePrivateMediaMimeType(file.type))) {
+    throw new Error(language === "en" ? "Choose an image, audio or video file." : "Kies een afbeelding, audio- of videobestand.");
+  }
+  if (!Number.isSafeInteger(file.size) || file.size <= 0 || file.size > MAX_FILE_BYTES) {
+    throw new Error(language === "en" ? "Files must be 20 MB or smaller." : "Bestanden mogen maximaal 20 MB zijn.");
+  }
 }
 
 export function safePrivateMediaFileName(value: string): string {
@@ -158,8 +162,8 @@ export async function listPrivateMedia(): Promise<PrivateMediaItem[]> {
   return items.sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? "")).slice(0, 100);
 }
 
-export async function uploadPrivateMedia(file: File, sessionId: string, assignmentTitle?: string): Promise<void> {
-  validatePrivateMediaFile(file);
+export async function uploadPrivateMedia(file: File, sessionId: string, assignmentTitle?: string, language: "nl" | "en" = "nl"): Promise<void> {
+  validatePrivateMediaFile(file, language);
   const userId = await currentUserId();
   const safeSessionId = safeMediaSessionFolder(sessionId);
   const safeAssignment = safeAssignmentPrefix(assignmentTitle);
