@@ -17,13 +17,16 @@ const cinematicWorld = readFileSync(
 
 describe("experience-run deletion safety proposal", () => {
   it("layers a restrictive owner-and-status guard over the original owner policy", () => {
-    expect(baseMigration).toMatch(/create policy afterhours_experience_runs_delete_own[\\s\\S]*?for delete to authenticated using \\(user_id = \\(select auth\\.uid\\(\\)\\)\\)/i);
-    expect(proposal).toMatch(/create policy afterhours_experience_runs_terminal_delete_guard/i);
-    expect(proposal).toMatch(/as restrictive[\\s\\S]*?for delete[\\s\\S]*?to authenticated/i);
-    expect(proposal).toMatch(/user_id = \\(select auth\\.uid\\(\\)\\)/i);
-    expect(proposal).toMatch(/status in \\('ready', 'completed', 'stopped'\\)/i);
-    expect(proposal).not.toMatch(/status in \\([^)]*'active'|status in \\([^)]*'paused'/i);
-    expect(proposal).not.toMatch(/drop policy if exists afterhours_experience_runs_delete_own/i);
+    expect(baseMigration).toContain("create policy afterhours_experience_runs_delete_own");
+    expect(baseMigration).toContain("for delete to authenticated using (user_id = (select auth.uid()))");
+    expect(proposal).toContain("create policy afterhours_experience_runs_terminal_delete_guard");
+    expect(proposal).toContain("as restrictive");
+    expect(proposal).toContain("for delete");
+    expect(proposal).toContain("to authenticated");
+    expect(proposal).toContain("user_id = (select auth.uid())");
+    expect(proposal).toContain("status in ('ready', 'completed', 'stopped')");
+    expect(proposal).not.toContain("drop policy if exists afterhours_experience_runs_delete_own");
+    expect(proposal).not.toMatch(/status in \([^)]*'active'|status in \([^)]*'paused'/i);
   });
 
   it("does not attempt to delete consent-visible runs owned by another account", () => {
