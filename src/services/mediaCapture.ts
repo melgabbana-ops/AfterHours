@@ -81,9 +81,10 @@ export function appendMediaCaptureChunk(
   chunk: Blob,
   maxBytes = MAX_MEDIA_CAPTURE_BYTES,
 ): number | null {
-  if (!Number.isFinite(currentBytes) || currentBytes < 0 || !Number.isFinite(maxBytes) || maxBytes < 0) return null;
+  if (!Number.isSafeInteger(currentBytes) || currentBytes < 0 || !Number.isSafeInteger(maxBytes) || maxBytes < 0 || currentBytes > maxBytes) return null;
+  if (!Number.isSafeInteger(chunk.size) || chunk.size < 0) return null;
   if (chunk.size === 0) return currentBytes;
-  if (currentBytes + chunk.size > maxBytes) return null;
+  if (chunk.size > maxBytes - currentBytes) return null;
   chunks.push(chunk);
   return currentBytes + chunk.size;
 }
@@ -184,7 +185,7 @@ export function missingCaptureTrack(
 
 /** An interrupted capture may be previewed locally only when it contains usable, bounded data. */
 export function canRecoverInterruptedCapture(blobSize: number, maxBytes = MAX_MEDIA_CAPTURE_BYTES): boolean {
-  return Number.isFinite(blobSize) && Number.isFinite(maxBytes) && blobSize > 0 && maxBytes >= 0 && blobSize <= maxBytes;
+  return Number.isSafeInteger(blobSize) && Number.isSafeInteger(maxBytes) && blobSize > 0 && maxBytes >= 0 && blobSize <= maxBytes;
 }
 
 
