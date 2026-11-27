@@ -23,3 +23,21 @@ describe("self-healing workflow scope", () => {
     expect(workflow).toContain("Automatic source edits and pushes are disabled.");
   });
 });
+
+const pagesWorkflow = readFileSync(
+  resolve(process.cwd(), ".github/workflows/deploy-pages.yml"),
+  "utf8",
+);
+
+describe("GitHub Pages workflow deployment boundary", () => {
+  it("only validates and packages the static artifact", () => {
+    expect(pagesWorkflow).toContain("name: Validate AFTER HOURS GitHub Pages artifact");
+    expect(pagesWorkflow).toContain("permissions:\n  contents: read");
+    expect(pagesWorkflow).toContain("actions/upload-pages-artifact@v5");
+    expect(pagesWorkflow).not.toContain("pages: write");
+    expect(pagesWorkflow).not.toContain("id-token: write");
+    expect(pagesWorkflow).not.toContain("actions/configure-pages");
+    expect(pagesWorkflow).not.toContain("actions/deploy-pages");
+    expect(pagesWorkflow).not.toContain("environment:");
+  });
+});
