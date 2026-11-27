@@ -10,6 +10,7 @@ const SAFETY_ENTRY_PARAMS = ["stop", "safety", "safeword", "pause", "consent"] a
 
 export function initialScreenFromSearch(search: string): Screen {
   const params = new URLSearchParams(search);
+  if (params.has("stop")) return "safety";
   if (params.has("couple")) return "couples";
   const value = params.get("screen");
   return value && DEEP_LINK_SCREENS.includes(value as Screen) ? value as Screen : "home";
