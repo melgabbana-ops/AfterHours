@@ -280,3 +280,8 @@
 @media(prefers-reduced-motion:reduce){
   .cw-tabs{scroll-behavior:auto}
 }
+
+.cw-invite-consent{display:flex;align-items:flex-start;gap:11px;margin-top:14px;padding:14px;border:1px solid rgba(207,174,121,.32);background:rgba(9,8,7,.72);color:#e3d4bc;font-size:11px;line-height:1.65}
+.cw-invite-consent input{width:18px;height:18px;flex:none;margin:1px 0 0;accent-color:#c99e60}
+.cw-invite-consent input:focus-visible{outline:2px solid #e4c58f;outline-offset:3px}
+.cw-invite-consent:has(input:disabled){opacity:.58}
