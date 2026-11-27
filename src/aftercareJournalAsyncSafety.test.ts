@@ -24,11 +24,11 @@ describe("private journal async safety", () => {
   });
 
   it("checks for a lifecycle lock before decrypting entries after a backup import", () => {
-    const import = sourceSection("const importBackup = async", "return <section");
-    const writeIndex = import.indexOf("await importPrivateJournalBackup");
-    const firstGuardIndex = import.indexOf("if (!canCommit()) return;");
-    const readIndex = import.indexOf("await loadPrivateJournalEntries");
-    const secondGuardIndex = import.indexOf("if (!canCommit()) return;", firstGuardIndex + 1);
+    const backupImport = sourceSection("const importBackup = async", "return <section");
+    const writeIndex = backupImport.indexOf("await importPrivateJournalBackup");
+    const firstGuardIndex = backupImport.indexOf("if (!canCommit()) return;");
+    const readIndex = backupImport.indexOf("await loadPrivateJournalEntries");
+    const secondGuardIndex = backupImport.indexOf("if (!canCommit()) return;", firstGuardIndex + 1);
 
     expect(writeIndex).toBeGreaterThanOrEqual(0);
     expect(firstGuardIndex).toBeGreaterThan(writeIndex);
