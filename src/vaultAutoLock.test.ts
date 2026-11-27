@@ -144,6 +144,26 @@ describe("Black Vault automatic locking", () => {
     cleanup();
   });
 
+  it("resets the inactivity deadline after wheel and nested scroll activity", () => {
+    vi.useFakeTimers();
+    const windowTarget = new EventTarget();
+    const documentTarget = new FakeDocument();
+    const onLock = vi.fn();
+    const cleanup = bindVaultAutoLock(windowTarget, documentTarget, () => true, onLock);
+
+    vi.advanceTimersByTime(4 * 60 * 1000);
+    windowTarget.dispatchEvent(new Event("wheel"));
+    vi.advanceTimersByTime(4 * 60 * 1000);
+    documentTarget.dispatchEvent(new Event("scroll"));
+    vi.advanceTimersByTime(5 * 60 * 1000 - 1);
+
+    expect(onLock).not.toHaveBeenCalled();
+    vi.advanceTimersByTime(1);
+    expect(onLock).toHaveBeenCalledOnce();
+    expect(onLock).toHaveBeenCalledWith("idle");
+    cleanup();
+  });
+
   it("removes listeners and cancels the inactivity timer on cleanup", () => {
     vi.useFakeTimers();
     const windowTarget = new EventTarget();
