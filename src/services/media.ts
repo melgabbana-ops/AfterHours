@@ -67,8 +67,10 @@ export function toPrivateMediaItem(
   const path = `${userId}/${folderName}/${item.name}`;
   if (!validatePrivateMediaPath(path, userId)) return null;
 
-  const size = Number(item.metadata?.size ?? 0);
-  if (!Number.isSafeInteger(size) || size < 0) return null;
+  const size = item.metadata?.size;
+  // Storage metadata is untrusted: do not coerce strings, null, or missing values
+  // into a plausible byte count before displaying private-file details.
+  if (typeof size !== "number" || !Number.isSafeInteger(size) || size < 0) return null;
 
   const createdAt = typeof item.created_at === "string" && Number.isFinite(Date.parse(item.created_at))
     ? item.created_at
