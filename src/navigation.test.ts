@@ -52,6 +52,11 @@ describe("shouldShowColdIntro", () => {
     expect(shouldShowColdIntro("?stop=1")).toBe(false);
     expect(shouldShowColdIntro("?screen=legal")).toBe(false);
   });
+
+  it("does not interrupt a private couple-room invitation with the promotional intro", () => {
+    expect(shouldShowColdIntro("?couple=ABCD2345XY")).toBe(false);
+    expect(shouldShowColdIntro("?couple=ABCD2345XY&ref=invite")).toBe(false);
+  });
 });
 
 describe("shouldShowTeaser", () => {
