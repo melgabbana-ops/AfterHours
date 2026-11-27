@@ -63,27 +63,32 @@ function isState(value:unknown):value is AfterHoursState{
   &&(v.safety==="green"||v.safety==="amber")
   &&!!consent
   &&(consent.status==="pending"||consent.status==="active"||consent.status==="revoked")
-  &&(consent.confirmedAt===null||typeof consent.confirmedAt==="string")
-  &&(consent.revokedAt===null||typeof consent.revokedAt==="string")
+  &&(consent.confirmedAt===null||isTimestamp(consent.confirmedAt))
+  &&(consent.revokedAt===null||isTimestamp(consent.revokedAt))
   &&!!profile
   &&typeof profile.id==="string"
   &&typeof profile.displayName==="string"
   &&typeof profile.username==="string"
   &&(profile.avatarStyle===undefined||profile.avatarStyle==="sigil"||profile.avatarStyle==="collar"||profile.avatarStyle==="key"||profile.avatarStyle==="crown")
-  &&Number.isFinite(profile.level)
-  &&Number.isFinite(profile.xp)
-  &&Number.isFinite(profile.sessions)
-  &&typeof profile.createdAt==="string"
+  &&Number.isInteger(profile.level)
+  &&Number(profile.level)>=1
+  &&Number.isInteger(profile.xp)
+  &&Number(profile.xp)>=0
+  &&Number.isInteger(profile.sessions)
+  &&Number(profile.sessions)>=0
+  &&isTimestamp(profile.createdAt)
   &&!!session
   &&typeof session.id==="string"
+  &&session.id.trim().length>0
   &&typeof session.profileId==="string"
+  &&session.profileId===profile.id
   &&(session.status==="ready"||session.status==="active"||session.status==="paused"||session.status==="completed"||session.status==="stopped")
   &&typeof session.round==="number"
   &&Number.isInteger(session.round)
   &&session.round>=0
   &&session.round<3
-  &&(session.startedAt===null||typeof session.startedAt==="string")
-  &&typeof session.updatedAt==="string"
+  &&(session.startedAt===null||isTimestamp(session.startedAt))
+  &&isTimestamp(session.updatedAt)
   &&Array.isArray(v.history)
   &&Array.isArray(v.notifications);
 }
