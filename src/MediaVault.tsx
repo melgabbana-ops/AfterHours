@@ -71,12 +71,20 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
   const captureInterruptedRef = useRef(false);
   const captureFailedRef = useRef(false);
   const captureStartInFlightRef = useRef(false);
+  const captureStartButtonRef = useRef<HTMLButtonElement|null>(null);
+  const returnFocusToCaptureRef = useRef(false);
 
 
   useEffect(()=>{
     if(livePreviewRef.current) livePreviewRef.current.srcObject=liveStream;
   },[liveStream]);
   useEffect(()=>{frameStyleRef.current=frameStyle},[frameStyle]);
+  useEffect(()=>{
+    if(!isPhotoCameraOpen&&!pendingCapture&&returnFocusToCaptureRef.current){
+      returnFocusToCaptureRef.current=false;
+      captureStartButtonRef.current?.focus();
+    }
+  },[isPhotoCameraOpen,pendingCapture]);
   useEffect(()=>{
     if(!isRecording){setRecordingSeconds(0);return;}
     const startedAt=Date.now();
@@ -493,6 +501,14 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
     }
   };
 
+  const cancelPhotoCamera=()=>{
+    // The launcher returns to the DOM after the camera closes; restore keyboard focus to it.
+    returnFocusToCaptureRef.current=true;
+    stopCaptureTracks();
+    setCaptureConsent(false);
+    setMessage(t("Camera gesloten. Er is niets opgeslagen.","Camera closed. Nothing was saved."));
+  };
+
   const takePhoto=async()=>{
     const canvas=liveCanvasRef.current;
     if(!canvas||!isPhotoCameraOpen){setMessage(t("De camera is niet actief.","Camera is not active."));return;}
@@ -524,6 +540,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
     try{
       const saved=await upload(pendingCapture);
       if(!saved||!mountedRef.current)return;
+      returnFocusToCaptureRef.current=true;
       setPendingCapture(null);
       setPendingOriginalFile(null);
       if(pendingUrl){URL.revokeObjectURL(pendingUrl);setPendingUrl("");}
@@ -536,6 +553,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
 
   const discardCapture=()=>{
     if(saveInProgressRef.current)return;
+    returnFocusToCaptureRef.current=true;
     setPendingCapture(null);
     setPendingOriginalFile(null);
     if(pendingUrl){URL.revokeObjectURL(pendingUrl);setPendingUrl("");}
@@ -620,7 +638,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
               <label>{t("Opnametype","Recording type")}<select value={captureKind} disabled={isRecording||isPhotoCameraOpen||busy} onChange={e=>setCaptureKind(e.target.value as "photo"|"video"|"voice")}><option value="photo">{t("Foto met live overlay","Photo with live overlay")}</option><option value="video">{t("Video met camera","Video with camera")}</option><option value="voice">{t("Alleen stem","Voice only")}</option></select></label>
               {captureKind!=="voice"&&<label>{t("Camerapositie","Camera")}<select value={cameraFacing} disabled={isRecording||isPhotoCameraOpen||busy} onChange={e=>setCameraFacing(e.target.value as "user"|"environment")}><option value="environment">{t("Achtercamera","Rear camera")}</option><option value="user">{t("Selfiecamera","Front camera")}</option></select></label>}
               <label className="media-consent-check"><input type="checkbox" checked={captureConsent} disabled={isRecording||busy||!!pendingCapture} onChange={e=>setCaptureConsent(e.target.checked)}/><span>{t("Ik bevestig dat de betrokkenen akkoord zijn met het maken of uploaden van deze media en privéopslag. Delen vereist aparte toestemming.","I confirm that everyone involved agrees to capture or upload this media and store it privately. Sharing requires separate consent.")}</span></label>
-              {!isRecording&&!isPhotoCameraOpen&&!pendingCapture&&<button type="button" onClick={()=>void startCapture()} disabled={busy||!captureConsent}>{captureKind==="photo"?t("Open camera met live overlay","Open camera with live overlay"):t("Start opname · max. 60 sec.","Start recording · max 60 sec")}</button>}{isPhotoCameraOpen&&<div className="media-capture-controls"><button type="button" className="gold" onClick={()=>void takePhoto()} disabled={busy}>{t("Maak foto","Take photo")}</button><button type="button" onClick={()=>{stopCaptureTracks();setCaptureConsent(false);setMessage(t("Camera gesloten. Er is niets opgeslagen.","Camera closed. Nothing was saved."))}}>{t("Annuleren","Cancel")}</button></div>}
+              {!isRecording&&!isPhotoCameraOpen&&!pendingCapture&&<button ref={captureStartButtonRef} type="button" onClick={()=>void startCapture()} disabled={busy||!captureConsent}>{captureKind==="photo"?t("Open camera met live overlay","Open camera with live overlay"):t("Start opname · max. 60 sec.","Start recording · max 60 sec")}</button>}{isPhotoCameraOpen&&<div className="media-capture-controls"><button type="button" className="gold" onClick={()=>void takePhoto()} disabled={busy}>{t("Maak foto","Take photo")}</button><button type="button" onClick={cancelPhotoCamera}>{t("Annuleren","Cancel")}</button></div>}
               {isRecording&&<button type="button" className="media-stop-recording" onClick={stopCapture}>{t("Stop opname","Stop recording")}</button>}
             </div>
             {isRecording&&<div className="media-recording-status" role="status"><span/> {t("Opname actief. Je kunt op elk moment stoppen.","Recording is active. You can stop at any time.")}<strong className="media-recording-clock" aria-label={t("Resterende opnametijd","Recording time remaining")}>00:{String(recordingRemainingSeconds).padStart(2,"0")}</strong><div className="media-recording-progress" role="progressbar" aria-valuemin={0} aria-valuemax={60} aria-valuenow={recordingSeconds} aria-label={t("Opnameduur van maximaal 60 seconden","Recording duration, maximum 60 seconds")}><span style={{width:`${(recordingSeconds/60)*100}%`}}/></div></div>}
