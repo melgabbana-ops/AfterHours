@@ -111,7 +111,7 @@ nav button.active:before{content:"";position:absolute;top:0;left:30%;right:30%;h
 .task-card button,.safety-controls button{border:1px solid rgba(201,161,106,.28)!important;border-radius:4px!important;background:#0c0907!important;color:#d4c4ab!important}
 .task-card button.selected,.safety-controls button.selected{border-color:#d5b176!important;color:#f0d4a1!important;background:#21180f!important}
 .actions{gap:8px!important}.actions button{border-radius:4px!important;min-height:44px}
-.actions .stop,.danger-action,.stop-controller-stop{border:1px solid #8b4b43!important;background:rgba(85,27,22,.45)!important;color:#efb4a8!important}
+.actions .stop,.danger-action,.stop-controller-stop{border:1px solid #3b3326!important;background:rgba(23, 19, 13, .45)!important;color:#f4ebdd!important}
 .aftercare-card,.completion-card{
  max-width:460px;margin:0 auto;padding:24px 19px!important;border:1px solid var(--ah-border)!important;border-radius:7px!important;
  background:linear-gradient(180deg,rgba(5,4,3,.55),rgba(5,4,3,.96)),url("../visuals/ah-grand-candlelit-chamber.svg") center/cover!important;
@@ -157,7 +157,7 @@ nav button.active:before{content:"";position:absolute;top:0;left:30%;right:30%;h
 
 /* Final consistency pass: every secondary tool uses the same AFTER HOURS material language. */
 :root{
- --ah-danger:#c87970;
+ --ah-danger:#c89445;
  --ah-surface:rgba(18,13,9,.96);
  --ah-surface-raised:linear-gradient(145deg,#1c150e,#0a0806);
  --ah-line:rgba(201,161,106,.24);
@@ -217,7 +217,7 @@ hr{border:0;border-top:1px solid var(--ah-line)}
 :where(.tarot-spread-card p,.mood small,.media-item-copy small,.history-row small,.adminrow span){color:#a99d8c!important}
 :where(.radio-controls .radio-play){background:linear-gradient(180deg,#e4c58f,#b98a50)!important;color:#140e08!important}
 :where(.aftercare-note,.radio-note,.safety,.consent){background:rgba(17,13,9,.82)!important;border:1px solid var(--ah-line)!important}
-:where(.danger-action,.stop-controller-stop,.actions .stop,.stop-controller-stop){border-color:#75443d!important;background:rgba(65,25,21,.48)!important;color:#efb5a9!important}
+:where(.danger-action,.stop-controller-stop,.actions .stop,.stop-controller-stop){border-color:#3b3326!important;background:rgba(23, 19, 13, .48)!important;color:#f4ebdd!important}
 :where(.profile-message){background:#1b140b!important;border-color:#8b6a3b!important;color:#e6c58f!important}
 :where(.media-upload){border-color:#a17b49!important;color:#e2c28e!important;background:rgba(18,13,8,.65)!important}
 :where(.media-signed-link){border-color:#a17b49!important;color:#e5c58f!important;background:#100b07!important}
@@ -314,7 +314,7 @@ hr{border:0;border-top:1px solid var(--ah-line)}
  background:#100c08;color:#dfc79f;border-color:var(--ah-line)
 }
 :where(.safety-stop-action,.lovense-stop,.danger-action){
- background:rgba(74,25,21,.55)!important;border:1px solid #8c4c43!important;color:#f0b8ad!important
+ background:rgba(23, 19, 13, .55)!important;border:1px solid #3b3326!important;color:#f4ebdd!important
 }
 :where(.safety-pause-action){background:#21180f!important;border:1px solid #b38b54!important;color:#f0d8ad!important}
 :where(.safety-readiness-meter,.missions-progress-track,.onboarding-stepper){
@@ -802,13 +802,13 @@ hr{border:0;border-top:1px solid var(--ah-line)}
 /* Safety sync failures are shown on the landing screen after an immediate local stop. */
 .safety-sync-alert{
  display:flex;align-items:flex-start;gap:10px;margin:12px 0;padding:13px 14px;
- border:1px solid rgba(183,91,75,.55);border-radius:5px;
- background:linear-gradient(145deg,rgba(54,24,19,.92),rgba(12,8,7,.98));
- color:#f0d2c7;font-size:10px;line-height:1.55;
+ border:1px solid rgba(200, 148, 69, .55);border-radius:5px;
+ background:linear-gradient(145deg,rgba(23, 19, 13, .92),rgba(23, 19, 13, .98));
+ color:#f4ebdd;font-size:10px;line-height:1.55;
 }
-.safety-sync-alert svg{width:17px;height:17px;flex:none;color:#e1a28e}
+.safety-sync-alert svg{width:17px;height:17px;flex:none;color:#c89445}
 .safety-sync-alert span{flex:1;min-width:0;overflow-wrap:anywhere}
-.safety-sync-alert button{min-height:36px;padding:6px 9px;border:1px solid rgba(225,162,142,.5);border-radius:4px;background:transparent;color:#f0d2c7;font-size:9px}
+.safety-sync-alert button{min-height:36px;padding:6px 9px;border:1px solid rgba(200, 148, 69, .5);border-radius:4px;background:transparent;color:#f4ebdd;font-size:9px}
 
 
 /* Premium visual pass: Daily Ritual and Radio receive distinct, editorial compositions. */
@@ -1223,7 +1223,7 @@ hr{border:0;border-top:1px solid var(--ah-line)}
   letter-spacing:.1em!important;
 }
 .safety-pause-action{border:1px solid rgba(222,184,119,.58)!important;background:linear-gradient(145deg,#2b2114,#0c0906)!important;color:#f0d5a4!important}
-.safety-stop-action{border:1px solid rgba(191,105,91,.65)!important;background:linear-gradient(145deg,#301714,#100807)!important;color:#f0c7bd!important}
+.safety-stop-action{border:1px solid rgba(200, 148, 69, .65)!important;background:linear-gradient(145deg,#17130d,#17130d)!important;color:#f4ebdd!important}
 .legal-doc-tabs{
   display:flex!important;
   gap:7px!important;
@@ -1833,7 +1833,7 @@ body{color:var(--ah-ivory)!important}
 .ah-session-screen .timer strong{font-family:"Cinzel",Georgia,serif!important;font-size:clamp(42px,11vw,58px)!important;color:#f4dfb7!important}
 .ah-session-screen .actions{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px!important}
 .ah-session-screen .actions button{min-height:48px!important;padding:8px 4px!important;border:1px solid var(--ah-line)!important;border-radius:3px!important;background:rgba(20,14,8,.9)!important;color:#f0ddbd!important;font-size:10px!important}
-.ah-session-screen .actions button.stop{border-color:rgba(177,93,75,.6)!important;color:#f0b7a7!important}
+.ah-session-screen .actions button.stop{border-color:rgba(200, 148, 69, .6)!important;color:#f4ebdd!important}
 .aftercare-card,.completion-card{position:relative!important;max-width:470px!important;margin:18px auto!important;padding:27px 18px!important;border:1px solid rgba(220,185,129,.58)!important;border-radius:4px!important;background:linear-gradient(180deg,rgba(7,5,4,.56),rgba(6,4,3,.97) 42%)!important;box-shadow:0 25px 65px #000b!important}
 .aftercare-card:before,.completion-card:before{content:"";position:absolute;inset:7px;border:1px solid rgba(221,187,133,.16);pointer-events:none}
 .aftercare-card h2,.completion-card h2{font-size:clamp(30px,7vw,40px)!important;color:#f4dfbd!important;text-align:center!important}
