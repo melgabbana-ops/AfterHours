@@ -245,7 +245,7 @@ export default function CinematicWorld({
     "Ik nodig je uit om samen iets nieuws te verkennen. Alleen als dit voor jou goed voelt. We bespreken vooraf grenzen, signalen en aftercare.",
     "I invite you to explore something new together. Only if it feels right to you. We will discuss boundaries, signals and aftercare first."
   ));
-  const [currentCard, setCurrentCard] = useState<{ title: string; id: string } | null>(null);
+  const [currentCard, setCurrentCard] = useState<{ title: string; text: string; id: string } | null>(null);
   const [customCardTitle, setCustomCardTitle] = useState("");
   const [customCardText, setCustomCardText] = useState("");
 
@@ -1185,20 +1185,35 @@ export default function CinematicWorld({
     }
   }
 
-  async function drawRitualCard() {
-    const cards = [
-      ...RITUAL_CARDS.map((card) => ({ id: card.id, title: language === "nl" ? card.nl : card.en })),
-      ...customRitualCards.map((card) => ({ id: card.id, title: card.title }))
-    ];
-    if (!cards.length) return;
-    let selected = cards[Math.floor(Math.random() * cards.length)];
-    if (cards.length > 1 && selected.id === currentCard?.id) selected = cards[(cards.findIndex((card) => card.id === selected.id) + 1) % cards.length];
-    setCurrentCard(selected);
+  async function drawSpecificRitualCard(card: { id: string; title: string; text: string }) {
+    setCurrentCard(card);
     try {
-      await persist("ritual", "draw:" + crypto.randomUUID(), { cardId: selected.id, title: selected.title, drawnAt: new Date().toISOString() }, "ritual-keeper");
+      await persist("ritual", "draw:" + crypto.randomUUID(), {
+        cardId: card.id,
+        title: card.title,
+        text: card.text,
+        drawnAt: new Date().toISOString()
+      }, "ritual-keeper");
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : t("Kaart getrokken, maar de geschiedenis kon niet worden opgeslagen.", "Card drawn, but history could not be saved."));
     }
+  }
+
+  async function drawRitualCard() {
+    const cards = [
+      ...RITUAL_CARDS.map((card) => ({
+        id: card.id,
+        title: t("Reflectiekaart", "Reflection card"),
+        text: language === "nl" ? card.nl : card.en
+      })),
+      ...customRitualCards
+    ];
+    if (!cards.length) return;
+    let selected = cards[Math.floor(Math.random() * cards.length)];
+    if (cards.length > 1 && selected.id === currentCard?.id) {
+      selected = cards[(cards.findIndex((card) => card.id === selected.id) + 1) % cards.length];
+    }
+    await drawSpecificRitualCard(selected);
   }
 
 
@@ -1519,14 +1534,14 @@ export default function CinematicWorld({
       {tab === "deck" && (
         <section id="cw-active-panel" role="tabpanel" aria-labelledby={`cw-tab-${tab}`} tabIndex={0} className="cw-section cw-section--deck">
           <div className="cw-section-heading"><span className="cw-kicker">07 · CONTENT THAT GROWS WITH YOU</span><h2><Star /> The Ritual Deck</h2><p>{t("Reflectiekaarten voor verbinding, grenzen en aftercare. Voeg je eigen kaarten toe; iedere trekking wordt in je privégeschiedenis bewaard.", "Reflection cards for connection, boundaries and aftercare. Add your own cards; every draw is saved to your private history.")}</p></div>
-          <div className="cw-ritual-card">{currentCard ? <><span className="cw-kicker">{t("JOUW KAART", "YOUR CARD")}</span><p>{currentCard.title}</p></> : <><span className="cw-kicker">THE RITUAL DECK</span><p>{t("Trek een kaart om een nieuw gesprek te openen.", "Draw a card to open a new conversation.")}</p></>}<button type="button" className="cw-primary" onClick={() => void drawRitualCard()} disabled={busy || !remoteProfileId}><Sparkles size={15} />{t("Trek een kaart", "Draw a card")}</button></div>
+          <div className="cw-ritual-card">{currentCard ? <><span className="cw-kicker">{t("JOUW KAART", "YOUR CARD")}</span><strong>{currentCard.title}</strong><p>{currentCard.text}</p></> : <><span className="cw-kicker">THE RITUAL DECK</span><p>{t("Trek een kaart om een nieuw gesprek te openen.", "Draw a card to open a new conversation.")}</p></>}<button type="button" className="cw-primary" onClick={() => void drawRitualCard()} disabled={busy || !remoteProfileId}><Sparkles size={15} />{t("Trek een kaart", "Draw a card")}</button></div>
           <div className="cw-form-panel">
             <h3>{t("Maak je eigen kaart", "Create your own card")}</h3>
             <label>{t("Kaarttitel", "Card title")}<input value={customCardTitle} onChange={(event) => setCustomCardTitle(event.target.value)} maxLength={90} /></label>
             <label>{t("Reflectievraag of ritueel", "Reflection prompt or ritual")}<textarea rows={3} value={customCardText} onChange={(event) => setCustomCardText(event.target.value)} maxLength={500} /></label>
             <button type="button" className="cw-primary" onClick={() => void saveCustomRitualCard()} disabled={busy || !remoteProfileId || !customCardTitle.trim() || !customCardText.trim()}><Plus size={15} />{t("Kaart toevoegen", "Add card")}</button>
           </div>
-          <div className="cw-saved-list"><h3>{t("Eigen kaarten en trekkingen", "Custom cards and draws")} <span>{customRitualCards.length + ritualDrawCount}</span></h3>{customRitualCards.length ? customRitualCards.map((card) => <div className="cw-saved-row" key={card.id}><div><strong>{card.title}</strong><small>{card.text}</small></div><button type="button" onClick={() => setCurrentCard({ id: card.id, title: card.text })}>{t("Trek", "Draw")}</button><button type="button" onClick={() => void removeRitualCard(card.id)} aria-label={t("Kaart verwijderen", "Delete card")}><Trash2 size={14} /></button></div>) : <p className="cw-empty-state">{t("Je eigen kaarten verschijnen hier zodra je de eerste toevoegt.", "Your custom cards will appear here after you add the first one.")}</p>}</div>
+          <div className="cw-saved-list"><h3>{t("Eigen kaarten en trekkingen", "Custom cards and draws")} <span>{customRitualCards.length + ritualDrawCount}</span></h3>{customRitualCards.length ? customRitualCards.map((card) => <div className="cw-saved-row" key={card.id}><div><strong>{card.title}</strong><small>{card.text}</small></div><button type="button" onClick={() => void drawSpecificRitualCard(card)} disabled={busy}>{t("Trek", "Draw")}</button><button type="button" onClick={() => void removeRitualCard(card.id)} aria-label={t("Kaart verwijderen", "Delete card")}><Trash2 size={14} /></button></div>) : <p className="cw-empty-state">{t("Je eigen kaarten verschijnen hier zodra je de eerste toevoegt.", "Your custom cards will appear here after you add the first one.")}</p>}</div>
         </section>
       )}
 
