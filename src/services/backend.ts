@@ -134,7 +134,7 @@ export function revokeRemoteConsent(sessionId:string,revokedAt:string):Promise<s
  return enqueueRemoteMutation(async()=>{
   const{data:{user},error:userError}=await client.auth.getUser();
   if(userError||!user)return userError?.message??"Geen actieve gebruiker voor consent-sync.";
-  const{data:session,error:sessionError}=await client.from("sessions").select("id").eq("id",sessionId).eq("profile_id",expectedUserId).maybeSingle();
+  const{data:session,error:sessionError}=await client.from("sessions").select("id").eq("id",sessionId).eq("profile_id",user.id).maybeSingle();
   if(sessionError)return sessionError.message;
   if(!session)return "Server-sessie niet gevonden. STOP blijft lokaal actief; herstel de sessie voordat je opnieuw start.";
   // Always ask the server to enforce revocation, even if the latest consent
@@ -182,7 +182,7 @@ async function syncRemoteStateNow(state:AfterHoursState,expectedUserId:string):P
  let sessionId=isUuid(state.session.id)?state.session.id:null;
  let remoteSessionExists=false;
  if(sessionId){
-  const{data:owned,error:ownershipError}=await supabase.from("sessions").select("id").eq("id",sessionId).eq("profile_id",user.id).maybeSingle();
+  const{data:owned,error:ownershipError}=await supabase.from("sessions").select("id").eq("id",sessionId).eq("profile_id",expectedUserId).maybeSingle();
   if(ownershipError)return "Sessie-eigenaarschap kon niet worden gecontroleerd. Je sessie is niet gewijzigd. "+ownershipError.message;
   remoteSessionExists=Boolean(owned);
  }
