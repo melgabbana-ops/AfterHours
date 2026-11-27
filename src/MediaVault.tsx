@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { createMediaPreviewUrlRegistry } from "./mediaPreviewUrls";
+import { createPrivateMediaUrlExpiryTimer } from "./privateMediaUrlExpiry";
 import { bindMediaCaptureBackgroundGuard, isMediaCaptureAttemptCurrent } from "./mediaCaptureLifecycle";
 import {
   canApplyMediaOverlay,
@@ -79,6 +80,12 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
   const vaultNeedsRefreshRef = useRef(false);
   const previewUrlRegistryRef = useRef<ReturnType<typeof createMediaPreviewUrlRegistry> | null>(null);
   if (!previewUrlRegistryRef.current) previewUrlRegistryRef.current = createMediaPreviewUrlRegistry();
+  const signedUrlExpiryRef = useRef<ReturnType<typeof createPrivateMediaUrlExpiryTimer> | null>(null);
+  if (!signedUrlExpiryRef.current) signedUrlExpiryRef.current = createPrivateMediaUrlExpiryTimer();
+  const clearSignedUrl = useCallback(() => {
+    signedUrlExpiryRef.current?.clear();
+    setSignedUrl("");
+  }, []);
 
 
   useEffect(()=>{
@@ -99,6 +106,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
     return ()=>{
       mountedRef.current=false;
       previewUrlRegistryRef.current?.revokeAll();
+      signedUrlExpiryRef.current?.clear();
       if(captureTimeoutRef.current!==undefined) window.clearTimeout(captureTimeoutRef.current);
       streamInterruptionCleanupRef.current?.();
       streamInterruptionCleanupRef.current=null;
@@ -172,7 +180,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
     if (!file || !mountedRef.current) return false;
     setBusy(true);
     setMessage("");
-    setSignedUrl("");
+    clearSignedUrl();
     try {
       await uploadPrivateMedia(file, sessionId, assignmentTitle, language);
       if(!mountedRef.current)return true;
@@ -253,7 +261,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
       setPendingOriginalFile(null);
       setPendingUrl("");
       setOriginalPreviewUrl("");
-      setSignedUrl("");
+      clearSignedUrl();
       setItems([]);
       setDeletingPath("");
       setLoading(false);
@@ -262,7 +270,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
         ? "Privékluis afgeschermd toen de app naar de achtergrond ging. Camera en microfoon zijn gestopt; bestanden worden opnieuw geladen wanneer je terugkeert."
         : "Private vault hidden when the app went into the background. Camera and microphone were stopped; files will reload when you return.");
     });
-  }, [language]);
+  }, [language, clearSignedUrl]);
 
   const handleCaptureForeground = useCallback(() => {
     if (!vaultNeedsRefreshRef.current) return;
@@ -597,7 +605,6 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
       await stageSelectedFile(file,true);
     }catch(error){if(mountedRef.current&&generation===captureGenerationRef.current&&document.visibilityState==="visible")setMessage(error instanceof Error?error.message:t("De foto kon niet worden gemaakt.","Could not capture the photo."));}
   };
-
   const recordingRemainingSeconds=Math.max(0,60-recordingSeconds);
 
   const stopCapture=()=>{
@@ -640,10 +647,22 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
     const generation = vaultVisibilityGenerationRef.current;
     setBusy(true);
     setMessage("");
-    setSignedUrl("");
+    clearSignedUrl();
     try {
       const url=await createPrivateMediaUrl(item.path);
-      if(mountedRef.current&&generation===vaultVisibilityGenerationRef.current&&document.visibilityState==="visible")setSignedUrl(url);
+      if(mountedRef.current&&generation===vaultVisibilityGenerationRef.current&&document.visibilityState==="visible"){
+        setSignedUrl(url);
+        signedUrlExpiryRef.current?.schedule(() => {
+          if (!mountedRef.current) return;
+          setSignedUrl("");
+          if (generation === vaultVisibilityGenerationRef.current && document.visibilityState === "visible") {
+            setMessage(t(
+              "De tijdelijke link is verlopen. Open het bestand opnieuw om een nieuwe link te maken.",
+              "The temporary link has expired. Open the file again to create a new link.",
+            ));
+          }
+        });
+      }
     } catch (error) {
       if(mountedRef.current&&generation===vaultVisibilityGenerationRef.current&&document.visibilityState==="visible")setMessage(error instanceof Error ? error.message : t("Het bestand kon niet worden geopend.", "The file could not be opened."));
     } finally {
@@ -664,7 +683,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
       if(!mountedRef.current)return;
       setItems(current => current.filter(item => item.path !== path));
       setDeletingPath("");
-      setSignedUrl("");
+      clearSignedUrl();
       setMessage(t("Bestand verwijderd.", "File deleted."));
     } catch (error) {
       if(mountedRef.current)setMessage(error instanceof Error ? error.message : t("Verwijderen is mislukt.", "Could not delete the file."));
