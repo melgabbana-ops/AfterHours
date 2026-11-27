@@ -63,6 +63,27 @@ describe("local persistence", () => {
     expect(loadState()).toEqual(state);
   });
 
+  it("rejects invalid profile counters and timestamps without restoring a partial session", () => {
+    const state = defaultState();
+    const invalidStates = [
+      { ...state, profile: { ...state.profile, level: 0 } },
+      { ...state, profile: { ...state.profile, xp: -1 } },
+      { ...state, profile: { ...state.profile, sessions: 1.5 } },
+      { ...state, profile: { ...state.profile, createdAt: "not-a-date" } },
+      { ...state, session: { ...state.session, profileId: "another-profile" } },
+      { ...state, session: { ...state.session, updatedAt: "not-a-date" } },
+      { ...state, consent: { ...state.consent, confirmedAt: "not-a-date" } },
+    ];
+
+    for (const invalidState of invalidStates) {
+      localStorageMock.setItem("afterhours.state.v1", JSON.stringify(invalidState));
+      const restored = loadState();
+      expect(restored.profile.username).toBe("nightwalker");
+      expect(restored.session.status).toBe("ready");
+      expect(restored.consent.status).toBe("pending");
+    }
+  });
+
   it("falls back safely when stored state is malformed", () => {
     localStorageMock.setItem("afterhours.state.v1", "{broken");
 
