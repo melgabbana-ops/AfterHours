@@ -84,7 +84,7 @@
 .cw-checkin>strong{display:block;margin-bottom:10px;color:#e6d5b9;font-size:10px}
 .cw-checkin>div{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
 .cw-checkin button{min-height:48px;padding:8px 5px;border:1px solid rgba(207,174,121,.22);font-size:9px;color:#d9c9ae}
-.cw-checkin button.green{border-color:rgba(103,151,109,.55);color:#c9a16a}
+.cw-checkin button.green{border-color:rgba(207,174,121,.55);color:#c9a16a}
 .cw-checkin button.yellow{border-color:rgba(190,151,71,.55);color:#e5c982}
 .cw-checkin button.red{border-color:rgba(117,107,92,.65);color:#c9a16a}
 .cw-checkin button.selected{background:rgba(201,159,93,.14);box-shadow:inset 0 0 0 1px currentColor}
