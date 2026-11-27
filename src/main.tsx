@@ -1,5 +1,6 @@
 import React,{useEffect,useMemo,useRef,useState}from"react";
 import UnderConstruction from "./UnderConstruction";
+import MaintenanceBootstrap from "./MaintenanceBootstrap";
 import Teaser from "./Teaser";
 import ColdOpenIntro from "./ColdOpenIntro";
 
@@ -561,7 +562,14 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
  // Emergency safety access must render before maintenance, auth hydration and the cold-open.
  // STOP is handled locally first; any remote synchronization remains asynchronous.
  if(screen==="safety")return <React.Suspense fallback={<main className="safety-screen ah-editorial-screen"><p role="status">{t("Veiligheidsplan laden…","Loading safety plan…")}</p>{(state.session.status==="active"||state.session.status==="paused")&&<div className="safety-emergency-controls"><button type="button" className="safety-stop-action" onClick={()=>handleCheckIn("stop")}>{t("STOP NU","STOP NOW")}</button></div>}</main>}><main className="safety-screen ah-editorial-screen"><SafetyPlan key={state.profile.id} profileId={state.profile.id} language={language} sessionStatus={state.session.status} onPause={()=>handleCheckIn("pause")} onResume={startRound} onStopNow={()=>handleCheckIn("stop")}/><button className="back" onClick={()=>setScreen("home")}>← {t("Terug","Back")}</button></main></React.Suspense>;
- if(maintenanceStatus.active)return <UnderConstruction config={maintenanceConfig} language={language}/>;
+ if(maintenanceStatus.active)return <UnderConstruction
+  config={maintenanceConfig}
+  language={language}
+  sessionStatus={state.session.status}
+  onPause={()=>handleCheckIn("pause")}
+  onStopNow={()=>handleCheckIn("stop")}
+  onOpenSafety={()=>setScreen("safety")}
+ />;
  if(screen==="legal")return <React.Suspense fallback={<div className="gate"><div className="gate-card"><p>{t("Scherm laden…","Loading screen…")}</p></div></div>}><LegalCenter language={language} onBack={()=>setScreen("home")}/></React.Suspense>;
  if(!authReady)return <div className="gate"><div className="gate-card">
   <img className="gate-logo" src={`${import.meta.env.BASE_URL}after-hours-brand-logo-transparent.svg`} alt="AFTER HOURS" />
@@ -700,14 +708,9 @@ if(teaserPreview){
 }else if(maintenancePreview){
  root.render(<UnderConstruction/>);
 }else{
- void fetch(`${import.meta.env.BASE_URL}maintenance.json`,{cache:"no-store"})
-  .then(response=>response.ok?response.json():{enabled:false})
-  .catch(()=>({enabled:false}))
-  .then(rawConfig=>{
-   const config=rawConfig as MaintenanceConfig;
-   const maintenance=getMaintenanceStatus(config);
-   root.render(maintenance.active
-    ?<UnderConstruction config={config}/>
-    :<AppErrorBoundary><App maintenanceConfig={config}/></AppErrorBoundary>);
-  });
+ root.render(
+  <MaintenanceBootstrap>
+   {config=><AppErrorBoundary><App maintenanceConfig={config}/></AppErrorBoundary>}
+  </MaintenanceBootstrap>
+ );
 }
