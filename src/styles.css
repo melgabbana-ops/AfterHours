@@ -4892,3 +4892,15 @@ button,[role="button"],nav a{touch-action:manipulation}
 .teaser-safety-link svg{color:#d7a84f;flex:0 0 auto}
 .teaser-safety-link:focus-visible{outline:2px solid #f3c96b;outline-offset:3px}
 @media(max-width:520px){.teaser-safety-link{align-self:stretch;justify-content:center;margin-top:12px}}
+
+/* Dedicated screen identities for assignment capture and account/session control. */
+.capture-screen{max-width:860px;margin:0 auto;padding:clamp(20px,5vw,48px);background:radial-gradient(ellipse at 85% 0,rgba(201,161,106,.12),transparent 42%),#090806}
+.capture-screen .aftercare-card{max-width:760px;margin:0 auto;border:1px solid rgba(201,161,106,.42);border-radius:2px;padding:clamp(20px,4vw,38px);background:linear-gradient(145deg,#15110b,#090806)}
+.capture-screen .assignment-captions{margin:22px 0;padding:22px;border-left:2px solid #d7a84f;background:linear-gradient(90deg,rgba(201,161,106,.10),transparent 78%)}
+.capture-screen .assignment-captions strong{font:clamp(20px,4vw,30px) "Cinzel",Georgia,serif;color:#f4ebdd}
+.session-control-screen{max-width:760px;margin:0 auto;padding:clamp(20px,5vw,44px);background:radial-gradient(ellipse at 50% 0,rgba(201,161,106,.10),transparent 52%),#090806}
+.session-control-screen .admin{padding:clamp(20px,4vw,34px);border:1px solid rgba(201,161,106,.38);background:linear-gradient(155deg,#15110b,#090806);box-shadow:0 22px 60px rgba(0,0,0,.3)}
+.session-control-screen .adminrow{display:grid;grid-template-columns:32px minmax(0,1fr) 8px;align-items:center;gap:14px;padding:17px 0;border-bottom:1px solid rgba(201,161,106,.18)}
+.session-control-screen .safety-controls{margin:24px 0;padding:18px;border:1px solid rgba(201,161,106,.32);background:#100e0b}
+.session-control-screen .admin-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:24px}
+@media(max-width:520px){.session-control-screen .admin-actions{grid-template-columns:1fr}}
