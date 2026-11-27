@@ -2,7 +2,7 @@ self.addEventListener("message", (event) => {
   if (event.data && event.data.type === "SKIP_WAITING") self.skipWaiting();
 });
 
-const CACHE_NAME = "after-hours-v22";
+const CACHE_NAME = "after-hours-v23";
 const BASE_PATH = new URL(".", self.location.href).pathname;
 const asset = (path) => `${BASE_PATH}${path}`;
 
@@ -16,7 +16,7 @@ const APP_SHELL = [
   asset("sw-cache-policy.js"),
   asset("after-hours-brand-logo.svg"),
   asset("after-hours-brand-logo-transparent.svg"),
-  asset("visuals/ah-grand-candlelit-chamber.svg"),
+  asset("visuals/ah-cinematic-hero.svg"),
   asset("visuals/ah-experience-photo.svg"),
   asset("visuals/ah-aftercare-photo.svg"),
   asset("visuals/ah-completion-photo.svg"),
