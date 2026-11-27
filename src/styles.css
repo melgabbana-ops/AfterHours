@@ -5008,3 +5008,37 @@ button,[role="button"],nav a{touch-action:manipulation}
   outline-offset:3px;
 }
 .media-vault-locked button:disabled{opacity:.5}
+
+/* Black Vault controls: comfortable touch targets and visible keyboard focus. */
+.media-vault button,
+.media-vault .media-upload {
+  min-height: 44px;
+}
+.media-vault .media-vault-head button,
+.media-vault .media-item-actions button {
+  min-width: 44px;
+  padding: 10px 12px;
+  font-size: 10px;
+  line-height: 1.4;
+}
+.media-vault button:focus-visible,
+.media-vault a:focus-visible,
+.media-vault input:focus-visible,
+.media-vault select:focus-visible {
+  outline: 2px solid #f3d99e;
+  outline-offset: 3px;
+}
+.media-vault .media-upload:focus-within {
+  outline: 2px solid #f3d99e;
+  outline-offset: 3px;
+}
+@media (max-width: 520px) {
+  .media-vault .media-item-actions {
+    gap: 8px;
+  }
+  .media-vault .media-item-actions button {
+    min-height: 44px;
+    padding: 10px 12px;
+    font-size: 10px;
+  }
+}
