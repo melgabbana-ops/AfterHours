@@ -950,6 +950,16 @@ export default function CinematicWorld({
     }
   }
 
+  function prepareScene(scene: Scene) {
+    setSelectedSceneKey(scene.key);
+    setResumePrepared(false);
+    setRunConsent(false);
+    setStopSignal("");
+    setError("");
+    setMessage(t("Bevestig de scène-consent onderaan voordat je start.", "Confirm scene consent below before starting."));
+    setTab("experience");
+  }
+
   function editScene(scene: Scene) {
     setEditingSceneKey(scene.key);
     setSceneTitle(scene.title);
@@ -1546,7 +1556,7 @@ export default function CinematicWorld({
               <article className="cw-scene-card" key={scene.key}>
                 <div className="cw-scene-card-top"><span className="cw-kicker">{scene.custom ? t("EIGEN SCÈNE", "YOUR SCENE") : t("AFTER HOURS ORIGINAL", "AFTER HOURS ORIGINAL")}</span><span>{String(scene.steps.length).padStart(2, "0")} {t("FASES", "STEPS")}</span></div>
                 <h3>{scene.title}</h3><p>{scene.description}</p>
-                <div className="cw-card-actions"><button type="button" className="cw-primary" onClick={() => { setSelectedSceneKey(scene.key); setResumePrepared(false); setRunConsent(false); setStopSignal(""); setMessage(t("Bevestig de scène-consent onderaan voordat je start.", "Confirm scene consent below before starting.")); }} disabled={busy || stopPending}>{t("Selecteer scène", "Select scene")}</button>{scene.custom && <button type="button" onClick={() => editScene(scene)} aria-label={t("Scène bewerken", "Edit scene")}><Clapperboard size={15} /></button>}</div>
+                <div className="cw-card-actions"><button type="button" className="cw-primary" onClick={() => prepareScene(scene)} disabled={busy || stopPending}>{t("Selecteer scène", "Select scene")}</button>{scene.custom && <button type="button" onClick={() => editScene(scene)} aria-label={t("Scène bewerken", "Edit scene")}><Clapperboard size={15} /></button>}</div>
                 {scene.custom && <button type="button" className="cw-text-button" onClick={() => void removeScene(scene.key)}>{t("Scène verwijderen", "Delete scene")}</button>}
                 
               </article>
@@ -1570,7 +1580,7 @@ export default function CinematicWorld({
             </small>
             <div className="cw-card-actions"><button type="button" className="cw-primary" onClick={() => void saveDirectorScene()} disabled={busy || !remoteProfileId}><Save size={15} />{editingSceneKey ? t("Wijzigingen opslaan", "Save changes") : t("Scène opslaan", "Save scene")}</button><button type="button" onClick={() => { setEditingSceneKey(null); setSceneTitle(""); setSceneDescription(""); setSceneSteps(""); }}>{t("Nieuwe scène", "New scene")}</button></div>
           </div>
-          <div className="cw-saved-list"><h3>{t("Jouw scènes", "Your scenes")} <span>{sceneCount}</span></h3>{scenes.filter((scene) => scene.custom).length ? scenes.filter((scene) => scene.custom).map((scene) => <div className="cw-saved-row" key={scene.key}><div><strong>{scene.title}</strong><small>{scene.steps.length} {t("fases · direct speelbaar", "steps · ready to run")}</small></div><button type="button" onClick={() => editScene(scene)}>{t("Bewerken", "Edit")}</button><button type="button" onClick={() => setTab("experience")}>{t("Start", "Run")}</button></div>) : <p>{t("Je hebt nog geen eigen scènes. Maak hierboven je eerste ontwerp.", "You have no custom scenes yet. Create your first design above.")}</p>}</div>
+          <div className="cw-saved-list"><h3>{t("Jouw scènes", "Your scenes")} <span>{sceneCount}</span></h3>{scenes.filter((scene) => scene.custom).length ? scenes.filter((scene) => scene.custom).map((scene) => <div className="cw-saved-row" key={scene.key}><div><strong>{scene.title}</strong><small>{scene.steps.length} {t("fases · direct speelbaar", "steps · ready to run")}</small></div><button type="button" onClick={() => editScene(scene)}>{t("Bewerken", "Edit")}</button><button type="button" onClick={() => prepareScene(scene)}>{t("Start", "Run")}</button></div>) : <p>{t("Je hebt nog geen eigen scènes. Maak hierboven je eerste ontwerp.", "You have no custom scenes yet. Create your first design above.")}</p>}</div>
         </section>
       )}
 
