@@ -4,7 +4,7 @@ AFTER HOURS uses Supabase/PostgreSQL for account-scoped progress, session safety
 
 ## Migration history
 
-The version prefix in each file under `supabase/migrations/` must match the version recorded in the connected production project's Supabase migration ledger. The current production ledger has 28 entries. The file names below have been aligned to that ledger without changing SQL contents or applying any database change.
+The version prefix in each file under `supabase/migrations/` must match the version recorded in the connected production project's Supabase migration ledger. The current production ledger has 29 entries. The file names below match the connected production ledger. The latest entry, `20261123213434`, is already applied in production and is recorded here for source-control parity; do not replay it.
 
 | Production ledger version | Migration file |
 |---|---|
@@ -36,6 +36,7 @@ The version prefix in each file under `supabase/migrations/` must match the vers
 | `20261121000345` | `20261121000345_afterhours_experience_invitation_preview.sql` |
 | `20261121000429` | `20261121000429_afterhours_invite_requires_paused_run.sql` |
 | `20261121001151` | `20261121001151_afterhours_consent_rls_recursion_guard.sql` |
+| `20261123213434` | `20261123213434_afterhours_experience_run_insert_consent_guard.sql` |
 
 Run `npm run check:migrations` to verify that the checked-in file list still matches this deployed baseline. When adding a migration, use the version that was actually recorded by the reviewed migration workflow, then update the guard and this table in the same change. Never rename or replay an already-applied production migration casually.
 
