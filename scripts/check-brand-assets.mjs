@@ -78,8 +78,8 @@ if (!serviceWorker.includes('importScripts(asset("sw-cache-policy.js"))')
   process.exit(1);
 }
 
-if (!existsSync("public/visuals/ah-grand-candlelit-chamber.svg")) {
-  console.error("The approved candlelit chamber background is missing.");
+if (!existsSync("public/visuals/ah-cinematic-hero.svg")) {
+  console.error("The approved cinematic hero background is missing.");
   process.exit(1);
 }
 
