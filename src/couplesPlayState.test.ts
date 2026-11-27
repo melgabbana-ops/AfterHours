@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canStartRemotePlay, canResumeRemotePlay, shouldPauseRemotePlay, normalizeRoomCode, ROOM_CODE_LENGTH } from "./couplesPlayState";
+import { canStartRemotePlay, canResumeRemotePlay, shouldPauseRemotePlay, normalizeRoomCode, ROOM_CODE_LENGTH, stopCouplesPlayImmediately, type CouplesPlayStopChannel } from "./couplesPlayState";
 
 describe("remote couple play safety", () => {
   const ready = { connected: true, serverAuthorized: true, participantCount: 2, partnerPresent: true, ownConsent: true, partnerConsent: true };
@@ -36,5 +36,60 @@ describe("remote room code validation", () => {
     expect(normalizeRoomCode("ab-cd efgh ijkl mn23")).toBe("ABCDEFGHIJKLMN23");
     expect(normalizeRoomCode("123456789012345" )).toBe("");
     expect(normalizeRoomCode(null)).toBe("");
+  });
+});
+
+describe("immediate couple-play STOP", () => {
+  it("updates local safety state before waiting on remote broadcasts", () => {
+    const events: string[] = [];
+    const channel: CouplesPlayStopChannel = {
+      send: (message) => {
+        events.push("broadcast:" + message.event);
+        return new Promise<unknown>(() => {});
+      },
+    };
+
+    stopCouplesPlayImmediately({
+      setOwnConsent: (value) => events.push("own-consent:" + value),
+      setPartnerConsent: (value) => events.push("partner-consent:" + value),
+      setStatus: (value) => events.push("status:" + value),
+      setMessage: (value) => events.push("message:" + value),
+      channel,
+      round: 2,
+      message: "Stopped locally",
+    });
+
+    expect(events).toEqual([
+      "own-consent:false",
+      "partner-consent:false",
+      "status:stopped",
+      "message:Stopped locally",
+      "broadcast:reset-consent",
+      "broadcast:play-state",
+    ]);
+  });
+
+  it("keeps STOP effective when the realtime client throws synchronously", () => {
+    const events: string[] = [];
+    const channel: CouplesPlayStopChannel = {
+      send: () => { throw new Error("offline"); },
+    };
+
+    expect(() => stopCouplesPlayImmediately({
+      setOwnConsent: (value) => events.push("own-consent:" + value),
+      setPartnerConsent: (value) => events.push("partner-consent:" + value),
+      setStatus: (value) => events.push("status:" + value),
+      setMessage: (value) => events.push("message:" + value),
+      channel,
+      round: 0,
+      message: "Stopped locally",
+    })).not.toThrow();
+
+    expect(events.slice(0, 4)).toEqual([
+      "own-consent:false",
+      "partner-consent:false",
+      "status:stopped",
+      "message:Stopped locally",
+    ]);
   });
 });

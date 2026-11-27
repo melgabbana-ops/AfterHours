@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, Copy, Link2, MonitorSmartphone, Pause, Play, ShieldCheck, Users, Wifi, WifiOff } from "lucide-react";
 import { supabase, supabaseConfigured } from "./services/supabase";
-import { canResumeRemotePlay, canStartRemotePlay, shouldPauseRemotePlay, normalizeRoomCode, ROOM_CODE_LENGTH } from "./couplesPlayState";
+import { canResumeRemotePlay, canStartRemotePlay, shouldPauseRemotePlay, normalizeRoomCode, ROOM_CODE_LENGTH, stopCouplesPlayImmediately } from "./couplesPlayState";
 
 type Language = "nl" | "en";
 type Mode = "local" | "remote";
@@ -241,16 +241,21 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
       else { await navigator.clipboard.writeText(inviteUrl); setMessage(t("Uitnodigingslink gekopieerd.", "Invite link copied.")); }
     } catch { setMessage(t("Delen is niet gelukt. Deel de kamercode handmatig.", "Could not share. Send the room code manually.")); }
   };
-  const stop = async () => {
-    setMyConsent(false);
-    setLocalPartnerConsent(false);
-    if (mode === "remote" && channelRef.current) {
-      await channelRef.current.send({ type: "broadcast", event: "reset-consent", payload: { stopped: true } });
-    }
-    await publish(round, "stopped");
+  const stop = () => {
+    stopCouplesPlayImmediately({
+      setOwnConsent: setMyConsent,
+      setPartnerConsent: setLocalPartnerConsent,
+      setStatus,
+      setMessage,
+      channel: mode === "remote" ? channelRef.current : null,
+      round,
+      message: mode === "remote"
+        ? t("De ervaring is op dit apparaat direct gestopt. Controleer bij je partner of de stopmelding is aangekomen.", "The experience has been stopped on this device immediately. Check with your partner that they received the stop message.")
+        : t("De ervaring is direct gestopt. Beide toestemmingen zijn ingetrokken.", "The experience has been stopped immediately. Both consents have been withdrawn.")
+    });
   };
-  const leave = async () => {
-    if (status === "active" || status === "paused") await stop();
+  const leave = () => {
+    if (status === "active" || status === "paused") stop();
     onBack();
   };
 

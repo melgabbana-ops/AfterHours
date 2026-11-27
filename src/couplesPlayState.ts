@@ -36,3 +36,46 @@ export function canResumeRemotePlay(state: {
 }): boolean {
   return state.connected && state.serverAuthorized && state.participantCount === 2 && state.partnerPresent && state.ownConsent && state.partnerConsent;
 }
+
+export interface CouplesPlayStopChannel {
+  send(message: {
+    type: "broadcast";
+    event: "reset-consent" | "play-state";
+    payload: { stopped?: boolean; round?: number; status?: "stopped" };
+  }): Promise<unknown>;
+}
+
+/** Stop locally first; network notification is best-effort and never gates STOP. */
+export function stopCouplesPlayImmediately({
+  setOwnConsent,
+  setPartnerConsent,
+  setStatus,
+  setMessage,
+  channel,
+  round,
+  message,
+}: {
+  setOwnConsent: (value: boolean) => void;
+  setPartnerConsent: (value: boolean) => void;
+  setStatus: (value: "stopped") => void;
+  setMessage: (value: string) => void;
+  channel?: CouplesPlayStopChannel | null;
+  round: number;
+  message: string;
+}): void {
+  setOwnConsent(false);
+  setPartnerConsent(false);
+  setStatus("stopped");
+  setMessage(message);
+
+  if (!channel) return;
+  const sendBestEffort = (event: "reset-consent" | "play-state", payload: { stopped?: boolean; round?: number; status?: "stopped" }) => {
+    try {
+      void channel.send({ type: "broadcast", event, payload }).catch(() => undefined);
+    } catch {
+      // A local STOP must remain immediate even if the realtime client throws.
+    }
+  };
+  sendBestEffort("reset-consent", { stopped: true });
+  sendBestEffort("play-state", { round, status: "stopped" });
+}
