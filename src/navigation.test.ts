@@ -5,7 +5,7 @@ import manifestText from "../public/manifest.webmanifest?raw";
 describe("initialScreenFromSearch", () => {
   it("opens every supported direct-link screen", () => {
     const screens = [
-      "game", "gameSelect", "complete", "profile", "admin", "insights", "radio",
+      "game", "gameSelect", "complete", "consent", "profile", "admin", "insights", "radio",
       "aftercare", "prompts", "safety", "store", "onboarding", "controlroom",
       "missions", "legal", "social", "lovense", "daily", "capture", "cinematic", "couples",
     ];
@@ -16,6 +16,7 @@ describe("initialScreenFromSearch", () => {
 
   it("opens private couple-room invitations directly in duo play", () => {
     expect(initialScreenFromSearch("?couple=ABCD2345XY")).toBe("couples");
+    expect(initialScreenFromSearch("?stop=1")).toBe("safety");
   });
 
   it("falls back safely for missing or unknown screens", () => {
@@ -37,14 +38,25 @@ describe("initialScreenFromSearch", () => {
   });
 });
 
-
 describe("shouldShowTeaser", () => {
-  it("shows the promotional landing only when explicitly requested", () => {
+  it("shows the cinematic intro on a normal cold launch", () => {
+    expect(shouldShowTeaser("")).toBe(true);
+    expect(shouldShowTeaser("?campaign=radio&ref=home")).toBe(true);
     expect(shouldShowTeaser("?teaser=1")).toBe(true);
-    expect(shouldShowTeaser("")).toBe(false);
-    expect(shouldShowTeaser("?enter=1")).toBe(false);
-    expect(shouldShowTeaser("?screen=radio")).toBe(false);
-    expect(shouldShowTeaser("?screen=profile")).toBe(false);
-    expect(shouldShowTeaser("?maintenance=1")).toBe(false);
+  });
+
+  it("never blocks direct navigation or explicit entry", () => {
+    for (const search of [
+      "?enter=1", "?screen=radio", "?screen=profile", "?screen=safety",
+      "?screen=aftercare", "?couple=ABCD2345XY", "?maintenance=1",
+      "?stop=1", "?safeword=1", "?pause=1", "?screen=consent",
+    ]) {
+      expect(shouldShowTeaser(search)).toBe(false);
+    }
+  });
+
+  it("never puts the intro in front of an active safety state", () => {
+    expect(shouldShowTeaser("", true)).toBe(false);
+    expect(shouldShowTeaser("?teaser=1", true)).toBe(false);
   });
 });
