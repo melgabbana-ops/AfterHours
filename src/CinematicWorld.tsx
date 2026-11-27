@@ -8,7 +8,7 @@ import { hasUnsavedDirectorSceneChanges } from "./directorSceneDraftState";
 import { consumeInvitationTokenFromUrl } from "./invitationUrl";
 import {
   ArrowLeft, ArrowRight, BookOpen, CheckCircle2, Clapperboard, Copy,
-  Download, Eye, EyeOff, Flame, LockKeyhole, Mail, Music2, Pause,
+  Download, Eye, EyeOff, LockKeyhole, Mail, Music2, Pause,
   Play, Plus, Save, Share2, ShieldCheck, Sparkles, Square, Star, Trash2,
   UnlockKeyhole, Volume2, VolumeX
 } from "lucide-react";
@@ -1477,7 +1477,7 @@ export default function CinematicWorld({
     { id: "invitation", label: "Secret Invitation", icon: Mail },
     { id: "dominion", label: "Dominion", icon: ShieldCheck },
     { id: "deck", label: "Ritual Deck", icon: Star },
-    { id: "club", label: "Midnight Club", icon: Flame }
+    { id: "club", label: "Midnight Club", icon: Sparkles }
   ];
   const completedRuns = runs.filter((run) => run.status === "completed").length;
   const sceneCount = records.director.filter((record) => record.record_key.startsWith("scene:")).length;
@@ -1502,7 +1502,7 @@ export default function CinematicWorld({
 
   return (
     <main className="cw-world" data-tab={tab}>
-      <div className="cw-world-backdrop" aria-hidden="true"><img src={`${import.meta.env.BASE_URL}visuals/ah-grand-candlelit-chamber.svg`} alt="" decoding="async" /></div>
+      <div className="cw-world-backdrop" aria-hidden="true"><img src={`${import.meta.env.BASE_URL}visuals/ah-cinematic-hero.svg`} alt="" decoding="async" /></div>
       <header className="cw-header">
         <button type="button" onClick={() => void handleBack()} aria-label={t("Terug", "Back")}><ArrowLeft /></button>
         <span>AFTER HOURS · PRIVATE WORLD</span>
@@ -1510,7 +1510,7 @@ export default function CinematicWorld({
       </header>
 
       <section className="cw-hero">
-        <div className="cw-hero-emblem"><Flame /></div>
+        <div className="cw-hero-emblem"><Sparkles /></div>
         <span className="cw-kicker">A WORLD AFTER DARK</span>
         <h1>The Midnight Experience</h1>
         <p>{t(
