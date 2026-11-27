@@ -64,9 +64,13 @@ export function getPendingStopTimestamp(
   sessionUpdatedAt: string,
 ): string | null {
   if (sessionStatus !== "stopped" || consentStatus !== "revoked") return null;
-  const timestamp = revokedAt ?? sessionUpdatedAt;
-  if (!timestamp.trim() || !Number.isFinite(Date.parse(timestamp))) return null;
-  return timestamp;
+  const isValidTimestamp = (value: string | null): value is string =>
+    typeof value === "string" && value.trim().length > 0 && Number.isFinite(Date.parse(value));
+  // A damaged revocation timestamp must not suppress a valid STOP timestamp
+  // already persisted on the same stopped session.
+  if (isValidTimestamp(revokedAt)) return revokedAt;
+  if (isValidTimestamp(sessionUpdatedAt)) return sessionUpdatedAt;
+  return null;
 }
 
 /** A Supabase-backed session waits for authenticated remote hydration before its local timer can run. */
