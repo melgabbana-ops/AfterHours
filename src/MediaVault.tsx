@@ -4,6 +4,7 @@ import { createMediaPreviewUrlRegistry } from "./mediaPreviewUrls";
 import { createPrivateMediaUrlExpiryTimer } from "./privateMediaUrlExpiry";
 import { bindVaultAuthSession } from "./vaultAuthSession";
 import { bindMediaCaptureBackgroundGuard, isMediaCaptureAttemptCurrent } from "./mediaCaptureLifecycle";
+import { bindVaultAutoLock, hasSensitiveVaultContent } from "./vaultAutoLock";
 import {
   canApplyMediaOverlay,
   createPrivateMediaUrl,
@@ -41,6 +42,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isVaultLocked, setIsVaultLocked] = useState(false);
   const [signedUrl, setSignedUrl] = useState("");
   const [deletingPath, setDeletingPath] = useState("");
   const [captureKind,setCaptureKind] = useState<"photo"|"video"|"voice">("video");
@@ -62,6 +64,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
   const [isSavingCapture,setIsSavingCapture] = useState(false);
   const mountedRef = useRef(false);
   const authValidRef = useRef(false);
+  const vaultLockedRef = useRef(false);
   const authEventGenerationRef = useRef(0);
   const livePreviewRef = useRef<HTMLVideoElement|null>(null);
   const liveCanvasRef = useRef<HTMLCanvasElement|null>(null);
@@ -139,20 +142,22 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
   },[pendingOriginalFile]);
 
 
-  const refresh = useCallback(async (isActive: () => boolean = () => mountedRef.current): Promise<boolean> => {
+  const refresh = useCallback(async (isActive: () => boolean = () => mountedRef.current, allowLocked = false): Promise<boolean> => {
     const generation = vaultVisibilityGenerationRef.current;
     const canUpdate = () => authValidRef.current
       && isActive()
       && generation === vaultVisibilityGenerationRef.current
-      && document.visibilityState === "visible";
-    if (!authValidRef.current || document.visibilityState !== "visible") return false;
+      && document.visibilityState === "visible"
+      && (!vaultLockedRef.current || allowLocked);
+    if (!authValidRef.current || document.visibilityState !== "visible" || (vaultLockedRef.current && !allowLocked)) return false;
     if (canUpdate()) {
       setLoading(true);
       setMessage("");
     }
     try {
       const nextItems = await listPrivateMedia();
-      if (canUpdate()) setItems(nextItems);
+      if (!canUpdate()) return false;
+      setItems(nextItems);
       return true;
     } catch (error) {
       if (canUpdate()) {
@@ -240,7 +245,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
 
 
 
-  const handleCaptureBackground = useCallback((reason: "background" | "auth" = "background") => {
+  const handleCaptureBackground = useCallback((reason: "background" | "auth" | "idle" = "background") => {
     const captureWasStarting = captureStartInFlightRef.current;
     captureGenerationRef.current += 1;
     vaultVisibilityGenerationRef.current += 1;
@@ -288,21 +293,44 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
       setItems([]);
       setDeletingPath("");
       setLoading(false);
-      if (reason === "auth") setIsAuthenticated(false);
+      if (reason === "auth") {
+        setIsAuthenticated(false);
+        vaultLockedRef.current = false;
+        setIsVaultLocked(false);
+      } else if (reason === "idle") {
+        vaultLockedRef.current = true;
+        setIsVaultLocked(true);
+      }
       if (captureWasStarting) setBusy(false);
       setMessage(reason === "auth"
         ? t("Je sessie is niet meer actief. Meld je opnieuw aan via Session Control om de privékluis te openen.", "Your sign-in session is no longer active. Sign in again through Session Control to open your private vault.")
-        : language === "nl"
-          ? "Privékluis afgeschermd toen de app naar de achtergrond ging. Camera en microfoon zijn gestopt; bestanden worden opnieuw geladen wanneer je terugkeert."
-          : "Private vault hidden when the app went into the background. Camera and microphone were stopped; files will reload when you return.");
+        : reason === "idle"
+          ? t("Privékluis automatisch afgeschermd na vijf minuten inactiviteit. Tik op Opnieuw openen om de inhoud opnieuw te laden.", "Private vault automatically hidden after five minutes of inactivity. Tap Reopen to reload its contents.")
+          : language === "nl"
+            ? "Privékluis afgeschermd toen de app naar de achtergrond ging. Camera en microfoon zijn gestopt; bestanden worden opnieuw geladen wanneer je terugkeert."
+            : "Private vault hidden when the app went into the background. Camera and microphone were stopped; files will reload when you return.");
     });
   }, [language, clearSignedUrl]);
 
   const handleCaptureForeground = useCallback(() => {
-    if (!vaultNeedsRefreshRef.current) return;
+    if (!vaultNeedsRefreshRef.current || vaultLockedRef.current) return;
     vaultNeedsRefreshRef.current = false;
     void refresh();
   }, [refresh]);
+
+  const reopenVault = async () => {
+    if (!mountedRef.current || !authValidRef.current || document.visibilityState !== "visible" || busy) return;
+    setBusy(true);
+    const refreshed = await refresh(() => mountedRef.current, true);
+    if (!mountedRef.current) return;
+    if (refreshed && authValidRef.current) {
+      vaultLockedRef.current = false;
+      setIsVaultLocked(false);
+      vaultNeedsRefreshRef.current = false;
+      setMessage(t("Privékluis opnieuw geopend.", "Private vault reopened."));
+    }
+    setBusy(false);
+  };
 
   useEffect(() => bindMediaCaptureBackgroundGuard(
     window,
@@ -310,6 +338,35 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
     handleCaptureBackground,
     handleCaptureForeground,
   ), [handleCaptureBackground, handleCaptureForeground]);
+
+  useEffect(() => bindVaultAutoLock(
+    window,
+    document,
+    () => hasSensitiveVaultContent({
+      authenticated: authValidRef.current,
+      locked: vaultLockedRef.current,
+      itemCount: items.length,
+      hasSignedUrl: Boolean(signedUrl),
+      hasPendingPreview: Boolean(pendingCapture || pendingUrl || originalPreviewUrl),
+      hasActiveCapture: Boolean(liveStream || isRecording || isPhotoCameraOpen),
+    }),
+    (reason) => {
+      if (reason === "idle") handleCaptureBackground("idle");
+    },
+    5 * 60 * 1000,
+    () => undefined,
+  ), [
+    items.length,
+    signedUrl,
+    pendingCapture,
+    pendingUrl,
+    originalPreviewUrl,
+    liveStream,
+    isRecording,
+    isPhotoCameraOpen,
+    handleCaptureBackground,
+    isVaultLocked,
+  ]);
 
   useEffect(() => {
     if (!supabase) return;
@@ -760,12 +817,22 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
     <section className="media-vault auth-panel" aria-labelledby="media-vault-title">
       <span className="eyebrow">{t("PRIVÉOPSLAG", "PRIVATE STORAGE")}</span>
       <h3 id="media-vault-title">{assignmentTitle ? t("Opname bij opdracht", "Assignment capture") : t("Mijn privékluis", "My private vault")}</h3>
-      {isAuthenticated&&assignmentTitle&&<div className="assignment-captions"><strong>{assignmentTitle}</strong>{assignmentTask&&<p>{assignmentTask}</p>}<small>{t("Media wordt opgeslagen in de privékluis onder de huidige sessie. De opdracht wordt niet als openbare metadata gepubliceerd.","Media is stored privately under the current session. Assignment details are not published as public metadata.")}</small></div>}
+      {isAuthenticated&&!isVaultLocked&&assignmentTitle&&<div className="assignment-captions"><strong>{assignmentTitle}</strong>{assignmentTask&&<p>{assignmentTask}</p>}<small>{t("Media wordt opgeslagen in de privékluis onder de huidige sessie. De opdracht wordt niet als openbare metadata gepubliceerd.","Media is stored privately under the current session. Assignment details are not published as public metadata.")}</small></div>}
       <p>{t("Afbeeldingen, video en audio blijven privé. Open-links zijn maximaal 60 seconden geldig.", "Images, video and audio stay private. Open links are valid for up to 60 seconds.")}</p>
       {!supabaseConfigured ? (
         <small role="status">{t("Privéopslag verschijnt zodra Supabase is geconfigureerd.", "Private storage will appear once Supabase is configured.")}</small>
       ) : !isAuthenticated ? (
         <small role="status" aria-live="polite">{message || t("Log in via Session Control om je privékluis te openen.", "Sign in through Session Control to open your private vault.")}</small>
+      ) : isVaultLocked ? (
+        <div className="media-vault-locked" role="group" aria-labelledby="media-vault-locked-title">
+          <span className="eyebrow">{t("PRIVÉKLUIS AFGESCHERMD", "PRIVATE VAULT HIDDEN")}</span>
+          <h4 id="media-vault-locked-title">{t("Je privékluis is afgeschermd", "Your private vault is hidden")}</h4>
+          <p>{t("De inhoud is verborgen na vijf minuten inactiviteit. Tik om je privébestanden opnieuw te laden.", "Content was hidden after five minutes of inactivity. Tap to reload your private files.")}</p>
+          <button type="button" onClick={() => void reopenVault()} disabled={busy || loading}>
+            {busy || loading ? t("Even wachten…", "Please wait…") : t("Opnieuw openen", "Reopen vault")}
+          </button>
+          {message && <small role="status" aria-live="polite" aria-atomic="true">{message}</small>}
+        </div>
       ) : (
         <>
           <label className="media-upload">
