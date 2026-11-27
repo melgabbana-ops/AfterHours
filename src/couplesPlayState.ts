@@ -5,6 +5,10 @@ export function normalizeRoomCode(value: string | null | undefined): string {
   return code.length === ROOM_CODE_LENGTH ? code : "";
 }
 
+export function canStartLocalPlay(playerOneConsent: boolean, playerTwoConsent: boolean): boolean {
+  return playerOneConsent && playerTwoConsent;
+}
+
 export interface RemotePlayReadiness {
   connected: boolean;
   serverAuthorized: boolean;
