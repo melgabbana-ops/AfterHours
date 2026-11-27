@@ -305,7 +305,7 @@
  .cw-section--club>.cw-badges{padding-left:0;border-left:0}
 }
 @media(prefers-reduced-motion:reduce){
- .cw-world[data-tab] .cw-section,.cw-world[data-tab] .cw-ritual-card:before,.cw-world[data-tab] .cw-ritual-card:after{animation:none!important;transition:none!important;transform:none!important}
+ .cw-world[data-tab] .cw-hero,.cw-world[data-tab] .cw-experience,.cw-world[data-tab] .cw-panel,.cw-world[data-tab] .cw-section,.cw-world[data-tab] .cw-scene-card,.cw-world[data-tab] .cw-progress span,.cw-world[data-tab] .cw-ritual-card:before,.cw-world[data-tab] .cw-ritual-card:after{animation:none!important;transition:none!important;transform:none!important;filter:none!important}
 }
 
 
