@@ -69,7 +69,7 @@ const checks = [
   ["settings screen collapses to one column on phones", settingsStyles.includes("@media(max-width:700px)") && settingsStyles.includes("grid-template-columns:1fr")],
   ["settings screen uses a two-column tablet and desktop grid", settingsStyles.includes("grid-template-columns:repeat(2,minmax(0,1fr))")],
   ["cold-open keeps the age declaration and PAUSE/STOP actions", coldOpenSource.includes("ageConfirmed") && coldOpenSource.includes("cold-open-pause") && coldOpenSource.includes("cold-open-stop")],
-  ["cold-open artwork and logo are included in the offline app shell", coldOpenSource.includes("visuals/ah-grand-candlelit-chamber.svg") && coldOpenSource.includes("after-hours-brand-logo-transparent.svg") && serviceWorker.includes('asset("visuals/ah-grand-candlelit-chamber.svg")') && serviceWorker.includes('asset("after-hours-brand-logo-transparent.svg")')],
+  ["cold-open artwork and logo are included in the offline app shell", coldOpenSource.includes("visuals/ah-cinematic-hero.svg") && coldOpenSource.includes("after-hours-brand-logo-transparent.svg") && serviceWorker.includes('asset("visuals/ah-cinematic-hero.svg")') && serviceWorker.includes('asset("after-hours-brand-logo-transparent.svg")')],
   ["direct safety and STOP links bypass the cold-open", navigationSource.includes('params.has("stop")') && navigationSource.includes('params.get("screen") === "safety"')],
   ["settings is a reachable app screen", mainSource.includes('screen==="settings"')],
   ["privacy mode masks private details without masking safety controls", referencePagesStyles.includes(".app.privacy-mode .profile h2") && referencePagesStyles.includes(".app.privacy-mode .cw-decrypted p") && !referencePagesStyles.includes(".app.privacy-mode .stop-controller")],
