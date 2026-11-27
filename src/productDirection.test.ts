@@ -5,11 +5,19 @@ import matrix from "../docs/FEATURE_IMPLEMENTATION_MATRIX.md?raw";
 import visualBrief from "../docs/APPROVED_VISUAL_UPDATE_FOR_BOLT.md?raw";
 
 describe("AFTER HOURS locked product direction", () => {
-  it("defines the approved black, charcoal and champagne palette and explicitly rejects purple", () => {
+  it("defines the strict approved palette and rejects off-palette safety colors", () => {
     expect(direction).toContain("black, charcoal, champagne-gold, white and warm grey");
-    expect(direction).toContain("No purple, aubergine, plum, violet or lilac");
+    expect(direction).toContain("No purple, pink, rose, magenta, red, green, blue");
+    expect(direction).toContain("never through an extra danger hue");
     expect(direction).toContain("#C89445");
     expect(direction).toContain("#D7A84F");
+    expect(direction).toContain("Every screen has its own recognizable composition");
+    expect(direction).toContain("Director’s Room: split composition");
+    expect(direction).toContain("Settings: preference index");
+    expect(direction).toContain("Administration: restricted management console");
+    expect(direction).toContain("Direct safety and STOP routes bypass it");
+    expect(direction).toContain("PAUSE while a session is active and immediate STOP");
+    expect(direction).toContain("Privacy mode is a visual mask only");
   });
 
   it("marks the former feature checklist palette as superseded", () => {

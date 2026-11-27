@@ -21,7 +21,7 @@
 .radio-local-track-play strong,.radio-local-track-play small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .radio-local-track-play strong{color:#e8ddc8;font-size:11px;font-weight:500}
 .radio-local-track-play small{margin-top:3px;color:#938978;font-size:9px}
-.radio-local-track-remove{width:44px;height:44px;display:grid;place-items:center;border:1px solid rgba(180,110,90,.25);border-radius:4px;background:#0a0807;color:#c18c7b}
+.radio-local-track-remove{width:44px;height:44px;display:grid;place-items:center;border:1px solid rgba(201,161,106,.25);border-radius:4px;background:#0a0807;color:#c9a16a}
 .spotify-open{display:flex;align-items:center;gap:10px;margin:18px 20px;padding:14px;border:1px solid rgba(211,174,112,.25);border-radius:8px;background:#090807;color:#d7bd8c;text-decoration:none}
 .spotify-open span{font-size:10px;font-weight:700;letter-spacing:.08em}
 .spotify-open strong{flex:1;font-size:10px;font-weight:500}

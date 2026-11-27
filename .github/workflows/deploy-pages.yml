@@ -7,7 +7,8 @@ on:
     branches: [main]
   workflow_dispatch:
 
-# Validation only. No Pages configuration or deployment is performed here.
+# Validation only. Production hosting and deployment remain disabled until
+# the user explicitly authorizes a separate deployment change.
 permissions:
   contents: read
 
