@@ -37,6 +37,8 @@ const checks = [
   ["safe-area top inset", /env\(\s*safe-area-inset-top/i.test(styles)],
   ["safe-area bottom inset", /env\(\s*safe-area-inset-bottom/i.test(styles)],
   ["44px minimum touch target", /button\s*\{[^}]*min-height\s*:\s*44px/i.test(styles)],
+  ["Cinematic World tab controls keep a 44px mobile touch target", /\.cw-tabs button\s*\{[^}]*min-height\s*:\s*44px/i.test(worldExperienceStyles)],
+  ["Cinematic World back control keeps a 44px square touch target", /\.cw-header button\s*\{[^}]*width\s*:\s*44px[^}]*height\s*:\s*44px/i.test(worldExperienceStyles)],
   ["private safeword reveal controls keep a 44px touch target", /\.safety-signal-visibility\s*\{[^}]*min-height\s*:\s*44px/i.test(baseStyles)],
   ["horizontal overflow protection", /(?:body|html,body,#root)\s*\{[^}]*overflow-x\s*:\s*(?:hidden|clip)/i.test(styles)],
   ["border-box sizing", /\*\s*\{\s*box-sizing\s*:\s*border-box/i.test(styles)],

@@ -1,7 +1,7 @@
 .cw-world{position:relative;isolation:isolate;max-width:900px!important;min-height:calc(100dvh - 70px);margin:0 auto;padding:12px 18px calc(110px + env(safe-area-inset-bottom))!important;color:#eee2cd;background:radial-gradient(ellipse at 50% 8%,rgba(112,74,34,.2),transparent 42%),linear-gradient(180deg,#090806 0%,#050505 100%);overflow:hidden}
 .cw-world:before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.42;background:radial-gradient(ellipse at 10% 25%,rgba(207,151,76,.12),transparent 30%),radial-gradient(ellipse at 92% 55%,rgba(207,151,76,.1),transparent 28%),linear-gradient(90deg,transparent,rgba(218,179,118,.025),transparent)}
 .cw-header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:5px 0 14px;border-bottom:1px solid rgba(207,174,121,.2);font-size:8px;letter-spacing:.18em;color:#c7ad83}
-.cw-header button{display:grid;place-items:center;width:40px;height:40px;border:1px solid rgba(207,174,121,.35);color:#e6c68f}
+.cw-header button{display:grid;place-items:center;width:44px;height:44px;border:1px solid rgba(207,174,121,.35);color:#e6c68f}
 .cw-header button svg{width:17px}.cw-live{display:flex;align-items:center;gap:6px;color:#b7a68a}.cw-live i{width:5px;height:5px;border-radius:50%;background:#c8a56b;box-shadow:0 0 9px #c8a56b}
 .cw-hero{text-align:center;padding:28px 10px 24px;animation:cw-arrive .85s cubic-bezier(.2,.7,.2,1) both}
 .cw-hero-emblem{width:54px;height:54px;margin:0 auto 14px;display:grid;place-items:center;border:1px solid rgba(216,180,120,.58);border-radius:50%;color:#e6c68f;box-shadow:0 0 36px rgba(201,147,70,.13),inset 0 0 22px rgba(201,147,70,.08)}
@@ -9,7 +9,7 @@
 .cw-hero h1{margin:10px 0 9px;font:500 clamp(31px,8vw,53px)/1.06 Cinzel,Georgia,serif;letter-spacing:.015em;color:#f2e2c7;text-shadow:0 4px 26px rgba(215,168,79,.13)}
 .cw-hero p{max-width:560px;margin:0 auto;color:#b7aa97;font-size:11px;line-height:1.7}
 .cw-tabs{display:flex;gap:7px;overflow-x:auto;padding:4px 0 14px;scrollbar-width:none;border-bottom:1px solid rgba(207,174,121,.17)}.cw-tabs::-webkit-scrollbar{display:none}
-.cw-tabs button{flex:0 0 auto;min-height:39px;padding:0 13px;border:1px solid rgba(207,174,121,.2);background:rgba(13,11,8,.86);color:#a99c88;font-size:8px;letter-spacing:.11em;text-transform:uppercase;white-space:nowrap}
+.cw-tabs button{flex:0 0 auto;min-height:44px;padding:0 13px;border:1px solid rgba(207,174,121,.2);background:rgba(13,11,8,.86);color:#a99c88;font-size:8px;letter-spacing:.11em;text-transform:uppercase;white-space:nowrap}
 .cw-tabs button.active{border-color:#b99156;background:linear-gradient(180deg,rgba(133,93,44,.28),rgba(23,17,10,.9));color:#f0d39c;box-shadow:0 0 20px rgba(190,138,67,.08)}
 .cw-experience{padding:18px 0 10px;animation:cw-arrive .65s ease both}
 .cw-scene-art{position:relative;min-height:220px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;padding:22px;border:1px solid rgba(216,180,120,.43);background:linear-gradient(180deg,rgba(3,3,3,.02) 0%,rgba(3,3,3,.35) 35%,rgba(3,3,3,.96) 100%),radial-gradient(ellipse at 50% 0%,rgba(193,143,71,.35),transparent 50%),linear-gradient(125deg,#282016,#0b0907 58%,#1b130c);box-shadow:0 18px 50px rgba(0,0,0,.36)}
