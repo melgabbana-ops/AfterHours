@@ -194,6 +194,31 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
     }
   }, [mode, connected, status, partnerPresent]);
 
+  useEffect(() => {
+    if (mode !== "remote") return;
+    const pauseForInterruption = () => {
+      if (status !== "active") return;
+      setStatus("paused");
+      setMyConsent(false);
+      setMessage(t("Verbinding of scherm onderbroken. De Duo-ervaring is gepauzeerd. Beide spelers moeten opnieuw instemmen.", "Connection or screen interrupted. Duo is paused. Both players must consent again."));
+      const channel = channelRef.current;
+      if (channel) {
+        void channel.send({ type: "broadcast", event: "play-state", payload: { round, status: "paused" } }).catch(() => {});
+        void channel.send({ type: "broadcast", event: "reset-consent", payload: { stopped: false } }).catch(() => {});
+      }
+    };
+    const handleOffline = () => pauseForInterruption();
+    const handleVisibility = () => {
+      if (document.visibilityState === "hidden") pauseForInterruption();
+    };
+    window.addEventListener("offline", handleOffline);
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => {
+      window.removeEventListener("offline", handleOffline);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [mode, status, round, language]);
+
   const publish = async (nextRound: number, nextStatus: PlayStatus) => {
     if (mode === "local" && nextStatus === "active" && !canStartLocalPlay(myConsent, localPartnerConsent)) {
       setMessage(t("Beide spelers moeten opnieuw afzonderlijk instemmen voordat jullie starten of hervatten.", "Both players must separately consent again before starting or resuming."));
