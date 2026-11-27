@@ -52,7 +52,7 @@ describe("GitHub Pages publication boundary", () => {
     expect(publishWorkflow).toContain("branches: [main]");
     expect(publishWorkflow).toContain("workflow_dispatch:");
     expect(publishWorkflow).not.toContain("pull_request:");
-    expect((publishWorkflow.match(/if: github\\.ref == 'refs\\/heads\\/main'/g) ?? []).length).toBe(2);
+    expect(publishWorkflow.split("if: github.ref == 'refs/heads/main'").length - 1).toBe(2);
     expect(publishWorkflow).toContain("actions/configure-pages@v6");
     expect(publishWorkflow).toContain("actions/deploy-pages@v5");
   });
