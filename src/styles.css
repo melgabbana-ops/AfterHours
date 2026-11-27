@@ -4887,3 +4887,8 @@ button,[role="button"],nav a{touch-action:manipulation}
 .media-photo-compare button{flex:0 1 auto}
 .media-photo-compare small{color:#d7bd86;font-size:.78rem}
 @media(max-width:520px){.media-photo-editor-presets>div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.media-photo-compare{align-items:stretch;flex-direction:column}.media-photo-compare button{width:100%}}
+
+.teaser-safety-link{position:relative;z-index:2;align-self:flex-end;display:inline-flex;align-items:center;gap:8px;min-height:42px;margin:10px 0 0;padding:0 14px;border:1px solid rgba(201,161,106,.52);background:rgba(9,8,5,.92);color:#f4ebdd;text-decoration:none;font-size:9px;letter-spacing:.12em}
+.teaser-safety-link svg{color:#d7a84f;flex:0 0 auto}
+.teaser-safety-link:focus-visible{outline:2px solid #f3c96b;outline-offset:3px}
+@media(max-width:520px){.teaser-safety-link{align-self:stretch;justify-content:center;margin-top:12px}}
