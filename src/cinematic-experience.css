@@ -330,3 +330,12 @@
 .cw-invite-consent input{width:18px;height:18px;flex:none;margin:1px 0 0;accent-color:#c99e60}
 .cw-invite-consent input:focus-visible{outline:2px solid #e4c58f;outline-offset:3px}
 .cw-invite-consent:has(input:disabled){opacity:.58}
+
+.cw-shared-progress-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.cw-shared-progress-heading h3{margin:0}
+.cw-shared-progress-heading button{min-height:38px;padding:8px 12px;border:1px solid rgba(207,174,121,.4);color:#e4c58f;font-size:9px;letter-spacing:.08em}
+.cw-shared-progress-heading button:disabled{opacity:.45}
+.cw-shared-run{display:grid;gap:10px;padding:14px 0;border-top:1px solid rgba(207,174,121,.14)}
+.cw-shared-progress{height:5px;overflow:hidden;border-radius:8px;background:rgba(207,174,121,.14)}
+.cw-shared-progress>span{display:block;height:100%;background:linear-gradient(90deg,#a77b43,#e4c58f);transition:width .25s ease}
+@media(prefers-reduced-motion:reduce){.cw-shared-progress>span{transition:none}}
