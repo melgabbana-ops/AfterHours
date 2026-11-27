@@ -1469,7 +1469,7 @@ export default function CinematicWorld({
     }
   }
 
-  const tabItems: { id: Tab; label: string; icon: typeof Flame }[] = [
+  const tabItems: { id: Tab; label: string; icon: typeof Sparkles }[] = [
     { id: "experience", label: "Experience Engine", icon: Play },
     { id: "director", label: "Director's Room", icon: Clapperboard },
     { id: "vault", label: "Black Vault", icon: LockKeyhole },
@@ -1720,7 +1720,7 @@ export default function CinematicWorld({
 
       {tab === "club" && (
         <section id="cw-active-panel" role="tabpanel" aria-labelledby={`cw-tab-${tab}`} tabIndex={0} className="cw-section cw-section--club">
-          <div className="cw-section-heading"><span className="cw-kicker">08 · YOUR LONG GAME</span><h2><Flame /> The Midnight Club</h2><p>{t("Een privéoverzicht dat groeit door wat je daadwerkelijk ontwerpt, bewaart en afrondt. Geen nepstreaks of willekeurige punten.", "A private overview that grows through what you actually design, save and complete. No fake streaks or random points.")}</p></div>
+          <div className="cw-section-heading"><span className="cw-kicker">08 · YOUR LONG GAME</span><h2><Sparkles /> The Midnight Club</h2><p>{t("Een privéoverzicht dat groeit door wat je daadwerkelijk ontwerpt, bewaart en afrondt. Geen nepstreaks of willekeurige punten.", "A private overview that grows through what you actually design, save and complete. No fake streaks or random points.")}</p></div>
           <div className="cw-member-card"><span className="cw-kicker">MIDNIGHT MEMBER</span><strong>LEVEL {String(memberLevel).padStart(2, "0")}</strong><p>{t("Je lidmaatschap groeit met bewuste ervaringen en eigen creaties.", "Your membership grows through intentional experiences and personal creations.")}</p></div>
           <div className="cw-stats-grid">
             <div><strong>{completedRuns}</strong><span>{t("Ervaringen afgerond", "Runs completed")}</span></div>
