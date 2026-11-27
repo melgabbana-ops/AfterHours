@@ -40,6 +40,8 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
   const [participants, setParticipants] = useState<PresenceMeta[]>([]);
   const [round, setRound] = useState(0);
   const [status, setStatus] = useState<PlayStatus>("lobby");
+  const statusRef = useRef<PlayStatus>(status);
+  statusRef.current = status;
   const [localTurn, setLocalTurn] = useState<1 | 2>(1);
   const [answerDraft, setAnswerDraft] = useState("");
   const [localAnswers, setLocalAnswers] = useState<Array<{ round: number; player: 1 | 2; answer: string }>>([]);
@@ -143,7 +145,7 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
       if (["lobby", "active", "paused", "stopped", "completed"].includes(next.status || "")) setStatus(next.status!);
     });
     channel.on("broadcast", { event: "reset-consent" }, ({ payload }) => {
-      if (alive) { setMyConsent(false); const stopped = (payload as { stopped?: boolean } | undefined)?.stopped === true; setStatus(stopped ? "stopped" : status === "active" || status === "paused" ? "paused" : "lobby"); if (stopped) setAnswerDraft(""); }
+      if (alive) { setMyConsent(false); const stopped = (payload as { stopped?: boolean } | undefined)?.stopped === true; setStatus(stopped ? "stopped" : statusRef.current === "active" || statusRef.current === "paused" ? "paused" : "lobby"); if (stopped) setAnswerDraft(""); }
     });
     channel.subscribe(async state => {
       if (!alive) return;
@@ -161,7 +163,7 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
         // consent across reconnects, and never auto-resume an interrupted scene.
         setMyConsent(false);
         await channel.track({ participantId, displayName: name.trim() || t("Deelnemer", "Participant"), consent: false });
-        if (status === "active" || status === "paused") {
+        if (statusRef.current === "active" || statusRef.current === "paused") {
           setStatus("paused");
           await channel.send({ type: "broadcast", event: "reset-consent", payload: { stopped: false } });
         }
