@@ -46,6 +46,8 @@ if (!html.includes("og:image") || !html.includes("twitter:image") || !html.inclu
 const manifest = JSON.parse(readFileSync("public/manifest.webmanifest", "utf8"));
 const serviceWorker = readFileSync("public/sw.js", "utf8");
 const appSource = readFileSync("src/main.tsx", "utf8");
+const appStyles = readFileSync("src/styles.css", "utf8");
+const referenceStyles = ["src/reference-home.css", "src/reference-pages.css"].map((path) => readFileSync(path, "utf8")).join("\n");
 const cinematicWorldSource = readFileSync("src/CinematicWorld.tsx", "utf8");
 const coldOpenSource = readFileSync("src/ColdOpenIntro.tsx", "utf8");
 const cinematicVisualSources = [
@@ -57,7 +59,7 @@ const cinematicVisualSources = [
   readFileSync("src/cinematic-world.css", "utf8"),
   readFileSync("src/cinematic-experience.css", "utf8"),
   serviceWorker
-].join("\\n");
+].join("\n");
 const legacyCandleArtwork = "ah-grand-candlelit-chamber.svg";
 if (existsSync("public/visuals/" + legacyCandleArtwork) || cinematicVisualSources.includes(legacyCandleArtwork)) {
   console.error("Legacy candle chamber artwork must stay removed from the app and offline shell.");
@@ -67,8 +69,6 @@ if (!cinematicWorldSource.includes("visuals/ah-cinematic-hero.svg") || !coldOpen
   console.error("The Experience World and cold-open must use the approved cinematic hero artwork.");
   process.exit(1);
 }
-const appStyles = readFileSync("src/styles.css", "utf8");
-const referenceStyles = ["src/reference-home.css", "src/reference-pages.css"].map((path) => readFileSync(path, "utf8")).join("\n");
 const maintenanceSource = readFileSync("src/UnderConstruction.tsx", "utf8");
 const teaserSource = readFileSync("src/Teaser.tsx", "utf8");
 const onboardingSource = readFileSync("src/Onboarding.tsx", "utf8");
