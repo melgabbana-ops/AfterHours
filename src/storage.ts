@@ -110,26 +110,28 @@ const timerKey=(profileId:string)=>`${TIMER_KEY}:${profileId}`;
 
 export function loadTimer(profileId:string,round:number,initialSeconds:number):number{
  try{
-  const parsed=JSON.parse(localStorage.getItem(timerKey(profileId))??"null") as Partial<TimerSnapshot>|null;
-  if(!parsed
-   ||parsed.profileId!==profileId
-   ||parsed.round!==round
-   ||!Number.isInteger(parsed.round)
-   ||!Number.isInteger(parsed.seconds)
+  if(!Number.isFinite(initialSeconds)||initialSeconds<0)return 0;
+  const raw=localStorage.getItem(timerKey(profileId));
+  if(raw===null)return initialSeconds;
+  let parsed:Partial<TimerSnapshot>|null;
+  try{parsed=JSON.parse(raw) as Partial<TimerSnapshot>|null}catch{return 0;}
+  if(!parsed||typeof parsed!=="object"||typeof parsed.profileId!=="string"||!Number.isInteger(parsed.round))return 0;
+  // A valid snapshot for another round is stale, not evidence that this round's timer is corrupt.
+  if(parsed.profileId!==profileId||parsed.round!==round)return initialSeconds;
+  // A malformed snapshot for this profile and round must never restore a fresh full timer.
+  if(!Number.isInteger(parsed.seconds)
    ||Number(parsed.seconds)<0
    ||Number(parsed.seconds)>initialSeconds
    ||!Number.isFinite(parsed.savedAt)
    ||Number(parsed.savedAt)<0
    ||typeof parsed.running!=="boolean"
-   ||!Number.isFinite(initialSeconds)
-   ||initialSeconds<0
-  )return initialSeconds;
+  )return 0;
   // A device clock rollback must never restore extra active session time.
   // Fail closed at zero so the app transitions the active round to PAUSE.
   if(parsed.running && Number(parsed.savedAt)>Date.now())return 0;
   const elapsed=parsed.running?Math.floor((Date.now()-Number(parsed.savedAt))/1000):0;
   return Math.max(0,Math.min(initialSeconds,Number(parsed.seconds)-elapsed));
- }catch{return initialSeconds}
+ }catch{return 0}
 }
 
 export function saveTimer(profileId:string,round:number,seconds:number,running=true):boolean{try{localStorage.setItem(timerKey(profileId),JSON.stringify({profileId,round,seconds,savedAt:Date.now(),running}));return true}catch{return false}}
