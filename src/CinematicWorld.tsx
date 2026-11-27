@@ -1382,7 +1382,7 @@ export default function CinematicWorld({
                   <Pause />
                   <h3>{t("Deze ervaring is gepauzeerd", "This experience is paused")}</h3>
                   <p>{t("Er zijn geen verdere stappen beschikbaar zolang de pauze actief is. Controleer je verbinding en hervat pas nadat de pauzestatus is bevestigd en opnieuw toestemming is gegeven.", "No further steps are available while the pause is active. Check your connection, and resume only after the paused status is confirmed and fresh consent is given.")}</p>
-                  <button type="button" className="cw-stop" onClick={() => void stopScene()} disabled={stopPending} aria-label={t("Ervaring onmiddellijk stoppen", "Stop experience immediately")}><Square size={14} /> STOP</button>
+                  <button type="button" className="cw-stop" onClick={() => void stopScene()} aria-label={t("Ervaring onmiddellijk stoppen", "Stop experience immediately")}><Square size={14} /> STOP</button>
                 </div>
               ) : (
                 <>
