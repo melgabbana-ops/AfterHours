@@ -272,9 +272,9 @@ describe("AFTER HOURS push notification navigation safety", () => {
 
 describe("AFTER HOURS offline intro shell", () => {
   it("pre-caches the transparent teaser logo and local cinematic backgrounds", () => {
-    expect(workerSource).toContain('const CACHE_NAME = "after-hours-v22"');
+    expect(workerSource).toContain('const CACHE_NAME = "after-hours-v23"');
     expect(workerSource).toContain('asset("after-hours-brand-logo-transparent.svg")');
-    expect(workerSource).toContain('asset("visuals/ah-grand-candlelit-chamber.svg")');
+    expect(workerSource).toContain('asset("visuals/ah-cinematic-hero.svg")');
     expect(workerSource).toContain('asset("visuals/ah-cinematic-background.svg")');
     expect(workerSource).toContain('asset("visuals/ah-cinematic-hero.svg")');
     for (const visual of [

@@ -75,7 +75,7 @@ describe("AFTER HOURS service-worker cache privacy boundary", () => {
   it("loads the tested policy and invalidates the previous broad cache version", () => {
     expect(workerSource).toContain('importScripts(asset("sw-cache-policy.js"))');
     expect(workerSource).toContain("shouldCacheRequest(request, url, BASE_PATH, self.location.origin)");
-    expect(workerSource).toContain('const CACHE_NAME = "after-hours-v22"');
+    expect(workerSource).toContain('const CACHE_NAME = "after-hours-v23"');
     expect(workerSource).toContain('asset("sw-cache-policy.js")');
   });
 });
