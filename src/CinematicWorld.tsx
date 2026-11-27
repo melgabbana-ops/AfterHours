@@ -211,8 +211,11 @@ export default function CinematicWorld({
 
   useLayoutEffect(() => {
     const consumed = consumeInvitationTokenFromUrl(window.location.href);
-    if (consumed.hadInviteParameter) {
-      window.history.replaceState(window.history.state, "", consumed.sanitizedUrl);
+    const sanitized = new URL(consumed.hadInviteParameter ? consumed.sanitizedUrl : window.location.href);
+    const hadWorldTab = sanitized.searchParams.has("worldTab");
+    if (hadWorldTab) sanitized.searchParams.delete("worldTab");
+    if (consumed.hadInviteParameter || hadWorldTab) {
+      window.history.replaceState(window.history.state, "", sanitized.toString());
     }
   }, []);
 
