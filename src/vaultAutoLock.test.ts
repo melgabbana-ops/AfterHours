@@ -1,11 +1,30 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { bindVaultAutoLock } from "./vaultAutoLock";
+import { bindVaultAutoLock, hasSensitiveVaultContent } from "./vaultAutoLock";
 
 class FakeDocument extends EventTarget {
   visibilityState = "visible";
 }
 
 describe("Black Vault automatic locking", () => {
+  it("only treats authenticated, unlocked private content as sensitive", () => {
+    const empty = {
+      authenticated: true,
+      locked: false,
+      itemCount: 0,
+      hasSignedUrl: false,
+      hasPendingPreview: false,
+      hasActiveCapture: false,
+    };
+
+    expect(hasSensitiveVaultContent(empty)).toBe(false);
+    expect(hasSensitiveVaultContent({ ...empty, itemCount: 1 })).toBe(true);
+    expect(hasSensitiveVaultContent({ ...empty, hasSignedUrl: true })).toBe(true);
+    expect(hasSensitiveVaultContent({ ...empty, hasPendingPreview: true })).toBe(true);
+    expect(hasSensitiveVaultContent({ ...empty, hasActiveCapture: true })).toBe(true);
+    expect(hasSensitiveVaultContent({ ...empty, authenticated: false, itemCount: 1 })).toBe(false);
+    expect(hasSensitiveVaultContent({ ...empty, locked: true, itemCount: 1 })).toBe(false);
+  });
+
   afterEach(() => {
     vi.useRealTimers();
   });
