@@ -18,6 +18,7 @@ const files = [...sourceStyles, ...visualAssets].sort();
 
 const forbiddenNames = /--[\w-]*(?:purple|violet|magenta|aubergine|plum)[\w-]*/i;
 const forbiddenNamedColors = /\b(?:purple|violet|magenta|fuchsia|indigo|rebeccapurple|darkviolet|darkmagenta|mediumvioletred|blueviolet|orchid|mediumorchid|darkorchid)\b/i;
+const forbiddenNamedColorValues = /(?:^|[;{])\s*(?:color|background(?:-color)?|border(?:-[\w-]+)?|outline(?:-color)?|fill|stroke)\s*:[^;{}]*\b(?:pink|hotpink|deeppink|rose|red|darkred|crimson|tomato|salmon|coral|green|lime|blue|cyan|aqua|teal|orange|yellow)\b[^;{}]*[;}]/i;
 const failures = [];
 
 function rgbToHsl(r, g, b) {
@@ -72,8 +73,10 @@ function hslFunctionToHsl(body) {
   return { hue: ((hue % 360) + 360) % 360, saturation, lightness };
 }
 
-function isPurpleFamily({ hue, saturation, lightness }) {
-  return saturation > 0.28 && lightness > 0.08 && hue >= 250 && hue <= 330;
+function isOutsideApprovedPalette({ hue, saturation }) {
+  const neutral = saturation <= 0.22;
+  const champagneGold = hue >= 18 && hue <= 58;
+  return !neutral && !champagneGold;
 }
 
 for (const file of files) {
@@ -86,20 +89,23 @@ for (const file of files) {
     failures.push(file + ": legacy purple-family custom-property name found");
   }
   if (forbiddenNamedColors.test(withoutComments)) {
-    failures.push(file + ": named purple-family color found");
+    failures.push(file + ": forbidden purple-family color name found");
+  }
+  if (forbiddenNamedColorValues.test(withoutComments)) {
+    failures.push(file + ": named color value outside the approved palette found");
   }
 
   for (const match of withoutComments.matchAll(/#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})\b/gi)) {
     const color = hexToHsl(match[0]);
-    if (color && isPurpleFamily(color)) failures.push(file + ": purple-family hex color " + match[0]);
+    if (color && isOutsideApprovedPalette(color)) failures.push(file + ": off-palette hex color " + match[0]);
   }
   for (const match of withoutComments.matchAll(/rgba?\(\s*([^)]*)\)/gi)) {
     const color = rgbFunctionToHsl(match[1]);
-    if (color && isPurpleFamily(color)) failures.push(file + ": purple-family RGB color " + match[0]);
+    if (color && isOutsideApprovedPalette(color)) failures.push(file + ": off-palette RGB color " + match[0]);
   }
   for (const match of withoutComments.matchAll(/hsla?\(\s*([^)]*)\)/gi)) {
     const color = hslFunctionToHsl(match[1]);
-    if (color && isPurpleFamily(color)) failures.push(file + ": purple-family HSL color " + match[0]);
+    if (color && isOutsideApprovedPalette(color)) failures.push(file + ": off-palette HSL color " + match[0]);
   }
 }
 
@@ -114,7 +120,7 @@ if (failures.length) {
 }
 
 console.log(
-  "Black-and-gold palette passed: scanned " + sourceStyles.length +
+  "Approved palette passed: scanned " + sourceStyles.length +
   " stylesheets and " + visualAssets.length +
-  " visual SVGs (hex, RGB, HSL and named colors).",
+  " visual SVGs. Only black, charcoal, champagne-gold, white and warm-neutral colors are allowed.",
 );

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { initialScreenFromSearch, shouldShowTeaser } from "./navigation";
+import { initialScreenFromSearch, shouldShowColdIntro, shouldShowTeaser } from "./navigation";
 import manifestText from "../public/manifest.webmanifest?raw";
 
 describe("initialScreenFromSearch", () => {
@@ -7,11 +7,17 @@ describe("initialScreenFromSearch", () => {
     const screens = [
       "game", "gameSelect", "complete", "profile", "admin", "insights", "radio",
       "aftercare", "prompts", "safety", "store", "onboarding", "controlroom",
-      "missions", "legal", "social", "lovense", "daily", "capture", "cinematic", "couples",
+      "missions", "legal", "social", "lovense", "daily", "capture", "cinematic", "couples", "settings",
     ];
     for (const screen of screens) {
       expect(initialScreenFromSearch(`?screen=${screen}`)).toBe(screen);
     }
+  });
+
+  it("opens direct STOP links in the safety screen before any other deep link", () => {
+    expect(initialScreenFromSearch("?stop=1")).toBe("safety");
+    expect(initialScreenFromSearch("?stop=1&couple=ABCD2345XY")).toBe("safety");
+    expect(initialScreenFromSearch("?screen=safety&couple=ABCD2345XY")).toBe("safety");
   });
 
   it("opens private couple-room invitations directly in duo play", () => {
@@ -37,6 +43,16 @@ describe("initialScreenFromSearch", () => {
   });
 });
 
+
+describe("shouldShowColdIntro", () => {
+  it("shows the intro on ordinary cold opens and preserves direct safety access", () => {
+    expect(shouldShowColdIntro("")).toBe(true);
+    expect(shouldShowColdIntro("?screen=profile")).toBe(true);
+    expect(shouldShowColdIntro("?screen=safety")).toBe(false);
+    expect(shouldShowColdIntro("?stop=1")).toBe(false);
+    expect(shouldShowColdIntro("?screen=legal")).toBe(false);
+  });
+});
 
 describe("shouldShowTeaser", () => {
   it("shows the promotional landing only when explicitly requested", () => {

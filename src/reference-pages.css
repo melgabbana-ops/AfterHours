@@ -141,7 +141,7 @@
 .ah-session-screen .actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important}
 .ah-session-screen .actions button{min-height:46px!important;border:1px solid var(--ref-line)!important;border-radius:6px!important;background:#100c08!important;color:#e9d8bd!important;font-size:9px!important}
 .ah-session-screen .actions .gold{background:linear-gradient(180deg,#e5c48d,#b58249)!important;color:#170f08!important}
-.ah-session-screen .actions .stop{background:linear-gradient(180deg,#8d302b,#4d1715)!important;color:#fff0e9!important;border-color:#c66a5d!important}
+.ah-session-screen .actions .stop{background:linear-gradient(180deg,#756b5c,#211b14)!important;color:#fff0e9!important;border-color:#c9a16a!important}
 .ah-session-screen .consent{margin-top:16px!important;border-color:var(--ref-line)!important;background:#0d0a07!important}
 .aftercare-card{
  max-width:470px!important;margin:0 auto!important;padding:28px 17px 22px!important;
@@ -317,7 +317,7 @@ input,select,textarea{accent-color:#c79b5d!important}
 .ah-session-screen .game-top>span:last-child{margin-left:auto!important;font-size:9px!important;letter-spacing:.14em!important}
 .ah-session-screen .session-state{display:inline-flex!important;align-items:center!important;gap:7px!important;margin-left:0!important;padding:7px 10px!important;border:1px solid rgba(216,183,126,.28)!important;border-radius:30px!important;background:rgba(12,9,6,.86)!important;color:#d8c5a6!important;font-size:8px!important;letter-spacing:.1em!important;white-space:nowrap!important}
 .ah-session-screen .session-state:before{content:"";width:6px;height:6px;border-radius:50%;background:#bd9258;box-shadow:0 0 9px rgba(216,183,126,.55)}
-.ah-session-screen .session-state.live:before{background:#9fc18a;box-shadow:0 0 10px rgba(159,193,138,.75)}
+.ah-session-screen .session-state.live:before{background:#c9a16a;box-shadow:0 0 10px rgba(201,161,106,.75)}
 .ah-session-screen .task-card>div{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;margin-top:14px!important}
 .ah-session-screen .task-card button{min-height:48px!important;padding:10px 12px!important;text-align:left!important;font-size:10px!important;line-height:1.4!important}
 .ah-session-screen .task-card button:focus-visible,.ah-session-screen .actions button:focus-visible,.ah-session-screen .next:focus-visible{outline:2px solid #f0d6a4!important;outline-offset:3px!important}
@@ -473,7 +473,7 @@ html,body,#root,.app{background:#050505!important;color:#f4e7d2!important}
 .ah-session-screen .timer{border-color:#f0d6a4!important;box-shadow:0 0 0 5px rgba(216,183,126,.08),0 0 30px rgba(216,183,126,.24),inset 0 0 24px rgba(216,183,126,.1)!important}
 .ah-session-screen .timer strong{font-size:clamp(34px,9vw,44px)!important}
 .ah-session-screen .actions button{border-radius:50px!important}
-.ah-session-screen .actions .stop{border-radius:6px!important;background:linear-gradient(180deg,#8d302b,#4d1715)!important}
+.ah-session-screen .actions .stop{border-radius:6px!important;background:linear-gradient(180deg,#756b5c,#211b14)!important}
 
 /* 04 AFTERCARE · candlelit panel and the exact two-by-two choice rhythm */
 .aftercare-screen:before{
@@ -666,7 +666,7 @@ html,body,#root,.app{background:#050505!important;color:#f4e7d2!important}
 }
 .ah-session-screen .actions button.stop{
  grid-column:1/-1!important;min-height:48px!important;
- border:1px solid #a64a42!important;background:linear-gradient(180deg,#8d302b,#4d1715)!important;
+ border:1px solid #756b5c!important;background:linear-gradient(180deg,#756b5c,#211b14)!important;
  color:#fff0e9!important;letter-spacing:.12em!important;
 }
 .ah-session-screen .consent{
@@ -1248,3 +1248,57 @@ html,body,#root,.app{background:#050505!important;color:#f4e7d2!important}
  line-height:1.45!important;
  font-variant-numeric:tabular-nums;
 }
+
+.header-tools .settings-shortcut{display:inline-flex;align-items:center;justify-content:center;flex:none;width:38px;height:38px;border:1px solid rgba(201,161,106,.3);border-radius:50%;background:rgba(9,8,7,.82);color:#dfbd83;transition:border-color .2s ease,background .2s ease,color .2s ease}
+.header-tools .settings-shortcut:hover{border-color:#dfbd83;background:rgba(201,161,106,.12);color:#f3e9d8}
+.header-tools .settings-shortcut:focus-visible{outline:2px solid #f0d8ad;outline-offset:3px}
+@media(max-width:560px){.header-tools .settings-shortcut{width:34px;height:34px}}
+@media(prefers-reduced-motion:reduce){.header-tools .settings-shortcut{transition:none}}
+
+.language-label-short{display:none}
+@media(max-width:520px){.language-label-full{display:none}.language-label-short{display:inline}.language-toggle{min-width:58px;gap:2px;padding-inline:4px}.language-toggle button{padding-inline:3px!important}}
+@media(max-width:420px){header .brand-nav img{max-width:104px!important}.header-tools{gap:4px!important}}
+@media(max-width:360px){header .brand-nav img{max-width:80px!important}.header-tools{gap:2px!important}.header-tools .privacy-shortcut{display:none!important}.language-toggle{font-size:8px!important;min-height:44px;padding-inline:3px}.language-toggle button{padding-inline:2px!important}}
+
+/* Privacy mode masks private content while leaving navigation and safety controls clear. */
+.app.privacy-mode .profile-portrait,
+.app.privacy-mode .profile h2,
+.app.privacy-mode .profile p,
+.app.privacy-mode .media-vault .media-item img,
+.app.privacy-mode .media-vault .media-item video,
+.app.privacy-mode .media-vault .media-item audio,
+.app.privacy-mode .media-vault .media-item-copy strong,
+.app.privacy-mode .media-vault .media-item-copy small,
+.app.privacy-mode .media-vault .media-pending-preview img,
+.app.privacy-mode .media-vault .media-pending-preview video,
+.app.privacy-mode .media-vault .media-pending-preview audio,
+.app.privacy-mode .media-vault .media-live-preview,
+.app.privacy-mode .media-vault .assignment-captions strong,
+.app.privacy-mode .media-vault .assignment-captions p,
+.app.privacy-mode .media-vault .assignment-captions small,
+.app.privacy-mode .ah-private-journal .ah-journal-list strong,
+.app.privacy-mode .ah-private-journal .ah-journal-list small,
+.app.privacy-mode .ah-private-journal .ah-journal-editor input,
+.app.privacy-mode .ah-private-journal .ah-journal-editor textarea,
+.app.privacy-mode .aftercare-history-note-content,
+.app.privacy-mode .aftercare-private-note-fields input,
+.app.privacy-mode .aftercare-private-note-fields textarea,
+.app.privacy-mode .cw-saved-row strong,
+.app.privacy-mode .cw-saved-row small,
+.app.privacy-mode .cw-decrypted strong,
+.app.privacy-mode .cw-decrypted p,
+.app.privacy-mode .cw-invite-preview strong,
+.app.privacy-mode .cw-invite-preview p,
+.app.privacy-mode .cw-invite-preview li,
+.app.privacy-mode .cw-invite-preview small,
+.app.privacy-mode .cw-member-card strong,
+.app.privacy-mode .cw-member-card span,
+.app.privacy-mode .cw-member-card p,
+.app.privacy-mode .cw-member-card small,
+.app.privacy-mode .cw-ritual-card h3,
+.app.privacy-mode .cw-ritual-card p,
+.app.privacy-mode .admin-console .admin-audit-row,
+.app.privacy-mode .admin .auth-panel strong,
+.app.privacy-mode .settings-account-email{filter:blur(6px);user-select:none;transition:filter .16s ease}
+.app.privacy-mode input:focus,.app.privacy-mode textarea:focus{filter:none!important;user-select:text}
+@media(prefers-reduced-motion:reduce){.app.privacy-mode [class]{transition:none!important}}

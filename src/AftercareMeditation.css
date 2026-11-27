@@ -16,7 +16,7 @@
 .aftercare-meditation-actions button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 16px;border-radius:12px}
 .aftercare-meditation-actions button svg{width:17px;height:17px}
 .aftercare-meditation-actions .aftercare-meditation-skip{border:1px solid rgba(203,169,103,.38);background:#100e0b;color:#e8d7b8}
-.aftercare-meditation-actions .aftercare-meditation-end{border:1px solid #7a4a42;background:#21110f;color:#f0c3bb}
+.aftercare-meditation-actions .aftercare-meditation-end{border:1px solid #756b5c;background:#0d0a08;color:#f3e9d8}
 .aftercare-meditation-disclaimer{margin:16px 0 0;color:#a99e8e;font-size:.82rem;line-height:1.6}
 .aftercare-meditation-message{margin:12px 0 0;color:#e4c98f}
 .aftercare-meditation button:focus-visible{outline:2px solid #f0d28b;outline-offset:3px}
