@@ -114,7 +114,7 @@ export default function SafetyPlan({
         <span className={"safety-room-pill safety-room-pill--" + sessionStatus} role="status" aria-live="polite"><i aria-hidden="true"/>{statusLabel}</span>
       </div>
       <p className="safety-room-summary">{t("Neem samen even de drie punten door. Deze checklist is een herinnering, geen digitale toestemming of vervanging van een gesprek.", "Review these three points together. This checklist is a reminder, not digital consent or a replacement for talking.")}</p>
-      <div className="safety-readiness-meter" aria-label={t(readinessCount + " van 3 punten afgevinkt", readinessCount + " of 3 items checked")}>
+      <div className="safety-readiness-meter" role="progressbar" aria-label={t("Voortgang veiligheidscheck", "Safety check progress")} aria-valuemin={0} aria-valuemax={3} aria-valuenow={readinessCount} aria-valuetext={t(readinessCount + " van 3 punten afgevinkt", readinessCount + " of 3 items checked")}>
         <div><span>{t("VOORBEREIDING", "PREPAREDNESS")}</span><strong>{readinessCount}/3</strong></div>
         <span className="safety-readiness-track"><i style={{ width: (readinessCount / 3 * 100) + "%" }}/></span>
       </div>
