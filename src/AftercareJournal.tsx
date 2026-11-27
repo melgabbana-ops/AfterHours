@@ -138,6 +138,9 @@ export default function AftercareJournal({ ownerId, language, onClose }: { owner
     try {
       const canCommit = () => generation === lockGeneration.current && document.visibilityState === "visible";
       const saved = await savePrivateJournalEntry(key, { title, body }, activeId ?? undefined, journalStorage, undefined, canCommit);
+      // A background lock may happen after the encrypted write finishes. Do not
+      // decrypt the journal again once that operation has been invalidated.
+      if (!canCommit()) return;
       const loaded = await loadPrivateJournalEntries(key, journalStorage);
       if (!canCommit()) return;
       setEntries(loaded);
@@ -155,6 +158,8 @@ export default function AftercareJournal({ ownerId, language, onClose }: { owner
     if (!activeId || !key || !window.confirm(t("Deze journalnotitie definitief verwijderen?", "Permanently delete this journal entry?"))) return;
     const generation = lockGeneration.current;
     setBusy(true);
+    setError("");
+    setMessage("");
     try {
       const deleted = await deletePrivateJournalEntry(
         activeId,
@@ -170,6 +175,10 @@ export default function AftercareJournal({ ownerId, language, onClose }: { owner
       setEntries(current => current.filter(entry => entry.id !== activeId));
       startNew();
       setMessage(t("Notitie verwijderd.", "Entry deleted."));
+    } catch (reason) {
+      if (generation === lockGeneration.current) {
+        setError(reason instanceof Error ? reason.message : t("Verwijderen is niet gelukt.", "Could not delete the entry."));
+      }
     } finally {
       if (generation === lockGeneration.current) setBusy(false);
     }
@@ -214,6 +223,8 @@ export default function AftercareJournal({ ownerId, language, onClose }: { owner
       const backupText = await file.text();
       const canCommit = () => generation === lockGeneration.current && document.visibilityState === "visible";
       const imported = await importPrivateJournalBackup(key, backupText, backupPassphrase, journalStorage, canCommit);
+      // Do not read decrypted entries after a lifecycle lock invalidates the import.
+      if (!canCommit()) return;
       const loaded = await loadPrivateJournalEntries(key, journalStorage);
       if (!canCommit()) return;
       setEntries(loaded);
@@ -242,19 +253,19 @@ export default function AftercareJournal({ ownerId, language, onClose }: { owner
     {!key ? <form className="ah-journal-unlock" onSubmit={openVault}>
       <span className="eyebrow">{vaultExists ? t("KLUIS VERGRENDELD","VAULT LOCKED") : t("NIEUWE PRIVÉKLUIS","NEW PRIVATE VAULT")}</span>
       <label htmlFor="ah-journal-passphrase">{t("Wachtzin","Passphrase")}</label>
-      <input id="ah-journal-passphrase" type="password" value={passphrase} onChange={event=>setPassphrase(event.target.value)} minLength={PRIVATE_JOURNAL_MIN_PASSPHRASE} autoComplete="current-password" required/>
-      {!vaultExists && <><label htmlFor="ah-journal-confirm">{t("Herhaal wachtzin","Confirm passphrase")}</label><input id="ah-journal-confirm" type="password" value={confirmation} onChange={event=>setConfirmation(event.target.value)} minLength={PRIVATE_JOURNAL_MIN_PASSPHRASE} autoComplete="new-password" required/><small>{t("Gebruik minimaal 12 tekens. Een lange, unieke wachtzin werkt het best.", "Use at least 12 characters. A long, unique passphrase works best.")}</small></>}
+      <input id="ah-journal-passphrase" type="password" value={passphrase} onChange={event=>setPassphrase(event.target.value)} minLength={PRIVATE_JOURNAL_MIN_PASSPHRASE} autoComplete="current-password" required disabled={busy}/>
+      {!vaultExists && <><label htmlFor="ah-journal-confirm">{t("Herhaal wachtzin","Confirm passphrase")}</label><input id="ah-journal-confirm" type="password" value={confirmation} onChange={event=>setConfirmation(event.target.value)} minLength={PRIVATE_JOURNAL_MIN_PASSPHRASE} autoComplete="new-password" required disabled={busy}/><small>{t("Gebruik minimaal 12 tekens. Een lange, unieke wachtzin werkt het best.", "Use at least 12 characters. A long, unique passphrase works best.")}</small></>}
       <button className="ah-journal-primary" type="submit" disabled={busy||passphrase.length<PRIVATE_JOURNAL_MIN_PASSPHRASE||(!vaultExists&&confirmation.length<PRIVATE_JOURNAL_MIN_PASSPHRASE)}><LockOpen size={15}/>{busy?t("Even geduld…","Please wait…"):vaultExists?t("Kluis ontgrendelen","Unlock vault"):t("Privékluis aanmaken","Create private vault")}</button>
     </form> : <div className="ah-journal-workspace">
       <aside className="ah-journal-list">
-        <div className="ah-journal-list-head"><span className="eyebrow">{t("JOURNAAL","JOURNAL")} · {entries.length}</span><button type="button" onClick={startNew} aria-label={t("Nieuwe notitie","New entry")}><Plus size={16}/></button></div>
-        {entries.length===0?<p className="ah-journal-empty">{t("Je kluis is nog leeg. Begin wanneer je wilt.", "Your vault is empty. Begin whenever you like.")}</p>:entries.map(entry=><button type="button" key={entry.id} className={activeId===entry.id?"active":""} onClick={()=>openEntry(entry)}><strong>{entry.title}</strong><small>{new Date(entry.updatedAt).toLocaleDateString(language==="en"?"en-GB":"nl-NL")}</small></button>)}
+        <div className="ah-journal-list-head"><span className="eyebrow">{t("JOURNAAL","JOURNAL")} · {entries.length}</span><button type="button" onClick={startNew} aria-label={t("Nieuwe notitie","New entry")} disabled={busy}><Plus size={16}/></button></div>
+        {entries.length===0?<p className="ah-journal-empty">{t("Je kluis is nog leeg. Begin wanneer je wilt.", "Your vault is empty. Begin whenever you like.")}</p>:entries.map(entry=><button type="button" key={entry.id} className={activeId===entry.id?"active":""} onClick={()=>openEntry(entry)} disabled={busy}><strong>{entry.title}</strong><small>{new Date(entry.updatedAt).toLocaleDateString(language==="en"?"en-GB":"nl-NL")}</small></button>)}
       </aside>
       <div className="ah-journal-editor">
         <label htmlFor="ah-journal-title">{t("TITEL","TITLE")}</label>
-        <input id="ah-journal-title" value={title} maxLength={120} onChange={event=>setTitle(event.target.value)} placeholder={t("Een moment om te bewaren…","A moment to remember…")}/>
+        <input id="ah-journal-title" value={title} maxLength={120} onChange={event=>setTitle(event.target.value)} placeholder={t("Een moment om te bewaren…","A moment to remember…")} disabled={busy}/>
         <label htmlFor="ah-journal-body">{t("JOUW REFLECTIE","YOUR REFLECTION")}</label>
-        <textarea id="ah-journal-body" value={body} maxLength={PRIVATE_JOURNAL_ENTRY_LIMIT} rows={8} onChange={event=>setBody(event.target.value)} placeholder={t("Schrijf vrijuit. Je woorden worden versleuteld voordat ze worden opgeslagen.", "Write freely. Your words are encrypted before they are stored.")}/>
+        <textarea id="ah-journal-body" value={body} maxLength={PRIVATE_JOURNAL_ENTRY_LIMIT} rows={8} onChange={event=>setBody(event.target.value)} placeholder={t("Schrijf vrijuit. Je woorden worden versleuteld voordat ze worden opgeslagen.", "Write freely. Your words are encrypted before they are stored.")} disabled={busy}/>
         <small className="ah-journal-count">{body.length.toLocaleString(language==="en"?"en-GB":"nl-NL")} / {PRIVATE_JOURNAL_ENTRY_LIMIT}</small>
         <div className="ah-journal-actions"><button type="button" className="ah-journal-primary" onClick={()=>void save()} disabled={busy||(!title.trim()&&!body.trim())}><Save size={15}/>{t("Versleuteld opslaan","Save encrypted")}</button>{activeId&&<button type="button" className="ah-journal-delete" onClick={()=>void remove()} disabled={busy}><Trash2 size={15}/>{t("Verwijderen","Delete")}</button>}</div>
       </div>
@@ -263,7 +274,7 @@ export default function AftercareJournal({ ownerId, language, onClose }: { owner
         <p>{t("Maak een versleutelde kopie of voeg een back-up samen met dit dagboek. De wachtzin van het back-upbestand is nodig om het te openen.", "Create an encrypted copy or merge a backup into this journal. The backup file's passphrase is required to open it.")}</p>
         <button type="button" className="ah-journal-backup-export" onClick={()=>void exportBackup()} disabled={busy}><Save size={14}/>{t("Back-up exporteren","Export backup")}</button>
         <label htmlFor="ah-journal-backup-passphrase">{t("Wachtzin van back-up","Backup passphrase")}</label>
-        <input id="ah-journal-backup-passphrase" type="password" value={backupPassphrase} onChange={event=>setBackupPassphrase(event.target.value)} autoComplete="off"/>
+        <input id="ah-journal-backup-passphrase" type="password" value={backupPassphrase} onChange={event=>setBackupPassphrase(event.target.value)} autoComplete="off" disabled={busy}/>
         <label className="ah-journal-backup-import" htmlFor="ah-journal-backup-file">{t("Versleutelde back-up importeren","Import encrypted backup")}<input id="ah-journal-backup-file" type="file" accept=".ahjournal,application/json" onChange={event=>void importBackup(event)} disabled={busy||backupPassphrase.length===0}/></label>
       </div>
       <div className="ah-journal-lock-row"><span><LockKeyhole size={13}/>{t("Kluis ontgrendeld op dit apparaat","Vault unlocked on this device")}</span><button type="button" onClick={() => lock()}>{t("Vergrendelen","Lock vault")}</button></div>
