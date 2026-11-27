@@ -71,8 +71,10 @@ export function bindVaultAutoLock(
     timeout = setTimeout(() => lockIfSensitive("idle"), idleMs);
   };
 
-  const activityEvents = ["pointerdown", "keydown", "touchstart"] as const;
+  const activityEvents = ["pointerdown", "keydown", "touchstart", "wheel"] as const;
   documentTarget.addEventListener("visibilitychange", onVisibilityChange);
+  // Capture scrolls from nested containers too, including the private vault list.
+  documentTarget.addEventListener("scroll", resetIdleTimer, { passive: true, capture: true });
   windowTarget.addEventListener("pagehide", onPageHide);
   activityEvents.forEach((eventName) => {
     windowTarget.addEventListener(eventName, resetIdleTimer, { passive: true });
@@ -90,6 +92,7 @@ export function bindVaultAutoLock(
   return () => {
     clearIdleTimeout();
     documentTarget.removeEventListener("visibilitychange", onVisibilityChange);
+    documentTarget.removeEventListener("scroll", resetIdleTimer, true);
     windowTarget.removeEventListener("pagehide", onPageHide);
     activityEvents.forEach((eventName) => {
       windowTarget.removeEventListener(eventName, resetIdleTimer);
