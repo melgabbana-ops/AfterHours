@@ -94,6 +94,17 @@ describe("private media upload validation", () => {
     expect(() => validatePrivateMediaFile({ type: "image/jpeg", size: 1024 })).not.toThrow();
   });
 
+  it("accepts a file at the exact 20 MB limit", () => {
+    expect(() => validatePrivateMediaFile({ type: "image/jpeg", size: 20 * 1024 * 1024 })).not.toThrow();
+  });
+
+  it("localizes file validation errors", () => {
+    expect(() => validatePrivateMediaFile({ type: "application/pdf", size: 1024 }, "en"))
+      .toThrow("Choose an image, audio or video file.");
+    expect(() => validatePrivateMediaFile({ type: "image/jpeg", size: 20 * 1024 * 1024 + 1 }, "en"))
+      .toThrow("Files must be 20 MB or smaller.");
+  });
+
   it("accepts iPhone HEIC and HEIF photos and QuickTime MOV videos", () => {
     expect(() => validatePrivateMediaFile({ type: "image/heic", size: 1024 })).not.toThrow();
     expect(() => validatePrivateMediaFile({ type: "image/heif", size: 1024 })).not.toThrow();
@@ -143,13 +154,13 @@ describe("private media upload validation", () => {
   it("rejects empty and non-integer file sizes", () => {
     for (const size of [0, -1, 1.5, Number.NaN, Number.POSITIVE_INFINITY]) {
       expect(() => validatePrivateMediaFile({ type: "image/png", size }))
-        .toThrow("Bestanden moeten kleiner zijn dan 20 MB.");
+        .toThrow("Bestanden mogen maximaal 20 MB zijn.");
     }
   });
 
   it("rejects files larger than 20 MB", () => {
     expect(() => validatePrivateMediaFile({ type: "image/png", size: 20 * 1024 * 1024 + 1 }))
-      .toThrow("Bestanden moeten kleiner zijn dan 20 MB.");
+      .toThrow("Bestanden mogen maximaal 20 MB zijn.");
   });
 });
 
