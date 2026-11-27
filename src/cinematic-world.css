@@ -15,3 +15,12 @@ body::after{content:"";position:fixed;z-index:0;pointer-events:none;inset:0;back
 @keyframes ah-room-glow{from{opacity:.68}to{opacity:1}}
 @media(max-width:520px){body::before{background-position:left .45rem bottom 5.6rem,right .45rem bottom 5.8rem;background-size:32px 66px,28px 58px;opacity:.34}}
 @media(prefers-reduced-motion:reduce){body::before,body::after,.app main,.app>.aftercare-screen,.app>.completion-screen,.app>.safety-screen,.app>.ah-profile-screen,.app>.game-select-screen,.app>.insights,.app>.radio-room{animation:none!important;filter:none!important;transform:none!important}.app button,.app a,.app .gamecard,.app .tile,.app .experience-choice{transition:none!important}}
+
+/* Shared-device Duo flow: deliberate turn-taking and fresh consent states. */
+.couples-local-turn,.couples-local-consent{display:grid;gap:12px;padding:16px;border:1px solid rgba(196,155,82,.38);border-radius:10px;background:linear-gradient(145deg,#171512,#0b0a08)}
+.couples-local-turn label{display:grid;gap:8px;color:#d8bd87;font-size:11px;letter-spacing:.12em}
+.couples-local-turn textarea{width:100%;min-height:92px;padding:12px;border:1px solid #554630;border-radius:8px;background:#080706;color:#f2e6d2;font:inherit;font-size:14px;line-height:1.55;resize:vertical}
+.couples-local-turn textarea:focus{outline:2px solid #c49b52;outline-offset:2px}
+.couples-local-turn small{color:#a99e8d;font-size:11px;line-height:1.5}
+.couples-local-consent>p{margin:0;color:#e5dac8;font-size:13px;line-height:1.55}
+.couples-status.completed{color:#d9bd84;border-color:#80643b}
