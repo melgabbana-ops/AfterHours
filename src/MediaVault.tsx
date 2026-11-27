@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { flushSync } from "react-dom";
+import { bindMediaCaptureBackgroundGuard, isMediaCaptureAttemptCurrent } from "./mediaCaptureLifecycle";
 import {
   canApplyMediaOverlay,
   createPrivateMediaUrl,
@@ -71,6 +73,9 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
   const captureInterruptedRef = useRef(false);
   const captureFailedRef = useRef(false);
   const captureStartInFlightRef = useRef(false);
+  const captureGenerationRef = useRef(0);
+  const vaultVisibilityGenerationRef = useRef(0);
+  const vaultNeedsRefreshRef = useRef(false);
 
 
   useEffect(()=>{
@@ -123,21 +128,26 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
 
 
   const refresh = useCallback(async (isActive: () => boolean = () => mountedRef.current): Promise<boolean> => {
-    if (isActive()) {
+    const generation = vaultVisibilityGenerationRef.current;
+    const canUpdate = () => isActive()
+      && generation === vaultVisibilityGenerationRef.current
+      && document.visibilityState === "visible";
+    if (document.visibilityState !== "visible") return false;
+    if (canUpdate()) {
       setLoading(true);
       setMessage("");
     }
     try {
       const nextItems = await listPrivateMedia();
-      if (isActive()) setItems(nextItems);
+      if (canUpdate()) setItems(nextItems);
       return true;
     } catch (error) {
-      if (isActive()) {
+      if (canUpdate()) {
         setMessage(error instanceof Error ? error.message : t("Privébestanden konden niet worden geladen.", "Private files could not be loaded."));
       }
       return false;
     } finally {
-      if (isActive()) setLoading(false);
+      if (canUpdate()) setLoading(false);
     }
   }, [language]);
 
@@ -201,8 +211,72 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
     if(captureTimeoutRef.current!==undefined){window.clearTimeout(captureTimeoutRef.current);captureTimeoutRef.current=undefined;}
   };
 
+
+
+  const handleCaptureBackground = useCallback(() => {
+    const captureWasStarting = captureStartInFlightRef.current;
+    captureGenerationRef.current += 1;
+    vaultVisibilityGenerationRef.current += 1;
+    captureStartInFlightRef.current = false;
+
+    streamInterruptionCleanupRef.current?.();
+    streamInterruptionCleanupRef.current = null;
+    if (renderFrameRef.current !== null) {
+      window.cancelAnimationFrame(renderFrameRef.current);
+      renderFrameRef.current = null;
+    }
+    discardMediaCapture(recorderRef.current, [streamRef.current, compositionStreamRef.current]);
+    recorderRef.current = null;
+    streamRef.current = null;
+    compositionStreamRef.current = null;
+    chunksRef.current = [];
+    captureBytesRef.current = 0;
+    captureSizeExceededRef.current = false;
+    captureInterruptedRef.current = false;
+    captureFailedRef.current = false;
+    if (captureTimeoutRef.current !== undefined) {
+      window.clearTimeout(captureTimeoutRef.current);
+      captureTimeoutRef.current = undefined;
+    }
+    if (livePreviewRef.current) livePreviewRef.current.srcObject = null;
+    vaultNeedsRefreshRef.current = true;
+
+    // Hide local previews and private file metadata before the OS can snapshot the app.
+    flushSync(() => {
+      setLiveStream(null);
+      setIsRecording(false);
+      setIsPhotoCameraOpen(false);
+      setCaptureConsent(false);
+      setPendingCapture(null);
+      setPendingOriginalFile(null);
+      setPendingUrl("");
+      setSignedUrl("");
+      setItems([]);
+      setDeletingPath("");
+      setLoading(false);
+      if (captureWasStarting) setBusy(false);
+      setMessage(language === "nl"
+        ? "Privékluis afgeschermd toen de app naar de achtergrond ging. Camera en microfoon zijn gestopt; bestanden worden opnieuw geladen wanneer je terugkeert."
+        : "Private vault hidden when the app went into the background. Camera and microphone were stopped; files will reload when you return.");
+    });
+  }, [language]);
+
+  const handleCaptureForeground = useCallback(() => {
+    if (!vaultNeedsRefreshRef.current) return;
+    vaultNeedsRefreshRef.current = false;
+    void refresh();
+  }, [refresh]);
+
+  useEffect(() => bindMediaCaptureBackgroundGuard(
+    window,
+    document,
+    handleCaptureBackground,
+    handleCaptureForeground,
+  ), [handleCaptureBackground, handleCaptureForeground]);
+
   const stageSelectedFile=async(file?:File,overlayAlreadyApplied=false)=>{
     if(!file||!mountedRef.current)return;
+    const generation = vaultVisibilityGenerationRef.current;
     if(!captureConsent){
       setMessage(t("Bevestig eerst dat de betrokkenen akkoord zijn met deze media en privéopslag.","First confirm that the people involved agree to this media and private storage."));
       return;
@@ -212,7 +286,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
       validatePrivateMediaFile(file);
       const overlayApplied=canApplyMediaOverlay(file.type)&&!overlayAlreadyApplied;
       const previewFile=overlayApplied?await composeImageWithOverlay(file,frameStyleRef.current):file;
-      if(!mountedRef.current)return;
+      if(!mountedRef.current||generation!==vaultVisibilityGenerationRef.current||document.visibilityState!=="visible")return;
       validatePrivateMediaFile(previewFile);
       if(pendingUrl) URL.revokeObjectURL(pendingUrl);
       setPendingCapture(previewFile);
@@ -228,18 +302,19 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
           ?t("Voorbeeld klaar. Dit fotoformaat wordt ongewijzigd bewaard omdat de browser het niet betrouwbaar via canvas kan verwerken.","Preview ready. This photo format will be kept unchanged because the browser cannot reliably process it through canvas.")
           :t("Voorbeeld klaar. Kies daarna zelf voor privé opslaan. Bestaande video's worden niet opnieuw gerenderd.","Preview ready. Choose whether to save privately. Existing videos are not re-rendered."));
     }catch(error){
-      if(mountedRef.current)setMessage(error instanceof Error ? error.message : t("Dit bestand kan niet worden gebruikt.","This file cannot be used."));
+      if(mountedRef.current&&generation===vaultVisibilityGenerationRef.current&&document.visibilityState==="visible")setMessage(error instanceof Error ? error.message : t("Dit bestand kan niet worden gebruikt.","This file cannot be used."));
     }finally{if(mountedRef.current)setBusy(false)}
   };
 
   const updatePendingImageEdit=async(style:OverlayFrameStyle,edits:PhotoEditTransform,recordHistory=true):Promise<boolean>=>{
     const original=pendingOriginalFile;
     if(!original||!pendingCapture||busy||isSavingCapture)return false;
+    const generation = vaultVisibilityGenerationRef.current;
     setBusy(true);
     setMessage("");
     try{
       const updated=await composeImageWithEdits(original,style,edits);
-      if(!mountedRef.current)return false;
+      if(!mountedRef.current||generation!==vaultVisibilityGenerationRef.current||document.visibilityState!=="visible")return false;
       validatePrivateMediaFile(updated);
       setFrameStyle(style);
       setPhotoEdits(edits);
@@ -254,7 +329,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
       setMessage(t("Foto bewerkt. Controleer de preview voordat je privé opslaat.","Photo edited. Review the preview before saving it privately."));
       return true;
     }catch(error){
-      if(mountedRef.current)setMessage(error instanceof Error?error.message:t("De foto kon niet worden bijgewerkt.","Could not update the photo."));
+      if(mountedRef.current&&generation===vaultVisibilityGenerationRef.current&&document.visibilityState==="visible")setMessage(error instanceof Error?error.message:t("De foto kon niet worden bijgewerkt.","Could not update the photo."));
       return false;
     }finally{
       if(mountedRef.current)setBusy(false);
@@ -293,6 +368,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
       return;
     }
     if(captureStartInFlightRef.current)return;
+    const generation = ++captureGenerationRef.current;
     captureStartInFlightRef.current=true;
     setBusy(true);
     setMessage("");
@@ -303,7 +379,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
         : captureKind==="video"
           ? {video:{facingMode:{ideal:cameraFacing},width:{ideal:1280},height:{ideal:720}},audio:true}
           : {video:false,audio:true}),30000,t("De toestemmingsaanvraag voor camera of microfoon duurde te lang. Controleer je browserinstellingen en probeer opnieuw.","The camera or microphone permission request took too long. Check your browser settings and try again."));
-      if(!mountedRef.current){stopMediaStreams([stream]);return;}
+      if(!isMediaCaptureAttemptCurrent(generation,captureGenerationRef.current,document.visibilityState,mountedRef.current)){stopMediaStreams([stream]);return;}
       const missingTrack=missingCaptureTrack(stream,captureKind!=="voice",captureKind!=="photo");
       if(missingTrack){
         stopMediaStreams([stream]);
@@ -312,6 +388,14 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
           : t("De microfoon heeft geen actief audiosignaal geleverd. Controleer de microfoontoestemming en probeer opnieuw.","The microphone did not provide an active audio track. Check microphone permission and try again."));
       }
       streamRef.current=stream;
+      const stopIfCaptureStale = () => {
+        const current = isMediaCaptureAttemptCurrent(generation,captureGenerationRef.current,document.visibilityState,mountedRef.current)
+          && streamRef.current === stream;
+        if (current) return false;
+        if (streamRef.current === stream) stopCaptureTracks();
+        else stopMediaStreams([stream]);
+        return true;
+      };
       streamInterruptionCleanupRef.current=watchMediaStreamInterruption(stream,()=>{
         if(!mountedRef.current)return;
         captureInterruptedRef.current=true;
@@ -321,27 +405,27 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
         setCaptureConsent(false);
         setMessage(t("Camera of microfoon is onderbroken. Er is niets opgeslagen. Start opnieuw als je wilt.","Camera or microphone was interrupted. Nothing was saved. Start again if you want."));
       });
-      if(streamRef.current!==stream)return;
+      if(stopIfCaptureStale())return;
       setLiveStream(stream);
       chunksRef.current=[];
       captureBytesRef.current=0;
       captureSizeExceededRef.current=false;
       if(captureKind==="photo"){
         await new Promise<void>(resolve=>window.requestAnimationFrame(()=>window.requestAnimationFrame(()=>resolve())));
-        if(!mountedRef.current||streamRef.current!==stream)return;
+        if(stopIfCaptureStale())return;
         const video=livePreviewRef.current;
         const canvas=liveCanvasRef.current;
         if(!video||!canvas)throw new Error(t("De camera-preview is niet beschikbaar.","Camera preview is not available."));
         video.srcObject=stream;
         await video.play();
-        if(!mountedRef.current||streamRef.current!==stream)return;
+        if(stopIfCaptureStale())return;
         await waitForVideoReady(
           video,
           5000,
           t("De camera startte niet op tijd.","The camera did not start in time."),
           t("De camera kon geen beeld leveren.","The camera could not provide a video frame."),
         );
-        if(!mountedRef.current||streamRef.current!==stream)return;
+        if(stopIfCaptureStale())return;
         canvas.width=Math.min(1920,video.videoWidth);
         canvas.height=Math.max(1,Math.round(canvas.width/(video.videoWidth/video.videoHeight)));
         const ctx=canvas.getContext("2d");
@@ -359,20 +443,20 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
       let recorderStream=stream;
       if(captureKind==="video"){
         await new Promise<void>(resolve=>window.requestAnimationFrame(()=>window.requestAnimationFrame(()=>resolve())));
-        if(!mountedRef.current||streamRef.current!==stream)return;
+        if(stopIfCaptureStale())return;
         const video=livePreviewRef.current;
         const canvas=liveCanvasRef.current;
         if(!video||!canvas||typeof canvas.captureStream!=="function")throw new Error(t("Deze browser kan de AH-overlay niet in de video opnemen. Gebruik een recente browser of maak een foto.","This browser cannot composite the AH overlay into video. Try a recent browser or take a photo."));
         video.srcObject=stream;
         await video.play();
-        if(!mountedRef.current||streamRef.current!==stream)return;
+        if(stopIfCaptureStale())return;
         await waitForVideoReady(
           video,
           5000,
           t("De camera startte niet op tijd.","The camera did not start in time."),
           t("De camera kon geen beeld leveren.","The camera could not provide a video frame."),
         );
-        if(!mountedRef.current||streamRef.current!==stream)return;
+        if(stopIfCaptureStale())return;
         const ratio=video.videoWidth/video.videoHeight;
         canvas.width=Math.min(1920,video.videoWidth);
         canvas.height=Math.max(1,Math.round(canvas.width/ratio));
@@ -483,27 +567,32 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
         }
       },60_000);
     }catch(error){
+      if(generation!==captureGenerationRef.current)return;
       stopCaptureTracks();
       if(!mountedRef.current)return;
       setCaptureConsent(false);
       setMessage(error instanceof Error?t(error.message,"Recording could not start: "+error.message):t("Geen toegang tot camera of microfoon. Controleer de browsertoestemming.","Camera or microphone access was denied. Check browser permissions."));
     }finally{
-      captureStartInFlightRef.current=false;
-      if(mountedRef.current)setBusy(false);
+      if(generation===captureGenerationRef.current){
+        captureStartInFlightRef.current=false;
+        if(mountedRef.current)setBusy(false);
+      }
     }
   };
 
   const takePhoto=async()=>{
+    const generation = captureGenerationRef.current;
+    const stream = streamRef.current;
     const canvas=liveCanvasRef.current;
-    if(!canvas||!isPhotoCameraOpen){setMessage(t("De camera is niet actief.","Camera is not active."));return;}
+    if(!canvas||!isPhotoCameraOpen||!stream){setMessage(t("De camera is niet actief.","Camera is not active."));return;}
     try{
       const blob=await new Promise<Blob>((resolve,reject)=>canvas.toBlob(value=>value?resolve(value):reject(new Error(t("De foto kon niet worden gemaakt.","Could not capture the photo."))),"image/jpeg",.94));
-      if(!mountedRef.current)return;
+      if(!isMediaCaptureAttemptCurrent(generation,captureGenerationRef.current,document.visibilityState,mountedRef.current)||streamRef.current!==stream)return;
       if(blob.size>20*1024*1024)throw new Error(t("De foto is te groot om veilig op te slaan.","The photo is too large to store safely."));
       const file=new File([blob],`after-hours-photo-${Date.now()}.jpg`,{type:"image/jpeg"});
       stopCaptureTracks();
       await stageSelectedFile(file,true);
-    }catch(error){if(mountedRef.current)setMessage(error instanceof Error?error.message:t("De foto kon niet worden gemaakt.","Could not capture the photo."));}
+    }catch(error){if(mountedRef.current&&generation===captureGenerationRef.current&&document.visibilityState==="visible")setMessage(error instanceof Error?error.message:t("De foto kon niet worden gemaakt.","Could not capture the photo."));}
   };
 
   const recordingRemainingSeconds=Math.max(0,60-recordingSeconds);
@@ -544,15 +633,16 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
   };
 
   const openItem = async (item: PrivateMediaItem) => {
-    if(!mountedRef.current)return;
+    if(!mountedRef.current||document.visibilityState!=="visible")return;
+    const generation = vaultVisibilityGenerationRef.current;
     setBusy(true);
     setMessage("");
     setSignedUrl("");
     try {
       const url=await createPrivateMediaUrl(item.path);
-      if(mountedRef.current)setSignedUrl(url);
+      if(mountedRef.current&&generation===vaultVisibilityGenerationRef.current&&document.visibilityState==="visible")setSignedUrl(url);
     } catch (error) {
-      if(mountedRef.current)setMessage(error instanceof Error ? error.message : t("Het bestand kon niet worden geopend.", "The file could not be opened."));
+      if(mountedRef.current&&generation===vaultVisibilityGenerationRef.current&&document.visibilityState==="visible")setMessage(error instanceof Error ? error.message : t("Het bestand kon niet worden geopend.", "The file could not be opened."));
     } finally {
       if(mountedRef.current)setBusy(false);
     }
