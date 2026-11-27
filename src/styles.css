@@ -4887,3 +4887,20 @@ button,[role="button"],nav a{touch-action:manipulation}
 .media-photo-compare button{flex:0 1 auto}
 .media-photo-compare small{color:#d7bd86;font-size:.78rem}
 @media(max-width:520px){.media-photo-editor-presets>div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.media-photo-compare{align-items:stretch;flex-direction:column}.media-photo-compare button{width:100%}}
+
+
+/* Emergency STOP remains unmistakable in the app crash-recovery screen. */
+.gate-card .safety-stop-action{
+ width:100%;
+ min-height:54px;
+ margin:16px 0 12px;
+ border:1px solid #756b5c!important;
+ border-radius:10px;
+ background:linear-gradient(145deg,#211b14,#0d0a08)!important;
+ color:#f3e9d8!important;
+ box-shadow:none!important;
+ font-size:12px;
+ font-weight:800;
+ letter-spacing:.12em;
+}
+.gate-card .safety-stop-action:focus-visible{outline:2px solid #e3c46f;outline-offset:3px}

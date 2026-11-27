@@ -45,6 +45,7 @@ import{getCurrentUser,sendMagicLink,signInWithProvider,signInWithPassword,signUp
 import{playNotificationSound,primeNotificationAudio}from"./services/notificationSound";
 import{levelFromXp,rankFromXp,rankIndexFromXp,rankNames,rankThresholds}from"./progression";
 import{notificationEvents}from"./services/notifications";
+import { createEmergencyStoppedState } from "./emergencyStop";
 import{canStartSessionWithVerifiedState,getPendingStopTimestamp,getSessionSafetyAnnouncement,getTaskChoiceFeedback,isTaskPassed,PASS_TASK_SELECTION,shouldResumeSession,shouldResumeSessionBeforeHydration}from"./services/sessionSafety";
 import {getMaintenanceStatus,formatMaintenanceDate,type MaintenanceConfig} from "./maintenance";
 import { getGuidedExperienceBlockReason } from "./experienceAccess";
@@ -67,12 +68,29 @@ const CinematicWorld = React.lazy(() => import("./CinematicWorld"));
 const CouplesPlay = React.lazy(() => import("./CouplesPlay"));
 const SettingsScreen = React.lazy(() => import("./SettingsScreen"));
 
-class AppErrorBoundary extends React.Component<React.PropsWithChildren, {hasError:boolean}>{
- state={hasError:false};
+class AppErrorBoundary extends React.Component<React.PropsWithChildren, {hasError:boolean;stopApplied:boolean;stopSaveFailed:boolean}>{
+ state={hasError:false,stopApplied:false,stopSaveFailed:false};
  static getDerivedStateFromError(){return {hasError:true};}
  componentDidCatch(){try{localStorage.setItem("afterhours.last-ui-error",new Date().toISOString())}catch{}}
+ handleEmergencyStop=()=>{
+  const current=loadState();
+  const now=new Date().toISOString();
+  const stoppedState=createEmergencyStoppedState(current,now);
+  let saved=false;
+  try{
+   saveState(stoppedState);
+   const persisted=loadState();
+   saved=persisted.session.status==="stopped"&&persisted.consent.status==="revoked"&&persisted.consent.revokedAt===now;
+  }catch{}
+  clearTimer(current.profile.id);
+  this.setState({stopApplied:saved,stopSaveFailed:!saved});
+ };
  render(){
-  if(this.state.hasError)return <div className="gate"><div className="gate-card" role="alert"><img className="gate-logo" src={`${import.meta.env.BASE_URL}after-hours-brand-logo-transparent.svg`} alt="AFTER HOURS" /><h1>Veilige herstelmodus</h1><p>Er ging iets mis in de interface. Je lokale sessiestatus blijft behouden.</p><button onClick={()=>window.location.reload()}>Opnieuw laden</button></div></div>;
+  if(this.state.hasError){
+   const localState=loadState();
+   const alreadyStopped=localState.session.status==="stopped"&&localState.consent.status==="revoked";
+   return <div className="gate"><div className="gate-card" role="alert"><img className="gate-logo" src={`${import.meta.env.BASE_URL}after-hours-brand-logo-transparent.svg`} alt="AFTER HOURS" /><h1>Veilige herstelmodus</h1><p>Er ging iets mis in de interface. Je lokale sessiestatus blijft behouden.</p>{!alreadyStopped&&!this.state.stopApplied&&<button type="button" className="safety-stop-action" aria-label="STOP: sessie onmiddellijk stoppen" onClick={this.handleEmergencyStop}>STOP NU</button>}{(alreadyStopped||this.state.stopApplied)&&<p role="status">De sessie is lokaal gestopt en toestemming is ingetrokken. De serverintrekking wordt opnieuw gecontroleerd zodra de app herstelt.</p>}{this.state.stopSaveFailed&&<p role="alert">De lokale opslag kon STOP niet bevestigen. Houd de app open en controleer de opslaginstellingen.</p>}<button onClick={()=>window.location.reload()}>Opnieuw laden</button></div></div>;
+  }
   return this.props.children;
  }
 }
@@ -471,7 +489,7 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
  };
  const revokeConsentRemotely=(sessionId:string,revokedAt:string)=>{setSafetySyncMessage("");void revokeRemoteConsent(sessionId,revokedAt).then(error=>{if(error)setSafetySyncMessage(t("Lokaal gestopt, maar intrekken op de server is niet bevestigd. Blijf gestopt en controleer je verbinding voordat je opnieuw start. ","Stopped locally, but server revocation was not confirmed. Stay stopped and check your connection before starting again. ")+error)}).catch(()=>setSafetySyncMessage(t("Lokaal gestopt, maar intrekken op de server is niet bevestigd. Blijf gestopt en controleer je verbinding voordat je opnieuw start.","Stopped locally, but server revocation was not confirmed. Stay stopped and check your connection before starting again.")))};
  const persistStoppedState=(now:string,notice?:string)=>{
-  const stoppedState:AfterHoursState={...state,consent:{status:"revoked",confirmedAt:null,revokedAt:now},notifications:notice?[notificationEvents.safety(notice),...state.notifications].slice(0,20):state.notifications,session:{...state.session,status:"stopped",startedAt:null,updatedAt:now}};
+  const stoppedState=createEmergencyStoppedState(state,now,notice);
   let localSaveFailed=false;
   try{saveState(stoppedState)}catch{localSaveFailed=true}
   clearTimer(state.profile.id);
