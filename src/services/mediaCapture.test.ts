@@ -99,10 +99,24 @@ describe("media capture size guard", () => {
     expect(chunks).toHaveLength(1);
   });
 
-  it("rejects invalid byte counters rather than accepting an unbounded capture", () => {
+  it("rejects fractional, unsafe and already-over-limit byte counters", () => {
     const chunks: BlobPart[] = [];
-    expect(appendMediaCaptureChunk(chunks, Number.NaN, new Blob(["x"]), 10)).toBeNull();
-    expect(appendMediaCaptureChunk(chunks, 0, new Blob(["x"]), Number.POSITIVE_INFINITY)).toBeNull();
+    const chunk = new Blob(["x"]);
+    for (const currentBytes of [-1, 0.5, Number.NaN, Number.POSITIVE_INFINITY, Number.MAX_SAFE_INTEGER + 1, 11]) {
+      expect(appendMediaCaptureChunk(chunks, currentBytes, chunk, 10)).toBeNull();
+    }
+    expect(appendMediaCaptureChunk(chunks, 0.5, new Blob([]), 10)).toBeNull();
+    expect(chunks).toHaveLength(0);
+  });
+
+  it("rejects malformed chunk sizes and unsafe limits without retaining data", () => {
+    const chunks: BlobPart[] = [];
+    for (const size of [-1, 0.5, Number.NaN, Number.POSITIVE_INFINITY, Number.MAX_SAFE_INTEGER + 1]) {
+      expect(appendMediaCaptureChunk(chunks, 0, ({ size } as Blob), 10)).toBeNull();
+    }
+    for (const maxBytes of [-1, 0.5, Number.NaN, Number.POSITIVE_INFINITY, Number.MAX_SAFE_INTEGER + 1]) {
+      expect(appendMediaCaptureChunk(chunks, 0, new Blob(["x"]), maxBytes)).toBeNull();
+    }
     expect(chunks).toHaveLength(0);
   });
 });
@@ -290,12 +304,13 @@ describe("interrupted capture recovery", () => {
     expect(canRecoverInterruptedCapture(MAX_MEDIA_CAPTURE_BYTES)).toBe(true);
   });
 
-  it("rejects empty, oversized, negative, or non-finite captures", () => {
-    expect(canRecoverInterruptedCapture(0)).toBe(false);
-    expect(canRecoverInterruptedCapture(MAX_MEDIA_CAPTURE_BYTES + 1)).toBe(false);
-    expect(canRecoverInterruptedCapture(-1)).toBe(false);
-    expect(canRecoverInterruptedCapture(Number.NaN)).toBe(false);
-    expect(canRecoverInterruptedCapture(1, Number.POSITIVE_INFINITY)).toBe(false);
+  it("rejects empty, oversized, fractional, unsafe or non-finite captures", () => {
+    for (const size of [0, MAX_MEDIA_CAPTURE_BYTES + 1, -1, 0.5, Number.NaN, Number.POSITIVE_INFINITY, Number.MAX_SAFE_INTEGER + 1]) {
+      expect(canRecoverInterruptedCapture(size)).toBe(false);
+    }
+    for (const maxBytes of [-1, 0.5, Number.NaN, Number.POSITIVE_INFINITY, Number.MAX_SAFE_INTEGER + 1]) {
+      expect(canRecoverInterruptedCapture(1, maxBytes)).toBe(false);
+    }
   });
 });
 
