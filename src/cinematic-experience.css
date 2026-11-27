@@ -238,3 +238,45 @@
   display: block;
   opacity: 0.72;
 }
+
+/* Mobile-first touch and keyboard ergonomics */
+.cw-tabs{
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior-x:contain;
+  scroll-snap-type:x proximity;
+  scroll-padding-inline:14px;
+  touch-action:pan-x pan-y;
+}
+.cw-tabs button{
+  min-height:44px;
+  scroll-snap-align:start;
+  -webkit-tap-highlight-color:transparent;
+}
+.cw-checkin button,
+.cw-choice-panel button,
+.cw-run-actions button,
+.cw-card-actions button,
+.cw-engine-integrations button,
+.cw-saved-row button{
+  min-height:44px;
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+}
+.cw-checkin button:focus-visible,
+.cw-choice-panel button:focus-visible,
+.cw-controls button:focus-visible,
+.cw-engine-integrations button:focus-visible,
+.cw-account-gate button:focus-visible,
+.cw-consent-gate button:focus-visible{
+  outline:2px solid #e3c38c;
+  outline-offset:3px;
+}
+@media(max-width:600px){
+  .cw-tabs{margin-inline:-13px;padding-inline:13px 18px;scroll-padding-inline:13px}
+  .cw-run-actions{gap:9px}
+  .cw-run-actions>button{min-height:48px}
+  .cw-checkin button{min-height:48px}
+}
+@media(prefers-reduced-motion:reduce){
+  .cw-tabs{scroll-behavior:auto}
+}
