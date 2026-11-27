@@ -639,7 +639,7 @@ function App({maintenanceConfig}:{maintenanceConfig:MaintenanceConfig}){
 
  {screen==="radio"&&<RadioRoom language={language} onBack={()=>setScreen("home")}/>}
 
- {screen==="safety"&&<main className="safety-screen ah-editorial-screen"><SafetyPlan key={state.profile.id} profileId={state.profile.id} language={language} sessionStatus={state.session.status} onPause={()=>handleCheckIn("pause")} onResume={startRound} onStopNow={()=>handleCheckIn("stop")}/><button className="back" onClick={()=>setScreen("home")}>← {t("Terug","Back")}</button></main>}
+ 
 
  {screen==="store"&&<Monetization language={language} onBack={()=>setScreen("home")} onStartFree={()=>setScreen("home")}/> }
 
