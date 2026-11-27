@@ -76,6 +76,11 @@ function isPurpleFamily({ hue, saturation, lightness }) {
   return saturation > 0.28 && lightness > 0.08 && hue >= 250 && hue <= 330;
 }
 
+/** Stylesheets may use only neutral black/charcoal/white/warm-gray or champagne-gold hues. */
+function isOutsideApprovedPalette({ hue, saturation }) {
+  return saturation > 0.18 && !(hue >= 20 && hue <= 70);
+}
+
 for (const file of files) {
   const source = await readFile(file, "utf8");
   const withoutComments = source
@@ -92,14 +97,17 @@ for (const file of files) {
   for (const match of withoutComments.matchAll(/#(?:[0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})\b/gi)) {
     const color = hexToHsl(match[0]);
     if (color && isPurpleFamily(color)) failures.push(file + ": purple-family hex color " + match[0]);
+    if (sourceStyles.includes(file) && color && isOutsideApprovedPalette(color)) failures.push(file + ": color outside approved black/champagne palette " + match[0]);
   }
   for (const match of withoutComments.matchAll(/rgba?\(\s*([^)]*)\)/gi)) {
     const color = rgbFunctionToHsl(match[1]);
     if (color && isPurpleFamily(color)) failures.push(file + ": purple-family RGB color " + match[0]);
+    if (sourceStyles.includes(file) && color && isOutsideApprovedPalette(color)) failures.push(file + ": RGB color outside approved palette " + match[0]);
   }
   for (const match of withoutComments.matchAll(/hsla?\(\s*([^)]*)\)/gi)) {
     const color = hslFunctionToHsl(match[1]);
     if (color && isPurpleFamily(color)) failures.push(file + ": purple-family HSL color " + match[0]);
+    if (sourceStyles.includes(file) && color && isOutsideApprovedPalette(color)) failures.push(file + ": HSL color outside approved palette " + match[0]);
   }
 }
 
