@@ -2,6 +2,7 @@ import type { KeyboardEvent } from "react";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { bindVaultAutoLock } from "./vaultAutoLock";
 import { isExperienceStartAttemptCurrent } from "./experienceStartAttempt";
+import { isExperienceResumeAttemptCurrent } from "./experienceResumeAttempt";
 import { consumeInvitationTokenFromUrl } from "./invitationUrl";
 import {
   ArrowLeft, ArrowRight, BookOpen, CheckCircle2, Clapperboard, Copy,
@@ -174,6 +175,10 @@ export default function CinematicWorld({
   const startContextRef = useRef({ remoteProfileId, consentActive, canStartExperience });
   startContextRef.current = { remoteProfileId, consentActive, canStartExperience };
   const runMutationRef = useRef<Promise<unknown> | null>(null);
+  const pendingRunRef = useRef<{ runId: string; ownerId: string; currentStep: number } | null>(null);
+  const resumePendingRef = useRef(false);
+  const resumeStopRequestedRef = useRef(false);
+  const [resumePending, setResumePending] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [runConsent, setRunConsent] = useState(false);
@@ -411,7 +416,8 @@ export default function CinematicWorld({
     if (!consentActive) {
       // Invalidate a start that is still waiting for its server response.
       startAttemptRef.current += 1;
-      if (runStatus === "active" && activeRunId) void stopScene(true);
+      if (resumePendingRef.current) void stopScene(true);
+      else if (runStatus === "active" && activeRunId) void stopScene(true);
     }
   }, [consentActive, runStatus, activeRunId]);
 
@@ -544,6 +550,8 @@ export default function CinematicWorld({
     setError("");
     setMessage("");
     if (!requestStartAccess()) return;
+    const ownerId = remoteProfileId;
+    if (!ownerId) { onRequestConsent(); return; }
     const snapshot = run.scene_snapshot as { sceneKey?: unknown; title?: unknown; description?: unknown; steps?: unknown };
     if (typeof snapshot.title !== "string" || !Array.isArray(snapshot.steps)) {
       setError(t("Deze opgeslagen scène kan niet worden hervat.", "This saved scene cannot be resumed."));
@@ -554,9 +562,75 @@ export default function CinematicWorld({
       setError(t("Deze scène bevat geen hervatbare stappen.", "This scene has no resumable steps."));
       return;
     }
+
+    const attempt = { id: ++startAttemptRef.current, ownerId, runId: run.id };
+    pendingRunRef.current = { runId: run.id, ownerId, currentStep: run.current_step };
+    resumePendingRef.current = true;
+    resumeStopRequestedRef.current = false;
+    setResumePending(true);
     setBusy(true);
     try {
-      await resumeExperienceRun({ runId: run.id, expectedUserId: remoteProfileId!, currentStep: run.current_step });
+      await resumeExperienceRun({ runId: run.id, expectedUserId: ownerId, currentStep: run.current_step });
+
+      // A resume can finish after STOP, consent withdrawal, account switching or
+      // navigation. Never expose a scene whose original safety context is stale.
+      if (!isExperienceResumeAttemptCurrent(attempt, {
+        currentAttemptId: startAttemptRef.current,
+        currentOwnerId: startContextRef.current.remoteProfileId,
+        consentActive: startContextRef.current.consentActive,
+        canStartExperience: startContextRef.current.canStartExperience,
+        stopPending: stopPendingRef.current,
+        pendingRunId: pendingRunRef.current?.runId ?? null
+      })) {
+        // If STOP already owns this run, its in-flight atomic withdrawal is
+        // responsible for the server state. Otherwise cancel this late resume.
+        if (!resumeStopRequestedRef.current) {
+          stopPendingRef.current = true;
+          setStopPending(true);
+          let serverConfirmed = false;
+          try {
+            await withdrawExperienceConsent(run.id, ownerId);
+            serverConfirmed = true;
+          } catch {
+            try {
+              await updateExperienceRun({
+                runId: run.id,
+                expectedUserId: ownerId,
+                status: "stopped",
+                currentStep: run.current_step
+              });
+              serverConfirmed = true;
+            } catch {
+              try {
+                const latestRuns = await loadExperienceRuns(ownerId);
+                serverConfirmed = latestRuns.some((item) => item.id === run.id && item.status === "stopped");
+              } catch {
+                // Keep the client fail-closed when the server state cannot be verified.
+              }
+            }
+          }
+
+          if (serverConfirmed) {
+            stopPendingRef.current = false;
+            setStopPending(false);
+            try { await refreshData(ownerId); } catch { /* STOP must not depend on history refresh. */ }
+            setMessage(t(
+              "Hervatten is geannuleerd omdat account, toestemming, navigatie of STOP veranderde. De serverstop is bevestigd.",
+              "Resume was cancelled because account, consent, navigation or STOP changed. The server stop is confirmed."
+            ));
+          } else {
+            setError(t(
+              "Hervatten is geannuleerd, maar de server kon de stop niet bevestigen. Blijf gestopt en meld je opnieuw aan bij het oorspronkelijke account om de status te controleren.",
+              "Resume was cancelled, but the server could not confirm the stop. Stay stopped and sign back in to the original account to verify its state."
+            ));
+          }
+        }
+        return;
+      }
+
+      pendingRunRef.current = null;
+      resumePendingRef.current = false;
+      setResumePending(false);
       setActiveScene({
         key: typeof snapshot.sceneKey === "string" ? snapshot.sceneKey : run.scene_key,
         title: snapshot.title,
@@ -579,15 +653,22 @@ export default function CinematicWorld({
       onSafetyResume();
       setMessage(t("De scène is hervat na een nieuwe consentbevestiging.", "The scene resumed after fresh consent confirmation."));
     } catch (cause) {
-      if (cause instanceof ExperienceRunResumeRollbackError) {
-        setError(t(
-          "De scène blijft gepauzeerd, maar het intrekken van de tijdelijk vernieuwde toestemming kon niet worden bevestigd. Start niet opnieuw; controleer je verbinding en gebruik STOP indien nodig.",
-          "The scene remains paused, but revoking the temporarily renewed consent could not be confirmed. Do not restart; check your connection and use STOP if needed."
-        ));
-      } else {
-        setError(cause instanceof Error ? cause.message : t("Hervatten is niet gelukt.", "Could not resume the scene."));
+      if (!resumeStopRequestedRef.current) {
+        if (cause instanceof ExperienceRunResumeRollbackError) {
+          setError(t(
+            "De scène blijft gepauzeerd, maar het intrekken van de tijdelijk vernieuwde toestemming kon niet worden bevestigd. Start niet opnieuw; controleer je verbinding en gebruik STOP indien nodig.",
+            "The scene remains paused, but revoking the temporarily renewed consent could not be confirmed. Do not restart; check your connection and use STOP if needed."
+          ));
+        } else {
+          setError(cause instanceof Error ? cause.message : t("Hervatten is niet gelukt.", "Could not resume the scene."));
+        }
       }
     } finally {
+      if (pendingRunRef.current?.runId === run.id && pendingRunRef.current.ownerId === ownerId) {
+        pendingRunRef.current = null;
+      }
+      resumePendingRef.current = false;
+      setResumePending(false);
       setBusy(false);
     }
   }
@@ -640,9 +721,11 @@ export default function CinematicWorld({
     setStopPending(true);
     setError("");
 
-    const runId = activeRunId;
-    const userId = remoteProfileId;
-    const currentStep = stepIndex;
+    const pendingRun = pendingRunRef.current;
+    if (resumePendingRef.current && pendingRun) resumeStopRequestedRef.current = true;
+    const runId = activeRunId ?? pendingRun?.runId ?? null;
+    const userId = pendingRun?.ownerId ?? remoteProfileId;
+    const currentStep = activeRunId ? stepIndex : pendingRun?.currentStep ?? stepIndex;
     let serverConfirmed = !runId || !userId;
 
     // STOP is local and immediate. Dispatch the atomic withdrawal RPC without
@@ -703,11 +786,18 @@ export default function CinematicWorld({
         setMessage(t("De scène is gestopt. Er wordt niets automatisch hervat.", "The scene has stopped. Nothing will resume automatically."));
       }
     } finally {
+      if (pendingRun && pendingRunRef.current?.runId === pendingRun.runId) pendingRunRef.current = null;
       stopPendingRef.current = false;
       // If the server could not confirm STOP, keep new runs blocked until the
       // user reloads and rechecks the authoritative server state.
       setStopPending(!serverConfirmed);
     }
+  }
+
+  async function stopRecoverableRun(run: ExperienceRun) {
+    if (!remoteProfileId || run.user_id !== remoteProfileId || stopPendingRef.current) return;
+    pendingRunRef.current = { runId: run.id, ownerId: remoteProfileId, currentStep: run.current_step };
+    await stopScene();
   }
 
   async function completeScene(finalInteractionLog = interactionLog) {
@@ -804,9 +894,10 @@ export default function CinematicWorld({
   }
 
   async function handleBack() {
-    // Leaving while a start request is pending must cancel its eventual UI commit.
+    // Leaving while a start or resume request is pending must cancel its eventual UI commit.
     startAttemptRef.current += 1;
-    if (runStatus === "active") await pauseScene();
+    if (resumePendingRef.current) await stopScene(true);
+    else if (runStatus === "active") await pauseScene();
     setVaultPassphrase("");
     setVaultPlain(null);
     if (audioContext.current) {
@@ -1381,9 +1472,18 @@ export default function CinematicWorld({
 
           {recoverableRun && !activeRunId && (
             <div className="cw-resume-card">
-              <div><span className="cw-kicker">{t("OPENSTAANDE ERVARING", "UNFINISHED EXPERIENCE")}</span><h3>{String(recoverableRun.scene_snapshot.title ?? recoverableRun.scene_key)}</h3><p>{t("Laatst opgeslagen bij fase", "Last saved at step")} {recoverableRun.current_step + 1} / {recoverableRun.total_steps}. {t("Er wordt niets automatisch hervat.", "Nothing resumes automatically.")}</p></div>
-              <button type="button" className="cw-primary" onClick={() => { setResumePrepared(true); setSelectedSceneKey(null); setRunConsent(false); setStopSignal(""); setMessage(t("Bevestig opnieuw consent en je stopsignaal voordat je hervat.", "Confirm consent and your stop signal again before resuming.")); }} disabled={busy || stopPending}>{t("Voorbereiden", "Prepare")}</button>
-              {resumePrepared && <div className="cw-run-gate"><label><input type="checkbox" checked={runConsent} onChange={(event) => setRunConsent(event.target.checked)} />{t("Ik stem nu opnieuw vrijwillig in met deze specifieke scène.", "I freely consent again to this specific scene.")}</label><input value={stopSignal} onChange={(event) => setStopSignal(event.target.value)} placeholder={t("Afgesproken stopsignaal", "Agreed stop signal")} aria-label={t("Afgesproken stopsignaal", "Agreed stop signal")} autoComplete="off" maxLength={32} /><button type="button" className="cw-primary" disabled={!runConsent || stopSignal.trim().length < 2 || busy || stopPending || !canStartExperience || !consentActive} onClick={() => void resumeScene(recoverableRun)}>{t("Hervat met nieuwe consent", "Resume with fresh consent")}</button></div>}
+              <div>
+                <span className="cw-kicker">{t("OPENSTAANDE ERVARING", "UNFINISHED EXPERIENCE")}</span>
+                <h3>{String(recoverableRun.scene_snapshot.title ?? recoverableRun.scene_key)}</h3>
+                <p>{t("Laatst opgeslagen bij fase", "Last saved at step")} {recoverableRun.current_step + 1} / {recoverableRun.total_steps}. {t("Er wordt niets automatisch hervat.", "Nothing resumes automatically.")}</p>
+                {recoverableRun.status === "active" && <p role="alert">{t("Deze ervaring stond nog actief toen de app werd verlaten. Hervat niet automatisch; stop deze run eerst om veilig verder te gaan.", "This experience was still active when the app was left. It will not resume automatically; stop this run before continuing safely.")}</p>}
+              </div>
+              <div className="cw-card-actions">
+                {recoverableRun.status === "paused" && <button type="button" className="cw-primary" onClick={() => { setResumePrepared(true); setSelectedSceneKey(null); setRunConsent(false); setStopSignal(""); setMessage(t("Bevestig opnieuw consent en je stopsignaal voordat je hervat.", "Confirm consent and your stop signal again before resuming.")); }} disabled={busy || stopPending}>{t("Voorbereiden", "Prepare")}</button>}
+                <button type="button" className="cw-danger" onClick={() => void stopRecoverableRun(recoverableRun)} disabled={stopPending} aria-label={t("Openstaande ervaring onmiddellijk stoppen", "Stop unfinished experience immediately")}><Square size={14} /> STOP</button>
+              </div>
+              {resumePrepared && recoverableRun.status === "paused" && <div className="cw-run-gate"><label><input type="checkbox" checked={runConsent} onChange={(event) => setRunConsent(event.target.checked)} />{t("Ik stem nu opnieuw vrijwillig in met deze specifieke scène.", "I freely consent again to this specific scene.")}</label><input value={stopSignal} onChange={(event) => setStopSignal(event.target.value)} placeholder={t("Afgesproken stopsignaal", "Agreed stop signal")} aria-label={t("Afgesproken stopsignaal", "Agreed stop signal")} autoComplete="off" maxLength={32} /><button type="button" className="cw-primary" disabled={!runConsent || stopSignal.trim().length < 2 || busy || stopPending || !canStartExperience || !consentActive} onClick={() => void resumeScene(recoverableRun)}>{t("Hervat met nieuwe consent", "Resume with fresh consent")}</button></div>}
+              {resumePending && <p className="cw-inline-message" role="status" aria-live="polite">{t("Hervatten wordt veilig bevestigd. STOP blijft beschikbaar.", "Resume is being verified safely. STOP remains available.")}</p>}
             </div>
           )}
 
