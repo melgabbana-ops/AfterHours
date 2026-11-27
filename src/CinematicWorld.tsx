@@ -3,6 +3,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { bindVaultAutoLock } from "./vaultAutoLock";
 import { isExperienceStartAttemptCurrent } from "./experienceStartAttempt";
 import { isExperienceResumeAttemptCurrent } from "./experienceResumeAttempt";
+import { validateDirectorSceneDraft } from "./directorSceneDraft";
 import { consumeInvitationTokenFromUrl } from "./invitationUrl";
 import {
   ArrowLeft, ArrowRight, BookOpen, CheckCircle2, Clapperboard, Copy,
@@ -911,17 +912,31 @@ export default function CinematicWorld({
 
   async function saveDirectorScene() {
     setError("");
-    const steps = sceneSteps.split("\n").map((step) => step.trim()).filter(Boolean).slice(0, 40);
-    if (!sceneTitle.trim() || !steps.length) {
-      setMessage(t("Geef je scène een naam en voeg minimaal één fase toe.", "Name your scene and add at least one phase."));
+    const validation = validateDirectorSceneDraft({
+      title: sceneTitle,
+      description: sceneDescription,
+      stepsText: sceneSteps
+    });
+    if (!validation.ok) {
+      const messages = {
+        "title-required": ["Geef je scène een naam.", "Give your scene a title."],
+        "title-too-long": ["De scenenaam mag maximaal 80 tekens bevatten.", "The scene title can contain up to 80 characters."],
+        "description-too-long": ["De sfeer en intentie mogen maximaal 500 tekens bevatten.", "The atmosphere and intention can contain up to 500 characters."],
+        "steps-text-too-long": ["De scènefases bevatten te veel tekst. Houd het totaal onder 5.000 tekens.", "The scene steps contain too much text. Keep the total under 5,000 characters."],
+        "steps-required": ["Voeg minimaal één scènefase toe.", "Add at least one scene step."],
+        "too-many-steps": ["Een scène mag maximaal 40 niet-lege fases bevatten. Er is niets opgeslagen.", "A scene can contain at most 40 non-empty steps. Nothing was saved."]
+      } as const;
+      const [nl, en] = messages[validation.reason];
+      setMessage(t(nl, en));
       return;
     }
+    const { title, description, steps } = validation.value;
     setBusy(true);
     try {
       const key = editingSceneKey ?? ("scene:" + crypto.randomUUID());
       await persist("director", key, {
-        title: sceneTitle.trim(),
-        description: sceneDescription.trim(),
+        title,
+        description,
         steps,
         language,
         updatedAt: new Date().toISOString()
@@ -1549,7 +1564,10 @@ export default function CinematicWorld({
           <div className="cw-form-panel">
             <label>{t("Naam van de scène", "Scene title")}<input value={sceneTitle} onChange={(event) => setSceneTitle(event.target.value)} maxLength={80} placeholder={t("Bijvoorbeeld: The Golden Hour", "For example: The Golden Hour")} /></label>
             <label>{t("Sfeer en intentie", "Atmosphere and intention")}<textarea value={sceneDescription} onChange={(event) => setSceneDescription(event.target.value)} rows={3} maxLength={500} /></label>
-            <label>{t("Scènefases, één per regel (max. 40)", "Scene steps, one per line (max. 40)")}<textarea value={sceneSteps} onChange={(event) => setSceneSteps(event.target.value)} rows={7} maxLength={5000} /></label>
+            <label>{t("Scènefases, één per regel (max. 40)", "Scene steps, one per line (max. 40)")}<textarea id="director-scene-steps" aria-describedby="director-scene-step-count" value={sceneSteps} onChange={(event) => setSceneSteps(event.target.value)} rows={7} maxLength={5000} /></label>
+            <small id="director-scene-step-count" className="cw-step-count" data-over-limit={sceneSteps.split(/\r\n?|\n/).map((step) => step.trim()).filter(Boolean).length > 40}>
+              {sceneSteps.split(/\r\n?|\n/).map((step) => step.trim()).filter(Boolean).length} / 40 {t("fases ingevuld", "steps entered")}
+            </small>
             <div className="cw-card-actions"><button type="button" className="cw-primary" onClick={() => void saveDirectorScene()} disabled={busy || !remoteProfileId}><Save size={15} />{editingSceneKey ? t("Wijzigingen opslaan", "Save changes") : t("Scène opslaan", "Save scene")}</button><button type="button" onClick={() => { setEditingSceneKey(null); setSceneTitle(""); setSceneDescription(""); setSceneSteps(""); }}>{t("Nieuwe scène", "New scene")}</button></div>
           </div>
           <div className="cw-saved-list"><h3>{t("Jouw scènes", "Your scenes")} <span>{sceneCount}</span></h3>{scenes.filter((scene) => scene.custom).length ? scenes.filter((scene) => scene.custom).map((scene) => <div className="cw-saved-row" key={scene.key}><div><strong>{scene.title}</strong><small>{scene.steps.length} {t("fases · direct speelbaar", "steps · ready to run")}</small></div><button type="button" onClick={() => editScene(scene)}>{t("Bewerken", "Edit")}</button><button type="button" onClick={() => setTab("experience")}>{t("Start", "Run")}</button></div>) : <p>{t("Je hebt nog geen eigen scènes. Maak hierboven je eerste ontwerp.", "You have no custom scenes yet. Create your first design above.")}</p>}</div>

@@ -325,3 +325,8 @@
 .cw-world .cw-checkin button.green{border-color:rgba(207,174,121,.55);color:#e5d8c4}
 .cw-world .cw-checkin button.yellow{border-color:rgba(207,174,121,.55);color:#e5d8c4}
 .cw-world .cw-checkin button.red{border-color:rgba(117,107,92,.65);color:#c9a16a}
+
+
+/* Director's Room: make the 40-step limit visible without silently truncating a draft. */
+.cw-step-count{margin-top:-6px;color:#a99b86;font-size:9px;line-height:1.5}
+.cw-step-count[data-over-limit="true"]{color:#e5c58e;font-weight:600}
