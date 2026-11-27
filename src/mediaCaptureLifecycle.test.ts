@@ -82,5 +82,7 @@ describe("media capture visibility lifecycle", () => {
     expect(mediaVaultSource).toContain("captureGenerationRef.current += 1");
     expect(mediaVaultSource).toContain("setItems([])");
     expect(mediaVaultSource).toContain("isMediaCaptureAttemptCurrent");
+    expect(mediaVaultSource).toContain("createMediaPreviewUrlRegistry");
+    expect(mediaVaultSource.match(/previewUrlRegistryRef\.current\?\.revokeAll\(\)/g)).toHaveLength(2);
   });
 });

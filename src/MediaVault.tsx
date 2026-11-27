@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
+import { createMediaPreviewUrlRegistry } from "./mediaPreviewUrls";
 import { bindMediaCaptureBackgroundGuard, isMediaCaptureAttemptCurrent } from "./mediaCaptureLifecycle";
 import {
   canApplyMediaOverlay,
@@ -76,6 +77,8 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
   const captureGenerationRef = useRef(0);
   const vaultVisibilityGenerationRef = useRef(0);
   const vaultNeedsRefreshRef = useRef(false);
+  const previewUrlRegistryRef = useRef<ReturnType<typeof createMediaPreviewUrlRegistry> | null>(null);
+  if (!previewUrlRegistryRef.current) previewUrlRegistryRef.current = createMediaPreviewUrlRegistry();
 
 
   useEffect(()=>{
@@ -95,6 +98,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
     mountedRef.current=true;
     return ()=>{
       mountedRef.current=false;
+      previewUrlRegistryRef.current?.revokeAll();
       if(captureTimeoutRef.current!==undefined) window.clearTimeout(captureTimeoutRef.current);
       streamInterruptionCleanupRef.current?.();
       streamInterruptionCleanupRef.current=null;
@@ -115,15 +119,11 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
     };
   },[]);
   useEffect(()=>{
-    const currentUrl=pendingUrl;
-    return ()=>{if(currentUrl)URL.revokeObjectURL(currentUrl);};
-  },[pendingUrl]);
-  useEffect(()=>{
     if(!pendingOriginalFile){setOriginalPreviewUrl("");setShowOriginalPhoto(false);return;}
-    const url=URL.createObjectURL(pendingOriginalFile);
+    const url=previewUrlRegistryRef.current!.create(pendingOriginalFile);
     setOriginalPreviewUrl(url);
     setShowOriginalPhoto(false);
-    return ()=>URL.revokeObjectURL(url);
+    return ()=>{previewUrlRegistryRef.current?.revoke(url);};
   },[pendingOriginalFile]);
 
 
@@ -239,6 +239,8 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
       captureTimeoutRef.current = undefined;
     }
     if (livePreviewRef.current) livePreviewRef.current.srcObject = null;
+    // Revoke every private preview synchronously before the browser can snapshot the app.
+    previewUrlRegistryRef.current?.revokeAll();
     vaultNeedsRefreshRef.current = true;
 
     // Hide local previews and private file metadata before the OS can snapshot the app.
@@ -250,6 +252,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
       setPendingCapture(null);
       setPendingOriginalFile(null);
       setPendingUrl("");
+      setOriginalPreviewUrl("");
       setSignedUrl("");
       setItems([]);
       setDeletingPath("");
@@ -288,14 +291,14 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
       const previewFile=overlayApplied?await composeImageWithOverlay(file,frameStyleRef.current):file;
       if(!mountedRef.current||generation!==vaultVisibilityGenerationRef.current||document.visibilityState!=="visible")return;
       validatePrivateMediaFile(previewFile, language);
-      if(pendingUrl) URL.revokeObjectURL(pendingUrl);
+      if(pendingUrl) previewUrlRegistryRef.current?.revoke(pendingUrl);
       setPendingCapture(previewFile);
       setPendingOriginalFile(overlayApplied?file:null);
       setPhotoEdits(defaultPhotoEditTransform);
       const initialHistory:PhotoEditHistoryEntry[] = overlayApplied?[{style:frameStyleRef.current,edits:defaultPhotoEditTransform}]:[];
       setPhotoHistory(initialHistory);
       setPhotoHistoryIndex(initialHistory.length-1);
-      setPendingUrl(URL.createObjectURL(previewFile));
+      setPendingUrl(previewUrlRegistryRef.current!.create(previewFile));
       setMessage(overlayApplied
         ?t("AH-overlay toegepast. Controleer de foto en kies daarna zelf voor privé opslaan.","AH overlay applied. Review the photo, then choose whether to save it privately.")
         :file.type.startsWith("image/")&&!overlayAlreadyApplied
@@ -324,8 +327,8 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
         setPhotoHistoryIndex(next.index);
       }
       setPendingCapture(updated);
-      if(pendingUrl) URL.revokeObjectURL(pendingUrl);
-      setPendingUrl(URL.createObjectURL(updated));
+      if(pendingUrl) previewUrlRegistryRef.current?.revoke(pendingUrl);
+      setPendingUrl(previewUrlRegistryRef.current!.create(updated));
       setMessage(t("Foto bewerkt. Controleer de preview voordat je privé opslaat.","Photo edited. Review the preview before saving it privately."));
       return true;
     }catch(error){
@@ -437,7 +440,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
         render();
         setIsPhotoCameraOpen(true);
         setPendingCapture(null);
-        if(pendingUrl){URL.revokeObjectURL(pendingUrl);setPendingUrl("");}
+        if(pendingUrl){previewUrlRegistryRef.current?.revoke(pendingUrl);setPendingUrl("");}
         return;
       }
       let recorderStream=stream;
@@ -525,8 +528,8 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
             setPendingCapture(partialFile);
             setPendingOriginalFile(null);
             // Release any previous local preview URL before replacing it.
-            if(pendingUrl)URL.revokeObjectURL(pendingUrl);
-            setPendingUrl(URL.createObjectURL(interruptedBlob));
+            if(pendingUrl)previewUrlRegistryRef.current?.revoke(pendingUrl);
+            setPendingUrl(previewUrlRegistryRef.current!.create(interruptedBlob));
             setMessage(t("Opname onderbroken. Er is een lokaal gedeeltelijk voorbeeld hersteld. Controleer het bestand en bevestig opnieuw toestemming voordat je het privé opslaat.","Recording interrupted. A local partial preview was recovered. Review it and reconfirm consent before saving it privately."));
           }else{
             setMessage(t("Camera of microfoon is onderbroken. Er was geen bruikbaar gedeeltelijk voorbeeld. Er is niets opgeslagen.","Camera or microphone was interrupted. No usable partial preview was available. Nothing was saved."));
@@ -549,17 +552,17 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
         if(blob.size>MAX_MEDIA_CAPTURE_BYTES){setCaptureConsent(false);setMessage(t("De opname is groter dan 20 MB en is niet opgeslagen. Maak een kortere opname.","The recording exceeded 20 MB and was not saved. Make a shorter recording."));return;}
         const extension=type.includes("mp4")?".mp4":type.includes("ogg")?".ogg":".webm";
         const file=new File([blob],`after-hours-${captureKind}-${Date.now()}${extension}`,{type});
-        if(pendingUrl)URL.revokeObjectURL(pendingUrl);
+        if(pendingUrl)previewUrlRegistryRef.current?.revoke(pendingUrl);
         setPendingCapture(file);
         setPendingOriginalFile(null);
-        setPendingUrl(URL.createObjectURL(blob));
+        setPendingUrl(previewUrlRegistryRef.current!.create(blob));
         setMessage(t("Voorbeeld klaar. Controleer de opname en sla alleen op als je dat nog steeds wilt.","Preview ready. Review the recording and save it only if you still want to."));
       };
       recorder.start(1000);
       setIsRecording(true);
       setPendingCapture(null);
       setPendingOriginalFile(null);
-      if(pendingUrl){URL.revokeObjectURL(pendingUrl);setPendingUrl("");}
+      if(pendingUrl){previewUrlRegistryRef.current?.revoke(pendingUrl);setPendingUrl("");}
       captureTimeoutRef.current=window.setTimeout(()=>{
         if(!mountedRef.current)return;
         if(stopMediaRecorder(recorder)){
@@ -615,7 +618,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
       if(!saved||!mountedRef.current)return;
       setPendingCapture(null);
       setPendingOriginalFile(null);
-      if(pendingUrl){URL.revokeObjectURL(pendingUrl);setPendingUrl("");}
+      if(pendingUrl){previewUrlRegistryRef.current?.revoke(pendingUrl);setPendingUrl("");}
       setCaptureConsent(false);
     }finally{
       saveInProgressRef.current=false;
@@ -627,7 +630,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
     if(saveInProgressRef.current)return;
     setPendingCapture(null);
     setPendingOriginalFile(null);
-    if(pendingUrl){URL.revokeObjectURL(pendingUrl);setPendingUrl("");}
+    if(pendingUrl){previewUrlRegistryRef.current?.revoke(pendingUrl);setPendingUrl("");}
     setCaptureConsent(false);
     setMessage(t("Media weggegooid. Er is niets geüpload.","Media discarded. Nothing was uploaded."));
   };
