@@ -1,7 +1,7 @@
 import React from "react";
 
 const INTRO_VIDEO = "https://gcdn.picsart.com/editing-temp/a18ef45a-9ae8-4ce4-93b4-68e40401defc.mp4";
-import { ArrowUpRight, LockKeyhole, Sparkles, ChevronRight, Gamepad2, Layers3, MoonStar, Target, UsersRound, ShoppingBag, Volume2, VolumeX } from "lucide-react";
+import { ArrowUpRight, LockKeyhole, Sparkles, ChevronRight, Gamepad2, Layers3, MoonStar, Target, UsersRound, ShoppingBag, Volume2, VolumeX, ShieldCheck } from "lucide-react";
 import { getTeaserVideoMotionSettings, subscribeToReducedMotionPreference, TEASER_REDUCED_MOTION_QUERY } from "./teaserMotion";
 
 export default function Teaser() {
@@ -57,6 +57,7 @@ export default function Teaser() {
   return <main className="teaser-screen moodboard-landing" style={{"--ah-cinematic-background": `url("${import.meta.env.BASE_URL}visuals/reference-home.svg")`} as React.CSSProperties}>
     <div className="teaser-noise" aria-hidden="true"/>
     <div className="teaser-top"><img className="teaser-logo" src={`${import.meta.env.BASE_URL}after-hours-brand-logo-transparent.svg`} alt="AFTER HOURS" /><div className="teaser-top-actions"><span className="teaser-private">18+ · {t("PRIVÉWERELD","PRIVATE EXPERIENCE")}</span><button className="language-toggle teaser-language-toggle" type="button" aria-label={t("Taal wijzigen","Change language")} onClick={() => setLanguage(language === "nl" ? "en" : "nl")}><span className={language === "nl" ? "language-active" : ""}>NL</span><span className="language-divider">/</span><span className={language === "en" ? "language-active" : ""}>EN</span></button></div></div>
+    <a className="teaser-safety-link" href="./?stop=1"><ShieldCheck size={14}/><span>{t("DIRECTE TOEGANG · VEILIGHEID / STOP","DIRECT ACCESS · SAFETY / STOP")}</span></a>
     <section className="teaser-film teaser-film-motion" aria-label={t("AFTER HOURS-intro","AFTER HOURS intro")}>
       <div className="teaser-atmosphere" aria-hidden="true"><span/><span/><span/><i/><i/></div>
       {introVideoUnavailable ? <div className="teaser-film-fallback" role="img" aria-label={t("Cinematische AFTER HOURS-achtergrond","Cinematic AFTER HOURS background")}/> : <video ref={introVideoRef} className="teaser-film-video" src={INTRO_VIDEO} autoPlay={videoMotion.autoPlay} muted={introMuted} loop={videoMotion.loop} controls={videoMotion.controls} playsInline preload={videoMotion.preload} poster={`${import.meta.env.BASE_URL}visuals/reference-home.svg`} aria-label={prefersReducedMotion ? t("AFTER HOURS-introvideo. Automatisch afspelen is uitgeschakeld vanwege de voorkeur voor minder beweging. Gebruik de videobediening om zelf af te spelen.","AFTER HOURS intro video. Autoplay is disabled because reduced motion is enabled. Use the video controls to play it when you choose.") : t("AFTER HOURS officiële introvideo","AFTER HOURS official intro video")} onLoadedData={() => setIntroVideoReady(true)} onError={() => setIntroVideoUnavailable(true)}/>}
