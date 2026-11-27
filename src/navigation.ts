@@ -20,5 +20,10 @@ export function shouldShowColdIntro(search: string): boolean {
 }
 
 export function shouldShowTeaser(search: string): boolean {
-  return new URLSearchParams(search).get("teaser") === "1";
+  const params = new URLSearchParams(search);
+  const protectedRoute = params.has("stop")
+    || params.has("couple")
+    || params.get("screen") === "safety"
+    || params.get("screen") === "legal";
+  return params.get("teaser") === "1" && !protectedRoute;
 }
