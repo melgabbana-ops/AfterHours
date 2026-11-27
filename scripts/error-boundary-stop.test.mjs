@@ -10,6 +10,10 @@ const handlerStart = boundary.indexOf("handleEmergencyStop=");
 const handlerEnd = boundary.indexOf("\n render()", handlerStart);
 const handler = boundary.slice(handlerStart, handlerEnd);
 
+const authGateStart = source.indexOf("if(!authReady)return");
+const authGateEnd = source.indexOf("if(showColdIntro)", authGateStart);
+const authGate = source.slice(authGateStart, authGateEnd);
+
 describe("crash-recovery emergency STOP", () => {
   it("keeps a direct STOP control in the error-boundary fallback", () => {
     expect(boundaryStart).toBeGreaterThanOrEqual(0);
@@ -38,4 +42,15 @@ describe("crash-recovery emergency STOP", () => {
     expect(styles).toContain(".gate-card .safety-stop-action");
     expect(styles).toContain(".gate-card .safety-stop-action:focus-visible");
   });
+  it("keeps local STOP and safety-plan access available while authentication is restoring", () => {
+    expect(authGateStart).toBeGreaterThanOrEqual(0);
+    expect(authGateEnd).toBeGreaterThan(authGateStart);
+    expect(authGate).toContain('className="safety-stop-action"');
+    expect(authGate).toContain('onClick={()=>handleCheckIn("stop")}');
+    expect(authGate).toContain('state.session.status==="active"||state.session.status==="paused"');
+    expect(authGate).toContain('onClick={()=>setScreen("safety")}');
+    expect(authGate).toContain('aria-live="assertive"');
+    expect(styles).toContain(".gate-card .gate-safety-link:focus-visible");
+  });
+
 });

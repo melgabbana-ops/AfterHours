@@ -4904,3 +4904,18 @@ button,[role="button"],nav a{touch-action:manipulation}
  letter-spacing:.12em;
 }
 .gate-card .safety-stop-action:focus-visible{outline:2px solid #e3c46f;outline-offset:3px}
+
+/* Keep the safety-plan route available while authentication is being restored. */
+.gate-card .gate-safety-link{
+ width:100%;
+ min-height:46px;
+ margin-top:4px;
+ border:1px solid var(--ah-hairline)!important;
+ border-radius:10px;
+ background:transparent!important;
+ color:var(--ah-champagne-light)!important;
+ box-shadow:none!important;
+ font-size:11px;
+ letter-spacing:.06em;
+}
+.gate-card .gate-safety-link:focus-visible{outline:2px solid #e3c46f;outline-offset:3px}
