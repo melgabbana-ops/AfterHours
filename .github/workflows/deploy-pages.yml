@@ -50,6 +50,7 @@ jobs:
       - name: Build production app
         run: npm run build
       - name: Configure GitHub Pages
+        if: github.event_name != 'pull_request'
         uses: actions/configure-pages@v6
         with:
           enablement: true
