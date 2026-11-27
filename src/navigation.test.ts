@@ -48,7 +48,7 @@ describe("shouldShowTeaser", () => {
     for (const search of [
       "?enter=1", "?screen=radio", "?screen=profile", "?screen=safety",
       "?screen=aftercare", "?couple=ABCD2345XY", "?maintenance=1",
-      "?stop=1", "?safeword=1", "?pause=1",
+      "?stop=1", "?safeword=1", "?pause=1", "?screen=consent",
     ]) {
       expect(shouldShowTeaser(search)).toBe(false);
     }
