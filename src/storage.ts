@@ -132,5 +132,14 @@ export function loadTimer(profileId:string,round:number,initialSeconds:number):n
  }catch{return initialSeconds}
 }
 
-export function saveTimer(profileId:string,round:number,seconds:number,running=true):boolean{try{localStorage.setItem(timerKey(profileId),JSON.stringify({profileId,round,seconds,savedAt:Date.now(),running}));return true}catch{return false}}
+export function saveTimer(profileId:string,round:number,seconds:number,running=true):boolean{
+ if(typeof profileId!=="string"||!profileId.trim()||!Number.isInteger(round)||round<0||round>=3||!Number.isInteger(seconds)||seconds<0||typeof running!=="boolean")return false;
+ try{
+  const snapshot:TimerSnapshot={profileId,round,seconds,savedAt:Date.now(),running};
+  const serialized=JSON.stringify(snapshot);
+  const key=timerKey(profileId);
+  localStorage.setItem(key,serialized);
+  return localStorage.getItem(key)===serialized;
+ }catch{return false}
+}
 export function clearTimer(profileId:string):boolean{try{localStorage.removeItem(timerKey(profileId));return true}catch{return false}}
