@@ -27,6 +27,7 @@ export function shouldShowTeaser(search: string, hasActiveSafetyState = false): 
   if (SAFETY_ENTRY_PARAMS.some((key) => params.has(key))) return false;
   if (params.has("couple")) return false;
   const screen = params.get("screen");
+  if (screen === "consent" || screen === "stop") return false;
   if (screen && DEEP_LINK_SCREENS.includes(screen as Screen)) return false;
   return true;
 }
