@@ -70,14 +70,14 @@ export async function loadRemoteState(preferredSessionId?:string):Promise<AfterH
 
  const legacyLocalSession=!preferredSessionId||preferredSessionId==="local-session";
  let sessionQuery=legacyLocalSession
-  ?supabase.from("sessions").select("*").eq("profile_id",user.id).order("updated_at",{ascending:false}).order("id",{ascending:false}).limit(1).maybeSingle()
-  :supabase.from("sessions").select("*").eq("profile_id",user.id).eq("id",preferredSessionId).maybeSingle();
+  ?supabase.from("sessions").select("*").eq("profile_id",expectedUserId).order("updated_at",{ascending:false}).order("id",{ascending:false}).limit(1).maybeSingle()
+  :supabase.from("sessions").select("*").eq("profile_id",expectedUserId).eq("id",preferredSessionId).maybeSingle();
  let{data:session,error:sessionError}=await sessionQuery;
  if(sessionError)throw new Error("Sessie kon niet worden geladen: "+sessionError.message);
  // A device-local session ID may not exist on this account. Recover the latest
  // server-owned session before deciding that no remote session is available.
  if(!session&&!legacyLocalSession){
-  const fallback=await supabase.from("sessions").select("*").eq("profile_id",user.id).order("updated_at",{ascending:false}).order("id",{ascending:false}).limit(1).maybeSingle();
+  const fallback=await supabase.from("sessions").select("*").eq("profile_id",expectedUserId).order("updated_at",{ascending:false}).order("id",{ascending:false}).limit(1).maybeSingle();
   if(fallback.error)throw new Error("Herstel van de laatste sessie is mislukt: "+fallback.error.message);
   session=fallback.data;
  }
@@ -94,7 +94,7 @@ export async function loadRemoteState(preferredSessionId?:string):Promise<AfterH
   ?await supabase.from("consent_records").select("status,confirmed_at,revoked_at").eq("session_id",effectiveSession.id).order("created_at",{ascending:false}).order("id",{ascending:false}).limit(1).maybeSingle()
   :{data:null,error:null};
  if(consentError)throw new Error("Toestemmingsstatus kon niet worden geladen: "+consentError.message);
- const{data:history,error:historyError}=await supabase.from("session_history").select("id,completed_at,xp_earned,rounds").eq("profile_id",user.id).order("completed_at",{ascending:false}).limit(12);
+ const{data:history,error:historyError}=await supabase.from("session_history").select("id,completed_at,xp_earned,rounds").eq("profile_id",expectedUserId).order("completed_at",{ascending:false}).limit(12);
  if(historyError)throw new Error("Sessiegeschiedenis kon niet worden geladen: "+historyError.message);
 
  return{
@@ -182,7 +182,7 @@ async function syncRemoteStateNow(state:AfterHoursState,expectedUserId:string):P
  let sessionId=isUuid(state.session.id)?state.session.id:null;
  let remoteSessionExists=false;
  if(sessionId){
-  const{data:owned,error:ownershipError}=await supabase.from("sessions").select("id").eq("id",sessionId).eq("profile_id",user.id).maybeSingle();
+  const{data:owned,error:ownershipError}=await supabase.from("sessions").select("id").eq("id",sessionId).eq("profile_id",expectedUserId).maybeSingle();
   if(ownershipError)return "Sessie-eigenaarschap kon niet worden gecontroleerd. Je sessie is niet gewijzigd. "+ownershipError.message;
   remoteSessionExists=Boolean(owned);
  }
