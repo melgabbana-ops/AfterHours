@@ -1,5 +1,5 @@
 /* AFTER HOURS · Screen-by-screen reference build
-   Visual direction: absolute black, champagne gold, bronze and warm candlelight.
+   Visual direction: absolute black, champagne gold, bronze and warm champagne gold.
    No purple tones are used anywhere in the interface. */
 :root{
  --ref-black:#050505;
@@ -475,7 +475,7 @@ html,body,#root,.app{background:#050505!important;color:#f4e7d2!important}
 .ah-session-screen .actions button{border-radius:50px!important}
 .ah-session-screen .actions .stop{border-radius:6px!important;background:linear-gradient(180deg,#756b5c,#211b14)!important}
 
-/* 04 AFTERCARE · candlelit panel and the exact two-by-two choice rhythm */
+/* 04 AFTERCARE · warm gold panel and the exact two-by-two choice rhythm */
 .aftercare-screen:before{
  background-image:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.86)),url("https://gcdn.picsart.com/pipeline-output/e8f4402a-7e90-4143-8149-9bec98ab3241.png"),url("/AfterHours/visuals/reference-aftercare.svg")!important;
  background-position:center 24%!important;background-size:cover!important;
@@ -498,7 +498,7 @@ html,body,#root,.app{background:#050505!important;color:#f4e7d2!important}
 .completion-stats{grid-template-columns:repeat(3,minmax(0,1fr))!important}
 .completion-stats>div{border-radius:4px!important}
 
-/* 06 TAROT · framed card, candlelit editorial scene */
+/* 06 TAROT · framed card, gold editorial scene */
 .insights:not(.insights-astro):before{
  background-image:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.9)),url("https://gcdn.picsart.com/pipeline-output/fad8c8e3-1edc-4ec5-96ea-40a5486e4128.png")!important;
  background-position:center 25%!important;background-size:cover!important;
@@ -691,7 +691,7 @@ html,body,#root,.app{background:#050505!important;color:#f4e7d2!important}
  .ah-session-screen .actions{gap:6px!important}
 }
 
-/* AFTERCARE · approved candlelit reference composition */
+/* AFTERCARE · approved gold reference composition */
 .aftercare-screen{
  padding:0 18px 112px!important;
 }
@@ -1125,7 +1125,7 @@ html,body,#root,.app{background:#050505!important;color:#f4e7d2!important}
  min-height:220px!important;padding:13px!important;display:flex!important;flex-direction:column!important;
  align-items:flex-start!important;justify-content:flex-end!important;gap:7px!important;text-align:left!important;
  border:1px solid rgba(218,180,119,.55)!important;border-radius:7px!important;
- background-image:linear-gradient(180deg,rgba(4,3,2,.06),rgba(4,3,2,.3) 36%,rgba(4,3,2,.96) 100%),url("/AfterHours/visuals/ah-grand-candlelit-chamber.svg")!important;
+ background-image:linear-gradient(180deg,rgba(4,3,2,.06),rgba(4,3,2,.3) 36%,rgba(4,3,2,.96) 100%),url("/AfterHours/visuals/ah-cinematic-hero.svg")!important;
  background-size:cover!important;background-position:center!important;
  box-shadow:0 15px 34px rgba(0,0,0,.38)!important;
 }
