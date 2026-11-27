@@ -393,16 +393,34 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
       </>}
     </section>}
     {status !== "lobby" && <section className="couples-round">
-      <div className="couples-round-top"><span className="eyebrow">{t("RONDE", "ROUND")} {round+1} / {prompts.length}</span><span className={"couples-status "+status}>{status==="active"?t("ACTIEF","ACTIVE"):status==="paused"?t("GEPAUZEERD","PAUSED"):t("GESTOPT","STOPPED")}</span></div>
+      <div className="couples-round-top"><span className="eyebrow">{t("RONDE", "ROUND")} {round+1} / {prompts.length}</span><span className={"couples-status "+status}>{status==="active"?t("ACTIEF","ACTIVE"):status==="paused"?t("GEPAUZEERD","PAUSED"):status==="completed"?t("AFGEROND","COMPLETED"):t("GESTOPT","STOPPED")}</span></div>
       <div className="couples-progress"><span style={{width:((round+1)/prompts.length*100)+"%"}}/></div>
       <h3>{t("Samen afstemmen", "Check in together")}</h3>
       <div className="couples-question"><small>{t("PRAAT SAMEN", "TALK TOGETHER")}</small><strong>{language==="nl"?prompts[round].nl:prompts[round].en}</strong></div>
+      {mode === "local" && status === "active" && <div className="couples-local-turn">
+        <label>{t("ANTWOORD VAN SPELER " + localTurn, "PLAYER " + localTurn + " ANSWER")}<textarea value={answerDraft} onChange={event => setAnswerDraft(event.target.value)} maxLength={1000} rows={3} placeholder={t("Schrijf hier je antwoord. Dit blijft alleen in deze sessie op dit apparaat.", "Write your answer here. It stays only in this session on this device.")}/></label>
+        <button type="button" className="couples-primary" onClick={submitLocalAnswer} disabled={!answerDraft.trim()}>{localTurn === 1 ? t("Opslaan en wisselen naar speler 2", "Save and pass to Player 2") : t("Opslaan en volgende vraag", "Save and continue")}</button>
+        <small>{t(localAnswers.filter(item => item.round === round).length + " van 2 antwoorden voor deze vraag opgeslagen.", localAnswers.filter(item => item.round === round).length + " of 2 answers saved for this prompt.")}</small>
+      </div>}
+      {mode === "local" && status === "paused" && <div className="couples-local-consent">
+        <p>{t("Hervatten vraagt om nieuwe toestemming van beide spelers.", "Resuming requires fresh consent from both players.")}</p>
+        <label className="couples-consent"><input type="checkbox" checked={myConsent} onChange={event => setMyConsent(event.target.checked)}/><span>{t("Speler 1 stemt opnieuw in.", "Player 1 consents again.")}</span></label>
+        <label className="couples-consent"><input type="checkbox" checked={localPartnerConsent} onChange={event => setLocalPartnerConsent(event.target.checked)}/><span>{t("Speler 2 stemt opnieuw in.", "Player 2 consents again.")}</span></label>
+        <button type="button" className="couples-primary" disabled={!ready} onClick={() => void publish(round, "active")}>{t("Hervat met nieuwe toestemming", "Resume with fresh consent")}</button>
+      </div>}
       <div className="couples-round-actions">
-        <button type="button" onClick={()=>void publish(Math.max(0,round-1),"active")} disabled={round===0||status!=="active"}>{t("Vorige", "Previous")}</button>
-        <button type="button" onClick={()=>void publish(round,status==="paused"?"active":"paused")} disabled={status==="stopped"||(status==="paused"&&mode==="remote"&&!canResumeRemotePlay({connected,serverAuthorized:false,participantCount:participants.length,partnerPresent,ownConsent:myConsent,partnerConsent:partnerConsented}))}><Pause size={15}/>{status==="paused"?t("Hervat","Resume"):t("Pauze","Pause")}</button>
-        <button type="button" className="couples-primary" onClick={()=>void publish(Math.min(prompts.length-1,round+1),"active")} disabled={round===prompts.length-1||status!=="active"}>{t("Volgende", "Next")}</button>
+        {mode === "remote" && <>
+          <button type="button" onClick={()=>void publish(Math.max(0,round-1),"active")} disabled={round===0||status!=="active"}>{t("Vorige", "Previous")}</button>
+          <button type="button" onClick={()=>void publish(round,status==="paused"?"active":"paused")} disabled={status==="stopped"||(status==="paused"&&!canResumeRemotePlay({connected,serverAuthorized:false,participantCount:participants.length,partnerPresent,ownConsent:myConsent,partnerConsent:partnerConsented}))}><Pause size={15}/>{status==="paused"?t("Hervat","Resume"):t("Pauze", "Pause")}</button>
+          <button type="button" className="couples-primary" onClick={()=>void publish(Math.min(prompts.length-1,round+1),"active")} disabled={round===prompts.length-1||status!=="active"}>{t("Volgende", "Next")}</button>
+        </>}
+        {mode === "local" && status === "active" && <button type="button" onClick={() => { setMyConsent(false); setLocalPartnerConsent(false); void publish(round, "paused"); }}><Pause size={15}/>{t("Pauze", "Pause")}</button>}
       </div>
-      <button type="button" className="couples-stop" onClick={()=>void stop()}><ShieldCheck size={16}/>{t("Stop de ervaring", "Stop experience")}</button>{status === "stopped" && <button type="button" className="couples-primary" onClick={() => void publish(0, "lobby")}>{t("Terug naar de lobby", "Return to lobby")}</button>}
+      {(status === "active" || status === "paused") && <button type="button" className="couples-stop" onClick={stop}><ShieldCheck size={16}/>{t("Stop de ervaring", "Stop experience")}</button>}
+      {(status === "stopped" || status === "completed") && <>
+        {status === "completed" && <p>{t(localAnswers.length + " antwoorden zijn alleen tijdelijk op dit apparaat bewaard.", localAnswers.length + " answers were kept only temporarily on this device.")}</p>}
+        <button type="button" className="couples-primary" onClick={returnToLobby}>{t("Terug naar de lobby", "Return to lobby")}</button>
+      </>}
     </section>}
     <aside className="couples-safety"><ShieldCheck size={18}/><p>{t("Consent kan altijd worden ingetrokken. Pauze en stop hebben direct voorrang. De kamercode is geen vervanging voor privacy of persoonlijke afspraken.", "Consent can always be withdrawn. Pause and stop always take priority. A room code is not a substitute for privacy or personal boundaries.")}</p></aside>
     {message && <p className="couples-message" role="status">{message}</p>}
