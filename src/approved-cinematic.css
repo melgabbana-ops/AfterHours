@@ -1878,7 +1878,7 @@ body{color:var(--ah-ivory)!important}
 
 
 /* AFTER HOURS page-specific visual art mapping.
-   The approved candlelit chamber remains the shared atmosphere. Each destination
+   The approved architectural gold artwork remains the shared atmosphere. Each destination
    now uses its own existing black-and-gold artwork instead of repeating the room. */
 .game-select-screen:before,.ah-session-screen:before{
  background-image:linear-gradient(180deg,rgba(0,0,0,.28),rgba(0,0,0,.9)),url("/AfterHours/visuals/ah-experience-photo.svg")!important;
