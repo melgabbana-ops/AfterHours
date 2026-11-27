@@ -16,6 +16,7 @@ describe("initialScreenFromSearch", () => {
 
   it("opens private couple-room invitations directly in duo play", () => {
     expect(initialScreenFromSearch("?couple=ABCD2345XY")).toBe("couples");
+    expect(initialScreenFromSearch("?stop=1")).toBe("safety");
   });
 
   it("falls back safely for missing or unknown screens", () => {
