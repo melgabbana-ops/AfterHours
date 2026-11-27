@@ -50,6 +50,36 @@ export function validatePrivateMediaPath(path: string, userId: string): boolean 
     );
 }
 
+interface PrivateMediaStorageEntry {
+  name?: string | null;
+  id?: string | null;
+  metadata?: { size?: unknown; mimetype?: unknown } | null;
+  created_at?: string | null;
+}
+
+/** Convert untrusted Storage list metadata into a safe, owner-scoped vault item. */
+export function toPrivateMediaItem(
+  userId: string,
+  folderName: string,
+  item: PrivateMediaStorageEntry,
+): PrivateMediaItem | null {
+  if (!item.name || !item.id) return null;
+  const path = `${userId}/${folderName}/${item.name}`;
+  if (!validatePrivateMediaPath(path, userId)) return null;
+
+  const size = Number(item.metadata?.size ?? 0);
+  if (!Number.isFinite(size) || size < 0) return null;
+
+  const createdAt = typeof item.created_at === "string" && Number.isFinite(Date.parse(item.created_at))
+    ? item.created_at
+    : null;
+  const contentType = typeof item.metadata?.mimetype === "string" && item.metadata.mimetype.trim()
+    ? item.metadata.mimetype.trim()
+    : null;
+
+  return { name: item.name, path, size, createdAt, contentType };
+}
+
 export function normalizePrivateMediaMimeType(type: string): string {
   return type.toLowerCase().split(";")[0].trim();
 }
@@ -115,14 +145,8 @@ export async function listPrivateMedia(): Promise<PrivateMediaItem[]> {
         });
         if (error) throw error;
         for (const item of data ?? []) {
-          if (!item.name || !item.id) continue;
-          items.push({
-            name: item.name,
-            path: `${prefix}/${item.name}`,
-            size: Number(item.metadata?.size ?? 0),
-            createdAt: item.created_at ?? null,
-            contentType: typeof item.metadata?.mimetype === "string" ? item.metadata.mimetype : null,
-          });
+          const safeItem = toPrivateMediaItem(userId, folder.name, item);
+          if (safeItem) items.push(safeItem);
         }
         if ((data?.length ?? 0) < STORAGE_PAGE_SIZE) break;
       }
