@@ -26,11 +26,11 @@ export default function Onboarding({ language = "nl", onComplete }: { language?:
       <span className="eyebrow">PRIVATE EXPERIENCE · 18+</span>
     </header>
     <div className="onboarding-stepper" aria-label={t("Stap","Step") + " " + (step + 1) + " / 4"}>
-      {[0,1,2,3].map((index) => <span key={index} className={index === step ? "current" : index < step ? "done" : ""}/>)}
+      {[0,1,2,3].map((index) => <span key={index} className={index === step ? "active current" : index < step ? "done" : ""} aria-current={index === step ? "step" : undefined} aria-label={t(`Stap ${index + 1}`, `Step ${index + 1}`)}/>)}
     </div>
-    <section className="onboarding-panel">
+    <section className="onboarding-panel" aria-labelledby="onboarding-title" aria-live="polite">
       <span className="eyebrow">{t("EEN PERSOONLIJKE INTRODUCTIE","YOUR PRIVATE INTRODUCTION")} · 0{step + 1}</span>
-      <h1>{titles[step]}</h1>
+      <h1 id="onboarding-title">{titles[step]}</h1>
       {step === 0 && <div className="onboarding-welcome">
         <Sparkles size={28}/>
         <p>{t("Ontdek een wereld van interactieve opdrachten, persoonlijke progressie en bewust gekozen spanning. Jij bepaalt wat past, waar je grens ligt en wanneer je stopt.", "Explore a world of interactive prompts, personal progression and deliberately chosen tension. You decide what fits, where your boundaries are and when to stop.")}</p>
