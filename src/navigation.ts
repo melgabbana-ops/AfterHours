@@ -6,7 +6,7 @@ const DEEP_LINK_SCREENS: readonly Screen[] = [
   "missions", "legal", "social", "lovense", "daily", "capture", "cinematic", "couples",
 ];
 
-const SAFETY_ENTRY_PARAMS = ["stop", "safety", "safeword", "pause"] as const;
+const SAFETY_ENTRY_PARAMS = ["stop", "safety", "safeword", "pause", "consent"] as const;
 
 export function initialScreenFromSearch(search: string): Screen {
   const params = new URLSearchParams(search);
@@ -28,5 +28,5 @@ export function shouldShowTeaser(search: string, hasActiveSafetyState = false): 
   if (params.has("couple")) return false;
   const screen = params.get("screen");
   if (screen && DEEP_LINK_SCREENS.includes(screen as Screen)) return false;
-  return params.get("teaser") === "1" || search.trim() === "" || !params.has("screen");
+  return true;
 }
