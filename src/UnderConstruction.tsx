@@ -3,7 +3,25 @@ import { formatMaintenanceDate, getMaintenanceStatus, type MaintenanceConfig } f
 
 type Language = "nl" | "en";
 
-export default function UnderConstruction({ config, language: initialLanguage }: { config?: MaintenanceConfig; language?: Language }) {
+type SessionStatus = "ready" | "active" | "paused" | "completed" | "stopped";
+
+type Props = {
+ config?: MaintenanceConfig;
+ language?: Language;
+ sessionStatus?: SessionStatus;
+ onStopNow?: () => void;
+ onPause?: () => void;
+ onOpenSafety?: () => void;
+};
+
+export default function UnderConstruction({
+ config,
+ language: initialLanguage,
+ sessionStatus = "ready",
+ onStopNow,
+ onPause,
+ onOpenSafety,
+}: Props) {
  const [language,setLanguage]=React.useState<Language>(()=>{if(initialLanguage)return initialLanguage;try{return localStorage.getItem("afterhours.language")==="en"?"en":"nl"}catch{return "en"}});
  React.useEffect(()=>{try{localStorage.setItem("afterhours.language",language);document.documentElement.lang=language}catch{/* Optional language preference */}},[language]);
  const t=(nl:string,en:string)=>language==="nl"?nl:en;
@@ -23,6 +41,11 @@ export default function UnderConstruction({ config, language: initialLanguage }:
   <p>{message}</p>
   {endTime&&<p className="maintenance-end-time">{t("Verwacht einde (indicatie): ","Expected finish (estimate): ")}{endTime}</p>}
   <div className="maintenance-status"><span/> {scheduled?t("GEPLAND ONDERHOUD","SCHEDULED MAINTENANCE"):t("IN ONTWIKKELING · BINNENKORT TERUG","IN DEVELOPMENT · BACK SOON")}</div>
+  {(sessionStatus === "active" || sessionStatus === "paused") && <div className="maintenance-safety-actions" role="group" aria-label={t("Directe sessiebediening","Immediate session controls")}>
+    {sessionStatus === "active" && onPause && <button type="button" className="maintenance-safety-pause" onClick={onPause}>{t("PAUZE","PAUSE")}</button>}
+    {onStopNow && <button type="button" className="maintenance-safety-stop" aria-label={t("STOP: sessie onmiddellijk stoppen","STOP: stop session immediately")} onClick={onStopNow}>{t("STOP NU","STOP NOW")}</button>}
+    {onOpenSafety && <button type="button" className="maintenance-safety-open" onClick={onOpenSafety}>{t("Veiligheidsplan openen","Open safety plan")}</button>}
+  </div>}
   <footer>AFTER HOURS · CINEMATIC BLACK & GOLD</footer>
  </main>
 }
