@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { createMediaPreviewUrlRegistry } from "./mediaPreviewUrls";
 import { createPrivateMediaUrlExpiryTimer } from "./privateMediaUrlExpiry";
+import { bindVaultAuthSession } from "./vaultAuthSession";
 import { bindMediaCaptureBackgroundGuard, isMediaCaptureAttemptCurrent } from "./mediaCaptureLifecycle";
 import {
   canApplyMediaOverlay,
@@ -39,6 +40,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [signedUrl, setSignedUrl] = useState("");
   const [deletingPath, setDeletingPath] = useState("");
   const [captureKind,setCaptureKind] = useState<"photo"|"video"|"voice">("video");
@@ -59,6 +61,8 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
   const [pendingUrl,setPendingUrl] = useState("");
   const [isSavingCapture,setIsSavingCapture] = useState(false);
   const mountedRef = useRef(false);
+  const authValidRef = useRef(false);
+  const authEventGenerationRef = useRef(0);
   const livePreviewRef = useRef<HTMLVideoElement|null>(null);
   const liveCanvasRef = useRef<HTMLCanvasElement|null>(null);
   const compositionStreamRef = useRef<MediaStream|null>(null);
@@ -137,10 +141,11 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
 
   const refresh = useCallback(async (isActive: () => boolean = () => mountedRef.current): Promise<boolean> => {
     const generation = vaultVisibilityGenerationRef.current;
-    const canUpdate = () => isActive()
+    const canUpdate = () => authValidRef.current
+      && isActive()
       && generation === vaultVisibilityGenerationRef.current
       && document.visibilityState === "visible";
-    if (document.visibilityState !== "visible") return false;
+    if (!authValidRef.current || document.visibilityState !== "visible") return false;
     if (canUpdate()) {
       setLoading(true);
       setMessage("");
@@ -161,15 +166,26 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
 
   useEffect(() => {
     let active = true;
+    const authGeneration = authEventGenerationRef.current;
     async function load() {
       if (!supabaseConfigured || !supabase) return;
       try {
         const { data, error } = await supabase.auth.getUser();
         if (error) throw error;
-        if (data.user && active) await refresh(() => active);
-        else if (active) setMessage(t("Log in via Session Control om je privékluis te openen.", "Sign in through Session Control to open your private vault."));
+        if (!active || authGeneration !== authEventGenerationRef.current) return;
+        if (data.user) {
+          authValidRef.current = true;
+          setIsAuthenticated(true);
+          await refresh(() => active && authGeneration === authEventGenerationRef.current);
+        } else {
+          authValidRef.current = false;
+          setIsAuthenticated(false);
+          setMessage(t("Log in via Session Control om je privékluis te openen.", "Sign in through Session Control to open your private vault."));
+        }
       } catch (error) {
-        if (active) setMessage(error instanceof Error ? error.message : t("Aanmelden is nodig voor privéopslag.", "Sign-in is required for private storage."));
+        if (active && authGeneration === authEventGenerationRef.current) {
+          setMessage(error instanceof Error ? error.message : t("Aanmelden is nodig voor privéopslag.", "Sign-in is required for private storage."));
+        }
       }
     }
     void load();
@@ -177,15 +193,18 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
   }, [refresh, language]);
 
   const upload = async (file?: File): Promise<boolean> => {
-    if (!file || !mountedRef.current) return false;
+    if (!file || !mountedRef.current || !authValidRef.current) return false;
+    const generation = vaultVisibilityGenerationRef.current;
     setBusy(true);
     setMessage("");
     clearSignedUrl();
     try {
       await uploadPrivateMedia(file, sessionId, assignmentTitle, language);
       if(!mountedRef.current)return true;
-      const refreshed = await refresh(() => mountedRef.current);
+      if (!authValidRef.current || generation !== vaultVisibilityGenerationRef.current) return false;
+      const refreshed = await refresh(() => mountedRef.current && generation === vaultVisibilityGenerationRef.current);
       if(!mountedRef.current)return true;
+      if (!authValidRef.current || generation !== vaultVisibilityGenerationRef.current) return false;
       setMessage(
         refreshed
           ? t("Bestand veilig geüpload naar je privékluis.", "File safely uploaded to your private vault.")
@@ -193,7 +212,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
       );
       return true;
     } catch (error) {
-      if(mountedRef.current)setMessage(error instanceof Error ? error.message : t("Uploaden is mislukt.", "Upload failed."));
+      if(mountedRef.current && authValidRef.current && generation === vaultVisibilityGenerationRef.current)setMessage(error instanceof Error ? error.message : t("Uploaden is mislukt.", "Upload failed."));
       return false;
     } finally {
       if(mountedRef.current)setBusy(false);
@@ -221,7 +240,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
 
 
 
-  const handleCaptureBackground = useCallback(() => {
+  const handleCaptureBackground = useCallback((reason: "background" | "auth" = "background") => {
     const captureWasStarting = captureStartInFlightRef.current;
     captureGenerationRef.current += 1;
     vaultVisibilityGenerationRef.current += 1;
@@ -261,14 +280,21 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
       setPendingOriginalFile(null);
       setPendingUrl("");
       setOriginalPreviewUrl("");
+      setShowOriginalPhoto(false);
+      setPhotoEdits(defaultPhotoEditTransform);
+      setPhotoHistory([]);
+      setPhotoHistoryIndex(-1);
       clearSignedUrl();
       setItems([]);
       setDeletingPath("");
       setLoading(false);
+      if (reason === "auth") setIsAuthenticated(false);
       if (captureWasStarting) setBusy(false);
-      setMessage(language === "nl"
-        ? "Privékluis afgeschermd toen de app naar de achtergrond ging. Camera en microfoon zijn gestopt; bestanden worden opnieuw geladen wanneer je terugkeert."
-        : "Private vault hidden when the app went into the background. Camera and microphone were stopped; files will reload when you return.");
+      setMessage(reason === "auth"
+        ? t("Je sessie is niet meer actief. Meld je opnieuw aan via Session Control om de privékluis te openen.", "Your sign-in session is no longer active. Sign in again through Session Control to open your private vault.")
+        : language === "nl"
+          ? "Privékluis afgeschermd toen de app naar de achtergrond ging. Camera en microfoon zijn gestopt; bestanden worden opnieuw geladen wanneer je terugkeert."
+          : "Private vault hidden when the app went into the background. Camera and microphone were stopped; files will reload when you return.");
     });
   }, [language, clearSignedUrl]);
 
@@ -285,8 +311,44 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
     handleCaptureForeground,
   ), [handleCaptureBackground, handleCaptureForeground]);
 
+  useEffect(() => {
+    if (!supabase) return;
+    return bindVaultAuthSession(supabase.auth, ({ event, authenticated }) => {
+      if (!authenticated) {
+        authEventGenerationRef.current += 1;
+        authValidRef.current = false;
+        handleCaptureBackground("auth");
+        return;
+      }
+
+      const wasAuthenticated = authValidRef.current;
+      authValidRef.current = true;
+      setIsAuthenticated(true);
+
+      if (event === "SIGNED_IN" || (!wasAuthenticated && event !== "INITIAL_SESSION")) {
+        authEventGenerationRef.current += 1;
+        const authGeneration = authEventGenerationRef.current;
+        if (document.visibilityState === "visible") {
+          vaultNeedsRefreshRef.current = false;
+          window.setTimeout(() => {
+            if (
+              mountedRef.current
+              && authValidRef.current
+              && authGeneration === authEventGenerationRef.current
+              && document.visibilityState === "visible"
+            ) {
+              void refresh();
+            }
+          }, 0);
+        } else {
+          vaultNeedsRefreshRef.current = true;
+        }
+      }
+    });
+  }, [handleCaptureBackground, refresh]);
+
   const stageSelectedFile=async(file?:File,overlayAlreadyApplied=false)=>{
-    if(!file||!mountedRef.current)return;
+    if(!file||!mountedRef.current||!authValidRef.current)return;
     const generation = vaultVisibilityGenerationRef.current;
     if(!captureConsent){
       setMessage(t("Bevestig eerst dat de betrokkenen akkoord zijn met deze media en privéopslag.","First confirm that the people involved agree to this media and private storage."));
@@ -319,7 +381,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
 
   const updatePendingImageEdit=async(style:OverlayFrameStyle,edits:PhotoEditTransform,recordHistory=true):Promise<boolean>=>{
     const original=pendingOriginalFile;
-    if(!original||!pendingCapture||busy||isSavingCapture)return false;
+    if(!authValidRef.current||!original||!pendingCapture||busy||isSavingCapture)return false;
     const generation = vaultVisibilityGenerationRef.current;
     setBusy(true);
     setMessage("");
@@ -370,6 +432,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
   },[pendingOriginalFile,photoHistoryIndex,photoHistory.length,busy,isSavingCapture]);
 
   const startCapture=async()=>{
+    if(!authValidRef.current)return;
     if(!captureConsent){
       setMessage(t("Bevestig eerst dat iedereen op de opname expliciet akkoord is met opnemen én privé opslaan.","First confirm that everyone recorded explicitly agrees to recording and private storage."));
       return;
@@ -613,7 +676,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
   };
 
   const saveCapture=async()=>{
-    if(!pendingCapture||!mountedRef.current||saveInProgressRef.current)return;
+    if(!pendingCapture||!mountedRef.current||!authValidRef.current||saveInProgressRef.current)return;
     if(!captureConsent){
       setMessage(t("Bevestig opnieuw dat iedereen akkoord is voordat je deze opname privé opslaat.","Please reconfirm that everyone agrees before saving this recording privately."));
       return;
@@ -643,7 +706,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
   };
 
   const openItem = async (item: PrivateMediaItem) => {
-    if(!mountedRef.current||document.visibilityState!=="visible")return;
+    if(!mountedRef.current||!authValidRef.current||document.visibilityState!=="visible")return;
     const generation = vaultVisibilityGenerationRef.current;
     setBusy(true);
     setMessage("");
@@ -671,22 +734,23 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
   };
 
   const removeItem = async (path: string) => {
-    if(!mountedRef.current)return;
+    if(!mountedRef.current || !authValidRef.current)return;
     if (deletingPath !== path) {
       setDeletingPath(path);
       return;
     }
+    const generation = vaultVisibilityGenerationRef.current;
     setBusy(true);
     setMessage("");
     try {
       await deletePrivateMedia(path);
-      if(!mountedRef.current)return;
+      if(!mountedRef.current || !authValidRef.current || generation !== vaultVisibilityGenerationRef.current)return;
       setItems(current => current.filter(item => item.path !== path));
       setDeletingPath("");
       clearSignedUrl();
       setMessage(t("Bestand verwijderd.", "File deleted."));
     } catch (error) {
-      if(mountedRef.current)setMessage(error instanceof Error ? error.message : t("Verwijderen is mislukt.", "Could not delete the file."));
+      if(mountedRef.current && authValidRef.current && generation === vaultVisibilityGenerationRef.current)setMessage(error instanceof Error ? error.message : t("Verwijderen is mislukt.", "Could not delete the file."));
     } finally {
       if(mountedRef.current)setBusy(false);
     }
@@ -696,10 +760,12 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
     <section className="media-vault auth-panel" aria-labelledby="media-vault-title">
       <span className="eyebrow">{t("PRIVÉOPSLAG", "PRIVATE STORAGE")}</span>
       <h3 id="media-vault-title">{assignmentTitle ? t("Opname bij opdracht", "Assignment capture") : t("Mijn privékluis", "My private vault")}</h3>
-      {assignmentTitle&&<div className="assignment-captions"><strong>{assignmentTitle}</strong>{assignmentTask&&<p>{assignmentTask}</p>}<small>{t("Media wordt opgeslagen in de privékluis onder de huidige sessie. De opdracht wordt niet als openbare metadata gepubliceerd.","Media is stored privately under the current session. Assignment details are not published as public metadata.")}</small></div>}
+      {isAuthenticated&&assignmentTitle&&<div className="assignment-captions"><strong>{assignmentTitle}</strong>{assignmentTask&&<p>{assignmentTask}</p>}<small>{t("Media wordt opgeslagen in de privékluis onder de huidige sessie. De opdracht wordt niet als openbare metadata gepubliceerd.","Media is stored privately under the current session. Assignment details are not published as public metadata.")}</small></div>}
       <p>{t("Afbeeldingen, video en audio blijven privé. Open-links zijn maximaal 60 seconden geldig.", "Images, video and audio stay private. Open links are valid for up to 60 seconds.")}</p>
       {!supabaseConfigured ? (
         <small role="status">{t("Privéopslag verschijnt zodra Supabase is geconfigureerd.", "Private storage will appear once Supabase is configured.")}</small>
+      ) : !isAuthenticated ? (
+        <small role="status" aria-live="polite">{message || t("Log in via Session Control om je privékluis te openen.", "Sign in through Session Control to open your private vault.")}</small>
       ) : (
         <>
           <label className="media-upload">
