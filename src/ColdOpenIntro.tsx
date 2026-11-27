@@ -21,7 +21,7 @@ export default function ColdOpenIntro({ language, ageConfirmed, sessionStatus, o
     <main className="cold-open-screen" aria-labelledby="cold-open-title">
       <img
         className="cold-open-art"
-        src={`${import.meta.env.BASE_URL}visuals/ah-grand-candlelit-chamber.svg`}
+        src={`${import.meta.env.BASE_URL}visuals/ah-cinematic-hero.svg`}
         alt=""
         aria-hidden="true"
       />
