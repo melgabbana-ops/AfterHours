@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Check, Eye, EyeOff, LockKeyhole, Pause, Play, Save, Square, Trash2 } from "lucide-react";
 interface SafetyPlanProps {
   profileId: string;
@@ -29,11 +29,23 @@ export default function SafetyPlan({
   onStopNow,
 }: SafetyPlanProps) {
   const [plan, setPlan] = useState<SafetyPlanData>(() => readSafetyPlan(profileId));
+  const [loadedProfileId, setLoadedProfileId] = useState(profileId);
   const [legacyPlanDetected, setLegacyPlanDetected] = useState(() => hasUnscopedSafetyPlan());
   const [saved, setSaved] = useState(false);
   const [message, setMessage] = useState("");
   const [showSafeword, setShowSafeword] = useState(false);
   const [showAmberSignal, setShowAmberSignal] = useState(false);
+
+  useEffect(() => {
+    if (loadedProfileId === profileId) return;
+    setPlan(readSafetyPlan(profileId));
+    setLoadedProfileId(profileId);
+    setSaved(false);
+    setMessage("");
+    setShowSafeword(false);
+    setShowAmberSignal(false);
+    setLegacyPlanDetected(hasUnscopedSafetyPlan());
+  }, [loadedProfileId, profileId]);
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
   const isSessionActive = sessionStatus === "active" || sessionStatus === "paused";
   const readinessCount = Object.values(plan.readiness).filter(Boolean).length;
@@ -44,6 +56,9 @@ export default function SafetyPlan({
     completed: t("Sessie afgerond", "Session completed"),
     stopped: t("Sessie gestopt", "Session stopped"),
   })[sessionStatus];
+
+  // Do not render a previous profile's private signals during a profile switch.
+  if (loadedProfileId !== profileId) return null;
 
   const update = (field: "safeword" | "amberSignal" | "boundaries", value: string) => {
     setPlan((current) => ({ ...current, [field]: value }));
