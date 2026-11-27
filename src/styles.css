@@ -4919,3 +4919,48 @@ button,[role="button"],nav a{touch-action:manipulation}
  letter-spacing:.06em;
 }
 .gate-card .gate-safety-link:focus-visible{outline:2px solid #e3c46f;outline-offset:3px}
+
+
+/* Emergency controls remain available even when scheduled maintenance is active. */
+.maintenance-safety-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  width: min(100%, 360px);
+  margin: 8px auto 0;
+}
+.maintenance-safety-actions button {
+  min-width: 0;
+  min-height: 48px;
+  padding: 12px 14px;
+  border: 1px solid rgba(215, 168, 79, .48);
+  border-radius: 10px;
+  background: #100e0b;
+  color: #f4ebdd;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .1em;
+  cursor: pointer;
+}
+.maintenance-safety-actions button:focus-visible {
+  outline: 2px solid #e3c46f;
+  outline-offset: 3px;
+}
+.maintenance-safety-actions .maintenance-safety-stop {
+  grid-column: 1 / -1;
+  min-height: 56px;
+  border-color: #a44a40;
+  background: #70231e;
+  color: #fff;
+  font-size: 13px;
+  letter-spacing: .14em;
+}
+.maintenance-safety-actions .maintenance-safety-pause,
+.maintenance-safety-actions .maintenance-safety-open {
+  background: #17130e;
+}
+@media (max-width: 420px) {
+  .maintenance-safety-actions { grid-template-columns: 1fr; }
+  .maintenance-safety-actions .maintenance-safety-stop { grid-column: auto; }
+}
