@@ -7,8 +7,8 @@ on:
     branches: [main]
   workflow_dispatch:
 
-# Validation only. Production hosting and deployment remain disabled until
-# the user explicitly authorizes a separate deployment change.
+# Validation only. Production publishing is isolated in publish-pages.yml,
+# which is gated to the main branch.
 permissions:
   contents: read
 
