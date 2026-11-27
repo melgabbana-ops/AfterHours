@@ -41,3 +41,19 @@ describe("GitHub Pages workflow deployment boundary", () => {
     expect(pagesWorkflow).not.toContain("environment:");
   });
 });
+
+const publishWorkflow = readFileSync(
+  resolve(process.cwd(), ".github/workflows/publish-pages.yml"),
+  "utf8",
+);
+
+describe("GitHub Pages publication boundary", () => {
+  it("only builds and publishes from the main branch", () => {
+    expect(publishWorkflow).toContain("branches: [main]");
+    expect(publishWorkflow).toContain("workflow_dispatch:");
+    expect(publishWorkflow).not.toContain("pull_request:");
+    expect(publishWorkflow.split("if: github.ref == 'refs/heads/main'").length - 1).toBe(2);
+    expect(publishWorkflow).toContain("actions/configure-pages@v6");
+    expect(publishWorkflow).toContain("actions/deploy-pages@v5");
+  });
+});

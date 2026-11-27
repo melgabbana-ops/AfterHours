@@ -1,3 +1,4 @@
+import type { KeyboardEvent } from "react";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { bindVaultAutoLock } from "./vaultAutoLock";
 import { isExperienceStartAttemptCurrent } from "./experienceStartAttempt";
@@ -1310,8 +1311,22 @@ export default function CinematicWorld({
   const unlocked = new Set(records.club.filter((record) => record.record_key.startsWith("milestone:")).map((record) => record.record_key.slice("milestone:".length)));
   const memberLevel = Math.max(1, Math.floor((completedRuns + sceneCount + ritualDrawCount) / 3) + 1);
 
+  const handleTabKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
+    const currentIndex = tabItems.findIndex((item) => item.id === tab);
+    const targetIndex = event.key === "ArrowRight" ? (currentIndex + 1) % tabItems.length
+      : event.key === "ArrowLeft" ? (currentIndex - 1 + tabItems.length) % tabItems.length
+      : event.key === "Home" ? 0
+      : event.key === "End" ? tabItems.length - 1
+      : -1;
+    if (targetIndex < 0) return;
+    event.preventDefault();
+    const nextTab = tabItems[targetIndex].id;
+    setTab(nextTab);
+    window.requestAnimationFrame(() => document.getElementById("cw-tab-" + nextTab)?.focus());
+  };
+
   return (
-    <main className="cw-world">
+    <main className="cw-world" data-tab={tab}>
       <div className="cw-world-backdrop" aria-hidden="true"><img src={`${import.meta.env.BASE_URL}visuals/ah-grand-candlelit-chamber.svg`} alt="" decoding="async" /></div>
       <header className="cw-header">
         <button type="button" onClick={() => void handleBack()} aria-label={t("Terug", "Back")}><ArrowLeft /></button>
@@ -1329,28 +1344,11 @@ export default function CinematicWorld({
         )}</p>
       </section>
 
-      <div
-        className="cw-tabs"
-        role="tablist"
-        aria-label={t("AFTER HOURS privéwereld", "AFTER HOURS private world")}
-        onKeyDown={(event) => {
-          if (!["ArrowRight", "ArrowLeft", "Home", "End"].includes(event.key)) return;
-          event.preventDefault();
-          const buttons = Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
-          const currentIndex = buttons.indexOf(document.activeElement as HTMLButtonElement);
-          const nextIndex = event.key === "Home" ? 0
-            : event.key === "End" ? buttons.length - 1
-            : (currentIndex + (event.key === "ArrowRight" ? 1 : -1) + buttons.length) % buttons.length;
-          const nextButton = buttons[nextIndex];
-          if (!nextButton) return;
-          nextButton.focus();
-          nextButton.click();
-        }}
-      >
+      <div className="cw-tabs" role="tablist" aria-label="AFTER HOURS private world">
         {tabItems.map((item) => {
           const Icon = item.icon;
           return (
-            <button type="button" role="tab" id={`cw-tab-${item.id}`} aria-controls="cw-active-panel" aria-selected={tab === item.id} tabIndex={tab === item.id ? 0 : -1} className={tab === item.id ? "active" : ""} key={item.id} onClick={() => { setTab(item.id); setMessage(""); setError(""); }}>
+            <button type="button" role="tab" id={`cw-tab-${item.id}`} aria-controls="cw-active-panel" aria-selected={tab === item.id} tabIndex={tab === item.id ? 0 : -1} className={tab === item.id ? "active" : ""} key={item.id} onKeyDown={handleTabKeyDown} onClick={() => { setTab(item.id); setMessage(""); setError(""); }}>
               <Icon size={14} />{item.label}
             </button>
           );
@@ -1359,18 +1357,18 @@ export default function CinematicWorld({
 
       {error && <div className="cw-alert" role="alert"><ShieldCheck size={16} /><span>{error}</span></div>}
       {message && <div className="cw-feedback" role="status" aria-live="polite"><CheckCircle2 size={15} />{message}</div>}
-      {loading && <div className="cw-loading">{t("Je privéwereld wordt veilig geladen…", "Loading your private world securely…")}</div>}
+      {loading && <div className="cw-loading" role="status" aria-live="polite">{t("Je privéwereld wordt veilig geladen…", "Loading your private world securely…")}</div>}
       {!remoteProfileId && <div className="cw-account-gate"><LockKeyhole /><div><strong>{t("Persoonlijke opslag vereist", "Personal storage required")}</strong><p>{t("Je kunt de wereld bekijken, maar opslaan, hervatten en privégegevens openen vereist een ingelogd AFTER HOURS-account.", "You can explore the world, but saving, resuming and opening private data requires a signed-in AFTER HOURS account.")}</p></div><button type="button" onClick={onRequestConsent}>{t("Account controleren", "Check account")}</button></div>}
 
       {tab === "experience" && (
-        <section className="cw-section" id="cw-active-panel" role="tabpanel" aria-labelledby={`cw-tab-${tab}`} tabIndex={0}>
+        <section id="cw-active-panel" role="tabpanel" aria-labelledby={`cw-tab-${tab}`} tabIndex={0} className="cw-section cw-section--experience">
           <div className="cw-section-heading"><span className="cw-kicker">01 · THE HEART OF AFTER HOURS</span><h2><Sparkles /> The Experience Engine</h2><p>{t("Kies een bestaande scène of speel je eigen ontwerp uit The Director's Room. Elke stap wordt bewaard, elke hervatting vraagt opnieuw om consent.", "Choose a built-in scene or run your own creation from The Director's Room. Every step is saved, and every resume requires fresh consent.")}</p></div>
 
           {recoverableRun && !activeRunId && (
             <div className="cw-resume-card">
               <div><span className="cw-kicker">{t("OPENSTAANDE ERVARING", "UNFINISHED EXPERIENCE")}</span><h3>{String(recoverableRun.scene_snapshot.title ?? recoverableRun.scene_key)}</h3><p>{t("Laatst opgeslagen bij fase", "Last saved at step")} {recoverableRun.current_step + 1} / {recoverableRun.total_steps}. {t("Er wordt niets automatisch hervat.", "Nothing resumes automatically.")}</p></div>
               <button type="button" className="cw-primary" onClick={() => { setResumePrepared(true); setSelectedSceneKey(null); setRunConsent(false); setStopSignal(""); setMessage(t("Bevestig opnieuw consent en je stopsignaal voordat je hervat.", "Confirm consent and your stop signal again before resuming.")); }} disabled={busy || stopPending}>{t("Voorbereiden", "Prepare")}</button>
-              {resumePrepared && <div className="cw-run-gate"><label><input type="checkbox" checked={runConsent} onChange={(event) => setRunConsent(event.target.checked)} />{t("Ik stem nu opnieuw vrijwillig in met deze specifieke scène.", "I freely consent again to this specific scene.")}</label><input aria-label={t("Afgesproken stopsignaal", "Agreed stop signal")} autoComplete="off" value={stopSignal} onChange={(event) => setStopSignal(event.target.value)} placeholder={t("Afgesproken stopsignaal", "Agreed stop signal")} maxLength={32} /><button type="button" className="cw-primary" disabled={!runConsent || stopSignal.trim().length < 2 || busy || stopPending || !canStartExperience || !consentActive} onClick={() => void resumeScene(recoverableRun)}>{t("Hervat met nieuwe consent", "Resume with fresh consent")}</button></div>}
+              {resumePrepared && <div className="cw-run-gate"><label><input type="checkbox" checked={runConsent} onChange={(event) => setRunConsent(event.target.checked)} />{t("Ik stem nu opnieuw vrijwillig in met deze specifieke scène.", "I freely consent again to this specific scene.")}</label><input value={stopSignal} onChange={(event) => setStopSignal(event.target.value)} placeholder={t("Afgesproken stopsignaal", "Agreed stop signal")} maxLength={32} /><button type="button" className="cw-primary" disabled={!runConsent || stopSignal.trim().length < 2 || busy || stopPending || !canStartExperience || !consentActive} onClick={() => void resumeScene(recoverableRun)}>{t("Hervat met nieuwe consent", "Resume with fresh consent")}</button></div>}
             </div>
           )}
 
@@ -1381,19 +1379,19 @@ export default function CinematicWorld({
                 <div className="cw-aftercare"><CheckCircle2 /><h3>{t("De ervaring is afgerond", "Experience complete")}</h3><p>{t("Neem rustig de tijd. Vraag wat prettig voelt: water, warmte, praten, stilte of ruimte. Een korte check-in en aftercare horen bij de ervaring.", "Take your time. Ask what feels right: water, warmth, conversation, quiet or space. A check-in and aftercare are part of the experience.")}</p><div className="cw-card-actions"><button type="button" className="cw-primary" onClick={onOpenAftercare}>{t("Open AFTERCARE", "Open AFTERCARE")}</button><button type="button" onClick={() => { setActiveScene(null); setActiveRunId(null); setRunStatus(null); setTab("club"); }}>{t("Midnight Club", "Midnight Club")}</button></div></div>
               ) : (
                 <>
-                  <div className="cw-step-progress" role="progressbar" aria-label={t("Voortgang van de ervaring", "Experience progress")} aria-valuemin={1} aria-valuemax={activeScene.steps.length} aria-valuenow={stepIndex + 1} aria-valuetext={t(`Fase ${stepIndex + 1} van ${activeScene.steps.length}`, `Step ${stepIndex + 1} of ${activeScene.steps.length}`)}><span style={{ width: (((stepIndex + 1) / activeScene.steps.length) * 100) + "%" }} /></div>
+                  <div className="cw-step-progress"><span style={{ width: (((stepIndex + 1) / activeScene.steps.length) * 100) + "%" }} /></div>
                   {lastPathChoice !== "unset" && <div className="cw-choice-note">{lastPathChoice === "gentle" ? t("Je koos voor een rustiger tempo.", "You chose a gentler pace.") : lastPathChoice === "deepen" ? t("Je koos voor extra verdieping en reflectie.", "You chose deeper reflection.") : lastPathChoice === "skip" ? t("De vorige fase is bewust overgeslagen.", "The previous step was consciously skipped.") : t("Je koos ervoor het afgesproken tempo aan te houden.", "You chose to keep the agreed pace.")}</div>}
                   <div className="cw-step-card"><span className="cw-kicker">{t("FASE", "STEP")} {stepIndex + 1}</span><p>{activeScene.steps[stepIndex]}</p></div>
-                  <div className="cw-checkin"><strong id="cw-checkin-label">{t("Hoe voelt dit voor jou?", "How does this feel for you?")}</strong><div role="group" aria-labelledby="cw-checkin-label">
-                    <button type="button" aria-pressed={checkIn === "green"} className={checkIn === "green" ? "selected green" : "green"} onClick={() => setCheckIn("green")}>{t("Groen · Verder", "Green · Continue")}</button>
-                    <button type="button" aria-pressed={checkIn === "yellow"} className={checkIn === "yellow" ? "selected yellow" : "yellow"} onClick={() => { setCheckIn("yellow"); void pauseScene(); }}>{t("Geel · Pauze", "Yellow · Pause")}</button>
-                    <button type="button" aria-pressed={checkIn === "red"} className={checkIn === "red" ? "selected red" : "red"} onClick={() => { setCheckIn("red"); void stopScene(); }}>{t("Rood · Stop", "Red · Stop")}</button>
+                  <div className="cw-checkin"><strong>{t("Hoe voelt dit voor jou?", "How does this feel for you?")}</strong><div>
+                    <button type="button" className={checkIn === "green" ? "selected green" : "green"} onClick={() => setCheckIn("green")}>{t("Groen · Verder", "Green · Continue")}</button>
+                    <button type="button" className={checkIn === "yellow" ? "selected yellow" : "yellow"} onClick={() => { setCheckIn("yellow"); void pauseScene(); }}>{t("Geel · Pauze", "Yellow · Pause")}</button>
+                    <button type="button" className={checkIn === "red" ? "selected red" : "red"} onClick={() => { setCheckIn("red"); void stopScene(); }}>{t("Rood · Stop", "Red · Stop")}</button>
                   </div><small>{t("Je stopsignaal is alleen in deze sessie nodig en wordt niet opgeslagen.", "Your stop signal is only needed in this session and is never stored.")}</small></div>
-                  <div className="cw-choice-panel"><strong id="cw-path-label">{t("Kies je volgende pad", "Choose your next path")}</strong><div role="group" aria-labelledby="cw-path-label">
-                    <button type="button" aria-pressed={pathChoice === "steady"} className={pathChoice === "steady" ? "selected" : ""} onClick={() => setPathChoice("steady")}>{t("Aangehouden tempo", "Keep this pace")}</button>
-                    <button type="button" aria-pressed={pathChoice === "gentle"} className={pathChoice === "gentle" ? "selected" : ""} onClick={() => setPathChoice("gentle")}>{t("Zachter en rustiger", "Softer and slower")}</button>
-                    <button type="button" aria-pressed={pathChoice === "deepen"} className={pathChoice === "deepen" ? "selected" : ""} onClick={() => setPathChoice("deepen")}>{t("Meer verdieping", "Explore deeper")}</button>
-                    <button type="button" aria-pressed={pathChoice === "skip"} className={pathChoice === "skip" ? "selected" : ""} onClick={() => setPathChoice("skip")}>{t("Deze fase overslaan", "Skip this step")}</button>
+                  <div className="cw-choice-panel"><strong>{t("Kies je volgende pad", "Choose your next path")}</strong><div>
+                    <button type="button" className={pathChoice === "steady" ? "selected" : ""} onClick={() => setPathChoice("steady")}>{t("Aangehouden tempo", "Keep this pace")}</button>
+                    <button type="button" className={pathChoice === "gentle" ? "selected" : ""} onClick={() => setPathChoice("gentle")}>{t("Zachter en rustiger", "Softer and slower")}</button>
+                    <button type="button" className={pathChoice === "deepen" ? "selected" : ""} onClick={() => setPathChoice("deepen")}>{t("Meer verdieping", "Explore deeper")}</button>
+                    <button type="button" className={pathChoice === "skip" ? "selected" : ""} onClick={() => setPathChoice("skip")}>{t("Deze fase overslaan", "Skip this step")}</button>
                   </div><small>{t("Je keuze wordt bij deze ervaring bewaard en bepaalt de toon van de volgende fase.", "Your choice is saved with this experience and shapes the tone of the next step.")}</small></div>
                   <div className="cw-run-actions">
                     <button type="button" onClick={() => void pauseScene()} disabled={busy}><Pause size={15} />{t("Pauzeren", "Pause")}</button>
@@ -1424,7 +1422,7 @@ export default function CinematicWorld({
       )}
 
       {tab === "director" && (
-        <section className="cw-section" id="cw-active-panel" role="tabpanel" aria-labelledby={`cw-tab-${tab}`} tabIndex={0}>
+        <section id="cw-active-panel" role="tabpanel" aria-labelledby={`cw-tab-${tab}`} tabIndex={0} className="cw-section cw-section--director">
           <div className="cw-section-heading"><span className="cw-kicker">02 · DESIGN YOUR SCENE</span><h2><Clapperboard /> The Director's Room</h2><p>{t("Ontwerp een scène met eigen fases. Zodra je opslaat, verschijnt die direct in The Experience Engine.", "Design a scene with your own steps. Once saved, it appears directly in The Experience Engine.")}</p></div>
           <div className="cw-form-panel">
             <label>{t("Naam van de scène", "Scene title")}<input value={sceneTitle} onChange={(event) => setSceneTitle(event.target.value)} maxLength={80} placeholder={t("Bijvoorbeeld: The Golden Hour", "For example: The Golden Hour")} /></label>
@@ -1437,7 +1435,7 @@ export default function CinematicWorld({
       )}
 
       {tab === "vault" && (
-        <section className="cw-section" id="cw-active-panel" role="tabpanel" aria-labelledby={`cw-tab-${tab}`} tabIndex={0}>
+        <section id="cw-active-panel" role="tabpanel" aria-labelledby={`cw-tab-${tab}`} tabIndex={0} className="cw-section cw-section--vault">
           <div className="cw-section-heading"><span className="cw-kicker">03 · PRIVATE BY DESIGN</span><h2><LockKeyhole /> The Black Vault</h2><p>{t("Je notities worden op je toestel versleuteld vóór ze naar Supabase gaan. De server bewaart alleen AES-GCM-ciphertext. Je wachtzin wordt nooit verstuurd of opgeslagen.", "Your notes are encrypted on your device before they reach Supabase. The server stores AES-GCM ciphertext only. Your passphrase is never sent or stored.")}</p></div>
           <div className="cw-form-panel">
             <label>{t("Kluiswachtzin (minimaal 10 tekens)", "Vault passphrase (at least 10 characters)")}<input type="password" autoComplete="new-password" value={vaultPassphrase} onChange={(event) => setVaultPassphrase(event.target.value)} /></label>
@@ -1447,7 +1445,7 @@ export default function CinematicWorld({
             {vaultMessage && <p className="cw-inline-message" role="status">{vaultMessage}</p>}
           </div>
           <div className="cw-saved-list"><h3>{t("Versleutelde notities", "Encrypted notes")} <span>{vaultRecords.length}</span></h3>
-            {vaultRecords.map((record) => <div className="cw-saved-row" key={record.record_key}><div><strong>{t("Privénotitie", "Private note")}</strong><small>{new Date(record.updated_at).toLocaleString(language === "nl" ? "nl-NL" : "en-GB")}</small></div><button type="button" onClick={() => void unlockVault(record)}><UnlockKeyhole size={14} />{t("Open", "Unlock")}</button><button type="button" onClick={() => void deleteVaultNote(record.record_key)} aria-label={t("Verwijderen", "Delete")}><Trash2 size={14} /></button></div>)}
+            {vaultRecords.length ? vaultRecords.map((record) => <div className="cw-saved-row" key={record.record_key}><div><strong>{t("Privénotitie", "Private note")}</strong><small>{new Date(record.updated_at).toLocaleString(language === "nl" ? "nl-NL" : "en-GB")}</small></div><button type="button" onClick={() => void unlockVault(record)}><UnlockKeyhole size={14} />{t("Open", "Unlock")}</button><button type="button" onClick={() => void deleteVaultNote(record.record_key)} aria-label={t("Verwijderen", "Delete")}><Trash2 size={14} /></button></div>) : <p className="cw-empty-state">{t("De kluis is nog leeg. Je eerste versleutelde notitie verschijnt hier.", "The vault is empty. Your first encrypted note will appear here.")}</p>}
           </div>
           {vaultPlain && <div className="cw-decrypted"><div><Eye size={15} /><strong>{vaultPlain.title}</strong><button type="button" onClick={() => lockVault(t("Kluis vergrendeld.", "Vault locked."))}><EyeOff size={14} />{t("Vergrendelen", "Lock")}</button></div><p>{vaultPlain.content}</p></div>}
           <p className="cw-privacy-note">{t("Belangrijk: zonder je wachtzin is ontsleutelen niet mogelijk. Bewaar een eigen back-up op een vertrouwde plek.", "Important: without your passphrase, decryption is impossible. Keep your own backup in a trusted place.")}</p>
@@ -1455,7 +1453,7 @@ export default function CinematicWorld({
       )}
 
       {tab === "sensory" && (
-        <section className="cw-section" id="cw-active-panel" role="tabpanel" aria-labelledby={`cw-tab-${tab}`} tabIndex={0}>
+        <section id="cw-active-panel" role="tabpanel" aria-labelledby={`cw-tab-${tab}`} tabIndex={0} className="cw-section cw-section--sensory">
           <div className="cw-section-heading"><span className="cw-kicker">04 · THE AFTER HOURS SIGNATURE</span><h2><Music2 /> The Sensory Lab</h2><p>{t("Een originele, zachte soundscape die in de browser wordt opgebouwd. Geen externe muziekstream en geen extra betaalde dienst.", "An original, gentle soundscape generated in your browser. No external music stream and no paid service.")}</p></div>
           <div className="cw-form-panel">
             <label>{t("Sfeer", "Atmosphere")}<select value={sensoryTheme} onChange={(event) => setSensoryTheme(event.target.value)}><option value="embers">{t("Embers · warme gloed", "Embers · warm glow")}</option><option value="rain">{t("Nocturne · zachte regen", "Nocturne · soft rain")}</option><option value="noir">{t("Noir · diepe resonantie", "Noir · deep resonance")}</option></select></label>
@@ -1467,7 +1465,7 @@ export default function CinematicWorld({
       )}
 
       {tab === "invitation" && (
-        <section className="cw-section" id="cw-active-panel" role="tabpanel" aria-labelledby={`cw-tab-${tab}`} tabIndex={0}>
+        <section id="cw-active-panel" role="tabpanel" aria-labelledby={`cw-tab-${tab}`} tabIndex={0} className="cw-section cw-section--invitation">
           <div className="cw-section-heading"><span className="cw-kicker">05 · A MOMENT TO REMEMBER</span><h2><Mail /> The Secret Invitation</h2><p>{t("Pauzeer eerst je ervaring. Deel daarna een beveiligde uitnodigingslink. De ontvanger bekijkt de volledige scène en geeft zelf expliciet toestemming voordat jij hervat.", "Pause your experience first. Then share a secure invitation link. The recipient reviews the full scene and explicitly consents before you resume.")}</p></div>
           {incomingInviteToken && (
             <div className="cw-form-panel cw-invite-accept">
@@ -1475,7 +1473,7 @@ export default function CinematicWorld({
               <h3>{t("Je bent uitgenodigd", "You are invited")}</h3>
               <p>{t("Bekijk eerst de exacte inhoud. Door te accepteren leg je alleen jouw eigen toestemming vast. Je kunt later altijd stoppen of je toestemming intrekken.", "Review the exact contents first. Accepting records only your own consent. You can always stop later or withdraw consent.")}</p>
               {!remoteProfileId ? <p>{t("Log in op je eigen AFTER HOURS-account om de scène te bekijken en eventueel te accepteren.", "Sign in to your own AFTER HOURS account to preview and optionally accept the scene.")}</p> : null}
-              {invitePreviewLoading && <p>{t("Scène veilig ophalen…", "Loading scene securely…")}</p>}
+              {invitePreviewLoading && <p role="status" aria-live="polite">{t("Scène veilig ophalen…", "Loading scene securely…")}</p>}
               {invitePreview && <div className="cw-invite-preview"><strong>{invitePreview.title}</strong>{invitePreview.description && <p>{invitePreview.description}</p>}<ol>{invitePreview.steps.slice(0, 12).map((step, index) => <li key={index}>{step}</li>)}</ol><small>{t("Uitnodiging verloopt", "Invitation expires")} {new Date(invitePreview.expires_at).toLocaleString(language === "nl" ? "nl-NL" : "en-GB")}</small></div>}
               <div className="cw-controls">
                 <button type="button" className="cw-primary" disabled={busy || !remoteProfileId || !invitePreview || invitePreviewLoading} onClick={() => void acceptIncomingInvitation()}><CheckCircle2 size={15} />{t("Ik accepteer en geef mijn eigen toestemming", "Accept and give my own consent")}</button>
@@ -1491,13 +1489,13 @@ export default function CinematicWorld({
             {inviteLink && <div className="cw-invite-link"><label>{t("Jouw eenmalige uitnodigingslink", "Your one-time invitation link")}<input readOnly value={inviteLink} /></label><button type="button" onClick={() => { void navigator.clipboard?.writeText(inviteLink); setMessage(t("Uitnodigingslink gekopieerd.", "Invitation link copied.")); }}><Copy size={15} />{t("Kopieer link", "Copy link")}</button></div>}
           </div>
           {joinedRuns.length > 0 && <div className="cw-saved-list"><h3>{t("Ervaringen waarvoor jij toestemming gaf", "Experiences you consented to")} <span>{joinedRuns.length}</span></h3>{joinedRuns.map((run) => <div className="cw-saved-row" key={run.id}><div><strong>{String(run.scene_snapshot.title ?? run.scene_key)}</strong><small>{t("Je neemt deel als gast ·", "You are a participant ·")} {run.status === "active" ? t("Actief", "Active") : t("Gepauzeerd", "Paused")}</small></div><button type="button" className="cw-danger" disabled={busy} onClick={() => void withdrawSharedConsent(run.id)}>{t("Toestemming intrekken en stoppen", "Withdraw consent and stop")}</button></div>)}</div>}
-          <div className="cw-saved-list"><h3>{t("Uitnodigingen en toestemmingen", "Invitations and consent")} <span>{experienceInvites.length}</span></h3>{experienceInvites.map((invite) => <div className="cw-saved-row" key={invite.id}><div><strong>{invite.status === "accepted" ? t("Toestemming ontvangen", "Consent received") : invite.status === "pending" && new Date(invite.expires_at).getTime() <= Date.now() ? t("Verlopen", "Expired") : t(invite.status === "revoked" ? "Ingetrokken" : "Wacht op acceptatie", invite.status === "revoked" ? "Revoked" : "Awaiting acceptance")}</strong><small>{t("Geldig tot", "Expires")} {new Date(invite.expires_at).toLocaleString(language === "nl" ? "nl-NL" : "en-GB")}{invite.accepted_at ? " · " + t("Geaccepteerd", "Accepted") + " " + new Date(invite.accepted_at).toLocaleString(language === "nl" ? "nl-NL" : "en-GB") : ""}</small></div>{invite.status === "pending" && new Date(invite.expires_at).getTime() > Date.now() ? <button type="button" disabled={busy} onClick={() => void revokeInvite(invite)}>{t("Intrekken", "Revoke")}</button> : null}</div>)}</div>
-          <div className="cw-saved-list"><h3>{t("Eerdere uitnodigingsconcepten", "Previous invitation drafts")} <span>{records.invitation.length}</span></h3>{records.invitation.map((record) => <div className="cw-saved-row" key={record.record_key}><div><strong>{String(record.payload.title ?? t("Uitnodiging", "Invitation"))}</strong><small>{record.payload.shareStatus === "shared" ? t("Gedeeld", "Shared") : t("Concept", "Draft")} · {new Date(record.updated_at).toLocaleDateString(language === "nl" ? "nl-NL" : "en-GB")}</small></div><button type="button" onClick={() => { setInviteTitle(String(record.payload.title ?? "")); setInviteMessage(String(record.payload.message ?? "")); }}>{t("Open", "Open")}</button></div>)}</div>
+          <div className="cw-saved-list"><h3>{t("Uitnodigingen en toestemmingen", "Invitations and consent")} <span>{experienceInvites.length}</span></h3>{experienceInvites.length ? experienceInvites.map((invite) => <div className="cw-saved-row" key={invite.id}><div><strong>{invite.status === "accepted" ? t("Toestemming ontvangen", "Consent received") : invite.status === "pending" && new Date(invite.expires_at).getTime() <= Date.now() ? t("Verlopen", "Expired") : t(invite.status === "revoked" ? "Ingetrokken" : "Wacht op acceptatie", invite.status === "revoked" ? "Revoked" : "Awaiting acceptance")}</strong><small>{t("Geldig tot", "Expires")} {new Date(invite.expires_at).toLocaleString(language === "nl" ? "nl-NL" : "en-GB")}{invite.accepted_at ? " · " + t("Geaccepteerd", "Accepted") + " " + new Date(invite.accepted_at).toLocaleString(language === "nl" ? "nl-NL" : "en-GB") : ""}</small></div>{invite.status === "pending" && new Date(invite.expires_at).getTime() > Date.now() ? <button type="button" disabled={busy} onClick={() => void revokeInvite(invite)}>{t("Intrekken", "Revoke")}</button> : null}</div>) : <p className="cw-empty-state">{t("Er zijn nog geen uitnodigingen. Een nieuwe uitnodiging blijft altijd vrijwillig en tijdelijk.", "There are no invitations yet. Every invitation remains voluntary and time-limited.")}</p>}</div>
+          <div className="cw-saved-list"><h3>{t("Eerdere uitnodigingsconcepten", "Previous invitation drafts")} <span>{records.invitation.length}</span></h3>{records.invitation.length ? records.invitation.map((record) => <div className="cw-saved-row" key={record.record_key}><div><strong>{String(record.payload.title ?? t("Uitnodiging", "Invitation"))}</strong><small>{record.payload.shareStatus === "shared" ? t("Gedeeld", "Shared") : t("Concept", "Draft")} · {new Date(record.updated_at).toLocaleDateString(language === "nl" ? "nl-NL" : "en-GB")}</small></div><button type="button" onClick={() => { setInviteTitle(String(record.payload.title ?? "")); setInviteMessage(String(record.payload.message ?? "")); }}>{t("Open", "Open")}</button></div>) : <p className="cw-empty-state">{t("Nog geen uitnodigingsconcepten bewaard.", "No invitation drafts have been saved yet.")}</p>}</div>
         </section>
       )}
 
       {tab === "dominion" && (
-        <section className="cw-section" id="cw-active-panel" role="tabpanel" aria-labelledby={`cw-tab-${tab}`} tabIndex={0}>
+        <section id="cw-active-panel" role="tabpanel" aria-labelledby={`cw-tab-${tab}`} tabIndex={0} className="cw-section cw-section--dominion">
           <div className="cw-section-heading"><span className="cw-kicker">06 · KNOW YOUR DYNAMIC</span><h2><ShieldCheck /> The Dominion</h2><p>{t("Een persoonlijk dynamiekprofiel als hulpmiddel voor gesprekken en afstemming. Dit profiel is nooit toestemming voor een toekomstige handeling.", "A personal dynamics profile to support conversations and alignment. This profile is never consent for a future action.")}</p></div>
           <div className="cw-form-panel">
             <label>{t("Voorkeursrol of dynamiek", "Preferred role or dynamic")}<input value={domRole} onChange={(event) => setDomRole(event.target.value)} maxLength={100} /></label>
@@ -1512,7 +1510,7 @@ export default function CinematicWorld({
       )}
 
       {tab === "deck" && (
-        <section className="cw-section" id="cw-active-panel" role="tabpanel" aria-labelledby={`cw-tab-${tab}`} tabIndex={0}>
+        <section id="cw-active-panel" role="tabpanel" aria-labelledby={`cw-tab-${tab}`} tabIndex={0} className="cw-section cw-section--deck">
           <div className="cw-section-heading"><span className="cw-kicker">07 · CONTENT THAT GROWS WITH YOU</span><h2><Star /> The Ritual Deck</h2><p>{t("Reflectiekaarten voor verbinding, grenzen en aftercare. Voeg je eigen kaarten toe; iedere trekking wordt in je privégeschiedenis bewaard.", "Reflection cards for connection, boundaries and aftercare. Add your own cards; every draw is saved to your private history.")}</p></div>
           <div className="cw-ritual-card">{currentCard ? <><span className="cw-kicker">{t("JOUW KAART", "YOUR CARD")}</span><p>{currentCard.title}</p></> : <><span className="cw-kicker">THE RITUAL DECK</span><p>{t("Trek een kaart om een nieuw gesprek te openen.", "Draw a card to open a new conversation.")}</p></>}<button type="button" className="cw-primary" onClick={() => void drawRitualCard()} disabled={busy || !remoteProfileId}><Sparkles size={15} />{t("Trek een kaart", "Draw a card")}</button></div>
           <div className="cw-form-panel">
@@ -1521,12 +1519,12 @@ export default function CinematicWorld({
             <label>{t("Reflectievraag of ritueel", "Reflection prompt or ritual")}<textarea rows={3} value={customCardText} onChange={(event) => setCustomCardText(event.target.value)} maxLength={500} /></label>
             <button type="button" className="cw-primary" onClick={() => void saveCustomRitualCard()} disabled={busy || !remoteProfileId || !customCardTitle.trim() || !customCardText.trim()}><Plus size={15} />{t("Kaart toevoegen", "Add card")}</button>
           </div>
-          <div className="cw-saved-list"><h3>{t("Eigen kaarten en trekkingen", "Custom cards and draws")} <span>{customRitualCards.length + ritualDrawCount}</span></h3>{customRitualCards.map((card) => <div className="cw-saved-row" key={card.id}><div><strong>{card.title}</strong><small>{card.text}</small></div><button type="button" onClick={() => setCurrentCard({ id: card.id, title: card.text })}>{t("Trek", "Draw")}</button><button type="button" onClick={() => void removeRitualCard(card.id)} aria-label={t("Kaart verwijderen", "Delete card")}><Trash2 size={14} /></button></div>)}</div>
+          <div className="cw-saved-list"><h3>{t("Eigen kaarten en trekkingen", "Custom cards and draws")} <span>{customRitualCards.length + ritualDrawCount}</span></h3>{customRitualCards.length ? customRitualCards.map((card) => <div className="cw-saved-row" key={card.id}><div><strong>{card.title}</strong><small>{card.text}</small></div><button type="button" onClick={() => setCurrentCard({ id: card.id, title: card.text })}>{t("Trek", "Draw")}</button><button type="button" onClick={() => void removeRitualCard(card.id)} aria-label={t("Kaart verwijderen", "Delete card")}><Trash2 size={14} /></button></div>) : <p className="cw-empty-state">{t("Je eigen kaarten verschijnen hier zodra je de eerste toevoegt.", "Your custom cards will appear here after you add the first one.")}</p>}</div>
         </section>
       )}
 
       {tab === "club" && (
-        <section className="cw-section" id="cw-active-panel" role="tabpanel" aria-labelledby={`cw-tab-${tab}`} tabIndex={0}>
+        <section id="cw-active-panel" role="tabpanel" aria-labelledby={`cw-tab-${tab}`} tabIndex={0} className="cw-section cw-section--club">
           <div className="cw-section-heading"><span className="cw-kicker">08 · YOUR LONG GAME</span><h2><Flame /> The Midnight Club</h2><p>{t("Een privéoverzicht dat groeit door wat je daadwerkelijk ontwerpt, bewaart en afrondt. Geen nepstreaks of willekeurige punten.", "A private overview that grows through what you actually design, save and complete. No fake streaks or random points.")}</p></div>
           <div className="cw-member-card"><span className="cw-kicker">MIDNIGHT MEMBER</span><strong>LEVEL {String(memberLevel).padStart(2, "0")}</strong><p>{t("Je lidmaatschap groeit met bewuste ervaringen en eigen creaties.", "Your membership grows through intentional experiences and personal creations.")}</p></div>
           <div className="cw-stats-grid">
@@ -1540,7 +1538,7 @@ export default function CinematicWorld({
           </div>
           <div className="cw-badges"><h3>{t("Jouw mijlpalen", "Your milestones")}</h3>{MILESTONES.map((item) => <div key={item[0]} className={unlocked.has(item[0]) ? "earned" : ""}><span>{unlocked.has(item[0]) ? <CheckCircle2 size={17} /> : <Star size={17} />}</span><div><strong>{item[1]}</strong><small>{language === "nl" ? item[2] : item[3]}</small></div><em>{unlocked.has(item[0]) ? t("ONTGRENDELD", "UNLOCKED") : t("NOG TE VERDIENEN", "LOCKED")}</em></div>)}</div>
           <div className="cw-form-panel"><h3>{t("Jouw gegevens blijven van jou", "Your data stays yours")}</h3><p>{t("Exporteer een back-up of verwijder alle gegevens van deze acht onderdelen. Kluisnotities blijven versleuteld in de export.", "Export a backup or delete all data from these eight modules. Vault notes remain encrypted in the export.")}</p><div className="cw-card-actions"><button type="button" className="cw-primary" onClick={exportBackup} disabled={!remoteProfileId}><Download size={15} />{t("Exporteer back-up", "Export backup")}</button><button type="button" className="cw-danger" onClick={() => void deleteAllWorldData()} disabled={busy || !remoteProfileId}><Trash2 size={15} />{t("Verwijder alle World-gegevens", "Delete all World data")}</button></div></div>
-          <div className="cw-saved-list"><h3>{t("Recente ervaringen", "Recent experiences")} <span>{runs.length}</span></h3>{runs.slice(0, 8).map((run) => <div className="cw-saved-row" key={run.id}><div><strong>{String(run.scene_snapshot.title ?? run.scene_key)}</strong><small>{run.status.toUpperCase()} · {new Date(run.updated_at).toLocaleString(language === "nl" ? "nl-NL" : "en-GB")}</small></div><span>{run.current_step}/{run.total_steps}</span></div>)}</div>
+          <div className="cw-saved-list"><h3>{t("Recente ervaringen", "Recent experiences")} <span>{runs.length}</span></h3>{runs.length ? runs.slice(0, 8).map((run) => <div className="cw-saved-row" key={run.id}><div><strong>{String(run.scene_snapshot.title ?? run.scene_key)}</strong><small>{run.status.toUpperCase()} · {new Date(run.updated_at).toLocaleString(language === "nl" ? "nl-NL" : "en-GB")}</small></div><span>{run.current_step}/{run.total_steps}</span></div>) : <p className="cw-empty-state">{t("Je eerste afgeronde ervaring verschijnt hier.", "Your first completed experience will appear here.")}</p>}</div>
         </section>
       )}
 
