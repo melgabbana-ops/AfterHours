@@ -1377,6 +1377,13 @@ export default function CinematicWorld({
               <div className="cw-scene-art"><span className="cw-kicker">{t("LIVE SCÈNE", "LIVE SCENE")} · {String(stepIndex + 1).padStart(2, "0")} / {String(activeScene.steps.length).padStart(2, "0")}</span><h3>{activeScene.title}</h3><p>{activeScene.description}</p></div>
               {runStatus === "completed" ? (
                 <div className="cw-aftercare"><CheckCircle2 /><h3>{t("De ervaring is afgerond", "Experience complete")}</h3><p>{t("Neem rustig de tijd. Vraag wat prettig voelt: water, warmte, praten, stilte of ruimte. Een korte check-in en aftercare horen bij de ervaring.", "Take your time. Ask what feels right: water, warmth, conversation, quiet or space. A check-in and aftercare are part of the experience.")}</p><div className="cw-card-actions"><button type="button" className="cw-primary" onClick={onOpenAftercare}>{t("Open AFTERCARE", "Open AFTERCARE")}</button><button type="button" onClick={() => { setActiveScene(null); setActiveRunId(null); setRunStatus(null); setTab("club"); }}>{t("Midnight Club", "Midnight Club")}</button></div></div>
+              ) : runStatus === "paused" ? (
+                <div className="cw-aftercare cw-paused-state" role="status" aria-live="polite">
+                  <Pause />
+                  <h3>{t("Deze ervaring is gepauzeerd", "This experience is paused")}</h3>
+                  <p>{t("Er zijn geen verdere stappen beschikbaar zolang de pauze actief is. Controleer je verbinding en hervat pas nadat de pauzestatus is bevestigd en opnieuw toestemming is gegeven.", "No further steps are available while the pause is active. Check your connection, and resume only after the paused status is confirmed and fresh consent is given.")}</p>
+                  <button type="button" className="cw-stop" onClick={() => void stopScene()} disabled={stopPending} aria-label={t("Ervaring onmiddellijk stoppen", "Stop experience immediately")}><Square size={14} /> STOP</button>
+                </div>
               ) : (
                 <>
                   <div className="cw-step-progress"><span style={{ width: (((stepIndex + 1) / activeScene.steps.length) * 100) + "%" }} /></div>
