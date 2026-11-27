@@ -68,4 +68,11 @@ describe("shouldShowTeaser", () => {
     expect(shouldShowTeaser("?screen=profile")).toBe(false);
     expect(shouldShowTeaser("?maintenance=1")).toBe(false);
   });
+
+  it("never lets the promotional teaser override direct safety, legal, or private invitations", () => {
+    expect(shouldShowTeaser("?teaser=1&stop=1")).toBe(false);
+    expect(shouldShowTeaser("?teaser=1&screen=safety")).toBe(false);
+    expect(shouldShowTeaser("?teaser=1&screen=legal")).toBe(false);
+    expect(shouldShowTeaser("?teaser=1&couple=ABCD2345XY")).toBe(false);
+  });
 });
