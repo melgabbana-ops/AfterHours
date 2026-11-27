@@ -164,6 +164,7 @@ export default function CinematicWorld({
   const [inviteLink, setInviteLink] = useState("");
   const [incomingInviteToken, setIncomingInviteToken] = useState<string | null>(() => consumeInvitationTokenFromUrl(window.location.href).token);
   const [invitePreview, setInvitePreview] = useState<ExperienceInvitationPreview | null>(null);
+  const [inviteConsentConfirmed, setInviteConsentConfirmed] = useState(false);
   const [invitePreviewLoading, setInvitePreviewLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -362,6 +363,7 @@ export default function CinematicWorld({
 
   useEffect(() => {
     let active = true;
+    setInviteConsentConfirmed(false);
     if (!incomingInviteToken || !remoteProfileId) {
       setInvitePreview(null);
       setInvitePreviewLoading(false);
@@ -1084,6 +1086,7 @@ export default function CinematicWorld({
   }
 
   function dismissIncomingInvitation() {
+    setInviteConsentConfirmed(false);
     setIncomingInviteToken(null);
     setInvitePreview(null);
     setInvitePreviewLoading(false);
@@ -1092,7 +1095,7 @@ export default function CinematicWorld({
   }
 
   async function acceptIncomingInvitation() {
-    if (!remoteProfileId || !incomingInviteToken || !invitePreview) return;
+    if (!remoteProfileId || !incomingInviteToken || !invitePreview || !inviteConsentConfirmed) return;
     setBusy(true);
     setError("");
     try {
@@ -1103,6 +1106,7 @@ export default function CinematicWorld({
       const digest = await crypto.subtle.digest("SHA-256", tokenBytes);
       const tokenHash = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
       const accepted = await acceptExperienceInvitation(tokenHash, remoteProfileId);
+      setInviteConsentConfirmed(false);
       setIncomingInviteToken(null);
       setInvitePreview(null);
       const sanitizedUrl = consumeInvitationTokenFromUrl(window.location.href).sanitizedUrl;
@@ -1477,8 +1481,9 @@ export default function CinematicWorld({
               {!remoteProfileId ? <p>{t("Log in op je eigen AFTER HOURS-account om de scène te bekijken en eventueel te accepteren.", "Sign in to your own AFTER HOURS account to preview and optionally accept the scene.")}</p> : null}
               {invitePreviewLoading && <p>{t("Scène veilig ophalen…", "Loading scene securely…")}</p>}
               {invitePreview && <div className="cw-invite-preview"><strong>{invitePreview.title}</strong>{invitePreview.description && <p>{invitePreview.description}</p>}<ol>{invitePreview.steps.slice(0, 12).map((step, index) => <li key={index}>{step}</li>)}</ol><small>{t("Uitnodiging verloopt", "Invitation expires")} {new Date(invitePreview.expires_at).toLocaleString(language === "nl" ? "nl-NL" : "en-GB")}</small></div>}
+              <label className="cw-invite-consent"><input type="checkbox" checked={inviteConsentConfirmed} onChange={(event) => setInviteConsentConfirmed(event.target.checked)} disabled={busy || !invitePreview || invitePreviewLoading} /><span>{t("Ik heb de volledige scène en de grenzen gelezen. Ik kies vrijwillig om aan deze specifieke ervaring deel te nemen. Ik kan op ieder moment pauzeren, stoppen of mijn toestemming intrekken.", "I have reviewed the full scene and boundaries. I freely choose to participate in this specific experience. I can pause, stop, or withdraw consent at any time.")}</span></label>
               <div className="cw-controls">
-                <button type="button" className="cw-primary" disabled={busy || !remoteProfileId || !invitePreview || invitePreviewLoading} onClick={() => void acceptIncomingInvitation()}><CheckCircle2 size={15} />{t("Ik accepteer en geef mijn eigen toestemming", "Accept and give my own consent")}</button>
+                <button type="button" className="cw-primary" disabled={busy || !remoteProfileId || !invitePreview || invitePreviewLoading || !inviteConsentConfirmed} onClick={() => void acceptIncomingInvitation()}><CheckCircle2 size={15} />{t("Ik accepteer en geef mijn eigen toestemming", "Accept and give my own consent")}</button>
                 <button type="button" disabled={busy} onClick={dismissIncomingInvitation}>{t("Niet nu, uitnodiging sluiten", "Not now, close invitation")}</button>
               </div>
             </div>
