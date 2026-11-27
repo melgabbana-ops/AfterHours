@@ -157,8 +157,15 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
           ));
           return;
         }
+        // Every new channel connection is a fresh safety boundary. Never carry
+        // consent across reconnects, and never auto-resume an interrupted scene.
+        setMyConsent(false);
+        await channel.track({ participantId, displayName: name.trim() || t("Deelnemer", "Participant"), consent: false });
+        if (status === "active" || status === "paused") {
+          setStatus("paused");
+          await channel.send({ type: "broadcast", event: "reset-consent", payload: { stopped: false } });
+        }
         setConnected(true);
-        await channel.track({ participantId, displayName: name.trim() || t("Deelnemer", "Participant"), consent: myConsent });
       } else if (state === "CHANNEL_ERROR" || state === "TIMED_OUT" || state === "CLOSED") {
         setConnected(false);
         setMessage(t("Verbinding verbroken. Probeer opnieuw verbinding te maken.", "Connection lost. Try reconnecting."));
@@ -185,6 +192,32 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
       if (channel) void channel.send({ type: "broadcast", event: "reset-consent", payload: { stopped: false } }).catch(() => {});
     }
   }, [mode, connected, status, partnerPresent]);
+
+  useEffect(() => {
+    if (mode !== "remote") return;
+    const pauseForInterruption = () => {
+      if (status !== "active") return;
+      // Keep the pause local-first. Reconnection never changes this status to active.
+      setStatus("paused");
+      setMyConsent(false);
+      setMessage(t("Verbinding of scherm onderbroken. De Duo-ervaring is gepauzeerd. Beide spelers moeten opnieuw instemmen.", "Connection or screen interrupted. Duo is paused. Both players must consent again."));
+      const channel = channelRef.current;
+      if (channel) {
+        void channel.send({ type: "broadcast", event: "play-state", payload: { round, status: "paused" } }).catch(() => {});
+        void channel.send({ type: "broadcast", event: "reset-consent", payload: { stopped: false } }).catch(() => {});
+      }
+    };
+    const handleOffline = () => pauseForInterruption();
+    const handleVisibility = () => {
+      if (document.visibilityState === "hidden") pauseForInterruption();
+    };
+    window.addEventListener("offline", handleOffline);
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => {
+      window.removeEventListener("offline", handleOffline);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [mode, status, round, language]);
 
   const publish = async (nextRound: number, nextStatus: PlayStatus) => {
     if (mode === "local" && nextStatus === "active" && !canStartLocalPlay(myConsent, localPartnerConsent)) {
