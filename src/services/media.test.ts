@@ -35,10 +35,11 @@ describe("private vault listing metadata", () => {
     expect(toPrivateMediaItem(owner, "session-456", { id: "object-1", name })).toBeNull();
   });
 
-  it("rejects incomplete storage entries and invalid size metadata", () => {
+  it("rejects incomplete storage entries and non-numeric size metadata", () => {
     expect(toPrivateMediaItem(owner, "session-456", { name: "photo.jpg" })).toBeNull();
     expect(toPrivateMediaItem(owner, "session-456", { id: "object-1", name: "" })).toBeNull();
-    for (const size of [-1, 1.5, Number.NaN, Number.POSITIVE_INFINITY, Number.MAX_SAFE_INTEGER + 1, "not-a-size"]) {
+    expect(toPrivateMediaItem(owner, "session-456", { id: "object-1", name: "photo.jpg" })).toBeNull();
+    for (const size of [-1, 1.5, Number.NaN, Number.POSITIVE_INFINITY, Number.MAX_SAFE_INTEGER + 1, "1024", "not-a-size", null, undefined]) {
       expect(toPrivateMediaItem(owner, "session-456", {
         id: "object-1",
         name: "photo.jpg",
