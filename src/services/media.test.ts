@@ -1,5 +1,67 @@
 import { describe, expect, it } from "vitest";
-import { assertPrivateMediaDeletionConfirmed, canApplyMediaOverlay, normalizePrivateMediaMimeType, safeAssignmentPrefix, safeMediaSessionFolder, safePrivateMediaFileName, validatePrivateMediaFile, validatePrivateMediaPath } from "./media";
+import { assertPrivateMediaDeletionConfirmed, canApplyMediaOverlay, normalizePrivateMediaMimeType, safeAssignmentPrefix, safeMediaSessionFolder, safePrivateMediaFileName, toPrivateMediaItem, validatePrivateMediaFile, validatePrivateMediaPath } from "./media";
+
+describe("private vault listing metadata", () => {
+  const owner = "user-123";
+
+  it("maps a valid owner-scoped storage entry to a displayable item", () => {
+    expect(toPrivateMediaItem(owner, "session-456", {
+      id: "object-1",
+      name: "photo.jpg",
+      metadata: { size: 1024, mimetype: "image/jpeg" },
+      created_at: "2026-11-27T12:00:00.000Z",
+    })).toEqual({
+      name: "photo.jpg",
+      path: "user-123/session-456/photo.jpg",
+      size: 1024,
+      createdAt: "2026-11-27T12:00:00.000Z",
+      contentType: "image/jpeg",
+    });
+  });
+
+  it.each([
+    ["a traversal folder", "../other"],
+    ["a nested folder", "session/subfolder"],
+    ["an encoded folder", "session%2Fother"],
+  ])("rejects %s from a storage listing", (_label, folder) => {
+    expect(toPrivateMediaItem(owner, folder, { id: "object-1", name: "photo.jpg" })).toBeNull();
+  });
+
+  it.each([
+    ["a traversal filename", "../private.jpg"],
+    ["an encoded filename", "photo%2Fprivate.jpg"],
+    ["a filename with a slash", "nested/photo.jpg"],
+  ])("rejects %s from a storage listing", (_label, name) => {
+    expect(toPrivateMediaItem(owner, "session-456", { id: "object-1", name })).toBeNull();
+  });
+
+  it("rejects incomplete storage entries and invalid size metadata", () => {
+    expect(toPrivateMediaItem(owner, "session-456", { name: "photo.jpg" })).toBeNull();
+    expect(toPrivateMediaItem(owner, "session-456", { id: "object-1", name: "" })).toBeNull();
+    for (const size of [-1, Number.NaN, Number.POSITIVE_INFINITY, "not-a-size"]) {
+      expect(toPrivateMediaItem(owner, "session-456", {
+        id: "object-1",
+        name: "photo.jpg",
+        metadata: { size },
+      })).toBeNull();
+    }
+  });
+
+  it("keeps a valid item but omits malformed optional metadata", () => {
+    expect(toPrivateMediaItem(owner, "session-456", {
+      id: "object-1",
+      name: "photo.jpg",
+      metadata: { size: 0, mimetype: "   " },
+      created_at: "not-a-date",
+    })).toEqual({
+      name: "photo.jpg",
+      path: "user-123/session-456/photo.jpg",
+      size: 0,
+      createdAt: null,
+      contentType: null,
+    });
+  });
+});
 
 describe("private media filename safety", () => {
   it("replaces empty and dot-only names with a safe filename", () => {
