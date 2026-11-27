@@ -29,6 +29,8 @@ function memoryStorage() {
 describe("encrypted private journal vault", () => {
   it("auto-locks the local journal on inactivity or background and invalidates work on close", () => {
     expect(journalSource).toContain('import { bindVaultAutoLock, type VaultAutoLockReason } from "./vaultAutoLock";');
+    expect(journalSource).toContain('import { flushSync } from "react-dom";');
+    expect(journalSource).toContain('(reason) => flushSync(() => lock(reason)),');
     expect(journalSource).toContain('() => key !== null');
     expect(journalSource).toContain('(reason) => lock(reason)');
     expect(journalSource).toContain('useEffect(() => () => {');

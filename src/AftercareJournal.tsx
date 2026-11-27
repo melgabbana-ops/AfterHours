@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import { bindVaultAutoLock, type VaultAutoLockReason } from "./vaultAutoLock";
 import { canContinuePrivateJournalUnlock } from "./privateJournalUnlock";
 import { ArrowLeft, BookOpen, LockKeyhole, LockOpen, Plus, Save, Trash2 } from "lucide-react";
@@ -64,6 +65,9 @@ export default function AftercareJournal({ ownerId, language, onClose }: { owner
     document,
     () => key !== null || busy,
     (reason) => lock(reason),
+    undefined,
+    // Flush lifecycle locks before iOS/Android can snapshot private journal text.
+    (reason) => flushSync(() => lock(reason)),
   ), [key, busy, lock]);
 
   useEffect(() => () => {

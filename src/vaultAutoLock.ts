@@ -14,6 +14,7 @@ export function bindVaultAutoLock(
   isSensitive: () => boolean,
   onLock: (reason: VaultAutoLockReason) => void,
   idleMs = 5 * 60 * 1000,
+  onBackgroundLock: (reason: VaultAutoLockReason) => void = onLock,
 ): () => void {
   let timeout: ReturnType<typeof setTimeout> | undefined;
 
@@ -24,19 +25,24 @@ export function bindVaultAutoLock(
     }
   };
 
-  const lockIfSensitive = (reason: VaultAutoLockReason) => {
+  const lockIfSensitive = (
+    reason: VaultAutoLockReason,
+    notify: (reason: VaultAutoLockReason) => void = onLock,
+  ) => {
     if (!isSensitive()) return;
     clearIdleTimeout();
-    onLock(reason);
+    notify(reason);
   };
 
+  // Background lifecycle events need a synchronous UI commit so private text
+  // is cleared before mobile browsers capture the app-switcher snapshot.
   const onVisibilityChange = () => {
     if (documentTarget.visibilityState !== "visible") {
-      lockIfSensitive("background");
+      lockIfSensitive("background", onBackgroundLock);
     }
   };
 
-  const onPageHide = () => lockIfSensitive("background");
+  const onPageHide = () => lockIfSensitive("background", onBackgroundLock);
 
   const resetIdleTimer = () => {
     clearIdleTimeout();

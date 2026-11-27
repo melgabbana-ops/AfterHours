@@ -52,6 +52,40 @@ describe("Black Vault automatic locking", () => {
     cleanup();
   });
 
+  it("uses the synchronous background callback before page snapshots", () => {
+    const windowTarget = new EventTarget();
+    const documentTarget = new FakeDocument();
+    const onLock = vi.fn();
+    const onBackgroundLock = vi.fn();
+    const cleanup = bindVaultAutoLock(windowTarget, documentTarget, () => true, onLock, undefined, onBackgroundLock);
+
+    documentTarget.visibilityState = "hidden";
+    documentTarget.dispatchEvent(new Event("visibilitychange"));
+    expect(onBackgroundLock).toHaveBeenCalledOnce();
+    expect(onBackgroundLock).toHaveBeenCalledWith("background");
+    expect(onLock).not.toHaveBeenCalled();
+
+    windowTarget.dispatchEvent(new Event("pagehide"));
+    expect(onBackgroundLock).toHaveBeenCalledTimes(2);
+    expect(onLock).not.toHaveBeenCalled();
+    cleanup();
+  });
+
+  it("keeps the normal callback for an already-hidden initial mount", () => {
+    const windowTarget = new EventTarget();
+    const documentTarget = new FakeDocument();
+    const onLock = vi.fn();
+    const onBackgroundLock = vi.fn();
+    documentTarget.visibilityState = "hidden";
+
+    const cleanup = bindVaultAutoLock(windowTarget, documentTarget, () => true, onLock, undefined, onBackgroundLock);
+
+    expect(onLock).toHaveBeenCalledOnce();
+    expect(onLock).toHaveBeenCalledWith("background");
+    expect(onBackgroundLock).not.toHaveBeenCalled();
+    cleanup();
+  });
+
   it("locks on pagehide but ignores lifecycle events when the vault is empty", () => {
     const windowTarget = new EventTarget();
     const documentTarget = new FakeDocument();
