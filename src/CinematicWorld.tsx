@@ -1344,7 +1344,7 @@ export default function CinematicWorld({
         )}</p>
       </section>
 
-      <div className="cw-tabs" role="tablist" aria-label="AFTER HOURS private world">
+      <div className="cw-tabs" role="tablist" aria-label={t("AFTER HOURS privédomein", "AFTER HOURS private world")}>
         {tabItems.map((item) => {
           const Icon = item.icon;
           return (
@@ -1389,16 +1389,16 @@ export default function CinematicWorld({
                   <div className="cw-step-progress"><span style={{ width: (((stepIndex + 1) / activeScene.steps.length) * 100) + "%" }} /></div>
                   {lastPathChoice !== "unset" && <div className="cw-choice-note">{lastPathChoice === "gentle" ? t("Je koos voor een rustiger tempo.", "You chose a gentler pace.") : lastPathChoice === "deepen" ? t("Je koos voor extra verdieping en reflectie.", "You chose deeper reflection.") : lastPathChoice === "skip" ? t("De vorige fase is bewust overgeslagen.", "The previous step was consciously skipped.") : t("Je koos ervoor het afgesproken tempo aan te houden.", "You chose to keep the agreed pace.")}</div>}
                   <div className="cw-step-card"><span className="cw-kicker">{t("FASE", "STEP")} {stepIndex + 1}</span><p>{activeScene.steps[stepIndex]}</p></div>
-                  <div className="cw-checkin"><strong>{t("Hoe voelt dit voor jou?", "How does this feel for you?")}</strong><div>
-                    <button type="button" className={checkIn === "green" ? "selected green" : "green"} onClick={() => setCheckIn("green")}>{t("Groen · Verder", "Green · Continue")}</button>
-                    <button type="button" className={checkIn === "yellow" ? "selected yellow" : "yellow"} onClick={() => { setCheckIn("yellow"); void pauseScene(); }}>{t("Geel · Pauze", "Yellow · Pause")}</button>
-                    <button type="button" className={checkIn === "red" ? "selected red" : "red"} onClick={() => { setCheckIn("red"); void stopScene(); }}>{t("Rood · Stop", "Red · Stop")}</button>
+                  <div className="cw-checkin" role="group" aria-label={t("Veiligheidscheck-in", "Safety check-in")}><strong>{t("Hoe voelt dit voor jou?", "How does this feel for you?")}</strong><div>
+                    <button type="button" className={checkIn === "green" ? "selected green" : "green"} aria-pressed={checkIn === "green"} onClick={() => setCheckIn("green")}>{t("Groen · Verder", "Green · Continue")}</button>
+                    <button type="button" className={checkIn === "yellow" ? "selected yellow" : "yellow"} aria-pressed={checkIn === "yellow"} onClick={() => { setCheckIn("yellow"); void pauseScene(); }}>{t("Geel · Pauze", "Yellow · Pause")}</button>
+                    <button type="button" className={checkIn === "red" ? "selected red" : "red"} aria-pressed={checkIn === "red"} onClick={() => { setCheckIn("red"); void stopScene(); }}>{t("Rood · Stop", "Red · Stop")}</button>
                   </div><small>{t("Je stopsignaal is alleen in deze sessie nodig en wordt niet opgeslagen.", "Your stop signal is only needed in this session and is never stored.")}</small></div>
-                  <div className="cw-choice-panel"><strong>{t("Kies je volgende pad", "Choose your next path")}</strong><div>
-                    <button type="button" className={pathChoice === "steady" ? "selected" : ""} onClick={() => setPathChoice("steady")}>{t("Aangehouden tempo", "Keep this pace")}</button>
-                    <button type="button" className={pathChoice === "gentle" ? "selected" : ""} onClick={() => setPathChoice("gentle")}>{t("Zachter en rustiger", "Softer and slower")}</button>
-                    <button type="button" className={pathChoice === "deepen" ? "selected" : ""} onClick={() => setPathChoice("deepen")}>{t("Meer verdieping", "Explore deeper")}</button>
-                    <button type="button" className={pathChoice === "skip" ? "selected" : ""} onClick={() => setPathChoice("skip")}>{t("Deze fase overslaan", "Skip this step")}</button>
+                  <div className="cw-choice-panel" role="group" aria-label={t("Kies het gewenste tempo of vervolg", "Choose your preferred pace or next step")}><strong>{t("Kies je volgende pad", "Choose your next path")}</strong><div>
+                    <button type="button" className={pathChoice === "steady" ? "selected" : ""} aria-pressed={pathChoice === "steady"} onClick={() => setPathChoice("steady")}>{t("Aangehouden tempo", "Keep this pace")}</button>
+                    <button type="button" className={pathChoice === "gentle" ? "selected" : ""} aria-pressed={pathChoice === "gentle"} onClick={() => setPathChoice("gentle")}>{t("Zachter en rustiger", "Softer and slower")}</button>
+                    <button type="button" className={pathChoice === "deepen" ? "selected" : ""} aria-pressed={pathChoice === "deepen"} onClick={() => setPathChoice("deepen")}>{t("Meer verdieping", "Explore deeper")}</button>
+                    <button type="button" className={pathChoice === "skip" ? "selected" : ""} aria-pressed={pathChoice === "skip"} onClick={() => setPathChoice("skip")}>{t("Deze fase overslaan", "Skip this step")}</button>
                   </div><small>{t("Je keuze wordt bij deze ervaring bewaard en bepaalt de toon van de volgende fase.", "Your choice is saved with this experience and shapes the tone of the next step.")}</small></div>
                   <div className="cw-run-actions">
                     <button type="button" onClick={() => void pauseScene()} disabled={busy}><Pause size={15} />{t("Pauzeren", "Pause")}</button>
