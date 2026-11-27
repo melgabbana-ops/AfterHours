@@ -141,7 +141,7 @@
 .ah-session-screen .actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important}
 .ah-session-screen .actions button{min-height:46px!important;border:1px solid var(--ref-line)!important;border-radius:6px!important;background:#100c08!important;color:#e9d8bd!important;font-size:9px!important}
 .ah-session-screen .actions .gold{background:linear-gradient(180deg,#e5c48d,#b58249)!important;color:#170f08!important}
-.ah-session-screen .actions .stop{background:linear-gradient(180deg,#8d302b,#4d1715)!important;color:#fff0e9!important;border-color:#c66a5d!important}
+.ah-session-screen .actions .stop{background:linear-gradient(180deg,#3b3326,#17130d)!important;color:#f4ebdd!important;border-color:#c89445!important}
 .ah-session-screen .consent{margin-top:16px!important;border-color:var(--ref-line)!important;background:#0d0a07!important}
 .aftercare-card{
  max-width:470px!important;margin:0 auto!important;padding:28px 17px 22px!important;
@@ -317,7 +317,7 @@ input,select,textarea{accent-color:#c79b5d!important}
 .ah-session-screen .game-top>span:last-child{margin-left:auto!important;font-size:9px!important;letter-spacing:.14em!important}
 .ah-session-screen .session-state{display:inline-flex!important;align-items:center!important;gap:7px!important;margin-left:0!important;padding:7px 10px!important;border:1px solid rgba(216,183,126,.28)!important;border-radius:30px!important;background:rgba(12,9,6,.86)!important;color:#d8c5a6!important;font-size:8px!important;letter-spacing:.1em!important;white-space:nowrap!important}
 .ah-session-screen .session-state:before{content:"";width:6px;height:6px;border-radius:50%;background:#bd9258;box-shadow:0 0 9px rgba(216,183,126,.55)}
-.ah-session-screen .session-state.live:before{background:#9fc18a;box-shadow:0 0 10px rgba(159,193,138,.75)}
+.ah-session-screen .session-state.live:before{background:#c89445;box-shadow:0 0 10px rgba(200, 148, 69, .75)}
 .ah-session-screen .task-card>div{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;margin-top:14px!important}
 .ah-session-screen .task-card button{min-height:48px!important;padding:10px 12px!important;text-align:left!important;font-size:10px!important;line-height:1.4!important}
 .ah-session-screen .task-card button:focus-visible,.ah-session-screen .actions button:focus-visible,.ah-session-screen .next:focus-visible{outline:2px solid #f0d6a4!important;outline-offset:3px!important}
@@ -473,7 +473,7 @@ html,body,#root,.app{background:#050505!important;color:#f4e7d2!important}
 .ah-session-screen .timer{border-color:#f0d6a4!important;box-shadow:0 0 0 5px rgba(216,183,126,.08),0 0 30px rgba(216,183,126,.24),inset 0 0 24px rgba(216,183,126,.1)!important}
 .ah-session-screen .timer strong{font-size:clamp(34px,9vw,44px)!important}
 .ah-session-screen .actions button{border-radius:50px!important}
-.ah-session-screen .actions .stop{border-radius:6px!important;background:linear-gradient(180deg,#8d302b,#4d1715)!important}
+.ah-session-screen .actions .stop{border-radius:6px!important;background:linear-gradient(180deg,#3b3326,#17130d)!important}
 
 /* 04 AFTERCARE · candlelit panel and the exact two-by-two choice rhythm */
 .aftercare-screen:before{
@@ -666,8 +666,8 @@ html,body,#root,.app{background:#050505!important;color:#f4e7d2!important}
 }
 .ah-session-screen .actions button.stop{
  grid-column:1/-1!important;min-height:48px!important;
- border:1px solid #a64a42!important;background:linear-gradient(180deg,#8d302b,#4d1715)!important;
- color:#fff0e9!important;letter-spacing:.12em!important;
+ border:1px solid #c89445!important;background:linear-gradient(180deg,#3b3326,#17130d)!important;
+ color:#f4ebdd!important;letter-spacing:.12em!important;
 }
 .ah-session-screen .consent{
  display:flex!important;align-items:center!important;gap:10px!important;
