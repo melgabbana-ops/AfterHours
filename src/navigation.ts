@@ -16,7 +16,7 @@ export function initialScreenFromSearch(search: string): Screen {
 
 export function shouldShowColdIntro(search: string): boolean {
   const params = new URLSearchParams(search);
-  return !params.has("stop") && params.get("screen") !== "safety" && params.get("screen") !== "legal";
+  return !params.has("stop") && !params.has("couple") && params.get("screen") !== "safety" && params.get("screen") !== "legal";
 }
 
 export function shouldShowTeaser(search: string): boolean {
