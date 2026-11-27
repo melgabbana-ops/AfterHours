@@ -306,3 +306,21 @@
 @media(prefers-reduced-motion:reduce){
  .cw-world[data-tab] .cw-section,.cw-world[data-tab] .cw-scene-light,.cw-world[data-tab] .cw-ritual-card:before,.cw-world[data-tab] .cw-ritual-card:after{animation:none!important;transition:none!important;transform:none!important}
 }
+
+
+/* Screen-specific atmosphere: distinct visual signatures, shared monochrome-gold system. */
+.cw-world[data-tab="experience"] .cw-section--experience .cw-section-heading{position:relative;padding:0 0 16px 18px;border-left:1px solid rgba(223,189,131,.58)}
+.cw-world[data-tab="director"] .cw-section--director>.cw-form-panel{position:relative;border-left:2px solid #c9a16a;background:linear-gradient(115deg,rgba(201,161,106,.09),transparent 34%),linear-gradient(155deg,#17120c,#050505)}
+.cw-world[data-tab="director"] .cw-section--director>.cw-saved-list{background:repeating-linear-gradient(180deg,transparent 0 39px,rgba(201,161,106,.055) 40px 41px)}
+.cw-world[data-tab="vault"] .cw-section--vault>.cw-form-panel{background:radial-gradient(circle at 50% 42%,transparent 0 54px,rgba(201,161,106,.07) 55px 56px,transparent 57px 88px,rgba(201,161,106,.055) 89px 90px,transparent 91px),linear-gradient(155deg,#17120c,#050505)}
+.cw-world[data-tab="sensory"] .cw-section--sensory>.cw-form-panel{background:repeating-linear-gradient(90deg,transparent 0 22px,rgba(201,161,106,.035) 23px 24px),radial-gradient(ellipse at 50% 0%,rgba(201,161,106,.15),transparent 65%),linear-gradient(145deg,#17120c,#050505)}
+.cw-world[data-tab="sensory"] .cw-section--sensory>.cw-form-panel>label{padding:8px 10px;border-bottom:1px solid rgba(201,161,106,.17)}
+.cw-world[data-tab="invitation"] .cw-section--invitation>.cw-invite-preview{position:relative;background:linear-gradient(100deg,rgba(201,161,106,.12),transparent 68%),linear-gradient(180deg,rgba(255,255,255,.025),transparent)}
+.cw-world[data-tab="invitation"] .cw-section--invitation>.cw-invite-preview:before{content:"";display:block;width:34px;height:1px;margin:0 0 15px;background:#dfbd83;box-shadow:0 0 18px rgba(223,189,131,.55)}
+.cw-world[data-tab="dominion"] .cw-section--dominion>.cw-form-panel{background:repeating-linear-gradient(180deg,transparent 0 43px,rgba(201,161,106,.045) 44px 45px),linear-gradient(145deg,#17120c,#050505)}
+.cw-world[data-tab="deck"] .cw-section--deck>.cw-ritual-card{background:radial-gradient(circle at 50% 50%,rgba(201,161,106,.13) 0 1px,transparent 2px 28px,rgba(201,161,106,.08) 29px 30px,transparent 31px 58px,rgba(201,161,106,.06) 59px 60px,transparent 61px),linear-gradient(145deg,#17120c,#070605)}
+.cw-world[data-tab="club"] .cw-section--club>.cw-member-card{position:relative;overflow:hidden;background:radial-gradient(ellipse at 85% 0%,rgba(223,189,131,.2),transparent 48%),linear-gradient(145deg,#1c160e,#070605)}
+.cw-world[data-tab="club"] .cw-section--club>.cw-stats-grid>div{border-top:1px solid rgba(223,189,131,.45);background:linear-gradient(180deg,rgba(201,161,106,.075),rgba(13,10,7,.85) 48%)}
+.cw-world .cw-checkin button.green{border-color:rgba(207,174,121,.55);color:#e5d8c4}
+.cw-world .cw-checkin button.yellow{border-color:rgba(207,174,121,.55);color:#e5d8c4}
+.cw-world .cw-checkin button.red{border-color:rgba(117,107,92,.65);color:#c9a16a}
