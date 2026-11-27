@@ -5,7 +5,7 @@ import manifestText from "../public/manifest.webmanifest?raw";
 describe("initialScreenFromSearch", () => {
   it("opens every supported direct-link screen", () => {
     const screens = [
-      "game", "gameSelect", "complete", "profile", "admin", "insights", "radio",
+      "game", "gameSelect", "complete", "consent", "profile", "admin", "insights", "radio",
       "aftercare", "prompts", "safety", "store", "onboarding", "controlroom",
       "missions", "legal", "social", "lovense", "daily", "capture", "cinematic", "couples",
     ];
