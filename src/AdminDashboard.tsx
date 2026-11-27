@@ -90,7 +90,7 @@ export default function AdminDashboard({language,onBack}:{language:Locale;onBack
     setMessage(t("Wijzigingen opgeslagen en in het auditlog vastgelegd.","Changes saved and recorded in the audit log."));
    }
   }catch(error){
-   setMessage(t("Opslaan is mislukt. Controleer de migratie en je beheerdersrechten.","Save failed. Check the migration and your admin permissions."));
+   setMessage(t("Opslaan is mislukt. Controleer de bestaande serverconfiguratie en je beheerdersrechten. Deze melding vraagt niet om een migratie.","Save failed. Check the existing server configuration and your admin permissions. This message does not require a migration."));
   }finally{setSavingSlug(null)}
  };
 
@@ -109,10 +109,10 @@ export default function AdminDashboard({language,onBack}:{language:Locale;onBack
   <h1>{t("Beheerpaneel","Admin dashboard")}</h1>
   <p className="admin-intro">{t("Alleen geautoriseerde beheerders zien deze gegevens. Statistieken zijn geaggregeerd; persoonlijke sessie-inhoud wordt niet getoond.","Only allowlisted admins can see this data. Metrics are aggregated; private session content is not shown.")}</p>
 
-  {status==="loading"&&<section className="admin-state"><Activity/><strong>{t("Beveiligde toegang controleren…","Checking secure access…")}</strong></section>}
-  {status==="unavailable"&&<section className="admin-state"><AlertCircle/><strong>{t("Backend niet beschikbaar","Backend unavailable")}</strong><p>{t("Het paneel vereist de ingestelde Supabase-backend. Er wordt geen lokale beheermodus gebruikt.","This dashboard requires the configured Supabase backend. No local admin mode is provided.")}</p></section>}
-  {status==="setup"&&<section className="admin-state"><AlertCircle/><strong>{t("Beheerdermigratie vereist","Admin migration required")}</strong><p>{t("Voer supabase/migrate_admin_dashboard.sql uit in de juiste Supabase-database en geef daarna je geverifieerde auth-user-ID toegang via public.app_admins. Tot die tijd blijft het paneel gesloten.","Run supabase/migrate_admin_dashboard.sql in the correct Supabase database, then allowlist your verified auth user ID in public.app_admins. The panel remains closed until then.")}</p></section>}
-  {status==="denied"&&<section className="admin-state"><ShieldCheck/><strong>{t("Geen beheerdersrechten","No admin access")}</strong><p>{t("Deze account staat niet op de server-side beheerderslijst. Alleen een bestaande beheerder of databasebeheerder kan toegang toekennen.","This account is not on the server-side admin allowlist. Only an existing admin or database administrator can grant access.")}</p></section>}
+  {status==="loading"&&<section className="admin-state" role="status" aria-live="polite"><Activity/><strong>{t("Beveiligde toegang controleren…","Checking secure access…")}</strong></section>}
+  {status==="unavailable"&&<section className="admin-state" role="alert"><AlertCircle/><strong>{t("Backend niet beschikbaar","Backend unavailable")}</strong><p>{t("Het paneel vereist de ingestelde Supabase-backend. Er wordt geen lokale beheermodus gebruikt.","This dashboard requires the configured Supabase backend. No local admin mode is provided.")}</p></section>}
+  {status==="setup"&&<section className="admin-state" role="alert"><AlertCircle/><strong>{t("Beheerconfiguratie niet beschikbaar","Admin configuration unavailable")}</strong><p>{t("De bestaande server-side beheerdersconfiguratie kon niet worden bevestigd. Deze app voert geen migratie uit. Laat een bevoegde beheerder de huidige configuratie buiten deze app controleren.","The existing server-side admin configuration could not be verified. This app does not run migrations. Ask an authorized administrator to review the current configuration outside this app.")}</p></section>}
+  {status==="denied"&&<section className="admin-state" role="alert"><ShieldCheck/><strong>{t("Geen beheerdersrechten","No admin access")}</strong><p>{t("Deze account staat niet op de server-side beheerderslijst. Alleen een bestaande beheerder of databasebeheerder kan toegang toekennen.","This account is not on the server-side admin allowlist. Only an existing admin or database administrator can grant access.")}</p></section>}
 
   {status==="ready"&&<>
    <section className="admin-metrics"><div className="admin-section-head"><div><span className="eyebrow">{t("OVERZICHT","OVERVIEW")}</span><h2>{t("Gebruik & activiteit","Usage & activity")}</h2></div><span className="admin-secure"><ShieldCheck size={15}/>{t("Server-geautoriseerd","Server-authorized")}</span></div>
@@ -133,7 +133,7 @@ export default function AdminDashboard({language,onBack}:{language:Locale;onBack
    </section>
 
    <section className="admin-audit"><span className="eyebrow">{t("BEHEERLOG","AUDIT LOG")}</span><h2>{t("Recente wijzigingen","Recent changes")}</h2>
-    {auditError?<p role="status">{t("De beheerlog kon niet worden geladen. Probeer het paneel later opnieuw te openen.","The audit log could not be loaded. Try reopening the dashboard later.")}</p>:audit.length===0?<p>{t("Nog geen beheeracties geregistreerd.","No admin actions recorded yet.")}</p>:audit.map(item=><div className="admin-audit-row" key={item.id}><div><strong>{item.action}</strong><small>{String(item.metadata?.slug??"")}</small></div><time>{new Date(item.created_at).toLocaleString(language==="nl"?"nl-NL":"en-GB")}</time></div>)}
+    {auditError?<p role="alert">{t("De beheerlog kon niet worden geladen. Probeer het paneel later opnieuw te openen.","The audit log could not be loaded. Try reopening the dashboard later.")}</p>:audit.length===0?<p>{t("Nog geen beheeracties geregistreerd.","No admin actions recorded yet.")}</p>:audit.map(item=><div className="admin-audit-row" key={item.id}><div><strong>{item.action}</strong><small>{String(item.metadata?.slug??"")}</small></div><time>{new Date(item.created_at).toLocaleString(language==="nl"?"nl-NL":"en-GB")}</time></div>)}
    </section>
   </>}
  </main>;
