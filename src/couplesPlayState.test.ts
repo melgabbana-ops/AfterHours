@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { canStartRemotePlay, canResumeRemotePlay, shouldPauseRemotePlay, normalizeRoomCode, ROOM_CODE_LENGTH } from "./couplesPlayState";
+import { canStartLocalPlay, canStartRemotePlay, canResumeRemotePlay, shouldPauseRemotePlay, normalizeRoomCode, ROOM_CODE_LENGTH } from "./couplesPlayState";
+
+describe("local couple play consent", () => {
+  it("requires separate consent from both people before starting", () => {
+    expect(canStartLocalPlay(true, true)).toBe(true);
+    expect(canStartLocalPlay(true, false)).toBe(false);
+    expect(canStartLocalPlay(false, true)).toBe(false);
+    expect(canStartLocalPlay(false, false)).toBe(false);
+  });
+});
 
 describe("remote couple play safety", () => {
   const ready = { connected: true, serverAuthorized: true, participantCount: 2, partnerPresent: true, ownConsent: true, partnerConsent: true };
