@@ -4,6 +4,7 @@ import { bindVaultAutoLock } from "./vaultAutoLock";
 import { isExperienceStartAttemptCurrent } from "./experienceStartAttempt";
 import { isExperienceResumeAttemptCurrent } from "./experienceResumeAttempt";
 import { validateDirectorSceneDraft } from "./directorSceneDraft";
+import { hasUnsavedDirectorSceneChanges } from "./directorSceneDraftState";
 import { consumeInvitationTokenFromUrl } from "./invitationUrl";
 import {
   ArrowLeft, ArrowRight, BookOpen, CheckCircle2, Clapperboard, Copy,
@@ -195,9 +196,11 @@ export default function CinematicWorld({
   const [stepIndex, setStepIndex] = useState(0);
   const [runStatus, setRunStatus] = useState<"active" | "paused" | "completed" | null>(null);
   const [editingSceneKey, setEditingSceneKey] = useState<string | null>(null);
+  const [deletingSceneKey, setDeletingSceneKey] = useState<string | null>(null);
+  const deletingSceneRef = useRef(false);
   const [sceneTitle, setSceneTitle] = useState("");
   const [sceneDescription, setSceneDescription] = useState("");
-  const [sceneSteps, setSceneSteps] = useState("Aankomen en afstemmen\nGrenzen en signalen bevestigen\nEen gezamenlijke opdracht kiezen\nAftercare en reflectie");
+  const [sceneSteps, setSceneSteps] = useState("");
   const [vaultPassphrase, setVaultPassphrase] = useState("");
   const [vaultTitle, setVaultTitle] = useState("");
   const [vaultDraft, setVaultDraft] = useState("");
@@ -276,6 +279,13 @@ export default function CinematicWorld({
   const invitableRuns = runs.filter((run) => run.user_id === remoteProfileId && run.status === "paused");
   const joinedRuns = runs.filter((run) => run.user_id !== remoteProfileId && (run.status === "active" || run.status === "paused"));
   const selectedScene = scenes.find((scene) => scene.key === selectedSceneKey) ?? null;
+  const editingScene = scenes.find((scene) => scene.key === editingSceneKey) ?? null;
+  const sceneDraftDirty = hasUnsavedDirectorSceneChanges(
+    { title: sceneTitle, description: sceneDescription, stepsText: sceneSteps },
+    editingScene
+      ? { title: editingScene.title, description: editingScene.description, stepsText: editingScene.steps.join("\n") }
+      : null
+  );
 
   async function refreshData(userId = remoteProfileId) {
     if (!userId) return;
@@ -960,7 +970,26 @@ export default function CinematicWorld({
     setTab("experience");
   }
 
+  function confirmDiscardSceneDraft() {
+    if (!sceneDraftDirty) return true;
+    return window.confirm(t(
+      "Je hebt niet-opgeslagen wijzigingen. Wil je deze wijzigingen weggooien?",
+      "You have unsaved changes. Discard them?"
+    ));
+  }
+
+  function startNewScene() {
+    if (!confirmDiscardSceneDraft()) return;
+    setEditingSceneKey(null);
+    setSceneTitle("");
+    setSceneDescription("");
+    setSceneSteps("");
+    setError("");
+    setMessage("");
+  }
+
   function editScene(scene: Scene) {
+    if (!confirmDiscardSceneDraft()) return;
     setEditingSceneKey(scene.key);
     setSceneTitle(scene.title);
     setSceneDescription(scene.description);
@@ -969,11 +998,23 @@ export default function CinematicWorld({
   }
 
   async function removeScene(key: string) {
-    if (!remoteProfileId || !window.confirm(t("Deze eigen scène definitief verwijderen?", "Permanently delete this personal scene?"))) return;
+    if (!remoteProfileId || deletingSceneRef.current) return;
+    const removesCurrentDraft = editingSceneKey === key;
+    const confirmation = removesCurrentDraft && sceneDraftDirty
+      ? t(
+        "Deze scène definitief verwijderen en ook je niet-opgeslagen wijzigingen weggooien?",
+        "Permanently delete this scene and discard your unsaved changes?"
+      )
+      : t("Deze eigen scène definitief verwijderen?", "Permanently delete this personal scene?");
+    if (!window.confirm(confirmation)) return;
+
+    deletingSceneRef.current = true;
+    setDeletingSceneKey(key);
+    setError("");
     try {
       await deleteWorldRecord("director", key, remoteProfileId);
       setRecords((current) => ({ ...current, director: current.director.filter((record) => record.record_key !== key) }));
-      if (editingSceneKey === key) {
+      if (removesCurrentDraft) {
         setEditingSceneKey(null);
         setSceneTitle("");
         setSceneDescription("");
@@ -982,6 +1023,9 @@ export default function CinematicWorld({
       setMessage(t("Scène verwijderd.", "Scene deleted."));
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : t("Verwijderen is niet gelukt.", "Could not delete scene."));
+    } finally {
+      deletingSceneRef.current = false;
+      setDeletingSceneKey(null);
     }
   }
 
@@ -1572,15 +1616,16 @@ export default function CinematicWorld({
         <section id="cw-active-panel" role="tabpanel" aria-labelledby={`cw-tab-${tab}`} tabIndex={0} className="cw-section cw-section--director">
           <div className="cw-section-heading"><span className="cw-kicker">02 · DESIGN YOUR SCENE</span><h2><Clapperboard /> The Director's Room</h2><p>{t("Ontwerp een scène met eigen fases. Zodra je opslaat, verschijnt die direct in The Experience Engine.", "Design a scene with your own steps. Once saved, it appears directly in The Experience Engine.")}</p></div>
           <div className="cw-form-panel">
+            {sceneDraftDirty && <p className="cw-inline-message">{t("Je hebt niet-opgeslagen wijzigingen.", "You have unsaved changes.")}</p>}
             <label>{t("Naam van de scène", "Scene title")}<input value={sceneTitle} onChange={(event) => setSceneTitle(event.target.value)} maxLength={80} placeholder={t("Bijvoorbeeld: The Golden Hour", "For example: The Golden Hour")} /></label>
             <label>{t("Sfeer en intentie", "Atmosphere and intention")}<textarea value={sceneDescription} onChange={(event) => setSceneDescription(event.target.value)} rows={3} maxLength={500} /></label>
             <label>{t("Scènefases, één per regel (max. 40)", "Scene steps, one per line (max. 40)")}<textarea id="director-scene-steps" aria-describedby="director-scene-step-count" value={sceneSteps} onChange={(event) => setSceneSteps(event.target.value)} rows={7} maxLength={5000} /></label>
             <small id="director-scene-step-count" className="cw-step-count" data-over-limit={sceneSteps.split(/\r\n?|\n/).map((step) => step.trim()).filter(Boolean).length > 40}>
               {sceneSteps.split(/\r\n?|\n/).map((step) => step.trim()).filter(Boolean).length} / 40 {t("fases ingevuld", "steps entered")}
             </small>
-            <div className="cw-card-actions"><button type="button" className="cw-primary" onClick={() => void saveDirectorScene()} disabled={busy || !remoteProfileId}><Save size={15} />{editingSceneKey ? t("Wijzigingen opslaan", "Save changes") : t("Scène opslaan", "Save scene")}</button><button type="button" onClick={() => { setEditingSceneKey(null); setSceneTitle(""); setSceneDescription(""); setSceneSteps(""); }}>{t("Nieuwe scène", "New scene")}</button></div>
+            <div className="cw-card-actions"><button type="button" className="cw-primary" onClick={() => void saveDirectorScene()} disabled={busy || !remoteProfileId || deletingSceneKey !== null}><Save size={15} />{editingSceneKey ? t("Wijzigingen opslaan", "Save changes") : t("Scène opslaan", "Save scene")}</button><button type="button" onClick={startNewScene} disabled={deletingSceneKey !== null}>{t("Nieuwe scène", "New scene")}</button></div>
           </div>
-          <div className="cw-saved-list"><h3>{t("Jouw scènes", "Your scenes")} <span>{sceneCount}</span></h3>{scenes.filter((scene) => scene.custom).length ? scenes.filter((scene) => scene.custom).map((scene) => <div className="cw-saved-row" key={scene.key}><div><strong>{scene.title}</strong><small>{scene.steps.length} {t("fases · direct speelbaar", "steps · ready to run")}</small></div><button type="button" onClick={() => editScene(scene)}>{t("Bewerken", "Edit")}</button><button type="button" onClick={() => prepareScene(scene)} disabled={busy || stopPending}>{t("Start", "Run")}</button></div>) : <p>{t("Je hebt nog geen eigen scènes. Maak hierboven je eerste ontwerp.", "You have no custom scenes yet. Create your first design above.")}</p>}</div>
+          <div className="cw-saved-list"><h3>{t("Jouw scènes", "Your scenes")} <span>{sceneCount}</span></h3>{scenes.filter((scene) => scene.custom).length ? scenes.filter((scene) => scene.custom).map((scene) => <div className="cw-saved-row" key={scene.key}><div><strong>{scene.title}</strong><small>{scene.steps.length} {t("fases · direct speelbaar", "steps · ready to run")}</small></div><button type="button" onClick={() => editScene(scene)} disabled={deletingSceneKey !== null}>{t("Bewerken", "Edit")}</button><button type="button" onClick={() => prepareScene(scene)} disabled={busy || stopPending}>{t("Start", "Run")}</button><button type="button" className="cw-text-button" onClick={() => void removeScene(scene.key)} disabled={deletingSceneKey !== null} aria-label={t(\`Verwijder scène \${scene.title}\`, \`Delete scene \${scene.title}\`)}><Trash2 size={14} />{deletingSceneKey === scene.key ? t("Bezig…", "Deleting…") : t("Verwijderen", "Delete")}</button></div>) : <p>{t("Je hebt nog geen eigen scènes. Maak hierboven je eerste ontwerp.", "You have no custom scenes yet. Create your first design above.")}</p>}</div>
         </section>
       )}
 
