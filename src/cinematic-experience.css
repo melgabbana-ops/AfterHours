@@ -93,6 +93,7 @@
 .cw-run-actions>button:not(.cw-primary){display:inline-flex;align-items:center;gap:7px;min-height:48px;padding:10px 13px;border:1px solid rgba(207,174,121,.34);color:#dfceb1;font-size:9px}
 .cw-run-actions .cw-stop,.cw-danger{display:inline-flex;align-items:center;gap:7px;min-height:48px;padding:10px 13px;border:1px solid rgba(117,107,92,.65);color:#c9a16a;font-size:9px}
 .cw-aftercare{padding:18px;border:1px solid rgba(207,174,121,.3);background:rgba(5,5,4,.75);text-align:center}
+.cw-paused-state{display:grid;justify-items:center;gap:10px;margin:14px 0;border-color:rgba(207,174,121,.46);background:linear-gradient(145deg,rgba(24,19,12,.96),rgba(5,5,4,.98))}.cw-paused-state>svg{color:#d4b47f}.cw-paused-state .cw-stop{justify-self:center;min-width:112px;min-height:48px}
 .cw-aftercare>svg{width:30px;height:30px;color:#d4b47f}
 .cw-aftercare h3{color:#f0dfc0;font:500 24px Cinzel,Georgia,serif}
 .cw-aftercare p{color:#c6b79f;font-size:11px;line-height:1.7}
