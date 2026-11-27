@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowLeft, Copy, Link2, MonitorSmartphone, Pause, Play, ShieldCheck, Users, Wifi, WifiOff } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ArrowLeft, MonitorSmartphone, Pause, Play, ShieldCheck, Wifi } from "lucide-react";
 import { supabase, supabaseConfigured } from "./services/supabase";
-import { canResumeRemotePlay, canStartLocalPlay, canStartRemotePlay, shouldPauseRemotePlay, normalizeRoomCode, ROOM_CODE_LENGTH } from "./couplesPlayState";
+import { canResumeRemotePlay, canStartLocalPlay, canStartRemotePlay, shouldPauseRemotePlay } from "./couplesPlayState";
 
 type Language = "nl" | "en";
 type Mode = "local" | "remote";
@@ -14,13 +14,6 @@ const prompts = [
   { nl: "Wil je doorgaan, aanpassen, pauzeren of stoppen?", en: "Would you like to continue, adjust, pause, or stop?" },
   { nl: "Welke vorm van aftercare past nu bij jullie?", en: "What kind of aftercare would feel right now?" }
 ];
-function newCode() {
-  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  const bytes = new Uint8Array(ROOM_CODE_LENGTH);
-  crypto.getRandomValues(bytes);
-  return Array.from(bytes, value => alphabet[value % alphabet.length]).join("");
-}
-
 export default function CouplesPlay({ language, onBack, onOpenInvitations }: { language: Language; onBack: () => void; onOpenInvitations: () => void }) {
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
   // Legacy room-code links are intentionally not joined: they lack account-bound private-channel authorization.
@@ -53,13 +46,6 @@ export default function CouplesPlay({ language, onBack, onOpenInvitations }: { l
   const partnerPresent = participants.some(person => person.participantId !== participantId);
   const partnerConsented = participants.some(person => person.participantId !== participantId && person.consent === true);
   const ready = mode === "local" ? canStartLocalPlay(myConsent, localPartnerConsent) : canStartRemotePlay({ connected, serverAuthorized: false, participantCount: participants.length, partnerPresent, ownConsent: myConsent, partnerConsent: partnerConsented });
-  const inviteUrl = useMemo(() => {
-    const url = new URL(window.location.href);
-    url.search = "";
-    url.hash = "";
-    url.searchParams.set("couple", roomCode);
-    return url.toString();
-  }, [roomCode]);
 
   useEffect(() => {
     if (!supabaseConfigured || !supabase) {
@@ -317,18 +303,6 @@ export default function CouplesPlay({ language, onBack, onOpenInvitations }: { l
     setAnswerDraft("");
     setLocalAnswers([]);
     setLocalTurn(1);
-  };
-  const createRoom = () => {
-    setRoomCode(newCode());
-    setMyConsent(false);
-    setStatus("lobby");
-    setRound(0);
-  };
-  const shareInvite = async () => {
-    try {
-      if (navigator.share) await navigator.share({ title: "AFTER HOURS Duo", text: t("Kom naar onze Duo-kamer met code.", "Join our Duo room with a code."), url: inviteUrl });
-      else { await navigator.clipboard.writeText(inviteUrl); setMessage(t("Uitnodigingslink gekopieerd.", "Invite link copied.")); }
-    } catch { setMessage(t("Delen is niet gelukt. Deel de kamercode handmatig.", "Could not share. Send the room code manually.")); }
   };
   const stop = () => {
     setMyConsent(false);
