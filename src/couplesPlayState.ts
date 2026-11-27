@@ -1,5 +1,9 @@
 export const ROOM_CODE_LENGTH = 16;
 
+export function canStartLocalPlay(playerOneConsent: boolean, playerTwoConsent: boolean): boolean {
+  return playerOneConsent && playerTwoConsent;
+}
+
 export function normalizeRoomCode(value: string | null | undefined): string {
   const code = (value ?? "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, ROOM_CODE_LENGTH);
   return code.length === ROOM_CODE_LENGTH ? code : "";
