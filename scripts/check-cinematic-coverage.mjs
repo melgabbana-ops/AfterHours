@@ -21,9 +21,9 @@ await collect(sourceRoot);
 if (stylesheetFiles.length === 0) throw new Error("No CSS files found under src/");
 const styles = (await Promise.all(stylesheetFiles.map((file) => readFile(file, "utf8")))).join("\n");
 
-const reducedMotionRules = [...styles.matchAll(/@media\\s*\\(\\s*prefers-reduced-motion\\s*:\\s*reduce\\s*\\)\\s*\\{([^}]+)\\}/gi)]
+const reducedMotionRules = [...styles.matchAll(/@media\s*\(\s*prefers-reduced-motion\s*:\s*reduce\s*\)\s*\{([^}]+)\}/gi)]
   .map((match) => match[1])
-  .join("\\n");
+  .join("\n");
 const reducedMotionTargets = [
   ".cw-world[data-tab] .cw-hero",
   ".cw-world[data-tab] .cw-experience",
@@ -33,7 +33,7 @@ const reducedMotionTargets = [
   ".cw-world[data-tab] .cw-progress span"
 ];
 const missingReducedMotionTargets = reducedMotionTargets.filter((selector) => !reducedMotionRules.includes(selector));
-if (missingReducedMotionTargets.length || !/animation\\s*:\\s*none\\s*!important/i.test(reducedMotionRules)) {
+if (missingReducedMotionTargets.length || !/animation\s*:\s*none\s*!important/i.test(reducedMotionRules)) {
   throw new Error("Reduced-motion coverage failed. Missing selectors or animation override: " + missingReducedMotionTargets.join(", "));
 }
 console.log("Reduced-motion coverage passed: cinematic motion is disabled for all primary Experience World surfaces.");
