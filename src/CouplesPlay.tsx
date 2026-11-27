@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, Copy, Link2, MonitorSmartphone, Pause, Play, ShieldCheck, Users, Wifi, WifiOff } from "lucide-react";
 import { supabase, supabaseConfigured } from "./services/supabase";
-import { canResumeRemotePlay, canStartRemotePlay, shouldPauseRemotePlay, normalizeRoomCode, ROOM_CODE_LENGTH } from "./couplesPlayState";
+import { canResumeRemotePlay, canStartLocalPlay, canStartRemotePlay, shouldPauseRemotePlay, normalizeRoomCode, ROOM_CODE_LENGTH } from "./couplesPlayState";
 
 type Language = "nl" | "en";
 type Mode = "local" | "remote";
-type PlayStatus = "lobby" | "active" | "paused" | "stopped";
+type PlayStatus = "lobby" | "active" | "paused" | "stopped" | "completed";
 type PresenceMeta = { [key: string]: unknown; participantId?: string; displayName?: string; consent?: boolean };
 const prompts = [
   { nl: "Wat heb je vandaag nodig om je op je gemak te voelen?", en: "What do you need today to feel comfortable?" },
@@ -23,10 +23,10 @@ function newCode() {
 
 export default function CouplesPlay({ language, onBack }: { language: Language; onBack: () => void }) {
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
-  const initialCode = useMemo(() => normalizeRoomCode(new URLSearchParams(window.location.search).get("couple")), []);
-  const [mode, setMode] = useState<Mode>(initialCode ? "remote" : "local");
-  const [roomCode, setRoomCode] = useState(initialCode);
-  const [joinCode, setJoinCode] = useState(initialCode);
+  // Legacy room-code links are intentionally not joined: they lack account-bound private-channel authorization.
+  const [mode, setMode] = useState<Mode>("local");
+  const [roomCode] = useState("");
+  const [joinCode, setJoinCode] = useState("");
   const [localParticipantId] = useState(() => crypto.randomUUID());
   const [authenticatedUserId, setAuthenticatedUserId] = useState<string | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
@@ -40,6 +40,11 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
   const [participants, setParticipants] = useState<PresenceMeta[]>([]);
   const [round, setRound] = useState(0);
   const [status, setStatus] = useState<PlayStatus>("lobby");
+  const statusRef = useRef<PlayStatus>(status);
+  statusRef.current = status;
+  const [localTurn, setLocalTurn] = useState<1 | 2>(1);
+  const [answerDraft, setAnswerDraft] = useState("");
+  const [localAnswers, setLocalAnswers] = useState<Array<{ round: number; player: 1 | 2; answer: string }>>([]);
   const [message, setMessage] = useState("");
   const channelRef = useRef<any>(null);
   const consentRef = useRef(myConsent);
@@ -48,7 +53,7 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
   connectedRef.current = connected;
   const partnerPresent = participants.some(person => person.participantId !== participantId);
   const partnerConsented = participants.some(person => person.participantId !== participantId && person.consent === true);
-  const ready = mode === "local" ? myConsent && localPartnerConsent : canStartRemotePlay({ connected, serverAuthorized: false, participantCount: participants.length, partnerPresent, ownConsent: myConsent, partnerConsent: partnerConsented });
+  const ready = mode === "local" ? canStartLocalPlay(myConsent, localPartnerConsent) : canStartRemotePlay({ connected, serverAuthorized: false, participantCount: participants.length, partnerPresent, ownConsent: myConsent, partnerConsent: partnerConsented });
   const inviteUrl = useMemo(() => {
     const url = new URL(window.location.href);
     url.search = "";
@@ -137,10 +142,10 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
         return;
       }
       if (Number.isInteger(next.round) && next.round! >= 0 && next.round! < prompts.length) setRound(next.round!);
-      if (["lobby", "active", "paused", "stopped"].includes(next.status || "")) setStatus(next.status!);
+      if (["lobby", "active", "paused", "stopped", "completed"].includes(next.status || "")) setStatus(next.status!);
     });
     channel.on("broadcast", { event: "reset-consent" }, ({ payload }) => {
-      if (alive) { setMyConsent(false); const stopped = (payload as { stopped?: boolean } | undefined)?.stopped === true; setStatus(stopped ? "stopped" : "lobby"); if (!stopped) setRound(0); }
+      if (alive) { setMyConsent(false); const stopped = (payload as { stopped?: boolean } | undefined)?.stopped === true; setStatus(stopped ? "stopped" : statusRef.current === "active" || statusRef.current === "paused" ? "paused" : "lobby"); if (stopped) setAnswerDraft(""); }
     });
     channel.subscribe(async state => {
       if (!alive) return;
@@ -154,8 +159,14 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
           ));
           return;
         }
+        // A reconnect is a fresh safety boundary. Never carry consent or auto-resume.
+        setMyConsent(false);
+        await channel.track({ participantId, displayName: name.trim() || t("Deelnemer", "Participant"), consent: false });
+        if (statusRef.current === "active" || statusRef.current === "paused") {
+          setStatus("paused");
+          await channel.send({ type: "broadcast", event: "reset-consent", payload: { stopped: false } });
+        }
         setConnected(true);
-        await channel.track({ participantId, displayName: name.trim() || t("Deelnemer", "Participant"), consent: myConsent });
       } else if (state === "CHANNEL_ERROR" || state === "TIMED_OUT" || state === "CLOSED") {
         setConnected(false);
         setMessage(t("Verbinding verbroken. Probeer opnieuw verbinding te maken.", "Connection lost. Try reconnecting."));
@@ -176,11 +187,23 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
   useEffect(() => {
     if (mode === "remote" && shouldPauseRemotePlay({ connected, active: status === "active", partnerPresent })) {
       setStatus("paused");
-      setMessage(t("Je partner heeft de kamer verlaten. De ervaring is automatisch gepauzeerd.", "Your partner left the room. The experience paused automatically."));
+      setMyConsent(false);
+      setMessage(t("Je partner heeft de kamer verlaten. De ervaring is automatisch gepauzeerd. Beide deelnemers moeten opnieuw instemmen.", "Your partner left the room. The experience paused automatically. Both participants must consent again."));
+      const channel = channelRef.current;
+      if (channel) void channel.send({ type: "broadcast", event: "reset-consent", payload: { stopped: false } }).catch(() => {});
     }
   }, [mode, connected, status, partnerPresent]);
 
   const publish = async (nextRound: number, nextStatus: PlayStatus) => {
+    if (mode === "local" && nextStatus === "active" && !canStartLocalPlay(myConsent, localPartnerConsent)) {
+      setMessage(t("Beide spelers moeten opnieuw afzonderlijk instemmen voordat jullie starten of hervatten.", "Both players must separately consent again before starting or resuming."));
+      return false;
+    }
+    // PAUSE and STOP are local-first: a slow or failed network must never delay safety.
+    if (nextStatus === "paused" || nextStatus === "stopped") {
+      setRound(nextRound);
+      setStatus(nextStatus);
+    }
     // Remote room-code broadcasts are not protected by account-bound private-channel
     // authorization yet. Fail closed: never allow an active remote session until the
     // server-side invitation and membership policies are implemented and verified.
@@ -213,7 +236,12 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
         setMessage(t("Geen stabiele verbinding. De wijziging is lokaal veiliggesteld, maar niet met je partner gedeeld.", "Connection is not stable. The change was kept locally safe, but was not shared with your partner."));
         return false;
       }
-      const result = await channel.send({ type: "broadcast", event: "play-state", payload: { round: nextRound, status: nextStatus } });
+      let result: string;
+      try {
+        result = await channel.send({ type: "broadcast", event: "play-state", payload: { round: nextRound, status: nextStatus } });
+      } catch {
+        result = "error";
+      }
       if (result !== "ok") {
         if (nextStatus === "paused" || nextStatus === "stopped") {
           setRound(nextRound);
@@ -229,6 +257,43 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
     setStatus(nextStatus);
     return true;
   };
+  const startLocal = () => {
+    setLocalTurn(1);
+    setAnswerDraft("");
+    setLocalAnswers([]);
+    setRound(0);
+    void publish(0, "active");
+  };
+  const submitLocalAnswer = () => {
+    const answer = answerDraft.trim();
+    if (!answer || mode !== "local" || status !== "active") return;
+    setLocalAnswers(current => [...current, { round, player: localTurn, answer }]);
+    setAnswerDraft("");
+    if (localTurn === 1) {
+      setLocalTurn(2);
+      setMessage(t("Antwoord opgeslagen op dit apparaat. Geef het toestel aan speler 2.", "Answer saved on this device. Pass the device to Player 2."));
+      return;
+    }
+    if (round < prompts.length - 1) {
+      setRound(current => current + 1);
+      setLocalTurn(1);
+      setMessage(t("Beide antwoorden zijn opgeslagen. Speler 1 is aan de beurt bij de volgende vraag.", "Both answers are saved. Player 1 goes first on the next prompt."));
+      return;
+    }
+    setStatus("completed");
+    setMyConsent(false);
+    setLocalPartnerConsent(false);
+    setMessage(t("Jullie Duo-ervaring is afgerond. Neem samen rustig de tijd voor aftercare.", "Your Duo experience is complete. Take time together for aftercare."));
+  };
+  const returnToLobby = () => {
+    setStatus("lobby");
+    setRound(0);
+    setMyConsent(false);
+    setLocalPartnerConsent(false);
+    setAnswerDraft("");
+    setLocalAnswers([]);
+    setLocalTurn(1);
+  };
   const createRoom = () => {
     setRoomCode(newCode());
     setMyConsent(false);
@@ -241,16 +306,20 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
       else { await navigator.clipboard.writeText(inviteUrl); setMessage(t("Uitnodigingslink gekopieerd.", "Invite link copied.")); }
     } catch { setMessage(t("Delen is niet gelukt. Deel de kamercode handmatig.", "Could not share. Send the room code manually.")); }
   };
-  const stop = async () => {
+  const stop = () => {
     setMyConsent(false);
     setLocalPartnerConsent(false);
-    if (mode === "remote" && channelRef.current) {
-      await channelRef.current.send({ type: "broadcast", event: "reset-consent", payload: { stopped: true } });
+    setStatus("stopped");
+    setAnswerDraft("");
+    setLocalAnswers([]);
+    const channel = channelRef.current;
+    if (mode === "remote" && channel) {
+      void channel.send({ type: "broadcast", event: "reset-consent", payload: { stopped: true } }).catch(() => {});
     }
-    await publish(round, "stopped");
+    void publish(round, "stopped");
   };
   const leave = async () => {
-    if (status === "active" || status === "paused") await stop();
+    if (status === "active" || status === "paused") stop();
     onBack();
   };
 
@@ -277,7 +346,7 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
       </div>
       <label className="couples-consent"><input type="checkbox" checked={myConsent} onChange={e=>setMyConsent(e.target.checked)}/><span>{t("Speler 1 stemt vrijwillig in.", "Player 1 freely consents.")}</span></label>
       <label className="couples-consent"><input type="checkbox" checked={localPartnerConsent} onChange={e=>setLocalPartnerConsent(e.target.checked)}/><span>{t("Speler 2 stemt vrijwillig in.", "Player 2 freely consents.")}</span></label>
-      <button type="button" className="couples-primary" disabled={!ready} onClick={()=>void publish(0, "active")}><Play size={16}/>{t("Start samen", "Start together")}</button>
+      <button type="button" className="couples-primary" disabled={!ready} onClick={startLocal}><Play size={16}/>{t("Start samen", "Start together")}</button>
     </section> : <section className="couples-lobby">
       <span className="eyebrow">REMOTE · ROOM CODE</span><h3>{t("Verbind jullie apparaten", "Connect your devices")}</h3>
       {!supabaseConfigured ? <p role="alert">{t("Online koppelspel vereist een geconfigureerde realtime-verbinding. Lokaal spelen blijft beschikbaar.", "Online couple play requires a configured realtime connection. Local play remains available.")}</p> : <>
