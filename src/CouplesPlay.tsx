@@ -21,12 +21,12 @@ function newCode() {
   return Array.from(bytes, value => alphabet[value % alphabet.length]).join("");
 }
 
-export default function CouplesPlay({ language, onBack }: { language: Language; onBack: () => void }) {
+export default function CouplesPlay({ language, onBack, onOpenInvitations }: { language: Language; onBack: () => void; onOpenInvitations: () => void }) {
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
-  const initialCode = useMemo(() => normalizeRoomCode(new URLSearchParams(window.location.search).get("couple")), []);
-  const [mode, setMode] = useState<Mode>(initialCode ? "remote" : "local");
-  const [roomCode, setRoomCode] = useState(initialCode);
-  const [joinCode, setJoinCode] = useState(initialCode);
+  // Legacy room-code links are intentionally not joined: they lack account-bound private-channel authorization.
+  const [mode, setMode] = useState<Mode>("local");
+  const [roomCode] = useState("");
+  const [joinCode] = useState("");
   const [localParticipantId] = useState(() => crypto.randomUUID());
   const [authenticatedUserId, setAuthenticatedUserId] = useState<string | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
@@ -363,7 +363,7 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
         <MonitorSmartphone/><strong>{t("Lokaal samen", "Together locally")}</strong><span>{t("Eén telefoon, tablet of iPad. Om de beurt antwoorden.", "One phone, tablet or iPad. Take turns answering.")}</span>
       </button>
       <button type="button" className={mode === "remote" ? "couples-mode-card selected" : "couples-mode-card"} onClick={() => { setMode("remote"); setMyConsent(false); setStatus("lobby"); }} disabled={status === "active" || status === "paused"}>
-        <Wifi/><strong>{t("Op afstand", "Long distance")}</strong><span>{t("Verbind twee apparaten met een kamer met code.", "Connect two devices through a room with a code.")}</span>
+        <Wifi/><strong>{t("Op afstand", "Long distance")}</strong><span>{t("Gebruik een privé-uitnodiging die aan accounts en toestemming is gekoppeld.", "Use a private invitation tied to accounts and consent.")}</span>
       </button>
     </div>
     {mode === "local" ? <section className="couples-lobby">
@@ -376,24 +376,11 @@ export default function CouplesPlay({ language, onBack }: { language: Language; 
       <label className="couples-consent"><input type="checkbox" checked={localPartnerConsent} onChange={e=>setLocalPartnerConsent(e.target.checked)}/><span>{t("Speler 2 stemt vrijwillig in.", "Player 2 freely consents.")}</span></label>
       <button type="button" className="couples-primary" disabled={!ready} onClick={startLocal}><Play size={16}/>{t("Start samen", "Start together")}</button>
     </section> : <section className="couples-lobby">
-      <span className="eyebrow">REMOTE · ROOM CODE</span><h3>{t("Verbind jullie apparaten", "Connect your devices")}</h3>
-      {!supabaseConfigured ? <p role="alert">{t("Online koppelspel vereist een geconfigureerde realtime-verbinding. Lokaal spelen blijft beschikbaar.", "Online couple play requires a configured realtime connection. Local play remains available.")}</p> : <>
-        {!roomCode ? <div className="couples-room-entry">
-          <label className="couples-join-code">{t("Kamercode invoeren", "Enter room code")}<input value={joinCode} onChange={e=>setJoinCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,ROOM_CODE_LENGTH))} maxLength={ROOM_CODE_LENGTH} autoComplete="off" placeholder={t("16 tekens", "16 characters")}/></label>
-          <button type="button" className="couples-primary" disabled={normalizeRoomCode(joinCode) === ""} onClick={()=>{setRoomCode(joinCode);setMyConsent(false);setStatus("lobby");setRound(0);}}><Link2 size={16}/>{t("Deelnemen aan kamer met code", "Join room with a code")}</button>
-          <span className="couples-entry-divider">{t("of maak zelf een kamer aan", "or create your own room")}</span>
-          <button type="button" className="couples-secondary" onClick={createRoom}><Users size={16}/>{t("Maak een kamer met code", "Create a room with a code")}</button>
-        </div> : <>
-          <div className="couples-room-code"><small>{t("JULLIE KAMERCODE", "YOUR ROOM CODE")}</small><strong>{roomCode}</strong><button type="button" onClick={()=>void shareInvite()}><Copy size={15}/>{t("Deel uitnodiging", "Share invite")}</button></div>
-          <div className="couples-connection" role="status">{connected ? <><Wifi size={17}/>{t("Verbonden met de kamer met code", "Connected to room with a code")}</> : <><WifiOff size={17}/>{t("Verbinding maken…", "Connecting…")}</>}</div>
-          <p className="couples-consent-note" role="alert">{t("Online Duo is momenteel alleen als technische preview beschikbaar. Starten is geblokkeerd totdat uitnodigingen aan accounts zijn gekoppeld en de server de kamertoegang afdwingt. Gebruik Lokaal samen voor een sessie.", "Online Duo is currently a technical preview only. Starting is blocked until invitations are account-bound and the server enforces room access. Use Together locally for a session.")}</p>
-          <label className="couples-join-code">{t("Jouw naam", "Your name")}<input value={name} onChange={e=>setName(e.target.value)} maxLength={24} placeholder={t("Naam", "Name")}/></label>
-          <div className="couples-presence"><Users size={17}/><strong>{participants.length} / 2</strong><span>{partnerPresent ? t("Partner is aanwezig", "Partner is here") : t("Wachten op je partner…", "Waiting for your partner…")}</span></div>
-          <label className="couples-consent"><input type="checkbox" checked={myConsent} onChange={e=>{setMyConsent(e.target.checked);if(!e.target.checked){setStatus("lobby");void channelRef.current?.send({type:"broadcast",event:"reset-consent",payload:{stopped:false}});}}}/><span>{t("Ik stem vrijwillig in met deze ervaring.", "I freely consent to this experience.")}</span></label>
-          <p className="couples-consent-note">{t("Starten kan pas als beide deelnemers verbonden zijn en ieder afzonderlijk instemt.", "Play starts only when both participants are connected and each consents separately.")}</p>
-          <button type="button" className="couples-primary" disabled={!ready} onClick={()=>void publish(0,"active")}><Play size={16}/>{t("Start samen", "Start together")}</button>
-        </>}
-      </>}
+      <span className="eyebrow">REMOTE · PRIVATE INVITATION</span>
+      <h3>{t("Online samen spelen", "Play together online")}</h3>
+      <p role="status">{t("Kamercodes zijn uitgeschakeld omdat ze geen accountgebonden toegang garanderen. Gebruik de beveiligde uitnodigingsruimte: de ontvanger logt in met een eigen account, bekijkt de scène en geeft afzonderlijk toestemming. Hervatten kan pas nadat alle deelnemers opnieuw hebben ingestemd.", "Room codes are disabled because they do not guarantee account-bound access. Use the secure invitation area: the recipient signs in with their own account, reviews the scene and gives separate consent. Resuming is blocked until every participant consents again.")}</p>
+      <button type="button" className="couples-primary" onClick={onOpenInvitations}><ShieldCheck size={16}/>{t("Open Secret Invitation", "Open Secret Invitation")}</button>
+      <p className="couples-consent-note">{t("Online Duo blijft geblokkeerd totdat de privé-uitnodiging en serverbeveiliging zijn geverifieerd. Lokaal samen spelen blijft beschikbaar.", "Online Duo remains blocked until private invitations and server-side access controls are verified. Local play remains available.")}</p>
     </section>}
     {status !== "lobby" && <section className="couples-round">
       <div className="couples-round-top"><span className="eyebrow">{t("RONDE", "ROUND")} {round+1} / {prompts.length}</span><span className={"couples-status "+status}>{status==="active"?t("ACTIEF","ACTIVE"):status==="paused"?t("GEPAUZEERD","PAUSED"):status==="completed"?t("AFGEROND","COMPLETED"):t("GESTOPT","STOPPED")}</span></div>
