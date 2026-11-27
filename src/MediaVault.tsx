@@ -174,7 +174,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
     setMessage("");
     setSignedUrl("");
     try {
-      await uploadPrivateMedia(file, sessionId, assignmentTitle);
+      await uploadPrivateMedia(file, sessionId, assignmentTitle, language);
       if(!mountedRef.current)return true;
       const refreshed = await refresh(() => mountedRef.current);
       if(!mountedRef.current)return true;
@@ -283,11 +283,11 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
     }
     setBusy(true);
     try{
-      validatePrivateMediaFile(file);
+      validatePrivateMediaFile(file, language);
       const overlayApplied=canApplyMediaOverlay(file.type)&&!overlayAlreadyApplied;
       const previewFile=overlayApplied?await composeImageWithOverlay(file,frameStyleRef.current):file;
       if(!mountedRef.current||generation!==vaultVisibilityGenerationRef.current||document.visibilityState!=="visible")return;
-      validatePrivateMediaFile(previewFile);
+      validatePrivateMediaFile(previewFile, language);
       if(pendingUrl) URL.revokeObjectURL(pendingUrl);
       setPendingCapture(previewFile);
       setPendingOriginalFile(overlayApplied?file:null);
@@ -315,7 +315,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
     try{
       const updated=await composeImageWithEdits(original,style,edits);
       if(!mountedRef.current||generation!==vaultVisibilityGenerationRef.current||document.visibilityState!=="visible")return false;
-      validatePrivateMediaFile(updated);
+      validatePrivateMediaFile(updated, language);
       setFrameStyle(style);
       setPhotoEdits(edits);
       if(recordHistory){
