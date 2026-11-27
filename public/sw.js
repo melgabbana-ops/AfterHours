@@ -27,7 +27,7 @@ const APP_SHELL = [
   asset("visuals/ah-radio-vinyl.svg"),
   asset("visuals/ah-tarot-frame.svg"),
   asset("visuals/ah-cinematic-background.svg"),
-  asset("visuals/ah-cinematic-hero.svg"),
+
   asset("visuals/reference-home.svg"),
   asset("visuals/reference-consent.svg"),
   asset("visuals/reference-experience.svg"),
