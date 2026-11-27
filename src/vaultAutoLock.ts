@@ -1,5 +1,26 @@
 export type VaultAutoLockReason = "background" | "idle";
 
+export interface VaultSensitiveContentState {
+  authenticated: boolean;
+  locked: boolean;
+  itemCount: number;
+  hasSignedUrl: boolean;
+  hasPendingPreview: boolean;
+  hasActiveCapture: boolean;
+}
+
+/** Only arm the inactivity lock while authenticated private content is visible. */
+export function hasSensitiveVaultContent(state: VaultSensitiveContentState): boolean {
+  return state.authenticated
+    && !state.locked
+    && (
+      state.itemCount > 0
+      || state.hasSignedUrl
+      || state.hasPendingPreview
+      || state.hasActiveCapture
+    );
+}
+
 export interface VaultVisibilityTarget extends EventTarget {
   readonly visibilityState: string;
 }
