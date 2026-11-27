@@ -68,7 +68,7 @@ export function toPrivateMediaItem(
   if (!validatePrivateMediaPath(path, userId)) return null;
 
   const size = Number(item.metadata?.size ?? 0);
-  if (!Number.isFinite(size) || size < 0) return null;
+  if (!Number.isSafeInteger(size) || size < 0) return null;
 
   const createdAt = typeof item.created_at === "string" && Number.isFinite(Date.parse(item.created_at))
     ? item.created_at
@@ -93,7 +93,7 @@ export function canApplyMediaOverlay(type: string): boolean {
 
 export function validatePrivateMediaFile(file: Pick<File, "type" | "size">): void {
   if (!ALLOWED_TYPES.has(normalizePrivateMediaMimeType(file.type))) throw new Error("Kies een afbeelding, audio- of videobestand.");
-  if (file.size <= 0 || file.size > MAX_FILE_BYTES) throw new Error("Bestanden moeten kleiner zijn dan 20 MB.");
+  if (!Number.isSafeInteger(file.size) || file.size <= 0 || file.size > MAX_FILE_BYTES) throw new Error("Bestanden moeten kleiner zijn dan 20 MB.");
 }
 
 export function safePrivateMediaFileName(value: string): string {
