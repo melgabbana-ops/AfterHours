@@ -666,9 +666,7 @@ try{
  activeSafetyStateAtLaunch=false;
 }
 const teaserPreview=shouldShowTeaser(window.location.search,activeSafetyStateAtLaunch);
-if(teaserPreview){
- root.render(<Teaser/>);
-}else if(maintenancePreview){
+if(maintenancePreview){
  root.render(<UnderConstruction/>);
 }else{
  void fetch(`${import.meta.env.BASE_URL}maintenance.json`,{cache:"no-store"})
@@ -677,8 +675,8 @@ if(teaserPreview){
   .then(rawConfig=>{
    const config=rawConfig as MaintenanceConfig;
    const maintenance=getMaintenanceStatus(config);
-   root.render(maintenance.active
-    ?<UnderConstruction config={config}/>
-    :<AppErrorBoundary><App maintenanceConfig={config}/></AppErrorBoundary>);
+   if(maintenance.active)root.render(<UnderConstruction config={config}/>);
+   else if(teaserPreview)root.render(<Teaser/>);
+   else root.render(<AppErrorBoundary><App maintenanceConfig={config}/></AppErrorBoundary>);
   });
 }
