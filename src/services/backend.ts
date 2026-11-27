@@ -134,7 +134,7 @@ export function revokeRemoteConsent(sessionId:string,revokedAt:string):Promise<s
  return enqueueRemoteMutation(async()=>{
   const{data:{user},error:userError}=await client.auth.getUser();
   if(userError||!user)return userError?.message??"Geen actieve gebruiker voor consent-sync.";
-  const{data:session,error:sessionError}=await client.from("sessions").select("id").eq("id",sessionId).eq("profile_id",user.id).maybeSingle();
+  const{data:session,error:sessionError}=await client.from("sessions").select("id").eq("id",sessionId).eq("profile_id",expectedUserId).maybeSingle();
   if(sessionError)return sessionError.message;
   if(!session)return "Server-sessie niet gevonden. STOP blijft lokaal actief; herstel de sessie voordat je opnieuw start.";
   // Always ask the server to enforce revocation, even if the latest consent
@@ -154,22 +154,25 @@ export async function completeRemoteSession(sessionId:string,rounds:number):Prom
  return {error:null,xpEarned:Number(data?.xp_earned??120),alreadyCompleted:Boolean(data?.already_completed)};
 }
 
-export function syncRemoteState(state:AfterHoursState):Promise<string|null>{
+export function syncRemoteState(state:AfterHoursState,expectedUserId?:string):Promise<string|null>{
+ if(!supabaseConfigured||!supabase)return Promise.resolve(null);
+ if(!expectedUserId?.trim())return Promise.resolve("Account-sync niet uitgevoerd: account-eigenaarschap is niet bevestigd.");
  const generation=++syncGeneration;
  return enqueueRemoteMutation(()=>{
   if(generation!==syncGeneration)return Promise.resolve(null);
-  return syncRemoteStateNow(state);
+  return syncRemoteStateNow(state,expectedUserId);
  });
 }
 
-async function syncRemoteStateNow(state:AfterHoursState):Promise<string|null>{
+async function syncRemoteStateNow(state:AfterHoursState,expectedUserId:string):Promise<string|null>{
  if(!supabaseConfigured||!supabase)return null;
  if(state.session.status==="completed")return null;
  const{data:{user},error:userError}=await supabase.auth.getUser();
  if(userError||!user)return userError?.message??"Geen actieve gebruiker voor sessie-sync.";
+ if(user.id!==expectedUserId)return "Het aangemelde account is gewijzigd. De oude sessiegegevens zijn niet gesynchroniseerd.";
 
  const{error:profileError}=await supabase.from("profiles").upsert({
-  id:user.id,
+  id:expectedUserId,
   display_name:state.profile.displayName,
   username:state.profile.username,
   avatar_style:state.profile.avatarStyle??"sigil"
@@ -192,7 +195,7 @@ async function syncRemoteStateNow(state:AfterHoursState):Promise<string|null>{
 
  const sessionPayload={
   id:sessionId,
-  profile_id:user.id,
+  profile_id:expectedUserId,
   status:"ready" as const,
   round:0,
   started_at:null,
