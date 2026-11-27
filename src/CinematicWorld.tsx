@@ -156,7 +156,7 @@ export default function CinematicWorld({
   onOpenGameLibrary, onOpenAftercare, onOpenSafetyPlan
 }: Props) {
   const t = (nl: string, en: string) => language === "nl" ? nl : en;
-  const [tab, setTab] = useState<Tab>(() => consumeInvitationTokenFromUrl(window.location.href).hadInviteParameter ? "invitation" : "experience");
+  const [tab, setTab] = useState<Tab>(() => new URLSearchParams(window.location.search).get("worldTab") === "invitation" || consumeInvitationTokenFromUrl(window.location.href).hadInviteParameter ? "invitation" : "experience");
   const [records, setRecords] = useState<RecordMap>(EMPTY_RECORDS);
   const [runs, setRuns] = useState<ExperienceRun[]>([]);
   const [experienceInvites, setExperienceInvites] = useState<ExperienceInvitation[]>([]);
