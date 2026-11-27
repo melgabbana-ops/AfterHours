@@ -604,12 +604,21 @@ export default function CinematicWorld({
     try {
       await mutation;
       if (stopPendingRef.current) return;
-      setRunStatus("paused");
+      setRuns((current) => current.map((run) => run.id === activeRunId
+        ? { ...run, status: "paused" as const, current_step: stepIndex }
+        : run
+      ));
       setCheckIn("unset");
       setPathChoice("unset");
+      setRunConsent(false);
+      setResumePrepared(false);
+      setStopSignal("");
       onSafetyPause();
-      setMessage(t("Gepauzeerd. Voor hervatten is een nieuwe check-in en consent nodig.", "Paused. Resuming requires a fresh check-in and consent."));
-      try { await refreshData(); } catch { setMessage(t("Gepauzeerd. Je verbinding is nodig om de geschiedenis te verversen.", "Paused. Reconnect to refresh the history.")); }
+      setActiveRunId(null);
+      setActiveScene(null);
+      setRunStatus(null);
+      setMessage(t("Gepauzeerd en veilig opgeslagen. Je kunt hervatten vanuit Openstaande ervaring, met een nieuwe check-in en consent.", "Paused and safely saved. You can resume from Unfinished experience with a fresh check-in and consent."));
+      try { await refreshData(); } catch { setMessage(t("De scène is lokaal afgesloten en blijft gepauzeerd. Controleer je verbinding voordat je hervat.", "The scene is closed locally and remains paused. Check your connection before resuming.")); }
     } catch {
       if (stopPendingRef.current) return;
       setRunStatus("paused");
