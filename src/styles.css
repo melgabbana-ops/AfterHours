@@ -4765,6 +4765,14 @@ button,[role="button"],nav a{touch-action:manipulation}
 /* Remote duo room entry: distinct join and create paths, responsive on narrow screens. */
 .couples-room-entry{display:grid;gap:14px;max-width:520px;margin:18px auto 0}
 .couples-room-entry .couples-primary,.couples-room-entry .couples-secondary{width:100%}
+.couples-local-turn,.couples-local-consent{display:grid;gap:12px;padding:16px;border:1px solid rgba(196,155,82,.38);border-radius:10px;background:linear-gradient(145deg,#171512,#0b0a08)}
+.couples-local-turn label{display:grid;gap:8px;color:#d8bd87;font-size:11px;letter-spacing:.12em}
+.couples-local-turn textarea{width:100%;min-height:92px;padding:12px;border:1px solid #554630;border-radius:8px;background:#080706;color:#f2e6d2;font:inherit;font-size:14px;line-height:1.55;resize:vertical}
+.couples-local-turn textarea:focus{outline:2px solid #c49b52;outline-offset:2px}
+.couples-local-turn small{color:#a99e8d;font-size:11px;line-height:1.5}
+.couples-local-consent>p{margin:0;color:#e5dac8;font-size:13px;line-height:1.55}
+.couples-status.completed{color:#d9bd84;border-color:#80643b}
+
 .couples-secondary{display:inline-flex;justify-content:center;align-items:center;gap:9px;min-height:46px;padding:11px 16px;border:1px solid #6b5738;border-radius:8px;background:#11100e;color:#e8d7b7;font-weight:700}
 .couples-entry-divider{display:flex;align-items:center;gap:12px;color:#8f8779;font-size:11px;letter-spacing:.08em;text-transform:uppercase}
 .couples-entry-divider:before,.couples-entry-divider:after{content:"";height:1px;flex:1;background:#3b3429}
