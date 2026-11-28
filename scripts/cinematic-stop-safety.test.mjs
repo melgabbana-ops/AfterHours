@@ -12,8 +12,33 @@ const styles = readFileSync(
 const stopStart = source.indexOf("async function stopScene(");
 const stopEnd = source.indexOf("async function completeScene(", stopStart);
 const stopHandler = source.slice(stopStart, stopEnd);
+const pauseStart = source.indexOf("async function pauseScene()");
+const pauseEnd = source.indexOf("async function stopScene(", pauseStart);
+const pauseHandler = source.slice(pauseStart, pauseEnd);
+const pauseCatchStart = pauseHandler.indexOf("} catch {");
+const pauseFinallyStart = pauseHandler.indexOf("} finally", pauseCatchStart);
+const pauseCatch = pauseHandler.slice(pauseCatchStart, pauseFinallyStart);
 
 describe("Experience Engine immediate STOP", () => {
+  it("routes an unconfirmed pause through the run-specific atomic STOP", () => {
+    expect(pauseStart).toBeGreaterThanOrEqual(0);
+    expect(pauseEnd).toBeGreaterThan(pauseStart);
+    expect(pauseCatch).toContain("await stopScene()");
+    expect(pauseCatch).not.toContain("onSafetyPause()");
+    expect(pauseCatch).not.toContain("onSafetyStop()");
+  });
+
+  it("rejects a late pause response after STOP, account, consent, or run changes", () => {
+    expect(pauseHandler).toContain("isExperiencePauseAttemptCurrent");
+    expect(pauseHandler).toContain("currentAttemptId: startAttemptRef.current");
+    expect(pauseHandler).toContain("currentRunId: activeRunId");
+    expect(pauseHandler).toContain("if (!isCurrentPause()) return;");
+  });
+
+  it("does not apply stale pause history after a newer safety action", () => {
+    expect(source).toContain("async function refreshData(userId = remoteProfileId, isCurrent: () => boolean = () => true)");
+    expect(pauseHandler).toContain("await refreshData(attempt.ownerId, isCurrentPause)");
+  });
   it("applies local stop and safety state before dispatching server confirmation", () => {
     const localReset = stopHandler.indexOf("setActiveScene(null)");
     const safetyStop = stopHandler.indexOf("onSafetyStop()");
