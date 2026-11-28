@@ -34,11 +34,14 @@ export interface ExperienceEmergencyDockState {
 
 /** Keep direct STOP controls visible for active and recoverable Experience Engine runs. */
 export function shouldShowExperienceEmergencyDock(state: ExperienceEmergencyDockState): boolean {
-  if (state.activeRunId) {
-    return state.activeScenePresent && (state.runStatus === "active" || state.runStatus === "paused");
-  }
-  return Boolean(
+  const activeSceneNeedsStop = Boolean(
+    state.activeRunId
+      && state.activeScenePresent
+      && (state.runStatus === "active" || state.runStatus === "paused"),
+  );
+  const recoverableRunNeedsStop = Boolean(
     state.recoverableRunId
       && (state.recoverableRunStatus === "active" || state.recoverableRunStatus === "paused"),
   );
+  return activeSceneNeedsStop || recoverableRunNeedsStop;
 }

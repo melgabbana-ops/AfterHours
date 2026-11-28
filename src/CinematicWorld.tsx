@@ -969,9 +969,12 @@ export default function CinematicWorld({
 
     const pendingRun = pendingRunRef.current;
     if (resumePendingRef.current && pendingRun) resumeStopRequestedRef.current = true;
-    const runId = activeRunId ?? pendingRun?.runId ?? null;
+    const activeSceneRun = Boolean(
+      activeRunId && activeScene && (runStatus === "active" || runStatus === "paused"),
+    );
+    const runId = activeSceneRun ? activeRunId : pendingRun?.runId ?? activeRunId ?? null;
     const userId = pendingRun?.ownerId ?? activeRunOwnerRef.current ?? remoteProfileId;
-    const currentStep = activeRunId ? stepIndex : pendingRun?.currentStep ?? stepIndex;
+    const currentStep = activeSceneRun ? stepIndex : pendingRun?.currentStep ?? stepIndex;
     if (runId && userId) pendingRunRef.current = { runId, ownerId: userId, currentStep };
     activeRunOwnerRef.current = null;
     let serverConfirmed = !runId;
@@ -1957,6 +1960,9 @@ export default function CinematicWorld({
   const interactionCount = runs.reduce((total, run) => total + (run.interaction_log?.length ?? 0), 0);
   const unlocked = new Set(records.club.filter((record) => record.record_key.startsWith("milestone:")).map((record) => record.record_key.slice("milestone:".length)));
   const memberLevel = Math.max(1, Math.floor((completedRuns + sceneCount + ritualDrawCount) / 3) + 1);
+  const activeEmergencyRun = Boolean(
+    activeRunId && activeScene && (runStatus === "active" || runStatus === "paused"),
+  );
   const showEmergencyDock = shouldShowExperienceEmergencyDock({
     activeRunId,
     activeScenePresent: Boolean(activeScene),
@@ -1964,7 +1970,7 @@ export default function CinematicWorld({
     recoverableRunId: recoverableRun?.id ?? null,
     recoverableRunStatus: recoverableRun?.status === "active" || recoverableRun?.status === "paused" ? recoverableRun.status : null,
   });
-  const emergencyRunStatus = activeRunId ? runStatus : recoverableRun?.status ?? null;
+  const emergencyRunStatus = activeEmergencyRun ? runStatus : recoverableRun?.status ?? null;
 
   const handleTabKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
     const currentIndex = tabItems.findIndex((item) => item.id === tab);
@@ -2226,7 +2232,7 @@ export default function CinematicWorld({
           <span>{t("VEILIGHEID · DIRECT", "SAFETY · IMMEDIATE")}</span>
           <strong>{emergencyRunStatus === "paused" ? t("Ervaring gepauzeerd", "Experience paused") : t("Ervaring actief", "Experience active")}</strong>
         </div>
-        {activeRunId && emergencyRunStatus === "active" && (
+        {activeEmergencyRun && emergencyRunStatus === "active" && (
           <button
             type="button"
             className="cw-emergency-pause"
@@ -2241,7 +2247,7 @@ export default function CinematicWorld({
           type="button"
           className="cw-emergency-stop"
           onClick={() => {
-            if (activeRunId) void stopScene();
+            if (activeEmergencyRun) void stopScene();
             else if (recoverableRun) void stopRecoverableRun(recoverableRun);
           }}
           disabled={stopPending}

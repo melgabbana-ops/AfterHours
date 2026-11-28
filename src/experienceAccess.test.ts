@@ -71,6 +71,28 @@ describe("Experience Engine emergency controls", () => {
     })).toBe(true);
   });
 
+  it("keeps STOP visible when a stale active pointer coexists with a recoverable run", () => {
+    expect(shouldShowExperienceEmergencyDock({
+      ...emptyState,
+      activeRunId: "stale-run",
+      activeScenePresent: false,
+      runStatus: "active",
+      recoverableRunId: "recoverable-run",
+      recoverableRunStatus: "paused",
+    })).toBe(true);
+  });
+
+  it("keeps STOP visible for a recoverable run when the stale active pointer is completed", () => {
+    expect(shouldShowExperienceEmergencyDock({
+      ...emptyState,
+      activeRunId: "stale-run",
+      activeScenePresent: true,
+      runStatus: "completed",
+      recoverableRunId: "recoverable-run",
+      recoverableRunStatus: "active",
+    })).toBe(true);
+  });
+
   it("does not show the dock without a live scene or recoverable run", () => {
     expect(shouldShowExperienceEmergencyDock({
       ...emptyState,
