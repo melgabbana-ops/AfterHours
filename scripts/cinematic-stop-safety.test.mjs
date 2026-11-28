@@ -65,6 +65,23 @@ describe("Experience Engine immediate STOP", () => {
     expect(persistHandler).toContain("if (!isOwnerCurrent()) return saved;");
   });
 
+  it("does not let stale Director's Room completions clear another account's mutation state", () => {
+    const saveStart = source.indexOf("async function saveDirectorScene()");
+    const saveEnd = source.indexOf("\n  function prepareScene", saveStart);
+    const saveHandler = source.slice(saveStart, saveEnd);
+    const deleteStart = source.indexOf("async function removeScene(");
+    const deleteEnd = source.indexOf("\n  async function saveVaultNote", deleteStart);
+    const deleteHandler = source.slice(deleteStart, deleteEnd);
+    const ownerEffect = source.match(/useLayoutEffect\(\(\) => \{[\s\S]*?worldOwnerGenerationRef\.current \+= 1;[\s\S]*?\}, \[remoteProfileId\]\);/)?.[0] ?? "";
+
+    expect(saveHandler).toContain("if (isOwnerCurrent()) setBusy(false);");
+    expect(deleteHandler).toContain("if (isOwnerCurrent()) {");
+    expect(deleteHandler).toContain("deletingSceneRef.current = false;");
+    expect(ownerEffect).toContain("setBusy(false);");
+    expect(ownerEffect).toContain("deletingSceneRef.current = false;");
+    expect(ownerEffect).toContain("setDeletingSceneKey(null);");
+  });
+
   it("applies local stop and safety state before dispatching server confirmation", () => {
     const localReset = stopHandler.indexOf("setActiveScene(null)");
     const safetyStop = stopHandler.indexOf("onSafetyStop()");
