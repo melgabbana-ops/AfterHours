@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
-const world = readFileSync(new URL("./CinematicWorld.tsx", import.meta.url), "utf8");
+const world = readFileSync(new URL("../src/CinematicWorld.tsx", import.meta.url), "utf8");
 
 describe("Director's Room draft navigation safety", () => {
   it("asks before leaving the private world with unsaved scene changes", () => {
