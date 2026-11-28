@@ -14,6 +14,7 @@ const draftInvitation = world.slice(
 describe("invitation account isolation", () => {
   it("checks the owner and STOP state before exposing a run invitation", () => {
     expect(runInvitation).toContain("isInvitationOwnerAttemptCurrent");
+    expect(runInvitation).toContain("safetyGeneration: startAttemptRef.current");
     expect(runInvitation).toContain("await refreshData(ownerId, isActionCurrent)");
     expect(runInvitation).toContain("if (!isActionCurrent())");
   });
