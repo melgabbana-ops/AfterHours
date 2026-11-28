@@ -7,6 +7,7 @@ import { isExperienceResumeAttemptCurrent } from "./experienceResumeAttempt";
 import { shouldShowExperienceEmergencyDock } from "./experienceAccess";
 import { validateDirectorSceneDraft } from "./directorSceneDraft";
 import { hasUnsavedDirectorSceneChanges } from "./directorSceneDraftState";
+import { isWorldOwnerAttemptCurrent, type WorldOwnerAttempt } from "./worldOwnerAttempt";
 import { consumeInvitationTokenFromUrl } from "./invitationUrl";
 import {
   ArrowLeft, ArrowRight, BookOpen, CheckCircle2, Clapperboard, Copy,
@@ -176,8 +177,12 @@ export default function CinematicWorld({
   const [stopPending, setStopPending] = useState(false);
   const stopPendingRef = useRef(false);
   const startAttemptRef = useRef(0);
+  const worldOwnerGenerationRef = useRef(0);
   const startContextRef = useRef({ remoteProfileId, consentActive, canStartExperience });
   startContextRef.current = { remoteProfileId, consentActive, canStartExperience };
+  useLayoutEffect(() => {
+    worldOwnerGenerationRef.current += 1;
+  }, [remoteProfileId]);
   const runMutationRef = useRef<Promise<unknown> | null>(null);
   const pendingRunRef = useRef<{ runId: string; ownerId: string; currentStep: number } | null>(null);
   const resumePendingRef = useRef(false);
@@ -289,8 +294,14 @@ export default function CinematicWorld({
       : null
   );
 
-  async function refreshData(userId = remoteProfileId, isCurrent: () => boolean = () => true) {
+  async function refreshData(userId = remoteProfileId, isCurrent?: () => boolean) {
     if (!userId) return;
+    const attempt: WorldOwnerAttempt = { ownerId: userId, generation: worldOwnerGenerationRef.current };
+    const canApply = () => isWorldOwnerAttemptCurrent(
+      attempt,
+      startContextRef.current.remoteProfileId,
+      worldOwnerGenerationRef.current
+    ) && (!isCurrent || isCurrent());
     const [director, vault, dominion, sensory, invitation, ritual, club, history, invites] = await Promise.all([
       loadWorldRecords("director", userId),
       loadWorldRecords("vault", userId),
@@ -302,7 +313,7 @@ export default function CinematicWorld({
       loadExperienceRuns(userId),
       loadExperienceInvitations(userId)
     ]);
-    if (!isCurrent()) return;
+    if (!canApply()) return;
     setRecords({ director, vault, dominion, sensory, invitation, ritual, club });
     setRuns(history);
     setExperienceInvites(invites);
@@ -337,6 +348,8 @@ export default function CinematicWorld({
     setActiveRunId(null);
     setActiveScene(null);
     setRunStatus(null);
+    setEditingSceneKey(null);
+    setDeletingSceneKey(null);
     setSceneTitle("");
     setSceneDescription("");
     setSceneSteps("Aankomen en afstemmen\nGrenzen en signalen bevestigen\nEen gezamenlijke opdracht kiezen\nAftercare en reflectie");
@@ -444,8 +457,16 @@ export default function CinematicWorld({
   }, []);
 
   async function persist(module: WorldModule, key: string, payload: Record<string, unknown>, milestone?: string) {
-    if (!remoteProfileId) throw new Error(t("Meld je eerst aan om veilig op te slaan.", "Sign in first to save securely."));
-    const saved = await saveWorldRecord(module, key, payload, remoteProfileId);
+    const ownerId = remoteProfileId;
+    if (!ownerId) throw new Error(t("Meld je eerst aan om veilig op te slaan.", "Sign in first to save securely."));
+    const attempt: WorldOwnerAttempt = { ownerId, generation: worldOwnerGenerationRef.current };
+    const isOwnerCurrent = () => isWorldOwnerAttemptCurrent(
+      attempt,
+      startContextRef.current.remoteProfileId,
+      worldOwnerGenerationRef.current
+    );
+    const saved = await saveWorldRecord(module, key, payload, ownerId);
+    if (!isOwnerCurrent()) return saved;
     setRecords((current) => ({
       ...current,
       [module]: [saved, ...current[module].filter((record) => record.record_key !== key)]
@@ -453,11 +474,13 @@ export default function CinematicWorld({
     if (milestone) {
       const definition = MILESTONES.find((item) => item[0] === milestone);
       if (definition) {
+        if (!isOwnerCurrent()) return saved;
         const recordKey = "milestone:" + milestone;
         const badge = await saveWorldRecord("club", recordKey, {
           title: language === "nl" ? definition[2] : definition[3],
           unlockedAt: new Date().toISOString()
-        }, remoteProfileId);
+        }, ownerId);
+        if (!isOwnerCurrent()) return saved;
         setRecords((current) => ({
           ...current,
           club: [badge, ...current.club.filter((record) => record.record_key !== recordKey)]
@@ -963,6 +986,17 @@ export default function CinematicWorld({
       return;
     }
     const { title, description, steps } = validation.value;
+    const ownerId = remoteProfileId;
+    if (!ownerId) {
+      setError(t("Meld je eerst aan om een scène veilig op te slaan.", "Sign in first to save a scene securely."));
+      return;
+    }
+    const attempt: WorldOwnerAttempt = { ownerId, generation: worldOwnerGenerationRef.current };
+    const isOwnerCurrent = () => isWorldOwnerAttemptCurrent(
+      attempt,
+      startContextRef.current.remoteProfileId,
+      worldOwnerGenerationRef.current
+    );
     setBusy(true);
     try {
       const key = editingSceneKey ?? ("scene:" + crypto.randomUUID());
@@ -973,10 +1007,13 @@ export default function CinematicWorld({
         language,
         updatedAt: new Date().toISOString()
       }, "scene-maker");
+      if (!isOwnerCurrent()) return;
       setEditingSceneKey(key);
       setMessage(t("Scène opgeslagen. Je vindt hem nu direct terug in The Experience Engine.", "Scene saved. You can now find it directly in The Experience Engine."));
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : t("Scène opslaan is niet gelukt.", "Could not save scene."));
+      if (isOwnerCurrent()) {
+        setError(cause instanceof Error ? cause.message : t("Scène opslaan is niet gelukt.", "Could not save scene."));
+      }
     } finally {
       setBusy(false);
     }
@@ -1020,7 +1057,14 @@ export default function CinematicWorld({
   }
 
   async function removeScene(key: string) {
-    if (!remoteProfileId || deletingSceneRef.current) return;
+    const ownerId = remoteProfileId;
+    if (!ownerId || deletingSceneRef.current) return;
+    const attempt: WorldOwnerAttempt = { ownerId, generation: worldOwnerGenerationRef.current };
+    const isOwnerCurrent = () => isWorldOwnerAttemptCurrent(
+      attempt,
+      startContextRef.current.remoteProfileId,
+      worldOwnerGenerationRef.current
+    );
     const removesCurrentDraft = editingSceneKey === key;
     const confirmation = removesCurrentDraft && sceneDraftDirty
       ? t(
@@ -1034,7 +1078,8 @@ export default function CinematicWorld({
     setDeletingSceneKey(key);
     setError("");
     try {
-      await deleteWorldRecord("director", key, remoteProfileId);
+      await deleteWorldRecord("director", key, ownerId);
+      if (!isOwnerCurrent()) return;
       setRecords((current) => ({ ...current, director: current.director.filter((record) => record.record_key !== key) }));
       if (removesCurrentDraft) {
         setEditingSceneKey(null);
@@ -1044,7 +1089,9 @@ export default function CinematicWorld({
       }
       setMessage(t("Scène verwijderd.", "Scene deleted."));
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : t("Verwijderen is niet gelukt.", "Could not delete scene."));
+      if (isOwnerCurrent()) {
+        setError(cause instanceof Error ? cause.message : t("Verwijderen is niet gelukt.", "Could not delete scene."));
+      }
     } finally {
       deletingSceneRef.current = false;
       setDeletingSceneKey(null);
