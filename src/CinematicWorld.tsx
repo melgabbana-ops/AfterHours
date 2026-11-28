@@ -1671,6 +1671,7 @@ export default function CinematicWorld({
 
     setBusy(true);
     setError("");
+    let acceptedByServer = false;
     try {
       const tokenBytes = new Uint8Array(token.match(/.{1,2}/g)?.map((byte) => Number.parseInt(byte, 16)) ?? []);
       if (!/^[a-f0-9]{64}$/i.test(token) || tokenBytes.length !== 32) {
@@ -1684,6 +1685,7 @@ export default function CinematicWorld({
       if (!isAttemptCurrent()) return;
 
       const accepted = await acceptExperienceInvitation(tokenHash, ownerId);
+      acceptedByServer = true;
 
       // The server may finish after the user dismisses the invite or switches
       // accounts. Roll back that late consent under its original owner; if the
@@ -1691,7 +1693,7 @@ export default function CinematicWorld({
       if (!isAttemptCurrent()) {
         try {
           await withdrawExperienceConsent(accepted.run_id, ownerId);
-          if (isOwnerCurrent()) {
+          if (isOwnerCurrent() && incomingInviteTokenRef.current === null) {
             setMessage(t(
               "De uitnodiging is niet geaccepteerd omdat de uitnodiging of accountstatus veranderde. De toestemming is ingetrokken.",
               "The invitation was not accepted because the invitation or account state changed. Consent was withdrawn."
@@ -1720,7 +1722,7 @@ export default function CinematicWorld({
       setMessage(t("Uitnodiging geaccepteerd. Je eigen toestemming is vastgelegd. De eigenaar kan de ervaring nu hervatten; als jij later je toestemming intrekt, stopt de ervaring voor iedereen.", "Invitation accepted. Your own consent has been recorded. The host can now resume; if you later withdraw your consent, the experience stops for everyone."));
       setTab("invitation");
     } catch (cause) {
-      if (isAttemptCurrent()) {
+      if (isOwnerCurrent() && (acceptedByServer || isAttemptCurrent())) {
         setError(cause instanceof Error ? cause.message : t("Uitnodiging accepteren is niet gelukt.", "Could not accept invitation."));
       }
     } finally {
