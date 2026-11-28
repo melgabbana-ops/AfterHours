@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { hasUnsavedDirectorSceneChanges } from "./directorSceneDraftState";
+import {
+  DIRECTOR_SCENE_STARTER_STEPS,
+  hasUnsavedDirectorSceneChanges
+} from "./directorSceneDraftState";
 
 const saved = {
   title: "The Golden Hour",
@@ -12,11 +15,27 @@ describe("Director's Room unsaved scene draft protection", () => {
     expect(hasUnsavedDirectorSceneChanges({ title: "", description: "", stepsText: "" })).toBe(false);
   });
 
+  it("treats the untouched starter outline as clean", () => {
+    expect(hasUnsavedDirectorSceneChanges({
+      title: "",
+      description: "",
+      stepsText: DIRECTOR_SCENE_STARTER_STEPS
+    })).toBe(false);
+  });
+
   it("detects content in a new scene draft", () => {
     expect(hasUnsavedDirectorSceneChanges({
       title: "New scene",
       description: "",
       stepsText: ""
+    })).toBe(true);
+  });
+
+  it("detects edits made to the starter outline", () => {
+    expect(hasUnsavedDirectorSceneChanges({
+      title: "",
+      description: "",
+      stepsText: DIRECTOR_SCENE_STARTER_STEPS.replace("Aankomen", "Samen aankomen")
     })).toBe(true);
   });
 
@@ -37,6 +56,6 @@ describe("Director's Room unsaved scene draft protection", () => {
   });
 
   it("detects unsaved changes if the previously edited scene is no longer available", () => {
-    expect(hasUnsavedDirectorSceneChanges(saved, null)).toBe(true);
+    expect(hasUnsavedDirectorSceneChanges(saved, null, true)).toBe(true);
   });
 });

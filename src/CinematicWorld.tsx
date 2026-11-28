@@ -7,7 +7,7 @@ import { isExperiencePauseAttemptCurrent } from "./experiencePauseAttempt";
 import { isExperienceResumeAttemptCurrent } from "./experienceResumeAttempt";
 import { shouldShowExperienceEmergencyDock } from "./experienceAccess";
 import { validateDirectorSceneDraft } from "./directorSceneDraft";
-import { hasUnsavedDirectorSceneChanges } from "./directorSceneDraftState";
+import { DIRECTOR_SCENE_STARTER_STEPS, hasUnsavedDirectorSceneChanges } from "./directorSceneDraftState";
 import { isWorldOwnerAttemptCurrent, type WorldOwnerAttempt } from "./worldOwnerAttempt";
 import { isDominionProfileVisible } from "./dominionProfileAccess";
 import { isRitualDeckVisible, shouldRevealRitualDraw } from "./ritualDeckAccess";
@@ -428,7 +428,8 @@ export default function CinematicWorld({
     { title: sceneTitle, description: sceneDescription, stepsText: sceneSteps },
     editingScene
       ? { title: editingScene.title, description: editingScene.description, stepsText: editingScene.steps.join("\n") }
-      : null
+      : null,
+    editingSceneKey !== null
   );
 
   async function refreshData(userId = remoteProfileId, isCurrent?: () => boolean) {
@@ -492,7 +493,7 @@ export default function CinematicWorld({
     setDeletingSceneKey(null);
     setSceneTitle("");
     setSceneDescription("");
-    setSceneSteps("Aankomen en afstemmen\nGrenzen en signalen bevestigen\nEen gezamenlijke opdracht kiezen\nAftercare en reflectie");
+    setSceneSteps(DIRECTOR_SCENE_STARTER_STEPS);
     setInviteTitle(t("Een uitnodiging na middernacht", "A Midnight Invitation"));
     setInviteMessage(t("Ik nodig je uit om samen iets nieuws te verkennen. Alleen als dit voor jou goed voelt. We bespreken vooraf grenzen, signalen en aftercare.", "I invite you to explore something new together. Only if it feels right to you. We will discuss boundaries, signals and aftercare first."));
     setCustomCardTitle("");
