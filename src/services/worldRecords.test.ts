@@ -149,19 +149,18 @@ describe("AFTER HOURS private world storage", () => {
     await expect(loadExperienceRuns("user-a")).resolves.toEqual(rows);
     expect(mocks.from).toHaveBeenCalledWith("afterhours_experience_runs");
     expect(mocks.select).toHaveBeenCalledWith("id,user_id,scene_key,scene_snapshot,status,current_step,total_steps,created_at,updated_at,started_at,completed_at,interaction_log");
-    expect(mocks.eq).toHaveBeenCalledOnce();
-    expect(mocks.eq).toHaveBeenCalledWith("user_id", "user-a");
+    expect(mocks.eq).not.toHaveBeenCalled();
     expect(mocks.range).toHaveBeenCalledWith(0, 99);
   });
 
-  it("loads a single run status with owner scoping for the emergency STOP recovery path", async () => {
+  it("loads a shared run status through consent-based RLS for emergency STOP recovery", async () => {
     mocks.maybeSingle.mockResolvedValueOnce({ data: { id: "run-1", status: "stopped" }, error: null });
 
     await expect(loadExperienceRunStatus("run-1", "user-a")).resolves.toEqual({ id: "run-1", status: "stopped" });
     expect(mocks.from).toHaveBeenCalledWith("afterhours_experience_runs");
     expect(mocks.select).toHaveBeenCalledWith("id,status");
-    expect(mocks.eq).toHaveBeenNthCalledWith(1, "user_id", "user-a");
-    expect(mocks.eq).toHaveBeenNthCalledWith(2, "id", "run-1");
+    expect(mocks.eq).toHaveBeenCalledOnce();
+    expect(mocks.eq).toHaveBeenCalledWith("id", "run-1");
   });
 
   it("detects persisted active or paused runs for the signed-in owner", async () => {

@@ -117,7 +117,7 @@ export async function loadExperienceRuns(expectedUserId: string): Promise<Experi
     supabase!
       .from("afterhours_experience_runs")
       .select("id,user_id,scene_key,scene_snapshot,status,current_step,total_steps,created_at,updated_at,started_at,completed_at,interaction_log")
-      .eq("user_id", expectedUserId)
+      // RLS includes the owner and currently-consented participants.
       .order("updated_at", { ascending: false })
       .order("id", { ascending: true })
       .range(from, to)
@@ -132,7 +132,7 @@ export async function loadExperienceRunStatus(
   const { data, error } = await supabase!
     .from("afterhours_experience_runs")
     .select("id,status")
-    .eq("user_id", expectedUserId)
+    // The row-level policy permits the owner and a currently-consented participant.
     .eq("id", runId)
     .maybeSingle();
   if (error) throw new Error(error.message);
