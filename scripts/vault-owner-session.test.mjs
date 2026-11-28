@@ -6,7 +6,7 @@ const source = readFileSync(
   "utf8",
 );
 
-function extract(start: string, end: string) {
+function extract(start, end) {
   const startIndex = source.indexOf(start);
   const endIndex = source.indexOf(end, startIndex + start.length);
   return source.slice(startIndex, endIndex);
