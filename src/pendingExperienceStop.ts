@@ -9,6 +9,15 @@ export type PendingExperienceStopStorage = Pick<Storage, "getItem" | "setItem" |
 const STORAGE_KEY = "afterhours.pending-experience-stops.v1";
 const MAX_PENDING_STOPS = 20;
 
+// Keep an in-memory marker when browser storage is unavailable or full. This
+// protects the current app lifetime, but callers still receive false so they
+// never mistake a volatile marker for a durable retry across page reloads.
+const volatileStops = new Map<string, PendingExperienceStop>();
+
+function stopKey(runId: string, ownerId: string): string {
+  return ownerId + "\u0000" + runId;
+}
+
 function readAll(storage: PendingExperienceStopStorage): PendingExperienceStop[] {
   try {
     const raw = storage.getItem(STORAGE_KEY);
@@ -30,13 +39,20 @@ function readAll(storage: PendingExperienceStopStorage): PendingExperienceStop[]
   }
 }
 
-/** Read only minimal run/owner identifiers for a pending server-side STOP. */
+/** Read durable and current-lifetime STOP markers for one account only. */
 export function getPendingExperienceStops(
   storage: PendingExperienceStopStorage,
   ownerId: string,
 ): PendingExperienceStop[] {
   if (!ownerId) return [];
-  return readAll(storage).filter((item) => item.ownerId === ownerId);
+  const unique = new Map<string, PendingExperienceStop>();
+  for (const item of readAll(storage)) {
+    if (item.ownerId === ownerId) unique.set(stopKey(item.runId, item.ownerId), item);
+  }
+  for (const item of volatileStops.values()) {
+    if (item.ownerId === ownerId) unique.set(stopKey(item.runId, item.ownerId), item);
+  }
+  return [...unique.values()];
 }
 
 /** Persist a STOP retry without storing scene content, consent text, or interaction history. */
@@ -49,11 +65,18 @@ export function enqueuePendingExperienceStop(
   if (!runId.trim() || !ownerId.trim() || !queuedAt) return false;
   const current = readAll(storage);
   if (current.some((item) => item.runId === runId && item.ownerId === ownerId)) return true;
-  if (current.length >= MAX_PENDING_STOPS) return false;
+  const pending = { runId, ownerId, queuedAt };
+  const key = stopKey(runId, ownerId);
+  if (current.length >= MAX_PENDING_STOPS) {
+    volatileStops.set(key, pending);
+    return false;
+  }
   try {
-    storage.setItem(STORAGE_KEY, JSON.stringify([...current, { runId, ownerId, queuedAt }]));
+    storage.setItem(STORAGE_KEY, JSON.stringify([...current, pending]));
+    volatileStops.delete(key);
     return true;
   } catch {
+    volatileStops.set(key, pending);
     return false;
   }
 }
@@ -64,6 +87,7 @@ export function removePendingExperienceStop(
   runId: string,
   ownerId: string,
 ): boolean {
+  volatileStops.delete(stopKey(runId, ownerId));
   const current = readAll(storage);
   const next = current.filter((item) => item.runId !== runId || item.ownerId !== ownerId);
   if (next.length === current.length) return true;
