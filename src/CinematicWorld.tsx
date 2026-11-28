@@ -1567,11 +1567,13 @@ export default function CinematicWorld({
         await revokeCreatedInvitation();
         return;
       }
+      const canShare = typeof navigator.share === "function";
+      const canCopy = typeof navigator.clipboard?.writeText === "function";
       let copiedToClipboard = false;
       try {
-        if (navigator.share) {
+        if (canShare) {
           await navigator.share({ title: t("AFTER HOURS · uitnodiging", "AFTER HOURS · invitation"), text: t("Je bent uitgenodigd om deel te nemen. Je kiest zelf of je accepteert. Inloggen is vereist.", "You are invited to participate. You choose whether to accept. Sign-in is required."), url: url.toString() });
-        } else if (navigator.clipboard?.writeText) {
+        } else if (canCopy) {
           await navigator.clipboard.writeText(url.toString());
           copiedToClipboard = true;
         }
@@ -1585,7 +1587,7 @@ export default function CinematicWorld({
       }
       if (copiedToClipboard) {
         setMessage(t("Veilige uitnodigingslink gekopieerd. De link verloopt over zeven dagen.", "Secure invitation link copied. It expires in seven days."));
-      } else if (!navigator.share) {
+      } else if (!canShare) {
         setMessage(t("Uitnodigingslink aangemaakt. Kopieer de link hieronder.", "Invitation link created. Copy the link below."));
       }
     } catch (cause) {
@@ -1689,17 +1691,19 @@ export default function CinematicWorld({
       if (shareAfterSave) {
         // Never open a share sheet for a draft after its owner has changed.
         if (!isOwnerCurrent()) return;
-        if (navigator.share) {
+        const canShare = typeof navigator.share === "function";
+        const canCopy = typeof navigator.clipboard?.writeText === "function";
+        if (canShare) {
           await navigator.share({ title: inviteTitle.trim(), text: body, url: url.toString() });
-        } else if (navigator.clipboard?.writeText) {
+        } else if (canCopy) {
           await navigator.clipboard.writeText(body);
         }
         if (!isOwnerCurrent()) return;
         await persist("invitation", key, { title: inviteTitle.trim(), message: inviteMessage.trim(), createdAt, sharedAt: new Date().toISOString(), shareStatus: "shared" });
         if (!isOwnerCurrent()) return;
-        if (!navigator.share && navigator.clipboard?.writeText) {
+        if (!canShare && canCopy) {
           setMessage(t("Uitnodiging opgeslagen en gekopieerd. Je kunt hem nu zelf versturen.", "Invitation saved and copied. You can send it yourself."));
-        } else if (!navigator.share) {
+        } else if (!canShare) {
           setMessage(t("Uitnodiging opgeslagen. Kopieer de tekst handmatig om hem te delen.", "Invitation saved. Copy the text manually to share it."));
         }
       } else {
