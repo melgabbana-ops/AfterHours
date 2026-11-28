@@ -178,10 +178,12 @@ export default function CinematicWorld({
   const stopPendingRef = useRef(false);
   const startAttemptRef = useRef(0);
   const worldOwnerGenerationRef = useRef(0);
+  const vaultSessionGenerationRef = useRef(0);
   const startContextRef = useRef({ remoteProfileId, consentActive, canStartExperience });
   startContextRef.current = { remoteProfileId, consentActive, canStartExperience };
   useLayoutEffect(() => {
     worldOwnerGenerationRef.current += 1;
+    vaultSessionGenerationRef.current += 1;
     setBusy(false);
     deletingSceneRef.current = false;
     setDeletingSceneKey(null);
@@ -220,6 +222,7 @@ export default function CinematicWorld({
   const vaultSensitive = Boolean(vaultPassphrase || vaultPlain || vaultTitle || vaultDraft);
   vaultSensitiveRef.current = vaultSensitive;
   const lockVault = useCallback((message?: string) => {
+    vaultSessionGenerationRef.current += 1;
     setVaultPassphrase("");
     setVaultPlain(null);
     setVaultTitle("");
@@ -1105,8 +1108,20 @@ export default function CinematicWorld({
 
   async function saveVaultNote() {
     setError("");
-    if (!remoteProfileId) { setVaultPassphrase(""); setError(t("Meld je aan om de versleutelde kluis te gebruiken.", "Sign in to use the encrypted vault.")); return; }
-    if (vaultPassphrase.length < 10 || !vaultTitle.trim() || !vaultDraft.trim()) {
+    const ownerId = remoteProfileId;
+    if (!ownerId) { setVaultPassphrase(""); setError(t("Meld je aan om de versleutelde kluis te gebruiken.", "Sign in to use the encrypted vault.")); return; }
+    const ownerAttempt: WorldOwnerAttempt = { ownerId, generation: worldOwnerGenerationRef.current };
+    const isOwnerCurrent = () => isWorldOwnerAttemptCurrent(
+      ownerAttempt,
+      startContextRef.current.remoteProfileId,
+      worldOwnerGenerationRef.current
+    );
+    const vaultGeneration = vaultSessionGenerationRef.current;
+    const isVaultAttemptCurrent = () => isOwnerCurrent() && vaultSessionGenerationRef.current === vaultGeneration;
+    const passphrase = vaultPassphrase;
+    const title = vaultTitle.trim();
+    const content = vaultDraft;
+    if (passphrase.length < 10 || !title || !content.trim()) {
       setVaultPassphrase("");
       setVaultMessage(t("Gebruik minimaal 10 tekens als wachtzin en vul titel en notitie in.", "Use a passphrase of at least 10 characters and enter a title and note."));
       return;
@@ -1115,9 +1130,10 @@ export default function CinematicWorld({
     try {
       const salt = crypto.getRandomValues(new Uint8Array(16));
       const iv = crypto.getRandomValues(new Uint8Array(12));
-      const key = await deriveVaultKey(vaultPassphrase, salt);
-      const plaintext = new TextEncoder().encode(JSON.stringify({ title: vaultTitle.trim(), content: vaultDraft }));
+      const key = await deriveVaultKey(passphrase, salt);
+      const plaintext = new TextEncoder().encode(JSON.stringify({ title, content }));
       const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, plaintext);
+      if (!isVaultAttemptCurrent()) return;
       const recordKey = "vault:" + crypto.randomUUID();
       await persist("vault", recordKey, {
         version: 1,
@@ -1127,53 +1143,87 @@ export default function CinematicWorld({
         iv: bytesToBase64(iv),
         ciphertext: bytesToBase64(new Uint8Array(encrypted))
       }, "vault-keeper");
+      if (!isVaultAttemptCurrent()) return;
       setVaultTitle("");
       setVaultDraft("");
       setVaultPlain(null);
       setVaultMessage(t("Versleuteld opgeslagen. De server heeft alleen ciphertext ontvangen.", "Encrypted and saved. The server received ciphertext only."));
     } catch (cause) {
-      setVaultMessage(cause instanceof Error ? cause.message : t("Versleutelen of opslaan is niet gelukt.", "Encryption or saving failed."));
+      if (isVaultAttemptCurrent()) {
+        setVaultMessage(cause instanceof Error ? cause.message : t("Versleutelen of opslaan is niet gelukt.", "Encryption or saving failed."));
+      }
     } finally {
-      setVaultPassphrase("");
-      setBusy(false);
+      if (isOwnerCurrent()) {
+        setVaultPassphrase("");
+        setBusy(false);
+      }
     }
   }
 
   async function unlockVault(record: WorldRecord | undefined) {
+    const ownerId = remoteProfileId;
+    if (!ownerId) { setVaultPassphrase(""); setVaultMessage(t("Meld je aan om de versleutelde kluis te gebruiken.", "Sign in to use the encrypted vault.")); return; }
     if (!record) { setVaultPassphrase(""); setVaultMessage(t("Er is nog geen versleutelde notitie.", "There is no encrypted note yet.")); return; }
-    if (vaultPassphrase.length < 10) { setVaultPassphrase(""); setVaultMessage(t("Vul eerst je wachtzin in.", "Enter your passphrase first.")); return; }
+    const passphrase = vaultPassphrase;
+    if (passphrase.length < 10) { setVaultPassphrase(""); setVaultMessage(t("Vul eerst je wachtzin in.", "Enter your passphrase first.")); return; }
+    const ownerAttempt: WorldOwnerAttempt = { ownerId, generation: worldOwnerGenerationRef.current };
+    const vaultAttempt = ++vaultSessionGenerationRef.current;
+    const isCurrentVaultAttempt = () => isWorldOwnerAttemptCurrent(
+      ownerAttempt,
+      startContextRef.current.remoteProfileId,
+      worldOwnerGenerationRef.current
+    ) && vaultSessionGenerationRef.current === vaultAttempt;
     try {
       const payload = record.payload as { salt?: string; iv?: string; ciphertext?: string };
       if (!payload.salt || !payload.iv || !payload.ciphertext) throw new Error("Invalid encrypted vault item.");
-      const key = await deriveVaultKey(vaultPassphrase, base64ToBytes(payload.salt));
+      const key = await deriveVaultKey(passphrase, base64ToBytes(payload.salt));
+      if (!isCurrentVaultAttempt()) return;
       const plaintext = await crypto.subtle.decrypt(
         { name: "AES-GCM", iv: toArrayBuffer(base64ToBytes(payload.iv)) },
         key,
         toArrayBuffer(base64ToBytes(payload.ciphertext))
       );
+      if (!isCurrentVaultAttempt()) return;
       const parsed = JSON.parse(new TextDecoder().decode(plaintext)) as { title?: string; content?: string };
+      if (!isCurrentVaultAttempt()) return;
       setVaultPlain({ title: String(parsed.title ?? ""), content: String(parsed.content ?? "") });
       setVaultMessage(t("Notitie alleen in deze open sessie ontsleuteld.", "Note decrypted in this open session only."));
     } catch {
-      setVaultPlain(null);
-      setVaultMessage(t("Ontgrendelen mislukt. Controleer je wachtzin.", "Could not unlock. Check your passphrase."));
+      if (isCurrentVaultAttempt()) {
+        setVaultPlain(null);
+        setVaultMessage(t("Ontgrendelen mislukt. Controleer je wachtzin.", "Could not unlock. Check your passphrase."));
+      }
     } finally {
-      setVaultPassphrase("");
+      if (isCurrentVaultAttempt()) setVaultPassphrase("");
     }
   }
 
   async function deleteVaultNote(key: string) {
-    if (!remoteProfileId || !window.confirm(t("Deze versleutelde notitie definitief verwijderen?", "Permanently delete this encrypted note?"))) return;
+    const ownerId = remoteProfileId;
+    if (!ownerId || !window.confirm(t("Deze versleutelde notitie definitief verwijderen?", "Permanently delete this encrypted note?"))) return;
+    const attempt: WorldOwnerAttempt = { ownerId, generation: worldOwnerGenerationRef.current };
+    const isOwnerCurrent = () => isWorldOwnerAttemptCurrent(
+      attempt,
+      startContextRef.current.remoteProfileId,
+      worldOwnerGenerationRef.current
+    );
     try {
-      await deleteWorldRecord("vault", key, remoteProfileId);
+      await deleteWorldRecord("vault", key, ownerId);
+      if (!isOwnerCurrent()) return;
       setRecords((current) => ({ ...current, vault: current.vault.filter((record) => record.record_key !== key) }));
       lockVault(t("Versleutelde notitie verwijderd en kluis vergrendeld.", "Encrypted note deleted and vault locked."));
     } catch (cause) {
-      setVaultMessage(cause instanceof Error ? cause.message : t("Verwijderen is niet gelukt.", "Could not delete note."));
+      if (isOwnerCurrent()) {
+        setVaultMessage(cause instanceof Error ? cause.message : t("Verwijderen is niet gelukt.", "Could not delete note."));
+      }
     }
   }
 
   async function saveDominion() {
+    const ownerId = remoteProfileId;
+    if (!ownerId) { setError(t("Meld je aan om je dynamiekprofiel veilig op te slaan.", "Sign in to save your dynamics profile securely.")); return; }
+    const attempt: WorldOwnerAttempt = { ownerId, generation: worldOwnerGenerationRef.current };
+    const isOwnerCurrent = () => isWorldOwnerAttemptCurrent(attempt, startContextRef.current.remoteProfileId, worldOwnerGenerationRef.current);
     setBusy(true);
     try {
       await persist("dominion", "profile", {
@@ -1184,23 +1234,27 @@ export default function CinematicWorld({
         aftercare: domAftercare.trim(),
         updatedAt: new Date().toISOString()
       }, "dominion-profile");
-      setMessage(t("Je dynamiekprofiel is privé opgeslagen.", "Your dynamics profile has been saved privately."));
+      if (isOwnerCurrent()) setMessage(t("Je dynamiekprofiel is privé opgeslagen.", "Your dynamics profile has been saved privately."));
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : t("Profiel opslaan is niet gelukt.", "Could not save profile."));
+      if (isOwnerCurrent()) setError(cause instanceof Error ? cause.message : t("Profiel opslaan is niet gelukt.", "Could not save profile."));
     } finally {
-      setBusy(false);
+      if (isOwnerCurrent()) setBusy(false);
     }
   }
 
   async function saveSensory() {
+    const ownerId = remoteProfileId;
+    if (!ownerId) { setError(t("Meld je aan om je soundscape veilig op te slaan.", "Sign in to save your soundscape securely.")); return; }
+    const attempt: WorldOwnerAttempt = { ownerId, generation: worldOwnerGenerationRef.current };
+    const isOwnerCurrent = () => isWorldOwnerAttemptCurrent(attempt, startContextRef.current.remoteProfileId, worldOwnerGenerationRef.current);
     setBusy(true);
     try {
       await persist("sensory", "preferences", { theme: sensoryTheme, volume: sensoryVolume, updatedAt: new Date().toISOString() }, "sound-signature");
-      setMessage(t("Je soundscape-instellingen zijn opgeslagen.", "Your soundscape settings have been saved."));
+      if (isOwnerCurrent()) setMessage(t("Je soundscape-instellingen zijn opgeslagen.", "Your soundscape settings have been saved."));
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : t("Soundscape opslaan is niet gelukt.", "Could not save soundscape."));
+      if (isOwnerCurrent()) setError(cause instanceof Error ? cause.message : t("Soundscape opslaan is niet gelukt.", "Could not save soundscape."));
     } finally {
-      setBusy(false);
+      if (isOwnerCurrent()) setBusy(false);
     }
   }
 
