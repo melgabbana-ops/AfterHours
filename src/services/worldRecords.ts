@@ -9,6 +9,9 @@ export type WorldRecord<T = Record<string, unknown>> = {
   updated_at: string;
 };
 export type ExperienceRunStatus = "ready" | "active" | "paused" | "completed" | "stopped";
+
+const PRIVATE_PAGE_SIZE = 100;
+type PrivatePage<T> = { data: T[] | null; error: { message: string } | null };
 export type ExperienceRun = {
   id: string;
   user_id: string;
@@ -33,20 +36,37 @@ async function assertWorldAccount(expectedUserId: string) {
   return user;
 }
 
+async function loadAllPrivatePages<T>(
+  expectedUserId: string,
+  loadPage: (from: number, to: number) => PromiseLike<PrivatePage<T>>,
+): Promise<T[]> {
+  const rows: T[] = [];
+  for (let offset = 0; ; offset += PRIVATE_PAGE_SIZE) {
+    await assertWorldAccount(expectedUserId);
+    const { data, error } = await loadPage(offset, offset + PRIVATE_PAGE_SIZE - 1);
+    if (error) throw new Error(error.message);
+    const page = data ?? [];
+    rows.push(...page);
+    if (page.length < PRIVATE_PAGE_SIZE) break;
+  }
+  await assertWorldAccount(expectedUserId);
+  return rows;
+}
+
 export async function loadWorldRecords<T = Record<string, unknown>>(
   module: WorldModule,
   expectedUserId: string,
 ): Promise<WorldRecord<T>[]> {
-  await assertWorldAccount(expectedUserId);
-  const { data, error } = await supabase!
-    .from("afterhours_world_records")
-    .select("id,record_key,payload,created_at,updated_at")
-    .eq("user_id", expectedUserId)
-    .eq("module", module)
-    .order("updated_at", { ascending: false })
-    .limit(100);
-  if (error) throw new Error(error.message);
-  return (data ?? []) as WorldRecord<T>[];
+  return loadAllPrivatePages<WorldRecord<T>>(expectedUserId, (from, to) =>
+    supabase!
+      .from("afterhours_world_records")
+      .select("id,record_key,payload,created_at,updated_at")
+      .eq("user_id", expectedUserId)
+      .eq("module", module)
+      .order("updated_at", { ascending: false })
+      .order("id", { ascending: true })
+      .range(from, to)
+  );
 }
 
 export async function saveWorldRecord<T extends Record<string, unknown>>(
@@ -93,15 +113,31 @@ export async function deleteWorldRecord(
 }
 
 export async function loadExperienceRuns(expectedUserId: string): Promise<ExperienceRun[]> {
+  return loadAllPrivatePages<ExperienceRun>(expectedUserId, (from, to) =>
+    supabase!
+      .from("afterhours_experience_runs")
+      .select("id,user_id,scene_key,scene_snapshot,status,current_step,total_steps,created_at,updated_at,started_at,completed_at,interaction_log")
+      .eq("user_id", expectedUserId)
+      .order("updated_at", { ascending: false })
+      .order("id", { ascending: true })
+      .range(from, to)
+  );
+}
+
+export async function loadExperienceRunStatus(
+  runId: string,
+  expectedUserId: string,
+): Promise<{ id: string; status: ExperienceRunStatus } | null> {
   await assertWorldAccount(expectedUserId);
   const { data, error } = await supabase!
     .from("afterhours_experience_runs")
-    .select("id,user_id,scene_key,scene_snapshot,status,current_step,total_steps,created_at,updated_at,started_at,completed_at,interaction_log")
+    .select("id,status")
     .eq("user_id", expectedUserId)
-    .order("updated_at", { ascending: false })
-    .limit(50);
+    .eq("id", runId)
+    .maybeSingle();
   if (error) throw new Error(error.message);
-  return (data ?? []) as ExperienceRun[];
+  await assertWorldAccount(expectedUserId);
+  return data as { id: string; status: ExperienceRunStatus } | null;
 }
 
 export async function hasActiveExperienceRuns(expectedUserId: string): Promise<boolean> {
@@ -328,15 +364,15 @@ export type ExperienceInvitation = {
 };
 
 export async function loadExperienceInvitations(expectedUserId: string): Promise<ExperienceInvitation[]> {
-  await assertWorldAccount(expectedUserId);
-  const { data, error } = await supabase!
-    .from("afterhours_experience_invitations")
-    .select("id,run_id,status,accepted_at,expires_at,created_at")
-    .eq("inviter_user_id", expectedUserId)
-    .order("created_at", { ascending: false })
-    .limit(50);
-  if (error) throw new Error(error.message);
-  return (data ?? []) as ExperienceInvitation[];
+  return loadAllPrivatePages<ExperienceInvitation>(expectedUserId, (from, to) =>
+    supabase!
+      .from("afterhours_experience_invitations")
+      .select("id,run_id,status,accepted_at,expires_at,created_at")
+      .eq("inviter_user_id", expectedUserId)
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: true })
+      .range(from, to)
+  );
 }
 
 export async function createExperienceInvitation(args: {
