@@ -13,6 +13,15 @@ function extract(start, end) {
 }
 
 const ownerEffect = extract("useLayoutEffect(() => {\n    worldOwnerGenerationRef.current += 1;", "\n  const runMutationRef");
+const mediaVaultSource = readFileSync(
+  new URL("../src/MediaVault.tsx", import.meta.url),
+  "utf8",
+);
+const mediaVaultAuth = mediaVaultSource.slice(
+  mediaVaultSource.indexOf("return bindVaultAuthSession"),
+  mediaVaultSource.indexOf("\n  }, [handleCaptureBackground, refresh]);", mediaVaultSource.indexOf("return bindVaultAuthSession")),
+);
+
 const lockVault = extract("const lockVault = useCallback", "\n\n  useLayoutEffect");
 const saveVault = extract("async function saveVaultNote()", "\n  async function unlockVault");
 const unlockVault = extract("async function unlockVault(", "\n  async function deleteVaultNote");
@@ -24,6 +33,17 @@ describe("Black Vault owner and lock-session guards", () => {
   it("invalidates pending vault work when the account changes or the vault locks", () => {
     expect(ownerEffect).toContain("vaultSessionGenerationRef.current += 1;");
     expect(lockVault).toContain("vaultSessionGenerationRef.current += 1;");
+  });
+
+  it("clears the previous media account before refreshing a changed identity", () => {
+    expect(mediaVaultAuth).toContain("hasVaultAuthIdentityChanged(authUserIdRef.current, userId)");
+    expect(mediaVaultAuth).toContain('handleCaptureBackground("auth")');
+    expect(mediaVaultAuth).toContain("identityChanged || event === \"SIGNED_IN\"");
+    const identitySwitch = mediaVaultAuth.slice(
+      mediaVaultAuth.indexOf("const identityChanged"),
+      mediaVaultAuth.indexOf("authUserIdRef.current = userId"),
+    );
+    expect(identitySwitch).toContain('handleCaptureBackground("auth")');
   });
 
   it("does not reveal decrypted content after a lock or account change", () => {

@@ -19,6 +19,24 @@ export interface VaultAuthClient {
 export interface VaultAuthState {
   event: string;
   authenticated: boolean;
+  userId: string | null;
+}
+
+/** Return only a real Supabase user id; malformed sessions fail closed. */
+function getVaultAuthUserId(user: unknown): string | null {
+  if (typeof user !== "object" || user === null) return null;
+  const id = (user as { id?: unknown }).id;
+  return typeof id === "string" && id.trim().length > 0 ? id : null;
+}
+
+/** Detect an account switch without treating the first session as a switch. */
+export function hasVaultAuthIdentityChanged(
+  currentUserId: string | null,
+  nextUserId: string | null,
+): boolean {
+  return currentUserId !== null
+    && nextUserId !== null
+    && currentUserId !== nextUserId;
 }
 
 /**
@@ -32,9 +50,11 @@ export function bindVaultAuthSession(
   let active = true;
   const { data: { subscription } } = auth.onAuthStateChange((event, session) => {
     if (!active) return;
+    const userId = event === "SIGNED_OUT" ? null : getVaultAuthUserId(session?.user);
     onChange({
       event,
-      authenticated: event !== "SIGNED_OUT" && Boolean(session?.user),
+      authenticated: userId !== null,
+      userId,
     });
   });
 

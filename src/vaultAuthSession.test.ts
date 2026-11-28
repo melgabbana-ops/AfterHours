@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { bindVaultAuthSession, type VaultAuthClient } from "./vaultAuthSession";
+import { bindVaultAuthSession, hasVaultAuthIdentityChanged, type VaultAuthClient } from "./vaultAuthSession";
 
 function createAuthHarness() {
   let listener: ((event: string, session: { user?: unknown } | null) => void) | undefined;
@@ -35,6 +35,7 @@ describe("Black Vault authentication lifecycle", () => {
     expect(onChange).toHaveBeenCalledWith({
       event: "INITIAL_SESSION",
       authenticated: true,
+      userId: "user-1",
     });
     cleanup();
   });
@@ -49,6 +50,7 @@ describe("Black Vault authentication lifecycle", () => {
     expect(onChange).toHaveBeenCalledWith({
       event: "SIGNED_OUT",
       authenticated: false,
+      userId: null,
     });
     cleanup();
   });
@@ -65,12 +67,36 @@ describe("Black Vault authentication lifecycle", () => {
     expect(onChange).toHaveBeenNthCalledWith(1, {
       event: "SIGNED_IN",
       authenticated: true,
+      userId: "user-1",
     });
     expect(onChange).toHaveBeenNthCalledWith(2, {
       event: "TOKEN_REFRESHED",
       authenticated: true,
+      userId: "user-1",
     });
     cleanup();
+  });
+
+  it("fails closed when a session user has no usable id", () => {
+    const harness = createAuthHarness();
+    const onChange = vi.fn();
+    const cleanup = bindVaultAuthSession(harness.auth, onChange);
+
+    harness.emit("INITIAL_SESSION", { user: {} });
+
+    expect(onChange).toHaveBeenCalledWith({
+      event: "INITIAL_SESSION",
+      authenticated: false,
+      userId: null,
+    });
+    cleanup();
+  });
+
+  it("detects a real account switch but not an initial or unchanged identity", () => {
+    expect(hasVaultAuthIdentityChanged(null, "user-1")).toBe(false);
+    expect(hasVaultAuthIdentityChanged("user-1", "user-1")).toBe(false);
+    expect(hasVaultAuthIdentityChanged("user-1", "user-2")).toBe(true);
+    expect(hasVaultAuthIdentityChanged("user-1", null)).toBe(false);
   });
 
   it("unsubscribes and ignores callbacks after cleanup", () => {

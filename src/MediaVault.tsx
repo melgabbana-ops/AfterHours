@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import { createMediaPreviewUrlRegistry } from "./mediaPreviewUrls";
 import { createPrivateMediaUrlExpiryTimer } from "./privateMediaUrlExpiry";
-import { bindVaultAuthSession } from "./vaultAuthSession";
+import { bindVaultAuthSession, hasVaultAuthIdentityChanged } from "./vaultAuthSession";
 import { bindMediaCaptureBackgroundGuard, isMediaCaptureAttemptCurrent } from "./mediaCaptureLifecycle";
 import { bindVaultAutoLock, hasSensitiveVaultContent } from "./vaultAutoLock";
 import {
@@ -64,6 +64,7 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
   const [isSavingCapture,setIsSavingCapture] = useState(false);
   const mountedRef = useRef(false);
   const authValidRef = useRef(false);
+  const authUserIdRef = useRef<string | null>(null);
   const vaultLockedRef = useRef(false);
   const authEventGenerationRef = useRef(0);
   const livePreviewRef = useRef<HTMLVideoElement|null>(null);
@@ -179,10 +180,12 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
         if (error) throw error;
         if (!active || authGeneration !== authEventGenerationRef.current) return;
         if (data.user) {
+          authUserIdRef.current = data.user.id;
           authValidRef.current = true;
           setIsAuthenticated(true);
           await refresh(() => active && authGeneration === authEventGenerationRef.current);
         } else {
+          authUserIdRef.current = null;
           authValidRef.current = false;
           setIsAuthenticated(false);
           setMessage(t("Log in via Session Control om je privékluis te openen.", "Sign in through Session Control to open your private vault."));
@@ -370,19 +373,27 @@ export default function MediaVault({ sessionId, language = "nl", assignmentTitle
 
   useEffect(() => {
     if (!supabase) return;
-    return bindVaultAuthSession(supabase.auth, ({ event, authenticated }) => {
-      if (!authenticated) {
+    return bindVaultAuthSession(supabase.auth, ({ event, authenticated, userId }) => {
+      if (!authenticated || !userId) {
         authEventGenerationRef.current += 1;
+        authUserIdRef.current = null;
         authValidRef.current = false;
         handleCaptureBackground("auth");
         return;
       }
 
+      const identityChanged = hasVaultAuthIdentityChanged(authUserIdRef.current, userId);
       const wasAuthenticated = authValidRef.current;
+      if (identityChanged) {
+        // Clear the previous account's previews and metadata before loading the next account.
+        authValidRef.current = false;
+        handleCaptureBackground("auth");
+      }
+      authUserIdRef.current = userId;
       authValidRef.current = true;
       setIsAuthenticated(true);
 
-      if (event === "SIGNED_IN" || (!wasAuthenticated && event !== "INITIAL_SESSION")) {
+      if (identityChanged || event === "SIGNED_IN" || (!wasAuthenticated && event !== "INITIAL_SESSION")) {
         authEventGenerationRef.current += 1;
         const authGeneration = authEventGenerationRef.current;
         if (document.visibilityState === "visible") {
