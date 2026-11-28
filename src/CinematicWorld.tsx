@@ -629,7 +629,7 @@ export default function CinematicWorld({
   async function persist(module: WorldModule, key: string, payload: Record<string, unknown>, milestone?: string) {
     const ownerId = remoteProfileId;
     if (!ownerId) throw new Error(t("Meld je eerst aan om veilig op te slaan.", "Sign in first to save securely."));
-    const attempt: WorldOwnerAttempt & { safetyGeneration: number } = { ownerId, generation: worldOwnerGenerationRef.current, safetyGeneration: startAttemptRef.current };
+    const attempt: WorldOwnerAttempt = { ownerId, generation: worldOwnerGenerationRef.current };
     const isOwnerCurrent = () => isWorldOwnerAttemptCurrent(
       attempt,
       startContextRef.current.remoteProfileId,
@@ -1505,7 +1505,7 @@ export default function CinematicWorld({
     }
     const ownerId = remoteProfileId;
     if (!ownerId) return;
-    const attempt: WorldOwnerAttempt = { ownerId, generation: worldOwnerGenerationRef.current };
+    const attempt: WorldOwnerAttempt & { safetyGeneration: number } = { ownerId, generation: worldOwnerGenerationRef.current, safetyGeneration: startAttemptRef.current };
     const isOwnerCurrent = () => isWorldOwnerAttemptCurrent(
       attempt,
       startContextRef.current.remoteProfileId,
