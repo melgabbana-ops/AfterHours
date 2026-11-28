@@ -2,6 +2,7 @@ import type { KeyboardEvent } from "react";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { bindVaultAutoLock } from "./vaultAutoLock";
 import { isExperienceStartAttemptCurrent } from "./experienceStartAttempt";
+import { isExperiencePauseAttemptCurrent } from "./experiencePauseAttempt";
 import { isExperienceResumeAttemptCurrent } from "./experienceResumeAttempt";
 import { shouldShowExperienceEmergencyDock } from "./experienceAccess";
 import { validateDirectorSceneDraft } from "./directorSceneDraft";
@@ -288,7 +289,7 @@ export default function CinematicWorld({
       : null
   );
 
-  async function refreshData(userId = remoteProfileId) {
+  async function refreshData(userId = remoteProfileId, isCurrent: () => boolean = () => true) {
     if (!userId) return;
     const [director, vault, dominion, sensory, invitation, ritual, club, history, invites] = await Promise.all([
       loadWorldRecords("director", userId),
@@ -301,6 +302,7 @@ export default function CinematicWorld({
       loadExperienceRuns(userId),
       loadExperienceInvitations(userId)
     ]);
+    if (!isCurrent()) return;
     setRecords({ director, vault, dominion, sensory, invitation, ritual, club });
     setRuns(history);
     setExperienceInvites(invites);
@@ -687,18 +689,27 @@ export default function CinematicWorld({
 
   async function pauseScene() {
     if (!activeRunId || !remoteProfileId || stopPendingRef.current || stopPending) return;
+    const attempt = { id: startAttemptRef.current, ownerId: remoteProfileId, runId: activeRunId };
+    const isCurrentPause = () => isExperiencePauseAttemptCurrent(attempt, {
+      currentAttemptId: startAttemptRef.current,
+      currentOwnerId: startContextRef.current.remoteProfileId,
+      consentActive: startContextRef.current.consentActive,
+      canStartExperience: startContextRef.current.canStartExperience,
+      stopPending: stopPendingRef.current,
+      currentRunId: activeRunId
+    });
     setBusy(true);
     const mutation = updateExperienceRun({
-      runId: activeRunId,
-      expectedUserId: remoteProfileId,
+      runId: attempt.runId,
+      expectedUserId: attempt.ownerId,
       status: "paused",
       currentStep: stepIndex
     });
     runMutationRef.current = mutation;
     try {
       await mutation;
-      if (stopPendingRef.current) return;
-      setRuns((current) => current.map((run) => run.id === activeRunId
+      if (!isCurrentPause()) return;
+      setRuns((current) => current.map((run) => run.id === attempt.runId
         ? { ...run, status: "paused" as const, current_step: stepIndex }
         : run
       ));
@@ -712,14 +723,24 @@ export default function CinematicWorld({
       setActiveScene(null);
       setRunStatus(null);
       setMessage(t("Gepauzeerd en veilig opgeslagen. Je kunt hervatten vanuit Openstaande ervaring, met een nieuwe check-in en consent.", "Paused and safely saved. You can resume from Unfinished experience with a fresh check-in and consent."));
-      try { await refreshData(); } catch { setMessage(t("De scène is lokaal afgesloten en blijft gepauzeerd. Controleer je verbinding voordat je hervat.", "The scene is closed locally and remains paused. Check your connection before resuming.")); }
+      try {
+        await refreshData(attempt.ownerId, isCurrentPause);
+        if (!isCurrentPause()) return;
+      } catch {
+        if (!isCurrentPause()) return;
+        setMessage(t("De scène is lokaal afgesloten en blijft gepauzeerd. Controleer je verbinding voordat je hervat.", "The scene is closed locally and remains paused. Check your connection before resuming."));
+      }
     } catch {
-      if (stopPendingRef.current) return;
-      setRunStatus("paused");
-      setCheckIn("unset");
-      onSafetyPause();
-      onSafetyStop();
-      setError(t("De server kon de pauze niet bevestigen. De app is daarom uit voorzorg gestopt. Controleer je verbinding voordat je opnieuw begint.", "The server could not confirm the pause. The app has therefore stopped as a precaution. Check your connection before starting again."));
+      if (!isCurrentPause()) return;
+      // A failed pause can leave the run paused while its consent write failed.
+      // Revoke this run's consent and stop it atomically instead of only stopping the app timer.
+      await stopScene();
+      if (!stopPendingRef.current) {
+        setMessage(t(
+          "De pauze kon niet veilig worden bevestigd. De scène is daarom gestopt. Bevestig opnieuw consent voordat je opnieuw begint.",
+          "The pause could not be safely confirmed. The scene has been stopped. Confirm consent again before starting another scene."
+        ));
+      }
     } finally {
       if (runMutationRef.current === mutation) runMutationRef.current = null;
       setBusy(false);
