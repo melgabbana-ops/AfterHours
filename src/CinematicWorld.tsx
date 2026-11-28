@@ -1491,7 +1491,7 @@ export default function CinematicWorld({
     activeScenePresent: Boolean(activeScene),
     runStatus,
     recoverableRunId: recoverableRun?.id ?? null,
-    recoverableRunStatus: recoverableRun?.status ?? null,
+    recoverableRunStatus: recoverableRun?.status === "active" || recoverableRun?.status === "paused" ? recoverableRun.status : null,
   });
   const emergencyRunStatus = activeRunId ? runStatus : recoverableRun?.status ?? null;
 
