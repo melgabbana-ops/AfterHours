@@ -10,6 +10,13 @@ import { hasUnsavedDirectorSceneChanges } from "./directorSceneDraftState";
 import { isWorldOwnerAttemptCurrent, type WorldOwnerAttempt } from "./worldOwnerAttempt";
 import { consumeInvitationTokenFromUrl } from "./invitationUrl";
 import {
+  enqueuePendingExperienceStop,
+  getPendingExperienceStops,
+  removePendingExperienceStop,
+  type PendingExperienceStop,
+  type PendingExperienceStopStorage,
+} from "./pendingExperienceStop";
+import {
   ArrowLeft, ArrowRight, BookOpen, CheckCircle2, Clapperboard, Copy,
   Download, Eye, EyeOff, LockKeyhole, Mail, Music2, Pause,
   Play, Plus, Save, Share2, ShieldCheck, Sparkles, Square, Star, Trash2,
@@ -33,7 +40,7 @@ type Props = {
   onRequestConsent: () => void;
   onSafetyPause: () => void;
   onSafetyResume: () => void;
-  onSafetyStop: () => void;
+  onSafetyStop: (message?: string) => void;
   onOpenGameLibrary: () => void;
   onOpenAftercare: () => void;
   onOpenSafetyPlan: () => void;
@@ -43,6 +50,36 @@ type Scene = { key: string; title: string; description: string; steps: string[];
 type ScenePayload = { title: string; description: string; steps: string[]; language: "nl" | "en"; updatedAt: string };
 type RecordMap = Record<WorldModule, WorldRecord[]>;
 type CheckIn = "unset" | "green" | "yellow" | "red";
+
+function pendingExperienceStopStorages(): PendingExperienceStopStorage[] {
+  const storages: PendingExperienceStopStorage[] = [];
+  try { storages.push(window.localStorage); } catch { /* Storage may be disabled. */ }
+  try { storages.push(window.sessionStorage); } catch { /* Try the other browser store. */ }
+  return storages;
+}
+
+function queuePendingExperienceStopForOwner(runId: string, ownerId: string): boolean {
+  for (const storage of pendingExperienceStopStorages()) {
+    if (enqueuePendingExperienceStop(storage, runId, ownerId)) return true;
+  }
+  return false;
+}
+
+function getPendingExperienceStopsForOwner(ownerId: string): PendingExperienceStop[] {
+  const unique = new Map<string, PendingExperienceStop>();
+  for (const storage of pendingExperienceStopStorages()) {
+    for (const pending of getPendingExperienceStops(storage, ownerId)) {
+      unique.set(pending.ownerId + ":" + pending.runId, pending);
+    }
+  }
+  return [...unique.values()];
+}
+
+function clearPendingExperienceStopForOwner(runId: string, ownerId: string): void {
+  for (const storage of pendingExperienceStopStorages()) {
+    removePendingExperienceStop(storage, runId, ownerId);
+  }
+}
 type PathChoice = "unset" | "steady" | "gentle" | "deepen" | "skip";
 
 const MODULES: WorldModule[] = ["director", "vault", "dominion", "sensory", "invitation", "ritual", "club"];
@@ -185,6 +222,8 @@ export default function CinematicWorld({
     worldOwnerGenerationRef.current += 1;
     vaultSessionGenerationRef.current += 1;
     setBusy(false);
+    stopPendingRef.current = false;
+    setStopPending(false);
     deletingSceneRef.current = false;
     setDeletingSceneKey(null);
   }, [remoteProfileId]);
@@ -207,6 +246,77 @@ export default function CinematicWorld({
   const [activeRunId, setActiveRunId] = useState<string | null>(null);
   const [stepIndex, setStepIndex] = useState(0);
   const [runStatus, setRunStatus] = useState<"active" | "paused" | "completed" | null>(null);
+  const activeRunOwnerRef = useRef<string | null>(null);
+  const previousRemoteOwnerRef = useRef(remoteProfileId);
+
+  useLayoutEffect(() => {
+    const previousOwner = previousRemoteOwnerRef.current;
+    if (previousOwner && previousOwner !== remoteProfileId) {
+      const pendingRun = pendingRunRef.current;
+      const runId = runStatus === "active" ? activeRunId : pendingRun?.runId ?? null;
+      const ownerId = pendingRun?.ownerId ?? activeRunOwnerRef.current ?? previousOwner;
+      if (runId && ownerId) {
+        startAttemptRef.current += 1;
+        if (resumePendingRef.current) resumeStopRequestedRef.current = true;
+        const queued = queuePendingExperienceStopForOwner(runId, ownerId);
+        pendingRunRef.current = null;
+        activeRunOwnerRef.current = null;
+        setActiveRunId(null);
+        setActiveScene(null);
+        setRunStatus(null);
+        setRunConsent(false);
+        setResumePrepared(false);
+        setSelectedSceneKey(null);
+        setStopSignal("");
+        setCheckIn("unset");
+        setPathChoice("unset");
+        const notice = queued
+          ? t("De actieve scène is lokaal gestopt. De serverstop wordt bevestigd zodra je opnieuw aanmeldt bij het oorspronkelijke account.", "The active scene was stopped locally. The server stop will be confirmed when you sign back into the original account.")
+          : t("De actieve scène is lokaal gestopt, maar de serverstop kon niet op dit apparaat worden vastgelegd. Meld je opnieuw aan bij het oorspronkelijke account en controleer de openstaande ervaring voordat je verdergaat.", "The active scene was stopped locally, but this device could not save the server-stop retry. Sign back into the original account and verify the unfinished experience before continuing.");
+        stopPendingRef.current = !queued && startContextRef.current.remoteProfileId === ownerId;
+        setStopPending(stopPendingRef.current);
+        setMessage(notice);
+        if (!queued) setError(notice);
+        onSafetyStop(notice);
+      }
+    }
+    previousRemoteOwnerRef.current = remoteProfileId;
+  }, [remoteProfileId, activeRunId, runStatus, stepIndex, onSafetyStop, language]);
+
+  useEffect(() => {
+    const handleAuthSessionEnded = () => {
+      startAttemptRef.current += 1;
+      if (resumePendingRef.current) resumeStopRequestedRef.current = true;
+      const pendingRun = pendingRunRef.current;
+      const runId = runStatus === "active" ? activeRunId : pendingRun?.runId ?? null;
+      const ownerId = pendingRun?.ownerId ?? activeRunOwnerRef.current ?? remoteProfileId;
+      let notice: string | undefined;
+      if (runId && ownerId) {
+        const queued = queuePendingExperienceStopForOwner(runId, ownerId);
+        pendingRunRef.current = null;
+        activeRunOwnerRef.current = null;
+        setActiveRunId(null);
+        setActiveScene(null);
+        setRunStatus(null);
+        setRunConsent(false);
+        setResumePrepared(false);
+        setSelectedSceneKey(null);
+        setStopSignal("");
+        setCheckIn("unset");
+        setPathChoice("unset");
+        notice = queued
+          ? t("De actieve scène is direct lokaal gestopt. De serverstop wordt bevestigd zodra je opnieuw aanmeldt bij het oorspronkelijke account.", "The active scene was stopped locally. The server stop will be confirmed when you sign back into the original account.")
+          : t("De actieve scène is direct lokaal gestopt, maar de serverstop kon niet op dit apparaat worden vastgelegd. Meld je opnieuw aan bij het oorspronkelijke account en controleer de openstaande ervaring voordat je verdergaat.", "The active scene was stopped locally, but this device could not save the server-stop retry. Sign back into the original account and verify the unfinished experience before continuing.");
+        stopPendingRef.current = !queued;
+        setStopPending(!queued);
+        if (!queued) setError(notice);
+        else setMessage(notice);
+      }
+      onSafetyStop(notice);
+    };
+    window.addEventListener("afterhours:auth-session-ended", handleAuthSessionEnded);
+    return () => window.removeEventListener("afterhours:auth-session-ended", handleAuthSessionEnded);
+  }, [activeRunId, runStatus, remoteProfileId, stepIndex, onSafetyStop, language]);
   const [editingSceneKey, setEditingSceneKey] = useState<string | null>(null);
   const [deletingSceneKey, setDeletingSceneKey] = useState<string | null>(null);
   const deletingSceneRef = useRef(false);
@@ -386,8 +496,61 @@ export default function CinematicWorld({
           loadExperienceInvitations(remoteProfileId)
         ]);
         if (!active) return;
+        const pendingStops = getPendingExperienceStopsForOwner(remoteProfileId);
+        const stoppedRunIds = new Set<string>();
+        let pendingStopFailed = false;
+        if (pendingStops.length) {
+          stopPendingRef.current = true;
+          setStopPending(true);
+          for (const pending of pendingStops) {
+            if (!active) return;
+            const knownRun = history.find((run) => run.id === pending.runId);
+            if (knownRun && ["ready", "completed", "stopped"].includes(knownRun.status)) {
+              clearPendingExperienceStopForOwner(pending.runId, remoteProfileId);
+              if (knownRun.status === "stopped") stoppedRunIds.add(pending.runId);
+              continue;
+            }
+            try {
+              await withdrawExperienceConsent(pending.runId, remoteProfileId);
+              stoppedRunIds.add(pending.runId);
+              clearPendingExperienceStopForOwner(pending.runId, remoteProfileId);
+            } catch {
+              try {
+                await updateExperienceRun({
+                  runId: pending.runId,
+                  expectedUserId: remoteProfileId,
+                  status: "stopped",
+                  currentStep: 0
+                });
+                stoppedRunIds.add(pending.runId);
+                clearPendingExperienceStopForOwner(pending.runId, remoteProfileId);
+              } catch {
+                try {
+                  const latestRuns = await loadExperienceRuns(remoteProfileId);
+                  const latestRun = latestRuns.find((run) => run.id === pending.runId);
+                  if (latestRun && ["ready", "completed", "stopped"].includes(latestRun.status)) {
+                    clearPendingExperienceStopForOwner(pending.runId, remoteProfileId);
+                    if (latestRun.status === "stopped") stoppedRunIds.add(pending.runId);
+                  } else {
+                    pendingStopFailed = true;
+                  }
+                } catch {
+                  pendingStopFailed = true;
+                }
+              }
+            }
+          }
+          if (!active) return;
+          stopPendingRef.current = pendingStopFailed;
+          setStopPending(pendingStopFailed);
+          if (pendingStopFailed) {
+            setError(t("Een eerdere STOP is lokaal bewaard, maar de server heeft de stop nog niet bevestigd. Start geen nieuwe scène; controleer je verbinding en probeer opnieuw.", "A previous STOP is saved locally, but the server has not confirmed it. Do not start a new scene; check your connection and try again."));
+          } else {
+            setMessage(t("De eerdere STOP is op de server bevestigd. Er wordt niets automatisch hervat.", "The earlier STOP is confirmed by the server. Nothing will resume automatically."));
+          }
+        }
         setRecords({ director, vault, dominion, sensory, invitation, ritual, club });
-        setRuns(history);
+        setRuns(history.map((run) => stoppedRunIds.has(run.id) ? { ...run, status: "stopped" as const } : run));
         setExperienceInvites(invites);
       } catch (cause) {
         if (active) setError(cause instanceof Error ? cause.message : t("Privégegevens konden niet worden geladen.", "Private data could not be loaded."));
@@ -549,17 +712,17 @@ export default function CinematicWorld({
               currentStep: 0
             });
           } catch {
-            // Fail closed: do not allow another start until the server state
-            // can be checked again by the original account.
-            stopPendingRef.current = true;
-            setStopPending(true);
-            setError(t(
-              "De start is geannuleerd, maar de server kon de stop niet bevestigen. Blijf gestopt en meld je opnieuw aan bij het oorspronkelijke account om de status te controleren.",
-              "The start was cancelled, but the server could not confirm the stop. Stay stopped and sign back in to the original account to verify its state."
-            ));
+            const queued = queuePendingExperienceStopForOwner(runId, attempt.ownerId);
+            const shouldBlockOwner = startContextRef.current.remoteProfileId === attempt.ownerId;
+            stopPendingRef.current = shouldBlockOwner;
+            setStopPending(shouldBlockOwner);
+            setError(queued
+              ? t("De start is geannuleerd. De serverstop is lokaal opgeslagen en wordt opnieuw bevestigd zodra je bij het oorspronkelijke account bent aangemeld.", "The start was cancelled. The server stop is saved locally and will be retried when you sign into the original account.")
+              : t("De start is geannuleerd, maar de serverstop kon niet worden bevestigd of lokaal worden opgeslagen. Meld je opnieuw aan bij het oorspronkelijke account en controleer de openstaande ervaring.", "The start was cancelled, but the server stop could not be confirmed or saved locally. Sign back into the original account and verify the unfinished experience."));
             return;
           }
         }
+        clearPendingExperienceStopForOwner(runId, attempt.ownerId);
         setMessage(t(
           "De start is geannuleerd omdat toestemming, account of STOP-status veranderde. De serverstop is bevestigd.",
           "The start was cancelled because consent, account, or STOP state changed. The server stop is confirmed."
@@ -567,6 +730,7 @@ export default function CinematicWorld({
         return;
       }
 
+      activeRunOwnerRef.current = attempt.ownerId;
       setActiveScene(scene);
       setActiveRunId(runId);
       setStepIndex(0);
@@ -654,6 +818,7 @@ export default function CinematicWorld({
           }
 
           if (serverConfirmed) {
+            clearPendingExperienceStopForOwner(run.id, ownerId);
             stopPendingRef.current = false;
             setStopPending(false);
             try { await refreshData(ownerId); } catch { /* STOP must not depend on history refresh. */ }
@@ -662,10 +827,13 @@ export default function CinematicWorld({
               "Resume was cancelled because account, consent, navigation or STOP changed. The server stop is confirmed."
             ));
           } else {
-            setError(t(
-              "Hervatten is geannuleerd, maar de server kon de stop niet bevestigen. Blijf gestopt en meld je opnieuw aan bij het oorspronkelijke account om de status te controleren.",
-              "Resume was cancelled, but the server could not confirm the stop. Stay stopped and sign back in to the original account to verify its state."
-            ));
+            const queued = queuePendingExperienceStopForOwner(run.id, ownerId);
+            const shouldBlockOwner = startContextRef.current.remoteProfileId === ownerId;
+            stopPendingRef.current = shouldBlockOwner;
+            setStopPending(shouldBlockOwner);
+            setError(queued
+              ? t("Hervatten is geannuleerd. De serverstop is lokaal opgeslagen en wordt opnieuw bevestigd bij het oorspronkelijke account.", "Resume was cancelled. The server stop is saved locally and will be retried under the original account.")
+              : t("Hervatten is geannuleerd, maar de serverstop kon niet worden bevestigd of lokaal worden opgeslagen. Meld je opnieuw aan bij het oorspronkelijke account en controleer de openstaande ervaring.", "Resume was cancelled, but the server stop could not be confirmed or saved locally. Sign back into the original account and verify the unfinished experience."));
           }
         }
         return;
@@ -674,6 +842,7 @@ export default function CinematicWorld({
       pendingRunRef.current = null;
       resumePendingRef.current = false;
       setResumePending(false);
+      activeRunOwnerRef.current = ownerId;
       setActiveScene({
         key: typeof snapshot.sceneKey === "string" ? snapshot.sceneKey : run.scene_key,
         title: snapshot.title,
@@ -698,10 +867,13 @@ export default function CinematicWorld({
     } catch (cause) {
       if (!resumeStopRequestedRef.current) {
         if (cause instanceof ExperienceRunResumeRollbackError) {
-          setError(t(
-            "De scène blijft gepauzeerd, maar het intrekken van de tijdelijk vernieuwde toestemming kon niet worden bevestigd. Start niet opnieuw; controleer je verbinding en gebruik STOP indien nodig.",
-            "The scene remains paused, but revoking the temporarily renewed consent could not be confirmed. Do not restart; check your connection and use STOP if needed."
-          ));
+          const queued = queuePendingExperienceStopForOwner(run.id, ownerId);
+          const shouldBlockOwner = startContextRef.current.remoteProfileId === ownerId;
+          stopPendingRef.current = shouldBlockOwner;
+          setStopPending(shouldBlockOwner);
+          setError(queued
+            ? t("De scène blijft gepauzeerd. De intrekking is lokaal opgeslagen en wordt opnieuw bevestigd; start geen nieuwe scène voordat de status is gecontroleerd.", "The scene remains paused. Revocation is saved locally and will be retried; do not start another scene until the state is verified.")
+            : t("De scène blijft gepauzeerd, maar de serverintrekking kon niet worden bevestigd of lokaal worden opgeslagen. Start niet opnieuw; meld je opnieuw aan bij het oorspronkelijke account en controleer de status.", "The scene remains paused, but server revocation could not be confirmed or saved locally. Do not restart; sign back into the original account and verify the state."));
         } else {
           setError(cause instanceof Error ? cause.message : t("Hervatten is niet gelukt.", "Could not resume the scene."));
         }
@@ -748,6 +920,7 @@ export default function CinematicWorld({
       setResumePrepared(false);
       setStopSignal("");
       onSafetyPause();
+      activeRunOwnerRef.current = null;
       setActiveRunId(null);
       setActiveScene(null);
       setRunStatus(null);
@@ -786,9 +959,11 @@ export default function CinematicWorld({
     const pendingRun = pendingRunRef.current;
     if (resumePendingRef.current && pendingRun) resumeStopRequestedRef.current = true;
     const runId = activeRunId ?? pendingRun?.runId ?? null;
-    const userId = pendingRun?.ownerId ?? remoteProfileId;
+    const userId = pendingRun?.ownerId ?? activeRunOwnerRef.current ?? remoteProfileId;
     const currentStep = activeRunId ? stepIndex : pendingRun?.currentStep ?? stepIndex;
-    let serverConfirmed = !runId || !userId;
+    if (runId && userId) pendingRunRef.current = { runId, ownerId: userId, currentStep };
+    activeRunOwnerRef.current = null;
+    let serverConfirmed = !runId;
 
     // STOP is local and immediate. Dispatch the atomic withdrawal RPC without
     // waiting for an in-flight mutation. The database row lock serializes STOP
@@ -828,31 +1003,36 @@ export default function CinematicWorld({
             });
             serverConfirmed = true;
           } catch {
-            setError(t(
-              "STOP is direct op dit apparaat uitgevoerd, maar de server kon de stop niet bevestigen. Blijf gestopt en controleer je verbinding voordat je opnieuw begint.",
-              "STOP was applied immediately on this device, but the server could not confirm it. Stay stopped and verify your connection before starting again."
-            ));
+            // The local scene is already stopped. Keep a retry marker for the original owner.
           }
         }
 
         if (serverConfirmed) {
+          clearPendingExperienceStopForOwner(runId, userId);
           setRuns((current) => current.map((run) => run.id === runId ? { ...run, status: "stopped" as const } : run));
+        } else {
+          const queued = queuePendingExperienceStopForOwner(runId, userId);
+          setError(queued
+            ? t("STOP is direct uitgevoerd. De serverbevestiging is nog niet binnen; de herhaling is opgeslagen voor het oorspronkelijke account. Blijf gestopt.", "STOP was applied immediately. Server confirmation is still pending; a retry is saved for the original account. Stay stopped.")
+            : t("STOP is direct uitgevoerd, maar de server kon de stop niet bevestigen en de herhaling kon niet lokaal worden opgeslagen. Meld je opnieuw aan bij het oorspronkelijke account en controleer de openstaande ervaring.", "STOP was applied immediately, but the server could not confirm it and the retry could not be saved locally. Sign back into the original account and verify the unfinished experience."));
         }
         try {
           await refreshData(userId);
         } catch {
           // The local scene is already stopped; stale history must not block STOP.
         }
+      } else if (runId) {
+        setError(t("STOP is lokaal uitgevoerd, maar de oorspronkelijke accounteigenaar kon niet worden vastgesteld. Meld je opnieuw aan bij het oorspronkelijke account en controleer de openstaande ervaring.", "STOP was applied locally, but the original account owner could not be identified. Sign back into the original account and verify the unfinished experience."));
       }
       if (!fromConsentChange && serverConfirmed) {
         setMessage(t("De scène is gestopt. Er wordt niets automatisch hervat.", "The scene has stopped. Nothing will resume automatically."));
       }
     } finally {
-      if (pendingRun && pendingRunRef.current?.runId === pendingRun.runId) pendingRunRef.current = null;
-      stopPendingRef.current = false;
-      // If the server could not confirm STOP, keep new runs blocked until the
-      // user reloads and rechecks the authoritative server state.
-      setStopPending(!serverConfirmed);
+      if (pendingRunRef.current?.runId === runId && pendingRunRef.current?.ownerId === userId) pendingRunRef.current = null;
+      if (startContextRef.current.remoteProfileId === userId || !startContextRef.current.remoteProfileId) {
+        stopPendingRef.current = !serverConfirmed;
+        setStopPending(!serverConfirmed);
+      }
     }
   }
 
@@ -877,6 +1057,7 @@ export default function CinematicWorld({
     try {
       await mutation;
       if (stopPendingRef.current) return;
+      activeRunOwnerRef.current = null;
       setInteractionLog(finalInteractionLog);
       setPathChoice("unset");
       const firstCompletion = runs.filter((run) => run.status === "completed").length === 0;
