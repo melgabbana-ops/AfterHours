@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => ({
   is: vi.fn(),
   order: vi.fn(),
   limit: vi.fn(),
+  range: vi.fn(),
   upsert: vi.fn(),
   insert: vi.fn(),
   single: vi.fn(),
@@ -23,7 +24,7 @@ vi.mock("./supabase", () => ({
   supabase: { auth: { getUser: mocks.getUser }, from: mocks.from },
 }));
 
-import { createExperienceInvitation, loadExperienceInvitations, deleteExperienceRun, deleteWorldRecord, ExperienceRunDeletionBlockedError, ExperienceRunResumeRollbackError, hasActiveExperienceRuns, loadExperienceRuns, loadWorldRecords, resumeExperienceRun, saveWorldRecord, updateExperienceRun } from "./worldRecords";
+import { createExperienceInvitation, loadExperienceInvitations, deleteExperienceRun, deleteWorldRecord, ExperienceRunDeletionBlockedError, ExperienceRunResumeRollbackError, hasActiveExperienceRuns, loadExperienceRunStatus, loadExperienceRuns, loadWorldRecords, resumeExperienceRun, saveWorldRecord, updateExperienceRun } from "./worldRecords";
 
 const chain = {
   select: mocks.select,
@@ -33,6 +34,7 @@ const chain = {
   is: mocks.is,
   order: mocks.order,
   limit: mocks.limit,
+  range: mocks.range,
   upsert: mocks.upsert,
   insert: mocks.insert,
   single: mocks.single,
@@ -53,6 +55,7 @@ describe("AFTER HOURS private world storage", () => {
     mocks.is.mockReturnValue(chain);
     mocks.order.mockReturnValue(chain);
     mocks.limit.mockReturnValue(chain);
+    mocks.range.mockResolvedValue({ data: [], error: null });
     mocks.upsert.mockReturnValue(chain);
     mocks.insert.mockReturnValue(chain);
     mocks.update.mockReturnValue(chain);
@@ -69,12 +72,41 @@ describe("AFTER HOURS private world storage", () => {
 
   it("scopes private record reads to the verified user and selected module", async () => {
     const rows = [{ id: "record-1", record_key: "scene:1", payload: { title: "My scene" }, created_at: "2026-11-21T00:00:00Z", updated_at: "2026-11-21T00:00:00Z" }];
-    mocks.limit.mockResolvedValue({ data: rows, error: null });
+    mocks.range.mockResolvedValueOnce({ data: rows, error: null });
 
     await expect(loadWorldRecords("director", "user-a")).resolves.toEqual(rows);
     expect(mocks.from).toHaveBeenCalledWith("afterhours_world_records");
     expect(mocks.eq).toHaveBeenNthCalledWith(1, "user_id", "user-a");
     expect(mocks.eq).toHaveBeenNthCalledWith(2, "module", "director");
+    expect(mocks.range).toHaveBeenCalledWith(0, 99);
+  });
+
+  it("loads every page of private world records without exposing a previous account's rows", async () => {
+    const firstPage = Array.from({ length: 100 }, (_, index) => ({
+      id: `record-${index}`, record_key: `scene:${index}`, payload: { title: `Scene ${index}` },
+      created_at: "2026-11-21T00:00:00Z", updated_at: "2026-11-21T00:00:00Z",
+    }));
+    const secondPage = [{ id: "record-100", record_key: "scene:100", payload: { title: "Scene 100" }, created_at: "2026-11-21T00:00:00Z", updated_at: "2026-11-21T00:00:00Z" }];
+    mocks.range.mockResolvedValueOnce({ data: firstPage, error: null }).mockResolvedValueOnce({ data: secondPage, error: null });
+
+    await expect(loadWorldRecords("director", "user-a")).resolves.toHaveLength(101);
+    expect(mocks.range).toHaveBeenNthCalledWith(1, 0, 99);
+    expect(mocks.range).toHaveBeenNthCalledWith(2, 100, 199);
+    expect(mocks.getUser).toHaveBeenCalledTimes(3);
+  });
+
+  it("stops paginating private records if the signed-in account changes between pages", async () => {
+    const firstPage = Array.from({ length: 100 }, (_, index) => ({
+      id: `record-${index}`, record_key: `scene:${index}`, payload: {},
+      created_at: "2026-11-21T00:00:00Z", updated_at: "2026-11-21T00:00:00Z",
+    }));
+    mocks.range.mockResolvedValueOnce({ data: firstPage, error: null });
+    mocks.getUser
+      .mockResolvedValueOnce({ data: { user: { id: "user-a" } }, error: null })
+      .mockResolvedValueOnce({ data: { user: { id: "user-b" } }, error: null });
+
+    await expect(loadWorldRecords("director", "user-a")).rejects.toThrow("The signed-in account changed.");
+    expect(mocks.range).toHaveBeenCalledOnce();
   });
 
   it("confirms a private world record deletion only after the database returns the deleted row", async () => {
@@ -112,13 +144,24 @@ describe("AFTER HOURS private world storage", () => {
       completed_at: null,
       interaction_log: []
     }];
-    mocks.limit.mockResolvedValue({ data: rows, error: null });
+    mocks.range.mockResolvedValueOnce({ data: rows, error: null });
 
     await expect(loadExperienceRuns("user-a")).resolves.toEqual(rows);
     expect(mocks.from).toHaveBeenCalledWith("afterhours_experience_runs");
     expect(mocks.select).toHaveBeenCalledWith("id,user_id,scene_key,scene_snapshot,status,current_step,total_steps,created_at,updated_at,started_at,completed_at,interaction_log");
     expect(mocks.eq).toHaveBeenCalledOnce();
     expect(mocks.eq).toHaveBeenCalledWith("user_id", "user-a");
+    expect(mocks.range).toHaveBeenCalledWith(0, 99);
+  });
+
+  it("loads a single run status with owner scoping for the emergency STOP recovery path", async () => {
+    mocks.maybeSingle.mockResolvedValueOnce({ data: { id: "run-1", status: "stopped" }, error: null });
+
+    await expect(loadExperienceRunStatus("run-1", "user-a")).resolves.toEqual({ id: "run-1", status: "stopped" });
+    expect(mocks.from).toHaveBeenCalledWith("afterhours_experience_runs");
+    expect(mocks.select).toHaveBeenCalledWith("id,status");
+    expect(mocks.eq).toHaveBeenNthCalledWith(1, "user_id", "user-a");
+    expect(mocks.eq).toHaveBeenNthCalledWith(2, "id", "run-1");
   });
 
   it("detects persisted active or paused runs for the signed-in owner", async () => {
@@ -167,7 +210,7 @@ describe("AFTER HOURS private world storage", () => {
       expires_at: "2026-11-30T12:00:00.000Z",
       created_at: "2026-11-23T12:00:00.000Z",
     }];
-    mocks.limit.mockResolvedValue({ data: invitations, error: null });
+    mocks.range.mockResolvedValueOnce({ data: invitations, error: null });
 
     await expect(loadExperienceInvitations("user-a")).resolves.toEqual(invitations);
     expect(mocks.from).toHaveBeenCalledWith("afterhours_experience_invitations");
