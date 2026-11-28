@@ -330,3 +330,114 @@
 /* Director's Room: make the 40-step limit visible without silently truncating a draft. */
 .cw-step-count{margin-top:-6px;color:#a99b86;font-size:9px;line-height:1.5}
 .cw-step-count[data-over-limit="true"]{color:#e5c58e;font-weight:600}
+
+
+/* Persistent safety controls stay within reach while an Experience Engine run is active. */
+.cw-emergency-dock {
+  position: fixed;
+  left: 50%;
+  bottom: calc(82px + env(safe-area-inset-bottom, 0px));
+  z-index: 9;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: min(860px, calc(100vw - 28px));
+  padding: 10px;
+  border: 1px solid rgba(207, 174, 121, .48);
+  background: rgba(8, 7, 6, .97);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, .58);
+  backdrop-filter: blur(18px);
+  transform: translateX(-50%);
+}
+.cw-emergency-dock-copy {
+  flex: 1;
+  min-width: 0;
+  padding: 0 8px;
+}
+.cw-emergency-dock-copy span,
+.cw-emergency-dock-copy strong {
+  display: block;
+}
+.cw-emergency-dock-copy span {
+  color: #d2b17c;
+  font-size: 8px;
+  letter-spacing: .16em;
+}
+.cw-emergency-dock-copy strong {
+  margin-top: 4px;
+  color: #f1dfc0;
+  font-size: 10px;
+}
+.cw-emergency-dock button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 48px;
+  padding: 10px 15px;
+  border: 1px solid rgba(207, 174, 121, .38);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  white-space: nowrap;
+}
+.cw-emergency-pause {
+  background: #17120c;
+  color: #e7d1a6;
+}
+.cw-emergency-stop {
+  border-color: #c9a16a !important;
+  background: #0d0a08;
+  color: #f3e9d8;
+}
+.cw-emergency-dock button:focus-visible {
+  outline: 2px solid #e3c38c;
+  outline-offset: 3px;
+}
+.cw-emergency-dock button:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+.app:has(.cw-emergency-dock) .stop-controller {
+  bottom: calc(146px + env(safe-area-inset-bottom, 0px));
+}
+@media (max-width: 520px) {
+  .cw-emergency-dock {
+    left: 10px;
+    right: 10px;
+    bottom: calc(82px + env(safe-area-inset-bottom, 0px));
+    width: auto;
+    gap: 6px;
+    padding: 8px;
+    transform: none;
+  }
+  .cw-emergency-dock-copy {
+    padding: 0 3px;
+  }
+  .cw-emergency-dock-copy span {
+    font-size: 7px;
+  }
+  .cw-emergency-dock-copy strong {
+    font-size: 9px;
+  }
+  .cw-emergency-dock button {
+    min-height: 48px;
+    padding: 10px 11px;
+    font-size: 9px;
+  }
+}
+@media (max-width: 360px) {
+  .cw-emergency-dock {
+    gap: 4px;
+    padding: 7px;
+  }
+  .cw-emergency-dock button {
+    padding: 10px 8px;
+    font-size: 8px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cw-emergency-dock {
+    backdrop-filter: none;
+  }
+}

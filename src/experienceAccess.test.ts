@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getGuidedExperienceBlockReason } from "./experienceAccess";
+import { getGuidedExperienceBlockReason, shouldShowExperienceEmergencyDock } from "./experienceAccess";
 
 describe("guided experience access", () => {
   const verifiedAccess = {
@@ -41,5 +41,57 @@ describe("guided experience access", () => {
 
   it("allows guided games only after consent and account state are verified", () => {
     expect(getGuidedExperienceBlockReason(verifiedAccess)).toBeNull();
+  });
+});
+
+
+describe("Experience Engine emergency controls", () => {
+  const emptyState = {
+    activeRunId: null,
+    activeScenePresent: false,
+    runStatus: null,
+    recoverableRunId: null,
+    recoverableRunStatus: null,
+  } as const;
+
+  it.each(["active", "paused"] as const)("keeps the dock visible for an %s active scene", (runStatus) => {
+    expect(shouldShowExperienceEmergencyDock({
+      ...emptyState,
+      activeRunId: "run-1",
+      activeScenePresent: true,
+      runStatus,
+    })).toBe(true);
+  });
+
+  it.each(["active", "paused"] as const)("keeps STOP visible for a recoverable %s run", (recoverableRunStatus) => {
+    expect(shouldShowExperienceEmergencyDock({
+      ...emptyState,
+      recoverableRunId: "run-2",
+      recoverableRunStatus,
+    })).toBe(true);
+  });
+
+  it("does not show the dock without a live scene or recoverable run", () => {
+    expect(shouldShowExperienceEmergencyDock({
+      ...emptyState,
+      activeRunId: "run-3",
+      activeScenePresent: false,
+      runStatus: "active",
+    })).toBe(false);
+    expect(shouldShowExperienceEmergencyDock(emptyState)).toBe(false);
+  });
+
+  it("does not show emergency controls for completed or stopped runs", () => {
+    expect(shouldShowExperienceEmergencyDock({
+      ...emptyState,
+      activeRunId: "run-4",
+      activeScenePresent: true,
+      runStatus: "completed",
+    })).toBe(false);
+    expect(shouldShowExperienceEmergencyDock({
+      ...emptyState,
+      recoverableRunId: "run-5",
+      recoverableRunStatus: "stopped",
+    })).toBe(false);
   });
 });

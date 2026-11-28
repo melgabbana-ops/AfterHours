@@ -20,3 +20,25 @@ export function getGuidedExperienceBlockReason(access: GuidedExperienceAccess): 
   )) return "account";
   return null;
 }
+
+
+export type ExperienceEmergencyRunStatus = "active" | "paused" | "completed" | "stopped" | null;
+
+export interface ExperienceEmergencyDockState {
+  activeRunId: string | null;
+  activeScenePresent: boolean;
+  runStatus: ExperienceEmergencyRunStatus;
+  recoverableRunId: string | null;
+  recoverableRunStatus: ExperienceEmergencyRunStatus;
+}
+
+/** Keep direct STOP controls visible for active and recoverable Experience Engine runs. */
+export function shouldShowExperienceEmergencyDock(state: ExperienceEmergencyDockState): boolean {
+  if (state.activeRunId) {
+    return state.activeScenePresent && (state.runStatus === "active" || state.runStatus === "paused");
+  }
+  return Boolean(
+    state.recoverableRunId
+      && (state.recoverableRunStatus === "active" || state.recoverableRunStatus === "paused"),
+  );
+}

@@ -3,6 +3,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { bindVaultAutoLock } from "./vaultAutoLock";
 import { isExperienceStartAttemptCurrent } from "./experienceStartAttempt";
 import { isExperienceResumeAttemptCurrent } from "./experienceResumeAttempt";
+import { shouldShowExperienceEmergencyDock } from "./experienceAccess";
 import { validateDirectorSceneDraft } from "./directorSceneDraft";
 import { hasUnsavedDirectorSceneChanges } from "./directorSceneDraftState";
 import { consumeInvitationTokenFromUrl } from "./invitationUrl";
@@ -1485,6 +1486,14 @@ export default function CinematicWorld({
   const interactionCount = runs.reduce((total, run) => total + (run.interaction_log?.length ?? 0), 0);
   const unlocked = new Set(records.club.filter((record) => record.record_key.startsWith("milestone:")).map((record) => record.record_key.slice("milestone:".length)));
   const memberLevel = Math.max(1, Math.floor((completedRuns + sceneCount + ritualDrawCount) / 3) + 1);
+  const showEmergencyDock = shouldShowExperienceEmergencyDock({
+    activeRunId,
+    activeScenePresent: Boolean(activeScene),
+    runStatus,
+    recoverableRunId: recoverableRun?.id ?? null,
+    recoverableRunStatus: recoverableRun?.status ?? null,
+  });
+  const emergencyRunStatus = activeRunId ? runStatus : recoverableRun?.status ?? null;
 
   const handleTabKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
     const currentIndex = tabItems.findIndex((item) => item.id === tab);
@@ -1501,6 +1510,7 @@ export default function CinematicWorld({
   };
 
   return (
+    <>
     <main className="cw-world" data-tab={tab}>
       <div className="cw-world-backdrop" aria-hidden="true"><img src={`${import.meta.env.BASE_URL}visuals/ah-cinematic-hero.svg`} alt="" decoding="async" /></div>
       <header className="cw-header">
@@ -1739,5 +1749,37 @@ export default function CinematicWorld({
 
       <footer className="cw-footer"><span><LockKeyhole size={12} /> PRIVATE BY DESIGN</span><span>{t("Jouw account · Jouw grenzen · Jouw regie", "Your account · Your boundaries · Your control")}</span></footer>
     </main>
+    {showEmergencyDock && (
+      <aside className="cw-emergency-dock" role="group" aria-label={t("Directe veiligheidsbediening", "Immediate safety controls")}>
+        <div className="cw-emergency-dock-copy">
+          <span>{t("VEILIGHEID · DIRECT", "SAFETY · IMMEDIATE")}</span>
+          <strong>{emergencyRunStatus === "paused" ? t("Ervaring gepauzeerd", "Experience paused") : t("Ervaring actief", "Experience active")}</strong>
+        </div>
+        {activeRunId && emergencyRunStatus === "active" && (
+          <button
+            type="button"
+            className="cw-emergency-pause"
+            onClick={() => void pauseScene()}
+            disabled={busy || stopPending}
+            aria-label={t("Ervaring onmiddellijk pauzeren", "Pause experience immediately")}
+          >
+            <Pause size={15} /> {t("PAUZE", "PAUSE")}
+          </button>
+        )}
+        <button
+          type="button"
+          className="cw-emergency-stop"
+          onClick={() => {
+            if (activeRunId) void stopScene();
+            else if (recoverableRun) void stopRecoverableRun(recoverableRun);
+          }}
+          disabled={stopPending}
+          aria-label={t("Ervaring onmiddellijk stoppen", "Stop experience immediately")}
+        >
+          <Square size={15} /> {t("STOP NU", "STOP NOW")}
+        </button>
+      </aside>
+    )}
+    </>
   );
 }
