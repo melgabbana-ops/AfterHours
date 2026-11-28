@@ -1,6 +1,7 @@
 import type { KeyboardEvent } from "react";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { bindVaultAutoLock } from "./vaultAutoLock";
+import { createSensoryAudioAttemptGuard } from "./sensoryAudioAttempt";
 import { isExperienceStartAttemptCurrent } from "./experienceStartAttempt";
 import { isExperiencePauseAttemptCurrent } from "./experiencePauseAttempt";
 import { isExperienceResumeAttemptCurrent } from "./experienceResumeAttempt";
@@ -373,6 +374,7 @@ export default function CinematicWorld({
   const [soundOn, setSoundOn] = useState(false);
   const audioContext = useRef<AudioContext | null>(null);
   const masterGain = useRef<GainNode | null>(null);
+  const sensoryAudioGuardRef = useRef(createSensoryAudioAttemptGuard());
   const [inviteTitle, setInviteTitle] = useState(t("Een uitnodiging na middernacht", "A Midnight Invitation"));
   const [inviteMessage, setInviteMessage] = useState(t(
     "Ik nodig je uit om samen iets nieuws te verkennen. Alleen als dit voor jou goed voelt. We bespreken vooraf grenzen, signalen en aftercare.",
@@ -477,7 +479,12 @@ export default function CinematicWorld({
     setCurrentCard(null);
     setVaultMessage("");
     setMessage("");
-    if (audioContext.current) { void audioContext.current.close(); audioContext.current = null; masterGain.current = null; setSoundOn(false); }
+    sensoryAudioGuardRef.current.invalidate();
+    const previousAudioContext = audioContext.current;
+    audioContext.current = null;
+    masterGain.current = null;
+    setSoundOn(false);
+    if (previousAudioContext) void previousAudioContext.close().catch(() => {});
     if (!remoteProfileId) {
       setLoading(false);
       setError(t("Meld je aan om deze privéruimtes veilig aan je AFTER HOURS-account te koppelen.", "Sign in to securely connect these private spaces to your AFTER HOURS account."));
@@ -619,11 +626,11 @@ export default function CinematicWorld({
   }, [consentActive, runStatus, activeRunId]);
 
   useEffect(() => () => {
-    if (audioContext.current) {
-      void audioContext.current.close();
-      audioContext.current = null;
-      masterGain.current = null;
-    }
+    sensoryAudioGuardRef.current.invalidate();
+    const context = audioContext.current;
+    audioContext.current = null;
+    masterGain.current = null;
+    if (context) void context.close().catch(() => {});
   }, []);
 
   async function persist(module: WorldModule, key: string, payload: Record<string, unknown>, milestone?: string) {
@@ -1443,8 +1450,15 @@ export default function CinematicWorld({
   }
 
   async function startAmbient() {
+    if (audioContext.current) return;
+    const guard = sensoryAudioGuardRef.current;
+    const attemptId = guard.begin();
+    if (attemptId === null) return;
+
+    let context: AudioContext | null = null;
     try {
-      const context = new AudioContext();
+      context = new AudioContext();
+      audioContext.current = context;
       const master = context.createGain();
       const filter = context.createBiquadFilter();
       const low = context.createOscillator();
@@ -1473,21 +1487,45 @@ export default function CinematicWorld({
       high.start();
       pulse.start();
       await context.resume();
-      audioContext.current = context;
+
+      // STOP, account changes, and component teardown invalidate this attempt.
+      // A late resume must never resurrect an audio context that was closed.
+      if (!guard.isCurrent(attemptId) || audioContext.current !== context) {
+        if (audioContext.current === context) audioContext.current = null;
+        if (masterGain.current?.context === context) masterGain.current = null;
+        if (context.state !== "closed") await context.close().catch(() => {});
+        return;
+      }
+
       masterGain.current = master;
       setSoundOn(true);
     } catch {
-      setError(t("Je browser kon de soundscape niet starten. Controleer audio-instellingen.", "Your browser could not start the soundscape. Check audio settings."));
+      const isCurrent = guard.isCurrent(attemptId);
+      if (context && audioContext.current === context) audioContext.current = null;
+      if (context && masterGain.current?.context === context) masterGain.current = null;
+      if (isCurrent) {
+        setSoundOn(false);
+        setError(t("Je browser kon de soundscape niet starten. Controleer audio-instellingen.", "Your browser could not start the soundscape. Check audio settings."));
+      }
+      if (context && context.state !== "closed") await context.close().catch(() => {});
+    } finally {
+      guard.finish(attemptId);
     }
   }
 
   async function stopAmbient() {
-    if (audioContext.current) {
-      await audioContext.current.close();
-      audioContext.current = null;
-      masterGain.current = null;
-    }
+    sensoryAudioGuardRef.current.invalidate();
+    const context = audioContext.current;
+    audioContext.current = null;
+    masterGain.current = null;
     setSoundOn(false);
+    if (context && context.state !== "closed") {
+      try {
+        await context.close();
+      } catch {
+        // The context may already have been closed by a concurrent STOP.
+      }
+    }
   }
 
   function updateVolume(value: number) {
