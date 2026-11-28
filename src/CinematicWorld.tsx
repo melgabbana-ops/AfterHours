@@ -182,6 +182,9 @@ export default function CinematicWorld({
   startContextRef.current = { remoteProfileId, consentActive, canStartExperience };
   useLayoutEffect(() => {
     worldOwnerGenerationRef.current += 1;
+    setBusy(false);
+    deletingSceneRef.current = false;
+    setDeletingSceneKey(null);
   }, [remoteProfileId]);
   const runMutationRef = useRef<Promise<unknown> | null>(null);
   const pendingRunRef = useRef<{ runId: string; ownerId: string; currentStep: number } | null>(null);
@@ -1015,7 +1018,7 @@ export default function CinematicWorld({
         setError(cause instanceof Error ? cause.message : t("Scène opslaan is niet gelukt.", "Could not save scene."));
       }
     } finally {
-      setBusy(false);
+      if (isOwnerCurrent()) setBusy(false);
     }
   }
 
@@ -1093,8 +1096,10 @@ export default function CinematicWorld({
         setError(cause instanceof Error ? cause.message : t("Verwijderen is niet gelukt.", "Could not delete scene."));
       }
     } finally {
-      deletingSceneRef.current = false;
-      setDeletingSceneKey(null);
+      if (isOwnerCurrent()) {
+        deletingSceneRef.current = false;
+        setDeletingSceneKey(null);
+      }
     }
   }
 
