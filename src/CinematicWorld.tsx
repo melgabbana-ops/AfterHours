@@ -9,6 +9,7 @@ import { shouldShowExperienceEmergencyDock } from "./experienceAccess";
 import { validateDirectorSceneDraft } from "./directorSceneDraft";
 import { hasUnsavedDirectorSceneChanges } from "./directorSceneDraftState";
 import { isWorldOwnerAttemptCurrent, type WorldOwnerAttempt } from "./worldOwnerAttempt";
+import { isDominionProfileVisible } from "./dominionProfileAccess";
 import { isInvitationOwnerAttemptCurrent } from "./invitationOwnerAttempt";
 import { isInvitationAcceptanceAttemptCurrent } from "./invitationAcceptanceAttempt";
 import { consumeInvitationTokenFromUrl } from "./invitationUrl";
@@ -367,6 +368,7 @@ export default function CinematicWorld({
     if (tab === "vault" || !vaultSensitive) return;
     lockVault(language === "nl" ? "Kluis vergrendeld bij verlaten van de kluis." : "Vault locked when leaving the vault.");
   }, [tab, vaultSensitive, language, lockVault]);
+  const [dominionLoadedFor, setDominionLoadedFor] = useState<string | null>(null);
   const [domRole, setDomRole] = useState("");
   const [domAddress, setDomAddress] = useState("");
   const [domHardLimits, setDomHardLimits] = useState("");
@@ -459,6 +461,7 @@ export default function CinematicWorld({
     setDomHardLimits("");
     setDomSoftLimits("");
     setDomAftercare("");
+    setDominionLoadedFor(null);
     setRunConsent(false);
     setSelectedSceneKey(null);
     setResumePrepared(false);
@@ -560,6 +563,14 @@ export default function CinematicWorld({
             setMessage(t("De eerdere STOP is op de server bevestigd. Er wordt niets automatisch hervat.", "The earlier STOP is confirmed by the server. Nothing will resume automatically."));
           }
         }
+        const dominionProfile = dominion.find((record) => record.record_key === "profile");
+        const dominionPayload = dominionProfile?.payload;
+        setDomRole(typeof dominionPayload?.role === "string" ? dominionPayload.role : "");
+        setDomAddress(typeof dominionPayload?.address === "string" ? dominionPayload.address : "");
+        setDomHardLimits(typeof dominionPayload?.hardLimits === "string" ? dominionPayload.hardLimits : "");
+        setDomSoftLimits(typeof dominionPayload?.softLimits === "string" ? dominionPayload.softLimits : "");
+        setDomAftercare(typeof dominionPayload?.aftercare === "string" ? dominionPayload.aftercare : "");
+        setDominionLoadedFor(remoteProfileId);
         setRecords({ director, vault, dominion, sensory, invitation, ritual, club });
         setRuns(history.map((run) => stoppedRunIds.has(run.id) ? { ...run, status: "stopped" as const } : run));
         setExperienceInvites(invites);
@@ -602,13 +613,12 @@ export default function CinematicWorld({
 
   useEffect(() => {
     const profile = records.dominion.find((record) => record.record_key === "profile");
-    if (!profile) return;
-    const payload = profile.payload;
-    setDomRole(String(payload.role ?? ""));
-    setDomAddress(String(payload.address ?? ""));
-    setDomHardLimits(String(payload.hardLimits ?? ""));
-    setDomSoftLimits(String(payload.softLimits ?? ""));
-    setDomAftercare(String(payload.aftercare ?? ""));
+    const payload = profile?.payload;
+    setDomRole(typeof payload?.role === "string" ? payload.role : "");
+    setDomAddress(typeof payload?.address === "string" ? payload.address : "");
+    setDomHardLimits(typeof payload?.hardLimits === "string" ? payload.hardLimits : "");
+    setDomSoftLimits(typeof payload?.softLimits === "string" ? payload.softLimits : "");
+    setDomAftercare(typeof payload?.aftercare === "string" ? payload.aftercare : "");
   }, [records.dominion]);
 
   useEffect(() => {
@@ -2179,15 +2189,28 @@ export default function CinematicWorld({
       {tab === "dominion" && (
         <section id="cw-active-panel" role="tabpanel" aria-labelledby={`cw-tab-${tab}`} tabIndex={0} className="cw-section cw-section--dominion">
           <div className="cw-section-heading"><span className="cw-kicker">06 · KNOW YOUR DYNAMIC</span><h2><ShieldCheck /> The Dominion</h2><p>{t("Een persoonlijk dynamiekprofiel als hulpmiddel voor gesprekken en afstemming. Dit profiel is nooit toestemming voor een toekomstige handeling.", "A personal dynamics profile to support conversations and alignment. This profile is never consent for a future action.")}</p></div>
-          <div className="cw-form-panel">
-            <label>{t("Voorkeursrol of dynamiek", "Preferred role or dynamic")}<input value={domRole} onChange={(event) => setDomRole(event.target.value)} maxLength={100} /></label>
-            <label>{t("Aanspreekvorm of titel", "Preferred form of address or title")}<input value={domAddress} onChange={(event) => setDomAddress(event.target.value)} maxLength={100} /></label>
-            <label>{t("Harde grenzen · niet onderhandelbaar", "Hard limits · non-negotiable")}<textarea rows={3} value={domHardLimits} onChange={(event) => setDomHardLimits(event.target.value)} maxLength={2500} /></label>
-            <label>{t("Zachte grenzen · eerst bespreken", "Soft limits · discuss first")}<textarea rows={3} value={domSoftLimits} onChange={(event) => setDomSoftLimits(event.target.value)} maxLength={2500} /></label>
-            <label>{t("Aftercare die bij jou past", "Aftercare that works for you")}<textarea rows={3} value={domAftercare} onChange={(event) => setDomAftercare(event.target.value)} maxLength={1800} /></label>
-            <button type="button" className="cw-primary" onClick={() => void saveDominion()} disabled={busy || !remoteProfileId}><Save size={15} />{t("Profiel privé opslaan", "Save private profile")}</button>
-          </div>
-          <p className="cw-privacy-note">{t("Je kunt dit profiel op ieder moment aanpassen of verwijderen. Iedere scène vraagt opnieuw om expliciete, actuele toestemming.", "You can edit or delete this profile at any time. Every scene still requires fresh, explicit consent.")}</p>
+          {isDominionProfileVisible(remoteProfileId, dominionLoadedFor) ? (
+            <>
+              <div className="cw-form-panel">
+                <label>{t("Voorkeursrol of dynamiek", "Preferred role or dynamic")}<input value={domRole} onChange={(event) => setDomRole(event.target.value)} maxLength={100} /></label>
+                <label>{t("Aanspreekvorm of titel", "Preferred form of address or title")}<input value={domAddress} onChange={(event) => setDomAddress(event.target.value)} maxLength={100} /></label>
+                <label>{t("Harde grenzen · niet onderhandelbaar", "Hard limits · non-negotiable")}<textarea rows={3} value={domHardLimits} onChange={(event) => setDomHardLimits(event.target.value)} maxLength={2500} /></label>
+                <label>{t("Zachte grenzen · eerst bespreken", "Soft limits · discuss first")}<textarea rows={3} value={domSoftLimits} onChange={(event) => setDomSoftLimits(event.target.value)} maxLength={2500} /></label>
+                <label>{t("Aftercare die bij jou past", "Aftercare that works for you")}<textarea rows={3} value={domAftercare} onChange={(event) => setDomAftercare(event.target.value)} maxLength={1800} /></label>
+                <button type="button" className="cw-primary" onClick={() => void saveDominion()} disabled={busy || !remoteProfileId}><Save size={15} />{t("Profiel privé opslaan", "Save private profile")}</button>
+              </div>
+              <p className="cw-privacy-note">{t("Je kunt dit profiel op ieder moment aanpassen of verwijderen. Iedere scène vraagt opnieuw om expliciete, actuele toestemming.", "You can edit or delete this profile at any time. Every scene still requires fresh, explicit consent.")}</p>
+            </>
+          ) : (
+            <div className="cw-form-panel" role="status" aria-live="polite">
+              <p>{!remoteProfileId
+                ? t("Meld je aan om je privéprofiel te bekijken.", "Sign in to view your private profile.")
+                : loading
+                  ? t("Je privéprofiel wordt veilig geladen…", "Your private profile is loading securely…")
+                  : t("Je privéprofiel kon niet worden geladen. Open de module opnieuw om het opnieuw te proberen.", "Your private profile could not be loaded. Reopen the module to try again.")}</p>
+            </div>
+          )}
+
         </section>
       )}
 
