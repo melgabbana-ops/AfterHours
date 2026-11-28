@@ -1137,6 +1137,8 @@ export default function CinematicWorld({
   }
 
   async function handleBack() {
+    // Keep an unfinished Director's Room draft until the user explicitly confirms discard.
+    if (!confirmDiscardSceneDraft()) return;
     // Leaving while a start or resume request is pending must cancel its eventual UI commit.
     startAttemptRef.current += 1;
     if (resumePendingRef.current) await stopScene(true);
