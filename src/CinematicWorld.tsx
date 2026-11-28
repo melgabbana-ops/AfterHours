@@ -10,7 +10,7 @@ import { validateDirectorSceneDraft } from "./directorSceneDraft";
 import { hasUnsavedDirectorSceneChanges } from "./directorSceneDraftState";
 import { isWorldOwnerAttemptCurrent, type WorldOwnerAttempt } from "./worldOwnerAttempt";
 import { isDominionProfileVisible } from "./dominionProfileAccess";
-import { isRitualDeckVisible } from "./ritualDeckAccess";
+import { isRitualDeckVisible, shouldRevealRitualDraw } from "./ritualDeckAccess";
 import { isInvitationOwnerAttemptCurrent } from "./invitationOwnerAttempt";
 import { isInvitationAcceptanceAttemptCurrent } from "./invitationAcceptanceAttempt";
 import { consumeInvitationTokenFromUrl } from "./invitationUrl";
@@ -1853,7 +1853,6 @@ export default function CinematicWorld({
       startContextRef.current.remoteProfileId,
       worldOwnerGenerationRef.current
     );
-    setCurrentCard(card);
     setBusy(true);
     try {
       await persist("ritual", "draw:" + crypto.randomUUID(), {
@@ -1862,6 +1861,8 @@ export default function CinematicWorld({
         text: card.text,
         drawnAt: new Date().toISOString()
       }, "ritual-keeper");
+      if (!shouldRevealRitualDraw(isOwnerCurrent(), true)) return;
+      setCurrentCard(card);
     } catch (cause) {
       if (isOwnerCurrent()) setError(cause instanceof Error ? cause.message : t("Kaart getrokken, maar de geschiedenis kon niet worden opgeslagen.", "Card drawn, but history could not be saved."));
     } finally {
