@@ -11,6 +11,7 @@ import { hasUnsavedDirectorSceneChanges } from "./directorSceneDraftState";
 import { isWorldOwnerAttemptCurrent, type WorldOwnerAttempt } from "./worldOwnerAttempt";
 import { isDominionProfileVisible } from "./dominionProfileAccess";
 import { isRitualDeckVisible, shouldRevealRitualDraw } from "./ritualDeckAccess";
+import { getRitualDrawHistory } from "./ritualDeckHistory";
 import { isInvitationOwnerAttemptCurrent } from "./invitationOwnerAttempt";
 import { isInvitationAcceptanceAttemptCurrent } from "./invitationAcceptanceAttempt";
 import { consumeInvitationTokenFromUrl } from "./invitationUrl";
@@ -417,6 +418,7 @@ export default function CinematicWorld({
     .filter((record) => record.record_key.startsWith("card:"))
     .map((record) => ({ id: record.record_key, title: String(record.payload.title ?? ""), text: String(record.payload.text ?? "") }))
     .filter((card) => card.title && card.text);
+  const ritualDrawHistory = getRitualDrawHistory(ritualRecords);
   const recoverableRun = runs.find((run) => run.user_id === remoteProfileId && (run.status === "active" || run.status === "paused")) ?? null;
   const invitableRuns = runs.filter((run) => run.user_id === remoteProfileId && run.status === "paused");
   const joinedRuns = runs.filter((run) => run.user_id !== remoteProfileId && (run.status === "active" || run.status === "paused"));
@@ -1888,9 +1890,17 @@ export default function CinematicWorld({
   }
 
 
-  async function removeRitualCard(key: string) {
+  async function removeRitualRecord(key: string) {
     const ownerId = remoteProfileId;
-    if (!ownerId || !isRitualDeckVisible(ownerId, ritualDeckLoadedFor) || !window.confirm(t("Deze eigen reflectiekaart verwijderen?", "Delete this custom reflection card?"))) return;
+    const isDraw = key.startsWith("draw:");
+    if (
+      !ownerId ||
+      (!isDraw && !key.startsWith("card:")) ||
+      !isRitualDeckVisible(ownerId, ritualDeckLoadedFor) ||
+      !window.confirm(isDraw
+        ? t("Deze trekking uit je privégeschiedenis verwijderen?", "Delete this draw from your private history?")
+        : t("Deze eigen reflectiekaart verwijderen?", "Delete this custom reflection card?"))
+    ) return;
     const attempt: WorldOwnerAttempt = { ownerId, generation: worldOwnerGenerationRef.current };
     const isOwnerCurrent = () => isWorldOwnerAttemptCurrent(
       attempt,
@@ -1903,9 +1913,11 @@ export default function CinematicWorld({
       if (!isOwnerCurrent()) return;
       setRecords((current) => ({ ...current, ritual: current.ritual.filter((record) => record.record_key !== key) }));
       if (currentCard?.id === key) setCurrentCard(null);
-      setMessage(t("Eigen kaart verwijderd.", "Custom card deleted."));
+      setMessage(isDraw
+        ? t("Trekking verwijderd uit je privégeschiedenis.", "Draw removed from your private history.")
+        : t("Eigen kaart verwijderd.", "Custom card deleted."));
     } catch (cause) {
-      if (isOwnerCurrent()) setError(cause instanceof Error ? cause.message : t("Kaart verwijderen is niet gelukt.", "Could not delete card."));
+      if (isOwnerCurrent()) setError(cause instanceof Error ? cause.message : t("Verwijderen is niet gelukt.", "Could not delete item."));
     } finally {
       if (isOwnerCurrent()) setBusy(false);
     }
@@ -2275,7 +2287,7 @@ export default function CinematicWorld({
             <button type="button" className="cw-primary" onClick={() => void saveCustomRitualCard()} disabled={busy || !remoteProfileId || !ritualDeckVisible || !customCardTitle.trim() || !customCardText.trim()}><Plus size={15} />{t("Kaart toevoegen", "Add card")}</button>
           </div>
           <div className="cw-saved-list">
-            <h3>{t("Eigen kaarten en trekkingen", "Custom cards and draws")} <span>{customRitualCards.length + ritualDrawCount}</span></h3>
+            <h3>{t("Eigen kaarten", "Custom cards")} <span>{customRitualCards.length}</span></h3>
             {!ritualDeckVisible ? (
               <p className="cw-empty-state" role="status" aria-live="polite">
                 {!remoteProfileId
@@ -2284,8 +2296,31 @@ export default function CinematicWorld({
                     ? t("Je privékaarten worden veilig geladen…", "Your private cards are loading securely…")
                     : t("Je privékaarten konden niet worden geladen. Open de module opnieuw om opnieuw te proberen.", "Your private cards could not be loaded. Reopen the module to try again.")}
               </p>
-            ) : customRitualCards.length ? customRitualCards.map((card) => <div className="cw-saved-row" key={card.id}><div><strong>{card.title}</strong><small>{card.text}</small></div><button type="button" onClick={() => void drawSpecificRitualCard(card)} disabled={busy}>{t("Trek", "Draw")}</button><button type="button" onClick={() => void removeRitualCard(card.id)} disabled={busy} aria-label={t("Kaart verwijderen", "Delete card")}><Trash2 size={14} /></button></div>) : <p className="cw-empty-state">{t("Je eigen kaarten verschijnen hier zodra je de eerste toevoegt.", "Your custom cards will appear here after you add the first one.")}</p>}
+            ) : customRitualCards.length ? customRitualCards.map((card) => (
+              <div className="cw-saved-row" key={card.id}>
+                <div><strong>{card.title}</strong><small>{card.text}</small></div>
+                <button type="button" onClick={() => void drawSpecificRitualCard(card)} disabled={busy}>{t("Trek", "Draw")}</button>
+                <button type="button" onClick={() => void removeRitualRecord(card.id)} disabled={busy} aria-label={t(`Verwijder kaart: ${card.title}`, `Delete card: ${card.title}`)}><Trash2 size={14} /></button>
+              </div>
+            )) : <p className="cw-empty-state">{t("Je eigen kaarten verschijnen hier zodra je de eerste toevoegt.", "Your custom cards will appear here after you add the first one.")}</p>}
           </div>
+          {ritualDeckVisible && (
+            <div className="cw-saved-list cw-ritual-history">
+              <h3>{t("Recente trekkingen", "Recent draws")} <span>{ritualDrawHistory.length}</span></h3>
+              {ritualDrawHistory.length ? ritualDrawHistory.map((draw) => (
+                <div className="cw-saved-row" key={draw.id}>
+                  <div>
+                    <strong>{draw.title}</strong>
+                    <small>{draw.text}</small>
+                    <small>{draw.drawnAt
+                      ? new Date(draw.drawnAt).toLocaleString(language === "nl" ? "nl-NL" : "en-GB")
+                      : t("Datum onbekend", "Date unavailable")}</small>
+                  </div>
+                  <button type="button" onClick={() => void removeRitualRecord(draw.id)} disabled={busy} aria-label={t(`Verwijder trekking: ${draw.title}`, `Delete draw: ${draw.title}`)}><Trash2 size={14} /></button>
+                </div>
+              )) : <p className="cw-empty-state">{t("Je trekkingen verschijnen hier nadat je een kaart hebt getrokken.", "Your draws will appear here after you draw a card.")}</p>}
+            </div>
+          )}
         </section>
       )}
 
