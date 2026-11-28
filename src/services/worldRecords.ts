@@ -97,6 +97,7 @@ export async function loadExperienceRuns(expectedUserId: string): Promise<Experi
   const { data, error } = await supabase!
     .from("afterhours_experience_runs")
     .select("id,user_id,scene_key,scene_snapshot,status,current_step,total_steps,created_at,updated_at,started_at,completed_at,interaction_log")
+    .eq("user_id", expectedUserId)
     .order("updated_at", { ascending: false })
     .limit(50);
   if (error) throw new Error(error.message);

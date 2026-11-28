@@ -117,7 +117,8 @@ describe("AFTER HOURS private world storage", () => {
     await expect(loadExperienceRuns("user-a")).resolves.toEqual(rows);
     expect(mocks.from).toHaveBeenCalledWith("afterhours_experience_runs");
     expect(mocks.select).toHaveBeenCalledWith("id,user_id,scene_key,scene_snapshot,status,current_step,total_steps,created_at,updated_at,started_at,completed_at,interaction_log");
-    expect(mocks.eq).not.toHaveBeenCalled();
+    expect(mocks.eq).toHaveBeenCalledOnce();
+    expect(mocks.eq).toHaveBeenCalledWith("user_id", "user-a");
   });
 
   it("detects persisted active or paused runs for the signed-in owner", async () => {
