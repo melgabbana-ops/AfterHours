@@ -31,7 +31,7 @@ import {
 import {
   acceptExperienceInvitation, createExperienceInvitation, createExperienceRun, previewExperienceInvitation,
   deleteExperienceRun, deleteWorldRecord, ExperienceRunDeletionBlockedError, ExperienceRunResumeRollbackError, hasActiveExperienceRuns, loadExperienceInvitations,
-  loadExperienceRuns, loadWorldRecords, resumeExperienceRun, revokeExperienceInvitation,
+  loadExperienceRunStatus, loadExperienceRuns, loadWorldRecords, resumeExperienceRun, revokeExperienceInvitation,
   saveWorldRecord, updateExperienceRun, withdrawExperienceConsent,
   type ExperienceInvitation, type ExperienceInvitationPreview, type ExperienceRun, type WorldModule, type WorldRecord
 } from "./services/worldRecords";
@@ -555,8 +555,7 @@ export default function CinematicWorld({
                 clearPendingExperienceStopForOwner(pending.runId, remoteProfileId);
               } catch {
                 try {
-                  const latestRuns = await loadExperienceRuns(remoteProfileId);
-                  const latestRun = latestRuns.find((run) => run.id === pending.runId);
+                  const latestRun = await loadExperienceRunStatus(pending.runId, remoteProfileId);
                   if (latestRun && ["ready", "completed", "stopped"].includes(latestRun.status)) {
                     clearPendingExperienceStopForOwner(pending.runId, remoteProfileId);
                     if (latestRun.status === "stopped") stoppedRunIds.add(pending.runId);
@@ -846,8 +845,8 @@ export default function CinematicWorld({
               serverConfirmed = true;
             } catch {
               try {
-                const latestRuns = await loadExperienceRuns(ownerId);
-                serverConfirmed = latestRuns.some((item) => item.id === run.id && item.status === "stopped");
+                const latestRun = await loadExperienceRunStatus(run.id, ownerId);
+                serverConfirmed = latestRun?.status === "stopped";
               } catch {
                 // Keep the client fail-closed when the server state cannot be verified.
               }
