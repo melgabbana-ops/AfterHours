@@ -2305,7 +2305,7 @@ export default function CinematicWorld({
             )) : <p className="cw-empty-state">{t("Je eigen kaarten verschijnen hier zodra je de eerste toevoegt.", "Your custom cards will appear here after you add the first one.")}</p>}
           </div>
           {ritualDeckVisible && (
-            <div className="cw-saved-list cw-ritual-history">
+            <div className="cw-saved-list">
               <h3>{t("Recente trekkingen", "Recent draws")} <span>{ritualDrawHistory.length}</span></h3>
               {ritualDrawHistory.length ? ritualDrawHistory.map((draw) => (
                 <div className="cw-saved-row" key={draw.id}>
