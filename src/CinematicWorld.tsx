@@ -10,6 +10,7 @@ import { validateDirectorSceneDraft } from "./directorSceneDraft";
 import { hasUnsavedDirectorSceneChanges } from "./directorSceneDraftState";
 import { isWorldOwnerAttemptCurrent, type WorldOwnerAttempt } from "./worldOwnerAttempt";
 import { isInvitationOwnerAttemptCurrent } from "./invitationOwnerAttempt";
+import { isInvitationAcceptanceAttemptCurrent } from "./invitationAcceptanceAttempt";
 import { consumeInvitationTokenFromUrl } from "./invitationUrl";
 import {
   enqueuePendingExperienceStop,
@@ -209,6 +210,8 @@ export default function CinematicWorld({
   const [selectedInviteRunId, setSelectedInviteRunId] = useState("");
   const [inviteLink, setInviteLink] = useState("");
   const [incomingInviteToken, setIncomingInviteToken] = useState<string | null>(() => consumeInvitationTokenFromUrl(window.location.href).token);
+  const incomingInviteTokenRef = useRef(incomingInviteToken);
+  incomingInviteTokenRef.current = incomingInviteToken;
   const [invitePreview, setInvitePreview] = useState<ExperienceInvitationPreview | null>(null);
   const [invitePreviewLoading, setInvitePreviewLoading] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -1639,6 +1642,8 @@ export default function CinematicWorld({
   }
 
   function dismissIncomingInvitation() {
+    // Invalidate an acceptance that is still hashing or waiting on the server.
+    incomingInviteTokenRef.current = null;
     setIncomingInviteToken(null);
     setInvitePreview(null);
     setInvitePreviewLoading(false);
@@ -1647,29 +1652,79 @@ export default function CinematicWorld({
   }
 
   async function acceptIncomingInvitation() {
-    if (!remoteProfileId || !incomingInviteToken || !invitePreview) return;
+    const ownerId = remoteProfileId;
+    const token = incomingInviteToken;
+    if (!ownerId || !token || !invitePreview) return;
+
+    const attempt = { ownerId, generation: worldOwnerGenerationRef.current, token };
+    const isOwnerCurrent = () => isWorldOwnerAttemptCurrent(
+      attempt,
+      startContextRef.current.remoteProfileId,
+      worldOwnerGenerationRef.current
+    );
+    const isAttemptCurrent = () => isInvitationAcceptanceAttemptCurrent(
+      attempt,
+      startContextRef.current.remoteProfileId,
+      worldOwnerGenerationRef.current,
+      incomingInviteTokenRef.current
+    );
+
     setBusy(true);
     setError("");
     try {
-      const tokenBytes = new Uint8Array(incomingInviteToken.match(/.{1,2}/g)?.map((byte) => Number.parseInt(byte, 16)) ?? []);
-      if (!/^[a-f0-9]{64}$/i.test(incomingInviteToken) || tokenBytes.length !== 32) {
+      const tokenBytes = new Uint8Array(token.match(/.{1,2}/g)?.map((byte) => Number.parseInt(byte, 16)) ?? []);
+      if (!/^[a-f0-9]{64}$/i.test(token) || tokenBytes.length !== 32) {
         throw new Error(t("Deze uitnodigingslink is ongeldig.", "This invitation link is invalid."));
       }
       const digest = await crypto.subtle.digest("SHA-256", tokenBytes);
       const tokenHash = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
-      const accepted = await acceptExperienceInvitation(tokenHash, remoteProfileId);
+
+      // Dismissal, token replacement, account switching, or a new view generation
+      // cancels acceptance before the consent RPC is sent.
+      if (!isAttemptCurrent()) return;
+
+      const accepted = await acceptExperienceInvitation(tokenHash, ownerId);
+
+      // The server may finish after the user dismisses the invite or switches
+      // accounts. Roll back that late consent under its original owner; if the
+      // account is unavailable, persist a STOP retry for that owner.
+      if (!isAttemptCurrent()) {
+        try {
+          await withdrawExperienceConsent(accepted.run_id, ownerId);
+          if (isOwnerCurrent()) {
+            setMessage(t(
+              "De uitnodiging is niet geaccepteerd omdat de uitnodiging of accountstatus veranderde. De toestemming is ingetrokken.",
+              "The invitation was not accepted because the invitation or account state changed. Consent was withdrawn."
+            ));
+          }
+        } catch {
+          const queued = queuePendingExperienceStopForOwner(accepted.run_id, ownerId);
+          if (isOwnerCurrent()) {
+            stopPendingRef.current = true;
+            setStopPending(true);
+            setError(queued
+              ? t("De late uitnodigingsacceptatie wordt nog veilig ingetrokken. Start geen nieuwe scène totdat STOP is bevestigd.", "The late invitation acceptance is awaiting safe withdrawal. Do not start a new scene until STOP is confirmed.")
+              : t("De late uitnodigingsacceptatie kon niet worden ingetrokken of lokaal bewaard. Start geen nieuwe scène en meld je opnieuw aan om de status te controleren.", "The late invitation acceptance could not be withdrawn or saved locally. Do not start a new scene; sign in again to verify its status."));
+          }
+        }
+        return;
+      }
+
+      incomingInviteTokenRef.current = null;
       setIncomingInviteToken(null);
       setInvitePreview(null);
       const sanitizedUrl = consumeInvitationTokenFromUrl(window.location.href).sanitizedUrl;
       window.history.replaceState(window.history.state, "", sanitizedUrl);
-      await refreshData();
-      setMessage(t("Uitnodiging geaccepteerd. Je eigen toestemming is vastgelegd. De eigenaar kan de ervaring nu hervatten; als jij later je toestemming intrekt, stopt de ervaring voor iedereen.", "Invitation accepted. Your own consent has been recorded. The host can now resume; if you later withdraw consent, the experience stops for everyone."));
+      await refreshData(ownerId, isOwnerCurrent);
+      if (!isOwnerCurrent()) return;
+      setMessage(t("Uitnodiging geaccepteerd. Je eigen toestemming is vastgelegd. De eigenaar kan de ervaring nu hervatten; als jij later je toestemming intrekt, stopt de ervaring voor iedereen.", "Invitation accepted. Your own consent has been recorded. The host can now resume; if you later withdraw your consent, the experience stops for everyone."));
       setTab("invitation");
-      void accepted;
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : t("Uitnodiging accepteren is niet gelukt.", "Could not accept invitation."));
+      if (isAttemptCurrent()) {
+        setError(cause instanceof Error ? cause.message : t("Uitnodiging accepteren is niet gelukt.", "Could not accept invitation."));
+      }
     } finally {
-      setBusy(false);
+      if (isOwnerCurrent()) setBusy(false);
     }
   }
 
