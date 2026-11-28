@@ -36,9 +36,35 @@ describe("Experience Engine immediate STOP", () => {
   });
 
   it("does not apply stale pause history after a newer safety action", () => {
-    expect(source).toContain("async function refreshData(userId = remoteProfileId, isCurrent: () => boolean = () => true)");
+    expect(source).toContain("async function refreshData(userId = remoteProfileId, isCurrent?: () => boolean)");
+    expect(source).toContain("const canApply = () => isWorldOwnerAttemptCurrent(");
+    expect(source).toContain("if (!canApply()) return;");
     expect(pauseHandler).toContain("await refreshData(attempt.ownerId, isCurrentPause)");
   });
+  it("scopes private world refreshes to the account and view generation that requested them", () => {
+    expect(source).toContain("const attempt: WorldOwnerAttempt = { ownerId: userId, generation: worldOwnerGenerationRef.current };");
+    expect(source).toContain("startContextRef.current.remoteProfileId");
+    expect(source).toContain("worldOwnerGenerationRef.current");
+  });
+
+  it("ignores late Director's Room saves and deletes after an account switch", () => {
+    const saveStart = source.indexOf("async function saveDirectorScene()");
+    const saveEnd = source.indexOf("\n  function prepareScene", saveStart);
+    const saveHandler = source.slice(saveStart, saveEnd);
+    const deleteStart = source.indexOf("async function removeScene(");
+    const deleteEnd = source.indexOf("\n  async function saveVaultNote", deleteStart);
+    const deleteHandler = source.slice(deleteStart, deleteEnd);
+    const persistStart = source.indexOf("async function persist(");
+    const persistEnd = source.indexOf("\n  function requestStartAccess", persistStart);
+    const persistHandler = source.slice(persistStart, persistEnd);
+
+    expect(saveHandler).toContain("if (!isOwnerCurrent()) return;");
+    expect(saveHandler).toContain("if (isOwnerCurrent()) {");
+    expect(deleteHandler).toContain("if (!isOwnerCurrent()) return;");
+    expect(deleteHandler).toContain("if (isOwnerCurrent()) {");
+    expect(persistHandler).toContain("if (!isOwnerCurrent()) return saved;");
+  });
+
   it("applies local stop and safety state before dispatching server confirmation", () => {
     const localReset = stopHandler.indexOf("setActiveScene(null)");
     const safetyStop = stopHandler.indexOf("onSafetyStop()");
