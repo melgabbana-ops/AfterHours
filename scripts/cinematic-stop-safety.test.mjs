@@ -136,7 +136,7 @@ describe("Experience Engine immediate STOP", () => {
     const firstStopGuard = inviteHandler.indexOf("if (stopPendingRef.current || stopPending)");
     const tokenGeneration = inviteHandler.indexOf("crypto.getRandomValues");
     const invitationWrite = inviteHandler.indexOf("await createExperienceInvitation");
-    const secondStopGuard = inviteHandler.lastIndexOf("if (stopPendingRef.current || stopPending)", invitationWrite);
+    const secondStopGuard = inviteHandler.indexOf("if (!isActionCurrent())", tokenGeneration);
 
     expect(inviteStart).toBeGreaterThanOrEqual(0);
     expect(inviteEnd).toBeGreaterThan(inviteStart);
@@ -144,6 +144,8 @@ describe("Experience Engine immediate STOP", () => {
     expect(firstStopGuard).toBeLessThan(tokenGeneration);
     expect(secondStopGuard).toBeGreaterThan(tokenGeneration);
     expect(secondStopGuard).toBeLessThan(invitationWrite);
+    expect(inviteHandler).toContain("isInvitationOwnerAttemptCurrent");
+    expect(inviteHandler).toContain("revokeCreatedInvitation");
   });
 
   it("disables the invitation control while STOP is pending", () => {
