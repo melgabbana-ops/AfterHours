@@ -8,6 +8,7 @@ import { shouldShowExperienceEmergencyDock } from "./experienceAccess";
 import { validateDirectorSceneDraft } from "./directorSceneDraft";
 import { hasUnsavedDirectorSceneChanges } from "./directorSceneDraftState";
 import { isWorldOwnerAttemptCurrent, type WorldOwnerAttempt } from "./worldOwnerAttempt";
+import { isInvitationOwnerAttemptCurrent } from "./invitationOwnerAttempt";
 import { consumeInvitationTokenFromUrl } from "./invitationUrl";
 import {
   enqueuePendingExperienceStop,
@@ -1495,8 +1496,6 @@ export default function CinematicWorld({
   }
 
   async function createRunInvitation(runId: string) {
-    // A failed STOP confirmation leaves the UI fail-closed. Do not create a
-    // fresh invitation from a stale paused snapshot while STOP is unresolved.
     if (stopPendingRef.current || stopPending) {
       setError(t(
         "STOP wordt nog door de server bevestigd. Maak pas een nieuwe uitnodiging nadat de status is gecontroleerd.",
@@ -1504,8 +1503,21 @@ export default function CinematicWorld({
       ));
       return;
     }
-    if (!remoteProfileId) return;
-    const run = runs.find((item) => item.id === runId && item.user_id === remoteProfileId);
+    const ownerId = remoteProfileId;
+    if (!ownerId) return;
+    const attempt: WorldOwnerAttempt = { ownerId, generation: worldOwnerGenerationRef.current };
+    const isOwnerCurrent = () => isWorldOwnerAttemptCurrent(
+      attempt,
+      startContextRef.current.remoteProfileId,
+      worldOwnerGenerationRef.current
+    );
+    const isActionCurrent = () => isInvitationOwnerAttemptCurrent(
+      attempt,
+      startContextRef.current.remoteProfileId,
+      worldOwnerGenerationRef.current,
+      stopPendingRef.current || stopPending
+    );
+    const run = runs.find((item) => item.id === runId && item.user_id === ownerId);
     if (!run || run.status !== "paused") {
       setError(t("Pauzeer eerst je eigen ervaring. De scène blijft gepauzeerd totdat iedereen de uitnodiging heeft bekeken en geaccepteerd.", "Pause your own experience first. The scene must remain paused until everyone has reviewed and accepted the invitation."));
       return;
@@ -1513,45 +1525,75 @@ export default function CinematicWorld({
     setBusy(true);
     setError("");
     setInviteLink("");
+    let invitationId: string | null = null;
+    const revokeCreatedInvitation = async () => {
+      if (!invitationId) return;
+      try {
+        await revokeExperienceInvitation(invitationId, ownerId);
+      } catch {
+        // The raw token is never exposed when the owner or STOP context is stale.
+      }
+      if (isOwnerCurrent()) setInviteLink("");
+    };
     try {
       const tokenBytes = crypto.getRandomValues(new Uint8Array(32));
       const token = Array.from(tokenBytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
       const digest = await crypto.subtle.digest("SHA-256", tokenBytes);
       const tokenHash = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
-      // STOP may begin while the browser is hashing the one-time invitation token.
-      // Recheck immediately before the write so the stale UI cannot enqueue it.
-      if (stopPendingRef.current || stopPending) {
-        setError(t(
-          "STOP wordt nog door de server bevestigd. De uitnodiging is niet aangemaakt.",
-          "STOP is still awaiting server confirmation. The invitation was not created."
-        ));
+      // STOP or an account switch can happen while the one-time token is hashed.
+      if (!isActionCurrent()) {
+        if (isOwnerCurrent()) {
+          setError(t(
+            "STOP wordt nog door de server bevestigd. De uitnodiging is niet aangemaakt.",
+            "STOP is still awaiting server confirmation. The invitation was not created."
+          ));
+        }
         return;
       }
-      await createExperienceInvitation({ runId, tokenHash, expectedUserId: remoteProfileId });
+      const invitation = await createExperienceInvitation({ runId, tokenHash, expectedUserId: ownerId });
+      invitationId = invitation.id;
+      if (!isActionCurrent()) {
+        await revokeCreatedInvitation();
+        return;
+      }
       const url = new URL(window.location.href);
       url.searchParams.set("screen", "cinematic");
       url.searchParams.delete("invite");
       // Keep bearer tokens in the fragment: browsers do not send it to the server or in Referer headers.
       url.hash = new URLSearchParams({ invite: token }).toString();
       setInviteLink(url.toString());
-      await refreshData();
+      await refreshData(ownerId, isActionCurrent);
+      if (!isActionCurrent()) {
+        await revokeCreatedInvitation();
+        return;
+      }
+      let copiedToClipboard = false;
       try {
         if (navigator.share) {
           await navigator.share({ title: t("AFTER HOURS · uitnodiging", "AFTER HOURS · invitation"), text: t("Je bent uitgenodigd om deel te nemen. Je kiest zelf of je accepteert. Inloggen is vereist.", "You are invited to participate. You choose whether to accept. Sign-in is required."), url: url.toString() });
         } else if (navigator.clipboard?.writeText) {
           await navigator.clipboard.writeText(url.toString());
-          setMessage(t("Veilige uitnodigingslink gekopieerd. De link verloopt over zeven dagen.", "Secure invitation link copied. It expires in seven days."));
-        } else {
-          setMessage(t("Uitnodigingslink aangemaakt. Kopieer de link hieronder.", "Invitation link created. Copy the link below."));
+          copiedToClipboard = true;
         }
       } catch (cause) {
         if (!(cause instanceof Error && cause.name === "AbortError")) throw cause;
-        setMessage(t("Delen geannuleerd. De link blijft hieronder beschikbaar.", "Sharing cancelled. The link remains available below."));
+        if (isActionCurrent()) setMessage(t("Delen geannuleerd. De link blijft hieronder beschikbaar.", "Sharing cancelled. The link remains available below."));
+      }
+      if (!isActionCurrent()) {
+        await revokeCreatedInvitation();
+        return;
+      }
+      if (copiedToClipboard) {
+        setMessage(t("Veilige uitnodigingslink gekopieerd. De link verloopt over zeven dagen.", "Secure invitation link copied. It expires in seven days."));
+      } else if (!navigator.share) {
+        setMessage(t("Uitnodigingslink aangemaakt. Kopieer de link hieronder.", "Invitation link created. Copy the link below."));
       }
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : t("Uitnodiging kon niet worden aangemaakt.", "Could not create invitation."));
+      if (isActionCurrent()) {
+        setError(cause instanceof Error ? cause.message : t("Uitnodiging kon niet worden aangemaakt.", "Could not create invitation."));
+      }
     } finally {
-      setBusy(false);
+      if (isOwnerCurrent()) setBusy(false);
     }
   }
 
@@ -1622,6 +1664,17 @@ export default function CinematicWorld({
   }
 
   async function createInvitation(shareAfterSave = false) {
+    const ownerId = remoteProfileId;
+    if (!ownerId) {
+      setError(t("Meld je aan om een uitnodiging veilig op te slaan.", "Sign in to save an invitation securely."));
+      return;
+    }
+    const attempt: WorldOwnerAttempt = { ownerId, generation: worldOwnerGenerationRef.current };
+    const isOwnerCurrent = () => isWorldOwnerAttemptCurrent(
+      attempt,
+      startContextRef.current.remoteProfileId,
+      worldOwnerGenerationRef.current
+    );
     setBusy(true);
     setError("");
     try {
@@ -1632,27 +1685,35 @@ export default function CinematicWorld({
       url.hash = "";
       const body = inviteTitle.trim() + "\n\n" + inviteMessage.trim() + "\n\n" + url.toString();
       await persist("invitation", key, { title: inviteTitle.trim(), message: inviteMessage.trim(), createdAt, shareStatus: "draft" }, "secret-sender");
+      if (!isOwnerCurrent()) return;
       if (shareAfterSave) {
+        // Never open a share sheet for a draft after its owner has changed.
+        if (!isOwnerCurrent()) return;
         if (navigator.share) {
           await navigator.share({ title: inviteTitle.trim(), text: body, url: url.toString() });
         } else if (navigator.clipboard?.writeText) {
           await navigator.clipboard.writeText(body);
+        }
+        if (!isOwnerCurrent()) return;
+        await persist("invitation", key, { title: inviteTitle.trim(), message: inviteMessage.trim(), createdAt, sharedAt: new Date().toISOString(), shareStatus: "shared" });
+        if (!isOwnerCurrent()) return;
+        if (!navigator.share && navigator.clipboard?.writeText) {
           setMessage(t("Uitnodiging opgeslagen en gekopieerd. Je kunt hem nu zelf versturen.", "Invitation saved and copied. You can send it yourself."));
-        } else {
+        } else if (!navigator.share) {
           setMessage(t("Uitnodiging opgeslagen. Kopieer de tekst handmatig om hem te delen.", "Invitation saved. Copy the text manually to share it."));
         }
-        await persist("invitation", key, { title: inviteTitle.trim(), message: inviteMessage.trim(), createdAt, sharedAt: new Date().toISOString(), shareStatus: "shared" });
       } else {
-        setMessage(t("Uitnodiging als concept opgeslagen.", "Invitation saved as a draft."));
+        if (isOwnerCurrent()) setMessage(t("Uitnodiging als concept opgeslagen.", "Invitation saved as a draft."));
       }
     } catch (cause) {
+      if (!isOwnerCurrent()) return;
       if (cause instanceof Error && cause.name === "AbortError") {
         setMessage(t("Delen geannuleerd. Je concept blijft bewaard.", "Sharing cancelled. Your draft remains saved."));
       } else {
         setError(cause instanceof Error ? cause.message : t("Uitnodiging opslaan is niet gelukt.", "Could not save invitation."));
       }
     } finally {
-      setBusy(false);
+      if (isOwnerCurrent()) setBusy(false);
     }
   }
 
